@@ -1,0 +1,86 @@
+{
+  "version": "1.0.0",
+  "weights": {
+    "liquidity": {
+      "max_points": 30,
+      "thresholds": {
+        "excellent": { "min": 500000, "points": 30 },
+        "good": { "min": 250000, "points": 22 },
+        "fair": { "min": 100000, "points": 15 },
+        "poor": { "min": 50000, "points": 8 },
+        "reject": { "min": 0, "points": 0 }
+      }
+    },
+    "volume_24h": {
+      "max_points": 25,
+      "thresholds": {
+        "excellent": { "min": 1000000, "points": 25 },
+        "good": { "min": 500000, "points": 18 },
+        "fair": { "min": 100000, "points": 12 },
+        "poor": { "min": 50000, "points": 6 },
+        "reject": { "min": 0, "points": 0 }
+      }
+    },
+    "age_days": {
+      "max_points": 15,
+      "optimal_range": { "min": 7, "max": 30 },
+      "scoring": {
+        "optimal": 15,
+        "new_but_stable": { "min": 3, "max": 7, "points": 10 },
+        "mature": { "min": 30, "max": 90, "points": 10 },
+        "too_new": { "min": 0, "max": 2, "points": 0 },
+        "too_old": { "min": 90, "points": 5 }
+      }
+    },
+    "community": {
+      "max_points": 15,
+      "factors": {
+        "twitter_followers": { "weight": 0.3, "threshold": 10000 },
+        "telegram_members": { "weight": 0.3, "threshold": 5000 },
+        "discord_members": { "weight": 0.2, "threshold": 3000 },
+        "engagement_rate": { "weight": 0.2, "threshold": 0.05 }
+      }
+    },
+    "contract_safety": {
+      "max_points": 15,
+      "checks": {
+        "verified_source": 3,
+        "no_honeypot": 3,
+        "renounced_ownership": 3,
+        "locked_liquidity": 3,
+        "audit_report": 3
+      }
+    }
+  },
+  "catalysts": {
+    "bonuses": {
+      "hackathon_winner": 10,
+      "viral_moment": 10,
+      "kol_mention": 10,
+      "aixbt_high_conviction": 10,
+      "dexscreener_top_trending": 5,
+      "x402_verified": 5
+    },
+    "penalties": {
+      "major_cex_listed": -15,
+      "liquidity_dropping_fast": -15,
+      "team_inactive_7d": -15,
+      "recent_dump_50pct": -15,
+      "suspicious_volume": -10,
+      "x402_blocked": -20
+    }
+  },
+  "thresholds": {
+    "hot": { "min": 85, "action": "immediate_outreach" },
+    "qualified": { "min": 70, "action": "queue_outreach" },
+    "watch": { "min": 50, "action": "monitor" },
+    "pass": { "min": 0, "action": "archive" }
+  },
+  "auto_reject": {
+    "liquidity_below": 100000,
+    "age_hours_below": 2,
+    "no_socials": true,
+    "single_wallet_holding_above": 0.9,
+    "volume_to_mcap_ratio_above": 10
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "buzz-bd-agent",
+  "version": "3.3.0",
+  "description": "Autonomous business development agent for SolCex Exchange",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "scan": "node src/scanner/run.js",
+    "score": "node src/scorer/run.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "ai-agent",
+    "business-development",
+    "solana",
+    "x402",
+    "autonomous",
+    "openclaw"
+  ],
+  "author": "Buzz BD Agent <buzzbysolcex@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/buzzbysolcex/buzz-bd-agent"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
