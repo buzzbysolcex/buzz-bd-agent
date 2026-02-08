@@ -233,6 +233,47 @@ buzz-bd-agent/
 
 ---
 
+## Cross-Ecosystem x402 Interoperability
+
+Buzz doesn't operate in isolation. Through the x402 payment protocol, Buzz can:
+
+- **Receive payments** from 50,000+ elizaOS agents seeking CEX listing BD services
+- **Pay for premium intelligence** (Einstein AI whale alerts, Gloria AI news) autonomously
+- **Interface with elizaOS MCP Gateway** as a registered tool/service
+- **Participate in Jeju-powered agent-to-agent commerce** for token discovery
+
+### Why This Matters
+
+[elizaOS](https://elizaos.ai) (formerly ai16z) is the largest open-source agent framework with 17K+ GitHub stars and 1,300+ contributors. Their [4-layer stack](https://github.com/elizaOS) — Agents → Cloud → MCP/x402 → Jeju — uses the **same x402 payment protocol** Buzz uses for autonomous micropayments.
+
+This means every agent in the elizaOS ecosystem is a potential Buzz customer — paying USDC via x402 for SolCex listing intelligence and BD services.
+
+**Buzz is not just a BD agent — it's a node in the emerging agent economy.**
+
+### Shared Infrastructure
+
+| Component | Buzz | elizaOS | Compatibility |
+|-----------|------|---------|---------------|
+| Payment Protocol | x402 (USDC) | x402 (USDC) | ✅ Native |
+| Tool Standard | MCP | MCP Gateway | ✅ Compatible |
+| Deployment | Akash Network | Eliza Cloud | ✅ Decentralized |
+| Currency | USDC on Solana | USDC on Base/ETH | ✅ Cross-chain |
+
+### Revenue Model via Agent Economy
+
+```
+elizaOS Agent discovers token → Pays Buzz $0.50 via x402 →
+Buzz returns 100-point score → If qualified →
+Buzz initiates SolCex listing BD → Listing fee $5K-$7.5K USDC
+```
+
+References:
+- [elizaOS MCP Gateway](https://github.com/elizaOS/mcp-gateway) — x402 payment integration
+- [x402 Protocol](https://x.com/x402) — Autonomous agent payment standard
+- [Buzz BD Agent](https://github.com/buzzbysolcex/buzz-bd-agent) — Source code
+
+---
+  
 ## Links
 
 | Resource | URL |
