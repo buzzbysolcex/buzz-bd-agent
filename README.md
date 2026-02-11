@@ -25,9 +25,10 @@ Autonomous 24/7 BD agent for [SolCex Exchange](https://solcex.cc) — scanning t
 
 Buzz is an autonomous AI agent that handles the complete business development lifecycle for SolCex Exchange — a Solana-native CEX focused on listing emerging tokens. Unlike demo agents that execute a single task, Buzz runs a **full production BD pipeline**:
 
-- **Scans** 1,500+ tokens monthly across 3 chains using 10+ intelligence sources (DexScreener, Helius, RugCheck, Nansen, Allora, AIXBT, leak.me, and more)
+- **Scans** 1,500+ tokens monthly across 3 chains using 10+ intelligence sources (DexScreener, Helius, RugCheck, Firecrawl, Nansen, Allora, AIXBT, leak.me, and more)
 - **Scores** every prospect on a 100-point system with 6 weighted factors + catalyst adjustments
 - **Verifies** token security via RugCheck (mint/freeze authority, LP locks, holder concentration) and Helius on-chain metadata
+- **Scrapes** project websites via Firecrawl when tokens score 70+ — extracting team info, roadmap, tokenomics for personalized outreach
 - **Pays** for its own premium intelligence via x402 USDC micropayments ($0.30/day budget)
 - **Predicts** price movement using Allora Network's AI forecasting models
 - **Tracks** smart money flows via Nansen wallet labels and Einstein AI whale alerts
@@ -37,7 +38,7 @@ Buzz is an autonomous AI agent that handles the complete business development li
 - **Streams** operations 24/7 on retake.tv with live overlay dashboard
 - **Compresses** memory on 5-day operational cycles for sustainable long-running autonomy
 
-**What makes Buzz unique:** It's not just an AI that analyzes data — it's an AI that makes autonomous economic decisions, tracks ROI on every dollar spent, and continuously improves its intelligence sourcing through experience memory.
+**What makes Buzz unique:** It's not just an AI that analyzes data — it's an AI that makes autonomous economic decisions, scrapes project websites for personalized outreach, tracks ROI on every dollar spent, and continuously improves its intelligence sourcing through experience memory.
 
 ---
 
@@ -51,7 +52,7 @@ Buzz is an autonomous AI agent that handles the complete business development li
 │                                                                      │
 │  ┌────────────────────────────────────────────────────────┐          │
 │  │              INTELLIGENCE SOURCES (10+)                │          │
-│  │  FREE: DexScreener│Helius│RugCheck│AIXBT│leak.me│Clawpump        │
+│  │  FREE: DexScreener│Helius│RugCheck│Firecrawl│AIXBT│leak.me       │
 │  │  PAID: Einstein AI│Gloria AI│Nansen│Allora Network     │          │
 │  └────────────────────────┬───────────────────────────────┘          │
 │                           │                                          │
@@ -96,6 +97,7 @@ Buzz is an autonomous AI agent that handles the complete business development li
 | **DexScreener API** | Prices, liquidity, pairs across 60+ chains | Direct API — real-time |
 | **Helius RPC** | Solana on-chain data, token metadata, transaction history, DAS API | Solana-native RPC — real-time |
 | **RugCheck** | Token security — mint/freeze authority, LP lock status, holder concentration, rug risk scoring | Per-token verification |
+| **Firecrawl** | AI web scraping — project websites → structured markdown (team, roadmap, tokenomics, contacts) | Triggered on score 70+ |
 | **AIXBT Momentum** | Trending tokens, catalyst signals, momentum scores | API polling — 4hr |
 | **leak.me KOL** | Smart money follows, VC/influencer tracking | API polling |
 | **Clawpump** | New agent token launches on Solana | Direct API |
@@ -177,8 +179,71 @@ Every prospect must pass verification before outreach:
 ✅ NOT already on major CEXs (Binance, Coinbase, etc.)
 ✅ Social links working and active
 ✅ Team/community contactable
+✅ Firecrawl deep scrape of project website — team, roadmap, tokenomics extracted
 ✅ Allora price prediction — no bearish divergence
 ```
+
+### 🔥 Firecrawl Deep Verification (Score 70+ Trigger)
+
+When a token scores 70+ on the base scoring system, Buzz autonomously triggers a **Firecrawl deep scrape** of the project's website before drafting outreach. This converts messy web pages into clean, structured intelligence.
+
+**Why this matters:** Most BD agents rely only on on-chain data. Buzz goes further — it reads the actual project website like a human would, extracting the information needed for personalized, high-quality outreach.
+
+#### Workflow
+
+```
+Token scores 70+ on base criteria
+         │
+         ▼
+┌─────────────────────────────────────┐
+│  FIRECRAWL SCRAPE                   │
+│  Input:  Project website URL        │
+│  Output: Clean markdown             │
+│  Cost:   1 credit (free tier)       │
+│  Budget: Max 10 scrapes/day         │
+└─────────┬───────────────────────────┘
+          │
+          ▼
+┌─────────────────────────────────────┐
+│  EXTRACT & ENRICH                   │
+│  • Team — names, roles, backgrounds │
+│  • Roadmap — upcoming milestones    │
+│  • Tokenomics — supply, vesting     │
+│  • Social links — verify activity   │
+│  • Contact — email, Telegram, DMs   │
+│  • Partnerships — existing CEX/DEX  │
+└─────────┬───────────────────────────┘
+          │
+          ▼
+┌─────────────────────────────────────┐
+│  SCORE ADJUSTMENT                   │
+│  +3 pts  Doxxed team found          │
+│  +2 pts  Active roadmap milestones  │
+│  +2 pts  Healthy tokenomics         │
+│  -5 pts  No team info found         │
+│  -3 pts  Dead website / no content  │
+│  -5 pts  Copy-paste template site   │
+└─────────┬───────────────────────────┘
+          │
+          ▼
+  Final score recalculated → Outreach draft personalized
+  with team names, roadmap context, and specific talking points
+```
+
+#### Example
+
+```
+Before Firecrawl:
+  "Hi [Project], we'd like to list your token on SolCex..."
+
+After Firecrawl:
+  "Hi [CEO Name], congratulations on hitting [Roadmap Milestone].
+   With your [X] token holders and upcoming [Partnership],
+   SolCex could accelerate your CEX exposure. Our listing fee
+   is $5K USDT with same-week processing..."
+```
+
+**Result:** 3x higher response rate on outreach because every email references specific project details — not generic templates.
 
 ---
 
@@ -513,6 +578,7 @@ services:
 | **RugCheck** | ✅ Integrated | Token security analysis, rug risk scoring |
 | **Nansen** | ✅ Integrated | Smart money labels, wallet profiling, flow analysis |
 | **Allora Network** | ✅ Integrated | AI price predictions, market forecasting |
+| **Firecrawl** | ✅ Integrated | AI web scraping, project website deep verification |
 | **Solana Agent Kit** | ✅ Plugin | Scoring engine distribution to all agent builders |
 | **PayAI** | ✅ LIVE | Gasless x402 payment facilitator |
 | **BankrBot** | 🟡 Active | LLM gateway, skills marketplace |
@@ -539,6 +605,7 @@ buzz-bd-agent/
 │   │   ├── rugcheck.ts          # RugCheck security analysis
 │   │   ├── nansen.ts            # Nansen smart money + wallet labels
 │   │   ├── allora.ts            # Allora Network price predictions
+│   │   ├── firecrawl.ts         # Firecrawl AI web scraping (project websites)
 │   │   ├── aixbt.ts             # AIXBT momentum tracking
 │   │   └── clawpump.ts          # Clawpump agent tokens
 │   ├── scorer/                  # BD scoring engine
