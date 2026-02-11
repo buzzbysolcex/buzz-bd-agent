@@ -25,9 +25,12 @@ Autonomous 24/7 BD agent for [SolCex Exchange](https://solcex.cc) — scanning t
 
 Buzz is an autonomous AI agent that handles the complete business development lifecycle for SolCex Exchange — a Solana-native CEX focused on listing emerging tokens. Unlike demo agents that execute a single task, Buzz runs a **full production BD pipeline**:
 
-- **Scans** 1,500+ tokens monthly across 3 chains using free + paid intelligence
+- **Scans** 1,500+ tokens monthly across 3 chains using 10+ intelligence sources (DexScreener, Helius, RugCheck, Nansen, Allora, AIXBT, leak.me, and more)
 - **Scores** every prospect on a 100-point system with 6 weighted factors + catalyst adjustments
+- **Verifies** token security via RugCheck (mint/freeze authority, LP locks, holder concentration) and Helius on-chain metadata
 - **Pays** for its own premium intelligence via x402 USDC micropayments ($0.30/day budget)
+- **Predicts** price movement using Allora Network's AI forecasting models
+- **Tracks** smart money flows via Nansen wallet labels and Einstein AI whale alerts
 - **Verifies** every payment endpoint through zauthx402 trust scores before spending
 - **Learns** from outcomes through dual experience memory (free + paid ROI tracking)
 - **Drafts** personalized outreach emails with human-in-loop approval
@@ -46,10 +49,18 @@ Buzz is an autonomous AI agent that handles the complete business development li
 │                 Autonomous Commerce Edition                          │
 ├──────────────────────────────────────────────────────────────────────┤
 │                                                                      │
-│  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐             │
-│  │ Intelligence │   │   Scoring    │   │   Outreach   │             │
-│  │   Layers     │   │   Engine     │   │   System     │             │
-│  │ (Free+Paid)  │   │  (100 pts)   │   │ (Email/DM)   │             │
+│  ┌────────────────────────────────────────────────────────┐          │
+│  │              INTELLIGENCE SOURCES (10+)                │          │
+│  │  FREE: DexScreener│Helius│RugCheck│AIXBT│leak.me│Clawpump        │
+│  │  PAID: Einstein AI│Gloria AI│Nansen│Allora Network     │          │
+│  └────────────────────────┬───────────────────────────────┘          │
+│                           │                                          │
+│  ┌──────────────┐   ┌────┴─────────┐   ┌──────────────┐             │
+│  │  Security    │   │   Scoring    │   │   Outreach   │             │
+│  │  Verify      │   │   Engine     │   │   System     │             │
+│  │ RugCheck     │   │  (100 pts)   │   │ (Email/DM)   │             │
+│  │ Helius DAS   │   │  +Catalysts  │   │              │             │
+│  │ Nansen Flow  │   │  +Allora AI  │   │              │             │
 │  └──────┬───────┘   └──────┬───────┘   └──────┬───────┘             │
 │         │                  │                   │                     │
 │  ┌──────┴──────────────────┴───────────────────┴───────┐             │
@@ -70,6 +81,7 @@ Buzz is an autonomous AI agent that handles the complete business development li
 ├──────────────────────────────────────────────────────────────────────┤
 │  INFRA: Akash Network │ FRAMEWORK: OpenClaw │ MODEL: Claude Sonnet 4│
 │  STREAM: retake.tv    │ TOKEN: $BUZZBD/Base  │ PAYMENTS: x402/USDC   │
+│  PLUGIN: Solana Agent Kit │ SECURITY: RugCheck+Helius+Nansen         │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -82,18 +94,21 @@ Buzz is an autonomous AI agent that handles the complete business development li
 | Source | Data | Integration |
 |--------|------|-------------|
 | **DexScreener API** | Prices, liquidity, pairs across 60+ chains | Direct API — real-time |
+| **Helius RPC** | Solana on-chain data, token metadata, transaction history, DAS API | Solana-native RPC — real-time |
+| **RugCheck** | Token security — mint/freeze authority, LP lock status, holder concentration, rug risk scoring | Per-token verification |
 | **AIXBT Momentum** | Trending tokens, catalyst signals, momentum scores | API polling — 4hr |
 | **leak.me KOL** | Smart money follows, VC/influencer tracking | API polling |
 | **Clawpump** | New agent token launches on Solana | Direct API |
 | **Moltbook Forums** | Community signals, agent ecosystem intel | Forum monitoring |
-| **RugCheck** | Token security analysis, mint/freeze authority | Per-token verification |
 
-### Layer 2: PAID Sources (x402 Protocol)
+### Layer 2: PAID / Premium Sources (x402 Protocol + API Keys)
 
 | Source | Cost | Data | Schedule |
 |--------|------|------|----------|
 | **Einstein AI** | $0.10/call | Whale wallet movements, accumulation signals | 06:00 AST |
 | **Gloria AI** | $0.10/call | Breaking crypto news, sentiment shifts | 12:00 + 18:00 AST |
+| **Nansen** | API key | Smart money labels, wallet profiling, token flow analysis, whale tracking | Cross-reference with Einstein AI |
+| **Allora Network** | API key | AI-powered price predictions, market forecasting, sentiment models | Scoring enrichment |
 
 ### Layer 3: Cross-Reference Engine
 
@@ -102,10 +117,12 @@ Signals from Layer 1 + Layer 2 combine to generate special flags:
 | Flag | Trigger | Score Impact |
 |------|---------|-------------|
 | `[HIGH CONVICTION]` | AIXBT trending + DexScreener trending | +5 pts |
-| `[WHALE ALERT]` | Einstein AI confirmed whale activity | +5 pts |
+| `[WHALE ALERT]` | Einstein AI + Nansen confirmed whale activity | +5 pts |
 | `[BREAKING]` | Gloria AI breaking news catalyst | +5 pts |
 | `[KOL SIGNAL]` | leak.me smart money tracking | +3-5 pts |
-| `[VERIFIED]` | All verification checks passed | Priority flag |
+| `[PRICE PREDICTION]` | Allora Network bullish forecast | +3 pts |
+| `[NANSEN SMART MONEY]` | Nansen wallet labels show accumulation | +5 pts |
+| `[VERIFIED]` | All verification checks passed (RugCheck + Helius) | Priority flag |
 | `Revenue Signal` | ETH/BSC token scoring 80+ | Cross-chain premium |
 
 **Rule:** FREE sources first, always. Paid intelligence only supplements and cross-validates.
@@ -127,7 +144,7 @@ Signals from Layer 1 + Layer 2 combine to generate special flags:
 
 ### Catalyst Adjustments
 
-**Positive (+3 to +10):** Hackathon win, mainnet launch, major partnership, CEX listing announcement, audit completed, AIXBT+DexScreener cross-match, whale alert confirmed, KOL accumulation signal
+**Positive (+3 to +10):** Hackathon win, mainnet launch, major partnership, CEX listing announcement, audit completed, AIXBT+DexScreener cross-match, whale alert confirmed, KOL accumulation signal, Allora bullish price prediction, Nansen smart money accumulation
 
 **Negative (-5 to -15):** Delisting risk, exploit history, rugpull association, team controversy, smart contract vulnerability, already on major CEXs
 
@@ -145,14 +162,22 @@ Signals from Layer 1 + Layer 2 combine to generate special flags:
 Every prospect must pass verification before outreach:
 
 ```
-✅ Contract address confirmed (not just token name)
+✅ Contract address confirmed via Helius DAS API (not just token name)
 ✅ Pair address matches DexScreener URL
+✅ Token metadata verified on-chain via Helius RPC
 ✅ Token age verified (pair creation date)
-✅ Liquidity cross-checked across sources
-✅ RugCheck passed (no mint/freeze authority, LP locked)
+✅ Liquidity cross-checked across DexScreener + Jupiter
+✅ RugCheck PASSED:
+   - No mint authority
+   - No freeze authority
+   - LP locked (>50%, 90+ days preferred)
+   - Top 10 holder concentration <50%
+   - No rug risk flags
+✅ Nansen wallet analysis — no suspicious flow patterns
 ✅ NOT already on major CEXs (Binance, Coinbase, etc.)
 ✅ Social links working and active
 ✅ Team/community contactable
+✅ Allora price prediction — no bearish divergence
 ```
 
 ---
@@ -277,8 +302,11 @@ const verified = await buzz_verify_project('So1111111111111111111111111111111111
 ### Integration with Solana Agent Kit Ecosystem
 
 - Uses **Token Plugin** for swap analysis and real liquidity verification
-- Uses **rug_check action** (PR #90) as additional security layer
+- Uses **rug_check action** (PR #90) as additional security layer alongside Buzz's own RugCheck integration
 - Uses **Jupiter integration** to verify DEX liquidity depth
+- Enriched by **Helius RPC** for on-chain token metadata and transaction history
+- Enriched by **Nansen** for smart money labels and wallet flow analysis
+- Enriched by **Allora Network** for AI-powered price predictions and market forecasting
 - Compatible with **SendAI's 30+ protocol integrations**
 
 Source: [github.com/sendaifun/solana-agent-kit](https://github.com/sendaifun/solana-agent-kit)
@@ -481,7 +509,11 @@ services:
 | **OpenClaw** | ✅ LIVE | Deployment framework, Moltbook host |
 | **zauthx402** | ✅ LIVE | Trust verification, payment protocol |
 | **retake.tv** | ✅ LIVE | 24/7 live streaming, $BUZZBD token |
-| **Solana Agent Kit** | ✅ Plugin | Scoring engine distribution |
+| **Helius** | ✅ Integrated | Solana RPC, DAS API, on-chain token metadata |
+| **RugCheck** | ✅ Integrated | Token security analysis, rug risk scoring |
+| **Nansen** | ✅ Integrated | Smart money labels, wallet profiling, flow analysis |
+| **Allora Network** | ✅ Integrated | AI price predictions, market forecasting |
+| **Solana Agent Kit** | ✅ Plugin | Scoring engine distribution to all agent builders |
 | **PayAI** | ✅ LIVE | Gasless x402 payment facilitator |
 | **BankrBot** | 🟡 Active | LLM gateway, skills marketplace |
 | **Swarms Corp** | 📋 Post-hackathon | Enterprise agent orchestration |
@@ -503,8 +535,11 @@ buzz-bd-agent/
 ├── src/
 │   ├── scanner/                 # Token scanning modules
 │   │   ├── dexscreener.ts       # DexScreener API (60+ chains)
-│   │   ├── aixbt.ts             # AIXBT momentum tracking
+│   │   ├── helius.ts            # Helius RPC + DAS API (Solana)
 │   │   ├── rugcheck.ts          # RugCheck security analysis
+│   │   ├── nansen.ts            # Nansen smart money + wallet labels
+│   │   ├── allora.ts            # Allora Network price predictions
+│   │   ├── aixbt.ts             # AIXBT momentum tracking
 │   │   └── clawpump.ts          # Clawpump agent tokens
 │   ├── scorer/                  # BD scoring engine
 │   │   ├── scoring.ts           # 100-point scoring system
