@@ -1,185 +1,595 @@
-# 🐝 Buzz BD Agent — Autonomous Token Discovery & Outreach
+# 🐝 Buzz BD Agent v3.4 — Autonomous Commerce Edition
 
-> **The first autonomous AI business development agent that pays for its own intelligence.**
+> **First AI Business Development Agent That Pays for Its Own Intelligence**
 
-[![Live Stream](https://img.shields.io/badge/🔴_LIVE-retake.tv/BuzzBD-red)](https://retake.tv/BuzzBD)
-[![OpenClaw](https://img.shields.io/badge/OpenClaw-Submitted-orange)](https://www.moltbook.com/post/6c0d10f7-977f-434d-bea7-b13abc8f8f22)
-[![Colosseum](https://img.shields.io/badge/Colosseum-Agent_Hackathon-purple)](https://colosseum.com/agent-hackathon/projects/buzz-bd-agent-autonomous-token-discovery-outreach)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![$BUZZBD](https://img.shields.io/badge/$BUZZBD-Base_Chain-blue)](https://basescan.org/token/0xdbb38acb97f936eeccba05908d6a58b0829fcb07)
+Autonomous 24/7 BD agent for [SolCex Exchange](https://solcex.cc) — scanning tokens across Solana, Ethereum, and BSC, scoring prospects on a 100-point system, purchasing premium intelligence via x402 USDC micropayments, verifying payment endpoints through zauthx402 trust scores, live-streaming operations 24/7, and drafting personalized outreach — all without human intervention.
 
----
-
-## What is Buzz?
-
-Buzz is an autonomous AI agent that handles the **entire business development pipeline** for crypto exchange listings — scanning tokens across 5 chains, scoring prospects on a 100-point system, purchasing premium intelligence via x402 USDC micropayments, and drafting personalized outreach for qualified projects.
-
-**Buzz doesn't just analyze data — it makes autonomous economic decisions.** It buys whale alerts from Einstein AI, breaking news from Gloria AI, verifies every payment endpoint through zauthx402 trust scores, and measures ROI on every dollar spent.
-
-This is **agentic commerce in production** — not a demo.
+[![OpenClaw](https://img.shields.io/badge/Powered%20by-OpenClaw-blue)](https://openclaw.ai)
+[![Akash Network](https://img.shields.io/badge/Deployed%20on-Akash%20Network-red)](https://akash.network)
+[![Colosseum](https://img.shields.io/badge/Colosseum-Agent%20Hackathon-purple)](https://colosseum.com/agent-hackathon)
+[![USDC Hackathon](https://img.shields.io/badge/OpenClaw-USDC%20Hackathon-green)](https://openclaw.ai)
+[![retake.tv](https://img.shields.io/badge/LIVE-retake.tv%2FBuzzBD-orange)](https://retake.tv/BuzzBD)
+[![Agent Verified](https://img.shields.io/badge/ClawdIn-Agent%20Verified-brightgreen)](https://clawdin.ai)
+[![Moltbook](https://img.shields.io/badge/Moltbook-@BuzzBD-blue)](https://moltbook.com/u/BuzzBD)
+[![$BUZZBD](https://img.shields.io/badge/Token-$BUZZBD%20on%20Base-6366f1)](https://clanker.world/clanker/0xdbb38acb97f936eeccba05908d6a58b0829fcb07)
 
 ---
 
-## 📊 Live Stats (Updated Feb 8, 2026)
+## 🔴 LIVE NOW
 
-| Metric | Value |
-|--------|-------|
-| Tokens Scanned | **500+** across Solana, ETH, BSC, Base, Arbitrum |
-| Qualified Prospects | **15+** scoring 70+ on 100-point system |
-| Pipeline Value | **~$40K USDC** in potential listing fees |
-| x402 Payments | **20+** autonomous micropayments executed |
-| Heartbeats | **69+** continuous on Colosseum |
-| Intelligence Cost | **$0.30/day** ($9/month total) |
-| ROI Per Listing | **16,666x** ($0.30/day → $5,000/listing) |
-| Uptime | **24/7** on Akash Network |
+**Watch Buzz work in real-time:** [retake.tv/BuzzBD](https://retake.tv/BuzzBD) — 24/7 dashboard overlay with jazz soundtrack, showing live scanning, scoring, and pipeline activity.
 
 ---
 
-## 🔥 How It Works
+## 🎯 What Is Buzz?
+
+Buzz is an autonomous AI agent that handles the complete business development lifecycle for SolCex Exchange — a Solana-native CEX focused on listing emerging tokens. Unlike demo agents that execute a single task, Buzz runs a **full production BD pipeline**:
+
+- **Scans** 1,500+ tokens monthly across 3 chains using free + paid intelligence
+- **Scores** every prospect on a 100-point system with 6 weighted factors + catalyst adjustments
+- **Pays** for its own premium intelligence via x402 USDC micropayments ($0.30/day budget)
+- **Verifies** every payment endpoint through zauthx402 trust scores before spending
+- **Learns** from outcomes through dual experience memory (free + paid ROI tracking)
+- **Drafts** personalized outreach emails with human-in-loop approval
+- **Streams** operations 24/7 on retake.tv with live overlay dashboard
+- **Compresses** memory on 5-day operational cycles for sustainable long-running autonomy
+
+**What makes Buzz unique:** It's not just an AI that analyzes data — it's an AI that makes autonomous economic decisions, tracks ROI on every dollar spent, and continuously improves its intelligence sourcing through experience memory.
+
+---
+
+## 🏗️ Architecture
 
 ```
-DISCOVER → AI SIGNALS → CROSS-REFERENCE → SCORE → OUTREACH → SETTLE
+┌──────────────────────────────────────────────────────────────────────┐
+│                      BUZZ BD AGENT v3.4.0                            │
+│                 Autonomous Commerce Edition                          │
+├──────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐             │
+│  │ Intelligence │   │   Scoring    │   │   Outreach   │             │
+│  │   Layers     │   │   Engine     │   │   System     │             │
+│  │ (Free+Paid)  │   │  (100 pts)   │   │ (Email/DM)   │             │
+│  └──────┬───────┘   └──────┬───────┘   └──────┬───────┘             │
+│         │                  │                   │                     │
+│  ┌──────┴──────────────────┴───────────────────┴───────┐             │
+│  │           CORE AGENT (Claude Sonnet 4)              │             │
+│  └──────┬──────────┬───────────┬───────────┬───────────┘             │
+│         │          │           │           │                         │
+│  ┌──────┴──────┐ ┌─┴─────────┐ ┌┴──────────┐ ┌┴──────────┐         │
+│  │  x402       │ │ zauthx402 │ │ Dual      │ │ Compress  │         │
+│  │  Payments   │ │ Trust     │ │ Experience│ │ Protocol  │         │
+│  │  ($USDC)    │ │ Verify    │ │ Memory    │ │ (5-day)   │         │
+│  └──────┬──────┘ └───────────┘ └───────────┘ └───────────┘         │
+│         │                                                           │
+│  ┌──────┴──────────────────────────────────────────────┐             │
+│  │              CHANNELS & PRESENCE                     │             │
+│  │  Telegram | Email | Moltbook | retake.tv | Twitter   │             │
+│  └──────────────────────────────────────────────────────┘             │
+│                                                                      │
+├──────────────────────────────────────────────────────────────────────┤
+│  INFRA: Akash Network │ FRAMEWORK: OpenClaw │ MODEL: Claude Sonnet 4│
+│  STREAM: retake.tv    │ TOKEN: $BUZZBD/Base  │ PAYMENTS: x402/USDC   │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1. 🔍 Discover
-Scans DexScreener, AIXBT, and leak.me across 5 chains. Multiple scans daily. 500+ tokens evaluated.
+---
 
-### 2. 🤖 Dual AI Signals (Paid via x402)
-- **Einstein AI** — Whale alerts and large wallet movement detection. Purchased autonomously via x402 USDC micropayments.
-- **Gloria AI** — Breaking crypto news, sentiment shifts, and catalyst events. Multiple daily scans via x402.
+## 🧠 Intelligence Layers
 
-Every x402 payment is verified through **zauthx402 trust verification** BEFORE spending:
+### Layer 1: FREE Sources (Always-On)
+
+| Source | Data | Integration |
+|--------|------|-------------|
+| **DexScreener API** | Prices, liquidity, pairs across 60+ chains | Direct API — real-time |
+| **AIXBT Momentum** | Trending tokens, catalyst signals, momentum scores | API polling — 4hr |
+| **leak.me KOL** | Smart money follows, VC/influencer tracking | API polling |
+| **Clawpump** | New agent token launches on Solana | Direct API |
+| **Moltbook Forums** | Community signals, agent ecosystem intel | Forum monitoring |
+| **RugCheck** | Token security analysis, mint/freeze authority | Per-token verification |
+
+### Layer 2: PAID Sources (x402 Protocol)
+
+| Source | Cost | Data | Schedule |
+|--------|------|------|----------|
+| **Einstein AI** | $0.10/call | Whale wallet movements, accumulation signals | 06:00 AST |
+| **Gloria AI** | $0.10/call | Breaking crypto news, sentiment shifts | 12:00 + 18:00 AST |
+
+### Layer 3: Cross-Reference Engine
+
+Signals from Layer 1 + Layer 2 combine to generate special flags:
+
+| Flag | Trigger | Score Impact |
+|------|---------|-------------|
+| `[HIGH CONVICTION]` | AIXBT trending + DexScreener trending | +5 pts |
+| `[WHALE ALERT]` | Einstein AI confirmed whale activity | +5 pts |
+| `[BREAKING]` | Gloria AI breaking news catalyst | +5 pts |
+| `[KOL SIGNAL]` | leak.me smart money tracking | +3-5 pts |
+| `[VERIFIED]` | All verification checks passed | Priority flag |
+| `Revenue Signal` | ETH/BSC token scoring 80+ | Cross-chain premium |
+
+**Rule:** FREE sources first, always. Paid intelligence only supplements and cross-validates.
+
+---
+
+## 💯 Scoring System (100 Points)
+
+### Base Criteria
+
+| Factor | Weight | Excellent | Good | Acceptable |
+|--------|--------|-----------|------|------------|
+| Market Cap | 20% | >$10M | $1M-$10M | $500K-$1M |
+| Liquidity | 25% | >$500K | $200K-$500K | $100K min |
+| Volume 24h | 20% | >$1M | $500K-$1M | $100K-$500K |
+| Social Metrics | 15% | Active all platforms | 2+ platforms | 1 platform |
+| Token Age | 10% | Established (90d+) | Moderate (30d+) | New (7d+) |
+| Team Transparency | 10% | Doxxed + active | Partial info | Anonymous |
+
+### Catalyst Adjustments
+
+**Positive (+3 to +10):** Hackathon win, mainnet launch, major partnership, CEX listing announcement, audit completed, AIXBT+DexScreener cross-match, whale alert confirmed, KOL accumulation signal
+
+**Negative (-5 to -15):** Delisting risk, exploit history, rugpull association, team controversy, smart contract vulnerability, already on major CEXs
+
+### Score Actions
+
+| Range | Category | Action |
+|-------|----------|--------|
+| 85-100 | 🔥 HOT | Immediate outreach |
+| 70-84 | ✅ Qualified | Priority queue |
+| 50-69 | 👀 Watch | Monitor 48h |
+| 0-49 | ❌ Skip | No action |
+
+### Data Verification Protocol
+
+Every prospect must pass verification before outreach:
+
+```
+✅ Contract address confirmed (not just token name)
+✅ Pair address matches DexScreener URL
+✅ Token age verified (pair creation date)
+✅ Liquidity cross-checked across sources
+✅ RugCheck passed (no mint/freeze authority, LP locked)
+✅ NOT already on major CEXs (Binance, Coinbase, etc.)
+✅ Social links working and active
+✅ Team/community contactable
+```
+
+---
+
+## 💰 x402 Autonomous Payment System
+
+Buzz is the first BD agent that **pays for its own intelligence** using the [x402 HTTP payment protocol](https://x.com/x402).
+
+### How It Works
+
+```
+1. Buzz identifies need for premium data (whale alerts, breaking news)
+2. Check daily budget remaining ($0.30/day cap)
+3. Verify endpoint trust via zauthx402 (must be score 70+)
+4. If budget OK + endpoint trusted → execute x402 USDC payment
+5. Receive premium intelligence data
+6. Cross-reference with free data sources
+7. Log transaction + measure ROI
+8. Store outcome in experience memory for future optimization
+```
+
+### Budget Controls
+
+| Parameter | Value |
+|-----------|-------|
+| Monthly budget | $10 USDC |
+| Daily limit | $0.35 |
+| Per-call limit | $0.15 |
+| Max calls/day | 3 |
+| Emergency stop | `STOP x402` command |
+
+### Wallet
+
+| Field | Value |
+|-------|-------|
+| Address | `79AVHaE2g3GQYoqXCpvim12HeV563mYe7VHDrw28uzxG` |
+| Network | Solana Mainnet |
+| Currency | USDC (SPL) |
+| Facilitator | PayAI (payai.network) — gasless |
+
+### Transaction Logging
+
+Every x402 payment is logged with:
+```json
+{
+  "timestamp": "2026-02-07T06:00:00Z",
+  "source": "einstein_ai",
+  "cost_usdc": 0.10,
+  "endpoint": "whale_alerts",
+  "result_quality": "high",
+  "led_to_prospect": true,
+  "prospect_score": 87,
+  "roi_rating": "positive"
+}
+```
+
+---
+
+## 🔐 zauthx402 Trust Verification
+
+Before paying any x402 endpoint, Buzz verifies its trustworthiness:
 
 | Trust Level | Score | Action |
 |-------------|-------|--------|
-| ✅ VERIFIED | 90-100 | Auto-pay within budget |
-| 🔵 TRUSTED | 70-89 | Pay with logging |
-| 🟡 CAUTIOUS | 50-69 | Requires human approval |
-| 🔴 UNTRUSTED | 0-49 | NEVER pay, flagged |
-| ⛔ BLACKLISTED | — | Permanent block |
+| VERIFIED | 90-100 | Auto-pay within budget |
+| TRUSTED | 70-89 | Pay with logging |
+| CAUTIOUS | 50-69 | Pay only with human approval |
+| UNTRUSTED | 0-49 | NEVER pay — flag for review |
+| BLACKLISTED | — | Permanent block |
 
-### 3. 🔥 Cross-Reference → HIGH CONVICTION Signals
-When free AND paid sources confirm the same signal:
+### Currently Verified Endpoints
 
-- 🔥 **[HIGH CONVICTION]** — Trending on BOTH AIXBT + DexScreener
-- 🐋 **[WHALE ALERT]** — Einstein AI confirmed large wallet movement
-- ⚡ **[BREAKING]** — Gloria AI breaking news catalyst
-- 💰 **[KOL SIGNAL]** — leak.me smart money accumulation detected
-
-### 4. 📊 100-Point Scoring Engine
-
-| Category | Weight | What It Measures |
-|----------|--------|-----------------|
-| Liquidity | 25 | DEX liquidity depth and stability |
-| Market Cap | 20 | Current valuation and growth potential |
-| Volume | 20 | 24h trading volume and trends |
-| Social | 15 | Community size, engagement, growth |
-| Age | 10 | Token maturity and track record |
-| Team | 10 | Doxxed team, partnerships, audits |
-
-**Catalyst Adjustments:** Hackathon win +10, Audit completed +8, Whale confirmed +5, Exploit history -15
-
-### 5. 📧 Outreach
-Drafts personalized BD emails from 30+ templates for prospects scoring 70+. Human-in-loop: Ogie approves before sending.
-
-### 6. ✅ Settle
-USDC on-chain settlement. Full audit trail. ROI tracking per x402 spend.
-
----
-
-## 🏗️ Tech Stack
-
-| Component | Role |
-|-----------|------|
-| **Akash Network** | Decentralized compute — 24/7 agent hosting |
-| **OpenClaw** | Agent framework — deployment + skills marketplace |
-| **Claude Sonnet 4** | AI backbone — reasoning, scoring, content |
-| **x402 Protocol** | Autonomous USDC micropayments |
-| **zauthx402** | Trust verification before every payment |
-| **Einstein AI** | Whale alerts via x402 |
-| **Gloria AI** | Breaking news via x402 |
-| **DexScreener API** | Market data — 60+ chains, real-time pairs |
-| **AIXBT** | Momentum intelligence — trending tokens |
-| **leak.me** | Smart money tracking — KOL follows, VC signals |
-| **retake.tv** | Live 24/7 streaming with overlay |
-| **$BUZZBD** | Agent token on Base chain |
-
----
-
-## 🏆 Hackathon Entries
-
-### Colosseum Agent Hackathon — $100K USDC Prize
-- **Status:** ✅ Submitted + 69+ heartbeats running
-- **Page:** [colosseum.com/agent-hackathon/projects/buzz-bd-agent](https://colosseum.com/agent-hackathon/projects/buzz-bd-agent-autonomous-token-discovery-outreach)
-- **Deadline:** February 12, 2026
-
-### OpenClaw USDC Hackathon — $30K Prize
-- **Status:** ✅ 3 entries submitted, 11 community votes, 4 technical replies
-- **Moltbook:** [moltbook.com/post/6c0d10f7](https://www.moltbook.com/post/6c0d10f7-977f-434d-bea7-b13abc8f8f22)
-- **Free Skill:** [buzz-token-scanner](https://github.com/buzzbysolcex/buzz-token-scanner) (MIT, zero deps)
-
-### Claude Code Hackathon — $100K API Credits
-- **Status:** ✅ Applied — "Built with Opus 4.6" track
-- **Dates:** February 10-16, 2026
-
-**3 hackathons. $230K+ combined prizes. One autonomous agent.**
-
----
-
-## 🔗 Live Proof
-
-| What | Where |
-|------|-------|
-| 🔴 Live 24/7 Stream | [retake.tv/BuzzBD](https://retake.tv/BuzzBD) |
-| 📂 Open Source Skill | [github.com/buzzbysolcex/buzz-token-scanner](https://github.com/buzzbysolcex/buzz-token-scanner) |
-| 💰 $BUZZBD Token | [basescan.org/token/0xdbb38...](https://basescan.org/token/0xdbb38acb97f936eeccba05908d6a58b0829fcb07) |
-| 🔑 On-Chain Wallet | [solscan.io/account/79AVHaE2g3GQ...](https://solscan.io/account/79AVHaE2g3GQYoqXCpvim12HeV563mYe7VHDrw28uzxG) |
-| ✅ Agent Verified | ClawdIn + ClawKey (VeryAI palm scan biometrics) |
-| 📝 OpenClaw Submission | [moltbook.com/post/6c0d10f7](https://www.moltbook.com/post/6c0d10f7-977f-434d-bea7-b13abc8f8f22) |
-
----
-
-## 💰 The ROI Math
-
-```
-Intelligence cost:  $0.30/day  →  $9/month
-Listing revenue:    $5,000 (SOL) to $7,500 (ETH/BSC) per listing
-ROI per close:      16,666x
-
-Current pipeline:   15+ qualified prospects  →  ~$40K potential fees
+```json
+{
+  "einstein_ai":      { "trust": 95, "status": "VERIFIED" },
+  "gloria_ai":        { "trust": 92, "status": "VERIFIED" },
+  "payai_facilitator": { "trust": 98, "status": "VERIFIED" }
+}
 ```
 
 ---
 
-## 👥 Team
+## 🔌 Solana Agent Kit Plugin
 
-| | Name | Role |
-|--|------|------|
-| 👨‍✈️ | **Ogie** ([@hidayahanka1](https://x.com/hidayahanka1)) | Builder · Strategist · 20+ years ops across 6 countries |
-| 🧠 | **Claude Opus 4.6** | Strategy · Research · Content · BuzzKit development |
-| 🐝 | **Buzz v3.4** ([@BuzzBySolCex](https://x.com/BuzzBySolCex)) | Autonomous BD Agent · 24/7 · Never sleeps |
+Buzz's scoring engine is available as a **Solana Agent Kit plugin** — allowing any agent builder to integrate Buzz's 100-point evaluation into their own agents.
 
-*"A chef who codes, an AI that strategizes, and a bee that never sleeps."*
+```bash
+npm install @solana-agent-kit/plugin-buzz-bd
+```
 
-Operating from Jeddah 🇸🇦 · Built for the global crypto ecosystem.
+### Three Actions Exposed
+
+```typescript
+import { buzzBdPlugin } from '@solana-agent-kit/plugin-buzz-bd';
+
+const agent = new SolanaAgentKit({
+  plugins: [buzzBdPlugin()]
+});
+
+// Action 1: Score any token
+const score = await buzz_score_token('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+// → { total: 82, category: "QUALIFIED", breakdown: {...}, recommendation: "..." }
+
+// Action 2: Find listing-quality tokens
+const listings = await buzz_find_listings({ minScore: 80, chains: ['solana'] });
+// → { prospects: [...], stats: { totalProspects: 12, pipelineValueUsdc: 60000 } }
+
+// Action 3: Full project verification
+const verified = await buzz_verify_project('So11111111111111111111111111111111111111112');
+// → { verification: { overallVerified: true, ... }, details: "✅ Contract verified..." }
+```
+
+### Use Cases for Other Agents
+
+| Agent Type | Use Case |
+|-----------|----------|
+| **Trading agents** | "Score this token before I buy" — safety + quality check |
+| **Portfolio agents** | "Find me listing-quality tokens" — curated discovery |
+| **Research agents** | "Give me the full BD analysis" — deep due diligence |
+| **DeFi agents** | Pre-swap verification via RugCheck + liquidity depth |
+
+### Integration with Solana Agent Kit Ecosystem
+
+- Uses **Token Plugin** for swap analysis and real liquidity verification
+- Uses **rug_check action** (PR #90) as additional security layer
+- Uses **Jupiter integration** to verify DEX liquidity depth
+- Compatible with **SendAI's 30+ protocol integrations**
+
+Source: [github.com/sendaifun/solana-agent-kit](https://github.com/sendaifun/solana-agent-kit)
 
 ---
 
-## 📬 Contact
+## 🧬 Dual Experience Learning
 
-- **Twitter:** [@BuzzBySolCex](https://x.com/BuzzBySolCex) · [@hidayahanka1](https://x.com/hidayahanka1)
-- **Email:** buzzbysolcex@gmail.com
-- **Exchange:** [SolCex Exchange](https://solcex.io)
+Buzz doesn't just collect data — it **learns from outcomes** across two memory systems:
+
+### Free Intelligence Experience
+Tracks which free sources produce the best prospects:
+- DexScreener trending → Did it lead to qualified prospects?
+- AIXBT signals → How often do they convert to 70+ scores?
+- Moltbook community signals → Accuracy over time
+
+### Paid Intelligence Experience
+Tracks ROI on every x402 dollar spent:
+- Einstein AI whale alerts → Did whale activity predict score improvement?
+- Gloria AI breaking news → Did news catalysts lead to outreach?
+- Cost per qualified prospect from paid sources
+
+This dual system means Buzz gets **better at spending money** over time, allocating budget to the sources that actually produce results.
 
 ---
 
-## License
+## 📺 retake.tv Live Stream
 
-MIT — See [LICENSE](LICENSE) for details.
+Buzz streams operations 24/7 at [retake.tv/BuzzBD](https://retake.tv/BuzzBD):
+
+- **Dashboard overlay** showing real-time pipeline, scores, and scan activity
+- **Jazz soundtrack** — because BD work is better with music
+- **Auto-recovery** — monitor script watches FFmpeg, restarts on failure with fresh RTMP key
+- **$BUZZBD token** minted on Base via retake.tv/Clanker
+
+### $BUZZBD Token
+
+| Field | Value |
+|-------|-------|
+| Chain | Base |
+| Contract | `0xdbb38acb97f936eeccba05908d6a58b0829fcb07` |
+| LP Fees | [clanker.world](https://clanker.world/clanker/0xdbb38acb97f936eeccba05908d6a58b0829fcb07) |
 
 ---
 
-<p align="center">
-  <strong>🐝 Buzz BD Agent v3.4 · SolCex Exchange · February 2026</strong><br>
-  <em>The bee doesn't need permission to fly.</em>
-</p>
+## ⏰ Operational Schedule (AST / UTC+3)
+
+### Daily Scan Cycle
+
+| Time | Task | Source | Cost |
+|------|------|--------|------|
+| 05:00 | Full deep scan | DexScreener + AIXBT + leak.me | FREE |
+| 06:00 | Whale alert scan | Einstein AI (x402) | $0.10 |
+| 07:00 | Morning Alpha tweet draft | Internal | FREE |
+| 09:00 | Free multi-chain scan refresh | DexScreener | FREE |
+| 12:00 | Breaking news scan #1 | Gloria AI (x402) | $0.10 |
+| 14:00 | Pipeline report + deal window | Internal | FREE |
+| 15:00 | Free scan refresh | Top movers | FREE |
+| 18:00 | Breaking news scan #2 | Gloria AI (x402) | $0.10 |
+| 21:00 | Evening scan | DexScreener + AIXBT | FREE |
+| 22:00 | Experience compression | Memory management | FREE |
+| 22:30 | Health report | Internal | FREE |
+| 23:00 | Daily spend report | ROI summary | FREE |
+
+### 5-Day Operational Cycles
+
+| Day | Focus |
+|-----|-------|
+| 0 | Calibration — baseline, test endpoints |
+| 1 | Discovery — full scan, identify new prospects |
+| 2 | Validation — deep dive on Day 1 finds |
+| 3 | Outreach — draft emails for qualified prospects |
+| 4 | Review — compress memory, ROI report, carry-forward |
+
+### Compression Protocol
+
+Memory stays lean through aggressive compression:
+- **Daily:** Store only TOP 5 prospects per chain, delete raw scan data
+- **Below 70 score:** Offload to Airtable, remove from active memory
+- **End of cycle:** Compile summary for carry-forward to next cycle
+- **Monthly:** Master ROI report
+
+---
+
+## 📊 Multi-Chain Token Scanning
+
+| Chain | Tag | Listing Fee | Priority |
+|-------|-----|-------------|----------|
+| Solana | `[SOL]` | $5,000 USDC | Primary — SolCex home chain |
+| Ethereum | `[ETH]` | $7,500 USDC | Cross-chain premium |
+| BSC | `[BSC]` | $7,500 USDC | High volume meme/community |
+
+---
+
+## 📧 Automated Outreach
+
+Buzz drafts personalized emails for qualified prospects:
+
+```
+From: buzzbysolcex@gmail.com
+To: [project_contact]
+Subject: SolCex Exchange Listing Opportunity — [TOKEN_NAME]
+
+Hi [NAME],
+
+I'm Buzz, the BD agent for SolCex Exchange. I've been tracking 
+[TOKEN_NAME] and I'm impressed by your [SPECIFIC_METRIC].
+
+[PERSONALIZED_PITCH based on token data and catalyst signals]
+
+SolCex listing includes:
+- Market making support
+- AMA hosting and community engagement
+- Promotional campaigns
+
+Would love to discuss. Reply here or reach our BD lead 
+@HidayahAnka1 on X.
+
+Best,
+Buzz 🐝
+SolCex Exchange BD Agent
+```
+
+**Human-in-Loop:** All outreach requires approval from Ogie before sending. Buzz drafts, Ogie decides.
+
+---
+
+## 🏆 Hackathon Participation
+
+### Colosseum Agent Hackathon — $100K USDC
+
+| Field | Value |
+|-------|-------|
+| Track | AI Trading Infra / Most Agentic |
+| Prize Pool | $100K USDC (1st: $50K, 2nd: $30K, 3rd: $15K, Most Agentic: $5K) |
+| Deadline | Feb 12, 2026 |
+| Status | ✅ Submitted + Active |
+| Votes | 11 human + 9 agent (20 total) |
+| Project | [colosseum.com/agent-hackathon/projects/buzz-bd-agent...](https://colosseum.com/agent-hackathon/projects/buzz-bd-agent-autonomous-token-discovery-outreach) |
+
+### OpenClaw USDC Hackathon — $30K USDC
+
+| Field | Value |
+|-------|-------|
+| Track | Agentic Commerce |
+| Prize Pool | $30K USDC (Circle) |
+| Deadline | Feb 8, 2026 (Submitted) |
+| Status | ✅ Submitted |
+| Submission | c7f83be5-b78a-4977-acb6-997ea18471f3 |
+
+---
+
+## 📈 Production Metrics
+
+| Metric | Value |
+|--------|-------|
+| Tokens scanned | 1,500+ monthly |
+| Active prospects | 8 pipeline |
+| Qualified (70+) | 7 |
+| HOT (85+) | 2 |
+| x402 transactions | 12+ autonomous payments |
+| x402 total spent | ~$1.20 USDC |
+| Pipeline value | $40,000+ potential |
+| Operational days | 8+ continuous |
+| Chains covered | 3 (SOL, ETH, BSC) |
+| Live stream uptime | 24/7 on retake.tv |
+
+---
+
+## 🚀 Deployment
+
+### Akash Network (Decentralized Cloud)
+
+```yaml
+services:
+  buzz-agent:
+    image: openclaw/agent:latest
+    env:
+      - AGENT_NAME=buzz-bd-agent
+      - MODEL=claude-sonnet-4
+      - CHANNEL=telegram
+    resources:
+      cpu: 2
+      memory: 4Gi
+      storage: 10Gi
+```
+
+**Why Akash?**
+- ✅ Decentralized — no single point of failure
+- ✅ Cost-effective — 85% cheaper than AWS
+- ✅ Censorship-resistant — agent runs independently
+- ✅ 24/7 uptime — always scanning, always ready
+
+---
+
+## 🤝 Partnership Ecosystem
+
+| Partner | Status | Role |
+|---------|--------|------|
+| **OpenClaw** | ✅ LIVE | Deployment framework, Moltbook host |
+| **zauthx402** | ✅ LIVE | Trust verification, payment protocol |
+| **retake.tv** | ✅ LIVE | 24/7 live streaming, $BUZZBD token |
+| **Solana Agent Kit** | ✅ Plugin | Scoring engine distribution |
+| **PayAI** | ✅ LIVE | Gasless x402 payment facilitator |
+| **BankrBot** | 🟡 Active | LLM gateway, skills marketplace |
+| **Swarms Corp** | 📋 Post-hackathon | Enterprise agent orchestration |
+
+**Principle:** Build alliances, NOT dependencies. Every partnership enhances Buzz's capabilities without creating lock-in.
+
+---
+
+## 📁 Project Structure
+
+```
+buzz-bd-agent/
+├── README.md                    # This file
+├── SKILL.md                     # Agent skill definition (v3.4)
+├── package.json                 # Node.js package config
+├── LICENSE                      # MIT
+├── config/
+│   └── scoring.json             # Scoring weights and thresholds
+├── src/
+│   ├── scanner/                 # Token scanning modules
+│   │   ├── dexscreener.ts       # DexScreener API (60+ chains)
+│   │   ├── aixbt.ts             # AIXBT momentum tracking
+│   │   ├── rugcheck.ts          # RugCheck security analysis
+│   │   └── clawpump.ts          # Clawpump agent tokens
+│   ├── scorer/                  # BD scoring engine
+│   │   ├── scoring.ts           # 100-point scoring system
+│   │   └── types.ts             # TypeScript interfaces
+│   ├── outreach/                # Email drafting and tracking
+│   │   └── templates/           # Email templates
+│   ├── x402/                    # Payment integration
+│   │   ├── client.ts            # x402 payment client
+│   │   ├── wallet.ts            # Wallet management
+│   │   └── zauthx402.ts         # Trust verification
+│   ├── experience/              # Dual learning system
+│   │   ├── free_insights.json   # Free source ROI tracking
+│   │   └── x402_insights.json   # Paid source ROI tracking
+│   └── plugin/                  # Solana Agent Kit plugin
+│       ├── index.ts             # Plugin entry point
+│       ├── actions.ts           # 3 exposed actions
+│       └── README.md            # Plugin documentation
+├── memory/                      # Agent memory system
+│   ├── pipeline/                # Active prospects
+│   ├── contacts/                # Project contacts
+│   ├── reports/                 # Daily reports
+│   ├── x402/                    # Payment transaction logs
+│   └── health/                  # System health status
+├── stream/                      # retake.tv live stream
+│   ├── overlay.html             # Dashboard overlay (v3)
+│   ├── bridge.py                # Data bridge (v3)
+│   └── monitor.sh               # Auto-recovery script
+└── cron/                        # Scheduled jobs
+    └── schedules.json           # 8 cron job definitions
+```
+
+---
+
+## 🔒 Security
+
+- ❌ No API keys in repo
+- ❌ No credentials in code
+- ❌ No wallet private keys exposed
+- ✅ All secrets in environment variables
+- ✅ Human approval for all outbound messages
+- ✅ zauthx402 trust verification before any payment
+- ✅ x402 budget controls with emergency stop
+- ✅ Prompt injection detection and reporting
+
+---
+
+## 🔗 Links
+
+| Platform | Link |
+|----------|------|
+| **SolCex Exchange** | [solcex.cc](https://solcex.cc) |
+| **Live Stream** | [retake.tv/BuzzBD](https://retake.tv/BuzzBD) |
+| **Twitter** | [@BuzzBySolCex](https://twitter.com/BuzzBySolCex) |
+| **Moltbook** | [@BuzzBD](https://moltbook.com/u/BuzzBD) (Verified, 79 karma) |
+| **Telegram Bot** | @BuzzBySolCex_bot |
+| **Email** | buzzbysolcex@gmail.com |
+| **Colosseum** | [Project Page](https://colosseum.com/agent-hackathon/projects/buzz-bd-agent-autonomous-token-discovery-outreach) |
+| **$BUZZBD Token** | [Base: 0xdbb3...](https://clanker.world/clanker/0xdbb38acb97f936eeccba05908d6a58b0829fcb07) |
+| **x402 Protocol** | [x.com/x402](https://x.com/x402) |
+| **OpenClaw** | [openclaw.ai](https://openclaw.ai) |
+| **Akash Network** | [akash.network](https://akash.network) |
+
+---
+
+## 📜 Changelog
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0.0 | Feb 3, 2026 | Initial creation — basic scanning + scoring |
+| 2.0.0 | Feb 4, 2026 | Moltbook, Gmail integration, report formats |
+| 2.3.0 | Feb 4, 2026 | Clawpump integration |
+| 3.0.0 | Feb 4, 2026 | Forum integration, email approval workflow |
+| 3.1.0 | Feb 5, 2026 | Experience memory, analysis improvements |
+| 3.2.0 | Feb 5, 2026 | zauthx402 trust verification layer |
+| 3.3.0 | Feb 6, 2026 | x402 payment integration, autonomous commerce |
+| **3.4.0** | **Feb 7, 2026** | **Dual experience learning, retake.tv 24/7 streaming, $BUZZBD token, compression protocol, Solana Agent Kit plugin, standardized reporting** |
+
+---
+
+## 📜 License
+
+MIT License — see [LICENSE](LICENSE)
+
+---
+
+*Built by Buzz 🐝 — the BD agent that never sleeps, pays for its own intelligence, and streams while it works.*
+
+*"Free intelligence first. Pay only for alpha. Track every dollar. Stream while you sleep."*
