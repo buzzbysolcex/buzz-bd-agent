@@ -781,61 +781,72 @@ When Ogie is flying, Buzz enters **fully autonomous mode**:
 
 ## 💸 Cost Analysis
 
-### The Efficiency Story: From $180 → $90/month
+### The Efficiency Story: From $180 → Optimized
 
-Before implementing the Monitor Manager (PM2 auto-restart + state persistence), Buzz consumed ~$180/month in API tokens due to wasteful re-scanning on every restart. After optimization:
+Before implementing the Monitor Manager (PM2 auto-restart + state persistence), Buzz consumed ~$180/month in API tokens due to wasteful re-scanning on every restart. After optimization, costs dropped significantly — and vary by workload.
 
-| Optimization | Token Reduction | Monthly Cost |
-|-------------|----------------|-------------|
-| **Before** (manual restart, no state) | ~1.2M tokens/day | **~$180/month** |
-| **After PM2 + state persistence** | ~720K tokens/day | **~$108/month** |
-| **+ Model routing (Sonnet for scans)** | ~400K tokens/day | **~$90/month** |
-| **Future: + Batch API + caching** | ~250K tokens/day | **~$60/month** |
+### Daily Activity Costs (Optimized Models)
 
-**Key insight:** Auto-restart with state persistence reduces API cost by 35-40% because Buzz skips known tokens and only processes NEW discoveries. It's not just convenience — it saves money.
+| Activity | Frequency | Model | Cost/Day |
+|---|---|---|---|
+| 🔍 Token Scanning | 6x/day | Haiku ($1/$5) | ~$0.54 |
+| 📊 Deep Scoring (Helius+RugCheck) | 6x/day | Sonnet ($3/$15) | ~$2.34 |
+| 📧 Outreach Drafting | 12 msgs/day | Sonnet ($3/$15) | ~$1.01 |
+| 📋 Pipeline Management | 2x/day | Haiku ($1/$5) | ~$0.14 |
+| 🤖 Moltbook Forum | 9 posts/day | Haiku ($1/$5) | ~$0.18 |
+| 🏆 Hackathon Tasks (Feb only) | 5 tasks/day | Opus ($5/$25) | ~$3.88 |
+| 🐦 Twitter Drafts | 4/day | Haiku ($1/$5) | ~$0.03 |
+| ⚙️ System Prompt (restarts) | 6x/day | Sonnet | ~$0.27 |
 
-### Full Monthly Cost Breakdown
+### Monthly Cost Scenarios
 
-| Category | Item | Cost |
-|----------|------|------|
-| **Anthropic API** | Claude Sonnet 4 (scanning, scoring, reports) | ~$70-80 |
-| | Claude Opus 4.6 (outreach drafting, strategy) | ~$10-15 |
-| **x402 Payments** | Einstein AI whale alerts (30 calls × $0.10) | $3.00 |
-| | Gloria AI breaking news (60 calls × $0.10) | $6.00 |
-| **Infrastructure** | Akash Network hosting | ~$15-20 |
-| **Intelligence APIs** | DexScreener API | FREE |
-| | AIXBT Momentum | FREE |
-| | leak.me KOL Tracker | FREE |
-| | Clawpump | FREE |
-| | Moltbook Forums | FREE |
-| | RugCheck API | FREE |
-| | Firecrawl (500 credits/month) | FREE |
-| | Solana Agent Kit | FREE |
-| | Helius Wallet API (1M free credits) | FREE |
-| | **Total** | **~$90-110/month** |
+| Scenario | API/Month | Akash | Total | Break-even |
+|---|---|---|---|---|
+| **February (hackathon + Moltbook + full ops)** | ~$252 | $15 | **~$267** | 0.27 listings |
+| **March+ (no hackathon, normal ops)** | ~$130 | $15 | **~$145** | 0.15 listings |
+| **+ Batch API (50% off non-urgent)** | ~$65 | $15 | **~$80** | 0.08 listings |
+| **+ Prompt caching (90% off prompts)** | ~$45 | $15 | **~$60** | 0.06 listings |
+
+### Cost Optimization Strategies Applied
+
+| Strategy | Savings | Status |
+|----------|---------|--------|
+| PM2 auto-restart + state persistence | ~35-40% token reduction | ✅ Active |
+| Model routing (Haiku for scans, Sonnet for scoring) | ~50% vs all-Opus | ✅ Active |
+| Compression protocol | ~30% context savings | ✅ Active |
+| Batch API for non-urgent tasks | ~50% on batched calls | 🔜 Planned |
+| Prompt caching | ~90% on system prompts | 🔜 Planned |
+| Post-hackathon workload drop | ~$3-5/day automatic savings | ⏰ After Feb 16 |
+
+### Critical Insight
+
+**All 9 external intelligence APIs cost ZERO:**
+- Helius free tier (1M credits, Buzz uses ~432K)
+- RugCheck, DexScreener, AIXBT, Moltbook, Clawpump, Firecrawl = all FREE
+- The ONLY real costs are Anthropic API tokens + $15/mo Akash hosting
 
 ### Buzz vs. Traditional BD
 
 | Category | Buzz (AI Agent) | Human BD Team |
 |----------|----------------|---------------|
-| Monthly total | **~$90-110** | $3,600-5,600+ |
+| Monthly total (normal ops) | **~$145** | $3,600-5,600+ |
+| Monthly total (hackathon) | **~$267** | N/A |
 | Intelligence tools | 9 sources FREE + $9 paid | $500+/month |
 | CRM software | $0 (built-in) | $100+/month |
 | Working hours | 24/7/365 | 8-10h/day, 5 days |
 | Multi-chain coverage | 3 chains simultaneous | 1 chain focus |
-| Response time | <5 minutes | Hours to days |
 | Wallet forensics | Automated (Helius) | Manual research |
-| **Annual cost** | **~$1,100-1,300** | **$43,200-67,200+** |
+| **Annual cost (optimized)** | **~$1,740** | **$43,200-67,200+** |
 
 ### ROI Projection
 
-| Listings/Month | Revenue | Cost (optimized) | Profit | ROI |
+| Listings/Month | Revenue | Cost (normal) | Profit | ROI |
 |---|---|---|---|---|
-| 1 listing | $1,000 | $100 | **$900** | 900% |
-| 3 listings | $3,000 | $100 | **$2,900** | 2,900% |
-| 5 listings | $5,000 | $100 | **$4,900** | 4,900% |
+| 1 listing | $1,000 | $145 | **$855** | 590% |
+| 3 listings | $3,000 | $145 | **$2,855** | 1,969% |
+| 5 listings | $5,000 | $145 | **$4,855** | 3,348% |
 
-**1 single listing pays for 10 months of Buzz operations.**
+**1 single listing pays for 7 months of operations.**
 
 | Timeline | Pipeline | Listings | Revenue |
 |----------|----------|----------|---------|
