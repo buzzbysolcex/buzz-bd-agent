@@ -781,38 +781,61 @@ When Ogie is flying, Buzz enters **fully autonomous mode**:
 
 ## 💸 Cost Analysis
 
+### The Efficiency Story: From $180 → $90/month
+
+Before implementing the Monitor Manager (PM2 auto-restart + state persistence), Buzz consumed ~$180/month in API tokens due to wasteful re-scanning on every restart. After optimization:
+
+| Optimization | Token Reduction | Monthly Cost |
+|-------------|----------------|-------------|
+| **Before** (manual restart, no state) | ~1.2M tokens/day | **~$180/month** |
+| **After PM2 + state persistence** | ~720K tokens/day | **~$108/month** |
+| **+ Model routing (Sonnet for scans)** | ~400K tokens/day | **~$90/month** |
+| **Future: + Batch API + caching** | ~250K tokens/day | **~$60/month** |
+
+**Key insight:** Auto-restart with state persistence reduces API cost by 35-40% because Buzz skips known tokens and only processes NEW discoveries. It's not just convenience — it saves money.
+
+### Full Monthly Cost Breakdown
+
+| Category | Item | Cost |
+|----------|------|------|
+| **Anthropic API** | Claude Sonnet 4 (scanning, scoring, reports) | ~$70-80 |
+| | Claude Opus 4.6 (outreach drafting, strategy) | ~$10-15 |
+| **x402 Payments** | Einstein AI whale alerts (30 calls × $0.10) | $3.00 |
+| | Gloria AI breaking news (60 calls × $0.10) | $6.00 |
+| **Infrastructure** | Akash Network hosting | ~$15-20 |
+| **Intelligence APIs** | DexScreener API | FREE |
+| | AIXBT Momentum | FREE |
+| | leak.me KOL Tracker | FREE |
+| | Clawpump | FREE |
+| | Moltbook Forums | FREE |
+| | RugCheck API | FREE |
+| | Firecrawl (500 credits/month) | FREE |
+| | Solana Agent Kit | FREE |
+| | Helius Wallet API (1M free credits) | FREE |
+| | **Total** | **~$90-110/month** |
+
 ### Buzz vs. Traditional BD
 
 | Category | Buzz (AI Agent) | Human BD Team |
 |----------|----------------|---------------|
-| Monthly salary | $0 | $3,000-5,000 |
-| Intelligence tools | $9/month (x402) | $500+/month |
+| Monthly total | **~$90-110** | $3,600-5,600+ |
+| Intelligence tools | 9 sources FREE + $9 paid | $500+/month |
 | CRM software | $0 (built-in) | $100+/month |
 | Working hours | 24/7/365 | 8-10h/day, 5 days |
 | Multi-chain coverage | 3 chains simultaneous | 1 chain focus |
 | Response time | <5 minutes | Hours to days |
-| **Total monthly cost** | **~$9** | **$3,600-5,600+** |
-| **Annual cost** | **~$108** | **$43,200-67,200+** |
-
-### Monthly Breakdown
-
-| Item | Cost |
-|------|------|
-| Einstein AI (whale alerts) | $3.00 (30 calls × $0.10) |
-| Gloria AI (breaking news) | $6.00 (60 calls × $0.10) |
-| DexScreener API | FREE |
-| AIXBT Momentum | FREE |
-| leak.me KOL | FREE |
-| Clawpump | FREE |
-| Moltbook | FREE |
-| RugCheck | FREE |
-| Firecrawl | FREE (500 credits/month) |
-| Solana Agent Kit | FREE |
-| Helius Wallet API | FREE |
-| Akash Network hosting | ~$15-20/month |
-| **Total** | **~$24-29/month** |
+| Wallet forensics | Automated (Helius) | Manual research |
+| **Annual cost** | **~$1,100-1,300** | **$43,200-67,200+** |
 
 ### ROI Projection
+
+| Listings/Month | Revenue | Cost (optimized) | Profit | ROI |
+|---|---|---|---|---|
+| 1 listing | $1,000 | $100 | **$900** | 900% |
+| 3 listings | $3,000 | $100 | **$2,900** | 2,900% |
+| 5 listings | $5,000 | $100 | **$4,900** | 4,900% |
+
+**1 single listing pays for 10 months of Buzz operations.**
 
 | Timeline | Pipeline | Listings | Revenue |
 |----------|----------|----------|---------|
