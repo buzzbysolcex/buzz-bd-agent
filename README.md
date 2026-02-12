@@ -13,6 +13,7 @@ Autonomous 24/7 BD agent for [SolCex Exchange](https://solcex.io) — scanning t
 [![Colosseum](https://img.shields.io/badge/Colosseum-Agent%20Hackathon-purple)](https://colosseum.com/agent-hackathon)
 [![Live Stream](https://img.shields.io/badge/Live-retake.tv%2FBuzzBD-orange)](https://retake.tv/BuzzBD)
 [![Stripe Validated](https://img.shields.io/badge/x402-Stripe%20Validated-blueviolet)](https://x402.org)
+[![ERC-8004](https://img.shields.io/badge/ERC--8004-Trust%20Standard-blue)](https://8004.org)
 
 -----
 
@@ -34,6 +35,7 @@ Buzz is an autonomous AI agent that handles the entire business development pipe
 - 📊 **Production results** — $40K+ pipeline of qualified prospects built autonomously
 - 💵 **97% cheaper than humans** — ~$154/month steady-state vs $5,500+/month for a human BD analyst
 - 🏭 **Industry-validated** — Stripe, CoinGecko, and Coinbase all adopted x402 on Feb 11, 2026 — five days after Buzz went live on the protocol
+- 🔗 **Ethereum trust standard** — ERC-8004 registration for on-chain agent identity and reputation
 
 -----
 
@@ -94,6 +96,7 @@ On February 11, 2026, the x402 protocol received massive industry validation fro
 │  INFRA: Akash Network      │ MODEL: Claude Sonnet 4  │ STREAM: retake.tv    │
 │  PAYMENTS: x402/USDC       │ TRUST: zauthx402        │ WALLET: Solana       │
 │  PROCESS: PM2 (auto-restart)│ FORENSICS: Helius      │ TOKEN: $BUZZBD/Base  │
+│  IDENTITY: ERC-8004        │ REGISTRY: 8004scan      │ VERIFY: AgentProof   │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -340,6 +343,43 @@ Verified Endpoints:
   gloria_ai:         trust 92 → VERIFIED
   payai_facilitator: trust 98 → VERIFIED
 ```
+
+-----
+
+## 🔗 ERC-8004 — Ethereum Agent Trust Standard
+
+Buzz is registering on [ERC-8004](https://8004.org), Ethereum Foundation’s emerging trust standard for AI agents — providing on-chain identity, reputation, and discoverability across the agent ecosystem.
+
+### Why ERC-8004?
+
+|Benefit              |Detail                                                                                                             |
+|---------------------|-------------------------------------------------------------------------------------------------------------------|
+|**On-chain identity**|Verifiable agent registration on Ethereum + Base                                                                   |
+|**Trust reputation** |Other agents and platforms can verify Buzz’s legitimacy before transacting                                         |
+|**Discoverability**  |Auto-indexed by [8004scan.io](https://8004scan.io) and [AgentProof.sh](https://agentproof.sh) (24K+ agents tracked)|
+|**Interoperability** |Standard interface for agent-to-agent commerce — any ERC-8004 agent can discover and verify Buzz                   |
+|**First mover**      |First autonomous exchange BD agent on Ethereum’s trust standard                                                    |
+
+### Community Presence
+
+|Channel                               |Status                                             |
+|--------------------------------------|---------------------------------------------------|
+|8004 Builders TG (2,143 members)      |✅ Joined, community map submitted                  |
+|Vitto Rivabella (EF dAI team)         |✅ Direct DM — sharing ERC-8004 article draft Feb 18|
+|AgentProof (@DevSpartan/Builder Benv1)|✅ INBOUND — auto-indexes Buzz on registration      |
+|Justin Bebis (Cod3x/Bankr)            |✅ Engaged in TG, Bankr blurb collaboration         |
+
+### Registration Plan
+
+1. Deploy ETH wallet for ERC-8004 registration
+1. Register Buzz on Base Sepolia testnet
+1. Register on Ethereum + Base mainnet
+1. Verify indexing on 8004scan + AgentProof
+1. Submit to EF Ecosystem Support Program (ESP) grant
+
+**Status:** Registration planned for late February 2026
+
+> *“Those who take part now as builders will influence development in the future.”* — ERC-8004 Community
 
 -----
 
@@ -672,15 +712,18 @@ Buzz runs entirely on [Akash Network](https://akash.network) — decentralized c
 - ✅ Dual experience memory (forum + x402 ROI)
 - ✅ Live streaming on retake.tv with overlay v3.6
 - ✅ $BUZZBD token on Base
+- ✅ ERC-8004 community presence (8004 Builders TG, Vitto DM, AgentProof inbound)
 
 ### Next (v4.0)
 
+- 🔜 **ERC-8004 on-chain registration** (Ethereum + Base mainnet, indexed on 8004scan + AgentProof)
 - 🔜 **ClawRouter integration** (78% LLM cost savings via smart model routing + x402)
-- 🔜 **Clawd.atg integration** (ERC-8004 agent identity, Agent Bounty Board, on-chain reputation)
+- 🔜 **Clawd.atg integration** (Agent Bounty Board, on-chain reputation)
 - 🔜 **Bankr LLM Gateway + Skills Marketplace** (publish Buzz scoring as paid Bankr skill)
 - 🔜 **ElizaOS plugin** (deploy Buzz as ElizaOS agent with multi-platform reach + agent swarms)
 - 🔜 Coinbase Agentic Wallet integration (Base USDC)
 - 🔜 x402 scoring API paywall (sell intelligence to other agents at $0.05/score)
+- 🔜 EF ESP grant application
 - 🔜 Agent-to-agent commerce marketplace
 - 🔜 Automated commission splits
 - 🔜 x402.eco ecosystem listing
@@ -827,6 +870,9 @@ buzz-bd-agent/
 |**$BUZZBD Token**        |[Clanker](https://clanker.world/clanker/0xdbb38acb97f936eeccba05908d6a58b0829fcb07)   |
 |**x402 Protocol**        |[x402.org](https://x402.org)                                                          |
 |**x402 Ecosystem**       |[x402.eco](https://x402.eco)                                                          |
+|**ERC-8004**             |[8004.org](https://8004.org)                                                          |
+|**8004scan**             |[8004scan.io](https://8004scan.io)                                                    |
+|**AgentProof**           |[agentproof.sh](https://agentproof.sh)                                                |
 |**Akash Network**        |[akash.network](https://akash.network)                                                |
 |**OpenClaw**             |[openclaw.ai](https://openclaw.ai)                                                    |
 |**ClawRouter**           |[github.com/BlockRunAI/ClawRouter](https://github.com/BlockRunAI/ClawRouter)          |
@@ -857,15 +903,15 @@ MIT License — see <LICENSE>
 
 ## Changelog
 
-|Version  |Date            |Changes                                                                                                                                                                                                   |
-|---------|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|1.0.0    |Feb 3, 2026     |Initial creation                                                                                                                                                                                          |
-|2.0.0    |Feb 4, 2026     |Moltbook, Gmail, reports                                                                                                                                                                                  |
-|3.0.0    |Feb 4, 2026     |Forum integration, email approval                                                                                                                                                                         |
-|3.3.0    |Feb 6, 2026     |x402 payment integration                                                                                                                                                                                  |
-|3.4.0    |Feb 7, 2026     |Consolidated autonomous commerce, dual experience                                                                                                                                                         |
-|3.5.0    |Feb 11, 2026    |Helius wallet forensics, RugCheck, Firecrawl, 15 crons, $SPSC first wallet scan                                                                                                                           |
-|**3.6.0**|**Feb 12, 2026**|**Industry-validated edition: Stripe/CoinGecko/Coinbase x402 convergence, full cost breakdown, pipeline with wallet flags, all 11 intelligence sources documented, recovery protocol, PM2, $BUZZBD token**|
+|Version  |Date            |Changes                                                                                                                                                                                                                                        |
+|---------|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|1.0.0    |Feb 3, 2026     |Initial creation                                                                                                                                                                                                                               |
+|2.0.0    |Feb 4, 2026     |Moltbook, Gmail, reports                                                                                                                                                                                                                       |
+|3.0.0    |Feb 4, 2026     |Forum integration, email approval                                                                                                                                                                                                              |
+|3.3.0    |Feb 6, 2026     |x402 payment integration                                                                                                                                                                                                                       |
+|3.4.0    |Feb 7, 2026     |Consolidated autonomous commerce, dual experience                                                                                                                                                                                              |
+|3.5.0    |Feb 11, 2026    |Helius wallet forensics, RugCheck, Firecrawl, 15 crons, $SPSC first wallet scan                                                                                                                                                                |
+|**3.6.0**|**Feb 13, 2026**|**Industry-validated edition: Stripe/CoinGecko/Coinbase x402 convergence, ERC-8004 trust standard integration, full cost breakdown, pipeline with wallet flags, all 11 intelligence sources documented, recovery protocol, PM2, $BUZZBD token**|
 
 -----
 
