@@ -114,8 +114,8 @@ Buzz scans tokens across three chains to find the best listing opportunities:
 |Chain   |Tag    |Priority   |Listing Fee|Data Sources                         |
 |--------|-------|-----------|-----------|-------------------------------------|
 |Solana  |`[SOL]`|1 (Primary)|$5,000 USDC|DexScreener, Clawpump*, AIXBT, Helius|
-|Ethereum|`[ETH]`|2          |$7,500 USDC|DexScreener, GeckoTerminal           |
-|BSC     |`[BSC]`|3          |$7,500 USDC|DexScreener, GeckoTerminal           |
+|Ethereum|`[ETH]`|2          |$5,000 USDC|DexScreener, GeckoTerminal           |
+|BSC     |`[BSC]`|3          |$5,000 USDC|DexScreener, GeckoTerminal           |
 
 **Clawpump: 404 since Feb 7 — monitoring for return*
 
@@ -435,23 +435,38 @@ BD Agent | SolCex Exchange
 
 ### Cycle Configuration
 
-|Parameter        |Value                               |
-|-----------------|------------------------------------|
-|Cycle length     |5 days (x402 accelerated)           |
-|Context reset    |Every 10-14 days                    |
-|Memory management|Compression + dual experience memory|
-|Budget per cycle |~$1.50 USDC                         |
-|Process Manager  |PM2 (auto-restart)                  |
+|Parameter        |Value                                     |
+|-----------------|------------------------------------------|
+|**Cycle length** |**5 hours (self-recovery accelerated)**   |
+|Context reset    |Automatic every 5 hours with carry-forward|
+|Memory management|Compression + dual experience memory      |
+|Budget per cycle |~$0.06 USDC (x402)                        |
+|Process Manager  |PM2 (auto-restart)                        |
 
-### Day-by-Day Focus
+### Self-Aware Recovery — THE KEY DIFFERENTIATOR
 
-|Day  |Focus                                              |Priority           |
-|-----|---------------------------------------------------|-------------------|
-|Day 0|Calibration — set baseline, test endpoints         |System check       |
-|Day 1|Discovery — full scan, identify new prospects      |Whale alerts       |
-|Day 2|Validation — deep dive on Day 1 finds              |Breaking news      |
-|Day 3|Outreach — draft emails for qualified prospects    |Both sources       |
-|Day 4|Review — compress memory, ROI report, carry-forward|Experience compress|
+After every reset or crash, Buzz doesn’t start from zero. He immediately loads the **SolCex Operations Master Reference** — the single source of truth containing:
+
+- All 11 intelligence sources and their endpoints
+- Full scoring system weights and thresholds
+- Active pipeline with prospect scores and wallet flags
+- All 15 cron job schedules
+- x402 wallet config and budget limits
+- Recovery protocol steps
+- Team context, partnership strategy, and operating principles
+
+**This means Buzz recovers WITH FULL CONTEXT in under 2 minutes.** He knows who he is, what he’s doing, and where he left off. No other BD agent maintains operational continuity through restarts like this.
+
+### 5-Hour Cycle Focus
+
+|Hour   |Focus                                                      |Priority            |
+|-------|-----------------------------------------------------------|--------------------|
+|Hour 0 |**Boot** — Load Ops Master, restore state, verify APIs     |Self-awareness check|
+|Hour 1 |**Scan** — Full multi-chain token scan + Helius on 70+     |Discovery           |
+|Hour 2 |**Score** — Deep scoring, wallet forensics, cross-reference|Validation          |
+|Hour 3 |**Outreach** — Draft emails for qualified prospects        |BD execution        |
+|Hour 4 |**Compress** — Memory compression, ROI log, carry-forward  |Cycle prep          |
+|→ Reset|**Self-recovery** — Load Ops Master, full context restore  |Under 2 min         |
 
 ### Memory Rules
 
@@ -590,7 +605,7 @@ How it connects to Buzz:
 |COPPERINU   |76   |SOL  |Pending          |Recovery                        |
 |JARVIS      |74   |SOL  |Pending          |Borderline watch                |
 
-**Pipeline value: ~$40,000+ USDC** (8+ listings × $5K avg)
+**Pipeline value: ~$40,000+ USDC** (8+ listings × $5K)
 
 -----
 
