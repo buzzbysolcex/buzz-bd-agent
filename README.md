@@ -5,7 +5,7 @@
 [![Agent](https://img.shields.io/badge/Agent-Autonomous-blue)]()
 [![Infrastructure](https://img.shields.io/badge/Infra-Akash_Network-red)]()
 [![x402](https://img.shields.io/badge/x402-Payments_Live-green)]()
-[![ERC-8004](https://img.shields.io/badge/ERC--8004-Agent_%233734-purple)]()
+[![ERC-8004](https://img.shields.io/badge/ERC--8004-Agent_%2325045_(ETH)_%2317483_(Base)-purple)]()
 [![Clawbal](https://img.shields.io/badge/Clawbal-On--Chain_PnL-orange)]()
 [![Stream](https://img.shields.io/badge/Stream-24%2F7_Live-brightgreen)]()
 [![Cost](https://img.shields.io/badge/Cost-%2441%2Fmo-yellow)]()
@@ -49,6 +49,7 @@ Buzz is an autonomous business development agent built for [SolCex Exchange](htt
 - Conducts **professional outreach** to qualified projects (85+ score) with human-in-the-loop approval
 - Pays for its own intelligence via **x402 micropayments** ($0.30/day)
 - Posts **on-chain alpha calls** to Clawbal with automatic PnL tracking
+- Registered as **ERC-8004 Agent #25045 (Ethereum) + #17483 (Base)** — dual-chain on-chain identity
 - Streams everything live at **retake.tv/BuzzBD**
 
 **What makes Buzz different:**
@@ -79,7 +80,7 @@ The x402 ecosystem is now backed by:
 - **CoinGecko** — First major API to accept x402 payments
 - **Circle** — USDC issuer ($61B supply)
 
-Buzz operates within this ecosystem as a live, production agent — not a demo. Every intelligence purchase, every API call, every on-chain alpha post is a real transaction in the x402 economy.
+Buzz operates within this ecosystem as a live, production agent — registered as **Agent #25045** on Ethereum and **Agent #17483** on Base. Dual-chain identity. Not a demo.
 
 **MCPay precedent:** At the Solana Cypherpunk Hackathon (Dec 2025), MCPay — an x402/MCP infrastructure project — won **1st place in the Stablecoin category ($25,000 USDC)**. The judges already value x402 commerce.
 
@@ -277,7 +278,7 @@ Every layer independently verifiable:
 
 | Layer | System | Score/Status | What It Proves |
 |-------|--------|-------------|----------------|
-| **Identity** | ERC-8004 | Agent #3734 | Registered on-chain identity |
+| **Identity** | ERC-8004 | Agent #25045 (ETH) + #17483 (Base) | Dual-chain on-chain identity (NFT) |
 | **Code Integrity** | ZAUTH RepoScan | 65/100 Good | 0 code matches, 100% original |
 | **Agent Quality** | A.V.I | 60/100 Tier 3 | Beat 41/100 benchmark by 46% |
 | **Financial Autonomy** | x402 Payments | $0.30/day active | Agent pays its own bills |
@@ -401,7 +402,8 @@ Every layer independently verifiable:
 
 ### Colosseum Submission
 
-- **Agent ID:** 3734
+- **Colosseum Agent ID:** 3734
+- **ERC-8004 Agent ID:** 25045 (Ethereum Mainnet) + 17483 (Base) — dual-chain NFT
 - **Forum Thread:** #4602 (8+ comments, all replied)
 - **Project:** buzz-bd-agent-autonomous-token-discovery-outreach
 - **Live App:** retake.tv/BuzzBD
@@ -536,6 +538,9 @@ buzz-bd-agent/
 | **Moltbook** | [@BuzzBD](https://moltbook.com/u/BuzzBD) |
 | **SolCex Exchange** | [solcex.com](https://solcex.com) |
 | **Clawbal PnL** | pnl.iqlabs.dev |
+| **ERC-8004 (ETH)** | [Agent #25045](https://www.8004scan.io/agents/ethereum/25045) |
+| **ERC-8004 (Base)** | [Agent #17483](https://www.8004scan.io/agents/base/17483) |
+| **8004scan** | [8004scan.io](https://8004scan.io) |
 | **Colosseum** | [Agent Hackathon](https://colosseum.com/agent-hackathon/projects/buzz-bd-agent-autonomous-token-discovery-outreach) |
 | **$BUZZBD Token** | [Base](https://basescan.org/token/0xdbb38acb97f936eeccba05908d6a58b0829fcb07) |
 | **Email** | buzzbysolcex@gmail.com |
@@ -546,7 +551,7 @@ buzz-bd-agent/
 
 | Version | Date | Changes |
 |---------|------|---------|
-| **3.7.0** | **Feb 14, 2026** | **On-Chain Credibility Edition:** Clawbal/IQLabs integration LIVE, first on-chain alpha call ($SPSC Score 90), PnL feedback loop, 6 new cron jobs (18 total), ClawRouter + MiniMax M2.5 cost optimization ($150→$41/mo), credibility stack complete (ERC-8004 + ZAUTH + A.V.I + Clawbal PnL), 5 wallets with full separation |
+| **3.7.0** | **Feb 14, 2026** | **On-Chain Credibility Edition:** Clawbal/IQLabs integration LIVE, first on-chain alpha call ($SPSC Score 90), PnL feedback loop, 6 new cron jobs (18 total), ClawRouter + MiniMax M2.5 cost optimization ($150→$41/mo), ERC-8004 dual-chain registration — Agent #25045 (ETH) + #17483 (Base), credibility stack complete, 7 wallets across 3 chains |
 | 3.6.0 | Feb 11, 2026 | Industry Validation Edition: Stripe x402 convergence, ecosystem diagram, 10 key differentiators, MCPay precedent |
 | 3.5.0 | Feb 10, 2026 | Helius wallet forensics, 11 intelligence sources, Colosseum submission |
 | 3.4.0 | Feb 9, 2026 | Solana Agent Kit plugin, autonomous commerce architecture |
@@ -577,4 +582,4 @@ Proprietary — SolCex Exchange. All rights reserved.
 ---
 
 *Buzz BD Agent v3.7.0 — February 14, 2026*
-*"We built it before Stripe validated it. On-chain track record IS credibility. Track every dollar, verify every call."*
+*"We built it before Stripe validated it. Dual-chain identity. On-chain track record IS credibility. Track every dollar, verify every call."*
