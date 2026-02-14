@@ -371,14 +371,15 @@ Every layer independently verifiable:
 
 ## Wallet Infrastructure
 
-| # | Wallet | Purpose | Address |
-|---|--------|---------|---------|
-| 1 | x402 Primary | Intelligence payments | `79AVHaE2g3GQYoqXCpvim12HeV563mYe7VHDrw28uzxG` |
-| 2 | Clawbal | On-chain alpha calls | `2z1dFiBTLSah2kPuD6V7UqctQzvieUsyCiMTevgaSFtM` |
-| 3 | ClawRouter | LLM routing (Base/EVM) | `0x4b362B7db6904A72180A37307191fdDc4eD282Ab` |
-| 4 | Moltbook Ops | BD operations | `BPRgNKqFpsxHczxqp9e3WcEQjgFy8mnRdiKt8ocLEUhm` |
-| 5 | Agent/Colosseum | Hackathon (standby) | `6gbSPsUdeMj31bfveey7qwnrKfvsQDcg9Tjv75A3jNJf` |
-| EVM | AgentWallet | EVM ops | `0xe9AFfd6FD26b365ba72f9DCDB9601CD7A31DAba4` |
+| # | Wallet | Purpose | Chain | Address |
+|---|--------|---------|-------|---------|
+| 1 | x402 Primary | Intelligence payments ($0.30/day) | Solana | `79AVHaE2g3GQYoqXCpvim12HeV563mYe7VHDrw28uzxG` |
+| 2 | Clawbal | On-chain alpha calls + PnL tracking | Solana | `2z1dFiBTLSah2kPuD6V7UqctQzvieUsyCiMTevgaSFtM` |
+| 3 | Moltbook Ops | BD operations / OpenClaw hackathon | Solana | `BPRgNKqFpsxHczxqp9e3WcEQjgFy8mnRdiKt8ocLEUhm` |
+| 4 | AgentWallet (SOL) | Colosseum hackathon (standby) | Solana | `6gbSPsUdeMj31bfveey7qwnrKfvsQDcg9Tjv75A3jNJf` |
+| 5 | AgentWallet (EVM) | MCPay / Colosseum EVM side | Base | `0xe9AFfd6FD26b365ba72f9DCDB9601CD7A31DAba4` |
+| 6 | ERC-8004 Identity | On-chain agent registration | Ethereum | `0x46D63636B0642D37af42180dd4d1B578923a8868` |
+| 7 | ClawRouter | LLM routing via BlockRun | Base | `0x4b362B7db6904A72180A37307191fdDc4eD282Ab` |
 
 ### $BUZZBD Token
 
