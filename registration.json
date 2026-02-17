@@ -1,0 +1,14 @@
+{
+  "erc8004": {
+    "version": "1.0",
+    "agent": {
+      "name": "Buzz BD Agent",
+      "version": "4.4.0",
+      "operator": "SolCex Exchange"
+    },
+    "registrations": [
+      {"chain": "ethereum", "registry_id": 25045},
+      {"chain": "base", "registry_id": 17483}
+    ]
+  }
+}
