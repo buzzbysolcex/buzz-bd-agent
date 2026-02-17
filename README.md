@@ -1,223 +1,509 @@
-# Buzz BD Agent v3.7 — Multi-Chain Intelligence Edition
+# 🐝 Buzz BD Agent v4.4.0
 
-> First AI BD agent with autonomous micropayments, multi-chain wallet forensics, on-chain credibility, and MiniMax M2.5-highspeed intelligence
+> Autonomous AI Business Development Agent for Crypto Token Listings
+>
+> **15 Intelligence Sources · 26 Cron Jobs · Multi-Chain · ERC-8004 Registered · elizaOS Native**
 
-[![ERC-8004](https://img.shields.io/badge/ERC--8004-Agent%20%2325045-blue)](https://8004scan.io)
-[![Base](https://img.shields.io/badge/Base-Agent%20%2317483-purple)](https://8004scan.io)
-[![Akash](https://img.shields.io/badge/Akash-Deployed-green)](https://akash.network)
-[![Stream](https://img.shields.io/badge/retake.tv-LIVE%2024%2F7-red)](https://retake.tv/BuzzBD)
+[![Platform](https://img.shields.io/badge/Platform-SolCex%20Exchange-blue)](https://solcex.io)
+[![Infrastructure](https://img.shields.io/badge/Infra-Akash%20Network-red)](https://akash.network)
+[![ERC-8004](https://img.shields.io/badge/ERC--8004-Ethereum%20%2325045-purple)](https://eips.ethereum.org/EIPS/eip-8004)
+[![ERC-8004](https://img.shields.io/badge/ERC--8004-Base%20%2317483-blue)](https://eips.ethereum.org/EIPS/eip-8004)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![Hackathon](https://img.shields.io/badge/Colosseum-Agent%20ID%203734-orange)](https://colosseum.org)
 
------
+---
 
-## Overview
+## What Buzz Does
 
-**Agent Name:** Buzz  
-**Version:** 3.7.0  
-**Platform:** Akash Network (Decentralized Cloud)  
-**Primary Model:** MiniMax M2.5-highspeed via AkashML  
-**Communication:** Telegram Bot (@BuzzBySolCex_bot)  
-**Twitter:** [@BuzzBySolCex](https://x.com/BuzzBySolCex)  
-**Email:** buzzbysolcex@gmail.com  
-**Moltbook:** @BuzzBD  
-**Colosseum:** Agent ID 3734  
-**Live Stream:** [retake.tv/BuzzBD](https://retake.tv/BuzzBD)  
-**Owner:** Ogie @ SolCex Exchange
+Buzz is an autonomous BD agent that runs 24/7 on decentralized infrastructure, scanning tokens across multiple blockchains and managing a complete listing pipeline for SolCex Exchange. It discovers high-potential tokens, scores them against 15 intelligence sources, verifies team credentials, and prepares outreach — all without human intervention.
 
------
+**Key differentiator:** Buzz doesn't just aggregate data. It cross-references paid and free intelligence, tracks ROI on every data call, learns from outcomes, and operates with verifiable on-chain identity via ERC-8004.
 
-## LLM Cascade
-
-Buzz runs a cost-optimized model cascade — **directly via AkashML**, no routing middleware.
-
-|Priority   |Model                            |Provider   |Cost                 |
-|-----------|---------------------------------|-----------|---------------------|
-|**Default**|**MiniMax M2.5-highspeed (229B)**|**AkashML**|**$100 free credits**|
-|Fallback 1 |Llama 70B                        |OpenRouter |$0                   |
-|Fallback 2 |Haiku 4.5                        |Anthropic  |~$0.25/1M in         |
-|Fallback 3 |Opus 4.5                         |Anthropic  |Last resort          |
-
-**Phase 1 APPROVED:** Twitter drafts, forum posts, pipeline management, system restarts → M2.5-highspeed  
-**Phase 2 PENDING:** Token scanning, initial scoring → awaiting production validation  
-**Stays on Claude:** Final outreach, wallet forensics, strategy decisions
-
-**Result:** Cost dropped from $1,320/day (all Opus) → ~$41/month (73% reduction)
-
------
+---
 
 ## Architecture
 
 ```
-13 Intelligence Sources (Free + Paid) → Scoring Engine (100pts) → Pipeline → Outreach → Human Approval
-         ↑                                        ↑                              ↓
-   x402 Payments ($)                    zauthx402 Trust              Ogie Approves
-         ↑                                        ↑                              ↓
-   PnL Tracking                        Experience Memory (4 tracks)   Email/DM Sent
-         ↑                                        ↑                              ↓
-   Clawbal On-Chain                    Allium Multi-Chain             Listing Closed
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        BUZZ BD AGENT v4.4.0                                  │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌──────────────┐  │
+│  │ 15 Intel      │  │   Scoring     │  │   Wallet      │  │  Outreach    │  │
+│  │ Sources       │  │   Engine      │  │  Forensics    │  │  System      │  │
+│  │ (Free+Paid)   │  │  (100-point)  │  │  (Helius)     │  │  (Auto-DM)   │  │
+│  └──────┬────────┘  └──────┬────────┘  └──────┬────────┘  └──────┬───────┘  │
+│         │                  │                   │                  │           │
+│  ┌──────┴──────────────────┴───────────────────┴──────────────────┴────────┐  │
+│  │              LLM Cascade (AkashML + MiniMax M2.5-highspeed)            │  │
+│  │         MiniMax M2.5 → Free APIs → Claude Sonnet → Claude Opus        │  │
+│  └──────┬──────────────────┬───────────────────┬──────────────────┬───────┘  │
+│         │                  │                   │                  │           │
+│  ┌──────┴──────┐  ┌───────┴───────┐  ┌────────┴───────┐  ┌──────┴───────┐  │
+│  │   Memory    │  │  26 Cron      │  │   ERC-8004     │  │  Channels    │  │
+│  │   System    │  │  Jobs         │  │  Dual-Chain    │  │  (TG/Email/  │  │
+│  │ (4 tracks)  │  │  (24/7)       │  │  Identity      │  │   elizaOS)   │  │
+│  └─────────────┘  └───────────────┘  └────────────────┘  └──────────────┘  │
+│                                                                              │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  INFRASTRUCTURE: Akash Network (Decentralized Cloud) · ~$41/month            │
+│  LLM: MiniMax M2.5-highspeed via AkashML (optimized cascade)                │
+│  IDENTITY: ERC-8004 — Ethereum #25045, Base #17483                           │
+│  INTEROP: elizaOS + OpenClaw plugin (agent-to-agent native)                  │
+│  PROTOCOL: x402 (autonomous micropayments on Base)                           │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
------
+---
 
-## Intelligence Sources (13)
+## ERC-8004 Integration
 
-### Layer 1: FREE Sources (11 sources — $0/day)
+Buzz is registered under ERC-8004 on both Ethereum and Base, establishing verifiable on-chain identity for autonomous agent commerce.
 
-|# |Source           |Data                                            |Status|
-|--|-----------------|------------------------------------------------|------|
-|1 |DexScreener API  |Prices, liquidity, pairs across 60+ chains      |LIVE  |
-|2 |AIXBT Momentum   |Trending tokens, catalysts, momentum scores     |LIVE  |
-|3 |leak.me KOL      |Smart money follows, VC/influencer tracking     |LIVE  |
-|4 |Clawpump         |New agent token launches on Solana              |LIVE  |
-|5 |Moltbook Forums  |Community signals, agent ecosystem intel        |LIVE  |
-|6 |RugCheck         |Contract risk analysis                          |LIVE  |
-|7 |Firecrawl        |Web scraping for project data                   |LIVE  |
-|8 |Helius Wallet API|Solana wallet forensics, deployer analysis      |LIVE  |
-|9 |Solana Agent Kit |On-chain transaction tools                      |LIVE  |
-|10|Allium API       |Multi-chain wallet PnL, balances, TX (16 chains)|LIVE  |
-|11|ATV Web3 Identity|Agent identity verification                     |LIVE  |
+### Why ERC-8004 Matters for Buzz
 
-### Layer 2: PAID Sources (x402 Protocol)
+Traditional BD agents have no way to prove identity in agent-to-agent interactions. When Buzz contacts a token project or interacts with another agent, there's no verifiable proof of who Buzz is, what exchange it represents, or its operational track record. ERC-8004 solves this by giving Buzz a machine-readable, on-chain identity that other agents and protocols can verify programmatically.
 
-|# |Source     |Cost      |Data                                  |Schedule         |
-|--|-----------|----------|--------------------------------------|-----------------|
-|12|Einstein AI|$0.10/call|Whale alerts, large wallet movements  |06:00 AST        |
-|13|Gloria AI  |$0.10/call|Breaking crypto news, sentiment shifts|12:00 + 18:00 AST|
+### Registration Details
 
------
+| Field | Ethereum | Base |
+|-------|----------|------|
+| **Registry ID** | #25045 | #17483 |
+| **Agent Name** | Buzz BD Agent | Buzz BD Agent |
+| **Operator** | SolCex Exchange | SolCex Exchange |
+| **Capabilities** | Token scanning, BD pipeline, x402 payments | Token scanning, BD pipeline, x402 payments |
+| **Status** | Active | Active |
 
-## Wallet Infrastructure
+### registration.json
 
-|#|Wallet |Purpose                     |Address                                       |
-|-|-------|----------------------------|----------------------------------------------|
-|1|BPRg…  |Moltbook Hackathon / BD Ops |`BPRgNKqFpsxHczxqp9e3WcEQjgFy8mnRdiKt8ocLEUhm`|
-|2|79AV…  |x402 Micropayments (PRIMARY)|`79AVHaE2g3GQYoqXCpvim12HeV563mYe7VHDrw28uzxG`|
-|3|6gbS…  |AgentWallet / Colosseum     |`6gbSPsUdeMj31bfveey7qwnrKfvsQDcg9Tjv75A3jNJf`|
-|4|0xe9AF…|EVM AgentWallet             |`0xe9AFfd6FD26b365ba72f9DCDB9601CD7A31DAba4`  |
-|5|2z1d…  |Clawbal on-chain alpha calls|`2z1dFiBTLSah2kPuD6V7UqctQzvieUsyCiMTevgaSFtM`|
+```json
+{
+  "erc8004": {
+    "version": "1.0",
+    "agent": {
+      "name": "Buzz BD Agent",
+      "version": "4.4.0",
+      "description": "Autonomous AI business development agent for crypto token listing pipeline management",
+      "operator": {
+        "name": "SolCex Exchange",
+        "website": "https://solcex.io",
+        "contact": "buzzbysolcex@gmail.com"
+      }
+    },
+    "registrations": [
+      {
+        "chain": "ethereum",
+        "registry_id": 25045,
+        "tx": "",
+        "status": "active"
+      },
+      {
+        "chain": "base",
+        "registry_id": 17483,
+        "tx": "",
+        "status": "active"
+      }
+    ],
+    "capabilities": {
+      "intelligence": {
+        "sources": 15,
+        "chains_monitored": ["solana", "ethereum", "bsc", "base", "arbitrum", "polygon"],
+        "scoring_system": "100-point weighted composite"
+      },
+      "commerce": {
+        "protocol": "x402",
+        "currency": "USDC",
+        "network": "solana",
+        "facilitator": "PayAI"
+      },
+      "interoperability": {
+        "elizaos_plugin": "@solcex/plugin-buzz-bd",
+        "openclaw_adapter": true,
+        "actions": [
+          "BUZZ_TOKEN_INTELLIGENCE",
+          "BUZZ_LISTING_PROSPECTS",
+          "BUZZ_AGENT_STATUS",
+          "BUZZ_MOMENTUM_SCAN"
+        ]
+      },
+      "trust_verification": {
+        "protocol": "zauthx402",
+        "levels": ["VERIFIED", "TRUSTED", "CAUTIOUS", "UNTRUSTED", "BLACKLISTED"]
+      }
+    },
+    "metadata": {
+      "infrastructure": "Akash Network",
+      "llm_primary": "MiniMax M2.5-highspeed (via AkashML)",
+      "uptime": "24/7 autonomous",
+      "cron_jobs": 26,
+      "monthly_cost_usd": 41,
+      "github": "https://github.com/buzzbysolcex/buzz-bd-agent"
+    }
+  }
+}
+```
 
------
+### Three Registries, One Agent
 
-## Credibility Stack
+Buzz leverages all three ERC-8004 discovery layers:
 
-|Layer              |Platform               |Status    |
-|-------------------|-----------------------|----------|
-|ERC-8004 (Ethereum)|Agent #25045           |REGISTERED|
-|ERC-8004 (Base)    |Agent #17483           |REGISTERED|
-|ClawdIn / Colosseum|Agent ID 3734          |VERIFIED  |
-|A.V.I Score        |60/100                 |SCORED    |
-|ZAUTH RepoScan     |65/100                 |SCANNED   |
-|Clawbal PnL        |On-chain alpha calls   |LIVE      |
-|IQLabs SDK         |Credibility integration|LIVE      |
+| Registry | Purpose | Buzz Usage |
+|----------|---------|------------|
+| **On-Chain Registry** | Permanent identity anchor | ETH #25045, Base #17483 — proves Buzz exists and who operates it |
+| **ENS/DNS Discovery** | Human-readable lookup | `buzz.solcex.eth` → resolves to agent metadata |
+| **Well-Known URI** | Service endpoint discovery | `solcex.io/.well-known/agent.json` → capabilities, API endpoints |
 
------
+This triple-layer approach means another agent can: (1) verify Buzz's identity on-chain, (2) discover Buzz via ENS, and (3) understand Buzz's capabilities and how to interact with it — all without human coordination.
 
-## Scoring System (100 Points)
+---
 
-|Factor           |Weight|Excellent           |Good        |Acceptable |
-|-----------------|------|--------------------|------------|-----------|
-|Market Cap       |20%   |>$10M               |$1M-$10M    |$500K-$1M  |
-|Liquidity        |25%   |>$500K              |$200K-$500K |$100K min  |
-|Volume 24h       |20%   |>$1M                |$500K-$1M   |$100K-$500K|
-|Social Metrics   |15%   |Active all platforms|2+ platforms|1 platform |
-|Token Age        |10%   |Established         |Moderate    |New        |
-|Team Transparency|10%   |Doxxed, active      |Partial     |Anonymous  |
+## Machine Economy Positioning
 
-### Wallet Forensics Adjustments (Helius + Allium)
+Buzz operates at the intersection of three emerging standards that together define autonomous agent commerce:
 
-- Multi-chain presence: +3
-- Serial token creator: -5
-- Net positive Solana PnL: +2
-- Price verification vs DexScreener: cross-check
+```
+                    ┌─────────────────────┐
+                    │    ERC-8004         │
+                    │    (Identity)       │
+                    │  "Who is this agent?"│
+                    └──────────┬──────────┘
+                               │
+              ┌────────────────┼────────────────┐
+              │                │                │
+    ┌─────────▼──────┐  ┌─────▼──────────┐  ┌──▼──────────────┐
+    │    x402         │  │  elizaOS/      │  │  zauthx402      │
+    │  (Payments)     │  │  OpenClaw      │  │  (Trust)        │
+    │ "Pay per query" │  │ (Interop)      │  │ "Can I trust    │
+    │                 │  │ "Talk to other │  │  this agent?"   │
+    │                 │  │  agents"       │  │                 │
+    └─────────────────┘  └───────────────┘  └─────────────────┘
+```
+
+**Identity (ERC-8004):** Other agents verify Buzz's legitimacy before engaging. No more anonymous bots — Buzz has a verifiable track record anchored on Ethereum and Base.
+
+**Payments (x402):** Buzz pays for premium intelligence (whale alerts, breaking news) via autonomous micropayments. Budget-controlled, ROI-tracked, with experience learning that optimizes spend over time.
+
+**Interoperability (elizaOS + OpenClaw):** Any agent in the elizaOS ecosystem can natively call Buzz's tools — token intelligence, momentum scans, pipeline queries. No custom integration needed.
+
+**Trust (zauthx402):** Before Buzz pays for data, it verifies endpoint authenticity. Trust scores from 0-100 determine whether to auto-pay, require approval, or blacklist.
+
+### Real-World Flow
+
+```
+1. Trading agent discovers Buzz via ERC-8004 registry
+2. Verifies Buzz identity on-chain (ETH #25045)
+3. Calls BUZZ_TOKEN_INTELLIGENCE("JUP") via elizaOS plugin
+4. Buzz checks 15 sources, returns score + recommendation
+5. Trading agent pays Buzz 0.01 USDC via x402 for the query
+6. Both agents log interaction for reputation building
+```
+
+This isn't theoretical — the infrastructure is deployed and running on Akash.
+
+---
+
+## Intelligence Sources (15 Active)
+
+### Free Sources (13)
+
+| # | Source | Data | Status |
+|---|--------|------|--------|
+| 1 | DexScreener API | Prices, liquidity, pairs across 60+ chains | ✅ Active |
+| 2 | AIXBT v2 Momentum | Trending tokens, momentum scores, surge detection | ✅ Active |
+| 3 | leak.me KOL Tracker | Smart money follows, VC/influencer tracking | ✅ Active |
+| 4 | Helius Wallet Forensics | On-chain activity, wallet history, token holds | ✅ Active |
+| 5 | ATV Web3 Identity | ENS deployer verification, identity resolution | ✅ Active |
+| 6 | Grok X Search | Real-time social sentiment from Twitter/X | ✅ Active |
+| 7 | Clawpump | New agent token launches on Solana | ✅ Active |
+| 8 | Moltbook Forums | Community signals, agent ecosystem intel | ✅ Active |
+| 9 | CoinGecko | Market data, rankings, categories | ✅ Active |
+| 10 | Clawbal On-Chain PnL | Wallet P&L tracking, performance metrics | ✅ Active |
+| 11 | HyperAgent Verifier | Cross-reference scoring, batch validation | ✅ Active |
+| 12 | HyperSkill Factory | Autonomous skill generation from intelligence | ✅ Active |
+| 13 | elizaOS Agent Network | Agent-to-agent intelligence via OpenClaw | ✅ Active |
+
+### Paid Sources (2 — x402 Protocol)
+
+| # | Source | Cost/Call | Data | Schedule |
+|---|--------|----------|------|----------|
+| 14 | Einstein AI | $0.10 | Whale alerts, large wallet movements | 06:00 AST |
+| 15 | Gloria AI | $0.10 | Breaking crypto news, sentiment shifts | 12:00 + 18:00 AST |
+
+---
+
+## Scoring System
+
+100-point weighted composite with catalyst adjustments:
+
+| Factor | Weight | What It Measures |
+|--------|--------|-----------------|
+| Liquidity | 25% | DEX liquidity depth (DexScreener) |
+| Market Cap | 20% | Fully diluted valuation |
+| Volume 24h | 20% | Trading activity |
+| Social Metrics | 15% | Twitter, Discord, Telegram presence |
+| Token Age | 10% | Maturity and track record |
+| Team Transparency | 10% | Doxxed team, public commits, identity |
+
+### Cross-Reference Bonuses
+
+| Condition | Adjustment | Flag |
+|-----------|-----------|------|
+| AIXBT ≥80 + DexScreener trending | +5 | `[HIGH CONVICTION]` |
+| AIXBT ≥50 + KOL follows | +3 | `[VALIDATED]` |
+| Grok social + AIXBT momentum rising | +3 | `[TIMING OPTIMAL]` |
+| ATV verified identity + AIXBT ≥60 | +5 | `[HIGH TRUST + MOMENTUM]` |
+| Whale alert + breaking news | +5 | `[WHALE + CATALYST]` |
 
 ### Score Actions
 
-|Range |Category   |Action                                    |
-|------|-----------|------------------------------------------|
-|85-100|🔥 HOT      |Immediate outreach + Clawbal on-chain post|
-|70-84 |✅ Qualified|Priority queue                            |
-|50-69 |👀 Watch    |Monitor 48h                               |
-|0-49  |❌ Skip     |No action                                 |
+| Range | Action |
+|-------|--------|
+| 85-100 🔥 | Immediate outreach |
+| 70-84 ✅ | Priority queue |
+| 50-69 👀 | Monitor 48h |
+| 0-49 ❌ | No action |
 
------
+---
 
-## x402 Payment Integration
+## elizaOS Plugin
 
-|Field              |Value                                                      |
-|-------------------|-----------------------------------------------------------|
-|Address            |`79AVHaE2g3GQYoqXCpvim12HeV563mYe7VHDrw28uzxG`             |
-|Network            |Solana Mainnet                                             |
-|Currency           |USDC (SPL)                                                 |
-|Facilitator        |PayAI (gasless)                                            |
-|Monthly budget     |$10 USDC                                                   |
-|Daily limit        |$0.35                                                      |
-|Industry validation|Stripe launched x402 on Base (Feb 11, 2026) — same protocol|
+Buzz exposes its intelligence as an elizaOS-native plugin, enabling any agent in the elizaOS/OpenClaw ecosystem to call Buzz's tools directly.
 
------
+### Installation
 
-## Monthly Cost Breakdown
+```bash
+npm install @solcex/plugin-buzz-bd
+```
 
-|Component                             |Cost          |
-|--------------------------------------|--------------|
-|LLM (MiniMax M2.5 via AkashML)        |~$8/mo        |
-|LLM fallbacks (Llama 70B free + Haiku)|~$9/mo        |
-|Akash hosting                         |~$6.30/mo     |
-|x402 intelligence payments            |~$9/mo        |
-|Intelligence APIs (13 sources)        |$0            |
-|Clawbal on-chain posts                |~$0.07/mo     |
-|**Total**                             |**~$41/month**|
+### OpenClaw Configuration
 
-**ROI:** 1 listing = 24+ months of operations
+```json
+{
+  "plugins": {
+    "eliza-adapter": {
+      "plugins": ["@solcex/plugin-buzz-bd"],
+      "settings": {
+        "BUZZ_WORKSPACE": "/data/workspace"
+      },
+      "agentName": "Buzz"
+    }
+  }
+}
+```
 
------
+### Available Actions
 
-## Cron Jobs (23 Active)
+| Action | Description | Parameters |
+|--------|-------------|------------|
+| `BUZZ_TOKEN_INTELLIGENCE` | Full token analysis with AIXBT cross-reference | `token`, `chain` |
+| `BUZZ_LISTING_PROSPECTS` | Current hot prospects from BD pipeline | `min_score`, `limit` |
+| `BUZZ_AGENT_STATUS` | Operational status and health check | — |
+| `BUZZ_MOMENTUM_SCAN` | Latest AIXBT momentum data | `min_score` |
 
-Buzz runs 23 automated cron jobs across intelligence gathering, pipeline management, experience compression, health monitoring, Clawbal posting, and Allium multi-chain forensics.
+### Agent-to-Agent Example
 
------
+```
+TradingBot: "What does Buzz think about JUP?"
+  → calls BUZZ_TOKEN_INTELLIGENCE({token: "JUP", chain: "solana"})
 
-## Live Stream
+Buzz returns:
+  Token: JUP (solana)
+  AIXBT: 72/100 [WARM]
+  Pipeline: YES - Active prospect
+  Recommendation: MODERATE - Worth monitoring
+  Sources: 15 intelligence feeds
+```
 
-Buzz streams 24/7 at [retake.tv/BuzzBD](https://retake.tv/BuzzBD) with real-time overlay showing pipeline status, scoring activity, and operational metrics.
+---
 
-**$BUZZBD Token:** `0xdbb38acb97f936eeccba05908d6a58b0829fcb07` (Base, via Clanker)
+## Operational Status
 
------
+| Metric | Value |
+|--------|-------|
+| **Version** | 4.4.0 |
+| **Infrastructure** | Akash Network (decentralized cloud) |
+| **Uptime** | 24/7 autonomous |
+| **Cron Jobs** | 26 active |
+| **Intelligence Sources** | 15 (13 free + 2 paid) |
+| **LLM** | MiniMax M2.5-highspeed via AkashML |
+| **Monthly Cost** | ~$41 |
+| **Chains Monitored** | Solana, Ethereum, BSC, Base, Arbitrum, Polygon |
+| **ERC-8004** | ETH #25045, Base #17483 |
+| **Hackathons** | Colosseum Agent Hackathon (ID 3734) |
 
-## Key Partnerships
+### Daily Schedule (AST / Jeddah)
 
-|Partner         |Role                                       |
-|----------------|-------------------------------------------|
-|MiniMax         |M2.5-highspeed — primary LLM via AkashML   |
-|Akash Network   |Decentralized cloud hosting                |
-|Helius          |Solana wallet forensics API                |
-|Allium          |Multi-chain wallet intelligence (16 chains)|
-|OpenClaw        |Deployment framework                       |
-|Zauth x402      |Trust verification protocol                |
-|retake.tv       |24/7 live streaming                        |
-|Stripe x402     |Industry validation (Feb 11, 2026)         |
-|CoinGecko x402  |Pay-per-use data marketplace               |
-|IQLabs / Clawbal|On-chain credibility posting               |
+| Time | Task | Source |
+|------|------|--------|
+| 05:00 | Full deep scan + AIXBT momentum | DexScreener + AIXBT v2 |
+| 06:00 | Whale alert scan | Einstein AI (x402) |
+| 07:00 | Alpha tweet draft | Internal |
+| 12:00 | AIXBT refresh + breaking news | AIXBT v2 + Gloria AI |
+| 14:00 | Pipeline review | Internal scoring |
+| 18:00 | Breaking news + AIXBT refresh | Gloria AI + AIXBT v2 |
+| 21:00 | Evening scan | DexScreener + AIXBT v2 |
+| 22:00 | Experience compression | Memory management |
+| 23:00 | Daily spend + ROI report | Internal |
 
------
+---
+
+## Tech Stack
+
+| Component | Technology |
+|-----------|-----------|
+| Runtime | Node.js 18+ on Akash Network |
+| LLM | MiniMax M2.5-highspeed (primary) via AkashML |
+| Payments | x402 protocol (USDC on Solana via PayAI) |
+| Identity | ERC-8004 (Ethereum + Base) |
+| Trust | zauthx402 verification protocol |
+| Data | DexScreener, AIXBT, leak.me, Helius, ATV, Grok |
+| Interop | elizaOS plugin + OpenClaw adapter |
+| Communication | Telegram Bot, Email |
+| Memory | JSON-based with compression and experience tracking |
+| Monitoring | HEARTBEAT.md + health crons |
+
+---
+
+## Partnerships
+
+| Partner | Integration | Status |
+|---------|------------|--------|
+| **Ethereum Foundation (dAI)** | ERC-8004 ecosystem, Vitto Rivabella collaboration | Active |
+| **ATV / GaryPalmerJr.eth** | Web3 Identity API — ENS deployer verification | Active |
+| **AIXBT** | x402 momentum API + web scrape fallback | Active |
+| **Helius** | Solana wallet forensics and on-chain analysis | Active |
+| **MiniMax** | M2.5-highspeed LLM via AkashML | Active |
+| **Akash Network** | Decentralized compute infrastructure | Active |
+| **PayAI** | Gasless x402 payment facilitation | Active |
+
+---
+
+## Repository Structure
+
+```
+buzz-bd-agent/
+├── README.md                          ← This file
+├── registration.json                  ← ERC-8004 registration data
+├── package.json
+├── LICENSE
+│
+├── modules/
+│   ├── aixbt/                         ← AIXBT v2 momentum intelligence
+│   │   ├── aixbt.js
+│   │   └── SKILL.md
+│   ├── dexscreener/                   ← DEX data intelligence
+│   ├── leak-me/                       ← KOL tracking
+│   ├── helius/                        ← Wallet forensics
+│   ├── atv-identity/                  ← Web3 identity verification
+│   ├── hyperskill/                    ← Autonomous skill factory
+│   └── hyperagent/                    ← Cross-reference verification
+│
+├── eliza-plugin-buzz/                 ← elizaOS plugin
+│   ├── index.js
+│   ├── package.json
+│   └── openclaw.plugin.json
+│
+├── memory/                            ← Operational memory
+│   ├── pipeline.md
+│   ├── cron-schedule.json
+│   ├── aixbt/
+│   ├── prospects/
+│   └── x402/
+│
+└── docs/
+    ├── HEARTBEAT.md                   ← Module health monitoring
+    ├── SCORING.md                     ← 100-point scoring methodology
+    └── X402.md                        ← Payment protocol integration
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- Akash Network account (or any Docker-compatible host)
+- Solana wallet with USDC (for x402 payments)
+- API keys: Helius, DexScreener (free)
+
+### Deploy on Akash
+
+```bash
+# Clone
+git clone https://github.com/buzzbysolcex/buzz-bd-agent.git
+cd buzz-bd-agent
+
+# Configure
+cp .env.example .env
+# Edit .env with your API keys and wallet
+
+# Deploy
+akash tx deployment create deploy.yml --from wallet
+```
+
+### Create registration.json
+
+```bash
+cat > registration.json << 'EOF'
+{
+  "erc8004": {
+    "version": "1.0",
+    "agent": {
+      "name": "Buzz BD Agent",
+      "version": "4.4.0",
+      "operator": "SolCex Exchange"
+    },
+    "registrations": [
+      {"chain": "ethereum", "registry_id": 25045},
+      {"chain": "base", "registry_id": 17483}
+    ]
+  }
+}
+EOF
+```
+
+### Test
+
+```bash
+# Test AIXBT module
+cd modules/aixbt && node aixbt.js test
+
+# Test elizaOS plugin
+cd eliza-plugin-buzz && node -e "var p=require('./index.js'); console.log(p.name, p.actions.length+' actions')"
+```
+
+---
 
 ## Changelog
 
-|Version|Date        |Changes                                                                                                                                         |
-|-------|------------|------------------------------------------------------------------------------------------------------------------------------------------------|
-|1.0.0  |Jan 28, 2026|Initial Buzz BD agent                                                                                                                           |
-|2.0.0  |Feb 1, 2026 |Telegram integration, automated scanning                                                                                                        |
-|3.0.0  |Feb 4, 2026 |Forum integration, email approval                                                                                                               |
-|3.1.0  |Feb 5, 2026 |Minara analysis, experience memory                                                                                                              |
-|3.2.0  |Feb 5, 2026 |zauthx402 trust layer                                                                                                                           |
-|3.3.0  |Feb 6, 2026 |x402 payment integration                                                                                                                        |
-|3.4.0  |Feb 7, 2026 |Consolidated autonomous commerce, dual experience                                                                                               |
-|3.5.0  |Feb 11, 2026|Wallet forensics (Helius), RugCheck, Firecrawl, 15 cron jobs                                                                                    |
-|3.6.0  |Feb 11, 2026|Industry validation (Stripe x402), 12 intel sources                                                                                             |
-|3.7.0  |Feb 15, 2026|Multi-chain intelligence (Allium), Clawbal on-chain credibility, MiniMax M2.5-highspeed via AkashML, LLM cascade, 23 cron jobs, 13 intel sources|
+| Version | Date | Highlights |
+|---------|------|-----------|
+| **4.4.0** | Feb 17, 2026 | elizaOS plugin (4 actions), AIXBT v2 (x402 API + scrape), HyperSkill Factory, HyperAgent Verifier, 15 sources, 26 cron jobs |
+| **4.3.0** | Feb 15, 2026 | ATV Web3 Identity API (Source #13), partnership blitz, ClawRouter removal, MiniMax direct via AkashML |
+| **4.0.0** | Feb 14, 2026 | ERC-8004 dual-chain registration (ETH #25045, Base #17483), LLM cascade optimization |
+| **3.7.0** | Feb 11, 2026 | Helius wallet forensics, Stripe x402 industry validation, 12 intelligence sources |
+| **3.4.0** | Feb 7, 2026 | x402 autonomous payments, zauthx402 trust verification, dual experience learning |
+| **3.0.0** | Feb 3, 2026 | OpenClaw skill submission, ERC-8004 planning, Bankr partnership strategy |
 
------
+---
 
-*Version 3.7.0 — February 15, 2026*  
-*Multi-Chain Intelligence Edition*  
-*“Free intelligence first. Pay only for alpha. Track every dollar. Verify every call on-chain.”*
+## Contact
+
+| Channel | Handle |
+|---------|--------|
+| Twitter | [@BuzzBySolCex](https://twitter.com/BuzzBySolCex) |
+| Telegram | [@BuzzBySolCex_bot](https://t.me/BuzzBySolCex_bot) |
+| Email | buzzbysolcex@gmail.com |
+| Operator | [@hidayahanka1](https://twitter.com/hidayahanka1) (Ogie) |
+| Exchange | [SolCex Exchange](https://solcex.io) |
+
+---
+
+## License
+
+MIT — See [LICENSE](LICENSE) for details.
+
+---
+
+*Built by Ogie + Claude Opus 4.6 · Running 24/7 on Akash Network · Powered by the machine economy*
