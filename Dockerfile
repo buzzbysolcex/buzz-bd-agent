@@ -1,20 +1,31 @@
-FROM openclaw/openclaw:v2026.2.19
+FROM node:22-slim
 
 LABEL maintainer="Ogie @ SolCex Exchange"
 LABEL description="Buzz BD Agent — Autonomous AI Business Development on Akash Network"
 LABEL version="5.2.0"
 LABEL openclaw.version="2026.2.19"
-LABEL org.opencontainers.image.source="https://github.com/buzzbysolcex/buzz-bd-agent"
 
-# Pre-install plugins (baked in = faster boot, no npm dependency at runtime)
-RUN npm install -g @openclaw/eliza-adapter \
-    && npm install -g @buzzbd/plugin-solcex-bd@1.0.0 \
-    && echo "Plugins installed successfully"
+# Install tini for proper signal handling + basic tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tini curl ca-certificates git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install OpenClaw globally (includes bundled plugins)
+RUN npm install -g openclaw@2026.2.19
 
 # Create required directories
 RUN mkdir -p /data/.openclaw \
     && mkdir -p /data/workspace/memory \
-    && mkdir -p /data/.npm-global
+    && mkdir -p /data/workspace/skills \
+    && mkdir -p /data/.npm-global \
+    && mkdir -p /opt/buzz-skills \
+    && mkdir -p /opt/buzz-config
+
+# Copy skills (ClawRouter + QuillShield)
+COPY skills/ /opt/buzz-skills/
+
+# Copy config template
+COPY openclaw.json.template /opt/buzz-config/openclaw.json.template
 
 # Copy entrypoint
 COPY entrypoint.sh /entrypoint.sh
@@ -23,5 +34,4 @@ RUN chmod +x /entrypoint.sh
 # Gateway port
 EXPOSE 18789
 
-# tini as PID 1 for proper signal handling
-ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/entrypoint.sh"]
