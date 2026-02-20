@@ -10,7 +10,12 @@
     "lastRunMode": "local"
   },
   "auth": {
-    "profiles": {}
+    "profiles": {
+      "minimax:default": {
+        "provider": "minimax",
+        "mode": "api_key"
+      }
+    }
   },
   "models": {
     "mode": "merge",
@@ -39,7 +44,7 @@
       },
       "akashml": {
         "baseUrl": "https://api.akashml.com/v1",
-        "apiKey": "<AKASHML_API_KEY>",
+        "apiKey": "<SET_YOUR_KEY>",
         "api": "openai-completions",
         "models": [
           {
@@ -158,5 +163,8 @@
         }
       }
     }
+  },
+  "env": {
+    "OPENROUTER_API_KEY": "<SET_YOUR_KEY>"
   }
 }
