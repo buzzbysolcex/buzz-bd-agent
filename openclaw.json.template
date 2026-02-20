@@ -12,7 +12,6 @@
   "auth": {
     "profiles": {
       "minimax:default": {
-        "provider": "minimax",
         "mode": "api_key"
       }
     }
