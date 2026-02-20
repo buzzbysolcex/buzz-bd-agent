@@ -1,79 +1,162 @@
 {
-  "version": "2026.2.19",
-  "gateway": {
-    "port": 18789,
-    "auth": {
-      "mode": "token",
-      "_note": "v2026.2.19: token auto-generated on first boot if not set. MUST differ from hooks.token or startup fails."
-    }
+  "meta": {
+    "lastTouchedVersion": "2026.2.19",
+    "lastTouchedAt": "2026-02-20T11:32:15.117Z"
   },
-  "agents": {
-    "main": {
-      "name": "Buzz BD Agent",
-      "description": "Autonomous BD agent for SolCex Exchange — token discovery, scoring, pipeline management",
-      "adapter": "eliza-adapter",
-      "plugin": "@buzzbd/plugin-solcex-bd",
-      "actions": ["SCAN_TOKENS", "SCORE_TOKEN", "CHECK_WALLET", "SUBMIT_LISTING"],
-      "hooks": ["market-intel", "pipeline-status", "listing-readiness"],
-      "channels": ["telegram", "web"],
-      "model": {
-        "provider": "minimax",
-        "id": "MiniMax-M2.5-highspeed"
-      }
-    },
-    "scout": {
-      "name": "Token Scout",
-      "description": "Sub-agent for delegated token discovery missions",
-      "role": "Token discovery delegation",
-      "model": {
-        "provider": "minimax",
-        "id": "MiniMax-M2.5-highspeed"
-      }
-    }
+  "wizard": {
+    "lastRunAt": "2026-02-18T12:14:37.186Z",
+    "lastRunVersion": "2026.2.17",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  },
+  "auth": {
+    "profiles": {}
   },
   "models": {
+    "mode": "merge",
     "providers": {
       "minimax": {
         "baseUrl": "https://api.minimax.io/anthropic",
-        "apiKey": "<REPLACE_WITH_MINIMAX_API_KEY>",
         "api": "anthropic-messages",
-        "models": [{
-          "id": "MiniMax-M2.5-highspeed",
-          "name": "MiniMax M2.5 Highspeed",
-          "input": ["text", "image"],
-          "cost": {"input": 0.15, "output": 0.6, "cacheRead": 0, "cacheWrite": 0},
-          "contextWindow": 1000000,
-          "maxTokens": 32768,
-          "reasoning": false
-        }]
+        "models": [
+          {
+            "id": "MiniMax-M2.5",
+            "name": "MiniMax M2.5",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 15,
+              "output": 60,
+              "cacheRead": 2,
+              "cacheWrite": 10
+            },
+            "contextWindow": 200000,
+            "maxTokens": 8192
+          }
+        ]
+      },
+      "akashml": {
+        "baseUrl": "https://api.akashml.com/v1",
+        "apiKey": "<AKASHML_API_KEY>",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "Qwen/Qwen3-30B-A3B",
+            "name": "Qwen3 30B",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 128000,
+            "maxTokens": 8192
+          }
+        ]
       }
-    },
-    "cascade": {
-      "order": ["minimax", "openrouter", "anthropic-haiku", "anthropic-opus"],
-      "notes": "MiniMax handles 90%+. Llama 70B (OpenRouter) = free fallback. Haiku if both down. Opus = LAST RESORT only."
     }
   },
-  "telegram": {
-    "bot": "@BuzzBySolCex_bot",
-    "chatId": "950395553",
-    "_note": "v2026.2.19: cron/heartbeat delivery now honors topic targets (<chatId>:topic:<threadId>)"
-  },
-  "security": {
-    "notes": [
-      "NEVER expose API keys in public repos",
-      "NEVER share wallet private keys",
-      "Run 'openclaw doctor' after every upgrade",
-      "Backup this config before any changes",
-      "v2026.2.19: hooks.token MUST differ from gateway.auth.token"
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "minimax/MiniMax-M2.5",
+        "fallbacks": [
+          "openrouter/meta-llama/llama-3.3-70b-instruct:free",
+          "akashml/Qwen/Qwen3-30B-A3B"
+        ]
+      },
+      "models": {
+        "minimax/MiniMax-M2.5": {
+          "alias": "MiniMax"
+        },
+        "openrouter/meta-llama/llama-3.3-70b-instruct:free": {
+          "alias": "Llama70B"
+        },
+        "akashml/Qwen/Qwen3-30B-A3B": {
+          "alias": "Qwen30B"
+        }
+      },
+      "workspace": "/Users/hidayahanka/.openclaw/workspace",
+      "memorySearch": {
+        "enabled": false
+      },
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8
+      }
+    },
+    "list": [
+      {
+        "id": "main"
+      }
     ]
   },
-  "_setup_instructions": [
-    "1. Replace <REPLACE_WITH_MINIMAX_API_KEY> with actual key",
-    "2. Set ANTHROPIC_API_KEY env var for Haiku/Opus fallback",
-    "3. Set OPENROUTER_API_KEY env var for Llama 70B free fallback",
-    "4. Verify gateway.auth.token is auto-generated (check logs on first boot)",
-    "5. Ensure hooks.token ≠ gateway.auth.token",
-    "6. Restore cron jobs from /data/workspace/memory/cron-schedule.json",
-    "7. Run: openclaw doctor"
-  ]
+  "messages": {
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "dmPolicy": "pairing",
+      "botToken": "<TELEGRAM_BOT_TOKEN>",
+      "groupPolicy": "allowlist",
+      "streamMode": "partial"
+    }
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": "<GATEWAY_AUTH_TOKEN>"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    },
+    "nodes": {
+      "denyCommands": [
+        "camera.snap",
+        "camera.clip",
+        "screen.record",
+        "calendar.add",
+        "contacts.add",
+        "reminders.add"
+      ]
+    }
+  },
+  "plugins": {
+    "entries": {
+      "telegram": {
+        "enabled": true
+      },
+      "eliza-adapter": {
+        "enabled": true,
+        "config": {
+          "plugins": [
+            "@buzzbd/plugin-solcex-bd"
+          ],
+          "settings": {
+            "HELIUS_API_KEY": "<REDACTED>"
+          },
+          "agentName": "Buzz"
+        }
+      }
+    }
+  }
 }
