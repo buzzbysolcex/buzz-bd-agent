@@ -16,7 +16,7 @@ version: "2.0"
 
 services:
   buzz-bd:
-    image: buzzbysolcex/buzz-bd-agent:v2026.2.19
+    image: ghcr.io/buzzbysolcex/buzz-bd-agent:v2026.2.19
     expose:
       - port: 18789
         as: 18789
