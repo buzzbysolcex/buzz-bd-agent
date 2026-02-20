@@ -46,3 +46,7 @@ coverage/
 tmp/
 temp/
 *.tmp
+
+# OpenClaw config (contains API keys and tokens)
+openclaw.json
+.openclaw/
