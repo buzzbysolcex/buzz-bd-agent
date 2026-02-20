@@ -1,0 +1,79 @@
+{
+  "version": "2026.2.19",
+  "gateway": {
+    "port": 18789,
+    "auth": {
+      "mode": "token",
+      "_note": "v2026.2.19: token auto-generated on first boot if not set. MUST differ from hooks.token or startup fails."
+    }
+  },
+  "agents": {
+    "main": {
+      "name": "Buzz BD Agent",
+      "description": "Autonomous BD agent for SolCex Exchange — token discovery, scoring, pipeline management",
+      "adapter": "eliza-adapter",
+      "plugin": "@buzzbd/plugin-solcex-bd",
+      "actions": ["SCAN_TOKENS", "SCORE_TOKEN", "CHECK_WALLET", "SUBMIT_LISTING"],
+      "hooks": ["market-intel", "pipeline-status", "listing-readiness"],
+      "channels": ["telegram", "web"],
+      "model": {
+        "provider": "minimax",
+        "id": "MiniMax-M2.5-highspeed"
+      }
+    },
+    "scout": {
+      "name": "Token Scout",
+      "description": "Sub-agent for delegated token discovery missions",
+      "role": "Token discovery delegation",
+      "model": {
+        "provider": "minimax",
+        "id": "MiniMax-M2.5-highspeed"
+      }
+    }
+  },
+  "models": {
+    "providers": {
+      "minimax": {
+        "baseUrl": "https://api.minimax.io/anthropic",
+        "apiKey": "<REPLACE_WITH_MINIMAX_API_KEY>",
+        "api": "anthropic-messages",
+        "models": [{
+          "id": "MiniMax-M2.5-highspeed",
+          "name": "MiniMax M2.5 Highspeed",
+          "input": ["text", "image"],
+          "cost": {"input": 0.15, "output": 0.6, "cacheRead": 0, "cacheWrite": 0},
+          "contextWindow": 1000000,
+          "maxTokens": 32768,
+          "reasoning": false
+        }]
+      }
+    },
+    "cascade": {
+      "order": ["minimax", "openrouter", "anthropic-haiku", "anthropic-opus"],
+      "notes": "MiniMax handles 90%+. Llama 70B (OpenRouter) = free fallback. Haiku if both down. Opus = LAST RESORT only."
+    }
+  },
+  "telegram": {
+    "bot": "@BuzzBySolCex_bot",
+    "chatId": "950395553",
+    "_note": "v2026.2.19: cron/heartbeat delivery now honors topic targets (<chatId>:topic:<threadId>)"
+  },
+  "security": {
+    "notes": [
+      "NEVER expose API keys in public repos",
+      "NEVER share wallet private keys",
+      "Run 'openclaw doctor' after every upgrade",
+      "Backup this config before any changes",
+      "v2026.2.19: hooks.token MUST differ from gateway.auth.token"
+    ]
+  },
+  "_setup_instructions": [
+    "1. Replace <REPLACE_WITH_MINIMAX_API_KEY> with actual key",
+    "2. Set ANTHROPIC_API_KEY env var for Haiku/Opus fallback",
+    "3. Set OPENROUTER_API_KEY env var for Llama 70B free fallback",
+    "4. Verify gateway.auth.token is auto-generated (check logs on first boot)",
+    "5. Ensure hooks.token ≠ gateway.auth.token",
+    "6. Restore cron jobs from /data/workspace/memory/cron-schedule.json",
+    "7. Run: openclaw doctor"
+  ]
+}

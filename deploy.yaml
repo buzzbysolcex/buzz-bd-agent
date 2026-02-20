@@ -1,0 +1,65 @@
+---
+# ============================================
+# Buzz BD Agent — Akash SDL
+# OpenClaw v2026.2.19
+# github.com/buzzbysolcex/buzz-bd-agent
+# ============================================
+# DEPLOYMENT NOTES:
+# - v2026.2.19 released Feb 19, 2026
+# - Gateway auto-generates auth token on first boot
+# - Persistent storage on /data survives redeployments
+# - Set API keys via env vars, NOT in this file
+# - Port 18789 must be globally accessible for Telegram webhook
+# ============================================
+
+version: "2.0"
+
+services:
+  buzz-bd:
+    image: buzzbysolcex/buzz-bd-agent:v2026.2.19
+    expose:
+      - port: 18789
+        as: 18789
+        to:
+          - global: true
+    env:
+      # CRITICAL: These must be set or config is ignored
+      - OPENCLAW_STATE_DIR=/data/.openclaw
+      - OPENCLAW_WORKSPACE_DIR=/data/workspace
+      - NPM_CONFIG_PREFIX=/data/.npm-global
+      # LLM Keys (set actual values, DO NOT commit real keys)
+      - ANTHROPIC_API_KEY=<SET_ON_DEPLOY>
+      - OPENROUTER_API_KEY=<SET_ON_DEPLOY>
+    params:
+      storage:
+        data:
+          mount: /data
+          size: 10Gi
+          readOnly: false
+
+profiles:
+  compute:
+    buzz-bd:
+      resources:
+        cpu:
+          units: 2
+        memory:
+          size: 2Gi
+        storage:
+          - name: data
+            size: 10Gi
+            attributes:
+              persistent: true
+              class: beta3
+  placement:
+    akash:
+      pricing:
+        buzz-bd:
+          denom: uakt
+          amount: 10000
+
+deployment:
+  buzz-bd:
+    akash:
+      profile: buzz-bd
+      count: 1
