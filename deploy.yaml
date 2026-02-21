@@ -1,35 +1,28 @@
 ---
 # ============================================
-# Buzz BD Agent — Akash SDL
-# OpenClaw v2026.2.19
+# Buzz BD Agent v5.3.2 — Akash SDL
+# OpenClaw v2026.2.19 + ClawRouter v0.9.39
+# BlockRun x402 — No API keys, USDC payments
 # github.com/buzzbysolcex/buzz-bd-agent
-# ============================================
-# DEPLOYMENT NOTES:
-# - v2026.2.19 released Feb 19, 2026
-# - Gateway auto-generates auth token on first boot
-# - Persistent storage on /data survives redeployments
-# - Set API keys via env vars, NOT in this file
-# - Port 18789 must be globally accessible for Telegram webhook
 # ============================================
 
 version: "2.0"
 
 services:
   buzz-bd:
-    image: ghcr.io/buzzbysolcex/buzz-bd-agent:v2026.2.19
+    image: ghcr.io/buzzbysolcex/buzz-bd-agent:v5.3.2
     expose:
       - port: 18789
         as: 18789
         to:
           - global: true
     env:
-      # CRITICAL: These must be set or config is ignored
       - OPENCLAW_STATE_DIR=/data/.openclaw
       - OPENCLAW_WORKSPACE_DIR=/data/workspace
       - NPM_CONFIG_PREFIX=/data/.npm-global
-      # LLM Keys (set actual values, DO NOT commit real keys)
-      - ANTHROPIC_API_KEY=<SET_ON_DEPLOY>
-      - OPENROUTER_API_KEY=<SET_ON_DEPLOY>
+      - TELEGRAM_BOT_TOKEN=<SET_ON_DEPLOY>
+      - MINIMAX_API_KEY=<SET_ON_DEPLOY>
+      - BLOCKRUN_WALLET_KEY=<SET_ON_DEPLOY>
     params:
       storage:
         data:
@@ -44,7 +37,7 @@ profiles:
         cpu:
           units: 2
         memory:
-          size: 2Gi
+          size: 4Gi
         storage:
           - name: data
             size: 10Gi
