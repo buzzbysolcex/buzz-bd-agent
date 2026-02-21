@@ -2,14 +2,14 @@
 
 **First autonomous AI agent for crypto exchange listing BD.** Token discovery, scoring, wallet forensics, and listing pipeline — running 24/7 on decentralized infrastructure.
 
-![ERC-8004 ETH](https://img.shields.io/badge/ERC--8004-ETH%20%2325045-blue) ![ERC-8004 Base](https://img.shields.io/badge/ERC--8004-Base%20%2317483-purple) ![npm](https://img.shields.io/npm/v/@buzzbd/plugin-solcex-bd) ![Akash](https://img.shields.io/badge/Akash-Deployed-green) ![OpenClaw](https://img.shields.io/badge/OpenClaw-v2026.2.19-orange) ![ClawRouter](https://img.shields.io/badge/ClawRouter-v0.9.39-blue)
+![ERC-8004 ETH](https://img.shields.io/badge/ERC--8004-ETH%20%2325045-blue) ![ERC-8004 Base](https://img.shields.io/badge/ERC--8004-Base%20%2317483-purple) ![npm](https://img.shields.io/npm/v/@buzzbd/plugin-solcex-bd) ![Akash](https://img.shields.io/badge/Akash-Deployed-green) ![OpenClaw](https://img.shields.io/badge/OpenClaw-v2026.2.19-orange) ![GHCR](https://img.shields.io/badge/GHCR-Pipeline%20Live-brightgreen)
 
 ## What Buzz Does
 
 Buzz discovers promising crypto tokens, scores them using a 100-point system across 16 intelligence sources, runs wallet forensics on deployer wallets, verifies contract safety, and manages the full BD pipeline — from discovery to listing. Ogie (BD Lead) approves all outreach. Buzz handles 90% of the work autonomously.
 
 **Operational since:** February 1, 2026
-**Current version:** Master Ops v5.3.2 (ClawRouter Live Edition)
+**Current version:** v5.3.6 — 3-Provider Cascade + GHCR Pipeline
 
 ---
 
@@ -52,57 +52,43 @@ Buzz discovers promising crypto tokens, scores them using a 100-point system acr
 |-----------|--------|
 | **Platform** | Akash Network (decentralized cloud) |
 | **Runtime** | OpenClaw v2026.2.19 |
-| **Container** | Docker via `ghcr.io/buzzbysolcex/buzz-bd-agent:v5.3.2` |
-| **ClawRouter** | v0.9.39 — pre-installed in Docker image, BlockRun x402 |
+| **Container** | Docker via `ghcr.io/buzzbysolcex/buzz-bd-agent:v5.3.6` |
 | **Resources** | 2 CPU, 4GB RAM, 10GB persistent storage |
 | **Cost** | ~$5-8/month (Akash compute) |
-| **LLM Cost** | ~$5-15/month (ClawRouter ECO via BlockRun x402) |
+| **LLM Cost** | ~$41/month (MiniMax M2.5 + free fallbacks) |
 | **Process** | `openclaw gateway --port 18789 --allow-unconfigured` |
 | **Channels** | Telegram (@BuzzBySolCex_bot) |
 | **BD Contact** | Telegram: @Ogie2 |
 | **Node** | v22 (Akash) / v25.5.0 (local Mac) |
 
-### Development Workflow
+### Development Workflow (GHCR Pipeline)
 
 ```
 Mac laptop (build + test) → Docker image → GHCR push → Akash deploy
 ```
 
-All code is tested locally before Docker build. GHCR image is **public** with zero credentials baked in — all secrets injected via Akash SDL env vars at runtime.
+All code is tested locally before Docker build. GHCR image is **public** with zero credentials baked in — all secrets injected via Akash SDL env vars at runtime. New tags force fresh image pulls on Akash providers.
 
 ---
 
-## 🧠 Smart LLM Routing — ClawRouter v0.9.39
+## 🧠 LLM Routing — 3-Provider Cascade
 
-**All LLM routing through [BlockRun](https://blockrun.ai) via x402 USDC micropayments.**
-No API keys needed — payment IS authentication. Powered by [@bc1max](https://github.com/BlockRunAI/ClawRouter)'s ClawRouter.
+| Priority | Model | Provider | Cost |
+|----------|-------|----------|------|
+| **Primary** | MiniMax M2.5 | MiniMax Direct | ~$41/mo |
+| **Fallback 1** | Llama 3.3 70B Instruct | OpenRouter (free tier) | $0 |
+| **Fallback 2** | Qwen3 30B A3B | AkashML | $0 |
 
-| Component | Value |
-|-----------|-------|
-| **Router** | ClawRouter v0.9.39 (pre-installed in Docker image) |
-| **Payment** | x402 USDC on Base — non-custodial |
-| **Default** | `blockrun/eco` (maximum savings) |
-| **Models** | 30+ (MiniMax, Claude, GPT-5, DeepSeek, Grok, Kimi, etc.) |
-| **Free Fallback** | `gpt-oss-120b` — always available, even at $0 balance |
-
-**Routing Profiles:**
-
-| Profile | Purpose | Savings vs Opus |
-|---------|---------|-----------------|
-| `eco` | Default — cheapest model per task | 95-100% |
-| `auto` | Balanced quality + cost | 85-95% |
-| `premium` | Best quality | 50-70% |
-| `free` | Zero cost only | 100% |
+If MiniMax fails or rate-limits, Buzz automatically cascades to free-tier models. Zero downtime.
 
 **Cost Evolution:**
 
 | Phase | Cost | What Changed |
 |-------|------|--------------|
 | Phase 1 (Feb 3-14) | $1,320/day | Claude Opus for everything |
-| Phase 2 (Feb 15-20) | $41/mo | MiniMax M2.5 direct |
-| **Phase 3 (Feb 21+)** | **~$5-15/mo** | **ClawRouter ECO via BlockRun** |
+| **Phase 2 (Feb 15+)** | **$41/mo** | **MiniMax M2.5 + free cascade** |
 
-**99.9% cost reduction from Phase 1.**
+**96.9% cost reduction from Phase 1.**
 
 ---
 
@@ -288,7 +274,6 @@ ClawHub + ClawTasks + ACP      ✅ All registered
 | ERC-8004 (ETH) | [8004scan.io/agents/ethereum/25045](https://8004scan.io/agents/ethereum/25045) |
 | ERC-8004 (Base) | [8004scan.io/agents/base/17483](https://8004scan.io/agents/base/17483) |
 | Akash Network | [akash.network](https://akash.network) |
-| BlockRun (ClawRouter) | [blockrun.ai](https://blockrun.ai) |
 | BD Contact (Ogie) | [@Ogie2 on Telegram](https://t.me/Ogie2) |
 
 ---
@@ -297,9 +282,9 @@ ClawHub + ClawTasks + ACP      ✅ All registered
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| **5.3.2** | **Feb 21, 2026** | **ClawRouter v0.9.39 LIVE via BlockRun x402. OpenRouter REMOVED. 30+ models, ECO tier, ~$5-15/mo. Standard dev workflow: Mac → Docker → GHCR → Akash. Boot self-check.** |
+| **5.3.5** | **Feb 21, 2026** | **GHCR pipeline proven (Mac → Docker → GHCR → Akash). 3-Provider cascade restored. Boot self-check. Multiple Docker build cycles validated.** |
 | 5.3.1 | Feb 20, 2026 | DFlow MCP (Source #16), 4-Layer Intelligence Architecture, CoinGecko + DS Boosts |
-| 5.3.0 | Feb 20, 2026 | OpenClaw v2026.2.19 on Akash, Docker pipeline, ClawRouter + QuillShield skills |
+| 5.3.0 | Feb 20, 2026 | OpenClaw v2026.2.19 on Akash, Docker pipeline, QuillShield skill |
 | 5.2.0 | Feb 18, 2026 | BD Lifecycle: inbound-first strategy, 36 crons, 3-Touch Warm-Up, competitor intelligence |
 | 5.1.0 | Feb 18, 2026 | Agent Bounty Board: first bounty posted on ClawdBotATG contract |
 | 5.0.0 | Feb 18, 2026 | ElizaOS plugin, multi-agent, agent-to-agent delegation, ACP bridge |
@@ -308,7 +293,7 @@ ClawHub + ClawTasks + ACP      ✅ All registered
 
 ---
 
-*Master Ops v5.3.2 — ClawRouter Live Edition*
-*OpenClaw v2026.2.19 | ClawRouter v0.9.39 via BlockRun x402 | 36 crons | 16/16 intel | 4-Layer Architecture*
-*Docker: ghcr.io/buzzbysolcex/buzz-bd-agent:v5.3.2 | 2 CPU / 4GB RAM | $5-8/mo*
+*v5.3.6 — 3-Provider Cascade + GHCR Pipeline*
+*OpenClaw v2026.2.19 | MiniMax M2.5 + Llama 70B + Qwen 30B | 36 crons | 16/16 intel | 4-Layer Architecture*
+*Docker: ghcr.io/buzzbysolcex/buzz-bd-agent:v5.3.6 | 2 CPU / 4GB RAM | $5-8/mo*
 *"Identity first. Intelligence deep. Commerce autonomous. Cost disciplined. Actions over promises. Ship from anywhere."*
