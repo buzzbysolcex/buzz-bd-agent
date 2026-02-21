@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 export OPENCLAW_STATE_DIR=/data/.openclaw
 export OPENCLAW_WORKSPACE_DIR=/data/workspace
@@ -8,9 +7,11 @@ export PATH="/data/.npm-global/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
 
 echo "============================================"
 echo "  Buzz BD Agent — OpenClaw v2026.2.19"
+echo "  ClawRouter v0.9.39 — BlockRun x402"
 echo "  State:     $OPENCLAW_STATE_DIR"
 echo "  Workspace: $OPENCLAW_WORKSPACE_DIR"
 echo "============================================"
+
 
 mkdir -p /data/.openclaw /data/workspace /data/workspace/skills /data/.npm-global /data/workspace/memory
 
@@ -34,39 +35,15 @@ cat > "$CONFIG" << JSONEOF
     }
   },
   "env": {
-    "MINIMAX_API_KEY": "$MINIMAX_API_KEY",
-    "OPENROUTER_API_KEY": "$OPENROUTER_API_KEY"
+    "MINIMAX_API_KEY": "$MINIMAX_API_KEY"
   },
-  "models": {
-    "providers": {
-      "akashml": {
-        "baseUrl": "https://api.akashml.com/v1",
-        "apiKey": "akml-VLgEXJDTuTPueuoGPXVtoPGzUfarBCNL",
-        "api": "openai-completions",
-        "models": [
-          {
-            "id": "Qwen/Qwen3-30B-A3B",
-            "name": "Qwen3 30B",
-            "contextWindow": 128000,
-            "maxTokens": 8192
-          }
-        ]
-      }
-    }
+  "plugins": {
+    "allow": ["clawrouter"]
   },
   "agents": {
     "defaults": {
-      "models": {
-        "minimax/MiniMax-M2.5": {"alias": "MiniMax"},
-        "openrouter/meta-llama/llama-3.3-70b-instruct:free": {"alias": "Llama70B"},
-        "akashml/Qwen/Qwen3-30B-A3B": {"alias": "Qwen30B"}
-      },
       "model": {
-        "primary": "minimax/MiniMax-M2.5",
-        "fallbacks": [
-          "openrouter/meta-llama/llama-3.3-70b-instruct:free",
-          "akashml/Qwen/Qwen3-30B-A3B"
-        ]
+        "primary": "blockrun/eco"
       },
       "subagents": {
         "maxConcurrent": 8
@@ -77,10 +54,32 @@ cat > "$CONFIG" << JSONEOF
 JSONEOF
 echo "[entrypoint] Config generated at $CONFIG"
 
+echo "[entrypoint] Setting up ClawRouter..."
+if [ -d "/opt/buzz-clawrouter/clawrouter" ]; then
+  mkdir -p /data/.openclaw/extensions
+  cp -r /opt/buzz-clawrouter/clawrouter /data/.openclaw/extensions/
+  echo "[entrypoint] ClawRouter plugin copied"
+fi
+
+if [ -n "$BLOCKRUN_WALLET_KEY" ]; then
+  mkdir -p /data/.openclaw/blockrun
+  echo "$BLOCKRUN_WALLET_KEY" > /data/.openclaw/blockrun/wallet.key
+  echo "[entrypoint] BlockRun wallet injected"
+fi
+
+echo "[entrypoint] Running boot self-check..."
+if [ -f "/data/workspace/memory/cron-schedule.json" ]; then
+  CRON_COUNT=$(cat /data/workspace/memory/cron-schedule.json | grep -c '"id"' 2>/dev/null || echo "0")
+  echo "[entrypoint] Cron schedule found: $CRON_COUNT jobs"
+else
+  echo "[entrypoint] WARNING: cron-schedule.json not found!"
+fi
+
 echo "[entrypoint] ENV check:"
 echo "  MINIMAX_API_KEY=$([ -n "$MINIMAX_API_KEY" ] && echo 'SET' || echo 'NOT SET')"
-echo "  OPENROUTER_API_KEY=$([ -n "$OPENROUTER_API_KEY" ] && echo 'SET' || echo 'NOT SET')"
+echo "  BLOCKRUN_WALLET_KEY=$([ -n "$BLOCKRUN_WALLET_KEY" ] && echo 'SET' || echo 'NOT SET')"
 echo "  TELEGRAM_BOT_TOKEN=$([ -n "$TELEGRAM_BOT_TOKEN" ] && echo 'SET' || echo 'NOT SET')"
+echo "  OpenRouter: REMOVED (using BlockRun via ClawRouter)"
 
 echo "[entrypoint] Starting gateway..."
 echo "[entrypoint] $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
