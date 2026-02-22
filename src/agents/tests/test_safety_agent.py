@@ -116,3 +116,76 @@ class TestFetchRugcheck:
             result = await agent._fetch_rugcheck("abc123", "solana")
         assert "Mutable metadata" in result["risks"]
         assert "Low liquidity" in result["risks"]
+
+
+class TestFetchDflow:
+    async def test_returns_unavailable_stub(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        result = await agent._fetch_dflow("abc123", "solana")
+        assert result["available"] is False
+
+    async def test_returns_expected_structure(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        result = await agent._fetch_dflow("abc123", "solana")
+        assert "routes_found" in result
+        assert "best_slippage" in result
+        assert "best_dex" in result
+        assert "orderbook_depth" in result
+
+
+class TestCalculateDflowModifier:
+    def test_3_plus_routes_bonus(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        result = {"routes_found": 3, "best_slippage": 2.0, "best_dex": "unknown", "orderbook_depth": 10000, "available": True}
+        assert agent._calculate_dflow_modifier(result) == 5
+
+    def test_low_slippage_bonus(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        result = {"routes_found": 1, "best_slippage": 0.5, "best_dex": "unknown", "orderbook_depth": 10000, "available": True}
+        assert agent._calculate_dflow_modifier(result) == 3
+
+    def test_tier1_dex_bonus(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        result = {"routes_found": 1, "best_slippage": 2.0, "best_dex": "jupiter", "orderbook_depth": 10000, "available": True}
+        assert agent._calculate_dflow_modifier(result) == 3
+
+    def test_high_orderbook_bonus(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        result = {"routes_found": 1, "best_slippage": 2.0, "best_dex": "unknown", "orderbook_depth": 60000, "available": True}
+        assert agent._calculate_dflow_modifier(result) == 2
+
+    def test_no_routes_penalty(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        result = {"routes_found": 0, "best_slippage": 0.0, "best_dex": "", "orderbook_depth": 0, "available": True}
+        assert agent._calculate_dflow_modifier(result) == -5
+
+    def test_high_slippage_penalty(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        result = {"routes_found": 1, "best_slippage": 6.0, "best_dex": "unknown", "orderbook_depth": 10000, "available": True}
+        assert agent._calculate_dflow_modifier(result) == -3
+
+    def test_all_bonuses_stacked(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        result = {"routes_found": 5, "best_slippage": 0.3, "best_dex": "jupiter", "orderbook_depth": 100000, "available": True}
+        assert agent._calculate_dflow_modifier(result) == 13
+
+    def test_unavailable_returns_zero(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        result = {"routes_found": 0, "best_slippage": 0.0, "best_dex": "", "orderbook_depth": 0, "available": False}
+        assert agent._calculate_dflow_modifier(result) == 0
+
+    def test_no_routes_and_high_slippage(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        result = {"routes_found": 0, "best_slippage": 7.0, "best_dex": "", "orderbook_depth": 0, "available": True}
+        assert agent._calculate_dflow_modifier(result) == -8
