@@ -1,7 +1,54 @@
 # src/scorers/tests/test_quillshield.py
+import os
 import pytest
+from unittest.mock import patch, AsyncMock
+from aioresponses import aioresponses
 from src.scorers.quillshield import _score_authority, _score_liquidity, _score_holders, _score_contract
 
+
+MOCK_DEXSCREENER_RESPONSE = {
+    "pairs": [{
+        "liquidity": {"usd": 600000},
+        "marketCap": 5000000,
+        "txns": {"h24": {"buys": 100, "sells": 80}},
+    }]
+}
+
+MOCK_HELIUS_RESPONSE = [{
+    "onChainAccountInfo": {
+        "accountInfo": {
+            "data": {
+                "parsed": {
+                    "info": {
+                        "mintAuthority": None,
+                        "freezeAuthority": None,
+                    }
+                }
+            }
+        }
+    },
+    "onChainMetadata": {
+        "metadata": {
+            "updateAuthority": None,
+        }
+    }
+}]
+
+MOCK_SOLANA_FM_RESPONSE = {
+    "result": [
+        {"info": {"owner": "wallet1", "amount": 200000}},
+        {"info": {"owner": "wallet2", "amount": 100000}},
+        {"info": {"owner": "wallet3", "amount": 80000}},
+        {"info": {"owner": "wallet4", "amount": 70000}},
+        {"info": {"owner": "wallet5", "amount": 60000}},
+        {"info": {"owner": "wallet6", "amount": 50000}},
+        {"info": {"owner": "wallet7", "amount": 40000}},
+        {"info": {"owner": "wallet8", "amount": 30000}},
+        {"info": {"owner": "wallet9", "amount": 20000}},
+        {"info": {"owner": "wallet10", "amount": 10000}},
+    ],
+    "totalSupply": 1000000,
+}
 
 class TestScoreAuthority:
     def test_all_revoked(self):
@@ -81,3 +128,71 @@ class TestScoreContract:
 
     def test_empty_dict(self):
         assert _score_contract({}) == 0
+
+
+class TestScore:
+    async def test_returns_score_and_breakdown(self, monkeypatch):
+        from src.scorers.quillshield import score
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        with aioresponses() as mocked:
+            mocked.get(
+                "https://api.dexscreener.com/latest/dex/tokens/abc123",
+                payload=MOCK_DEXSCREENER_RESPONSE,
+            )
+            mocked.post(
+                "https://api.helius.xyz/v0/token-metadata?api-key=test-key",
+                payload=MOCK_HELIUS_RESPONSE,
+            )
+            mocked.get(
+                "https://api.solana.fm/v0/tokens/abc123/holders",
+                payload=MOCK_SOLANA_FM_RESPONSE,
+            )
+            result = await score("abc123", "solana")
+
+        assert "score" in result
+        assert "breakdown" in result
+        assert "available" in result
+        assert result["available"] is True
+        assert result["breakdown"]["authority"] == 25
+
+    async def test_returns_flags_list(self, monkeypatch):
+        from src.scorers.quillshield import score
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        with aioresponses() as mocked:
+            mocked.get(
+                "https://api.dexscreener.com/latest/dex/tokens/abc123",
+                payload=MOCK_DEXSCREENER_RESPONSE,
+            )
+            mocked.post(
+                "https://api.helius.xyz/v0/token-metadata?api-key=test-key",
+                payload=MOCK_HELIUS_RESPONSE,
+            )
+            mocked.get(
+                "https://api.solana.fm/v0/tokens/abc123/holders",
+                payload=MOCK_SOLANA_FM_RESPONSE,
+            )
+            result = await score("abc123", "solana")
+
+        assert "flags" in result
+        assert isinstance(result["flags"], list)
+
+    async def test_returns_unavailable_on_all_errors(self, monkeypatch):
+        from src.scorers.quillshield import score
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        with aioresponses() as mocked:
+            mocked.get(
+                "https://api.dexscreener.com/latest/dex/tokens/abc123",
+                status=500,
+            )
+            mocked.post(
+                "https://api.helius.xyz/v0/token-metadata?api-key=test-key",
+                status=500,
+            )
+            mocked.get(
+                "https://api.solana.fm/v0/tokens/abc123/holders",
+                status=500,
+            )
+            result = await score("abc123", "solana")
+
+        assert result["available"] is False
+        assert result["score"] == 0
