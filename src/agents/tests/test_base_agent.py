@@ -1,4 +1,6 @@
 # src/agents/tests/test_base_agent.py
+import json
+import os
 import pytest
 from typing import Dict
 from src.agents.base_agent import BaseAgent
@@ -78,3 +80,35 @@ class TestEventLogging:
         agent.log_event("observation", "second")
         agent.log_event("decision", "third")
         assert [e["type"] for e in agent.events] == ["action", "observation", "decision"]
+
+
+class TestEventPersistence:
+    def test_events_written_to_jsonl(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        agent.log_event("action", "scan started")
+
+        events_file = tmp_path / "test_agent" / "events.jsonl"
+        assert events_file.exists()
+
+        lines = events_file.read_text().strip().split("\n")
+        assert len(lines) == 1
+        event = json.loads(lines[0])
+        assert event["type"] == "action"
+        assert event["description"] == "scan started"
+
+    def test_multiple_events_append_to_jsonl(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        agent.log_event("action", "first")
+        agent.log_event("observation", "second")
+
+        events_file = tmp_path / "test_agent" / "events.jsonl"
+        lines = events_file.read_text().strip().split("\n")
+        assert len(lines) == 2
+
+    def test_scratchpad_dir_created_from_env_var(self, tmp_path, monkeypatch):
+        custom_dir = tmp_path / "custom"
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(custom_dir))
+        agent = StubAgent(name="test_agent")
+        assert (custom_dir / "test_agent").is_dir()
