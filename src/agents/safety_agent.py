@@ -17,7 +17,50 @@ class SafetyAgent(BaseAgent):
         super().__init__(name="safety")
 
     async def execute(self, params: Dict) -> Dict:
-        raise NotImplementedError("TODO")
+        address = params.get("contract_address", "")
+        chain = params.get("chain", "")
+        if not address or not chain:
+            self.log_event("error", "Missing contract_address or chain")
+            return {
+                "contract_address": address,
+                "chain": chain,
+                "safety_score": 0,
+                "is_safe": False,
+                "sources": {
+                    "rugcheck": {"score": 0, "is_honeypot": False, "risks": [], "available": False},
+                    "quillshield": {"score": 0, "breakdown": {"authority": 0, "liquidity": 0, "holders": 0, "contract": 0}, "flags": [], "available": False},
+                    "dflow": {"routes_found": 0, "best_slippage": 0.0, "best_dex": "", "orderbook_depth": 0.0, "available": False},
+                },
+                "risk_flags": [],
+                "dflow_modifier": 0,
+            }
+        self.log_event("action", f"Starting safety check for {address} on {chain}")
+        rugcheck, quillshield, dflow = await asyncio.gather(
+            self._fetch_rugcheck(address, chain),
+            self._fetch_quillshield(address, chain),
+            self._fetch_dflow(address, chain),
+        )
+        dflow_modifier = self._calculate_dflow_modifier(dflow)
+        risk_flags = self._collect_risk_flags(rugcheck, quillshield, dflow)
+        safety_score = self._aggregate_score(rugcheck, quillshield, dflow_modifier)
+        is_safe = safety_score >= 60
+        safe_label = "SAFE" if is_safe else "UNSAFE"
+        self.log_event("decision", f"Safety score: {safety_score} ({safe_label}), {len(risk_flags)} risk flags", {
+            "safety_score": safety_score,
+            "is_safe": is_safe,
+            "risk_flags": risk_flags,
+        })
+        result = {
+            "contract_address": address,
+            "chain": chain,
+            "safety_score": safety_score,
+            "is_safe": is_safe,
+            "sources": {"rugcheck": rugcheck, "quillshield": quillshield, "dflow": dflow},
+            "risk_flags": risk_flags,
+            "dflow_modifier": dflow_modifier,
+        }
+        self.write_scratchpad(f"safety_{address}", result)
+        return result
 
     def _map_rugcheck_score(self, report: Dict) -> int:
         score = 100
@@ -64,6 +107,17 @@ class SafetyAgent(BaseAgent):
             "orderbook_depth": 0.0,
             "available": False,
         }
+
+    async def _fetch_quillshield(self, address: str, chain: str) -> Dict:
+        self.log_event("action", "Running QuillShield analysis", {"address": address})
+        try:
+            from src.scorers.quillshield import score as qs_score
+            result = await qs_score(address, chain)
+            self.log_event("observation", f"QuillShield score: {result.get('score', 0)}")
+            return result
+        except Exception as e:
+            self.log_event("error", f"QuillShield failed: {e}")
+            return {"score": 0, "breakdown": {"authority": 0, "liquidity": 0, "holders": 0, "contract": 0}, "flags": [], "available": False}
 
     def _calculate_dflow_modifier(self, dflow_result: Dict) -> int:
         if not dflow_result.get("available", False):

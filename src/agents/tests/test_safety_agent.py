@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch, AsyncMock
 from aioresponses import aioresponses
 from src.agents.safety_agent import SafetyAgent
 from src.agents.base_agent import BaseAgent
@@ -298,3 +299,125 @@ class TestAggregateScore:
         quillshield = {"score": 5, "available": True}
         score = agent._aggregate_score(rugcheck, quillshield, -8)
         assert score == 0
+
+
+class TestExecute:
+    async def test_returns_safety_score(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        with patch.object(agent, "_fetch_rugcheck", new_callable=AsyncMock) as mock_rc, \
+             patch.object(agent, "_fetch_quillshield", new_callable=AsyncMock) as mock_qs, \
+             patch.object(agent, "_fetch_dflow", new_callable=AsyncMock) as mock_df:
+            mock_rc.return_value = {"score": 80, "is_honeypot": False, "risks": [], "available": True}
+            mock_qs.return_value = {"score": 70, "breakdown": {"authority": 20, "liquidity": 15, "holders": 20, "contract": 15}, "flags": [], "available": True}
+            mock_df.return_value = {"routes_found": 0, "best_slippage": 0.0, "best_dex": "", "orderbook_depth": 0, "available": False}
+            result = await agent.execute({"contract_address": "abc123", "chain": "solana"})
+        assert "safety_score" in result
+        assert isinstance(result["safety_score"], int)
+        assert 0 <= result["safety_score"] <= 100
+
+    async def test_returns_is_safe_boolean(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        with patch.object(agent, "_fetch_rugcheck", new_callable=AsyncMock) as mock_rc, \
+             patch.object(agent, "_fetch_quillshield", new_callable=AsyncMock) as mock_qs, \
+             patch.object(agent, "_fetch_dflow", new_callable=AsyncMock) as mock_df:
+            mock_rc.return_value = {"score": 80, "is_honeypot": False, "risks": [], "available": True}
+            mock_qs.return_value = {"score": 70, "breakdown": {"authority": 20, "liquidity": 15, "holders": 20, "contract": 15}, "flags": [], "available": True}
+            mock_df.return_value = {"routes_found": 0, "best_slippage": 0.0, "best_dex": "", "orderbook_depth": 0, "available": False}
+            result = await agent.execute({"contract_address": "abc123", "chain": "solana"})
+        assert "is_safe" in result
+        assert result["is_safe"] is True
+
+    async def test_returns_individual_sources(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        with patch.object(agent, "_fetch_rugcheck", new_callable=AsyncMock) as mock_rc, \
+             patch.object(agent, "_fetch_quillshield", new_callable=AsyncMock) as mock_qs, \
+             patch.object(agent, "_fetch_dflow", new_callable=AsyncMock) as mock_df:
+            mock_rc.return_value = {"score": 80, "is_honeypot": False, "risks": [], "available": True}
+            mock_qs.return_value = {"score": 70, "breakdown": {"authority": 20, "liquidity": 15, "holders": 20, "contract": 15}, "flags": [], "available": True}
+            mock_df.return_value = {"routes_found": 0, "best_slippage": 0.0, "best_dex": "", "orderbook_depth": 0, "available": False}
+            result = await agent.execute({"contract_address": "abc123", "chain": "solana"})
+        assert "sources" in result
+        assert "rugcheck" in result["sources"]
+        assert "quillshield" in result["sources"]
+        assert "dflow" in result["sources"]
+
+    async def test_returns_risk_flags(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        with patch.object(agent, "_fetch_rugcheck", new_callable=AsyncMock) as mock_rc, \
+             patch.object(agent, "_fetch_quillshield", new_callable=AsyncMock) as mock_qs, \
+             patch.object(agent, "_fetch_dflow", new_callable=AsyncMock) as mock_df:
+            mock_rc.return_value = {"score": 50, "is_honeypot": True, "risks": ["Honeypot"], "available": True}
+            mock_qs.return_value = {"score": 30, "breakdown": {"authority": 5, "liquidity": 5, "holders": 10, "contract": 10}, "flags": ["authority_risk", "lp_not_locked"], "available": True}
+            mock_df.return_value = {"routes_found": 0, "best_slippage": 0.0, "best_dex": "", "orderbook_depth": 0, "available": False}
+            result = await agent.execute({"contract_address": "abc123", "chain": "solana"})
+        assert "honeypot_detected" in result["risk_flags"]
+        assert "authority_risk" in result["risk_flags"]
+
+    async def test_returns_dflow_modifier(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        with patch.object(agent, "_fetch_rugcheck", new_callable=AsyncMock) as mock_rc, \
+             patch.object(agent, "_fetch_quillshield", new_callable=AsyncMock) as mock_qs, \
+             patch.object(agent, "_fetch_dflow", new_callable=AsyncMock) as mock_df:
+            mock_rc.return_value = {"score": 80, "is_honeypot": False, "risks": [], "available": True}
+            mock_qs.return_value = {"score": 70, "breakdown": {"authority": 20, "liquidity": 15, "holders": 20, "contract": 15}, "flags": [], "available": True}
+            mock_df.return_value = {"routes_found": 0, "best_slippage": 0.0, "best_dex": "", "orderbook_depth": 0, "available": False}
+            result = await agent.execute({"contract_address": "abc123", "chain": "solana"})
+        assert "dflow_modifier" in result
+
+    async def test_unsafe_token(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        with patch.object(agent, "_fetch_rugcheck", new_callable=AsyncMock) as mock_rc, \
+             patch.object(agent, "_fetch_quillshield", new_callable=AsyncMock) as mock_qs, \
+             patch.object(agent, "_fetch_dflow", new_callable=AsyncMock) as mock_df:
+            mock_rc.return_value = {"score": 20, "is_honeypot": True, "risks": ["Honeypot"], "available": True}
+            mock_qs.return_value = {"score": 30, "breakdown": {"authority": 5, "liquidity": 5, "holders": 10, "contract": 10}, "flags": ["authority_risk"], "available": True}
+            mock_df.return_value = {"routes_found": 0, "best_slippage": 0.0, "best_dex": "", "orderbook_depth": 0, "available": False}
+            result = await agent.execute({"contract_address": "abc123", "chain": "solana"})
+        assert result["is_safe"] is False
+
+    async def test_writes_to_scratchpad(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        with patch.object(agent, "_fetch_rugcheck", new_callable=AsyncMock) as mock_rc, \
+             patch.object(agent, "_fetch_quillshield", new_callable=AsyncMock) as mock_qs, \
+             patch.object(agent, "_fetch_dflow", new_callable=AsyncMock) as mock_df:
+            mock_rc.return_value = {"score": 80, "is_honeypot": False, "risks": [], "available": True}
+            mock_qs.return_value = {"score": 70, "breakdown": {"authority": 20, "liquidity": 15, "holders": 20, "contract": 15}, "flags": [], "available": True}
+            mock_df.return_value = {"routes_found": 0, "best_slippage": 0.0, "best_dex": "", "orderbook_depth": 0, "available": False}
+            await agent.execute({"contract_address": "abc123", "chain": "solana"})
+        saved = agent.read_scratchpad("safety_abc123")
+        assert saved is not None
+        assert "safety_score" in saved
+
+    async def test_returns_contract_address_and_chain(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        with patch.object(agent, "_fetch_rugcheck", new_callable=AsyncMock) as mock_rc, \
+             patch.object(agent, "_fetch_quillshield", new_callable=AsyncMock) as mock_qs, \
+             patch.object(agent, "_fetch_dflow", new_callable=AsyncMock) as mock_df:
+            mock_rc.return_value = {"score": 80, "is_honeypot": False, "risks": [], "available": True}
+            mock_qs.return_value = {"score": 70, "breakdown": {"authority": 20, "liquidity": 15, "holders": 20, "contract": 15}, "flags": [], "available": True}
+            mock_df.return_value = {"routes_found": 0, "best_slippage": 0.0, "best_dex": "", "orderbook_depth": 0, "available": False}
+            result = await agent.execute({"contract_address": "abc123", "chain": "solana"})
+        assert result["contract_address"] == "abc123"
+        assert result["chain"] == "solana"
+
+    async def test_missing_contract_address(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        result = await agent.execute({"chain": "solana"})
+        assert result["safety_score"] == 0
+        assert result["is_safe"] is False
+
+    async def test_missing_chain(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        result = await agent.execute({"contract_address": "abc123"})
+        assert result["safety_score"] == 0
+        assert result["is_safe"] is False
