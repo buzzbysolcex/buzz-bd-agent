@@ -42,6 +42,8 @@ class SafetyAgent(BaseAgent):
         )
         dflow_modifier = self._calculate_dflow_modifier(dflow)
         risk_flags = self._collect_risk_flags(rugcheck, quillshield, dflow)
+        if not rugcheck.get("available") and not quillshield.get("available") and not dflow.get("available"):
+            risk_flags.append("all_sources_failed")
         safety_score = self._aggregate_score(rugcheck, quillshield, dflow_modifier)
         is_safe = safety_score >= 60
         safe_label = "SAFE" if is_safe else "UNSAFE"

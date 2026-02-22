@@ -421,3 +421,17 @@ class TestExecute:
         result = await agent.execute({"contract_address": "abc123"})
         assert result["safety_score"] == 0
         assert result["is_safe"] is False
+
+    async def test_all_sources_failed_flag(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        with patch.object(agent, "_fetch_rugcheck", new_callable=AsyncMock) as mock_rc, \
+             patch.object(agent, "_fetch_quillshield", new_callable=AsyncMock) as mock_qs, \
+             patch.object(agent, "_fetch_dflow", new_callable=AsyncMock) as mock_df:
+            mock_rc.return_value = {"score": 0, "is_honeypot": False, "risks": [], "available": False}
+            mock_qs.return_value = {"score": 0, "breakdown": {"authority": 0, "liquidity": 0, "holders": 0, "contract": 0}, "flags": [], "available": False}
+            mock_df.return_value = {"routes_found": 0, "best_slippage": 0.0, "best_dex": "", "orderbook_depth": 0, "available": False}
+            result = await agent.execute({"contract_address": "abc123", "chain": "solana"})
+        assert result["safety_score"] == 0
+        assert result["is_safe"] is False
+        assert "all_sources_failed" in result["risk_flags"]
