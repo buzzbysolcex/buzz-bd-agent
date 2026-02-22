@@ -29,3 +29,52 @@ class TestBaseAgentInit:
     def test_events_list_starts_empty(self):
         agent = StubAgent(name="test_agent")
         assert agent.events == []
+
+
+class TestEventLogging:
+    def test_log_event_appends_to_events(self):
+        agent = StubAgent(name="test_agent")
+        agent.log_event("action", "scanning tokens")
+        assert len(agent.events) == 1
+
+    def test_log_event_has_correct_type(self):
+        agent = StubAgent(name="test_agent")
+        agent.log_event("action", "scanning tokens")
+        assert agent.events[0]["type"] == "action"
+
+    def test_log_event_has_description(self):
+        agent = StubAgent(name="test_agent")
+        agent.log_event("observation", "found 5 tokens")
+        assert agent.events[0]["description"] == "found 5 tokens"
+
+    def test_log_event_has_data(self):
+        agent = StubAgent(name="test_agent")
+        agent.log_event("action", "scan", {"chain": "solana"})
+        assert agent.events[0]["data"] == {"chain": "solana"}
+
+    def test_log_event_data_defaults_to_empty_dict(self):
+        agent = StubAgent(name="test_agent")
+        agent.log_event("action", "scan")
+        assert agent.events[0]["data"] == {}
+
+    def test_log_event_has_timestamp(self):
+        agent = StubAgent(name="test_agent")
+        agent.log_event("action", "scan")
+        assert isinstance(agent.events[0]["timestamp"], float)
+
+    def test_log_event_has_agent_name(self):
+        agent = StubAgent(name="test_agent")
+        agent.log_event("action", "scan")
+        assert agent.events[0]["agent"] == "test_agent"
+
+    def test_log_event_validates_type(self):
+        agent = StubAgent(name="test_agent")
+        with pytest.raises(ValueError):
+            agent.log_event("invalid_type", "bad event")
+
+    def test_multiple_events_append_in_order(self):
+        agent = StubAgent(name="test_agent")
+        agent.log_event("action", "first")
+        agent.log_event("observation", "second")
+        agent.log_event("decision", "third")
+        assert [e["type"] for e in agent.events] == ["action", "observation", "decision"]
