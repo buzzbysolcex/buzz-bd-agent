@@ -251,3 +251,19 @@ class TestFetchCoingecko:
             tokens = await agent._fetch_coingecko()
 
         assert tokens == []
+
+
+class TestFetchAixbt:
+    async def test_returns_empty_list(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent()
+        tokens = await agent._fetch_aixbt()
+        assert tokens == []
+
+    async def test_logs_decision_event(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent()
+        await agent._fetch_aixbt()
+        decision_events = [e for e in agent.events if e["type"] == "decision"]
+        assert len(decision_events) == 1
+        assert "stub" in decision_events[0]["description"].lower()
