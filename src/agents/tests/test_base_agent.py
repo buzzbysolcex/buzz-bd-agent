@@ -142,3 +142,53 @@ class TestScratchpad:
         agent.write_scratchpad("key", {"v": 1})
         agent.write_scratchpad("key", {"v": 2})
         assert agent.read_scratchpad("key") == {"v": 2}
+
+
+class FailingAgent(BaseAgent):
+    """Agent that raises during execute()."""
+    async def execute(self, params: Dict) -> Dict:
+        raise RuntimeError("API call failed")
+
+
+class TestRunLifecycle:
+    async def test_run_returns_execute_result(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        result = await agent.run({"input": "data"})
+        assert result == {"stub": True}
+
+    async def test_run_sets_status_to_running_then_complete(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        await agent.run({})
+        assert agent.status == "complete"
+
+    async def test_run_sets_status_to_error_on_exception(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = FailingAgent(name="failing_agent")
+        with pytest.raises(RuntimeError):
+            await agent.run({})
+        assert agent.status == "error"
+
+    async def test_run_logs_start_event(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        await agent.run({})
+        assert agent.events[0]["type"] == "action"
+        assert "test_agent" in agent.events[0]["description"]
+
+    async def test_run_logs_error_event_on_failure(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = FailingAgent(name="failing_agent")
+        with pytest.raises(RuntimeError):
+            await agent.run({})
+        error_events = [e for e in agent.events if e["type"] == "error"]
+        assert len(error_events) == 1
+        assert "API call failed" in error_events[0]["description"]
+
+    async def test_run_logs_completion_event(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        await agent.run({})
+        assert agent.events[-1]["type"] == "observation"
+        assert "complete" in agent.events[-1]["description"].lower()

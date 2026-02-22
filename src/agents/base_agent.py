@@ -18,6 +18,19 @@ class BaseAgent(ABC):
         os.makedirs(self.scratchpad_dir, exist_ok=True)
         self._events_path = os.path.join(self.scratchpad_dir, "events.jsonl")
 
+    async def run(self, params: Dict) -> Dict:
+        self.status = "running"
+        self.log_event("action", f"{self.name} starting")
+        try:
+            result = await self.execute(params)
+            self.status = "complete"
+            self.log_event("observation", f"{self.name} completed")
+            return result
+        except Exception as e:
+            self.status = "error"
+            self.log_event("error", str(e))
+            raise
+
     def log_event(self, event_type: str, description: str, data: Optional[Dict] = None) -> Dict:
         if event_type not in VALID_EVENT_TYPES:
             raise ValueError(f"Invalid event type '{event_type}'. Must be one of: {VALID_EVENT_TYPES}")
