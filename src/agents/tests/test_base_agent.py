@@ -192,3 +192,51 @@ class TestRunLifecycle:
         await agent.run({})
         assert agent.events[-1]["type"] == "observation"
         assert "complete" in agent.events[-1]["description"].lower()
+
+
+class TestContext:
+    def test_context_returns_agent_name(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        ctx = agent.context()
+        assert ctx["agent"] == "test_agent"
+
+    def test_context_returns_status(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        ctx = agent.context()
+        assert ctx["status"] == "idle"
+
+    def test_context_returns_recent_events(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        for i in range(15):
+            agent.log_event("action", f"event {i}")
+        ctx = agent.context(max_events=5)
+        assert len(ctx["recent_events"]) == 5
+        assert ctx["recent_events"][0]["description"] == "event 10"
+
+    def test_context_returns_scratchpad_keys(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        agent.write_scratchpad("scan_result", {"data": 1})
+        agent.write_scratchpad("score", {"data": 2})
+        ctx = agent.context()
+        assert "scan_result" in ctx["scratchpad_keys"]
+        assert "score" in ctx["scratchpad_keys"]
+
+    def test_context_excludes_events_jsonl_from_scratchpad_keys(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        agent.log_event("action", "test")
+        agent.write_scratchpad("data", {"v": 1})
+        ctx = agent.context()
+        assert "events" not in ctx["scratchpad_keys"]
+
+    def test_context_defaults_to_10_events(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        for i in range(20):
+            agent.log_event("action", f"event {i}")
+        ctx = agent.context()
+        assert len(ctx["recent_events"]) == 10
