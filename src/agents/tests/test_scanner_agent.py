@@ -1,7 +1,54 @@
 # src/agents/tests/test_scanner_agent.py
+import json
 import pytest
+from aioresponses import aioresponses
 from src.agents.scanner_agent import ScannerAgent
 from src.agents.base_agent import BaseAgent
+
+
+DEXSCREENER_BOOSTS_URL = "https://api.dexscreener.com/token-boosts/latest/v1"
+
+MOCK_DEXSCREENER_BOOSTS = [
+    {
+        "url": "https://dexscreener.com/solana/abc123",
+        "chainId": "solana",
+        "tokenAddress": "abc123solana",
+        "description": "Test Token A",
+        "icon": "",
+        "links": []
+    },
+    {
+        "url": "https://dexscreener.com/ethereum/def456",
+        "chainId": "ethereum",
+        "tokenAddress": "def456eth",
+        "description": "Test Token B",
+        "icon": "",
+        "links": []
+    },
+    {
+        "url": "https://dexscreener.com/bsc/ghi789",
+        "chainId": "bsc",
+        "tokenAddress": "ghi789bsc",
+        "description": "BSC Token (should be filtered out)",
+        "icon": "",
+        "links": []
+    }
+]
+
+# DexScreener search returns pair data with mcap/volume/liquidity
+MOCK_DEXSCREENER_SEARCH = {
+    "pairs": [
+        {
+            "chainId": "solana",
+            "baseToken": {"address": "abc123solana", "name": "Token A", "symbol": "TKNA"},
+            "priceUsd": "0.50",
+            "marketCap": 5000000,
+            "liquidity": {"usd": 800000},
+            "volume": {"h24": 1200000},
+            "url": "https://dexscreener.com/solana/abc123"
+        }
+    ]
+}
 
 
 class TestScannerAgentInit:
@@ -29,3 +76,79 @@ class TestScannerAgentInit:
         monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = ScannerAgent()
         assert agent.status == "idle"
+
+
+class TestFetchDexscreener:
+    async def test_returns_list_of_tokens(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent(chains=["solana"])
+
+        with aioresponses() as mocked:
+            mocked.get(DEXSCREENER_BOOSTS_URL, payload=MOCK_DEXSCREENER_BOOSTS)
+            mocked.get(
+                "https://api.dexscreener.com/latest/dex/tokens/abc123solana",
+                payload=MOCK_DEXSCREENER_SEARCH,
+            )
+            tokens = await agent._fetch_dexscreener(["solana"])
+
+        assert isinstance(tokens, list)
+        assert len(tokens) >= 1
+
+    async def test_token_has_required_fields(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent(chains=["solana"])
+
+        with aioresponses() as mocked:
+            mocked.get(DEXSCREENER_BOOSTS_URL, payload=MOCK_DEXSCREENER_BOOSTS)
+            mocked.get(
+                "https://api.dexscreener.com/latest/dex/tokens/abc123solana",
+                payload=MOCK_DEXSCREENER_SEARCH,
+            )
+            tokens = await agent._fetch_dexscreener(["solana"])
+
+        token = tokens[0]
+        assert "contract_address" in token
+        assert "chain" in token
+        assert "name" in token
+        assert "symbol" in token
+        assert "mcap" in token
+        assert "volume_24h" in token
+        assert "liquidity" in token
+        assert "source" in token
+        assert token["source"] == "dexscreener"
+
+    async def test_filters_by_chain(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent(chains=["solana"])
+
+        with aioresponses() as mocked:
+            mocked.get(DEXSCREENER_BOOSTS_URL, payload=MOCK_DEXSCREENER_BOOSTS)
+            mocked.get(
+                "https://api.dexscreener.com/latest/dex/tokens/abc123solana",
+                payload=MOCK_DEXSCREENER_SEARCH,
+            )
+            tokens = await agent._fetch_dexscreener(["solana"])
+
+        chains = [t["chain"] for t in tokens]
+        assert "bsc" not in chains
+
+    async def test_returns_empty_on_error(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent()
+
+        with aioresponses() as mocked:
+            mocked.get(DEXSCREENER_BOOSTS_URL, status=500)
+            tokens = await agent._fetch_dexscreener(["solana"])
+
+        assert tokens == []
+
+    async def test_logs_error_event_on_failure(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent()
+
+        with aioresponses() as mocked:
+            mocked.get(DEXSCREENER_BOOSTS_URL, status=500)
+            await agent._fetch_dexscreener(["solana"])
+
+        error_events = [e for e in agent.events if e["type"] == "error"]
+        assert len(error_events) >= 1
