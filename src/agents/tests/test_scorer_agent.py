@@ -271,3 +271,118 @@ class TestApplyCatalysts:
         agent = ScorerAgent()
         result = agent._apply_catalysts({"x402_blocked": True})
         assert result["bonus"] == -20
+
+
+class TestApplyDflow:
+    def test_excellent_with_3_routes(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._apply_dflow({"routes_available": 3, "slippage_quality": "excellent"}) == 13
+
+    def test_excellent_with_5_routes(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._apply_dflow({"routes_available": 5, "slippage_quality": "excellent"}) == 13
+
+    def test_poor_slippage(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._apply_dflow({"routes_available": 5, "slippage_quality": "poor"}) == -8
+
+    def test_good_slippage_no_bonus(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._apply_dflow({"routes_available": 5, "slippage_quality": "good"}) == 0
+
+    def test_excellent_but_fewer_than_3_routes(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._apply_dflow({"routes_available": 2, "slippage_quality": "excellent"}) == 0
+
+    def test_empty_dict(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._apply_dflow({}) == 0
+
+
+class TestCheckAutoReject:
+    def test_low_liquidity_rejected(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = agent._check_auto_reject({"liquidity": 50000, "volume_24h": 100000, "mcap": 1000000})
+        assert result["rejected"] is True
+        assert result["reason"] == "liquidity_too_low"
+
+    def test_too_new_rejected(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = agent._check_auto_reject({"liquidity": 500000, "age_days": 0.05, "volume_24h": 100000, "mcap": 1000000})
+        assert result["rejected"] is True
+        assert result["reason"] == "too_new"
+
+    def test_suspicious_volume_rejected(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = agent._check_auto_reject({"liquidity": 500000, "volume_24h": 11000000, "mcap": 1000000})
+        assert result["rejected"] is True
+        assert result["reason"] == "suspicious_volume"
+
+    def test_passes_all_checks(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = agent._check_auto_reject({"liquidity": 500000, "volume_24h": 500000, "mcap": 1000000, "age_days": 10})
+        assert result["rejected"] is False
+
+    def test_zero_mcap_skips_volume_ratio(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = agent._check_auto_reject({"liquidity": 500000, "volume_24h": 500000, "mcap": 0})
+        assert result["rejected"] is False
+
+
+class TestGetStatus:
+    def test_hot(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._get_status(85) == "HOT"
+        assert agent._get_status(100) == "HOT"
+
+    def test_qualified(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._get_status(70) == "QUALIFIED"
+        assert agent._get_status(84) == "QUALIFIED"
+
+    def test_watch(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._get_status(50) == "WATCH"
+        assert agent._get_status(69) == "WATCH"
+
+    def test_skip(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._get_status(0) == "SKIP"
+        assert agent._get_status(49) == "SKIP"
+
+
+class TestGetRecommendation:
+    def test_hot_is_pipeline(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._get_recommendation("HOT") == "PIPELINE"
+
+    def test_qualified_is_pipeline(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._get_recommendation("QUALIFIED") == "PIPELINE"
+
+    def test_watch_is_watch(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._get_recommendation("WATCH") == "WATCH"
+
+    def test_skip_is_skip(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._get_recommendation("SKIP") == "SKIP"

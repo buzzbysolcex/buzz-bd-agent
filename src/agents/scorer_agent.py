@@ -109,5 +109,48 @@ class ScorerAgent(BaseAgent):
                 applied.append(label)
         return {"bonus": bonus, "applied": applied}
 
+    def _apply_dflow(self, dflow_data: Dict) -> int:
+        if not dflow_data:
+            return 0
+        routes = dflow_data.get("routes_available", 0)
+        quality = dflow_data.get("slippage_quality", "")
+        if quality == "poor":
+            return -8
+        if routes >= 3 and quality == "excellent":
+            return 13
+        return 0
+
+    def _check_auto_reject(self, token_data: Dict) -> Dict:
+        liquidity = token_data.get("liquidity", 0)
+        if liquidity < 100_000:
+            return {"rejected": True, "reason": "liquidity_too_low"}
+
+        age_days = token_data.get("age_days")
+        if age_days is not None and age_days < 0.083:
+            return {"rejected": True, "reason": "too_new"}
+
+        mcap = token_data.get("mcap", 0)
+        volume = token_data.get("volume_24h", 0)
+        if mcap > 0 and volume / mcap > 10:
+            return {"rejected": True, "reason": "suspicious_volume"}
+
+        return {"rejected": False, "reason": None}
+
+    def _get_status(self, score: int) -> str:
+        if score >= 85:
+            return "HOT"
+        if score >= 70:
+            return "QUALIFIED"
+        if score >= 50:
+            return "WATCH"
+        return "SKIP"
+
+    def _get_recommendation(self, status: str) -> str:
+        if status in ("HOT", "QUALIFIED"):
+            return "PIPELINE"
+        if status == "WATCH":
+            return "WATCH"
+        return "SKIP"
+
     async def execute(self, params: Dict) -> Dict:
         raise NotImplementedError("TODO")
