@@ -1,4 +1,5 @@
 # src/agents/scanner_agent.py
+import asyncio
 import aiohttp
 from typing import Dict, List, Optional
 from src.agents.base_agent import BaseAgent
@@ -17,7 +18,47 @@ class ScannerAgent(BaseAgent):
         self.chains = chains or DEFAULT_CHAINS
 
     async def execute(self, params: Dict) -> Dict:
-        raise NotImplementedError("TODO")
+        chains = params.get("chains", self.chains)
+        self.log_event("action", f"Scanning {len(chains)} chains", {"chains": chains})
+
+        # Gather all sources in parallel
+        dex_results, cg_results, aixbt_results = await asyncio.gather(
+            self._fetch_dexscreener(chains),
+            self._fetch_coingecko(),
+            self._fetch_aixbt(),
+        )
+
+        # Filter CoinGecko results by requested chains
+        chain_set = set(c.lower() for c in chains)
+        cg_filtered = [t for t in cg_results if t["chain"].lower() in chain_set]
+
+        # Flatten and deduplicate
+        all_tokens = dex_results + cg_filtered + aixbt_results
+        unique_tokens = self._deduplicate(all_tokens)
+
+        # Count per source
+        source_counts = {}
+        for token in unique_tokens:
+            for src in token.get("sources", []):
+                source_counts[src] = source_counts.get(src, 0) + 1
+
+        self.log_event("observation", f"Found {len(unique_tokens)} unique tokens", {
+            "total": len(unique_tokens),
+            "source_counts": source_counts,
+        })
+
+        # Persist to scratchpad
+        self.write_scratchpad("last_scan", {
+            "tokens": unique_tokens,
+            "total": len(unique_tokens),
+            "source_counts": source_counts,
+        })
+
+        return {
+            "tokens": unique_tokens,
+            "total": len(unique_tokens),
+            "source_counts": source_counts,
+        }
 
     async def _fetch_dexscreener(self, chains: List[str]) -> List[Dict]:
         self.log_event("action", "Fetching DexScreener boosts", {"chains": chains})

@@ -344,3 +344,105 @@ class TestDeduplicate:
         assert len(result) == 2
         # Each should have a sources list with one entry
         assert result[0]["sources"] == ["dexscreener"]
+
+
+class TestExecute:
+    async def test_returns_tokens_list(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent(chains=["solana"])
+
+        with aioresponses() as mocked:
+            mocked.get(DEXSCREENER_BOOSTS_URL, payload=MOCK_DEXSCREENER_BOOSTS)
+            mocked.get(
+                "https://api.dexscreener.com/latest/dex/tokens/abc123solana",
+                payload=MOCK_DEXSCREENER_SEARCH,
+            )
+            mocked.get(COINGECKO_TRENDING_URL, payload=MOCK_COINGECKO_TRENDING)
+
+            result = await agent.execute({"chains": ["solana"]})
+
+        assert "tokens" in result
+        assert isinstance(result["tokens"], list)
+
+    async def test_returns_total_count(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent(chains=["solana"])
+
+        with aioresponses() as mocked:
+            mocked.get(DEXSCREENER_BOOSTS_URL, payload=MOCK_DEXSCREENER_BOOSTS)
+            mocked.get(
+                "https://api.dexscreener.com/latest/dex/tokens/abc123solana",
+                payload=MOCK_DEXSCREENER_SEARCH,
+            )
+            mocked.get(COINGECKO_TRENDING_URL, payload=MOCK_COINGECKO_TRENDING)
+
+            result = await agent.execute({"chains": ["solana"]})
+
+        assert "total" in result
+        assert isinstance(result["total"], int)
+
+    async def test_returns_source_counts(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent(chains=["solana"])
+
+        with aioresponses() as mocked:
+            mocked.get(DEXSCREENER_BOOSTS_URL, payload=MOCK_DEXSCREENER_BOOSTS)
+            mocked.get(
+                "https://api.dexscreener.com/latest/dex/tokens/abc123solana",
+                payload=MOCK_DEXSCREENER_SEARCH,
+            )
+            mocked.get(COINGECKO_TRENDING_URL, payload=MOCK_COINGECKO_TRENDING)
+
+            result = await agent.execute({"chains": ["solana"]})
+
+        assert "source_counts" in result
+        assert isinstance(result["source_counts"], dict)
+
+    async def test_writes_to_scratchpad(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent(chains=["solana"])
+
+        with aioresponses() as mocked:
+            mocked.get(DEXSCREENER_BOOSTS_URL, payload=MOCK_DEXSCREENER_BOOSTS)
+            mocked.get(
+                "https://api.dexscreener.com/latest/dex/tokens/abc123solana",
+                payload=MOCK_DEXSCREENER_SEARCH,
+            )
+            mocked.get(COINGECKO_TRENDING_URL, payload=MOCK_COINGECKO_TRENDING)
+
+            await agent.execute({"chains": ["solana"]})
+
+        saved = agent.read_scratchpad("last_scan")
+        assert saved is not None
+        assert "tokens" in saved
+
+    async def test_survives_all_sources_failing(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent()
+
+        with aioresponses() as mocked:
+            mocked.get(DEXSCREENER_BOOSTS_URL, status=500)
+            mocked.get(COINGECKO_TRENDING_URL, status=500)
+
+            result = await agent.execute({})
+
+        assert result["tokens"] == []
+        assert result["total"] == 0
+
+    async def test_uses_params_chains_over_default(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent(chains=["solana", "ethereum", "base"])
+
+        with aioresponses() as mocked:
+            mocked.get(DEXSCREENER_BOOSTS_URL, payload=MOCK_DEXSCREENER_BOOSTS)
+            mocked.get(
+                "https://api.dexscreener.com/latest/dex/tokens/abc123solana",
+                payload=MOCK_DEXSCREENER_SEARCH,
+            )
+            mocked.get(COINGECKO_TRENDING_URL, payload=MOCK_COINGECKO_TRENDING)
+
+            result = await agent.execute({"chains": ["solana"]})
+
+        # All returned tokens should be solana
+        for token in result["tokens"]:
+            assert token["chain"] == "solana"
