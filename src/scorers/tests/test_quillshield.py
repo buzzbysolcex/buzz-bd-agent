@@ -68,7 +68,7 @@ class TestScoreAuthority:
         assert _score_authority(data) == 20  # 10 + 10 + 0
 
     def test_empty_dict(self):
-        assert _score_authority({}) == 0  # all treated as not revoked: -10 + -10 + 0 = -20, clamped to 0
+        assert _score_authority({}) == 0  # no keys present, no points added or subtracted
 
 
 class TestScoreLiquidity:
