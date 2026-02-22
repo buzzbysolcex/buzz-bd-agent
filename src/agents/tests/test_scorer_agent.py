@@ -224,3 +224,50 @@ class TestScoreSafety:
         monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = ScorerAgent()
         assert agent._score_safety({}) == 0
+
+
+class TestApplyCatalysts:
+    def test_no_catalysts(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = agent._apply_catalysts({})
+        assert result["bonus"] == 0
+        assert result["applied"] == []
+
+    def test_single_bonus(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = agent._apply_catalysts({"viral_moment": True})
+        assert result["bonus"] == 10
+        assert "+viral" in result["applied"]
+
+    def test_single_penalty(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = agent._apply_catalysts({"major_cex_listed": True})
+        assert result["bonus"] == -15
+        assert "-cex" in result["applied"]
+
+    def test_mixed_bonuses_and_penalties(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = agent._apply_catalysts({
+            "viral_moment": True,
+            "kol_mention": True,
+            "suspicious_volume": True,
+        })
+        assert result["bonus"] == 10
+        assert len(result["applied"]) == 3
+
+    def test_false_flags_ignored(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = agent._apply_catalysts({"viral_moment": False})
+        assert result["bonus"] == 0
+        assert result["applied"] == []
+
+    def test_x402_blocked_penalty(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = agent._apply_catalysts({"x402_blocked": True})
+        assert result["bonus"] == -20

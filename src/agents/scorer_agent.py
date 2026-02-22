@@ -31,6 +31,24 @@ SAFETY_CHECKS = [
 ]
 SAFETY_POINTS_PER_CHECK = 3
 
+CATALYST_BONUSES = [
+    ("hackathon_winner", 10, "+hackathon"),
+    ("viral_moment", 10, "+viral"),
+    ("kol_mention", 10, "+kol"),
+    ("aixbt_high_conviction", 10, "+aixbt"),
+    ("dexscreener_trending", 5, "+trending"),
+    ("x402_verified", 5, "+x402"),
+]
+
+CATALYST_PENALTIES = [
+    ("x402_blocked", -20, "-blocked"),
+    ("major_cex_listed", -15, "-cex"),
+    ("liquidity_dropping", -15, "-liq"),
+    ("team_inactive", -15, "-inactive"),
+    ("recent_dump", -15, "-dump"),
+    ("suspicious_volume", -10, "-sus"),
+]
+
 
 class ScorerAgent(BaseAgent):
     def __init__(self):
@@ -81,6 +99,15 @@ class ScorerAgent(BaseAgent):
             if contract.get(check, False):
                 score += SAFETY_POINTS_PER_CHECK
         return score
+
+    def _apply_catalysts(self, catalysts: Dict) -> Dict:
+        bonus = 0
+        applied = []
+        for flag, points, label in CATALYST_BONUSES + CATALYST_PENALTIES:
+            if catalysts.get(flag, False):
+                bonus += points
+                applied.append(label)
+        return {"bonus": bonus, "applied": applied}
 
     async def execute(self, params: Dict) -> Dict:
         raise NotImplementedError("TODO")
