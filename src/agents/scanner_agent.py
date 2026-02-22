@@ -107,6 +107,10 @@ class ScannerAgent(BaseAgent):
             self.log_event("error", f"CoinGecko fetch failed: {e}")
             return []
 
+    async def _fetch_aixbt(self) -> List[Dict]:
+        self.log_event("decision", "AIXBT source stubbed — endpoint not verified as JSON API")
+        return []
+
     @staticmethod
     def _parse_dollar_string(value) -> float:
         if isinstance(value, (int, float)):
