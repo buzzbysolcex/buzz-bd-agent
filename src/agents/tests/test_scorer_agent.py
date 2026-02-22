@@ -144,3 +144,83 @@ class TestScoreAge:
         monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = ScorerAgent()
         assert agent._score_age(None) == 0
+
+
+class TestScoreCommunity:
+    def test_all_above_thresholds(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        socials = {
+            "twitter_followers": 20000,
+            "telegram_members": 10000,
+            "discord_members": 5000,
+            "engagement_rate": 0.10,
+        }
+        assert agent._score_community(socials) == 15
+
+    def test_all_zero(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._score_community({}) == 0
+
+    def test_partial_twitter_only(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        socials = {"twitter_followers": 10000}
+        score = agent._score_community(socials)
+        assert score == round(15 * 0.3)
+
+    def test_proportional_twitter_half(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        socials = {"twitter_followers": 5000}
+        score = agent._score_community(socials)
+        assert score == round(15 * 0.3 * 0.5)
+
+    def test_empty_dict(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._score_community({}) == 0
+
+
+class TestScoreSafety:
+    def test_all_checks_pass(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        contract = {
+            "verified_source": True,
+            "no_honeypot": True,
+            "renounced_ownership": True,
+            "locked_liquidity": True,
+            "audit_report": True,
+        }
+        assert agent._score_safety(contract) == 15
+
+    def test_no_checks_pass(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        contract = {
+            "verified_source": False,
+            "no_honeypot": False,
+            "renounced_ownership": False,
+            "locked_liquidity": False,
+            "audit_report": False,
+        }
+        assert agent._score_safety(contract) == 0
+
+    def test_partial_checks(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        contract = {
+            "verified_source": True,
+            "no_honeypot": True,
+            "renounced_ownership": False,
+            "locked_liquidity": False,
+            "audit_report": False,
+        }
+        assert agent._score_safety(contract) == 6
+
+    def test_empty_dict(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._score_safety({}) == 0
