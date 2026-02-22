@@ -111,6 +111,22 @@ class ScannerAgent(BaseAgent):
         self.log_event("decision", "AIXBT source stubbed — endpoint not verified as JSON API")
         return []
 
+    def _deduplicate(self, tokens: List[Dict]) -> List[Dict]:
+        seen: Dict[tuple, Dict] = {}
+        for token in tokens:
+            key = (token["chain"].lower(), token["contract_address"].lower())
+            if key in seen:
+                existing = seen[key]
+                existing["sources"].append(token["source"])
+                # Keep the higher value for numeric fields
+                for field in ("mcap", "volume_24h", "liquidity"):
+                    existing[field] = max(existing[field], token.get(field, 0.0))
+            else:
+                token_copy = dict(token)
+                token_copy["sources"] = [token_copy.pop("source")]
+                seen[key] = token_copy
+        return list(seen.values())
+
     @staticmethod
     def _parse_dollar_string(value) -> float:
         if isinstance(value, (int, float)):

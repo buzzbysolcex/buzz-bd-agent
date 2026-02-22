@@ -267,3 +267,80 @@ class TestFetchAixbt:
         decision_events = [e for e in agent.events if e["type"] == "decision"]
         assert len(decision_events) == 1
         assert "stub" in decision_events[0]["description"].lower()
+
+
+class TestDeduplicate:
+    def test_removes_duplicates_by_chain_and_address(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent()
+        tokens = [
+            {"contract_address": "abc123", "chain": "solana", "name": "Token A",
+             "symbol": "TKNA", "mcap": 100.0, "volume_24h": 50.0,
+             "liquidity": 80.0, "source": "dexscreener", "source_url": "url1"},
+            {"contract_address": "abc123", "chain": "solana", "name": "Token A",
+             "symbol": "TKNA", "mcap": 100.0, "volume_24h": 50.0,
+             "liquidity": 0.0, "source": "coingecko", "source_url": "url2"},
+        ]
+        result = agent._deduplicate(tokens)
+        assert len(result) == 1
+
+    def test_merged_token_has_sources_list(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent()
+        tokens = [
+            {"contract_address": "abc123", "chain": "solana", "name": "Token A",
+             "symbol": "TKNA", "mcap": 100.0, "volume_24h": 50.0,
+             "liquidity": 80.0, "source": "dexscreener", "source_url": "url1"},
+            {"contract_address": "abc123", "chain": "solana", "name": "Token A",
+             "symbol": "TKNA", "mcap": 100.0, "volume_24h": 50.0,
+             "liquidity": 0.0, "source": "coingecko", "source_url": "url2"},
+        ]
+        result = agent._deduplicate(tokens)
+        assert "dexscreener" in result[0]["sources"]
+        assert "coingecko" in result[0]["sources"]
+
+    def test_keeps_richest_data(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent()
+        tokens = [
+            {"contract_address": "abc123", "chain": "solana", "name": "Token A",
+             "symbol": "TKNA", "mcap": 100.0, "volume_24h": 50.0,
+             "liquidity": 80.0, "source": "dexscreener", "source_url": "url1"},
+            {"contract_address": "abc123", "chain": "solana", "name": "Token A",
+             "symbol": "TKNA", "mcap": 200.0, "volume_24h": 0.0,
+             "liquidity": 0.0, "source": "coingecko", "source_url": "url2"},
+        ]
+        result = agent._deduplicate(tokens)
+        # Should keep the higher mcap and higher liquidity
+        assert result[0]["mcap"] == 200.0
+        assert result[0]["liquidity"] == 80.0
+
+    def test_different_chains_not_deduped(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent()
+        tokens = [
+            {"contract_address": "abc123", "chain": "solana", "name": "Token A",
+             "symbol": "TKNA", "mcap": 100.0, "volume_24h": 50.0,
+             "liquidity": 80.0, "source": "dexscreener", "source_url": "url1"},
+            {"contract_address": "abc123", "chain": "ethereum", "name": "Token A",
+             "symbol": "TKNA", "mcap": 100.0, "volume_24h": 50.0,
+             "liquidity": 80.0, "source": "dexscreener", "source_url": "url2"},
+        ]
+        result = agent._deduplicate(tokens)
+        assert len(result) == 2
+
+    def test_unique_tokens_unchanged(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent()
+        tokens = [
+            {"contract_address": "abc", "chain": "solana", "name": "A",
+             "symbol": "A", "mcap": 1.0, "volume_24h": 1.0,
+             "liquidity": 1.0, "source": "dexscreener", "source_url": "url1"},
+            {"contract_address": "def", "chain": "solana", "name": "B",
+             "symbol": "B", "mcap": 2.0, "volume_24h": 2.0,
+             "liquidity": 2.0, "source": "coingecko", "source_url": "url2"},
+        ]
+        result = agent._deduplicate(tokens)
+        assert len(result) == 2
+        # Each should have a sources list with one entry
+        assert result[0]["sources"] == ["dexscreener"]
