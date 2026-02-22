@@ -1,263 +1,372 @@
-# 🐝 Buzz BD Agent — Autonomous Business Development for CEX Listings
+# 🐝 Buzz BD Agent — Autonomous Token Discovery & Listing for SolCex Exchange
 
-**First autonomous AI agent for crypto exchange listing BD.** Token discovery, scoring, wallet forensics, and listing pipeline — running 24/7 on decentralized infrastructure.
+> The first AI Business Development agent operating autonomously 24/7 for a centralized exchange, powered by MiniMax M2.5 on decentralized compute.
 
-![ERC-8004 ETH](https://img.shields.io/badge/ERC--8004-ETH%20%2325045-blue) ![ERC-8004 Base](https://img.shields.io/badge/ERC--8004-Base%20%2317483-purple) ![npm](https://img.shields.io/npm/v/@buzzbd/plugin-solcex-bd) ![Akash](https://img.shields.io/badge/Akash-Deployed-green) ![OpenClaw](https://img.shields.io/badge/OpenClaw-v2026.2.19-orange) ![GHCR](https://img.shields.io/badge/GHCR-Pipeline%20Live-brightgreen)
+[![ERC-8004](https://img.shields.io/badge/ERC--8004-Agent%20%2325045-blue)](https://8004scan.io)
+[![Akash](https://img.shields.io/badge/Akash-Deployed-red)](https://akash.network)
+[![OpenClaw](https://img.shields.io/badge/OpenClaw-v2026.2.21-green)](https://github.com/openclaw/openclaw)
+[![Docker](https://img.shields.io/badge/GHCR-v5.3.8--hotfix6-purple)](https://ghcr.io/buzzbysolcex/buzz-bd-agent)
+[![npm](https://img.shields.io/badge/npm-@buzzbd/plugin--solcex--bd-orange)](https://npmjs.com/package/@buzzbd/plugin-solcex-bd)
+
+---
 
 ## What Buzz Does
 
-Buzz discovers promising crypto tokens, scores them using a 100-point system across 16 intelligence sources, runs wallet forensics on deployer wallets, verifies contract safety, and manages the full BD pipeline — from discovery to listing. Ogie (BD Lead) approves all outreach. Buzz handles 90% of the work autonomously.
+Buzz scans **30+ tokens per session** across multiple DEX data sources, runs them through a **4-layer intelligence pipeline**, scores them on a **100-point system**, and delivers qualified listing prospects to human BD leads via Telegram — all autonomously, 4x daily.
 
-**Operational since:** February 1, 2026
-**Current version:** v5.3.6 — 3-Provider Cascade + GHCR Pipeline
+**SolCex Listing Package:** 15K USDT total (5K fee + 10K liquidity) with professional market making ($450K+ depth), 450+ whale trader airdrop, AMA, and 10-14 day fast-track to go-live.
 
 ---
 
 ## Architecture
 
 ```
-╔═══════════════════════════════════════════════════╗
-║  LAYER 1 — CAST THE NET (Discovery)              ║
-║  DexScreener + AIXBT + Clawpump + CoinGecko      ║
-║  + DexScreener Boosts                             ║
-║  → 50-100 candidates per scan (4x daily)          ║
-╠═══════════════════════════════════════════════════╣
-║                    ↓ FILTER                        ║
-╠═══════════════════════════════════════════════════╣
-║  LAYER 2 — FILTER (Safety & Liquidity)            ║
-║  RugCheck + Helius + Allium + DFlow MCP           ║
-║  → 10-20 survive                                  ║
-╠═══════════════════════════════════════════════════╣
-║                    ↓ RESEARCH                      ║
-╠═══════════════════════════════════════════════════╣
-║  LAYER 3 — RESEARCH (Deep Intelligence)           ║
-║  leak.me + Firecrawl + ATV Identity + Grok        ║
-║  + Serper                                         ║
-║  → Research dossier per token                     ║
-╠═══════════════════════════════════════════════════╣
-║                    ↓ SCORE                         ║
-╠═══════════════════════════════════════════════════╣
-║  LAYER 4 — SCORE & ACT                            ║
-║  100-point scoring + DFlow modifiers (+13/-8)     ║
-║  + QuillShield safety overlay (0-100)             ║
-║  85+ HOT → 70+ QUALIFIED → 50+ WATCH → SKIP      ║
-╚═══════════════════════════════════════════════════╝
+┌─────────────────────────────────────────────────────────────────┐
+│                    MACHINE ECONOMY LAYER                         │
+│                                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌────────────────────────┐ │
+│  │  IDENTITY     │  │  PAYMENTS    │  │    INTEROP             │ │
+│  │  ERC-8004     │  │  x402 USDC   │  │  elizaOS plugin        │ │
+│  │  ETH #25045   │  │  zauthx402   │  │  Virtuals ACP          │ │
+│  │  Base #17483  │  │  $0.30/day   │  │  ClawHub Skill         │ │
+│  │  Base #18709  │  │              │  │  Agent Bounty Board    │ │
+│  └──────┬───────┘  └──────┬───────┘  └────────┬───────────────┘ │
+│         └─────────────────┼────────────────────┘                 │
+│                           ▼                                      │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │              AGENT-TO-AGENT LAYER                          │  │
+│  │  ACP Bridge: Agent Control Protocol communication          │  │
+│  │  Sub-agents: TOKEN SCOUT, MARKET INTEL (autonomous)        │  │
+│  │  Plugin: @buzzbd/plugin-solcex-bd@1.0.0 on npm             │  │
+│  └────────────────────────┬──────────────────────────────────┘  │
+│                           ▼                                      │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │              BUZZ BD AGENT v5.3.8                          │  │
+│  │                                                             │  │
+│  │  LLM: MiniMax M2.5 (anthropic-messages API)                │  │
+│  │  Skills: ClawRouter (LLM routing) + QuillShield (safety)   │  │
+│  │  Intel: 16/16 Sources | Crons: 36/36 | 20 TG Commands     │  │
+│  │  Score: 100-pt System | Forensics: Helius + Allium         │  │
+│  │  Cred: Clawbal On-Chain | ERC-8004 Verified                │  │
+│  └────────────────────────┬──────────────────────────────────┘  │
+│                           ▼                                      │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │              SOLCEX EXCHANGE                                │  │
+│  │  15K USDT Listing | Market Making | Whale Airdrop          │  │
+│  │  10-14 Day Fast-Track | Solana-Native CEX                  │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Deployment Stack
-
-| Component | Detail |
-|-----------|--------|
-| **Platform** | Akash Network (decentralized cloud) |
-| **Runtime** | OpenClaw v2026.2.19 |
-| **Container** | Docker via `ghcr.io/buzzbysolcex/buzz-bd-agent:v5.3.6` |
-| **Resources** | 2 CPU, 4GB RAM, 10GB persistent storage |
-| **Cost** | ~$5-8/month (Akash compute) |
-| **LLM Cost** | ~$41/month (MiniMax M2.5 + free fallbacks) |
-| **Process** | `openclaw gateway --port 18789 --allow-unconfigured` |
-| **Channels** | Telegram (@BuzzBySolCex_bot) |
-| **BD Contact** | Telegram: @Ogie2 |
-| **Node** | v22 (Akash) / v25.5.0 (local Mac) |
-
-### Development Workflow (GHCR Pipeline)
+## 4-Layer Intelligence Pipeline
 
 ```
-Mac laptop (build + test) → Docker image → GHCR push → Akash deploy
+╔══════════════════════════════════════════════════════════════════╗
+║  LAYER 1 — CAST THE NET (Discovery)                             ║
+║  DexScreener + AIXBT + Clawpump + CoinGecko + DexScreener Boosts║
+║  → 50-100 raw candidates per scan (4x daily)                    ║
+╠══════════════════════════════════════════════════════════════════╣
+║                           ↓ FILTER                               ║
+╠══════════════════════════════════════════════════════════════════╣
+║  LAYER 2 — FILTER (Safety & Liquidity Verification)             ║
+║  RugCheck + Helius Forensics + Allium 16-Chain + DFlow MCP      ║
+║  → Kill bad tokens fast, 10-20 survive                          ║
+╠══════════════════════════════════════════════════════════════════╣
+║                           ↓ RESEARCH                             ║
+╠══════════════════════════════════════════════════════════════════╣
+║  LAYER 3 — RESEARCH (Deep Intelligence)                          ║
+║  leak.me KOLs + Firecrawl + ATV Identity + Grok Sentiment + Serper║
+║  → Full research dossier per token                               ║
+╠══════════════════════════════════════════════════════════════════╣
+║                           ↓ SCORE                                ║
+╠══════════════════════════════════════════════════════════════════╣
+║  LAYER 4 — SCORE & ACT (100-Point System)                        ║
+║  85-100 🔥 HOT    → Immediate outreach + full forensics          ║
+║  70-84  ✅ QUAL   → Priority queue + forensics                   ║
+║  50-69  👀 WATCH  → Monitor 48h, rescan                          ║
+║  0-49   ❌ SKIP   → No action                                    ║
+╚══════════════════════════════════════════════════════════════════╝
 ```
-
-All code is tested locally before Docker build. GHCR image is **public** with zero credentials baked in — all secrets injected via Akash SDL env vars at runtime. New tags force fresh image pulls on Akash providers.
-
----
-
-## 🧠 LLM Routing — 3-Provider Cascade
-
-| Priority | Model | Provider | Cost |
-|----------|-------|----------|------|
-| **Primary** | MiniMax M2.5 | MiniMax Direct | ~$41/mo |
-| **Fallback 1** | Llama 3.3 70B Instruct | OpenRouter (free tier) | $0 |
-| **Fallback 2** | Qwen3 30B A3B | AkashML | $0 |
-
-If MiniMax fails or rate-limits, Buzz automatically cascades to free-tier models. Zero downtime.
-
-**Cost Evolution:**
-
-| Phase | Cost | What Changed |
-|-------|------|--------------|
-| Phase 1 (Feb 3-14) | $1,320/day | Claude Opus for everything |
-| **Phase 2 (Feb 15+)** | **$41/mo** | **MiniMax M2.5 + free cascade** |
-
-**96.9% cost reduction from Phase 1.**
 
 ---
 
 ## Intelligence Sources (16 Active)
 
-### Layer 1 — Discovery
-
-| # | Source | Method | Cost |
-|---|--------|--------|------|
-| 1 | **DexScreener** | REST API | Free |
-| 2 | **AIXBT** | Web scrape | Free |
-| 8 | **Clawpump** | Web monitor | Free |
-| 17 | **CoinGecko Trending** | REST API | Free |
-| 18 | **DexScreener Boosts** | REST API | Free |
-
-### Layer 2 — Filter
-
-| # | Source | Method | Cost |
-|---|--------|--------|------|
-| 4 | **RugCheck** | REST API | Free |
-| 5 | **Helius** | REST API | Free (rate limited) |
-| 6 | **Allium** | REST API | Free (10K/mo) |
-| 16 | **DFlow MCP** | mcporter CLI | Free |
-
-### Layer 3 — Research
-
-| # | Source | Method | Cost |
-|---|--------|--------|------|
-| 7 | **leak.me** | Web scrape | Free |
-| 9 | **Firecrawl** | REST API | Free (500 credits) |
-| 12 | **ATV Web3 Identity** | REST API | Free (10K/mo) |
-| 13 | **Grok (xAI)** | API | Paid |
-| 14 | **Serper** | REST API | Paid |
-
-### Supporting
-
-| # | Source | Method | Cost |
-|---|--------|--------|------|
-| 3 | **AIXBT v2** | x402 | ~$0.10/call |
-| 15 | **Sub-agents** | ACP protocol | Free |
-
-### x402 Paid Intelligence
-
-| Source | Protocol | Cost | Data |
-|--------|----------|------|------|
-| **Einstein AI** | x402 | ~$0.10/call | Whale alerts |
-| **Gloria AI** | x402 | ~$0.10/call | Breaking news |
+| # | Source | Layer | API | Data |
+|---|--------|-------|-----|------|
+| 1 | **DexScreener** | Discovery | REST (free) | Token profiles, pairs, boosts, trending |
+| 2 | **AIXBT** | Discovery | Scrape (free) | Momentum scoring, catalysts |
+| 3 | **AIXBT v2** | Supporting | x402 ($0.10/call) | Premium momentum + sentiment |
+| 4 | **RugCheck** | Filter | REST (free) | Contract safety, honeypot detection |
+| 5 | **Helius** | Filter | REST (free tier) | Solana wallet forensics, deployer history |
+| 6 | **Allium** | Filter | REST (free 10K/mo) | 16-chain wallet PnL, balances, transactions |
+| 7 | **leak.me** | Research | Scrape (free) | KOL/smart money tracking |
+| 8 | **Clawpump** | Discovery | Monitor (free) | Agent token launches |
+| 9 | **Firecrawl** | Research | REST (free 500 credits) | Website scraping for team/roadmap |
+| 10 | **Colosseum** | Supporting | Forum (free) | Hackathon community |
+| 11 | **Moltbook** | Supporting | API (free) | Agent social network |
+| 12 | **ATV Web3 Identity** | Research | REST (free 10K/mo) | ENS, Farcaster/Lens, Gitcoin Passport |
+| 13 | **Grok x_search** | Research | xAI API | Real-time X/Twitter sentiment |
+| 14 | **Serper** | Research | REST | Web search verification |
+| 15 | **OpenClaw Sub-agents** | Supporting | ACP (free) | Delegated intelligence via sub-agents |
+| 16 | **DFlow MCP** | Filter | mcporter (free) | DEX swap routes, liquidity depth, slippage |
 
 ---
 
-## QuillShield — Contract Safety Scoring
+## On-Chain Identity (ERC-8004)
 
-Buzz includes QuillShield, an automated smart contract safety scoring engine (0-100 points). No competitor in the CEX listing BD space has this.
+| Chain | Agent ID | Registry | Skills |
+|-------|----------|----------|--------|
+| **Ethereum** | #25045 | `0x8004A818BFB912233c491871b3d84c89A494BD9e` | — |
+| **Base** | #17483 | `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432` | — |
+| **Base (anet)** | #18709 | `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432` | 4 skills |
+| **Colosseum** | #3734 | Agent Hackathon entry | — |
 
-| Category | Points | Checks |
-|----------|--------|--------|
-| Authority Analysis | 25 | Mint/freeze/update authority revoked? |
-| Liquidity Analysis | 25 | LP size, lock status, burn verification |
-| Holder Distribution | 25 | Top holder concentration, whale analysis |
-| Contract Patterns | 25 | Trading enabled, tax/fee checks, verification |
-
-| Score | Label | Pipeline Action |
-|-------|-------|-----------------|
-| 80-100 | SAFE | Proceed with confidence |
-| 60-79 | CAUTION | Manual review recommended |
-| 40-59 | WARNING | High risk — multiple red flags |
-| 0-39 | DANGER | Auto-reject from pipeline |
-
-Data sources: DexScreener API, Helius API, Solana FM
-Tested on: $PUNCH — scored 45/100 CAUTION
+**Reputation Registries:**
+- Ethereum: `0x8004B663056A597Dffe9eCcC1965A193B7388713`
+- Base: `0x8004BAa17C55a88189AE136b182e5fdA19dE9b63`
 
 ---
 
-## DFlow MCP Integration
+## Wallets
 
-DFlow MCP integrated as intelligence source #16 via mcporter CLI v0.7.3.
+| Name | Chain | Address |
+|------|-------|---------|
+| **anet** | Base (EVM) | `0x2Dc03124091104E7798C0273D96FC5ED65F05aA9` |
+| **Buzz Base** | Base (EVM) | `0x4b362B7db6904A72180A37307191fdDc4eD282Ab` |
+| **ClawRouter** | Base (EVM) | `0x9b28931785c5687811850AD08e158F8479743A76` |
+| **Lobster** | Solana | `5iC7pGyzqpXD2xTK4Ww7zKRDVo9cceyHNeKBTiemo5Jp` |
+
+---
+
+## Deployment Stack
+
+| Component | Technology |
+|-----------|-----------|
+| **Compute** | Akash Network — 2 CPU, 4GB RAM, 10GB persistent storage (~$5-8/mo) |
+| **Container** | Docker on `ghcr.io/buzzbysolcex/buzz-bd-agent:v5.3.8-hotfix6` |
+| **Base Image** | `node:22-slim` + tini PID 1 |
+| **Runtime** | OpenClaw v2026.2.21 |
+| **Primary LLM** | MiniMax M2.5 (229B params, `anthropic-messages` API) |
+| **Free Fallbacks** | Llama 3.3 70B (OpenRouter) → Qwen3 30B (AkashML) |
+| **Emergency** | Claude Haiku 4.5 → Claude Opus 4.5 (last resort) |
+| **LLM Cost** | ~$41/mo (down from $1,320/day — 99.9% reduction) |
+| **Compute Cost** | ~$5-8/mo |
+| **Total Cost** | **~$48/mo for 24/7 autonomous BD agent** |
+| **Bot** | @BuzzBySolCex_bot (Telegram, 20 registered commands) |
+| **Crons** | 36 autonomous scheduled jobs |
+| **Skills** | ClawRouter (smart LLM routing) + QuillShield (contract safety) |
+
+---
+
+## Scoring Engine (100-Point System)
+
+### Instant Kill (Score = 0)
+- Mint authority NOT revoked
+- LP not locked AND not burned
+- Deployer funded from mixer
+- Deployer has 3+ previous rugs
+- Already listed on Tier 1/2 CEX
+
+### Key Bonuses
+| Signal | Points |
+|--------|--------|
+| AIXBT HIGH CONVICTION | +10 |
+| Hackathon/Competition | +10 |
+| Viral moment / KOL mention | +10 |
+| Identity verified (ENS+socials) | +5 |
+| DFlow 3+ swap routes | +5 |
+| Mint + Freeze revoked | +5 |
+| LP burned | +5 |
+| Audited | +5 |
+| Age >14d stable volume | +5 |
+
+### Key Penalties
+| Flag | Points |
+|------|--------|
+| Freeze authority active | -15 |
+| Top 10 holders >50% | -15 |
+| CEX already listed | -15 |
+| Liquidity dropping | -15 |
+| Top holder >15% | -10 |
+| Token age <24h | -10 |
+| Deployer holds >10% | -10 |
+
+### Layer 2 Mandatory Checks (before scoring 70+)
+1. **CEX listing check:** CoinGecko + CMC
+2. **CTO detection:** Community Takeover flag
+3. **Volatility check:** >+100% or <-30% → wait 48h
+
+---
+
+## BD Strategy — Inbound First
+
+| Channel | Target % | Method |
+|---------|----------|--------|
+| **INBOUND** | 60% | Public alpha threads → listing page → they apply |
+| **WARM OUTREACH** | 30% | 3-Touch warm-up → natural conversation |
+| **PARTNERSHIPS** | 10% | Market makers, launchpads, agents refer deals |
+
+### 3-Touch Warm-Up (Never Cold DM)
+| Touch | Timing | Action |
+|-------|--------|--------|
+| 1 | Day 0 | Public engagement on their tweet |
+| 2 | Day 2-3 | Valuable signal or alpha tag |
+| 3 | Day 5-7 | Natural listing conversation |
+
+### Pipeline Stages
+```
+DISCOVERED → SCORED → QUALIFIED → WARM_UP → OUTREACH_SENT → FOLLOW_UP_1 → FOLLOW_UP_2 → RESPONDED → NEGOTIATING → LISTED → POST_LISTING
+```
+
+---
+
+## Cron Schedule (36 Jobs)
+
+| Category | Count | Schedule |
+|----------|-------|----------|
+| Token Scanning | 4 | 05:00, 12:00, 18:30, 21:00 AST |
+| Prayer Reminders | 5 | Fajr, Dhuhr, Asr, Maghrib, Isha |
+| System Operations | 3 | Compression, health, digest |
+| Heartbeats | 3 | Colosseum 30m, Moltbook 4h, stream 5m |
+| x402 Intelligence | 5 | Whale alerts, breaking news, spend tracking |
+| Clawbal On-Chain | 3 | Post-scan, PnL update, daily summary |
+| Machine Economy | 3 | HyperSkill, HyperAgent, AIXBT v2 |
+| Agent Interop | 4 | Plugin health, sub-agent cleanup, ACP, elizaOS |
+| BD Lifecycle | 6 | Warm-up tracker, follow-ups, alpha draft, competitor alerts, inbound, post-listing |
+
+---
+
+## Partnerships
+
+### Tier 1 — Active Integrations
+
+| Partner | Integration |
+|---------|-------------|
+| **Vitto Rivabella** (EF dAI) | ERC-8004 article collaboration |
+| **Gary Palmer** (ATV) | ENS deployer verification |
+| **zauthx402** | x402 trust verification |
+| **Einstein AI** | x402 whale alerts |
+| **Gloria AI** | x402 breaking news |
+| **Helius** | Solana wallet forensics |
+| **Allium** | 16-chain PnL/balances |
+| **MiniMax** | Primary LLM provider |
+| **Rich Pedersen** (AgenticTrust.io) | Agent trust ontology |
+| **AgentProof** | Agent verification |
+
+### Tier 2 — Active Relationships
+
+| Partner | Status |
+|---------|--------|
+| **DFlow** | MCP integrated — Source #16, DEX route verification |
+| **Bankr** | Partnership pitch — USDC primary |
+| **ClawdBotATG** | Austin Griffith ecosystem — Agent Bounty Board |
+| **OpenClaw** | ClawHub marketplace — Buzz-as-a-Service |
+| **Virtuals Protocol** | ACP registered — 18K+ agent network |
+| **elizaOS** | PR #263 + npm published — Plugin registry |
+| **lobster.cash** | Agent commerce |
+
+---
+
+## Agent Bounty Board
+
+Buzz posted **Bounty #0** — the first-ever bounty on ClawdBotATG's Agent Bounty Board contract.
 
 | Field | Value |
 |-------|-------|
-| **Endpoint** | `https://pond.dflow.net/mcp` (free, public) |
-| **CLI** | mcporter v0.7.3 |
-| **Backing** | $7.5M (Framework, Coinbase, Multicoin, Circle, Cumberland, Wintermute) |
-| **Volume** | $2B+/30 days |
-
-**DFlow Scoring Modifiers (Layer 4):**
-
-| Condition | Points |
-|-----------|--------|
-| 3+ swap routes found | +5 |
-| Best route slippage < 1% for $10K | +3 |
-| Routes through Tier-1 DEXs (Raydium, Meteora, Phoenix) | +3 |
-| Orderbook depth > $50K | +2 |
-| No routes found | -5 |
-| All routes > 5% slippage | -3 |
-
-Max bonus: +13 pts | Max penalty: -8 pts
-
----
-
-## Cron Schedule (36 Active Jobs)
-
-| Category | Count | Jobs |
-|----------|-------|------|
-| Scanning & Intelligence | 4 | Deep scan (4x daily across all layers) |
-| Prayer Reminders | 5 | Fajr, Dhuhr, Asr, Maghrib, Isha |
-| System Operations | 3 | Memory compression, health check, pipeline digest |
-| Heartbeats & Monitoring | 3 | Colosseum (30m), Moltbook (4h), stream (5m) |
-| x402 Intelligence | 5 | Whale alert, breaking news (2x), spend review, Sunday reverify |
-| Clawbal On-Chain | 3 | Post-scan alpha, PnL refresh, daily summary |
-| Machine Economy | 3 | HyperSkill factory, HyperAgent verify, AIXBT v2 scan |
-| Agent Interoperability | 4 | Plugin health, sub-agent cleanup, ACP bridge, elizaOS registry |
-| BD Lifecycle | 6 | Warm-up tracker, follow-up check, alpha draft, competitor alert, inbound check, post-listing health |
-
-Daily x402 spend: ~$0.30-$0.50 | Monthly cap: $15 USDC
-
----
-
-## Credibility Stack
-
-Buzz maintains a multi-layer verifiable trust system — on-chain identity, code authenticity, independence scoring, on-chain alpha track record, and agent credit pre-qualification.
-
-### On-Chain Identity (ERC-8004)
-
-| Chain | Agent ID | Contract | Explorer |
-|-------|----------|----------|----------|
-| **Ethereum** | #25045 | `0x8004A818BFB912233c491871b3d84c89A494BD9e` | [8004scan.io](https://8004scan.io/agents/ethereum/25045) |
-| **Base** | #17483 | `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432` | [8004scan.io](https://8004scan.io/agents/base/17483) |
-| **Colosseum** | #3734 | Agent Hackathon entry | $100K USDC prize pool |
-
-### A.V.I — 60/100 Tier 3 Partner | ZAUTH — 65/100 Good (0 matches, 100% original) | ClawCredit — Active | Clawbal — LIVE
-
-```
-ERC-8004 On-Chain Identity     ✅ ETH #25045 + Base #17483
-A.V.I Independence Score       ✅ 60/100 — Tier 3 Partner
-ZAUTH Code Authenticity         ✅ 65/100 — 0 matches, 100% original
-ClawCredit Pre-Qualification   ✅ Active, monitoring
-Clawbal On-Chain Alpha          ✅ $SPSC first call, PnL tracking live
-Agent Bounty Board              ✅ Bounty #0 — first ever on contract
-ClawHub + ClawTasks + ACP      ✅ All registered
-```
+| Contract | `0x3797710f9ff1FA1Cf0Bf014581e4651845d75530` (Base) |
+| TX | `0xc8c8f2456014458ce1af971c6919a1f5693c0adb1723b9088f274381af60d2fc` |
+| Bounties | 3 live (Solana Research, Base Discovery, Agent Ecosystem Map) |
+| Escrowed | 23K $CLAWD |
+| CLI | [buzz-bounty-board](https://github.com/buzzbysolcex/buzz-bounty-board) |
 
 ---
 
 ## ElizaOS Plugin
 
+```bash
+npm install @buzzbd/plugin-solcex-bd
+```
+
 | Field | Value |
 |-------|-------|
 | **Package** | `@buzzbd/plugin-solcex-bd@1.0.0` |
-| **npm** | [npmjs.com/package/@buzzbd/plugin-solcex-bd](https://npmjs.com/package/@buzzbd/plugin-solcex-bd) |
 | **Actions** | SCAN_TOKENS, SCORE_TOKEN, CHECK_WALLET, SUBMIT_LISTING |
-| **Sub-agents** | TOKEN SCOUT, MARKET INTEL |
-| **Registry** | ElizaOS PR #263 |
+| **Hooks** | 3 (market intel, pipeline status, listing readiness) |
+| **Channels** | Telegram ✅, Web UI ✅, ACP ✅ |
+| **Registry PR** | #263 (elizaos-plugins/registry) |
 
 ---
 
-## BD Pipeline
+## Telegram Commands (20)
 
-| Channel | Target | How |
-|---------|--------|-----|
-| **Inbound** | 60% by Month 6 | Public alpha → listing page → auto-scoring |
-| **Warm Outreach** | 30% | 3-Touch warm-up sequence (never cold) |
-| **Partnerships** | 10% | Market makers, launchpads, agents refer deals |
+| Command | Description |
+|---------|-------------|
+| `/scan` | Run token scan now |
+| `/score` | Score a specific token |
+| `/pipeline` | Show active pipeline |
+| `/status` | System health check |
+| `/report` | Generate daily report |
+| `/search` | Search for a token |
+| `/wallet` | Check wallet forensics |
+| `/outreach` | Draft outreach message |
+| `/approve` | Approve outreach |
+| `/reject` | Reject outreach |
+| `/weekly` | Generate weekly report |
+| `/alpha` | Draft public alpha thread |
+| `/crons` | List active cron jobs |
+| `/health` | Full system health |
+| `/experience` | Show learned patterns |
+| `/help` | List all commands |
+| `/reset` | Reset conversation |
+| `/memory` | Show memory status |
+| `/config` | Show configuration |
+| `/version` | Show version info |
 
-| Score | Label | Action |
-|-------|-------|--------|
-| 85-100 | 🔥 HOT | Immediate outreach + full forensics |
-| 70-84 | ✅ QUALIFIED | Priority queue + forensics |
-| 50-69 | 👀 WATCH | Monitor 48h, rescan |
-| 0-49 | ❌ SKIP | No action |
+---
+
+## Competitor Intelligence
+
+| Exchange | Tokens | Fee Range | SolCex Advantage |
+|----------|--------|-----------|-----------------|
+| MEXC | 3,600+ | $30K–$80K | We're faster + cheaper |
+| Bitget | 800+ | $50K–$100K+ | Automated scoring matches their Nansen |
+| Gate.io | 3,800+ | $200K–$250K | 85-95% cheaper |
+| Binance | 400+ | $500K+ | Their Alpha additions = future signal |
+| Bybit | 600+ | $50K–$100K | Their listings = validation for our angle |
+
+**SolCex edge:** 85-95% cheaper than Tier 1/2. 10-14 day fast-track. 450 whale airdrop. Solana-native.
+
+---
+
+## Development Workflow
+
+```bash
+# Standard: Mac → Docker → GHCR → Akash (never install on Akash)
+cd ~/buzz-v538-hotfix6
+
+# Build (ALWAYS --no-cache for config/version changes)
+docker build --no-cache -t ghcr.io/buzzbysolcex/buzz-bd-agent:vNEW .
+
+# Push to GitHub Container Registry
+docker push ghcr.io/buzzbysolcex/buzz-bd-agent:vNEW
+
+# Deploy: Update SDL image tag → Akash Console → Update Deployment
+# For ENV var changes: Close deployment → Fresh deploy with new SDL
+```
+
+---
+
+## Cost History
+
+| Period | LLM | Daily Cost | Notes |
+|--------|-----|-----------|-------|
+| Feb 3-14 | Claude Opus 4.5 | ~$1,320/day | Prayer reminders costing $5 each |
+| Feb 14-15 | Haiku + Opus fallback | ~$5-10/day | First optimization |
+| Feb 15+ | MiniMax M2.5 | ~$1.37/day | **99.9% cost reduction** |
+| **Current** | **MiniMax + Akash** | **~$48/mo** | **Full autonomous BD agent** |
 
 ---
 
@@ -265,35 +374,45 @@ ClawHub + ClawTasks + ACP      ✅ All registered
 
 | Resource | URL |
 |----------|-----|
-| GitHub (agent) | [github.com/buzzbysolcex/buzz-bd-agent](https://github.com/buzzbysolcex/buzz-bd-agent) |
-| GitHub (plugin) | [github.com/buzzbysolcex/plugin-solcex-bd](https://github.com/buzzbysolcex/plugin-solcex-bd) |
-| npm | [@buzzbd/plugin-solcex-bd](https://npmjs.com/package/@buzzbd/plugin-solcex-bd) |
-| Twitter (Buzz) | [@BuzzBySolCex](https://twitter.com/BuzzBySolCex) |
-| Twitter (SolCex) | [@SolCex_Exchange](https://twitter.com/SolCex_Exchange) |
-| SolCex | [solcex.cc](https://solcex.cc) |
-| ERC-8004 (ETH) | [8004scan.io/agents/ethereum/25045](https://8004scan.io/agents/ethereum/25045) |
-| ERC-8004 (Base) | [8004scan.io/agents/base/17483](https://8004scan.io/agents/base/17483) |
-| Akash Network | [akash.network](https://akash.network) |
-| BD Contact (Ogie) | [@Ogie2 on Telegram](https://t.me/Ogie2) |
+| SolCex Exchange | [solcex.io](https://solcex.io) |
+| List with Us | [solcex.cc/list-with-us](https://solcex.cc/list-with-us) |
+| Buzz Twitter | [@BuzzBySolCex](https://x.com/BuzzBySolCex) |
+| SolCex Twitter | [@SolCex_Exchange](https://x.com/SolCex_Exchange) |
+| ERC-8004 Registry | [8004scan.io](https://8004scan.io) |
+| Colosseum Entry | Agent #3734 |
+| npm Plugin | [@buzzbd/plugin-solcex-bd](https://npmjs.com/package/@buzzbd/plugin-solcex-bd) |
+| Bounty Board CLI | [buzz-bounty-board](https://github.com/buzzbysolcex/buzz-bounty-board) |
+| Plugin Repo | [plugin-solcex-bd](https://github.com/buzzbysolcex/plugin-solcex-bd) |
+| x402 Protocol | [x402](https://x.com/x402) |
 
 ---
 
-## Changelog (Recent)
+## Team
 
-| Version | Date | Highlights |
-|---------|------|------------|
-| **5.3.5** | **Feb 21, 2026** | **GHCR pipeline proven (Mac → Docker → GHCR → Akash). 3-Provider cascade restored. Boot self-check. Multiple Docker build cycles validated.** |
-| 5.3.1 | Feb 20, 2026 | DFlow MCP (Source #16), 4-Layer Intelligence Architecture, CoinGecko + DS Boosts |
-| 5.3.0 | Feb 20, 2026 | OpenClaw v2026.2.19 on Akash, Docker pipeline, QuillShield skill |
-| 5.2.0 | Feb 18, 2026 | BD Lifecycle: inbound-first strategy, 36 crons, 3-Touch Warm-Up, competitor intelligence |
-| 5.1.0 | Feb 18, 2026 | Agent Bounty Board: first bounty posted on ClawdBotATG contract |
-| 5.0.0 | Feb 18, 2026 | ElizaOS plugin, multi-agent, agent-to-agent delegation, ACP bridge |
-| 4.5.1 | Feb 17, 2026 | Full standalone Master Ops, LLM cascade, 14/15 intel |
-| 4.0.0 | Feb 14, 2026 | MiniMax M2.5 primary: $1,320/day → $41/mo |
+| Role | Handle | Responsibility |
+|------|--------|----------------|
+| **BD Lead** | [@hidayahanka1](https://x.com/hidayahanka1) | Strategy, approvals, manual Twitter, partnerships |
+| **Strategy** | Claude Opus 4.6 | Documentation, analysis, planning, outreach drafts |
+| **Autonomous Agent** | Buzz 🐝 | Token scanning, scoring, pipeline management, reporting |
 
 ---
 
-*v5.3.6 — 3-Provider Cascade + GHCR Pipeline*
-*OpenClaw v2026.2.19 | MiniMax M2.5 + Llama 70B + Qwen 30B | 36 crons | 16/16 intel | 4-Layer Architecture*
-*Docker: ghcr.io/buzzbysolcex/buzz-bd-agent:v5.3.6 | 2 CPU / 4GB RAM | $5-8/mo*
-*"Identity first. Intelligence deep. Commerce autonomous. Cost disciplined. Actions over promises. Ship from anywhere."*
+## Principles
+
+1. **Free first, pay for alpha.** — Free intelligence sources before paid
+2. **On-chain track record IS credibility.** — Clawbal, ERC-8004, verifiable
+3. **Inbound > Warm > Cold. Always.** — Build reputation so projects come to us
+4. **The intel is the hook. The relationship is the close.** — Buzz discovers, Ogie closes
+5. **Layer the intelligence. Don't spray and pray.** — 4 layers, every token through all
+6. **Partnership not dependency.** — Distribution channels, not platform locks
+7. **USDC primary.** — Other tokens for utility only
+8. **LLM cascade = cost discipline.** — MiniMax first, Anthropic last resort
+9. **Agent-to-agent = the multiplier.** — Sub-agents extend reach
+10. **Ship from anywhere.** — Docker + Akash + Telegram = deploy from any timezone
+
+---
+
+*Powered by OpenClaw • Deployed on Akash Network • ERC-8004 Verified*
+*"Identity first. Intelligence deep. Commerce autonomous. Cost disciplined. Ship from anywhere."*
+
+#USDC #AgenticCommerce #Solana #AI #SolCex #BuzzBD #Base #ERC8004 #MachineEconomy #OpenClaw
