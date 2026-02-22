@@ -7,6 +7,7 @@ DEFAULT_CHAINS = ["solana", "ethereum", "base"]
 
 DEXSCREENER_BOOSTS_URL = "https://api.dexscreener.com/token-boosts/latest/v1"
 DEXSCREENER_TOKENS_URL = "https://api.dexscreener.com/latest/dex/tokens"
+COINGECKO_TRENDING_URL = "https://api.coingecko.com/api/v3/search/trending"
 SOURCE_TIMEOUT = aiohttp.ClientTimeout(total=10)
 
 
@@ -64,3 +65,56 @@ class ScannerAgent(BaseAgent):
         except Exception as e:
             self.log_event("error", f"DexScreener fetch failed: {e}")
             return []
+
+    async def _fetch_coingecko(self) -> List[Dict]:
+        self.log_event("action", "Fetching CoinGecko trending")
+        try:
+            async with aiohttp.ClientSession(timeout=SOURCE_TIMEOUT) as session:
+                async with session.get(COINGECKO_TRENDING_URL) as resp:
+                    if resp.status != 200:
+                        raise aiohttp.ClientError(f"CoinGecko returned {resp.status}")
+                    data = await resp.json()
+
+            tokens = []
+            for coin in data.get("coins", []):
+                item = coin.get("item", {})
+                platforms = item.get("platforms", {})
+                if not platforms:
+                    continue
+
+                # Take the first platform with an address
+                for chain, address in platforms.items():
+                    if not address:
+                        continue
+                    market_data = item.get("data", {})
+                    tokens.append({
+                        "contract_address": address,
+                        "chain": chain,
+                        "name": item.get("name", ""),
+                        "symbol": item.get("symbol", ""),
+                        "mcap": self._parse_dollar_string(market_data.get("market_cap", "0")),
+                        "volume_24h": self._parse_dollar_string(market_data.get("total_volume", "0")),
+                        "liquidity": 0.0,  # CoinGecko trending doesn't provide liquidity
+                        "source": "coingecko",
+                        "source_url": f"https://www.coingecko.com/en/coins/{item.get('id', '')}",
+                    })
+                    break  # one entry per coin
+
+            self.log_event("observation", f"CoinGecko returned {len(tokens)} tokens")
+            return tokens
+
+        except Exception as e:
+            self.log_event("error", f"CoinGecko fetch failed: {e}")
+            return []
+
+    @staticmethod
+    def _parse_dollar_string(value) -> float:
+        if isinstance(value, (int, float)):
+            return float(value)
+        if isinstance(value, str):
+            cleaned = value.replace("$", "").replace(",", "").strip()
+            try:
+                return float(cleaned)
+            except ValueError:
+                return 0.0
+        return 0.0

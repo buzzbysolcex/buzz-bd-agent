@@ -152,3 +152,102 @@ class TestFetchDexscreener:
 
         error_events = [e for e in agent.events if e["type"] == "error"]
         assert len(error_events) >= 1
+
+
+COINGECKO_TRENDING_URL = "https://api.coingecko.com/api/v3/search/trending"
+
+MOCK_COINGECKO_TRENDING = {
+    "coins": [
+        {
+            "item": {
+                "id": "token-a",
+                "name": "Token A",
+                "symbol": "TKNA",
+                "market_cap_rank": 150,
+                "platforms": {"solana": "abc123solana"},
+                "data": {
+                    "market_cap": "$5,000,000",
+                    "total_volume": "$1,200,000",
+                    "price": "$0.50"
+                }
+            }
+        },
+        {
+            "item": {
+                "id": "token-b",
+                "name": "Token B",
+                "symbol": "TKNB",
+                "market_cap_rank": 300,
+                "platforms": {"ethereum": "def456eth"},
+                "data": {
+                    "market_cap": "$2,000,000",
+                    "total_volume": "$500,000",
+                    "price": "$1.00"
+                }
+            }
+        },
+        {
+            "item": {
+                "id": "no-platform-token",
+                "name": "No Platform",
+                "symbol": "NOPE",
+                "market_cap_rank": 500,
+                "platforms": {},
+                "data": {
+                    "market_cap": "$100,000",
+                    "total_volume": "$10,000",
+                    "price": "$0.01"
+                }
+            }
+        }
+    ]
+}
+
+
+class TestFetchCoingecko:
+    async def test_returns_list_of_tokens(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent()
+
+        with aioresponses() as mocked:
+            mocked.get(COINGECKO_TRENDING_URL, payload=MOCK_COINGECKO_TRENDING)
+            tokens = await agent._fetch_coingecko()
+
+        assert isinstance(tokens, list)
+        assert len(tokens) >= 1
+
+    async def test_token_has_required_fields(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent()
+
+        with aioresponses() as mocked:
+            mocked.get(COINGECKO_TRENDING_URL, payload=MOCK_COINGECKO_TRENDING)
+            tokens = await agent._fetch_coingecko()
+
+        token = tokens[0]
+        assert "contract_address" in token
+        assert "chain" in token
+        assert "name" in token
+        assert "symbol" in token
+        assert token["source"] == "coingecko"
+
+    async def test_skips_tokens_without_platform(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent()
+
+        with aioresponses() as mocked:
+            mocked.get(COINGECKO_TRENDING_URL, payload=MOCK_COINGECKO_TRENDING)
+            tokens = await agent._fetch_coingecko()
+
+        names = [t["name"] for t in tokens]
+        assert "No Platform" not in names
+
+    async def test_returns_empty_on_error(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScannerAgent()
+
+        with aioresponses() as mocked:
+            mocked.get(COINGECKO_TRENDING_URL, status=429)
+            tokens = await agent._fetch_coingecko()
+
+        assert tokens == []
