@@ -86,3 +86,38 @@ class SafetyAgent(BaseAgent):
         if slippage > 5.0:
             modifier -= 3
         return modifier
+
+    def _collect_risk_flags(self, rugcheck: Dict, quillshield: Dict, dflow: Dict) -> List[str]:
+        flags = []
+        if rugcheck.get("available", False):
+            if rugcheck.get("is_honeypot", False):
+                flags.append("honeypot_detected")
+            for risk in rugcheck.get("risks", []):
+                name = risk.lower() if isinstance(risk, str) else ""
+                if "mint" in name and "authority" in name:
+                    flags.append("mint_authority_active")
+                elif "freeze" in name and "authority" in name:
+                    flags.append("freeze_authority_active")
+        if quillshield.get("available", False):
+            flags.extend(quillshield.get("flags", []))
+        if dflow.get("available", False):
+            if dflow.get("routes_found", 0) == 0:
+                flags.append("no_swap_routes")
+            if dflow.get("best_slippage", 0) > 5.0:
+                flags.append("high_slippage")
+            if dflow.get("orderbook_depth", 0) < 10000:
+                flags.append("low_orderbook_depth")
+        return flags
+
+    def _aggregate_score(self, rugcheck: Dict, quillshield: Dict, dflow_modifier: int) -> int:
+        sources = []
+        if rugcheck.get("available", False):
+            sources.append((rugcheck["score"], RUGCHECK_WEIGHT))
+        if quillshield.get("available", False):
+            sources.append((quillshield["score"], QUILLSHIELD_WEIGHT))
+        if not sources:
+            return 0
+        total_weight = sum(w for _, w in sources)
+        weighted_avg = sum(s * (w / total_weight) for s, w in sources)
+        score = round(weighted_avg) + dflow_modifier
+        return max(0, min(100, score))
