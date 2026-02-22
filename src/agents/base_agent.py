@@ -33,6 +33,18 @@ class BaseAgent(ABC):
             f.write(json.dumps(event) + "\n")
         return event
 
+    def write_scratchpad(self, key: str, data: Any) -> None:
+        filepath = os.path.join(self.scratchpad_dir, f"{key}.json")
+        with open(filepath, "w") as f:
+            json.dump(data, f, indent=2)
+
+    def read_scratchpad(self, key: str) -> Optional[Any]:
+        filepath = os.path.join(self.scratchpad_dir, f"{key}.json")
+        if os.path.exists(filepath):
+            with open(filepath, "r") as f:
+                return json.load(f)
+        return None
+
     @abstractmethod
     async def execute(self, params: Dict) -> Dict:
         ...
