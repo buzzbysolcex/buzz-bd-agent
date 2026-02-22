@@ -54,3 +54,35 @@ class SafetyAgent(BaseAgent):
         except Exception as e:
             self.log_event("error", f"RugCheck API failed: {e}")
             return empty
+
+    async def _fetch_dflow(self, address: str, chain: str) -> Dict:
+        self.log_event("decision", "DFlow MCP stubbed — integration pending")
+        return {
+            "routes_found": 0,
+            "best_slippage": 0.0,
+            "best_dex": "",
+            "orderbook_depth": 0.0,
+            "available": False,
+        }
+
+    def _calculate_dflow_modifier(self, dflow_result: Dict) -> int:
+        if not dflow_result.get("available", False):
+            return 0
+        modifier = 0
+        routes = dflow_result.get("routes_found", 0)
+        slippage = dflow_result.get("best_slippage", 0.0)
+        dex = dflow_result.get("best_dex", "").lower()
+        orderbook = dflow_result.get("orderbook_depth", 0.0)
+        if routes >= 3:
+            modifier += 5
+        if slippage > 0 and slippage < 1.0:
+            modifier += 3
+        if dex in TIER_1_DEXES:
+            modifier += 3
+        if orderbook > 50000:
+            modifier += 2
+        if routes == 0:
+            modifier -= 5
+        if slippage > 5.0:
+            modifier -= 3
+        return modifier
