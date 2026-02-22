@@ -20,61 +20,73 @@ class StubAgent(BaseAgent):
 
 
 class TestBaseAgentInit:
-    def test_name_is_set(self):
+    def test_name_is_set(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = StubAgent(name="test_agent")
         assert agent.name == "test_agent"
 
-    def test_initial_status_is_idle(self):
+    def test_initial_status_is_idle(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = StubAgent(name="test_agent")
         assert agent.status == "idle"
 
-    def test_events_list_starts_empty(self):
+    def test_events_list_starts_empty(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = StubAgent(name="test_agent")
         assert agent.events == []
 
 
 class TestEventLogging:
-    def test_log_event_appends_to_events(self):
+    def test_log_event_appends_to_events(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = StubAgent(name="test_agent")
         agent.log_event("action", "scanning tokens")
         assert len(agent.events) == 1
 
-    def test_log_event_has_correct_type(self):
+    def test_log_event_has_correct_type(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = StubAgent(name="test_agent")
         agent.log_event("action", "scanning tokens")
         assert agent.events[0]["type"] == "action"
 
-    def test_log_event_has_description(self):
+    def test_log_event_has_description(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = StubAgent(name="test_agent")
         agent.log_event("observation", "found 5 tokens")
         assert agent.events[0]["description"] == "found 5 tokens"
 
-    def test_log_event_has_data(self):
+    def test_log_event_has_data(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = StubAgent(name="test_agent")
         agent.log_event("action", "scan", {"chain": "solana"})
         assert agent.events[0]["data"] == {"chain": "solana"}
 
-    def test_log_event_data_defaults_to_empty_dict(self):
+    def test_log_event_data_defaults_to_empty_dict(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = StubAgent(name="test_agent")
         agent.log_event("action", "scan")
         assert agent.events[0]["data"] == {}
 
-    def test_log_event_has_timestamp(self):
+    def test_log_event_has_timestamp(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = StubAgent(name="test_agent")
         agent.log_event("action", "scan")
         assert isinstance(agent.events[0]["timestamp"], float)
 
-    def test_log_event_has_agent_name(self):
+    def test_log_event_has_agent_name(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = StubAgent(name="test_agent")
         agent.log_event("action", "scan")
         assert agent.events[0]["agent"] == "test_agent"
 
-    def test_log_event_validates_type(self):
+    def test_log_event_validates_type(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = StubAgent(name="test_agent")
         with pytest.raises(ValueError):
             agent.log_event("invalid_type", "bad event")
 
-    def test_multiple_events_append_in_order(self):
+    def test_multiple_events_append_in_order(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = StubAgent(name="test_agent")
         agent.log_event("action", "first")
         agent.log_event("observation", "second")
@@ -150,6 +162,13 @@ class FailingAgent(BaseAgent):
         raise RuntimeError("API call failed")
 
 
+class StatusCapturingAgent(BaseAgent):
+    """Agent that captures status during execute()."""
+    async def execute(self, params: Dict) -> Dict:
+        self.captured_status = self.status
+        return {}
+
+
 class TestRunLifecycle:
     async def test_run_returns_execute_result(self, tmp_path, monkeypatch):
         monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
@@ -192,6 +211,12 @@ class TestRunLifecycle:
         await agent.run({})
         assert agent.events[-1]["type"] == "observation"
         assert "complete" in agent.events[-1]["description"].lower()
+
+    async def test_status_is_running_during_execute(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StatusCapturingAgent(name="test_agent")
+        await agent.run({})
+        assert agent.captured_status == "running"
 
 
 class TestContext:
