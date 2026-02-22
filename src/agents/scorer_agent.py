@@ -15,6 +15,22 @@ VOLUME_THRESHOLDS = [
     (50_000, 6),
 ]
 
+COMMUNITY_FACTORS = {
+    "twitter_followers": {"weight": 0.3, "threshold": 10_000},
+    "telegram_members": {"weight": 0.3, "threshold": 5_000},
+    "discord_members": {"weight": 0.2, "threshold": 3_000},
+    "engagement_rate": {"weight": 0.2, "threshold": 0.05},
+}
+
+SAFETY_CHECKS = [
+    "verified_source",
+    "no_honeypot",
+    "renounced_ownership",
+    "locked_liquidity",
+    "audit_report",
+]
+SAFETY_POINTS_PER_CHECK = 3
+
 
 class ScorerAgent(BaseAgent):
     def __init__(self):
@@ -44,6 +60,27 @@ class ScorerAgent(BaseAgent):
         if 30 < age_days <= 90:
             return 10      # mature
         return 5           # too old (>90)
+
+    def _score_community(self, socials: Dict) -> int:
+        if not socials:
+            return 0
+        score = 0.0
+        for factor, config in COMMUNITY_FACTORS.items():
+            value = socials.get(factor, 0)
+            if value >= config["threshold"]:
+                score += 15 * config["weight"]
+            elif value > 0:
+                score += 15 * config["weight"] * (value / config["threshold"])
+        return round(score)
+
+    def _score_safety(self, contract: Dict) -> int:
+        if not contract:
+            return 0
+        score = 0
+        for check in SAFETY_CHECKS:
+            if contract.get(check, False):
+                score += SAFETY_POINTS_PER_CHECK
+        return score
 
     async def execute(self, params: Dict) -> Dict:
         raise NotImplementedError("TODO")
