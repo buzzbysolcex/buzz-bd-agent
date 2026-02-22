@@ -153,4 +153,71 @@ class ScorerAgent(BaseAgent):
         return "SKIP"
 
     async def execute(self, params: Dict) -> Dict:
-        raise NotImplementedError("TODO")
+        token_data = params.get("token_data", {})
+        address = token_data.get("contract_address", "")
+        symbol = token_data.get("symbol", "")
+
+        # Auto-reject check
+        reject = self._check_auto_reject(token_data)
+        if reject["rejected"]:
+            self.log_event("decision", f"Auto-rejected {symbol}: {reject['reason']}")
+            result = {
+                "contract_address": address,
+                "chain": token_data.get("chain", ""),
+                "name": token_data.get("name", ""),
+                "symbol": symbol,
+                "total_score": 0,
+                "breakdown": {"liquidity": 0, "volume": 0, "age": 0, "community": 0, "safety": 0},
+                "catalysts": {"bonus": 0, "applied": []},
+                "dflow_modifier": 0,
+                "status": "SKIP",
+                "recommendation": "SKIP",
+                "auto_rejected": True,
+                "reject_reason": reject["reason"],
+            }
+            self.write_scratchpad(f"score_{address}", result)
+            return result
+
+        # Score each dimension
+        breakdown = {
+            "liquidity": self._score_liquidity(token_data.get("liquidity", 0)),
+            "volume": self._score_volume(token_data.get("volume_24h", 0)),
+            "age": self._score_age(token_data.get("age_days")),
+            "community": self._score_community(token_data.get("socials", {})),
+            "safety": self._score_safety(token_data.get("contract", {})),
+        }
+        base_score = sum(breakdown.values())
+
+        # Apply modifiers
+        catalysts = self._apply_catalysts(token_data.get("catalysts", {}))
+        dflow_mod = self._apply_dflow(token_data.get("dflow", {}))
+
+        # Clamp total
+        total = max(0, min(100, base_score + catalysts["bonus"] + dflow_mod))
+
+        status = self._get_status(total)
+        recommendation = self._get_recommendation(status)
+
+        self.log_event("observation", f"Scored {symbol}: {total} ({status})", {
+            "total_score": total,
+            "breakdown": breakdown,
+            "status": status,
+        })
+
+        result = {
+            "contract_address": address,
+            "chain": token_data.get("chain", ""),
+            "name": token_data.get("name", ""),
+            "symbol": symbol,
+            "total_score": total,
+            "breakdown": breakdown,
+            "catalysts": catalysts,
+            "dflow_modifier": dflow_mod,
+            "status": status,
+            "recommendation": recommendation,
+            "auto_rejected": False,
+            "reject_reason": None,
+        }
+
+        self.write_scratchpad(f"score_{address}", result)
+        return result

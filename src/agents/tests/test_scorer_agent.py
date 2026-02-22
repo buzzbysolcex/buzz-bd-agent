@@ -2,6 +2,32 @@ import pytest
 from src.agents.scorer_agent import ScorerAgent
 from src.agents.base_agent import BaseAgent
 
+MOCK_TOKEN_DATA = {
+    "contract_address": "abc123solana",
+    "chain": "solana",
+    "name": "Token A",
+    "symbol": "TKNA",
+    "mcap": 5000000,
+    "volume_24h": 1200000,
+    "liquidity": 800000,
+    "age_days": 14,
+    "socials": {
+        "twitter_followers": 20000,
+        "telegram_members": 10000,
+        "discord_members": 5000,
+        "engagement_rate": 0.10,
+    },
+    "contract": {
+        "verified_source": True,
+        "no_honeypot": True,
+        "renounced_ownership": True,
+        "locked_liquidity": True,
+        "audit_report": True,
+    },
+    "catalysts": {},
+    "dflow": {},
+}
+
 
 class TestScorerAgentInit:
     def test_inherits_base_agent(self, tmp_path, monkeypatch):
@@ -386,3 +412,108 @@ class TestGetRecommendation:
         monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = ScorerAgent()
         assert agent._get_recommendation("SKIP") == "SKIP"
+
+
+class TestExecute:
+    async def test_returns_total_score(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = await agent.execute({"token_data": MOCK_TOKEN_DATA})
+        assert "total_score" in result
+        assert isinstance(result["total_score"], int)
+
+    async def test_returns_breakdown(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = await agent.execute({"token_data": MOCK_TOKEN_DATA})
+        breakdown = result["breakdown"]
+        assert breakdown["liquidity"] == 30
+        assert breakdown["volume"] == 25
+        assert breakdown["age"] == 15
+        assert breakdown["community"] == 15
+        assert breakdown["safety"] == 15
+
+    async def test_perfect_score_is_100(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = await agent.execute({"token_data": MOCK_TOKEN_DATA})
+        assert result["total_score"] == 100
+
+    async def test_returns_status_and_recommendation(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = await agent.execute({"token_data": MOCK_TOKEN_DATA})
+        assert result["status"] == "HOT"
+        assert result["recommendation"] == "PIPELINE"
+
+    async def test_auto_rejected_token(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        low_liq = dict(MOCK_TOKEN_DATA, liquidity=50000)
+        result = await agent.execute({"token_data": low_liq})
+        assert result["auto_rejected"] is True
+        assert result["total_score"] == 0
+        assert result["status"] == "SKIP"
+
+    async def test_catalysts_applied(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        data = dict(MOCK_TOKEN_DATA)
+        data["catalysts"] = {"suspicious_volume": True}
+        result = await agent.execute({"token_data": data})
+        assert result["catalysts"]["bonus"] == -10
+        assert result["total_score"] == 90
+
+    async def test_dflow_applied(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        data = dict(MOCK_TOKEN_DATA)
+        data["dflow"] = {"routes_available": 5, "slippage_quality": "poor"}
+        result = await agent.execute({"token_data": data})
+        assert result["dflow_modifier"] == -8
+        assert result["total_score"] == 92
+
+    async def test_score_clamped_to_0_100(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        data = dict(MOCK_TOKEN_DATA)
+        data["catalysts"] = {"viral_moment": True, "kol_mention": True}
+        result = await agent.execute({"token_data": data})
+        assert result["total_score"] == 100
+
+    async def test_writes_to_scratchpad(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        await agent.execute({"token_data": MOCK_TOKEN_DATA})
+        saved = agent.read_scratchpad("score_abc123solana")
+        assert saved is not None
+        assert saved["total_score"] == 100
+
+    async def test_returns_token_identity(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        result = await agent.execute({"token_data": MOCK_TOKEN_DATA})
+        assert result["contract_address"] == "abc123solana"
+        assert result["chain"] == "solana"
+        assert result["name"] == "Token A"
+        assert result["symbol"] == "TKNA"
+
+    async def test_minimal_token_data(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        minimal = {
+            "contract_address": "xyz789",
+            "chain": "ethereum",
+            "name": "Minimal",
+            "symbol": "MIN",
+            "mcap": 1000000,
+            "volume_24h": 500000,
+            "liquidity": 250000,
+        }
+        result = await agent.execute({"token_data": minimal})
+        assert result["total_score"] >= 0
+        assert result["breakdown"]["liquidity"] == 22
+        assert result["breakdown"]["volume"] == 18
+        assert result["breakdown"]["age"] == 0
+        assert result["breakdown"]["community"] == 0
+        assert result["breakdown"]["safety"] == 0
