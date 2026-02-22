@@ -58,6 +58,22 @@ class BaseAgent(ABC):
                 return json.load(f)
         return None
 
+    def context(self, max_events: int = 10) -> Dict:
+        return {
+            "agent": self.name,
+            "status": self.status,
+            "recent_events": self.events[-max_events:],
+            "scratchpad_keys": self._list_scratchpad_keys(),
+        }
+
+    def _list_scratchpad_keys(self) -> List[str]:
+        keys = []
+        if os.path.isdir(self.scratchpad_dir):
+            for filename in sorted(os.listdir(self.scratchpad_dir)):
+                if filename.endswith(".json"):
+                    keys.append(filename[:-5])
+        return keys
+
     @abstractmethod
     async def execute(self, params: Dict) -> Dict:
         ...
