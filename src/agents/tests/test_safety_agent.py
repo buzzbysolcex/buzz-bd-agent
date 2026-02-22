@@ -189,3 +189,112 @@ class TestCalculateDflowModifier:
         agent = SafetyAgent()
         result = {"routes_found": 0, "best_slippage": 7.0, "best_dex": "", "orderbook_depth": 0, "available": True}
         assert agent._calculate_dflow_modifier(result) == -8
+
+
+class TestCollectRiskFlags:
+    def test_no_flags_when_all_clean(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        rugcheck = {"is_honeypot": False, "risks": [], "available": True}
+        quillshield = {"breakdown": {"authority": 20, "liquidity": 20, "holders": 20, "contract": 20}, "flags": [], "available": True}
+        dflow = {"routes_found": 3, "best_slippage": 0.5, "orderbook_depth": 60000, "available": True}
+        flags = agent._collect_risk_flags(rugcheck, quillshield, dflow)
+        assert flags == []
+
+    def test_honeypot_flag(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        rugcheck = {"is_honeypot": True, "risks": ["Honeypot"], "available": True}
+        quillshield = {"breakdown": {"authority": 20, "liquidity": 20, "holders": 20, "contract": 20}, "flags": [], "available": True}
+        dflow = {"routes_found": 3, "best_slippage": 0.5, "orderbook_depth": 60000, "available": True}
+        flags = agent._collect_risk_flags(rugcheck, quillshield, dflow)
+        assert "honeypot_detected" in flags
+
+    def test_quillshield_flags_forwarded(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        rugcheck = {"is_honeypot": False, "risks": [], "available": True}
+        quillshield = {"breakdown": {"authority": 5, "liquidity": 5, "holders": 5, "contract": 5}, "flags": ["authority_risk", "lp_not_locked", "top_holders_concentrated", "contract_risk"], "available": True}
+        dflow = {"routes_found": 3, "best_slippage": 0.5, "orderbook_depth": 60000, "available": True}
+        flags = agent._collect_risk_flags(rugcheck, quillshield, dflow)
+        assert "authority_risk" in flags
+        assert "lp_not_locked" in flags
+
+    def test_dflow_no_routes_flag(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        rugcheck = {"is_honeypot": False, "risks": [], "available": True}
+        quillshield = {"breakdown": {"authority": 20, "liquidity": 20, "holders": 20, "contract": 20}, "flags": [], "available": True}
+        dflow = {"routes_found": 0, "best_slippage": 0.0, "orderbook_depth": 0, "available": True}
+        flags = agent._collect_risk_flags(rugcheck, quillshield, dflow)
+        assert "no_swap_routes" in flags
+
+    def test_dflow_high_slippage_flag(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        rugcheck = {"is_honeypot": False, "risks": [], "available": True}
+        quillshield = {"breakdown": {"authority": 20, "liquidity": 20, "holders": 20, "contract": 20}, "flags": [], "available": True}
+        dflow = {"routes_found": 1, "best_slippage": 6.0, "orderbook_depth": 5000, "available": True}
+        flags = agent._collect_risk_flags(rugcheck, quillshield, dflow)
+        assert "high_slippage" in flags
+        assert "low_orderbook_depth" in flags
+
+
+class TestAggregateScore:
+    def test_both_sources_available(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        rugcheck = {"score": 80, "available": True}
+        quillshield = {"score": 60, "available": True}
+        # weights 0.3 and 0.5, total 0.8. Redistributed: 0.3/0.8=0.375, 0.5/0.8=0.625
+        # 80*0.375 + 60*0.625 = 30 + 37.5 = 67.5 -> round(67.5) = 68
+        score = agent._aggregate_score(rugcheck, quillshield, 0)
+        assert score == 68
+
+    def test_only_rugcheck_available(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        rugcheck = {"score": 80, "available": True}
+        quillshield = {"score": 0, "available": False}
+        score = agent._aggregate_score(rugcheck, quillshield, 0)
+        assert score == 80
+
+    def test_only_quillshield_available(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        rugcheck = {"score": 0, "available": False}
+        quillshield = {"score": 70, "available": True}
+        score = agent._aggregate_score(rugcheck, quillshield, 0)
+        assert score == 70
+
+    def test_neither_available(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        rugcheck = {"score": 0, "available": False}
+        quillshield = {"score": 0, "available": False}
+        score = agent._aggregate_score(rugcheck, quillshield, 0)
+        assert score == 0
+
+    def test_dflow_modifier_applied(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        rugcheck = {"score": 80, "available": True}
+        quillshield = {"score": 60, "available": True}
+        score = agent._aggregate_score(rugcheck, quillshield, 13)
+        assert score == 81  # 68 + 13
+
+    def test_score_clamped_to_100(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        rugcheck = {"score": 100, "available": True}
+        quillshield = {"score": 100, "available": True}
+        score = agent._aggregate_score(rugcheck, quillshield, 13)
+        assert score == 100
+
+    def test_score_clamped_to_0(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SafetyAgent()
+        rugcheck = {"score": 5, "available": True}
+        quillshield = {"score": 5, "available": True}
+        score = agent._aggregate_score(rugcheck, quillshield, -8)
+        assert score == 0
