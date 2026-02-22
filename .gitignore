@@ -42,6 +42,14 @@ build/
 # Test coverage
 coverage/
 
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Agent scratchpad (runtime data)
+data/scratchpad/
+
 # Temporary files
 tmp/
 temp/

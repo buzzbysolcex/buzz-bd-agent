@@ -37,7 +37,7 @@ class BaseAgent(ABC):
         event = {
             "type": event_type,
             "description": description,
-            "data": data or {},
+            "data": data if data is not None else {},
             "timestamp": time.time(),
             "agent": self.name,
         }
