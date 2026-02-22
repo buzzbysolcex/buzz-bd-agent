@@ -112,3 +112,33 @@ class TestEventPersistence:
         monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(custom_dir))
         agent = StubAgent(name="test_agent")
         assert (custom_dir / "test_agent").is_dir()
+
+
+class TestScratchpad:
+    def test_write_and_read_scratchpad(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        agent.write_scratchpad("scan_result", {"score": 85, "chain": "solana"})
+        result = agent.read_scratchpad("scan_result")
+        assert result == {"score": 85, "chain": "solana"}
+
+    def test_read_nonexistent_key_returns_none(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        assert agent.read_scratchpad("nonexistent") is None
+
+    def test_scratchpad_writes_json_file(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        agent.write_scratchpad("my_key", {"data": 1})
+
+        filepath = tmp_path / "test_agent" / "my_key.json"
+        assert filepath.exists()
+        assert json.loads(filepath.read_text()) == {"data": 1}
+
+    def test_scratchpad_overwrites_existing_key(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = StubAgent(name="test_agent")
+        agent.write_scratchpad("key", {"v": 1})
+        agent.write_scratchpad("key", {"v": 2})
+        assert agent.read_scratchpad("key") == {"v": 2}
