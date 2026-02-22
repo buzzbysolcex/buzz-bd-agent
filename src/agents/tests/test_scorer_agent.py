@@ -82,3 +82,65 @@ class TestScoreVolume:
         monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
         agent = ScorerAgent()
         assert agent._score_volume(0) == 0
+
+
+class TestScoreAge:
+    def test_optimal_7_days(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._score_age(7) == 15
+
+    def test_optimal_15_days(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._score_age(15) == 15
+
+    def test_optimal_30_days(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._score_age(30) == 15
+
+    def test_new_but_stable_3_days(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._score_age(3) == 10
+
+    def test_new_but_stable_5_days(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._score_age(5) == 10
+
+    def test_mature_60_days(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._score_age(60) == 10
+
+    def test_mature_90_days(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._score_age(90) == 10
+
+    def test_too_new_1_day(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._score_age(1) == 0
+
+    def test_too_new_0_days(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._score_age(0) == 0
+
+    def test_too_old_91_days(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._score_age(91) == 5
+
+    def test_too_old_365_days(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._score_age(365) == 5
+
+    def test_none_returns_0(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = ScorerAgent()
+        assert agent._score_age(None) == 0

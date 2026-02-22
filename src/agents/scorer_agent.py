@@ -32,5 +32,18 @@ class ScorerAgent(BaseAgent):
                 return points
         return 0
 
+    def _score_age(self, age_days: Optional[float]) -> int:
+        if age_days is None:
+            return 0
+        if age_days < 2:
+            return 0       # too new
+        if 3 <= age_days < 7:
+            return 10      # new but stable
+        if 7 <= age_days <= 30:
+            return 15      # optimal
+        if 30 < age_days <= 90:
+            return 10      # mature
+        return 5           # too old (>90)
+
     async def execute(self, params: Dict) -> Dict:
         raise NotImplementedError("TODO")
