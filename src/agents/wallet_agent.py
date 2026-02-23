@@ -74,24 +74,9 @@ class WalletAgent(BaseAgent):
             self.log_event("error", "Missing deployer_address, token_address, or chain")
             return self._empty_result(deployer, token, chain, depth)
 
-        self.log_event("action", f"Starting wallet analysis for {token} (deployer: {deployer}) on {chain}", {"depth": depth})
+        try:
+            self.log_event("action", f"Starting wallet analysis for {token} (deployer: {deployer}) on {chain}", {"depth": depth})
 
-        liquidity_r, holders_r, deployer_r, tx_flow_r, forensics_r = await asyncio.gather(
-            self._analyze_liquidity(token, chain, depth),
-            self._analyze_holders(token, deployer, chain, depth),
-            self._analyze_deployer(deployer, chain, depth),
-            self._analyze_tx_flow(token, chain, depth),
-            self._run_forensics(token, deployer, chain, depth),
-        )
-
-        result = self._compute_verdict(
-            deployer, token, chain, depth,
-            liquidity_r, holders_r, deployer_r, tx_flow_r, forensics_r,
-        )
-
-        if depth == "quick" and params.get("depth", "standard") == "quick" and len(result["red_flags"]) >= 2:
-            self.log_event("decision", f"Auto-escalating from quick to standard: {len(result['red_flags'])} red flags")
-            depth = "standard"
             liquidity_r, holders_r, deployer_r, tx_flow_r, forensics_r = await asyncio.gather(
                 self._analyze_liquidity(token, chain, depth),
                 self._analyze_holders(token, deployer, chain, depth),
@@ -99,19 +84,40 @@ class WalletAgent(BaseAgent):
                 self._analyze_tx_flow(token, chain, depth),
                 self._run_forensics(token, deployer, chain, depth),
             )
+
             result = self._compute_verdict(
                 deployer, token, chain, depth,
                 liquidity_r, holders_r, deployer_r, tx_flow_r, forensics_r,
             )
 
-        self.log_event("decision", f"Wallet score: {result['wallet_score']} ({result['verdict']})", {
-            "wallet_score": result["wallet_score"],
-            "verdict": result["verdict"],
-            "red_flags": result["red_flags"],
-        })
+            if depth == "quick" and params.get("depth", "standard") == "quick" and len(result["red_flags"]) >= 2:
+                self.log_event("decision", f"Auto-escalating from quick to standard: {len(result['red_flags'])} red flags")
+                depth = "standard"
+                liquidity_r, holders_r, deployer_r, tx_flow_r, forensics_r = await asyncio.gather(
+                    self._analyze_liquidity(token, chain, depth),
+                    self._analyze_holders(token, deployer, chain, depth),
+                    self._analyze_deployer(deployer, chain, depth),
+                    self._analyze_tx_flow(token, chain, depth),
+                    self._run_forensics(token, deployer, chain, depth),
+                )
+                result = self._compute_verdict(
+                    deployer, token, chain, depth,
+                    liquidity_r, holders_r, deployer_r, tx_flow_r, forensics_r,
+                )
 
-        self.write_scratchpad(f"wallet_{token}", result)
-        return result
+            self.log_event("decision", f"Wallet score: {result['wallet_score']} ({result['verdict']})", {
+                "wallet_score": result["wallet_score"],
+                "verdict": result["verdict"],
+                "red_flags": result["red_flags"],
+            })
+
+            self.write_scratchpad(f"wallet_{token}", result)
+            return result
+        except Exception as e:
+            self.log_event("error", f"Wallet analysis failed unexpectedly: {e}")
+            empty = self._empty_result(deployer, token, chain, depth)
+            empty["red_flags"].append("all_sources_failed")
+            return empty
 
     async def _analyze_liquidity(self, token: str, chain: str, depth: str) -> Dict:
         empty = {
@@ -156,12 +162,16 @@ class WalletAgent(BaseAgent):
             elif liquidity_usd >= 50000:
                 score += 3
 
-            if lp_locked:
+            if lp_burned:
+                green_flags.append("lp_burned")
+                if lp_locked:
+                    score += 7  # burned AND locked
+                    green_flags.append("lp_locked_long")
+                else:
+                    score += 5  # burned only
+            elif lp_locked:
                 score += 7
                 green_flags.append("lp_locked_long")
-            elif lp_burned:
-                score += 7
-                green_flags.append("lp_burned")
             else:
                 red_flags.append("unlocked_lp")
 
@@ -488,9 +498,10 @@ class WalletAgent(BaseAgent):
                     bundled_wallets.extend(unique_payers)
             bundled_wallets = list(set(bundled_wallets))
 
+            # Stubbed — requires cross-referencing funding txs (planned for deep mode)
             sybil_clusters: list = []
             wash_trading_detected = False
-            same_funding_source = False
+            same_funding_source = False  # TODO: detect in deep mode via shared funding source analysis
 
             score = 0
             red_flags = []
