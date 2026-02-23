@@ -121,9 +121,126 @@ class SocialAgent(BaseAgent):
             return empty
 
     async def _search_grok(self, project: str, token: str, chain: str, depth: str) -> Dict:
-        return {"available": False, "score": 0, "twitter_score": 0, "community_score": 0, "red_flags": [], "green_flags": [],
-                "sentiment": "suspicious", "follower_estimate": 0, "engagement_level": "none",
-                "tweet_frequency": "none", "bot_suspicion": 0.0, "summary": ""}
+        empty = {
+            "available": False, "score": 0, "twitter_score": 0, "community_score": 0,
+            "red_flags": [], "green_flags": [],
+            "sentiment": "suspicious", "follower_estimate": 0, "engagement_level": "none",
+            "tweet_frequency": "none", "bot_suspicion": 0.0, "summary": "",
+        }
+        if depth != "deep":
+            return empty
+
+        api_key = os.environ.get("XAI_API_KEY", "")
+        if not api_key:
+            self.log_event("error", "XAI_API_KEY not set, skipping Grok analysis")
+            return empty
+
+        self.log_event("action", "Analyzing Twitter presence via Grok/xAI", {"project": project})
+        timeout = DEPTH_TIMEOUTS.get(depth, DEPTH_TIMEOUTS["deep"])
+        try:
+            prompt = GROK_PROMPT_TEMPLATE.format(
+                project_name=project, token_address=token, chain=chain,
+            )
+            headers = {
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            }
+            payload = {
+                "model": GROK_MODEL,
+                "messages": [{"role": "user", "content": prompt}],
+                "response_format": {"type": "json_object"},
+            }
+
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.post(GROK_API_URL, headers=headers, json=payload) as resp:
+                    if resp.status != 200:
+                        raise aiohttp.ClientError(f"Grok API returned {resp.status}")
+                    data = await resp.json()
+
+            content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+            try:
+                parsed = json.loads(content)
+            except (json.JSONDecodeError, TypeError):
+                self.log_event("error", "Grok returned invalid JSON")
+                return empty
+
+            sentiment = parsed.get("sentiment", "suspicious")
+            follower_estimate = int(parsed.get("follower_estimate", 0) or 0)
+            engagement_level = parsed.get("engagement_level", "none")
+            tweet_frequency = parsed.get("tweet_frequency", "none")
+            bot_suspicion = float(parsed.get("bot_suspicion", 0.0) or 0.0)
+            summary = parsed.get("summary", "")
+
+            # Twitter score (0-30)
+            twitter_score = 0
+            if follower_estimate >= 50000:
+                twitter_score += 12
+            elif follower_estimate >= 10000:
+                twitter_score += 8
+            elif follower_estimate >= 1000:
+                twitter_score += 4
+
+            if engagement_level == "high":
+                twitter_score += 8
+            elif engagement_level == "medium":
+                twitter_score += 5
+
+            if tweet_frequency == "active":
+                twitter_score += 5
+            elif tweet_frequency == "moderate":
+                twitter_score += 3
+
+            if bot_suspicion < 0.3:
+                twitter_score += 5
+
+            twitter_score = min(MAX_TWITTER, twitter_score)
+
+            # Community score (0-25)
+            community_score = 0
+            if sentiment == "positive":
+                community_score += 10
+            elif sentiment == "neutral":
+                community_score += 5
+
+            if engagement_level in ("high", "medium"):
+                community_score += 8
+
+            if tweet_frequency in ("active", "moderate"):
+                community_score += 7
+
+            community_score = min(MAX_COMMUNITY, community_score)
+
+            red_flags = []
+            green_flags = []
+
+            if bot_suspicion > 0.9:
+                red_flags.append("bot_farm")
+            if bot_suspicion > 0.7:
+                red_flags.append("fake_engagement")
+            if tweet_frequency == "dormant":
+                red_flags.append("dormant_social")
+
+            if sentiment == "positive":
+                green_flags.append("positive_sentiment")
+            if follower_estimate >= 10000:
+                green_flags.append("established_presence")
+            if engagement_level in ("high", "medium") and tweet_frequency == "active":
+                green_flags.append("active_community")
+
+            total_score = twitter_score + community_score
+
+            self.log_event("observation", f"Grok: sentiment={sentiment}, followers~{follower_estimate}, bots={bot_suspicion}, score={total_score}/55")
+            return {
+                "available": True, "score": total_score,
+                "twitter_score": twitter_score, "community_score": community_score,
+                "red_flags": red_flags, "green_flags": green_flags,
+                "sentiment": sentiment, "follower_estimate": follower_estimate,
+                "engagement_level": engagement_level, "tweet_frequency": tweet_frequency,
+                "bot_suspicion": bot_suspicion, "summary": summary,
+            }
+        except Exception as e:
+            self.log_event("error", f"Grok analysis failed: {e}")
+            return empty
 
     async def _search_atv(self, deployer: str, depth: str) -> Dict:
         empty = {
