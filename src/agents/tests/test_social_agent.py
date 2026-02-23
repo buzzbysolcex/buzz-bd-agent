@@ -745,3 +745,81 @@ class TestSentimentMapping:
         result = agent._compute_verdict("BONK", "abc123", "solana", "standard", grok, atv, serper)
         # raw=35 out of 45 available => 78%
         assert result["community_health"] == "B"
+
+
+class TestExecuteIntegration:
+    async def test_happy_path_returns_all_fields(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("SERPER_API_KEY", "test-key")
+        monkeypatch.setenv("XAI_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{ATV_API_URL}?addresses=dep123&include=name,twitter,github,discord", payload=MOCK_ATV_FULL_IDENTITY)
+            mocked.post(SERPER_API_URL, payload=MOCK_SERPER_POSITIVE)
+            mocked.post(GROK_API_URL, payload=MOCK_GROK_POSITIVE)
+            result = await agent.execute({
+                "project_name": "BONK", "token_address": "abc123",
+                "chain": "solana", "deployer_address": "dep123", "depth": "deep",
+            })
+        for field in ["social_score", "sentiment", "community_health", "team_verified",
+                       "breakdown", "grok_analysis", "team_identity", "web_reputation",
+                       "red_flags", "green_flags", "sources_used"]:
+            assert field in result
+        assert 0 <= result["social_score"] <= 100
+
+    async def test_writes_to_scratchpad(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{ATV_API_URL}?addresses=dep123&include=name,twitter,github,discord", payload=MOCK_ATV_FULL_IDENTITY)
+            await agent.execute({
+                "project_name": "BONK", "token_address": "abc123",
+                "chain": "solana", "deployer_address": "dep123", "depth": "quick",
+            })
+        saved = agent.read_scratchpad("social_abc123")
+        assert saved is not None
+        assert "social_score" in saved
+
+    async def test_all_apis_fail_gracefully(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("SERPER_API_KEY", "test-key")
+        monkeypatch.setenv("XAI_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{ATV_API_URL}?addresses=dep123&include=name,twitter,github,discord", status=500)
+            mocked.post(SERPER_API_URL, status=500)
+            mocked.post(GROK_API_URL, status=500)
+            result = await agent.execute({
+                "project_name": "BONK", "token_address": "abc123",
+                "chain": "solana", "deployer_address": "dep123", "depth": "deep",
+            })
+        assert result["social_score"] == 0
+        assert result["sentiment"] == "suspicious"
+        assert "all_sources_failed" in result["red_flags"]
+
+    async def test_partial_failure_still_scores(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("SERPER_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{ATV_API_URL}?addresses=dep123&include=name,twitter,github,discord", payload=MOCK_ATV_FULL_IDENTITY)
+            mocked.post(SERPER_API_URL, status=500)
+            result = await agent.execute({
+                "project_name": "BONK", "token_address": "abc123",
+                "chain": "solana", "deployer_address": "dep123", "depth": "standard",
+            })
+        assert result["social_score"] > 0
+        assert "atv" in result["sources_used"]
+
+    async def test_echoes_input_params(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{ATV_API_URL}?addresses=dep123&include=name,twitter,github,discord", payload=MOCK_ATV_FULL_IDENTITY)
+            result = await agent.execute({
+                "project_name": "BONK", "token_address": "abc123",
+                "chain": "solana", "deployer_address": "dep123", "depth": "quick",
+            })
+        assert result["project_name"] == "BONK"
+        assert result["token_address"] == "abc123"
+        assert result["chain"] == "solana"
