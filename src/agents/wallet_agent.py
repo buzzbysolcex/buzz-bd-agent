@@ -529,4 +529,112 @@ class WalletAgent(BaseAgent):
     def _compute_verdict(self, deployer: str, token: str, chain: str, depth: str,
                          liquidity_r: Dict, holders_r: Dict, deployer_r: Dict,
                          tx_flow_r: Dict, forensics_r: Dict) -> Dict:
-        return self._empty_result(deployer, token, chain, depth)
+        analyses = [
+            (liquidity_r, MAX_LIQUIDITY),
+            (holders_r, MAX_HOLDERS),
+            (deployer_r, MAX_DEPLOYER),
+            (tx_flow_r, MAX_TX_FLOW),
+            (forensics_r, MAX_FORENSICS),
+        ]
+
+        raw_score = 0
+        available_points = 0
+        for result, max_pts in analyses:
+            if result.get("available", False):
+                raw_score += result.get("score", 0)
+                available_points += max_pts
+
+        if available_points > 0:
+            wallet_score = round((raw_score / available_points) * 100)
+        else:
+            wallet_score = 0
+
+        wallet_score = max(0, min(100, wallet_score))
+
+        if wallet_score >= 80:
+            risk_level = "low"
+            verdict = "CLEAN"
+        elif wallet_score >= 60:
+            risk_level = "medium"
+            verdict = "CAUTION"
+        elif wallet_score >= 35:
+            risk_level = "high"
+            verdict = "SUSPICIOUS"
+        else:
+            risk_level = "critical"
+            verdict = "RUG_RISK"
+
+        red_flags = []
+        green_flags = []
+        for result, _ in analyses:
+            red_flags.extend(result.get("red_flags", []))
+            green_flags.extend(result.get("green_flags", []))
+
+        if available_points == 0:
+            red_flags.append("all_sources_failed")
+
+        sources_used = []
+        if liquidity_r.get("available") or tx_flow_r.get("available"):
+            sources_used.append("dexscreener")
+        if holders_r.get("available") or deployer_r.get("available") or forensics_r.get("available"):
+            sources_used.append("helius")
+        if deployer_r.get("cross_chain_activity", False):
+            sources_used.append("allium")
+
+        breakdown = {
+            "liquidity": liquidity_r.get("score", 0),
+            "holders": holders_r.get("score", 0),
+            "deployer": deployer_r.get("score", 0),
+            "tx_flow": tx_flow_r.get("score", 0),
+            "forensics": forensics_r.get("score", 0),
+        }
+
+        return {
+            "deployer_address": deployer,
+            "token_address": token,
+            "chain": chain,
+            "depth": depth,
+            "wallet_score": wallet_score,
+            "risk_level": risk_level,
+            "verdict": verdict,
+            "breakdown": breakdown,
+            "liquidity_health": {
+                "total_liquidity": liquidity_r.get("total_liquidity", 0.0),
+                "lp_locked": liquidity_r.get("lp_locked", False),
+                "lp_lock_duration_days": liquidity_r.get("lp_lock_duration_days"),
+                "lp_burned": liquidity_r.get("lp_burned", False),
+                "buy_sell_ratio": liquidity_r.get("buy_sell_ratio", 0.0),
+                "available": liquidity_r.get("available", False),
+            },
+            "holder_distribution": {
+                "top10_pct": holders_r.get("top10_pct", 0.0),
+                "deployer_pct": holders_r.get("deployer_pct", 0.0),
+                "unique_holders": holders_r.get("unique_holders", 0),
+                "whale_count": holders_r.get("whale_count", 0),
+                "available": holders_r.get("available", False),
+            },
+            "deployer_reputation": {
+                "age_days": deployer_r.get("age_days", 0),
+                "total_tokens_deployed": deployer_r.get("total_tokens_deployed", 0),
+                "rug_count": deployer_r.get("rug_count", 0),
+                "cross_chain_activity": deployer_r.get("cross_chain_activity", False),
+                "available": deployer_r.get("available", False),
+            },
+            "tx_flow": {
+                "organic_score": tx_flow_r.get("organic_score", 0.0),
+                "unique_buyers_24h": tx_flow_r.get("unique_buyers_24h", 0),
+                "unique_sellers_24h": tx_flow_r.get("unique_sellers_24h", 0),
+                "avg_tx_size": tx_flow_r.get("avg_tx_size", 0.0),
+                "available": tx_flow_r.get("available", False),
+            },
+            "forensics": {
+                "bundled_wallets": forensics_r.get("bundled_wallets", []),
+                "sybil_clusters": forensics_r.get("sybil_clusters", []),
+                "wash_trading_detected": forensics_r.get("wash_trading_detected", False),
+                "same_funding_source": forensics_r.get("same_funding_source", False),
+                "available": forensics_r.get("available", False),
+            },
+            "red_flags": red_flags,
+            "green_flags": green_flags,
+            "sources_used": sources_used,
+        }
