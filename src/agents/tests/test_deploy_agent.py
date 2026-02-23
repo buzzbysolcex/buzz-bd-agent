@@ -448,3 +448,80 @@ class TestFlagDetection:
         result = agent._compute_verdict("0xdep123", "solana", "standard",
                                         deploy_r, portfolio_r, cross_r)
         assert "negative_pnl" in result["red_flags"]
+
+
+class TestDepthGating:
+    @pytest.mark.asyncio
+    async def test_quick_only_runs_deployments(self, monkeypatch):
+        """Quick depth: only _analyze_deployments runs."""
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = DeployAgent()
+        txns = _make_helius_txns(count=5, oldest_age_days=100)
+        url = HELIUS_TXN_URL.format(address="0xdep123")
+        with aioresponses() as mocked:
+            mocked.get(f"{url}?api-key=test-key&limit=100", payload=txns)
+            result = await agent.execute({"deployer_address": "0xdep123", "chain": "solana", "depth": "quick"})
+        assert result["deployment_analysis"]["available"] is True
+        assert result["portfolio_analysis"]["available"] is False
+        assert result["cross_chain_analysis"]["available"] is False
+
+    @pytest.mark.asyncio
+    async def test_standard_runs_deployments_and_portfolio(self, monkeypatch):
+        """Standard depth: deployments + portfolio run."""
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = DeployAgent()
+        txns = _make_helius_txns(count=5, oldest_age_days=100)
+        das_resp = _make_das_response(token_count=5, total_value=500.0)
+        url = HELIUS_TXN_URL.format(address="0xdep123")
+        with aioresponses() as mocked:
+            mocked.get(f"{url}?api-key=test-key&limit=100", payload=txns)
+            mocked.post(f"{HELIUS_DAS_URL}/?api-key=test-key", payload=das_resp)
+            result = await agent.execute({"deployer_address": "0xdep123", "chain": "solana", "depth": "standard"})
+        assert result["deployment_analysis"]["available"] is True
+        assert result["portfolio_analysis"]["available"] is True
+        assert result["cross_chain_analysis"]["available"] is False
+
+    @pytest.mark.asyncio
+    async def test_deep_runs_all_three(self, monkeypatch):
+        """Deep depth: all 3 methods run (cross-chain still unavailable as stub)."""
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = DeployAgent()
+        txns = _make_helius_txns(count=5, oldest_age_days=100)
+        das_resp = _make_das_response(token_count=5, total_value=500.0)
+        url = HELIUS_TXN_URL.format(address="0xdep123")
+        with aioresponses() as mocked:
+            mocked.get(f"{url}?api-key=test-key&limit=100", payload=txns)
+            mocked.post(f"{HELIUS_DAS_URL}/?api-key=test-key", payload=das_resp)
+            result = await agent.execute({"deployer_address": "0xdep123", "chain": "solana", "depth": "deep"})
+        assert result["deployment_analysis"]["available"] is True
+        assert result["portfolio_analysis"]["available"] is True
+        assert result["cross_chain_analysis"]["available"] is False
+
+    @pytest.mark.asyncio
+    async def test_quick_score_normalized_to_100(self, monkeypatch):
+        """Quick mode: score normalizes using only deployment max (30) + reputation (20)."""
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = DeployAgent()
+        txns = _make_helius_txns(count=12, oldest_age_days=400)
+        url = HELIUS_TXN_URL.format(address="0xdep123")
+        with aioresponses() as mocked:
+            mocked.get(f"{url}?api-key=test-key&limit=100", payload=txns)
+            result = await agent.execute({"deployer_address": "0xdep123", "chain": "solana", "depth": "quick"})
+        assert result["deploy_score"] > 0
+        assert result["deploy_score"] <= 100
+
+    @pytest.mark.asyncio
+    async def test_default_depth_is_standard(self, monkeypatch):
+        """No depth param defaults to standard."""
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = DeployAgent()
+        txns = _make_helius_txns(count=5, oldest_age_days=100)
+        das_resp = _make_das_response(token_count=5, total_value=500.0)
+        url = HELIUS_TXN_URL.format(address="0xdep123")
+        with aioresponses() as mocked:
+            mocked.get(f"{url}?api-key=test-key&limit=100", payload=txns)
+            mocked.post(f"{HELIUS_DAS_URL}/?api-key=test-key", payload=das_resp)
+            result = await agent.execute({"deployer_address": "0xdep123", "chain": "solana"})
+        assert result["depth"] == "standard"
+        assert result["deployment_analysis"]["available"] is True
+        assert result["portfolio_analysis"]["available"] is True
