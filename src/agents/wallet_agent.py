@@ -114,7 +114,77 @@ class WalletAgent(BaseAgent):
         return result
 
     async def _analyze_liquidity(self, token: str, chain: str, depth: str) -> Dict:
-        return {"available": False, "score": 0}
+        empty = {
+            "available": False, "score": 0,
+            "total_liquidity": 0.0, "lp_locked": False, "lp_lock_duration_days": None,
+            "lp_burned": False, "buy_sell_ratio": 0.0,
+            "red_flags": [], "green_flags": [],
+        }
+        self.log_event("action", "Analyzing liquidity via DexScreener", {"token": token})
+        timeout = DEPTH_TIMEOUTS.get(depth, DEPTH_TIMEOUTS["standard"])
+        try:
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.get(f"{DEXSCREENER_TOKENS_URL}/{token}") as resp:
+                    if resp.status != 200:
+                        raise aiohttp.ClientError(f"DexScreener returned {resp.status}")
+                    data = await resp.json()
+
+            pairs = data.get("pairs", [])
+            if not pairs:
+                self.log_event("observation", "No pairs found on DexScreener")
+                return empty
+
+            pair = pairs[0]
+            liquidity_usd = float(pair.get("liquidity", {}).get("usd", 0) or 0)
+            txns = pair.get("txns", {}).get("h24", {})
+            buys = int(txns.get("buys", 0) or 0)
+            sells = int(txns.get("sells", 0) or 0)
+            buy_sell_ratio = buys / sells if sells > 0 else (float("inf") if buys > 0 else 0.0)
+
+            labels = [l.lower() if isinstance(l, str) else "" for l in pair.get("labels", [])]
+            lp_locked = any(lbl in LP_LOCK_ADDRESSES for lbl in labels)
+            lp_burned = any(lbl in BURN_ADDRESSES for lbl in labels)
+
+            score = 0
+            red_flags = []
+            green_flags = []
+
+            if liquidity_usd >= 500000:
+                score += 8
+            elif liquidity_usd >= 100000:
+                score += 5
+            elif liquidity_usd >= 50000:
+                score += 3
+
+            if lp_locked:
+                score += 7
+                green_flags.append("lp_locked_long")
+            elif lp_burned:
+                score += 7
+                green_flags.append("lp_burned")
+            else:
+                red_flags.append("unlocked_lp")
+
+            if 0.7 <= buy_sell_ratio <= 1.5:
+                score += 5
+            elif buy_sell_ratio > 5.0:
+                red_flags.append("honeypot_risk")
+
+            score = min(MAX_LIQUIDITY, score)
+
+            self.log_event("observation", f"Liquidity: ${liquidity_usd:,.0f}, score: {score}/25")
+            return {
+                "available": True, "score": score,
+                "total_liquidity": liquidity_usd,
+                "lp_locked": lp_locked, "lp_lock_duration_days": None,
+                "lp_burned": lp_burned,
+                "buy_sell_ratio": round(buy_sell_ratio, 2) if buy_sell_ratio != float("inf") else 999.0,
+                "red_flags": red_flags, "green_flags": green_flags,
+            }
+        except Exception as e:
+            self.log_event("error", f"Liquidity analysis failed: {e}")
+            return empty
+
 
     async def _analyze_holders(self, token: str, deployer: str, chain: str, depth: str) -> Dict:
         if depth == "quick":
