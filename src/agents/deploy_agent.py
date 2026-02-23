@@ -68,4 +68,23 @@ class DeployAgent(BaseAgent):
         }
 
     async def execute(self, params: Dict) -> Dict:
-        return self._empty_result()
+        deployer = params.get("deployer_address", "")
+        chain = params.get("chain", "")
+        depth = params.get("depth", "standard")
+
+        if depth not in VALID_DEPTHS:
+            depth = "standard"
+
+        if not deployer or not chain:
+            self.log_event("error", "Missing deployer_address or chain")
+            return self._empty_result(deployer, chain, depth)
+
+        try:
+            self.log_event("action", f"Starting deploy analysis for {deployer} on {chain}", {"depth": depth})
+            # Analysis methods will be added in subsequent tasks
+            return self._empty_result(deployer, chain, depth)
+        except Exception as e:
+            self.log_event("error", f"Deploy analysis failed unexpectedly: {e}")
+            empty = self._empty_result(deployer, chain, depth)
+            empty["red_flags"].append("all_sources_failed")
+            return empty

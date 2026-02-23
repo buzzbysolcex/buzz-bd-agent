@@ -33,3 +33,33 @@ class TestDeployAgentInit:
         assert result["red_flags"] == []
         assert result["green_flags"] == []
         assert result["sources_used"] == []
+
+
+class TestInputValidation:
+    @pytest.mark.asyncio
+    async def test_missing_deployer_address(self):
+        agent = DeployAgent()
+        result = await agent.execute({"chain": "solana"})
+        assert result["deploy_score"] == 0
+        assert result["risk_level"] == "critical"
+
+    @pytest.mark.asyncio
+    async def test_missing_chain(self):
+        agent = DeployAgent()
+        result = await agent.execute({"deployer_address": "0xabc"})
+        assert result["deploy_score"] == 0
+        assert result["risk_level"] == "critical"
+
+    @pytest.mark.asyncio
+    async def test_invalid_depth_defaults_to_standard(self):
+        agent = DeployAgent()
+        result = await agent.execute({"deployer_address": "0xabc", "chain": "solana", "depth": "ultra"})
+        assert result["depth"] == "standard"
+
+    @pytest.mark.asyncio
+    async def test_empty_params(self):
+        agent = DeployAgent()
+        result = await agent.execute({})
+        assert result["deploy_score"] == 0
+        assert result["deployer_address"] == ""
+        assert result["chain"] == ""
