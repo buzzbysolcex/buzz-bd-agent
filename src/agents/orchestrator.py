@@ -42,3 +42,14 @@ class OrchestratorAgent(BaseAgent):
 
     async def execute(self, params: Dict) -> Dict:
         raise NotImplementedError
+
+    def _redistribute_weights(self, failed_agents: List[str]) -> Dict[str, float]:
+        surviving = {
+            name: weight
+            for name, weight in self.AGENT_WEIGHTS.items()
+            if name not in failed_agents
+        }
+        if not surviving:
+            return {}
+        total = sum(surviving.values())
+        return {name: weight / total for name, weight in surviving.items()}
