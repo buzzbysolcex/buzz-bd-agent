@@ -55,7 +55,63 @@ class OrchestratorAgent(BaseAgent):
         }
 
     async def execute(self, params: Dict) -> Dict:
-        raise NotImplementedError
+        mode = params.get("mode", "scan")
+        if mode == "scan":
+            return await self._run_scan_pipeline(params)
+        elif mode == "evaluate":
+            return await self._evaluate_single_token(
+                params["token_data"],
+                depth=params.get("depth", "quick"),
+            )
+        else:
+            raise ValueError(f"Unknown mode: {mode}")
+
+    async def _run_scan_pipeline(self, params: Dict) -> Dict:
+        self.log_event("action", "Starting token scan")
+        scan_result = await self._scanner.run(params)
+        tokens = scan_result.get("tokens", [])
+        self.log_event("observation", f"Scanner found {len(tokens)} tokens")
+
+        results = []
+        for token in tokens:
+            token_data = {
+                "token_address": token["contract_address"],
+                "deployer_address": token.get("deployer_address", ""),
+                "chain": token["chain"],
+                "project_name": token.get("name", ""),
+                "market_data": {
+                    "mcap": token.get("mcap", 0),
+                    "volume_24h": token.get("volume_24h", 0),
+                    "liquidity": token.get("liquidity", 0),
+                },
+            }
+            result = await self._evaluate_single_token(token_data, depth="quick")
+            results.append(result)
+
+        self.write_scratchpad("last_scan_results", {
+            "tokens_scanned": len(tokens),
+            "results": results,
+        })
+
+        summary = self._build_summary(results)
+        self.log_event("observation", f"Scan complete: {summary}")
+
+        return {
+            "tokens_scanned": len(tokens),
+            "results": results,
+            "summary": summary,
+        }
+
+    def _build_summary(self, results: List[Dict]) -> Dict:
+        summary = {"strong_list": 0, "list": 0, "review": 0, "reject": 0, "avg_score": 0}
+        for r in results:
+            v = r["unified_verdict"].lower()
+            summary[v] = summary.get(v, 0) + 1
+        if results:
+            summary["avg_score"] = round(
+                sum(r["unified_score"] for r in results) / len(results)
+            )
+        return summary
 
     def _redistribute_weights(self, failed_agents: List[str]) -> Dict[str, float]:
         surviving = {

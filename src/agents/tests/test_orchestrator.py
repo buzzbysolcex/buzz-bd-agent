@@ -521,3 +521,103 @@ class TestDepthEscalation:
         await agent._evaluate_single_token(td, depth="quick")
         assert "quick" in captured_params
         assert "standard" in captured_params
+
+
+class TestExecute:
+    @pytest.mark.asyncio
+    async def test_scan_mode(self):
+        agent = OrchestratorAgent()
+        agent._scanner.run = AsyncMock(return_value={
+            "tokens": [
+                {"contract_address": "0xtok1", "chain": "solana", "name": "Token1",
+                 "mcap": 1000000, "volume_24h": 500000, "liquidity": 250000},
+                {"contract_address": "0xtok2", "chain": "solana", "name": "Token2",
+                 "mcap": 500000, "volume_24h": 200000, "liquidity": 100000},
+            ],
+            "total": 2,
+            "source_counts": {"dexscreener": 2},
+        })
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 30))
+
+        result = await agent.execute({"mode": "scan"})
+        assert result["tokens_scanned"] == 2
+        assert len(result["results"]) == 2
+        assert "summary" in result
+        agent._scanner.run.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_evaluate_mode(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 65))
+        td = _make_token_data()
+        result = await agent.execute({"mode": "evaluate", "token_data": td, "depth": "standard"})
+        assert "unified_score" in result
+        assert "unified_verdict" in result
+
+    @pytest.mark.asyncio
+    async def test_invalid_mode_raises(self):
+        agent = OrchestratorAgent()
+        with pytest.raises(ValueError, match="Unknown mode"):
+            await agent.execute({"mode": "invalid"})
+
+    @pytest.mark.asyncio
+    async def test_scan_persists_scratchpad(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = OrchestratorAgent()
+        agent._scanner.run = AsyncMock(return_value={
+            "tokens": [
+                {"contract_address": "0xtok1", "chain": "solana", "name": "T1",
+                 "mcap": 100, "volume_24h": 100, "liquidity": 100},
+            ],
+            "total": 1,
+            "source_counts": {},
+        })
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 30))
+
+        await agent.execute({"mode": "scan"})
+        saved = agent.read_scratchpad("last_scan_results")
+        assert saved is not None
+        assert saved["tokens_scanned"] == 1
+
+    @pytest.mark.asyncio
+    async def test_scan_builds_summary(self):
+        agent = OrchestratorAgent()
+        agent._scanner.run = AsyncMock(return_value={
+            "tokens": [
+                {"contract_address": f"0xtok{i}", "chain": "solana", "name": f"T{i}",
+                 "mcap": 100, "volume_24h": 100, "liquidity": 100}
+                for i in range(3)
+            ],
+            "total": 3,
+            "source_counts": {},
+        })
+        scores = [85, 65, 30]
+        call_count = {"n": 0}
+        original_evaluate = agent._evaluate_single_token
+
+        async def mock_evaluate(token_data, depth="quick"):
+            idx = call_count["n"]
+            call_count["n"] += 1
+            for name, sub in agent._agents.items():
+                sub.run = AsyncMock(return_value=_make_agent_result(name, scores[idx]))
+            return await original_evaluate(token_data, depth="standard")
+
+        agent._evaluate_single_token = mock_evaluate
+        result = await agent.execute({"mode": "scan"})
+        s = result["summary"]
+        assert s["strong_list"] == 1
+        assert s["list"] == 1
+        assert s["reject"] == 1
+
+    @pytest.mark.asyncio
+    async def test_default_mode_is_scan(self):
+        agent = OrchestratorAgent()
+        agent._scanner.run = AsyncMock(return_value={
+            "tokens": [], "total": 0, "source_counts": {},
+        })
+        result = await agent.execute({})
+        assert result["tokens_scanned"] == 0
+        assert result["results"] == []
