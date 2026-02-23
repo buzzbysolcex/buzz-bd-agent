@@ -363,7 +363,88 @@ class WalletAgent(BaseAgent):
             return empty
 
     async def _analyze_tx_flow(self, token: str, chain: str, depth: str) -> Dict:
-        return {"available": False, "score": 0}
+        empty = {
+            "available": False, "score": 0,
+            "organic_score": 0.0, "unique_buyers_24h": 0, "unique_sellers_24h": 0,
+            "avg_tx_size": 0.0, "red_flags": [], "green_flags": [],
+        }
+        self.log_event("action", "Analyzing TX flow", {"token": token, "depth": depth})
+        timeout = DEPTH_TIMEOUTS.get(depth, DEPTH_TIMEOUTS["standard"])
+        try:
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.get(f"{DEXSCREENER_TOKENS_URL}/{token}") as resp:
+                    if resp.status != 200:
+                        raise aiohttp.ClientError(f"DexScreener returned {resp.status}")
+                    data = await resp.json()
+
+            pairs = data.get("pairs", [])
+            if not pairs:
+                return empty
+
+            pair = pairs[0]
+            txns = pair.get("txns", {})
+            h24 = txns.get("h24", {})
+            h6 = txns.get("h6", {})
+            h1 = txns.get("h1", {})
+
+            buys_24h = int(h24.get("buys", 0) or 0)
+            sells_24h = int(h24.get("sells", 0) or 0)
+            buys_1h = int(h1.get("buys", 0) or 0)
+            sells_1h = int(h1.get("sells", 0) or 0)
+
+            volume_24h = float(pair.get("volume", {}).get("h24", 0) or 0)
+            total_txns_24h = buys_24h + sells_24h
+
+            organic_score = 0.0
+            if total_txns_24h > 0:
+                expected_h1 = total_txns_24h / 24
+                actual_h1 = buys_1h + sells_1h
+                if expected_h1 > 0:
+                    time_ratio = min(actual_h1 / expected_h1, 3.0) / 3.0
+                    time_score = 1.0 - abs(time_ratio - 0.33) / 0.67
+                else:
+                    time_score = 0.0
+                tx_diversity = min(total_txns_24h / 100, 1.0)
+                organic_score = round((time_score * 0.4 + tx_diversity * 0.6), 2)
+                organic_score = max(0.0, min(1.0, organic_score))
+
+            avg_tx_size = round(volume_24h / total_txns_24h, 2) if total_txns_24h > 0 else 0.0
+
+            score = 0
+            red_flags = []
+            green_flags = []
+
+            if organic_score > 0.8:
+                score += 8
+                green_flags.append("organic_trading")
+            elif organic_score > 0.5:
+                score += 5
+
+            if organic_score < 0.3:
+                red_flags.append("artificial_demand")
+
+            if buys_24h > 100:
+                score += 4
+            elif buys_24h > 50:
+                score += 2
+
+            if avg_tx_size > 0 and total_txns_24h > 20:
+                score += 3
+
+            score = min(MAX_TX_FLOW, score)
+
+            self.log_event("observation", f"TX Flow: organic={organic_score}, buyers={buys_24h}, score={score}/15")
+            return {
+                "available": True, "score": score,
+                "organic_score": organic_score,
+                "unique_buyers_24h": buys_24h,
+                "unique_sellers_24h": sells_24h,
+                "avg_tx_size": avg_tx_size,
+                "red_flags": red_flags, "green_flags": green_flags,
+            }
+        except Exception as e:
+            self.log_event("error", f"TX flow analysis failed: {e}")
+            return empty
 
     async def _run_forensics(self, token: str, deployer: str, chain: str, depth: str) -> Dict:
         if depth == "quick":

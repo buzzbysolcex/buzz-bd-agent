@@ -369,3 +369,77 @@ class TestAnalyzeDeployer:
             result = await agent._analyze_deployer("dep123", "solana", "deep")
         assert result["available"] is True
         assert result["cross_chain_activity"] is False
+
+
+# --- Task 6: TX flow analysis tests ---
+
+MOCK_DEXSCREENER_TX_ORGANIC = {
+    "pairs": [{
+        "liquidity": {"usd": 500000},
+        "marketCap": 5000000,
+        "txns": {
+            "h24": {"buys": 150, "sells": 120},
+            "h6": {"buys": 40, "sells": 35},
+            "h1": {"buys": 8, "sells": 6},
+        },
+        "volume": {"h24": 800000},
+    }]
+}
+
+MOCK_DEXSCREENER_TX_INORGANIC = {
+    "pairs": [{
+        "liquidity": {"usd": 100000},
+        "marketCap": 500000,
+        "txns": {
+            "h24": {"buys": 5, "sells": 2},
+            "h6": {"buys": 5, "sells": 2},
+            "h1": {"buys": 5, "sells": 2},
+        },
+        "volume": {"h24": 400000},
+    }]
+}
+
+
+class TestAnalyzeTxFlow:
+    async def test_organic_trading_scores_high(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_ORGANIC)
+            result = await agent._analyze_tx_flow("abc123", "solana", "quick")
+        assert result["available"] is True
+        assert result["organic_score"] > 0.5
+
+    async def test_inorganic_trading_detected(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_INORGANIC)
+            result = await agent._analyze_tx_flow("abc123", "solana", "quick")
+        assert result["available"] is True
+        assert result["organic_score"] < 0.5
+
+    async def test_unique_buyers_counted(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_ORGANIC)
+            result = await agent._analyze_tx_flow("abc123", "solana", "quick")
+        assert result["unique_buyers_24h"] == 150
+        assert result["unique_sellers_24h"] == 120
+
+    async def test_api_error_returns_unavailable(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", status=500)
+            result = await agent._analyze_tx_flow("abc123", "solana", "quick")
+        assert result["available"] is False
+
+    async def test_returns_red_flag_for_artificial(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_INORGANIC)
+            result = await agent._analyze_tx_flow("abc123", "solana", "quick")
+        assert "artificial_demand" in result["red_flags"]
