@@ -399,3 +399,52 @@ class TestComputeVerdict:
         result = agent._compute_verdict("0xdep123", "solana", "standard",
                                         deploy_r, portfolio_r, cross_r)
         assert "helius" in result["sources_used"]
+
+
+class TestFlagDetection:
+    def test_fresh_wallet_red_flag(self):
+        """wallet_age_days < 7 triggers fresh_wallet."""
+        agent = DeployAgent()
+        deploy_r = _make_deployment_result(score=5, wallet_age_days=3, total_deployments=1)
+        portfolio_r = _make_portfolio_result(available=False, score=0)
+        cross_r = _make_cross_chain_result(available=False)
+        result = agent._compute_verdict("0xdep123", "solana", "quick",
+                                        deploy_r, portfolio_r, cross_r)
+        assert "fresh_wallet" in result["red_flags"]
+        assert "first_time_deployer" in result["red_flags"]
+
+    def test_empty_wallet_red_flag(self):
+        """0 tokens and $0 value triggers empty_wallet."""
+        agent = DeployAgent()
+        deploy_r = _make_deployment_result(score=10)
+        portfolio_r = _make_portfolio_result(score=0, total_tokens_held=0, estimated_value_usd=0.0)
+        cross_r = _make_cross_chain_result(available=False)
+        result = agent._compute_verdict("0xdep123", "solana", "standard",
+                                        deploy_r, portfolio_r, cross_r)
+        assert "empty_wallet" in result["red_flags"]
+
+    def test_established_green_flags(self):
+        """Old wallet + many deploys + rich portfolio -> multiple green flags."""
+        agent = DeployAgent()
+        deploy_r = _make_deployment_result(score=25, wallet_age_days=400, total_deployments=12)
+        portfolio_r = _make_portfolio_result(score=17, total_tokens_held=15,
+                                            estimated_value_usd=5000.0,
+                                            has_significant_holdings=True)
+        cross_r = _make_cross_chain_result(available=False)
+        result = agent._compute_verdict("0xdep123", "solana", "standard",
+                                        deploy_r, portfolio_r, cross_r)
+        assert "prolific_deployer" in result["green_flags"]
+        assert "established_history" in result["green_flags"]
+        assert "positive_pnl" in result["green_flags"]
+        assert "diversified_portfolio" in result["green_flags"]
+
+    def test_negative_pnl_red_flag(self):
+        """3+ deployments but portfolio < $10 -> negative_pnl."""
+        agent = DeployAgent()
+        deploy_r = _make_deployment_result(score=10, total_deployments=5)
+        portfolio_r = _make_portfolio_result(score=0, total_tokens_held=1,
+                                            estimated_value_usd=5.0)
+        cross_r = _make_cross_chain_result(available=False)
+        result = agent._compute_verdict("0xdep123", "solana", "standard",
+                                        deploy_r, portfolio_r, cross_r)
+        assert "negative_pnl" in result["red_flags"]
