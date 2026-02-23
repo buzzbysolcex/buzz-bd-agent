@@ -7,7 +7,6 @@ from src.agents.base_agent import BaseAgent
 
 HELIUS_TXN_URL = "https://api.helius.xyz/v0/addresses/{address}/transactions"
 HELIUS_DAS_URL = "https://mainnet.helius-rpc.com"
-ALLIUM_API_URL = "https://api.allium.so/api/v1/query"
 
 VALID_DEPTHS = {"quick", "standard", "deep"}
 
@@ -102,6 +101,8 @@ class DeployAgent(BaseAgent):
             now = int(time.time())
             wallet_age_days = (now - oldest_ts) // 86400
 
+            # TODO: filter by tx type (CREATE, token mint patterns) for accurate
+            # deployment count. Currently counts all txns — matches WalletAgent pattern.
             total_deployments = len(txns)
 
             if total_deployments >= 10:
@@ -351,6 +352,9 @@ class DeployAgent(BaseAgent):
                 green_flags.append("prolific_deployer")
             if wallet_age >= 365 and total_deps >= 5:
                 green_flags.append("established_history")
+
+        # TODO: high_failure_rate — requires rug/failure detection not yet available
+        # Spec: "more than 50% of deployments are dead/zero-value tokens"
 
         if portfolio_available:
             tokens_held = portfolio_r.get("total_tokens_held", 0)
