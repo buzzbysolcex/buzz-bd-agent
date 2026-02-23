@@ -443,8 +443,24 @@ class DeployAgent(BaseAgent):
 
         try:
             self.log_event("action", f"Starting deploy analysis for {deployer} on {chain}", {"depth": depth})
-            # Analysis methods will be added in subsequent tasks
-            return self._empty_result(deployer, chain, depth)
+
+            deploy_r, portfolio_r, cross_chain_r = await asyncio.gather(
+                self._analyze_deployments(deployer, chain, depth),
+                self._analyze_portfolio(deployer, depth),
+                self._analyze_cross_chain(deployer, chain, depth),
+            )
+
+            result = self._compute_verdict(deployer, chain, depth,
+                                           deploy_r, portfolio_r, cross_chain_r)
+
+            self.log_event("decision", f"Deploy score: {result['deploy_score']} ({result['risk_level']})", {
+                "deploy_score": result["deploy_score"],
+                "risk_level": result["risk_level"],
+                "red_flags": result["red_flags"],
+            })
+
+            self.write_scratchpad(f"deploy_{deployer}", result)
+            return result
         except Exception as e:
             self.log_event("error", f"Deploy analysis failed unexpectedly: {e}")
             empty = self._empty_result(deployer, chain, depth)
