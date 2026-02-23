@@ -500,3 +500,102 @@ class TestComputeVerdict:
         assert "verified_team" in result["green_flags"]
         assert "fake_engagement" in result["red_flags"]
         assert "negative_press" in result["red_flags"]
+
+
+class TestDepthGating:
+    async def test_quick_only_runs_atv(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{ATV_API_URL}?addresses=dep123&include=name,twitter,github,discord",
+                payload=MOCK_ATV_FULL_IDENTITY,
+            )
+            result = await agent.execute({
+                "project_name": "BONK", "token_address": "abc123",
+                "chain": "solana", "deployer_address": "dep123", "depth": "quick",
+            })
+        assert result["team_identity"]["available"] is True
+        assert result["grok_analysis"]["available"] is False
+        assert result["web_reputation"]["available"] is False
+
+    async def test_standard_runs_atv_and_serper(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("SERPER_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{ATV_API_URL}?addresses=dep123&include=name,twitter,github,discord",
+                payload=MOCK_ATV_FULL_IDENTITY,
+            )
+            mocked.post(SERPER_API_URL, payload=MOCK_SERPER_POSITIVE)
+            result = await agent.execute({
+                "project_name": "BONK", "token_address": "abc123",
+                "chain": "solana", "deployer_address": "dep123", "depth": "standard",
+            })
+        assert result["team_identity"]["available"] is True
+        assert result["web_reputation"]["available"] is True
+        assert result["grok_analysis"]["available"] is False
+
+    async def test_deep_runs_all_sources(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("SERPER_API_KEY", "test-key")
+        monkeypatch.setenv("XAI_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{ATV_API_URL}?addresses=dep123&include=name,twitter,github,discord",
+                payload=MOCK_ATV_FULL_IDENTITY,
+            )
+            mocked.post(SERPER_API_URL, payload=MOCK_SERPER_POSITIVE)
+            mocked.post(GROK_API_URL, payload=MOCK_GROK_POSITIVE)
+            result = await agent.execute({
+                "project_name": "BONK", "token_address": "abc123",
+                "chain": "solana", "deployer_address": "dep123", "depth": "deep",
+            })
+        assert result["team_identity"]["available"] is True
+        assert result["web_reputation"]["available"] is True
+        assert result["grok_analysis"]["available"] is True
+
+    async def test_invalid_depth_defaults_to_standard(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        agent._search_grok = AsyncMock(return_value={"available": False, "score": 0, "twitter_score": 0, "community_score": 0, "red_flags": [], "green_flags": [], "sentiment": "suspicious", "follower_estimate": 0, "engagement_level": "none", "tweet_frequency": "none", "bot_suspicion": 0.0, "summary": ""})
+        agent._search_atv = AsyncMock(return_value={"available": False, "score": 0, "red_flags": [], "green_flags": [], "ens_name": None, "has_ens": False, "twitter_handle": None, "github_handle": None, "discord_handle": None, "identity_count": 0})
+        agent._search_serper = AsyncMock(return_value={"available": False, "score": 0, "red_flags": [], "green_flags": [], "total_results": 0, "positive_mentions": 0, "negative_mentions": 0, "scam_mentions": 0, "news_sources": []})
+        result = await agent.execute({
+            "project_name": "BONK", "token_address": "abc123",
+            "chain": "solana", "deployer_address": "dep123", "depth": "invalid",
+        })
+        assert result["depth"] == "standard"
+
+    async def test_sources_used_tracks_active_sources(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("SERPER_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{ATV_API_URL}?addresses=dep123&include=name,twitter,github,discord",
+                payload=MOCK_ATV_FULL_IDENTITY,
+            )
+            mocked.post(SERPER_API_URL, payload=MOCK_SERPER_POSITIVE)
+            result = await agent.execute({
+                "project_name": "BONK", "token_address": "abc123",
+                "chain": "solana", "deployer_address": "dep123", "depth": "standard",
+            })
+        assert "atv" in result["sources_used"]
+        assert "serper" in result["sources_used"]
+        assert "grok" not in result["sources_used"]
+
+    async def test_missing_deployer_still_runs_serper(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("SERPER_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.post(SERPER_API_URL, payload=MOCK_SERPER_POSITIVE)
+            result = await agent.execute({
+                "project_name": "BONK", "token_address": "abc123",
+                "chain": "solana", "deployer_address": "", "depth": "standard",
+            })
+        assert result["web_reputation"]["available"] is True
+        assert result["team_identity"]["available"] is False
