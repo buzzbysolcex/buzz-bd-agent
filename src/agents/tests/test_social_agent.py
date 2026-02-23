@@ -682,3 +682,66 @@ class TestFlagDetection:
                 "chain": "solana", "deployer_address": "dep123", "depth": "standard",
             })
         assert "clean_reputation" in result["green_flags"]
+
+
+class TestSentimentMapping:
+    def _make_grok(self, twitter_score=0, community_score=0, available=True, **kwargs):
+        defaults = {
+            "available": available, "score": twitter_score + community_score,
+            "twitter_score": twitter_score, "community_score": community_score,
+            "red_flags": [], "green_flags": [],
+            "sentiment": "neutral", "follower_estimate": 0, "engagement_level": "none",
+            "tweet_frequency": "none", "bot_suspicion": 0.0, "summary": "",
+        }
+        defaults.update(kwargs)
+        return defaults
+
+    def _make_atv(self, score=0, available=True, **kwargs):
+        defaults = {
+            "available": available, "score": score, "red_flags": [], "green_flags": [],
+            "ens_name": None, "has_ens": False, "twitter_handle": None,
+            "github_handle": None, "discord_handle": None, "identity_count": 0,
+        }
+        defaults.update(kwargs)
+        return defaults
+
+    def _make_serper(self, score=0, available=True, **kwargs):
+        defaults = {
+            "available": available, "score": score, "red_flags": [], "green_flags": [],
+            "total_results": 0, "positive_mentions": 0, "negative_mentions": 0,
+            "scam_mentions": 0, "news_sources": [],
+        }
+        defaults.update(kwargs)
+        return defaults
+
+    def test_grade_c_neutral(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        grok = self._make_grok(twitter_score=10, community_score=8, available=True)
+        atv = self._make_atv(score=10)
+        serper = self._make_serper(score=8)
+        result = agent._compute_verdict("BONK", "abc123", "solana", "deep", grok, atv, serper)
+        # raw=36 out of 100 available => 36%
+        assert result["community_health"] == "D" or result["community_health"] == "C"
+        assert result["sentiment"] in ("neutral", "negative")
+
+    def test_grade_d_negative(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        grok = self._make_grok(twitter_score=3, community_score=2, available=True, sentiment="negative")
+        atv = self._make_atv(score=5)
+        serper = self._make_serper(score=2)
+        result = agent._compute_verdict("BONK", "abc123", "solana", "deep", grok, atv, serper)
+        # raw=12 out of 100 => 12%
+        assert result["community_health"] == "F"
+        assert result["sentiment"] == "suspicious"
+
+    def test_grade_b_with_atv_serper_only(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        grok = self._make_grok(available=False)
+        atv = self._make_atv(score=20)
+        serper = self._make_serper(score=15)
+        result = agent._compute_verdict("BONK", "abc123", "solana", "standard", grok, atv, serper)
+        # raw=35 out of 45 available => 78%
+        assert result["community_health"] == "B"
