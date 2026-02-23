@@ -418,4 +418,133 @@ class SocialAgent(BaseAgent):
 
     def _compute_verdict(self, project: str, token: str, chain: str, depth: str,
                          grok_r: Dict, atv_r: Dict, serper_r: Dict) -> Dict:
-        return self._empty_result(project, token, chain, depth)
+        # Grok covers twitter (0-30) + community (0-25) = 55 total
+        # ATV covers team_identity (0-25)
+        # Serper covers web_reputation (0-20)
+        analyses = []
+        twitter_score = 0
+        community_score = 0
+
+        if grok_r.get("available", False):
+            twitter_score = grok_r.get("twitter_score", 0)
+            community_score = grok_r.get("community_score", 0)
+            analyses.append((twitter_score, MAX_TWITTER))
+            analyses.append((community_score, MAX_COMMUNITY))
+
+        atv_score = 0
+        if atv_r.get("available", False):
+            atv_score = atv_r.get("score", 0)
+            analyses.append((atv_score, MAX_TEAM_IDENTITY))
+
+        serper_score = 0
+        if serper_r.get("available", False):
+            serper_score = serper_r.get("score", 0)
+            analyses.append((serper_score, MAX_WEB_REPUTATION))
+
+        raw_score = sum(s for s, _ in analyses)
+        available_points = sum(m for _, m in analyses)
+
+        if available_points > 0:
+            social_score = round((raw_score / available_points) * 100)
+        else:
+            social_score = 0
+        social_score = max(0, min(100, social_score))
+
+        # Sentiment mapping
+        if social_score >= 80:
+            sentiment = "positive"
+            community_health = "A"
+        elif social_score >= 60:
+            sentiment = "positive" if grok_r.get("sentiment") == "positive" else "neutral"
+            community_health = "B"
+        elif social_score >= 40:
+            sentiment = "neutral"
+            community_health = "C"
+        elif social_score >= 20:
+            sentiment = "negative"
+            community_health = "D"
+        else:
+            sentiment = "suspicious"
+            community_health = "F"
+
+        # Override sentiment from Grok if available and score is not at extremes
+        if grok_r.get("available") and 20 <= social_score < 80:
+            grok_sentiment = grok_r.get("sentiment", "neutral")
+            if grok_sentiment == "suspicious":
+                sentiment = "suspicious"
+
+        # Team verified
+        team_verified = atv_r.get("has_ens", False) and atv_r.get("identity_count", 0) >= 2
+
+        # Aggregate flags
+        red_flags = []
+        green_flags = []
+        for source in [grok_r, atv_r, serper_r]:
+            red_flags.extend(source.get("red_flags", []))
+            green_flags.extend(source.get("green_flags", []))
+
+        if available_points == 0:
+            red_flags.append("all_sources_failed")
+
+        # Check cross-source red flag: no_social_presence
+        grok_has_data = grok_r.get("available", False) and grok_r.get("follower_estimate", 0) > 0
+        atv_has_data = atv_r.get("available", False) and atv_r.get("identity_count", 0) > 0
+        if not grok_has_data and not atv_has_data and grok_r.get("available", False):
+            red_flags.append("no_social_presence")
+
+        # Sources used
+        sources_used = []
+        if grok_r.get("available"):
+            sources_used.append("grok")
+        if atv_r.get("available"):
+            sources_used.append("atv")
+        if serper_r.get("available"):
+            sources_used.append("serper")
+
+        breakdown = {
+            "twitter": twitter_score,
+            "community": community_score,
+            "team_identity": atv_score,
+            "web_reputation": serper_score,
+        }
+
+        return {
+            "project_name": project,
+            "token_address": token,
+            "chain": chain,
+            "depth": depth,
+            "social_score": social_score,
+            "sentiment": sentiment,
+            "community_health": community_health,
+            "team_verified": team_verified,
+            "breakdown": breakdown,
+            "grok_analysis": {
+                "sentiment": grok_r.get("sentiment", "suspicious"),
+                "follower_estimate": grok_r.get("follower_estimate", 0),
+                "engagement_level": grok_r.get("engagement_level", "none"),
+                "tweet_frequency": grok_r.get("tweet_frequency", "none"),
+                "bot_suspicion": grok_r.get("bot_suspicion", 0.0),
+                "summary": grok_r.get("summary", ""),
+                "available": grok_r.get("available", False),
+            },
+            "team_identity": {
+                "ens_name": atv_r.get("ens_name"),
+                "has_ens": atv_r.get("has_ens", False),
+                "twitter_handle": atv_r.get("twitter_handle"),
+                "github_handle": atv_r.get("github_handle"),
+                "discord_handle": atv_r.get("discord_handle"),
+                "identity_count": atv_r.get("identity_count", 0),
+                "available": atv_r.get("available", False),
+            },
+            "web_reputation": {
+                "total_results": serper_r.get("total_results", 0),
+                "positive_mentions": serper_r.get("positive_mentions", 0),
+                "negative_mentions": serper_r.get("negative_mentions", 0),
+                "scam_mentions": serper_r.get("scam_mentions", 0),
+                "news_sources": serper_r.get("news_sources", []),
+                "available": serper_r.get("available", False),
+            },
+            "red_flags": red_flags,
+            "green_flags": green_flags,
+            "sources_used": sources_used,
+        }

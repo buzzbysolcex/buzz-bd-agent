@@ -398,3 +398,105 @@ class TestSearchGrok:
             mocked.post(GROK_API_URL, payload={"choices": [{"message": {"content": "not json"}}]})
             result = await agent._search_grok("BONK", "abc123", "solana", "deep")
         assert result["available"] is False
+
+
+class TestComputeVerdict:
+    def _make_grok(self, twitter_score=0, community_score=0, available=True, **kwargs):
+        defaults = {
+            "available": available, "score": twitter_score + community_score,
+            "twitter_score": twitter_score, "community_score": community_score,
+            "red_flags": [], "green_flags": [],
+            "sentiment": "neutral", "follower_estimate": 0, "engagement_level": "none",
+            "tweet_frequency": "none", "bot_suspicion": 0.0, "summary": "",
+        }
+        defaults.update(kwargs)
+        return defaults
+
+    def _make_atv(self, score=0, available=True, **kwargs):
+        defaults = {
+            "available": available, "score": score, "red_flags": [], "green_flags": [],
+            "ens_name": None, "has_ens": False, "twitter_handle": None,
+            "github_handle": None, "discord_handle": None, "identity_count": 0,
+        }
+        defaults.update(kwargs)
+        return defaults
+
+    def _make_serper(self, score=0, available=True, **kwargs):
+        defaults = {
+            "available": available, "score": score, "red_flags": [], "green_flags": [],
+            "total_results": 0, "positive_mentions": 0, "negative_mentions": 0,
+            "scam_mentions": 0, "news_sources": [],
+        }
+        defaults.update(kwargs)
+        return defaults
+
+    def test_high_score_positive_sentiment(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        grok = self._make_grok(twitter_score=25, community_score=20, sentiment="positive",
+                               green_flags=["positive_sentiment", "active_community"])
+        atv = self._make_atv(score=20, has_ens=True, identity_count=3,
+                             green_flags=["verified_team"])
+        serper = self._make_serper(score=15, green_flags=["clean_reputation"])
+        result = agent._compute_verdict("BONK", "abc123", "solana", "deep", grok, atv, serper)
+        assert result["social_score"] >= 80
+        assert result["sentiment"] == "positive"
+        assert result["community_health"] == "A"
+
+    def test_low_score_suspicious_sentiment(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        grok = self._make_grok(twitter_score=2, community_score=0, sentiment="suspicious",
+                               red_flags=["bot_farm", "fake_engagement"])
+        atv = self._make_atv(score=0, red_flags=["anonymous_team"])
+        serper = self._make_serper(score=0, red_flags=["scam_reports", "negative_press"])
+        result = agent._compute_verdict("SCAM", "xyz789", "solana", "deep", grok, atv, serper)
+        assert result["social_score"] < 20
+        assert result["sentiment"] == "suspicious"
+        assert result["community_health"] == "F"
+
+    def test_weight_redistribution_quick_mode(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        grok = self._make_grok(available=False)  # skipped in quick
+        atv = self._make_atv(score=20)
+        serper = self._make_serper(available=False)  # skipped in quick
+        result = agent._compute_verdict("BONK", "abc123", "solana", "quick", grok, atv, serper)
+        # 20 raw out of 25 available = 80
+        assert result["social_score"] == 80
+        assert result["community_health"] == "A"
+
+    def test_all_sources_failed(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        grok = self._make_grok(available=False)
+        atv = self._make_atv(available=False)
+        serper = self._make_serper(available=False)
+        result = agent._compute_verdict("BONK", "abc123", "solana", "standard", grok, atv, serper)
+        assert result["social_score"] == 0
+        assert result["sentiment"] == "suspicious"
+        assert result["community_health"] == "F"
+        assert "all_sources_failed" in result["red_flags"]
+
+    def test_team_verified_from_atv(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        grok = self._make_grok(available=False)
+        atv = self._make_atv(score=15, has_ens=True, identity_count=2,
+                             green_flags=["verified_team"])
+        serper = self._make_serper(available=False)
+        result = agent._compute_verdict("BONK", "abc123", "solana", "quick", grok, atv, serper)
+        assert result["team_verified"] is True
+
+    def test_red_and_green_flags_aggregated(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        grok = self._make_grok(twitter_score=15, community_score=10,
+                               green_flags=["positive_sentiment"], red_flags=["fake_engagement"])
+        atv = self._make_atv(score=10, green_flags=["verified_team"])
+        serper = self._make_serper(score=5, red_flags=["negative_press"])
+        result = agent._compute_verdict("BONK", "abc123", "solana", "deep", grok, atv, serper)
+        assert "positive_sentiment" in result["green_flags"]
+        assert "verified_team" in result["green_flags"]
+        assert "fake_engagement" in result["red_flags"]
+        assert "negative_press" in result["red_flags"]
