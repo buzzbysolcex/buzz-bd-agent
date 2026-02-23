@@ -157,3 +157,126 @@ class TestAnalyzeLiquidity:
             result = await agent._analyze_liquidity("abc123", "solana", "quick")
         assert "red_flags" in result
         assert "green_flags" in result
+
+
+# --- Task 4: Helius holder distribution analysis tests ---
+
+HELIUS_API_BASE = "https://api.helius.xyz"
+
+MOCK_HELIUS_HOLDERS_DISTRIBUTED = {
+    "result": {
+        "token_accounts": [
+            {"owner": "wallet1", "amount": 50000},
+            {"owner": "wallet2", "amount": 30000},
+            {"owner": "wallet3", "amount": 20000},
+            {"owner": "wallet4", "amount": 15000},
+            {"owner": "wallet5", "amount": 12000},
+            {"owner": "wallet6", "amount": 10000},
+            {"owner": "wallet7", "amount": 8000},
+            {"owner": "wallet8", "amount": 7000},
+            {"owner": "wallet9", "amount": 6000},
+            {"owner": "wallet10", "amount": 5000},
+        ],
+        "total_supply": 1000000,
+    }
+}
+
+MOCK_HELIUS_HOLDERS_CONCENTRATED = {
+    "result": {
+        "token_accounts": [
+            {"owner": "deployer1", "amount": 200000},
+            {"owner": "whale2", "amount": 150000},
+            {"owner": "whale3", "amount": 100000},
+            {"owner": "w4", "amount": 50000},
+            {"owner": "w5", "amount": 30000},
+            {"owner": "w6", "amount": 20000},
+            {"owner": "w7", "amount": 10000},
+            {"owner": "w8", "amount": 5000},
+            {"owner": "w9", "amount": 3000},
+            {"owner": "w10", "amount": 2000},
+        ],
+        "total_supply": 1000000,
+    }
+}
+
+
+class TestAnalyzeHolders:
+    async def test_skipped_in_quick_mode(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        result = await agent._analyze_holders("abc123", "dep123", "solana", "quick")
+        assert result["available"] is False
+
+    async def test_well_distributed_scores_high(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{HELIUS_API_BASE}/v0/tokens/abc123/holders?api-key=test-key&limit=50",
+                payload=MOCK_HELIUS_HOLDERS_DISTRIBUTED,
+            )
+            result = await agent._analyze_holders("abc123", "deployer_xyz", "solana", "standard")
+        assert result["available"] is True
+        assert result["score"] >= 15
+        assert result["top10_pct"] < 20.0
+
+    async def test_concentrated_scores_low(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{HELIUS_API_BASE}/v0/tokens/abc123/holders?api-key=test-key&limit=50",
+                payload=MOCK_HELIUS_HOLDERS_CONCENTRATED,
+            )
+            result = await agent._analyze_holders("abc123", "deployer1", "solana", "standard")
+        assert result["available"] is True
+        assert result["top10_pct"] > 50.0
+        assert "whale_concentration" in result["red_flags"]
+
+    async def test_deployer_heavy_bag_detected(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{HELIUS_API_BASE}/v0/tokens/abc123/holders?api-key=test-key&limit=50",
+                payload=MOCK_HELIUS_HOLDERS_CONCENTRATED,
+            )
+            result = await agent._analyze_holders("abc123", "deployer1", "solana", "standard")
+        assert result["deployer_pct"] == 20.0
+        assert "dev_heavy_bag" in result["red_flags"]
+
+    async def test_api_error_returns_unavailable(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{HELIUS_API_BASE}/v0/tokens/abc123/holders?api-key=test-key&limit=50",
+                status=500,
+            )
+            result = await agent._analyze_holders("abc123", "dep123", "solana", "standard")
+        assert result["available"] is False
+
+    async def test_no_api_key_returns_unavailable(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.delenv("HELIUS_API_KEY", raising=False)
+        agent = WalletAgent()
+        result = await agent._analyze_holders("abc123", "dep123", "solana", "standard")
+        assert result["available"] is False
+
+    async def test_broad_holder_base_green_flag(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        many_holders = {"result": {"token_accounts": [{"owner": f"w{i}", "amount": 100} for i in range(50)], "total_supply": 100000}}
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{HELIUS_API_BASE}/v0/tokens/abc123/holders?api-key=test-key&limit=50",
+                payload=many_holders,
+            )
+            result = await agent._analyze_holders("abc123", "nobody", "solana", "standard")
+        assert result["available"] is True
+        assert result["unique_holders"] == 50
