@@ -443,3 +443,84 @@ class TestAnalyzeTxFlow:
             mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_INORGANIC)
             result = await agent._analyze_tx_flow("abc123", "solana", "quick")
         assert "artificial_demand" in result["red_flags"]
+
+
+# --- Task 7: Forensics analysis tests ---
+
+MOCK_HELIUS_BUNDLED_TXS = [
+    {"type": "SWAP", "timestamp": 1700000100, "feePayer": "bundler1", "description": "buy token",
+     "tokenTransfers": [{"fromUserAccount": "bundler1", "toUserAccount": "pool", "mint": "abc123"}]},
+    {"type": "SWAP", "timestamp": 1700000100, "feePayer": "bundler2", "description": "buy token",
+     "tokenTransfers": [{"fromUserAccount": "bundler2", "toUserAccount": "pool", "mint": "abc123"}]},
+    {"type": "SWAP", "timestamp": 1700000100, "feePayer": "bundler3", "description": "buy token",
+     "tokenTransfers": [{"fromUserAccount": "bundler3", "toUserAccount": "pool", "mint": "abc123"}]},
+]
+
+MOCK_HELIUS_CLEAN_TXS = [
+    {"type": "SWAP", "timestamp": 1700000100, "feePayer": "buyer1", "description": "buy token",
+     "tokenTransfers": [{"fromUserAccount": "buyer1", "toUserAccount": "pool", "mint": "abc123"}]},
+    {"type": "SWAP", "timestamp": 1700005000, "feePayer": "buyer2", "description": "buy token",
+     "tokenTransfers": [{"fromUserAccount": "buyer2", "toUserAccount": "pool", "mint": "abc123"}]},
+    {"type": "SWAP", "timestamp": 1700010000, "feePayer": "buyer3", "description": "buy token",
+     "tokenTransfers": [{"fromUserAccount": "buyer3", "toUserAccount": "pool", "mint": "abc123"}]},
+]
+
+
+class TestRunForensics:
+    async def test_skipped_in_quick_mode(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        result = await agent._run_forensics("abc123", "dep123", "solana", "quick")
+        assert result["available"] is False
+
+    async def test_detects_bundled_wallets(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{HELIUS_API_BASE}/v0/addresses/abc123/transactions?api-key=test-key&limit=100&type=SWAP",
+                payload=MOCK_HELIUS_BUNDLED_TXS,
+            )
+            result = await agent._run_forensics("abc123", "dep123", "solana", "standard")
+        assert result["available"] is True
+        assert len(result["bundled_wallets"]) >= 2
+        assert "bundled_wallets" in result["red_flags"]
+
+    async def test_clean_transactions(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{HELIUS_API_BASE}/v0/addresses/abc123/transactions?api-key=test-key&limit=100&type=SWAP",
+                payload=MOCK_HELIUS_CLEAN_TXS,
+            )
+            result = await agent._run_forensics("abc123", "dep123", "solana", "standard")
+        assert result["available"] is True
+        assert result["bundled_wallets"] == []
+
+    async def test_sybil_clusters_stubbed(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{HELIUS_API_BASE}/v0/addresses/abc123/transactions?api-key=test-key&limit=100&type=SWAP",
+                payload=MOCK_HELIUS_CLEAN_TXS,
+            )
+            result = await agent._run_forensics("abc123", "dep123", "solana", "standard")
+        assert result["sybil_clusters"] == []
+        assert result["wash_trading_detected"] is False
+
+    async def test_api_error_returns_unavailable(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{HELIUS_API_BASE}/v0/addresses/abc123/transactions?api-key=test-key&limit=100&type=SWAP",
+                status=500,
+            )
+            result = await agent._run_forensics("abc123", "dep123", "solana", "standard")
+        assert result["available"] is False

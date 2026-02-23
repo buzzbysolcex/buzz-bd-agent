@@ -447,9 +447,84 @@ class WalletAgent(BaseAgent):
             return empty
 
     async def _run_forensics(self, token: str, deployer: str, chain: str, depth: str) -> Dict:
+        empty = {
+            "available": False, "score": 0,
+            "bundled_wallets": [], "sybil_clusters": [],
+            "wash_trading_detected": False, "same_funding_source": False,
+            "red_flags": [], "green_flags": [],
+        }
         if depth == "quick":
-            return {"available": False, "score": 0}
-        return {"available": False, "score": 0}
+            return empty
+
+        api_key = os.environ.get("HELIUS_API_KEY", "")
+        if not api_key:
+            self.log_event("error", "HELIUS_API_KEY not set, skipping forensics")
+            return empty
+
+        self.log_event("action", "Running forensics analysis", {"token": token})
+        timeout = DEPTH_TIMEOUTS.get(depth, DEPTH_TIMEOUTS["standard"])
+        try:
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                url = f"{HELIUS_API_BASE}/v0/addresses/{token}/transactions?api-key={api_key}&limit=100&type=SWAP"
+                async with session.get(url) as resp:
+                    if resp.status != 200:
+                        raise aiohttp.ClientError(f"Helius forensics returned {resp.status}")
+                    txs = await resp.json()
+
+            if not txs:
+                return {**empty, "available": True, "score": MAX_FORENSICS}
+
+            by_timestamp: Dict[int, list] = {}
+            for tx in txs:
+                ts = tx.get("timestamp", 0)
+                payer = tx.get("feePayer", "")
+                if ts and payer:
+                    by_timestamp.setdefault(ts, []).append(payer)
+
+            bundled_wallets = []
+            for ts, payers in by_timestamp.items():
+                unique_payers = list(set(payers))
+                if len(unique_payers) >= 2:
+                    bundled_wallets.extend(unique_payers)
+            bundled_wallets = list(set(bundled_wallets))
+
+            sybil_clusters: list = []
+            wash_trading_detected = False
+            same_funding_source = False
+
+            score = 0
+            red_flags = []
+            green_flags = []
+
+            if not bundled_wallets:
+                score += 5
+            else:
+                score -= 5
+                red_flags.append("bundled_wallets")
+
+            if not sybil_clusters:
+                score += 5
+
+            if not wash_trading_detected:
+                score += 5
+
+            if same_funding_source:
+                score -= 3
+
+            score = max(0, min(MAX_FORENSICS, score))
+
+            self.log_event("observation", f"Forensics: bundled={len(bundled_wallets)}, score={score}/15")
+            return {
+                "available": True, "score": score,
+                "bundled_wallets": bundled_wallets,
+                "sybil_clusters": sybil_clusters,
+                "wash_trading_detected": wash_trading_detected,
+                "same_funding_source": same_funding_source,
+                "red_flags": red_flags, "green_flags": green_flags,
+            }
+        except Exception as e:
+            self.log_event("error", f"Forensics analysis failed: {e}")
+            return empty
 
     def _compute_verdict(self, deployer: str, token: str, chain: str, depth: str,
                          liquidity_r: Dict, holders_r: Dict, deployer_r: Dict,
