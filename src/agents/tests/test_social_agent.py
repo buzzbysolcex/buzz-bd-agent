@@ -39,6 +39,33 @@ MOCK_ATV_NO_IDENTITY = [
 
 MOCK_ATV_EMPTY = []
 
+SERPER_API_URL = "https://google.serper.dev/search"
+
+MOCK_SERPER_POSITIVE = {
+    "organic": [
+        {"title": "BONK Token Review - Legit Meme Coin Growing Fast", "snippet": "BONK is a legitimate Solana meme coin with a growing community.", "link": "https://coindesk.com/bonk-review"},
+        {"title": "BONK Partnership with Major Exchange", "snippet": "BONK announces innovative partnership with top exchange.", "link": "https://cointelegraph.com/bonk-partnership"},
+        {"title": "Is BONK a Good Investment?", "snippet": "BONK token shows bullish signs and growing adoption.", "link": "https://example.com/bonk-analysis"},
+    ]
+}
+
+MOCK_SERPER_NEGATIVE = {
+    "organic": [
+        {"title": "BONK Token Scam Warning", "snippet": "Multiple reports of BONK being a rug pull scam.", "link": "https://example.com/bonk-scam"},
+        {"title": "BONK Fraud Alert - Avoid This Token", "snippet": "Users report fraud and ponzi-like behavior from BONK.", "link": "https://example.com/bonk-fraud"},
+        {"title": "BONK Rugpull Evidence Found", "snippet": "Evidence suggests BONK is a rugpull scheme. Avoid!", "link": "https://example.com/bonk-rug"},
+    ]
+}
+
+MOCK_SERPER_EMPTY = {"organic": []}
+
+MOCK_SERPER_MIXED = {
+    "organic": [
+        {"title": "BONK Review - Growing Community", "snippet": "BONK has a legit growing community.", "link": "https://example.com/good"},
+        {"title": "Is BONK a Scam?", "snippet": "Some say BONK is a scam but evidence is weak.", "link": "https://example.com/scam-q"},
+    ]
+}
+
 
 class TestSocialAgentInit:
     def test_inherits_base_agent(self, tmp_path, monkeypatch):
@@ -181,3 +208,73 @@ class TestSearchAtv:
                 )
                 result = await agent._search_atv("0xdep123", depth)
             assert result["available"] is True
+
+
+class TestSearchSerper:
+    async def test_skipped_in_quick_mode(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        result = await agent._search_serper("BONK", "abc123", "solana", "quick")
+        assert result["available"] is False
+
+    async def test_positive_results_score_well(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("SERPER_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.post(SERPER_API_URL, payload=MOCK_SERPER_POSITIVE)
+            result = await agent._search_serper("BONK", "abc123", "solana", "standard")
+        assert result["available"] is True
+        assert result["positive_mentions"] > 0
+        assert result["scam_mentions"] == 0
+        assert result["score"] >= 10
+        assert "clean_reputation" in result["green_flags"]
+
+    async def test_negative_results_with_scam(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("SERPER_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.post(SERPER_API_URL, payload=MOCK_SERPER_NEGATIVE)
+            result = await agent._search_serper("BONK", "abc123", "solana", "standard")
+        assert result["available"] is True
+        assert result["scam_mentions"] >= 3
+        assert "scam_reports" in result["red_flags"]
+        assert "negative_press" in result["red_flags"]
+
+    async def test_empty_results(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("SERPER_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.post(SERPER_API_URL, payload=MOCK_SERPER_EMPTY)
+            result = await agent._search_serper("BONK", "abc123", "solana", "standard")
+        assert result["available"] is True
+        assert result["total_results"] == 0
+        assert result["score"] == 0
+
+    async def test_api_error_returns_unavailable(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("SERPER_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.post(SERPER_API_URL, status=500)
+            result = await agent._search_serper("BONK", "abc123", "solana", "standard")
+        assert result["available"] is False
+
+    async def test_no_api_key_returns_unavailable(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.delenv("SERPER_API_KEY", raising=False)
+        agent = SocialAgent()
+        result = await agent._search_serper("BONK", "abc123", "solana", "standard")
+        assert result["available"] is False
+
+    async def test_detects_news_sources(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("SERPER_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.post(SERPER_API_URL, payload=MOCK_SERPER_POSITIVE)
+            result = await agent._search_serper("BONK", "abc123", "solana", "standard")
+        assert len(result["news_sources"]) >= 1
+        assert any("coindesk" in s for s in result["news_sources"])
