@@ -143,3 +143,59 @@ class OrchestratorAgent(BaseAgent):
         tasks = [_run_with_timeout(name, params) for name, params in agent_params.items()]
         results = await asyncio.gather(*tasks)
         return dict(results)
+
+    def _build_agent_params(self, token_data: Dict, depth: str) -> Dict[str, Dict]:
+        return {
+            "scorer": {
+                "token_data": {
+                    "contract_address": token_data["token_address"],
+                    "chain": token_data["chain"],
+                    "name": token_data.get("project_name", ""),
+                    "symbol": token_data.get("symbol", ""),
+                    "liquidity": token_data.get("market_data", {}).get("liquidity", 0),
+                    "volume_24h": token_data.get("market_data", {}).get("volume_24h", 0),
+                },
+            },
+            "safety": {
+                "contract_address": token_data["token_address"],
+                "chain": token_data["chain"],
+            },
+            "wallet": {
+                "deployer_address": token_data.get("deployer_address", ""),
+                "token_address": token_data["token_address"],
+                "chain": token_data["chain"],
+                "depth": depth,
+            },
+            "social": {
+                "project_name": token_data.get("project_name", ""),
+                "token_address": token_data["token_address"],
+                "chain": token_data["chain"],
+                "deployer_address": token_data.get("deployer_address", ""),
+                "depth": depth,
+            },
+            "deploy": {
+                "deployer_address": token_data.get("deployer_address", ""),
+                "chain": token_data["chain"],
+                "depth": depth,
+            },
+        }
+
+    async def _evaluate_single_token(self, token_data: Dict, depth: str = "quick") -> Dict:
+        self.log_event("action", f"Evaluating {token_data.get('token_address', '?')} at depth={depth}")
+
+        agent_params = self._build_agent_params(token_data, depth)
+        agent_results = await self._run_agents_parallel(agent_params)
+        merged = self._merge_results(agent_results, token_data)
+
+        # Depth escalation (only from quick)
+        if depth == "quick" and merged["unified_score"] >= self.DEEP_ESCALATION:
+            self.log_event("decision", f"Escalating to deep (score={merged['unified_score']})")
+            return await self._evaluate_single_token(token_data, depth="deep")
+        elif depth == "quick" and merged["unified_score"] >= self.STANDARD_ESCALATION:
+            self.log_event("decision", f"Escalating to standard (score={merged['unified_score']})")
+            return await self._evaluate_single_token(token_data, depth="standard")
+
+        addr = token_data.get("token_address", "unknown")
+        self.write_scratchpad(f"eval_{addr}", merged)
+
+        return merged
