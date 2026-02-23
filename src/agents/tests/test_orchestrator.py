@@ -356,3 +356,77 @@ class TestRunAgentsParallel:
         await agent._run_agents_parallel(params)
         elapsed = time.monotonic() - start
         assert elapsed < 0.3
+
+
+class TestBuildAgentParams:
+    def test_builds_all_five(self):
+        agent = OrchestratorAgent()
+        td = _make_token_data()
+        params = agent._build_agent_params(td, "standard")
+        assert set(params.keys()) == {"scorer", "safety", "wallet", "social", "deploy"}
+
+    def test_scorer_params(self):
+        agent = OrchestratorAgent()
+        td = _make_token_data(token_address="0xabc", chain="solana", project_name="Foo")
+        td["market_data"] = {"mcap": 100, "volume_24h": 200, "liquidity": 300}
+        params = agent._build_agent_params(td, "standard")
+        sp = params["scorer"]
+        assert sp["token_data"]["contract_address"] == "0xabc"
+        assert sp["token_data"]["chain"] == "solana"
+        assert sp["token_data"]["name"] == "Foo"
+        assert sp["token_data"]["liquidity"] == 300
+        assert sp["token_data"]["volume_24h"] == 200
+
+    def test_safety_params(self):
+        agent = OrchestratorAgent()
+        td = _make_token_data(token_address="0xabc", chain="ethereum")
+        params = agent._build_agent_params(td, "standard")
+        assert params["safety"] == {"contract_address": "0xabc", "chain": "ethereum"}
+
+    def test_wallet_params_include_depth(self):
+        agent = OrchestratorAgent()
+        td = _make_token_data(deployer_address="0xdep")
+        params = agent._build_agent_params(td, "deep")
+        assert params["wallet"]["depth"] == "deep"
+        assert params["wallet"]["deployer_address"] == "0xdep"
+
+    def test_social_params(self):
+        agent = OrchestratorAgent()
+        td = _make_token_data(project_name="Bar", deployer_address="0xd")
+        params = agent._build_agent_params(td, "quick")
+        assert params["social"]["project_name"] == "Bar"
+        assert params["social"]["deployer_address"] == "0xd"
+        assert params["social"]["depth"] == "quick"
+
+    def test_deploy_params(self):
+        agent = OrchestratorAgent()
+        td = _make_token_data(deployer_address="0xdep", chain="base")
+        params = agent._build_agent_params(td, "standard")
+        assert params["deploy"]["deployer_address"] == "0xdep"
+        assert params["deploy"]["chain"] == "base"
+        assert params["deploy"]["depth"] == "standard"
+
+
+class TestEvaluateSingleToken:
+    @pytest.mark.asyncio
+    async def test_returns_merged_result(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 70))
+        td = _make_token_data()
+        result = await agent._evaluate_single_token(td, depth="standard")
+        assert "unified_score" in result
+        assert "unified_verdict" in result
+        assert result["token_address"] == td["token_address"]
+
+    @pytest.mark.asyncio
+    async def test_persists_to_scratchpad(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 50))
+        td = _make_token_data(token_address="0xpersist")
+        await agent._evaluate_single_token(td, depth="standard")
+        saved = agent.read_scratchpad("eval_0xpersist")
+        assert saved is not None
+        assert saved["token_address"] == "0xpersist"
