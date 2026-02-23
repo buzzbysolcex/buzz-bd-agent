@@ -196,9 +196,108 @@ class SocialAgent(BaseAgent):
             return empty
 
     async def _search_serper(self, project: str, token: str, chain: str, depth: str) -> Dict:
-        return {"available": False, "score": 0, "red_flags": [], "green_flags": [],
-                "total_results": 0, "positive_mentions": 0, "negative_mentions": 0,
-                "scam_mentions": 0, "news_sources": []}
+        empty = {
+            "available": False, "score": 0, "red_flags": [], "green_flags": [],
+            "total_results": 0, "positive_mentions": 0, "negative_mentions": 0,
+            "scam_mentions": 0, "news_sources": [],
+        }
+        if depth == "quick":
+            return empty
+
+        api_key = os.environ.get("SERPER_API_KEY", "")
+        if not api_key:
+            self.log_event("error", "SERPER_API_KEY not set, skipping web search")
+            return empty
+
+        self.log_event("action", "Searching web via Serper", {"project": project})
+        timeout = DEPTH_TIMEOUTS.get(depth, DEPTH_TIMEOUTS["standard"])
+        try:
+            query = f'"{project}" crypto token review'
+            headers = {"X-API-Key": api_key, "Content-Type": "application/json"}
+
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.post(
+                    SERPER_API_URL,
+                    headers=headers,
+                    json={"q": query},
+                ) as resp:
+                    if resp.status != 200:
+                        raise aiohttp.ClientError(f"Serper returned {resp.status}")
+                    data = await resp.json()
+
+            organic = data.get("organic", [])
+            total_results = len(organic)
+
+            if total_results == 0:
+                self.log_event("observation", "Serper: 0 results, score=0/20")
+                return {
+                    "available": True, "score": 0, "red_flags": [], "green_flags": [],
+                    "total_results": 0, "positive_mentions": 0,
+                    "negative_mentions": 0, "scam_mentions": 0,
+                    "news_sources": [],
+                }
+
+            positive_mentions = 0
+            negative_mentions = 0
+            scam_mentions = 0
+            news_sources = []
+
+            for result in organic:
+                text = (result.get("title", "") + " " + result.get("snippet", "")).lower()
+                link = result.get("link", "")
+
+                if any(kw in text for kw in POSITIVE_KEYWORDS):
+                    positive_mentions += 1
+                if any(kw in text for kw in NEGATIVE_KEYWORDS):
+                    negative_mentions += 1
+                if any(kw in text for kw in SCAM_KEYWORDS):
+                    scam_mentions += 1
+
+                for domain in KNOWN_NEWS_DOMAINS:
+                    if domain in link:
+                        news_sources.append(domain)
+                        break
+
+            news_sources = list(set(news_sources))
+
+            score = 0
+            red_flags = []
+            green_flags = []
+
+            if total_results >= 20:
+                score += 5
+            elif total_results >= 5:
+                score += 3
+
+            if positive_mentions > negative_mentions:
+                score += 5
+            if scam_mentions == 0:
+                score += 5
+            if news_sources:
+                score += 5
+
+            if scam_mentions >= 3:
+                score -= 5
+                red_flags.append("scam_reports")
+            if negative_mentions > positive_mentions * 2 and negative_mentions > 0:
+                score -= 5
+                red_flags.append("negative_press")
+
+            score = max(0, min(MAX_WEB_REPUTATION, score))
+
+            if scam_mentions == 0 and positive_mentions > negative_mentions:
+                green_flags.append("clean_reputation")
+
+            self.log_event("observation", f"Serper: {total_results} results, +{positive_mentions}/-{negative_mentions} scam={scam_mentions}, score={score}/20")
+            return {
+                "available": True, "score": score, "red_flags": red_flags, "green_flags": green_flags,
+                "total_results": total_results, "positive_mentions": positive_mentions,
+                "negative_mentions": negative_mentions, "scam_mentions": scam_mentions,
+                "news_sources": news_sources,
+            }
+        except Exception as e:
+            self.log_event("error", f"Serper search failed: {e}")
+            return empty
 
     def _compute_verdict(self, project: str, token: str, chain: str, depth: str,
                          grok_r: Dict, atv_r: Dict, serper_r: Dict) -> Dict:
