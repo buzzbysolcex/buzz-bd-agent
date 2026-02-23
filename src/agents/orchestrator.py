@@ -35,6 +35,14 @@ class OrchestratorAgent(BaseAgent):
         "wallet:bundled_wallets",
     })
 
+    SCORE_KEYS = {
+        "scorer": "total_score",
+        "safety": "safety_score",
+        "wallet": "wallet_score",
+        "social": "social_score",
+        "deploy": "deploy_score",
+    }
+
     def __init__(self):
         super().__init__(name="orchestrator")
         self._scanner = ScannerAgent()
@@ -70,3 +78,49 @@ class OrchestratorAgent(BaseAgent):
         if score >= self.REVIEW_THRESHOLD:
             return "REVIEW"
         return "REJECT"
+
+    def _merge_results(self, agent_results: Dict[str, Optional[Dict]], token_data: Dict) -> Dict:
+        available = {}
+        failed_agents = []
+        for name, result in agent_results.items():
+            if result is not None:
+                key = self.SCORE_KEYS[name]
+                available[name] = result.get(key, 0)
+            else:
+                failed_agents.append(name)
+
+        weights = self._redistribute_weights(failed_agents)
+
+        if available:
+            unified_score = sum(available[name] * weights[name] for name in available)
+            unified_score = max(0, min(100, round(unified_score)))
+        else:
+            unified_score = 0
+
+        all_red_flags = []
+        all_green_flags = []
+        for name, result in agent_results.items():
+            if result is not None:
+                for flag in result.get("red_flags", []):
+                    all_red_flags.append(f"{name}:{flag}")
+                for flag in result.get("green_flags", []):
+                    all_green_flags.append(f"{name}:{flag}")
+
+        unified_verdict = self._compute_unified_verdict(unified_score, all_red_flags)
+
+        return {
+            "token_address": token_data.get("token_address", ""),
+            "chain": token_data.get("chain", ""),
+            "project_name": token_data.get("project_name", ""),
+            "unified_score": unified_score,
+            "unified_verdict": unified_verdict,
+            "weights_used": weights,
+            "agent_scores": available,
+            "failed_agents": failed_agents,
+            "red_flags": all_red_flags,
+            "green_flags": all_green_flags,
+            "agent_results": {
+                name: result for name, result in agent_results.items()
+                if result is not None
+            },
+        }

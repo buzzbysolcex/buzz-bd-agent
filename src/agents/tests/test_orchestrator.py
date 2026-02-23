@@ -122,3 +122,136 @@ class TestComputeUnifiedVerdict:
     def test_boundary_39_is_reject(self):
         agent = OrchestratorAgent()
         assert agent._compute_unified_verdict(39, []) == "REJECT"
+
+
+def _make_agent_result(agent_name, score, red_flags=None, green_flags=None):
+    """Helper to build a mock agent result dict."""
+    score_keys = {
+        "scorer": "total_score",
+        "safety": "safety_score",
+        "wallet": "wallet_score",
+        "social": "social_score",
+        "deploy": "deploy_score",
+    }
+    return {
+        score_keys[agent_name]: score,
+        "red_flags": red_flags or [],
+        "green_flags": green_flags or [],
+    }
+
+
+def _make_token_data(**overrides):
+    """Helper to build a token_data dict."""
+    data = {
+        "token_address": "0xtoken123",
+        "deployer_address": "0xdep456",
+        "chain": "solana",
+        "project_name": "TestToken",
+        "market_data": {"mcap": 1000000, "volume_24h": 500000, "liquidity": 250000},
+    }
+    data.update(overrides)
+    return data
+
+
+class TestMergeResults:
+    def test_all_agents_succeed(self):
+        agent = OrchestratorAgent()
+        results = {
+            "scorer": _make_agent_result("scorer", 80),
+            "safety": _make_agent_result("safety", 70),
+            "wallet": _make_agent_result("wallet", 60),
+            "social": _make_agent_result("social", 50),
+            "deploy": _make_agent_result("deploy", 90),
+        }
+        merged = agent._merge_results(results, _make_token_data())
+        assert merged["unified_score"] == 68
+        assert merged["unified_verdict"] == "LIST"
+        assert merged["failed_agents"] == []
+        assert len(merged["agent_scores"]) == 5
+
+    def test_with_one_failure(self):
+        agent = OrchestratorAgent()
+        results = {
+            "scorer": _make_agent_result("scorer", 80),
+            "safety": None,
+            "wallet": _make_agent_result("wallet", 60),
+            "social": _make_agent_result("social", 50),
+            "deploy": _make_agent_result("deploy", 90),
+        }
+        merged = agent._merge_results(results, _make_token_data())
+        assert merged["failed_agents"] == ["safety"]
+        assert "safety" not in merged["agent_scores"]
+        assert abs(sum(merged["weights_used"].values()) - 1.0) < 1e-9
+        assert merged["unified_score"] == 67
+
+    def test_compiles_red_flags_namespaced(self):
+        agent = OrchestratorAgent()
+        results = {
+            "scorer": _make_agent_result("scorer", 50),
+            "safety": _make_agent_result("safety", 40, red_flags=["honeypot_detected"]),
+            "wallet": _make_agent_result("wallet", 30, red_flags=["unlocked_lp", "whale_concentration"]),
+            "social": _make_agent_result("social", 60),
+            "deploy": _make_agent_result("deploy", 70),
+        }
+        merged = agent._merge_results(results, _make_token_data())
+        assert "safety:honeypot_detected" in merged["red_flags"]
+        assert "wallet:unlocked_lp" in merged["red_flags"]
+        assert "wallet:whale_concentration" in merged["red_flags"]
+        assert len(merged["red_flags"]) == 3
+
+    def test_compiles_green_flags_namespaced(self):
+        agent = OrchestratorAgent()
+        results = {
+            "scorer": _make_agent_result("scorer", 80),
+            "safety": _make_agent_result("safety", 90, green_flags=["verified_source"]),
+            "wallet": _make_agent_result("wallet", 85, green_flags=["lp_burned"]),
+            "social": _make_agent_result("social", 70),
+            "deploy": _make_agent_result("deploy", 75),
+        }
+        merged = agent._merge_results(results, _make_token_data())
+        assert "safety:verified_source" in merged["green_flags"]
+        assert "wallet:lp_burned" in merged["green_flags"]
+
+    def test_score_clamped_0_100(self):
+        agent = OrchestratorAgent()
+        results = {name: _make_agent_result(name, 0) for name in ["scorer", "safety", "wallet", "social", "deploy"]}
+        merged = agent._merge_results(results, _make_token_data())
+        assert merged["unified_score"] == 0
+
+        results = {name: _make_agent_result(name, 100) for name in ["scorer", "safety", "wallet", "social", "deploy"]}
+        merged = agent._merge_results(results, _make_token_data())
+        assert merged["unified_score"] == 100
+
+    def test_all_agents_failed(self):
+        agent = OrchestratorAgent()
+        results = {name: None for name in ["scorer", "safety", "wallet", "social", "deploy"]}
+        merged = agent._merge_results(results, _make_token_data())
+        assert merged["unified_score"] == 0
+        assert merged["unified_verdict"] == "REJECT"
+        assert len(merged["failed_agents"]) == 5
+
+    def test_includes_agent_results(self):
+        agent = OrchestratorAgent()
+        scorer_result = _make_agent_result("scorer", 80)
+        results = {
+            "scorer": scorer_result,
+            "safety": None,
+            "wallet": _make_agent_result("wallet", 60),
+            "social": None,
+            "deploy": _make_agent_result("deploy", 70),
+        }
+        merged = agent._merge_results(results, _make_token_data())
+        assert "scorer" in merged["agent_results"]
+        assert "wallet" in merged["agent_results"]
+        assert "deploy" in merged["agent_results"]
+        assert "safety" not in merged["agent_results"]
+        assert "social" not in merged["agent_results"]
+
+    def test_includes_token_metadata(self):
+        agent = OrchestratorAgent()
+        results = {name: _make_agent_result(name, 50) for name in ["scorer", "safety", "wallet", "social", "deploy"]}
+        td = _make_token_data(token_address="0xabc", chain="ethereum", project_name="FooToken")
+        merged = agent._merge_results(results, td)
+        assert merged["token_address"] == "0xabc"
+        assert merged["chain"] == "ethereum"
+        assert merged["project_name"] == "FooToken"
