@@ -430,3 +430,94 @@ class TestEvaluateSingleToken:
         saved = agent.read_scratchpad("eval_0xpersist")
         assert saved is not None
         assert saved["token_address"] == "0xpersist"
+
+
+class TestDepthEscalation:
+    @pytest.mark.asyncio
+    async def test_quick_stays_quick_below_50(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 30))
+        td = _make_token_data()
+        result = await agent._evaluate_single_token(td, depth="quick")
+        assert result["unified_score"] == 30
+        for sub in agent._agents.values():
+            assert sub.run.call_count == 1
+
+    @pytest.mark.asyncio
+    async def test_quick_escalates_to_standard_above_50(self):
+        agent = OrchestratorAgent()
+        call_depths = []
+
+        def _make_mock(agent_name):
+            async def mock_run(params):
+                depth = params.get("depth", "none")
+                call_depths.append(depth)
+                return _make_agent_result(agent_name, 55)
+            return mock_run
+
+        for name, sub in agent._agents.items():
+            sub.run = _make_mock(name)
+
+        td = _make_token_data()
+        result = await agent._evaluate_single_token(td, depth="quick")
+        assert "standard" in call_depths
+
+    @pytest.mark.asyncio
+    async def test_quick_escalates_to_deep_above_70(self):
+        agent = OrchestratorAgent()
+        call_depths = []
+
+        def _make_mock(agent_name):
+            async def mock_run(params):
+                depth = params.get("depth", "none")
+                call_depths.append(depth)
+                return _make_agent_result(agent_name, 75)
+            return mock_run
+
+        for name, sub in agent._agents.items():
+            sub.run = _make_mock(name)
+
+        td = _make_token_data()
+        result = await agent._evaluate_single_token(td, depth="quick")
+        assert "deep" in call_depths
+
+    @pytest.mark.asyncio
+    async def test_standard_no_escalation(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 90))
+        td = _make_token_data()
+        result = await agent._evaluate_single_token(td, depth="standard")
+        for sub in agent._agents.values():
+            assert sub.run.call_count == 1
+
+    @pytest.mark.asyncio
+    async def test_deep_no_escalation(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 95))
+        td = _make_token_data()
+        result = await agent._evaluate_single_token(td, depth="deep")
+        for sub in agent._agents.values():
+            assert sub.run.call_count == 1
+
+    @pytest.mark.asyncio
+    async def test_escalation_passes_depth_to_agents(self):
+        agent = OrchestratorAgent()
+        captured_params = {}
+
+        def _make_mock(agent_name):
+            async def capture_run(params):
+                if "depth" in params:
+                    captured_params[params["depth"]] = True
+                return _make_agent_result(agent_name, 55)
+            return capture_run
+
+        for name, sub in agent._agents.items():
+            sub.run = _make_mock(name)
+
+        td = _make_token_data()
+        await agent._evaluate_single_token(td, depth="quick")
+        assert "quick" in captured_params
+        assert "standard" in captured_params
