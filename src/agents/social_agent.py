@@ -82,4 +82,59 @@ class SocialAgent(BaseAgent):
         }
 
     async def execute(self, params: Dict) -> Dict:
-        raise NotImplementedError("execute not yet implemented")
+        project = params.get("project_name", "")
+        token = params.get("token_address", "")
+        chain = params.get("chain", "")
+        deployer = params.get("deployer_address", "")
+        depth = params.get("depth", "standard")
+
+        if depth not in VALID_DEPTHS:
+            depth = "standard"
+
+        if not project or not token or not chain:
+            self.log_event("error", "Missing project_name, token_address, or chain")
+            return self._empty_result(project, token, chain, depth)
+
+        try:
+            self.log_event("action", f"Starting social analysis for {project} ({token}) on {chain}", {"depth": depth})
+
+            grok_r, atv_r, serper_r = await asyncio.gather(
+                self._search_grok(project, token, chain, depth),
+                self._search_atv(deployer, depth),
+                self._search_serper(project, token, chain, depth),
+            )
+
+            result = self._compute_verdict(project, token, chain, depth, grok_r, atv_r, serper_r)
+
+            self.log_event("decision", f"Social score: {result['social_score']} ({result['sentiment']})", {
+                "social_score": result["social_score"],
+                "sentiment": result["sentiment"],
+                "red_flags": result["red_flags"],
+            })
+
+            self.write_scratchpad(f"social_{token}", result)
+            return result
+        except Exception as e:
+            self.log_event("error", f"Social analysis failed unexpectedly: {e}")
+            empty = self._empty_result(project, token, chain, depth)
+            empty["red_flags"].append("all_sources_failed")
+            return empty
+
+    async def _search_grok(self, project: str, token: str, chain: str, depth: str) -> Dict:
+        return {"available": False, "score": 0, "twitter_score": 0, "community_score": 0, "red_flags": [], "green_flags": [],
+                "sentiment": "suspicious", "follower_estimate": 0, "engagement_level": "none",
+                "tweet_frequency": "none", "bot_suspicion": 0.0, "summary": ""}
+
+    async def _search_atv(self, deployer: str, depth: str) -> Dict:
+        return {"available": False, "score": 0, "red_flags": [], "green_flags": [],
+                "ens_name": None, "has_ens": False, "twitter_handle": None,
+                "github_handle": None, "discord_handle": None, "identity_count": 0}
+
+    async def _search_serper(self, project: str, token: str, chain: str, depth: str) -> Dict:
+        return {"available": False, "score": 0, "red_flags": [], "green_flags": [],
+                "total_results": 0, "positive_mentions": 0, "negative_mentions": 0,
+                "scam_mentions": 0, "news_sources": []}
+
+    def _compute_verdict(self, project: str, token: str, chain: str, depth: str,
+                         grok_r: Dict, atv_r: Dict, serper_r: Dict) -> Dict:
+        return self._empty_result(project, token, chain, depth)
