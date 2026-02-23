@@ -255,3 +255,64 @@ class OrchestratorAgent(BaseAgent):
         self.write_scratchpad(f"eval_{addr}", merged)
 
         return merged
+
+    def format_scan_result(self, scan_result: Dict) -> str:
+        summary = scan_result.get("summary", {})
+        results = scan_result.get("results", [])
+
+        lines = [
+            "\U0001f50d *Scan Complete*",
+            f"Tokens scanned: {scan_result.get('tokens_scanned', 0)}",
+            f"Strong List: {summary.get('strong_list', 0)} | List: {summary.get('list', 0)}",
+            f"Review: {summary.get('review', 0)} | Reject: {summary.get('reject', 0)}",
+            "",
+        ]
+
+        top = [r for r in results if r["unified_verdict"] in ("STRONG_LIST", "LIST")]
+        for r in top[:10]:
+            emoji = "\U0001f7e2" if r["unified_verdict"] == "STRONG_LIST" else "\U0001f7e1"
+            flags = f" \u26a0\ufe0f {len(r['red_flags'])}" if r["red_flags"] else ""
+            lines.append(
+                f"{emoji} *{r['project_name']}* | "
+                f"Score: {r['unified_score']} | "
+                f"{r['unified_verdict']}{flags}"
+            )
+
+        return "\n".join(lines)
+
+    def format_evaluate_result(self, eval_result: Dict) -> str:
+        verdict_emoji = {
+            "STRONG_LIST": "\U0001f7e2",
+            "LIST": "\U0001f7e1",
+            "REVIEW": "\U0001f7e0",
+            "REJECT": "\U0001f534",
+        }
+        v = eval_result["unified_verdict"]
+
+        emoji = verdict_emoji.get(v, "⚪")
+        name = eval_result.get("project_name", "Unknown")
+        lines = [
+            f"{emoji} *{name}*",
+            f"Score: *{eval_result['unified_score']}*/100 \u2192 {v}",
+            "",
+            "*Agent Breakdown:*",
+        ]
+
+        for agent_name, score in eval_result.get("agent_scores", {}).items():
+            weight = eval_result.get("weights_used", {}).get(agent_name, 0)
+            lines.append(f"  {agent_name}: {score}/100 (w={weight:.0%})")
+
+        if eval_result.get("failed_agents"):
+            lines.append(f"\n\u26a0\ufe0f Failed: {', '.join(eval_result['failed_agents'])}")
+
+        if eval_result.get("red_flags"):
+            lines.append("\n\U0001f6a9 *Red Flags:*")
+            for flag in eval_result["red_flags"][:10]:
+                lines.append(f"  \u2022 {flag}")
+
+        if eval_result.get("green_flags"):
+            lines.append("\n\u2705 *Green Flags:*")
+            for flag in eval_result["green_flags"][:10]:
+                lines.append(f"  \u2022 {flag}")
+
+        return "\n".join(lines)
