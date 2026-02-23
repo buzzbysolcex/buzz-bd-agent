@@ -76,3 +76,49 @@ class TestRedistributeWeights:
         weights = agent._redistribute_weights(["scorer"])
         assert abs(weights["safety"] / weights["wallet"] - 1.0) < 1e-9
         assert abs(weights["safety"] / weights["social"] - 1.25) < 1e-9
+
+
+class TestComputeUnifiedVerdict:
+    def test_strong_list(self):
+        agent = OrchestratorAgent()
+        assert agent._compute_unified_verdict(85, []) == "STRONG_LIST"
+
+    def test_list(self):
+        agent = OrchestratorAgent()
+        assert agent._compute_unified_verdict(65, []) == "LIST"
+
+    def test_review(self):
+        agent = OrchestratorAgent()
+        assert agent._compute_unified_verdict(45, []) == "REVIEW"
+
+    def test_reject(self):
+        agent = OrchestratorAgent()
+        assert agent._compute_unified_verdict(30, []) == "REJECT"
+
+    def test_honeypot_overrides_to_reject(self):
+        agent = OrchestratorAgent()
+        assert agent._compute_unified_verdict(95, ["safety:honeypot_detected"]) == "REJECT"
+
+    def test_serial_rugger_overrides_to_reject(self):
+        agent = OrchestratorAgent()
+        assert agent._compute_unified_verdict(90, ["wallet:serial_rugger"]) == "REJECT"
+
+    def test_bundled_wallets_overrides_to_reject(self):
+        agent = OrchestratorAgent()
+        assert agent._compute_unified_verdict(85, ["wallet:bundled_wallets"]) == "REJECT"
+
+    def test_boundary_80_is_strong_list(self):
+        agent = OrchestratorAgent()
+        assert agent._compute_unified_verdict(80, []) == "STRONG_LIST"
+
+    def test_boundary_60_is_list(self):
+        agent = OrchestratorAgent()
+        assert agent._compute_unified_verdict(60, []) == "LIST"
+
+    def test_boundary_40_is_review(self):
+        agent = OrchestratorAgent()
+        assert agent._compute_unified_verdict(40, []) == "REVIEW"
+
+    def test_boundary_39_is_reject(self):
+        agent = OrchestratorAgent()
+        assert agent._compute_unified_verdict(39, []) == "REJECT"

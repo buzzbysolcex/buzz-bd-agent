@@ -29,6 +29,12 @@ class OrchestratorAgent(BaseAgent):
 
     AGENT_TIMEOUT = 30  # seconds
 
+    CRITICAL_FLAGS = frozenset({
+        "safety:honeypot_detected",
+        "wallet:serial_rugger",
+        "wallet:bundled_wallets",
+    })
+
     def __init__(self):
         super().__init__(name="orchestrator")
         self._scanner = ScannerAgent()
@@ -53,3 +59,14 @@ class OrchestratorAgent(BaseAgent):
             return {}
         total = sum(surviving.values())
         return {name: weight / total for name, weight in surviving.items()}
+
+    def _compute_unified_verdict(self, score: int, red_flags: List[str]) -> str:
+        if self.CRITICAL_FLAGS.intersection(red_flags):
+            return "REJECT"
+        if score >= self.STRONG_LIST_THRESHOLD:
+            return "STRONG_LIST"
+        if score >= self.LIST_THRESHOLD:
+            return "LIST"
+        if score >= self.REVIEW_THRESHOLD:
+            return "REVIEW"
+        return "REJECT"
