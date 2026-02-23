@@ -1,3 +1,4 @@
+import time
 import pytest
 from aioresponses import aioresponses
 from src.agents.deploy_agent import DeployAgent
@@ -7,7 +8,6 @@ HELIUS_TXN_URL = "https://api.helius.xyz/v0/addresses/{address}/transactions"
 
 
 def _make_helius_txns(count=12, oldest_age_days=400, types=None):
-    import time
     now = int(time.time())
     txns = []
     for i in range(count):
