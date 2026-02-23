@@ -280,3 +280,92 @@ class TestAnalyzeHolders:
             result = await agent._analyze_holders("abc123", "nobody", "solana", "standard")
         assert result["available"] is True
         assert result["unique_holders"] == 50
+
+
+# --- Task 5: Deployer analysis tests ---
+import time as time_module
+
+MOCK_HELIUS_DEPLOYER_ESTABLISHED = [
+    {"type": "TRANSFER", "timestamp": int(time_module.time()) - (400 * 86400), "description": "old tx"},
+    {"type": "TRANSFER", "timestamp": int(time_module.time()) - (200 * 86400), "description": "mid tx"},
+    {"type": "UNKNOWN", "timestamp": int(time_module.time()) - (10 * 86400), "description": "recent tx"},
+]
+
+MOCK_HELIUS_DEPLOYER_NEW = [
+    {"type": "TRANSFER", "timestamp": int(time_module.time()) - (5 * 86400), "description": "new deployer tx"},
+]
+
+MOCK_HELIUS_DEPLOYER_EMPTY = []
+
+
+class TestAnalyzeDeployer:
+    async def test_skipped_in_quick_mode(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        result = await agent._analyze_deployer("dep123", "solana", "quick")
+        assert result["available"] is False
+
+    async def test_established_deployer_scores_high(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{HELIUS_API_BASE}/v0/addresses/dep123/transactions?api-key=test-key&limit=100",
+                payload=MOCK_HELIUS_DEPLOYER_ESTABLISHED,
+            )
+            result = await agent._analyze_deployer("dep123", "solana", "standard")
+        assert result["available"] is True
+        assert result["age_days"] >= 390
+        assert result["score"] >= 8
+        assert "established_deployer" in result["green_flags"]
+
+    async def test_new_deployer_scores_low(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{HELIUS_API_BASE}/v0/addresses/dep123/transactions?api-key=test-key&limit=100",
+                payload=MOCK_HELIUS_DEPLOYER_NEW,
+            )
+            result = await agent._analyze_deployer("dep123", "solana", "standard")
+        assert result["available"] is True
+        assert result["age_days"] <= 10
+
+    async def test_api_error_returns_unavailable(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{HELIUS_API_BASE}/v0/addresses/dep123/transactions?api-key=test-key&limit=100",
+                status=500,
+            )
+            result = await agent._analyze_deployer("dep123", "solana", "standard")
+        assert result["available"] is False
+
+    async def test_empty_history_returns_unavailable(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{HELIUS_API_BASE}/v0/addresses/dep123/transactions?api-key=test-key&limit=100",
+                payload=MOCK_HELIUS_DEPLOYER_EMPTY,
+            )
+            result = await agent._analyze_deployer("dep123", "solana", "standard")
+        assert result["available"] is False
+
+    async def test_allium_stub_in_deep_mode(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{HELIUS_API_BASE}/v0/addresses/dep123/transactions?api-key=test-key&limit=100",
+                payload=MOCK_HELIUS_DEPLOYER_ESTABLISHED,
+            )
+            result = await agent._analyze_deployer("dep123", "solana", "deep")
+        assert result["available"] is True
+        assert result["cross_chain_activity"] is False

@@ -278,11 +278,89 @@ class WalletAgent(BaseAgent):
             self.log_event("error", f"Holder analysis failed: {e}")
             return empty
 
+    async def _fetch_allium(self, deployer_address: str) -> Dict:
+        """Allium cross-chain API — STUBBED."""
+        self.log_event("action", "Allium API not yet implemented")
+        return {"available": False}
 
     async def _analyze_deployer(self, deployer: str, chain: str, depth: str) -> Dict:
+        empty = {
+            "available": False, "score": 0,
+            "age_days": 0, "total_tokens_deployed": 0, "rug_count": 0,
+            "cross_chain_activity": False,
+            "red_flags": [], "green_flags": [],
+        }
         if depth == "quick":
-            return {"available": False, "score": 0}
-        return {"available": False, "score": 0}
+            return empty
+
+        api_key = os.environ.get("HELIUS_API_KEY", "")
+        if not api_key:
+            self.log_event("error", "HELIUS_API_KEY not set, skipping deployer analysis")
+            return empty
+
+        self.log_event("action", "Analyzing deployer via Helius", {"deployer": deployer})
+        timeout = DEPTH_TIMEOUTS.get(depth, DEPTH_TIMEOUTS["standard"])
+        try:
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                url = f"{HELIUS_API_BASE}/v0/addresses/{deployer}/transactions?api-key={api_key}&limit=100"
+                async with session.get(url) as resp:
+                    if resp.status != 200:
+                        raise aiohttp.ClientError(f"Helius deployer txs returned {resp.status}")
+                    txs = await resp.json()
+
+            if not txs:
+                return empty
+
+            timestamps = [tx.get("timestamp", 0) for tx in txs if tx.get("timestamp")]
+            if not timestamps:
+                return empty
+
+            earliest = min(timestamps)
+            now = int(time.time())
+            age_days = (now - earliest) // 86400
+            rug_count = 0
+            total_tokens_deployed = len(txs)
+
+            cross_chain = False
+            if depth == "deep":
+                allium = await self._fetch_allium(deployer)
+                if allium.get("available"):
+                    cross_chain = len(allium.get("chains_active", [])) > 1
+                    rug_count = allium.get("rug_indicators", 0)
+
+            score = 0
+            red_flags = []
+            green_flags = []
+
+            if age_days > 365:
+                score += 8
+                green_flags.append("established_deployer")
+            elif age_days > 180:
+                score += 5
+            elif age_days > 90:
+                score += 3
+
+            if rug_count == 0:
+                score += 7
+            elif rug_count >= 2:
+                score -= 10
+                red_flags.append("serial_rugger")
+
+            if cross_chain:
+                score += 5
+
+            score = max(0, min(MAX_DEPLOYER, score))
+
+            self.log_event("observation", f"Deployer: age={age_days}d, rugs={rug_count}, score={score}/20")
+            return {
+                "available": True, "score": score,
+                "age_days": age_days, "total_tokens_deployed": total_tokens_deployed,
+                "rug_count": rug_count, "cross_chain_activity": cross_chain,
+                "red_flags": red_flags, "green_flags": green_flags,
+            }
+        except Exception as e:
+            self.log_event("error", f"Deployer analysis failed: {e}")
+            return empty
 
     async def _analyze_tx_flow(self, token: str, chain: str, depth: str) -> Dict:
         return {"available": False, "score": 0}
