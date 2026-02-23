@@ -255,3 +255,104 @@ class TestMergeResults:
         assert merged["token_address"] == "0xabc"
         assert merged["chain"] == "ethereum"
         assert merged["project_name"] == "FooToken"
+
+
+class TestRunAgentsParallel:
+    @pytest.mark.asyncio
+    async def test_all_succeed(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 75))
+
+        params = {name: {} for name in agent._agents}
+        results = await agent._run_agents_parallel(params)
+        assert len(results) == 5
+        for name in agent._agents:
+            assert results[name] is not None
+
+    @pytest.mark.asyncio
+    async def test_one_timeout(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 75))
+        async def hang(*args, **kwargs):
+            await asyncio.sleep(999)
+        agent._agents["safety"].run = hang
+        agent.AGENT_TIMEOUT = 0.1
+
+        params = {name: {} for name in agent._agents}
+        results = await agent._run_agents_parallel(params)
+        assert results["safety"] is None
+        assert results["scorer"] is not None
+        assert results["wallet"] is not None
+
+    @pytest.mark.asyncio
+    async def test_one_exception(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 75))
+        agent._agents["wallet"].run = AsyncMock(side_effect=RuntimeError("API down"))
+
+        params = {name: {} for name in agent._agents}
+        results = await agent._run_agents_parallel(params)
+        assert results["wallet"] is None
+        assert results["scorer"] is not None
+        assert results["safety"] is not None
+
+    @pytest.mark.asyncio
+    async def test_all_fail(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(side_effect=RuntimeError("fail"))
+
+        params = {name: {} for name in agent._agents}
+        results = await agent._run_agents_parallel(params)
+        for name in agent._agents:
+            assert results[name] is None
+
+    @pytest.mark.asyncio
+    async def test_multiple_failures(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 75))
+        agent._agents["safety"].run = AsyncMock(side_effect=RuntimeError("fail"))
+        agent._agents["social"].run = AsyncMock(side_effect=RuntimeError("fail"))
+        agent._agents["deploy"].run = AsyncMock(side_effect=RuntimeError("fail"))
+
+        params = {name: {} for name in agent._agents}
+        results = await agent._run_agents_parallel(params)
+        assert results["safety"] is None
+        assert results["social"] is None
+        assert results["deploy"] is None
+        assert results["scorer"] is not None
+        assert results["wallet"] is not None
+
+    @pytest.mark.asyncio
+    async def test_timeout_uses_constant(self):
+        agent = OrchestratorAgent()
+        agent.AGENT_TIMEOUT = 0.05
+        async def slow(*args, **kwargs):
+            await asyncio.sleep(1)
+        for name, sub in agent._agents.items():
+            sub.run = slow
+
+        params = {name: {} for name in agent._agents}
+        results = await agent._run_agents_parallel(params)
+        for name in agent._agents:
+            assert results[name] is None
+
+    @pytest.mark.asyncio
+    async def test_agents_run_concurrently(self):
+        import time
+        agent = OrchestratorAgent()
+        async def slow_agent(params):
+            await asyncio.sleep(0.1)
+            return _make_agent_result("scorer", 50)
+        for name, sub in agent._agents.items():
+            sub.run = slow_agent
+
+        params = {name: {} for name in agent._agents}
+        start = time.monotonic()
+        await agent._run_agents_parallel(params)
+        elapsed = time.monotonic() - start
+        assert elapsed < 0.3

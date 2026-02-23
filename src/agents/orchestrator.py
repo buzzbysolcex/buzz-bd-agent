@@ -124,3 +124,22 @@ class OrchestratorAgent(BaseAgent):
                 if result is not None
             },
         }
+
+    async def _run_agents_parallel(self, agent_params: Dict[str, Dict]) -> Dict[str, Optional[Dict]]:
+        async def _run_with_timeout(name: str, params: Dict):
+            try:
+                result = await asyncio.wait_for(
+                    self._agents[name].run(params),
+                    timeout=self.AGENT_TIMEOUT,
+                )
+                return (name, result)
+            except asyncio.TimeoutError:
+                self.log_event("error", f"{name} timed out after {self.AGENT_TIMEOUT}s")
+                return (name, None)
+            except Exception as e:
+                self.log_event("error", f"{name} failed: {str(e)}")
+                return (name, None)
+
+        tasks = [_run_with_timeout(name, params) for name, params in agent_params.items()]
+        results = await asyncio.gather(*tasks)
+        return dict(results)
