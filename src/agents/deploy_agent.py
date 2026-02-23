@@ -268,6 +268,167 @@ class DeployAgent(BaseAgent):
         self.log_event("action", "Allium cross-chain API not yet implemented (stub)")
         return empty
 
+    def _compute_verdict(self, deployer: str, chain: str, depth: str,
+                         deploy_r: Dict, portfolio_r: Dict, cross_chain_r: Dict) -> Dict:
+        analyses = [
+            (deploy_r, MAX_DEPLOYMENT_HISTORY),
+            (portfolio_r, MAX_FINANCIAL_HEALTH),
+            (cross_chain_r, MAX_CROSS_CHAIN),
+        ]
+
+        raw_score = 0
+        available_points = 0
+        for result, max_pts in analyses:
+            if result.get("available", False):
+                raw_score += result.get("score", 0)
+                available_points += max_pts
+
+        # Reputation scoring (0-20 pts) — derived from deployment + portfolio data
+        reputation_score = 0
+        deploy_available = deploy_r.get("available", False)
+        portfolio_available = portfolio_r.get("available", False)
+
+        if deploy_available:
+            wallet_age = deploy_r.get("wallet_age_days", 0)
+            total_deps = deploy_r.get("total_deployments", 0)
+            if wallet_age >= 365 and total_deps >= 5:
+                reputation_score += 10
+            elif wallet_age >= 180 and total_deps >= 2:
+                reputation_score += 6
+
+            # No failed/rugged tokens — assume clean (no rug detection yet)
+            reputation_score += 5
+
+        if portfolio_available and portfolio_r.get("has_significant_holdings", False):
+            reputation_score += 5
+
+        reputation_score = min(MAX_REPUTATION, reputation_score)
+
+        if deploy_available or portfolio_available:
+            raw_score += reputation_score
+            available_points += MAX_REPUTATION
+
+        if available_points > 0:
+            deploy_score = round((raw_score / available_points) * 100)
+        else:
+            deploy_score = 0
+        deploy_score = max(0, min(100, deploy_score))
+
+        # Verdict mapping
+        if deploy_score >= 80:
+            risk_level = "low"
+            cross_chain_reputation = "established"
+        elif deploy_score >= 60:
+            risk_level = "medium"
+            cross_chain_reputation = "moderate"
+        elif deploy_score >= 30:
+            risk_level = "high"
+            cross_chain_reputation = "new"
+        else:
+            risk_level = "critical"
+            cross_chain_reputation = "unknown"
+
+        # Aggregate flags
+        red_flags = []
+        green_flags = []
+        for result, _ in analyses:
+            red_flags.extend(result.get("red_flags", []))
+            green_flags.extend(result.get("green_flags", []))
+
+        if available_points == 0:
+            red_flags.append("all_sources_failed")
+
+        # Detect red/green flags from data
+        if deploy_available:
+            wallet_age = deploy_r.get("wallet_age_days", 0)
+            total_deps = deploy_r.get("total_deployments", 0)
+
+            if wallet_age < 7:
+                red_flags.append("fresh_wallet")
+            if total_deps == 1 and wallet_age < 30:
+                red_flags.append("first_time_deployer")
+            if total_deps >= 10:
+                green_flags.append("prolific_deployer")
+            if wallet_age >= 365 and total_deps >= 5:
+                green_flags.append("established_history")
+
+        if portfolio_available:
+            tokens_held = portfolio_r.get("total_tokens_held", 0)
+            value_usd = portfolio_r.get("estimated_value_usd", 0.0)
+
+            if tokens_held == 0 and value_usd == 0:
+                red_flags.append("empty_wallet")
+            if value_usd >= 1000:
+                green_flags.append("positive_pnl")
+            if deploy_available and deploy_r.get("total_deployments", 0) >= 3 and value_usd < 10:
+                red_flags.append("negative_pnl")
+            if tokens_held >= 10:
+                green_flags.append("diversified_portfolio")
+
+        if cross_chain_r.get("available", False):
+            chains = cross_chain_r.get("chains_detected", [])
+            if len(chains) >= 3:
+                green_flags.append("multi_chain_active")
+            if len(chains) == 1:
+                red_flags.append("single_chain_deployer")
+
+        # Chains active
+        chains_active = [chain]
+        if cross_chain_r.get("available", False):
+            chains_active = cross_chain_r.get("chains_detected", [chain])
+            if chain not in chains_active:
+                chains_active.append(chain)
+
+        total_deployments = deploy_r.get("total_deployments", 0)
+
+        # Sources used
+        sources_used = []
+        if deploy_available or portfolio_available:
+            sources_used.append("helius")
+        if cross_chain_r.get("available", False):
+            sources_used.append("allium")
+
+        breakdown = {
+            "cross_chain_activity": cross_chain_r.get("score", 0),
+            "deployment_history": deploy_r.get("score", 0),
+            "financial_health": portfolio_r.get("score", 0),
+            "reputation": reputation_score,
+        }
+
+        return {
+            "deployer_address": deployer,
+            "chain": chain,
+            "depth": depth,
+            "deploy_score": deploy_score,
+            "risk_level": risk_level,
+            "cross_chain_reputation": cross_chain_reputation,
+            "chains_active": chains_active,
+            "total_deployments": total_deployments,
+            "breakdown": breakdown,
+            "deployment_analysis": {
+                "total_deployments": total_deployments,
+                "deployment_frequency": deploy_r.get("deployment_frequency", "first_time"),
+                "wallet_age_days": deploy_r.get("wallet_age_days", 0),
+                "oldest_tx_timestamp": deploy_r.get("oldest_tx_timestamp"),
+                "available": deploy_available,
+            },
+            "portfolio_analysis": {
+                "total_tokens_held": portfolio_r.get("total_tokens_held", 0),
+                "estimated_value_usd": portfolio_r.get("estimated_value_usd", 0.0),
+                "has_significant_holdings": portfolio_r.get("has_significant_holdings", False),
+                "available": portfolio_available,
+            },
+            "cross_chain_analysis": {
+                "chains_detected": cross_chain_r.get("chains_detected", []),
+                "total_cross_chain_txns": cross_chain_r.get("total_cross_chain_txns", 0),
+                "cross_chain_pnl_usd": cross_chain_r.get("cross_chain_pnl_usd", 0.0),
+                "available": cross_chain_r.get("available", False),
+            },
+            "red_flags": red_flags,
+            "green_flags": green_flags,
+            "sources_used": sources_used,
+        }
+
     async def execute(self, params: Dict) -> Dict:
         deployer = params.get("deployer_address", "")
         chain = params.get("chain", "")
