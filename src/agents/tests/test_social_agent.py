@@ -599,3 +599,86 @@ class TestDepthGating:
             })
         assert result["web_reputation"]["available"] is True
         assert result["team_identity"]["available"] is False
+
+
+class TestFlagDetection:
+    async def test_no_social_presence_flag(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("XAI_API_KEY", "test-key")
+        agent = SocialAgent()
+        # Grok returns available but no followers, ATV returns no identity
+        grok_empty = {
+            "choices": [{
+                "message": {
+                    "content": json.dumps({
+                        "sentiment": "suspicious", "follower_estimate": 0,
+                        "engagement_level": "none", "tweet_frequency": "none",
+                        "bot_suspicion": 0.0, "red_flags": [], "summary": "No Twitter presence found.",
+                    })
+                }
+            }]
+        }
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{ATV_API_URL}?addresses=dep123&include=name,twitter,github,discord",
+                payload=MOCK_ATV_NO_IDENTITY,
+            )
+            mocked.post(GROK_API_URL, payload=grok_empty)
+            result = await agent.execute({
+                "project_name": "GHOST", "token_address": "ghost123",
+                "chain": "solana", "deployer_address": "dep123", "depth": "deep",
+            })
+        assert "no_social_presence" in result["red_flags"]
+        assert "anonymous_team" in result["red_flags"]
+
+    async def test_verified_team_green_flag(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{ATV_API_URL}?addresses=dep123&include=name,twitter,github,discord",
+                payload=MOCK_ATV_FULL_IDENTITY,
+            )
+            result = await agent.execute({
+                "project_name": "BONK", "token_address": "abc123",
+                "chain": "solana", "deployer_address": "dep123", "depth": "quick",
+            })
+        assert "verified_team" in result["green_flags"]
+        assert result["team_verified"] is True
+
+    async def test_bot_farm_and_scam_combined(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("XAI_API_KEY", "test-key")
+        monkeypatch.setenv("SERPER_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{ATV_API_URL}?addresses=dep123&include=name,twitter,github,discord",
+                payload=MOCK_ATV_NO_IDENTITY,
+            )
+            mocked.post(SERPER_API_URL, payload=MOCK_SERPER_NEGATIVE)
+            mocked.post(GROK_API_URL, payload=MOCK_GROK_SUSPICIOUS)
+            result = await agent.execute({
+                "project_name": "SCAM", "token_address": "scam123",
+                "chain": "solana", "deployer_address": "dep123", "depth": "deep",
+            })
+        assert "bot_farm" in result["red_flags"]
+        assert "scam_reports" in result["red_flags"]
+        assert "anonymous_team" in result["red_flags"]
+        assert result["social_score"] < 30
+
+    async def test_clean_reputation_green_flag(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("SERPER_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.get(
+                f"{ATV_API_URL}?addresses=dep123&include=name,twitter,github,discord",
+                payload=MOCK_ATV_FULL_IDENTITY,
+            )
+            mocked.post(SERPER_API_URL, payload=MOCK_SERPER_POSITIVE)
+            result = await agent.execute({
+                "project_name": "BONK", "token_address": "abc123",
+                "chain": "solana", "deployer_address": "dep123", "depth": "standard",
+            })
+        assert "clean_reputation" in result["green_flags"]
