@@ -266,3 +266,41 @@ class TestAnalyzePortfolio:
         assert result["total_tokens_held"] == 0
         assert result["estimated_value_usd"] == 0.0
         assert result["score"] == 0
+
+
+class TestAnalyzeCrossChain:
+    @pytest.mark.asyncio
+    async def test_stub_returns_unavailable(self):
+        """Cross-chain stub always returns available: False."""
+        agent = DeployAgent()
+        result = await agent._analyze_cross_chain("0xdep123", "solana", "deep")
+        assert result["available"] is False
+        assert result["score"] == 0
+
+    @pytest.mark.asyncio
+    async def test_stub_has_correct_structure(self):
+        """Stub result has all required fields."""
+        agent = DeployAgent()
+        result = await agent._analyze_cross_chain("0xdep123", "solana", "deep")
+        assert "chains_detected" in result
+        assert "total_cross_chain_txns" in result
+        assert "cross_chain_pnl_usd" in result
+        assert result["chains_detected"] == []
+        assert result["total_cross_chain_txns"] == 0
+        assert result["cross_chain_pnl_usd"] == 0.0
+
+    @pytest.mark.asyncio
+    async def test_stub_skip_on_non_deep(self):
+        """Cross-chain stub skips entirely on quick/standard depth."""
+        agent = DeployAgent()
+        for depth in ("quick", "standard"):
+            result = await agent._analyze_cross_chain("0xdep123", "solana", depth)
+            assert result["available"] is False
+
+    @pytest.mark.asyncio
+    async def test_stub_logs_event(self):
+        """Stub logs an action event about Allium not being implemented."""
+        agent = DeployAgent()
+        await agent._analyze_cross_chain("0xdep123", "solana", "deep")
+        action_events = [e for e in agent.events if e["type"] == "action"]
+        assert any("Allium" in e["description"] or "stub" in e["description"].lower() for e in action_events)
