@@ -1,6 +1,6 @@
 # src/agents/tests/test_wallet_agent.py
 import pytest
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 from src.agents.wallet_agent import WalletAgent
 from src.agents.base_agent import BaseAgent
 
@@ -610,3 +610,249 @@ class TestComputeVerdict:
         for_ = {**self._make_result(10), "bundled_wallets": [], "sybil_clusters": [], "wash_trading_detected": False, "same_funding_source": False}
         result = agent._compute_verdict("dep", "tok", "solana", "standard", liq, hld, dep, txf, for_)
         assert 35 <= result["wallet_score"] < 80
+
+
+# --- Task 9: Depth gating integration tests ---
+
+class TestDepthGating:
+    async def test_quick_skips_holders_deployer_forensics(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_HEALTHY)
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_ORGANIC)
+            result = await agent.execute({
+                "deployer_address": "dep123", "token_address": "abc123",
+                "chain": "solana", "depth": "quick",
+            })
+        assert result["holder_distribution"]["available"] is False
+        assert result["deployer_reputation"]["available"] is False
+        assert result["forensics"]["available"] is False
+
+    async def test_quick_runs_liquidity_and_tx_flow(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_HEALTHY)
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_ORGANIC)
+            result = await agent.execute({
+                "deployer_address": "dep123", "token_address": "abc123",
+                "chain": "solana", "depth": "quick",
+            })
+        assert result["liquidity_health"]["available"] is True
+
+    async def test_standard_runs_helius_sources(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_HEALTHY)
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_ORGANIC)
+            mocked.get(f"{HELIUS_API_BASE}/v0/tokens/abc123/holders?api-key=test-key&limit=50", payload=MOCK_HELIUS_HOLDERS_DISTRIBUTED)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/dep123/transactions?api-key=test-key&limit=100", payload=MOCK_HELIUS_DEPLOYER_ESTABLISHED)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/abc123/transactions?api-key=test-key&limit=100&type=SWAP", payload=MOCK_HELIUS_CLEAN_TXS)
+            result = await agent.execute({
+                "deployer_address": "dep123", "token_address": "abc123",
+                "chain": "solana", "depth": "standard",
+            })
+        assert result["holder_distribution"]["available"] is True
+        assert result["deployer_reputation"]["available"] is True
+
+    async def test_deep_calls_allium_stub(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_HEALTHY)
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_ORGANIC)
+            mocked.get(f"{HELIUS_API_BASE}/v0/tokens/abc123/holders?api-key=test-key&limit=50", payload=MOCK_HELIUS_HOLDERS_DISTRIBUTED)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/dep123/transactions?api-key=test-key&limit=100", payload=MOCK_HELIUS_DEPLOYER_ESTABLISHED)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/abc123/transactions?api-key=test-key&limit=100&type=SWAP", payload=MOCK_HELIUS_CLEAN_TXS)
+            result = await agent.execute({
+                "deployer_address": "dep123", "token_address": "abc123",
+                "chain": "solana", "depth": "deep",
+            })
+        assert result["deployer_reputation"]["cross_chain_activity"] is False
+
+    async def test_invalid_depth_defaults_to_standard(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        agent._analyze_liquidity = AsyncMock(return_value={"available": False, "score": 0, "total_liquidity": 0, "lp_locked": False, "lp_lock_duration_days": None, "lp_burned": False, "buy_sell_ratio": 0, "red_flags": [], "green_flags": []})
+        agent._analyze_holders = AsyncMock(return_value={"available": False, "score": 0, "top10_pct": 0, "deployer_pct": 0, "unique_holders": 0, "whale_count": 0, "red_flags": [], "green_flags": []})
+        agent._analyze_deployer = AsyncMock(return_value={"available": False, "score": 0, "age_days": 0, "total_tokens_deployed": 0, "rug_count": 0, "cross_chain_activity": False, "red_flags": [], "green_flags": []})
+        agent._analyze_tx_flow = AsyncMock(return_value={"available": False, "score": 0, "organic_score": 0, "unique_buyers_24h": 0, "unique_sellers_24h": 0, "avg_tx_size": 0, "red_flags": [], "green_flags": []})
+        agent._run_forensics = AsyncMock(return_value={"available": False, "score": 0, "bundled_wallets": [], "sybil_clusters": [], "wash_trading_detected": False, "same_funding_source": False, "red_flags": [], "green_flags": []})
+        result = await agent.execute({
+            "deployer_address": "dep123", "token_address": "abc123",
+            "chain": "solana", "depth": "invalid",
+        })
+        assert result["depth"] == "standard"
+
+    async def test_sources_used_tracks_active_sources(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_HEALTHY)
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_ORGANIC)
+            mocked.get(f"{HELIUS_API_BASE}/v0/tokens/abc123/holders?api-key=test-key&limit=50", payload=MOCK_HELIUS_HOLDERS_DISTRIBUTED)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/dep123/transactions?api-key=test-key&limit=100", payload=MOCK_HELIUS_DEPLOYER_ESTABLISHED)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/abc123/transactions?api-key=test-key&limit=100&type=SWAP", payload=MOCK_HELIUS_CLEAN_TXS)
+            result = await agent.execute({
+                "deployer_address": "dep123", "token_address": "abc123",
+                "chain": "solana", "depth": "standard",
+            })
+        assert "dexscreener" in result["sources_used"]
+        assert "helius" in result["sources_used"]
+
+
+# --- Task 10: Auto-escalation tests ---
+
+class TestAutoEscalation:
+    async def test_escalates_quick_to_standard_on_red_flags(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            # Quick mode calls
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_LOW_LIQ)
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_INORGANIC)
+            # Standard mode re-calls after escalation
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_LOW_LIQ)
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_INORGANIC)
+            mocked.get(f"{HELIUS_API_BASE}/v0/tokens/abc123/holders?api-key=test-key&limit=50", payload=MOCK_HELIUS_HOLDERS_CONCENTRATED)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/dep123/transactions?api-key=test-key&limit=100", payload=MOCK_HELIUS_DEPLOYER_NEW)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/abc123/transactions?api-key=test-key&limit=100&type=SWAP", payload=MOCK_HELIUS_BUNDLED_TXS)
+            result = await agent.execute({
+                "deployer_address": "dep123", "token_address": "abc123",
+                "chain": "solana", "depth": "quick",
+            })
+        assert result["depth"] == "standard"  # escalated
+
+    async def test_no_escalation_when_clean(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_HEALTHY)
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_ORGANIC)
+            result = await agent.execute({
+                "deployer_address": "dep123", "token_address": "abc123",
+                "chain": "solana", "depth": "quick",
+            })
+        assert result["depth"] == "quick"  # no escalation
+
+    async def test_no_escalation_from_standard(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_LOW_LIQ)
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_INORGANIC)
+            mocked.get(f"{HELIUS_API_BASE}/v0/tokens/abc123/holders?api-key=test-key&limit=50", payload=MOCK_HELIUS_HOLDERS_CONCENTRATED)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/dep123/transactions?api-key=test-key&limit=100", payload=MOCK_HELIUS_DEPLOYER_NEW)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/abc123/transactions?api-key=test-key&limit=100&type=SWAP", payload=MOCK_HELIUS_BUNDLED_TXS)
+            result = await agent.execute({
+                "deployer_address": "dep123", "token_address": "abc123",
+                "chain": "solana", "depth": "standard",
+            })
+        assert result["depth"] == "standard"  # never escalates from standard
+
+
+# --- Task 11: Full execute() integration tests ---
+
+class TestExecuteIntegration:
+    async def test_happy_path_returns_all_fields(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_HEALTHY)
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_ORGANIC)
+            mocked.get(f"{HELIUS_API_BASE}/v0/tokens/abc123/holders?api-key=test-key&limit=50", payload=MOCK_HELIUS_HOLDERS_DISTRIBUTED)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/dep123/transactions?api-key=test-key&limit=100", payload=MOCK_HELIUS_DEPLOYER_ESTABLISHED)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/abc123/transactions?api-key=test-key&limit=100&type=SWAP", payload=MOCK_HELIUS_CLEAN_TXS)
+            result = await agent.execute({
+                "deployer_address": "dep123", "token_address": "abc123",
+                "chain": "solana", "depth": "standard",
+            })
+        assert "wallet_score" in result
+        assert "risk_level" in result
+        assert "verdict" in result
+        assert "breakdown" in result
+        assert "liquidity_health" in result
+        assert "holder_distribution" in result
+        assert "deployer_reputation" in result
+        assert "tx_flow" in result
+        assert "forensics" in result
+        assert "red_flags" in result
+        assert "green_flags" in result
+        assert "sources_used" in result
+        assert 0 <= result["wallet_score"] <= 100
+
+    async def test_writes_to_scratchpad(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_HEALTHY)
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_ORGANIC)
+            mocked.get(f"{HELIUS_API_BASE}/v0/tokens/abc123/holders?api-key=test-key&limit=50", payload=MOCK_HELIUS_HOLDERS_DISTRIBUTED)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/dep123/transactions?api-key=test-key&limit=100", payload=MOCK_HELIUS_DEPLOYER_ESTABLISHED)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/abc123/transactions?api-key=test-key&limit=100&type=SWAP", payload=MOCK_HELIUS_CLEAN_TXS)
+            await agent.execute({
+                "deployer_address": "dep123", "token_address": "abc123",
+                "chain": "solana", "depth": "standard",
+            })
+        saved = agent.read_scratchpad("wallet_abc123")
+        assert saved is not None
+        assert "wallet_score" in saved
+
+    async def test_all_apis_fail_gracefully(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", status=500)
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", status=500)
+            mocked.get(f"{HELIUS_API_BASE}/v0/tokens/abc123/holders?api-key=test-key&limit=50", status=500)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/dep123/transactions?api-key=test-key&limit=100", status=500)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/abc123/transactions?api-key=test-key&limit=100&type=SWAP", status=500)
+            result = await agent.execute({
+                "deployer_address": "dep123", "token_address": "abc123",
+                "chain": "solana", "depth": "standard",
+            })
+        assert result["wallet_score"] == 0
+        assert result["verdict"] == "RUG_RISK"
+        assert "all_sources_failed" in result["red_flags"]
+
+    async def test_partial_api_failure_still_scores(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_HEALTHY)
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_ORGANIC)
+            mocked.get(f"{HELIUS_API_BASE}/v0/tokens/abc123/holders?api-key=test-key&limit=50", status=500)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/dep123/transactions?api-key=test-key&limit=100", status=500)
+            mocked.get(f"{HELIUS_API_BASE}/v0/addresses/abc123/transactions?api-key=test-key&limit=100&type=SWAP", status=500)
+            result = await agent.execute({
+                "deployer_address": "dep123", "token_address": "abc123",
+                "chain": "solana", "depth": "standard",
+            })
+        assert result["wallet_score"] > 0  # DexScreener succeeded
+        assert "dexscreener" in result["sources_used"]
+
+    async def test_echoes_input_params(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        with aioresponses() as mocked:
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_HEALTHY)
+            mocked.get(f"{DEXSCREENER_TOKENS_URL}/abc123", payload=MOCK_DEXSCREENER_TX_ORGANIC)
+            result = await agent.execute({
+                "deployer_address": "dep123", "token_address": "abc123",
+                "chain": "solana", "depth": "quick",
+            })
+        assert result["deployer_address"] == "dep123"
+        assert result["token_address"] == "abc123"
+        assert result["chain"] == "solana"
