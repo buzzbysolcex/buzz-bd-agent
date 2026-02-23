@@ -104,6 +104,42 @@ def _make_das_response(token_count=15, total_value=5000.0):
     }
 
 
+def _make_deployment_result(score=0, available=True, total_deployments=5,
+                            deployment_frequency="moderate", wallet_age_days=200,
+                            **kwargs):
+    return {
+        "available": available, "score": score,
+        "total_deployments": total_deployments,
+        "deployment_frequency": deployment_frequency,
+        "wallet_age_days": wallet_age_days,
+        "oldest_tx_timestamp": "1000000",
+        "red_flags": kwargs.get("red_flags", []),
+        "green_flags": kwargs.get("green_flags", []),
+    }
+
+def _make_portfolio_result(score=0, available=True, total_tokens_held=5,
+                           estimated_value_usd=500.0, has_significant_holdings=False,
+                           **kwargs):
+    return {
+        "available": available, "score": score,
+        "total_tokens_held": total_tokens_held,
+        "estimated_value_usd": estimated_value_usd,
+        "has_significant_holdings": has_significant_holdings,
+        "red_flags": kwargs.get("red_flags", []),
+        "green_flags": kwargs.get("green_flags", []),
+    }
+
+def _make_cross_chain_result(score=0, available=False, **kwargs):
+    return {
+        "available": available, "score": score,
+        "chains_detected": kwargs.get("chains_detected", []),
+        "total_cross_chain_txns": kwargs.get("total_cross_chain_txns", 0),
+        "cross_chain_pnl_usd": kwargs.get("cross_chain_pnl_usd", 0.0),
+        "red_flags": kwargs.get("red_flags", []),
+        "green_flags": kwargs.get("green_flags", []),
+    }
+
+
 class TestAnalyzeDeployments:
     @pytest.mark.asyncio
     async def test_prolific_deployer_high_score(self, monkeypatch):
@@ -304,3 +340,62 @@ class TestAnalyzeCrossChain:
         await agent._analyze_cross_chain("0xdep123", "solana", "deep")
         action_events = [e for e in agent.events if e["type"] == "action"]
         assert any("Allium" in e["description"] or "stub" in e["description"].lower() for e in action_events)
+
+
+class TestComputeVerdict:
+    def test_high_score_low_risk(self):
+        """High raw scores -> deploy_score >=80, risk_level=low, reputation=established."""
+        agent = DeployAgent()
+        deploy_r = _make_deployment_result(score=25, wallet_age_days=400, total_deployments=12)
+        portfolio_r = _make_portfolio_result(score=17, has_significant_holdings=True, estimated_value_usd=5000)
+        cross_r = _make_cross_chain_result(available=False)
+        result = agent._compute_verdict("0xdep123", "solana", "standard",
+                                        deploy_r, portfolio_r, cross_r)
+        assert result["deploy_score"] >= 80
+        assert result["risk_level"] == "low"
+        assert result["cross_chain_reputation"] == "established"
+
+    def test_medium_score(self):
+        """Moderate scores -> 60-79, risk_level=medium, reputation=moderate."""
+        agent = DeployAgent()
+        cross_r = _make_cross_chain_result(available=False)
+        deploy_r = _make_deployment_result(score=22)
+        portfolio_r = _make_portfolio_result(score=12)
+        result = agent._compute_verdict("0xdep123", "solana", "standard",
+                                        deploy_r, portfolio_r, cross_r)
+        assert 60 <= result["deploy_score"] <= 79
+        assert result["risk_level"] == "medium"
+        assert result["cross_chain_reputation"] == "moderate"
+
+    def test_all_sources_failed(self):
+        """No available sources -> score 0, critical, unknown, all_sources_failed flag."""
+        agent = DeployAgent()
+        deploy_r = _make_deployment_result(available=False, score=0)
+        portfolio_r = _make_portfolio_result(available=False, score=0)
+        cross_r = _make_cross_chain_result(available=False)
+        result = agent._compute_verdict("0xdep123", "solana", "standard",
+                                        deploy_r, portfolio_r, cross_r)
+        assert result["deploy_score"] == 0
+        assert result["risk_level"] == "critical"
+        assert result["cross_chain_reputation"] == "unknown"
+        assert "all_sources_failed" in result["red_flags"]
+
+    def test_weight_redistribution(self):
+        """Score normalizes to 0-100 regardless of which methods ran."""
+        agent = DeployAgent()
+        deploy_r = _make_deployment_result(score=25)
+        portfolio_r = _make_portfolio_result(available=False, score=0)
+        cross_r = _make_cross_chain_result(available=False)
+        result = agent._compute_verdict("0xdep123", "solana", "quick",
+                                        deploy_r, portfolio_r, cross_r)
+        assert 0 < result["deploy_score"] <= 100
+
+    def test_sources_used_populated(self):
+        """sources_used reflects which APIs returned data."""
+        agent = DeployAgent()
+        deploy_r = _make_deployment_result(score=20)
+        portfolio_r = _make_portfolio_result(score=10)
+        cross_r = _make_cross_chain_result(available=False)
+        result = agent._compute_verdict("0xdep123", "solana", "standard",
+                                        deploy_r, portfolio_r, cross_r)
+        assert "helius" in result["sources_used"]
