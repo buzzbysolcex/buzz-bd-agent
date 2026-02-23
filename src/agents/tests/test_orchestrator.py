@@ -621,3 +621,94 @@ class TestExecute:
         result = await agent.execute({})
         assert result["tokens_scanned"] == 0
         assert result["results"] == []
+
+
+class TestTelegramFormatting:
+    def test_format_scan_result(self):
+        agent = OrchestratorAgent()
+        scan_result = {
+            "tokens_scanned": 5,
+            "summary": {"strong_list": 1, "list": 2, "review": 1, "reject": 1, "avg_score": 62},
+            "results": [
+                {"project_name": "Alpha", "unified_score": 85, "unified_verdict": "STRONG_LIST",
+                 "red_flags": [], "green_flags": ["safety:verified"]},
+                {"project_name": "Beta", "unified_score": 65, "unified_verdict": "LIST",
+                 "red_flags": ["wallet:unlocked_lp"], "green_flags": []},
+                {"project_name": "Gamma", "unified_score": 45, "unified_verdict": "REVIEW",
+                 "red_flags": [], "green_flags": []},
+            ],
+        }
+        text = agent.format_scan_result(scan_result)
+        assert "Scan Complete" in text
+        assert "5" in text
+        assert "Strong List: 1" in text
+        assert "Alpha" in text
+        assert "Beta" in text
+        assert "Gamma" not in text
+
+    def test_format_scan_result_empty(self):
+        agent = OrchestratorAgent()
+        scan_result = {
+            "tokens_scanned": 0,
+            "summary": {"strong_list": 0, "list": 0, "review": 0, "reject": 0, "avg_score": 0},
+            "results": [],
+        }
+        text = agent.format_scan_result(scan_result)
+        assert "Scan Complete" in text
+        assert "0" in text
+
+    def test_format_evaluate_strong_list(self):
+        agent = OrchestratorAgent()
+        eval_result = {
+            "project_name": "GoodToken",
+            "unified_score": 85,
+            "unified_verdict": "STRONG_LIST",
+            "agent_scores": {"scorer": 90, "safety": 80, "wallet": 85, "social": 75, "deploy": 95},
+            "weights_used": {"scorer": 0.15, "safety": 0.25, "wallet": 0.25, "social": 0.20, "deploy": 0.15},
+            "failed_agents": [],
+            "red_flags": [],
+            "green_flags": ["safety:verified_source", "wallet:lp_burned"],
+        }
+        text = agent.format_evaluate_result(eval_result)
+        assert "GoodToken" in text
+        assert "85" in text
+        assert "STRONG_LIST" in text
+        assert "scorer: 90" in text
+        assert "lp_burned" in text
+        assert "Failed" not in text
+
+    def test_format_evaluate_reject(self):
+        agent = OrchestratorAgent()
+        eval_result = {
+            "project_name": "BadToken",
+            "unified_score": 25,
+            "unified_verdict": "REJECT",
+            "agent_scores": {"scorer": 20, "safety": 10},
+            "weights_used": {"scorer": 0.15, "safety": 0.25},
+            "failed_agents": ["wallet", "social", "deploy"],
+            "red_flags": ["safety:honeypot_detected", "scorer:suspicious_volume"],
+            "green_flags": [],
+        }
+        text = agent.format_evaluate_result(eval_result)
+        assert "BadToken" in text
+        assert "REJECT" in text
+        assert "honeypot_detected" in text
+        assert "Failed" in text
+        assert "wallet" in text
+
+    def test_format_evaluate_with_failures(self):
+        agent = OrchestratorAgent()
+        eval_result = {
+            "project_name": "PartialToken",
+            "unified_score": 60,
+            "unified_verdict": "LIST",
+            "agent_scores": {"scorer": 70, "safety": 65, "wallet": 55},
+            "weights_used": {"scorer": 0.27, "safety": 0.45, "wallet": 0.27},
+            "failed_agents": ["social", "deploy"],
+            "red_flags": [],
+            "green_flags": [],
+        }
+        text = agent.format_evaluate_result(eval_result)
+        assert "Failed" in text
+        assert "social" in text
+        assert "deploy" in text
