@@ -525,3 +525,82 @@ class TestDepthGating:
         assert result["depth"] == "standard"
         assert result["deployment_analysis"]["available"] is True
         assert result["portfolio_analysis"]["available"] is True
+
+
+class TestExecuteIntegration:
+    @pytest.mark.asyncio
+    async def test_happy_path_all_fields(self, monkeypatch):
+        """Standard depth with good data -> all output fields present and correct types."""
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = DeployAgent()
+        txns = _make_helius_txns(count=12, oldest_age_days=400)
+        das_resp = _make_das_response(token_count=15, total_value=5000.0)
+        url = HELIUS_TXN_URL.format(address="0xdep123")
+        with aioresponses() as mocked:
+            mocked.get(f"{url}?api-key=test-key&limit=100", payload=txns)
+            mocked.post(f"{HELIUS_DAS_URL}/?api-key=test-key", payload=das_resp)
+            result = await agent.execute({
+                "deployer_address": "0xdep123",
+                "chain": "solana",
+                "depth": "standard",
+            })
+        # Structure checks
+        assert isinstance(result["deploy_score"], int)
+        assert 0 <= result["deploy_score"] <= 100
+        assert result["risk_level"] in ("low", "medium", "high", "critical")
+        assert result["cross_chain_reputation"] in ("established", "moderate", "new", "unknown")
+        assert isinstance(result["chains_active"], list)
+        assert isinstance(result["total_deployments"], int)
+        assert isinstance(result["breakdown"], dict)
+        assert isinstance(result["red_flags"], list)
+        assert isinstance(result["green_flags"], list)
+        assert isinstance(result["sources_used"], list)
+        assert "helius" in result["sources_used"]
+
+    @pytest.mark.asyncio
+    async def test_all_apis_fail_gracefully(self, monkeypatch):
+        """All API calls fail -> score 0, critical, all_sources_failed."""
+        monkeypatch.delenv("HELIUS_API_KEY", raising=False)
+        agent = DeployAgent()
+        result = await agent.execute({
+            "deployer_address": "0xdep123",
+            "chain": "solana",
+            "depth": "standard",
+        })
+        assert result["deploy_score"] == 0
+        assert result["risk_level"] == "critical"
+        assert result["cross_chain_reputation"] == "unknown"
+        assert "all_sources_failed" in result["red_flags"]
+
+    @pytest.mark.asyncio
+    async def test_scratchpad_written(self, monkeypatch, tmp_path):
+        """Results written to scratchpad after execute."""
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = DeployAgent()
+        txns = _make_helius_txns(count=5, oldest_age_days=100)
+        url = HELIUS_TXN_URL.format(address="0xdep123")
+        with aioresponses() as mocked:
+            mocked.get(f"{url}?api-key=test-key&limit=100", payload=txns)
+            mocked.post(f"{HELIUS_DAS_URL}/?api-key=test-key", payload=_make_das_response())
+            await agent.execute({"deployer_address": "0xdep123", "chain": "solana"})
+        saved = agent.read_scratchpad("deploy_0xdep123")
+        assert saved is not None
+        assert saved["deployer_address"] == "0xdep123"
+
+    @pytest.mark.asyncio
+    async def test_no_scratchpad_leak(self, monkeypatch, tmp_path):
+        """Scratchpad does not leak internal state."""
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = DeployAgent()
+        txns = _make_helius_txns(count=5, oldest_age_days=100)
+        url = HELIUS_TXN_URL.format(address="0xdep123")
+        with aioresponses() as mocked:
+            mocked.get(f"{url}?api-key=test-key&limit=100", payload=txns)
+            mocked.post(f"{HELIUS_DAS_URL}/?api-key=test-key", payload=_make_das_response())
+            await agent.execute({"deployer_address": "0xdep123", "chain": "solana"})
+        saved = agent.read_scratchpad("deploy_0xdep123")
+        saved_str = str(saved)
+        assert "api-key" not in saved_str.lower()
+        assert "test-key" not in saved_str
