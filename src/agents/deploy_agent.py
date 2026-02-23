@@ -230,6 +230,44 @@ class DeployAgent(BaseAgent):
             self.log_event("error", f"Portfolio analysis failed: {e}")
             return empty
 
+    async def _analyze_cross_chain(self, deployer: str, chain: str, depth: str) -> Dict:
+        """Analyze cross-chain activity via Allium API — STUBBED.
+
+        When implemented, this will use Allium's async query+poll pattern:
+        1. POST https://api.allium.so/api/v1/query with SQL + deployer param
+        2. Get run_id from response
+        3. Poll GET /api/v1/query/{run_id}/results until complete
+
+        Planned SQL queries:
+
+        Query 1 — Cross-chain activity:
+            SELECT chain, COUNT(*) as tx_count, SUM(value_usd) as total_value
+            FROM crosschain.transactions
+            WHERE from_address = :deployer
+            GROUP BY chain
+            ORDER BY tx_count DESC
+
+        Query 2 — Deployer PnL:
+            SELECT SUM(CASE WHEN direction='in' THEN value_usd ELSE -value_usd END) as pnl_usd
+            FROM crosschain.token_transfers
+            WHERE address = :deployer
+            AND block_timestamp > NOW() - INTERVAL '1 year'
+
+        Auth: Authorization: Bearer {ALLIUM_API_KEY}
+        """
+        empty = {
+            "available": False, "score": 0,
+            "chains_detected": [], "total_cross_chain_txns": 0,
+            "cross_chain_pnl_usd": 0.0,
+            "red_flags": [], "green_flags": [],
+        }
+
+        if depth != "deep":
+            return empty
+
+        self.log_event("action", "Allium cross-chain API not yet implemented (stub)")
+        return empty
+
     async def execute(self, params: Dict) -> Dict:
         deployer = params.get("deployer_address", "")
         chain = params.get("chain", "")
