@@ -1,4 +1,5 @@
 # src/agents/tests/test_social_agent.py
+import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from aioresponses import aioresponses
@@ -278,3 +279,122 @@ class TestSearchSerper:
             result = await agent._search_serper("BONK", "abc123", "solana", "standard")
         assert len(result["news_sources"]) >= 1
         assert any("coindesk" in s for s in result["news_sources"])
+
+
+GROK_API_URL = "https://api.x.ai/v1/chat/completions"
+
+MOCK_GROK_POSITIVE = {
+    "choices": [{
+        "message": {
+            "content": json.dumps({
+                "sentiment": "positive",
+                "follower_estimate": 55000,
+                "engagement_level": "high",
+                "tweet_frequency": "active",
+                "bot_suspicion": 0.1,
+                "red_flags": [],
+                "summary": "BONK has a strong and active Twitter community with genuine engagement.",
+            })
+        }
+    }]
+}
+
+MOCK_GROK_SUSPICIOUS = {
+    "choices": [{
+        "message": {
+            "content": json.dumps({
+                "sentiment": "suspicious",
+                "follower_estimate": 500,
+                "engagement_level": "low",
+                "tweet_frequency": "dormant",
+                "bot_suspicion": 0.95,
+                "red_flags": ["fake_engagement", "bot_farm"],
+                "summary": "Token shows signs of bot activity and fake engagement.",
+            })
+        }
+    }]
+}
+
+MOCK_GROK_NEUTRAL = {
+    "choices": [{
+        "message": {
+            "content": json.dumps({
+                "sentiment": "neutral",
+                "follower_estimate": 5000,
+                "engagement_level": "medium",
+                "tweet_frequency": "moderate",
+                "bot_suspicion": 0.3,
+                "red_flags": [],
+                "summary": "Average crypto project with moderate Twitter presence.",
+            })
+        }
+    }]
+}
+
+
+class TestSearchGrok:
+    async def test_skipped_in_quick_mode(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        result = await agent._search_grok("BONK", "abc123", "solana", "quick")
+        assert result["available"] is False
+
+    async def test_skipped_in_standard_mode(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = SocialAgent()
+        result = await agent._search_grok("BONK", "abc123", "solana", "standard")
+        assert result["available"] is False
+
+    async def test_positive_sentiment_scores_high(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("XAI_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.post(GROK_API_URL, payload=MOCK_GROK_POSITIVE)
+            result = await agent._search_grok("BONK", "abc123", "solana", "deep")
+        assert result["available"] is True
+        assert result["sentiment"] == "positive"
+        assert result["follower_estimate"] == 55000
+        assert result["twitter_score"] >= 20
+        assert result["community_score"] >= 15
+        assert "positive_sentiment" in result["green_flags"]
+        assert "established_presence" in result["green_flags"]
+        assert "active_community" in result["green_flags"]
+
+    async def test_suspicious_with_bots_detected(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("XAI_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.post(GROK_API_URL, payload=MOCK_GROK_SUSPICIOUS)
+            result = await agent._search_grok("SCAM", "xyz789", "solana", "deep")
+        assert result["available"] is True
+        assert result["bot_suspicion"] > 0.9
+        assert "bot_farm" in result["red_flags"]
+        assert "fake_engagement" in result["red_flags"]
+        assert "dormant_social" in result["red_flags"]
+
+    async def test_api_error_returns_unavailable(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("XAI_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.post(GROK_API_URL, status=500)
+            result = await agent._search_grok("BONK", "abc123", "solana", "deep")
+        assert result["available"] is False
+
+    async def test_no_api_key_returns_unavailable(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.delenv("XAI_API_KEY", raising=False)
+        agent = SocialAgent()
+        result = await agent._search_grok("BONK", "abc123", "solana", "deep")
+        assert result["available"] is False
+
+    async def test_malformed_json_returns_unavailable(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        monkeypatch.setenv("XAI_API_KEY", "test-key")
+        agent = SocialAgent()
+        with aioresponses() as mocked:
+            mocked.post(GROK_API_URL, payload={"choices": [{"message": {"content": "not json"}}]})
+            result = await agent._search_grok("BONK", "abc123", "solana", "deep")
+        assert result["available"] is False
