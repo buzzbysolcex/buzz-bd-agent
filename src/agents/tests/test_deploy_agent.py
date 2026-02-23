@@ -84,6 +84,26 @@ class TestInputValidation:
         assert result["chain"] == ""
 
 
+HELIUS_DAS_URL = "https://mainnet.helius-rpc.com"
+
+
+def _make_das_response(token_count=15, total_value=5000.0):
+    """Build a Helius DAS getAssetsByOwner response."""
+    items = []
+    value_per_token = total_value / token_count if token_count > 0 else 0
+    for i in range(token_count):
+        items.append({
+            "id": f"token{i}",
+            "content": {"metadata": {"name": f"Token{i}"}},
+            "token_info": {"price_info": {"total_price": value_per_token}},
+        })
+    return {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": {"items": items, "total": token_count},
+    }
+
+
 class TestAnalyzeDeployments:
     @pytest.mark.asyncio
     async def test_prolific_deployer_high_score(self, monkeypatch):
@@ -174,3 +194,75 @@ class TestAnalyzeDeployments:
         assert result["available"] is True
         assert result["deployment_frequency"] == "occasional"
         assert result["score"] >= 7  # 4 (deploys) + 4 (age 30+) + 3 (occasional) = 11
+
+
+class TestAnalyzePortfolio:
+    @pytest.mark.asyncio
+    async def test_skip_on_quick_depth(self, monkeypatch):
+        """Portfolio analysis skipped in quick mode."""
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = DeployAgent()
+        result = await agent._analyze_portfolio("0xdep123", "quick")
+        assert result["available"] is False
+        assert result["score"] == 0
+
+    @pytest.mark.asyncio
+    async def test_wealthy_deployer_high_score(self, monkeypatch):
+        """15 tokens, $5000 value → high financial health score."""
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = DeployAgent()
+        das_resp = _make_das_response(token_count=15, total_value=5000.0)
+        with aioresponses() as mocked:
+            mocked.post(f"{HELIUS_DAS_URL}/?api-key=test-key", payload=das_resp)
+            result = await agent._analyze_portfolio("0xdep123", "standard")
+        assert result["available"] is True
+        assert result["total_tokens_held"] == 15
+        assert result["estimated_value_usd"] == pytest.approx(5000.0, rel=0.01)
+        assert result["has_significant_holdings"] is True
+        assert result["score"] >= 13  # 5 (tokens>=10) + 5 (value>=1000) + 7 (significant) = 17
+
+    @pytest.mark.asyncio
+    async def test_modest_portfolio(self, monkeypatch):
+        """5 tokens, $500 value → moderate score."""
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = DeployAgent()
+        das_resp = _make_das_response(token_count=5, total_value=500.0)
+        with aioresponses() as mocked:
+            mocked.post(f"{HELIUS_DAS_URL}/?api-key=test-key", payload=das_resp)
+            result = await agent._analyze_portfolio("0xdep123", "standard")
+        assert result["available"] is True
+        assert result["total_tokens_held"] == 5
+        assert result["has_significant_holdings"] is False
+        assert result["score"] >= 6  # 3 (tokens>=3) + 3 (value>=100) = 6
+
+    @pytest.mark.asyncio
+    async def test_no_api_key(self, monkeypatch):
+        """Missing HELIUS_API_KEY → unavailable."""
+        monkeypatch.delenv("HELIUS_API_KEY", raising=False)
+        agent = DeployAgent()
+        result = await agent._analyze_portfolio("0xdep123", "standard")
+        assert result["available"] is False
+
+    @pytest.mark.asyncio
+    async def test_api_error(self, monkeypatch):
+        """DAS API returns 500 → unavailable."""
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = DeployAgent()
+        with aioresponses() as mocked:
+            mocked.post(f"{HELIUS_DAS_URL}/?api-key=test-key", status=500)
+            result = await agent._analyze_portfolio("0xdep123", "standard")
+        assert result["available"] is False
+
+    @pytest.mark.asyncio
+    async def test_empty_portfolio(self, monkeypatch):
+        """No tokens held → empty portfolio, low score."""
+        monkeypatch.setenv("HELIUS_API_KEY", "test-key")
+        agent = DeployAgent()
+        das_resp = _make_das_response(token_count=0, total_value=0.0)
+        with aioresponses() as mocked:
+            mocked.post(f"{HELIUS_DAS_URL}/?api-key=test-key", payload=das_resp)
+            result = await agent._analyze_portfolio("0xdep123", "standard")
+        assert result["available"] is True
+        assert result["total_tokens_held"] == 0
+        assert result["estimated_value_usd"] == 0.0
+        assert result["score"] == 0
