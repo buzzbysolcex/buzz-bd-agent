@@ -126,9 +126,74 @@ class SocialAgent(BaseAgent):
                 "tweet_frequency": "none", "bot_suspicion": 0.0, "summary": ""}
 
     async def _search_atv(self, deployer: str, depth: str) -> Dict:
-        return {"available": False, "score": 0, "red_flags": [], "green_flags": [],
-                "ens_name": None, "has_ens": False, "twitter_handle": None,
-                "github_handle": None, "discord_handle": None, "identity_count": 0}
+        empty = {
+            "available": False, "score": 0, "red_flags": [], "green_flags": [],
+            "ens_name": None, "has_ens": False, "twitter_handle": None,
+            "github_handle": None, "discord_handle": None, "identity_count": 0,
+        }
+        if not deployer:
+            return empty
+
+        self.log_event("action", "Looking up deployer identity via ATV", {"deployer": deployer})
+        timeout = DEPTH_TIMEOUTS.get(depth, DEPTH_TIMEOUTS["standard"])
+        try:
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                url = f"{ATV_API_URL}?addresses={deployer}&include=name,twitter,github,discord"
+                async with session.get(url) as resp:
+                    if resp.status != 200:
+                        raise aiohttp.ClientError(f"ATV returned {resp.status}")
+                    data = await resp.json()
+
+            ens_name = None
+            twitter_handle = None
+            github_handle = None
+            discord_handle = None
+
+            if data and isinstance(data, list) and len(data) > 0:
+                entry = data[0]
+                ens_name = entry.get("name")
+                twitter_handle = entry.get("twitter")
+                github_handle = entry.get("github")
+                discord_handle = entry.get("discord")
+
+            has_ens = ens_name is not None and ens_name != ""
+            identities = [has_ens, twitter_handle, github_handle, discord_handle]
+            identity_count = sum(1 for i in identities if i)
+
+            score = 0
+            red_flags = []
+            green_flags = []
+
+            if has_ens:
+                score += 10
+            if twitter_handle:
+                score += 5
+            if github_handle:
+                score += 5
+            if discord_handle:
+                score += 3
+            if identity_count >= 3:
+                score += 2
+
+            score = min(MAX_TEAM_IDENTITY, score)
+
+            if identity_count == 0:
+                red_flags.append("anonymous_team")
+            if has_ens and identity_count >= 2:
+                green_flags.append("verified_team")
+            if identity_count >= 3:
+                green_flags.append("multi_platform")
+
+            self.log_event("observation", f"ATV: ENS={ens_name}, identities={identity_count}, score={score}/25")
+            return {
+                "available": True, "score": score, "red_flags": red_flags, "green_flags": green_flags,
+                "ens_name": ens_name, "has_ens": has_ens, "twitter_handle": twitter_handle,
+                "github_handle": github_handle, "discord_handle": discord_handle,
+                "identity_count": identity_count,
+            }
+        except Exception as e:
+            self.log_event("error", f"ATV identity lookup failed: {e}")
+            return empty
 
     async def _search_serper(self, project: str, token: str, chain: str, depth: str) -> Dict:
         return {"available": False, "score": 0, "red_flags": [], "green_flags": [],
