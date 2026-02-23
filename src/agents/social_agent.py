@@ -3,7 +3,7 @@ import asyncio
 import json
 import os
 import aiohttp
-from typing import Dict, List, Optional
+from typing import Dict
 from src.agents.base_agent import BaseAgent
 
 GROK_API_URL = "https://api.x.ai/v1/chat/completions"
@@ -329,31 +329,26 @@ class SocialAgent(BaseAgent):
         self.log_event("action", "Searching web via Serper", {"project": project})
         timeout = DEPTH_TIMEOUTS.get(depth, DEPTH_TIMEOUTS["standard"])
         try:
-            query = f'"{project}" crypto token review'
+            queries = [f'"{project}" crypto token review']
+            if depth == "deep":
+                queries.append(f'"{project}" crypto scam OR rug OR hack')
+
             headers = {"X-API-Key": api_key, "Content-Type": "application/json"}
+            organic = []
 
             async with aiohttp.ClientSession(timeout=timeout) as session:
-                async with session.post(
-                    SERPER_API_URL,
-                    headers=headers,
-                    json={"q": query},
-                ) as resp:
-                    if resp.status != 200:
-                        raise aiohttp.ClientError(f"Serper returned {resp.status}")
-                    data = await resp.json()
+                for query in queries:
+                    async with session.post(
+                        SERPER_API_URL,
+                        headers=headers,
+                        json={"q": query},
+                    ) as resp:
+                        if resp.status != 200:
+                            raise aiohttp.ClientError(f"Serper returned {resp.status}")
+                        data = await resp.json()
+                        organic.extend(data.get("organic", []))
 
-            organic = data.get("organic", [])
             total_results = len(organic)
-
-            if total_results == 0:
-                self.log_event("observation", "Serper: 0 results, score=0/20")
-                return {
-                    "available": True, "score": 0, "red_flags": [], "green_flags": [],
-                    "total_results": 0, "positive_mentions": 0,
-                    "negative_mentions": 0, "scam_mentions": 0,
-                    "news_sources": [],
-                }
-
             positive_mentions = 0
             negative_mentions = 0
             scam_mentions = 0
@@ -388,7 +383,7 @@ class SocialAgent(BaseAgent):
 
             if positive_mentions > negative_mentions:
                 score += 5
-            if scam_mentions == 0:
+            if scam_mentions == 0 and total_results > 0:
                 score += 5
             if news_sources:
                 score += 5
