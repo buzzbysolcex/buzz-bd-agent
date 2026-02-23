@@ -187,9 +187,97 @@ class WalletAgent(BaseAgent):
 
 
     async def _analyze_holders(self, token: str, deployer: str, chain: str, depth: str) -> Dict:
+        empty = {
+            "available": False, "score": 0,
+            "top10_pct": 0.0, "deployer_pct": 0.0, "unique_holders": 0, "whale_count": 0,
+            "red_flags": [], "green_flags": [],
+        }
         if depth == "quick":
-            return {"available": False, "score": 0}
-        return {"available": False, "score": 0}
+            return empty
+
+        api_key = os.environ.get("HELIUS_API_KEY", "")
+        if not api_key:
+            self.log_event("error", "HELIUS_API_KEY not set, skipping holder analysis")
+            return empty
+
+        self.log_event("action", "Analyzing holders via Helius", {"token": token})
+        timeout = DEPTH_TIMEOUTS.get(depth, DEPTH_TIMEOUTS["standard"])
+        try:
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                url = f"{HELIUS_API_BASE}/v0/tokens/{token}/holders?api-key={api_key}&limit=50"
+                async with session.get(url) as resp:
+                    if resp.status != 200:
+                        raise aiohttp.ClientError(f"Helius holders returned {resp.status}")
+                    data = await resp.json()
+
+            result_data = data.get("result", {})
+            accounts = result_data.get("token_accounts", [])
+            total_supply = result_data.get("total_supply", 0)
+
+            if not accounts or total_supply <= 0:
+                return empty
+
+            amounts = sorted([a.get("amount", 0) for a in accounts], reverse=True)
+            owners = [a.get("owner", "") for a in accounts]
+            unique_holders = len(set(owners))
+
+            top10_total = sum(amounts[:10])
+            top10_pct = round((top10_total / total_supply) * 100, 1)
+
+            deployer_amount = 0
+            for a in accounts:
+                if a.get("owner", "") == deployer:
+                    deployer_amount = a.get("amount", 0)
+                    break
+            deployer_pct = round((deployer_amount / total_supply) * 100, 1)
+
+            whale_threshold = total_supply * 0.02
+            whale_count = sum(1 for amt in amounts if amt > whale_threshold)
+
+            score = 0
+            red_flags = []
+            green_flags = []
+
+            if top10_pct < 20:
+                score += 10
+                green_flags.append("well_distributed")
+            elif top10_pct < 30:
+                score += 7
+            elif top10_pct < 50:
+                score += 4
+            else:
+                red_flags.append("whale_concentration")
+
+            if deployer_pct < 5:
+                score += 5
+            elif deployer_pct < 10:
+                score += 3
+            else:
+                red_flags.append("dev_heavy_bag")
+
+            if unique_holders >= 1000:
+                score += 5
+                green_flags.append("broad_holder_base")
+            elif unique_holders >= 500:
+                score += 3
+
+            max_single_pct = (amounts[0] / total_supply) * 100 if amounts else 0
+            if max_single_pct <= 5:
+                score += 5
+
+            score = min(MAX_HOLDERS, score)
+
+            self.log_event("observation", f"Holders: top10={top10_pct}%, deployer={deployer_pct}%, holders={unique_holders}, score={score}/25")
+            return {
+                "available": True, "score": score,
+                "top10_pct": top10_pct, "deployer_pct": deployer_pct,
+                "unique_holders": unique_holders, "whale_count": whale_count,
+                "red_flags": red_flags, "green_flags": green_flags,
+            }
+        except Exception as e:
+            self.log_event("error", f"Holder analysis failed: {e}")
+            return empty
+
 
     async def _analyze_deployer(self, deployer: str, chain: str, depth: str) -> Dict:
         if depth == "quick":
