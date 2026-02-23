@@ -524,3 +524,89 @@ class TestRunForensics:
             )
             result = await agent._run_forensics("abc123", "dep123", "solana", "standard")
         assert result["available"] is False
+
+
+# --- Task 8: Verdict and scoring engine tests ---
+
+class TestComputeVerdict:
+    def _make_result(self, score, available=True, red_flags=None, green_flags=None):
+        return {
+            "available": available, "score": score,
+            "red_flags": red_flags or [], "green_flags": green_flags or [],
+        }
+
+    def test_clean_verdict(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        liq = {**self._make_result(20), "total_liquidity": 600000, "lp_locked": True, "lp_lock_duration_days": 200, "lp_burned": False, "buy_sell_ratio": 1.1}
+        hld = {**self._make_result(20), "top10_pct": 15.0, "deployer_pct": 3.0, "unique_holders": 1200, "whale_count": 1}
+        dep = {**self._make_result(15), "age_days": 400, "total_tokens_deployed": 5, "rug_count": 0, "cross_chain_activity": False}
+        txf = {**self._make_result(12), "organic_score": 0.9, "unique_buyers_24h": 150, "unique_sellers_24h": 120, "avg_tx_size": 500.0}
+        for_ = {**self._make_result(15), "bundled_wallets": [], "sybil_clusters": [], "wash_trading_detected": False, "same_funding_source": False}
+        result = agent._compute_verdict("dep", "tok", "solana", "standard", liq, hld, dep, txf, for_)
+        assert result["wallet_score"] >= 80
+        assert result["verdict"] == "CLEAN"
+        assert result["risk_level"] == "low"
+
+    def test_rug_risk_verdict(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        liq = {**self._make_result(3, red_flags=["unlocked_lp"]), "total_liquidity": 30000, "lp_locked": False, "lp_lock_duration_days": None, "lp_burned": False, "buy_sell_ratio": 0.1}
+        hld = {**self._make_result(0, red_flags=["whale_concentration", "dev_heavy_bag"]), "top10_pct": 70.0, "deployer_pct": 25.0, "unique_holders": 50, "whale_count": 5}
+        dep = {**self._make_result(0, red_flags=["serial_rugger"]), "age_days": 5, "total_tokens_deployed": 10, "rug_count": 3, "cross_chain_activity": False}
+        txf = {**self._make_result(0, red_flags=["artificial_demand"]), "organic_score": 0.1, "unique_buyers_24h": 5, "unique_sellers_24h": 2, "avg_tx_size": 10000.0}
+        for_ = {**self._make_result(0, red_flags=["bundled_wallets"]), "bundled_wallets": ["w1", "w2"], "sybil_clusters": [], "wash_trading_detected": False, "same_funding_source": True}
+        result = agent._compute_verdict("dep", "tok", "solana", "standard", liq, hld, dep, txf, for_)
+        assert result["wallet_score"] < 35
+        assert result["verdict"] == "RUG_RISK"
+        assert result["risk_level"] == "critical"
+
+    def test_weight_redistribution_quick_mode(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        liq = {**self._make_result(20), "total_liquidity": 500000, "lp_locked": True, "lp_lock_duration_days": 200, "lp_burned": False, "buy_sell_ratio": 1.0}
+        hld = {**self._make_result(0, available=False), "top10_pct": 0.0, "deployer_pct": 0.0, "unique_holders": 0, "whale_count": 0}
+        dep = {**self._make_result(0, available=False), "age_days": 0, "total_tokens_deployed": 0, "rug_count": 0, "cross_chain_activity": False}
+        txf = {**self._make_result(10), "organic_score": 0.7, "unique_buyers_24h": 80, "unique_sellers_24h": 60, "avg_tx_size": 300.0}
+        for_ = {**self._make_result(0, available=False), "bundled_wallets": [], "sybil_clusters": [], "wash_trading_detected": False, "same_funding_source": False}
+        result = agent._compute_verdict("dep", "tok", "solana", "quick", liq, hld, dep, txf, for_)
+        assert result["wallet_score"] == 75  # 30/40*100 = 75
+        assert result["verdict"] == "CAUTION"
+
+    def test_all_sources_failed(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        unavail = self._make_result(0, available=False)
+        liq = {**unavail, "total_liquidity": 0.0, "lp_locked": False, "lp_lock_duration_days": None, "lp_burned": False, "buy_sell_ratio": 0.0}
+        hld = {**unavail, "top10_pct": 0.0, "deployer_pct": 0.0, "unique_holders": 0, "whale_count": 0}
+        dep = {**unavail, "age_days": 0, "total_tokens_deployed": 0, "rug_count": 0, "cross_chain_activity": False}
+        txf = {**unavail, "organic_score": 0.0, "unique_buyers_24h": 0, "unique_sellers_24h": 0, "avg_tx_size": 0.0}
+        for_ = {**unavail, "bundled_wallets": [], "sybil_clusters": [], "wash_trading_detected": False, "same_funding_source": False}
+        result = agent._compute_verdict("dep", "tok", "solana", "standard", liq, hld, dep, txf, for_)
+        assert result["wallet_score"] == 0
+        assert result["verdict"] == "RUG_RISK"
+        assert "all_sources_failed" in result["red_flags"]
+
+    def test_red_and_green_flags_aggregated(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        liq = {**self._make_result(15, green_flags=["lp_locked_long"]), "total_liquidity": 200000, "lp_locked": True, "lp_lock_duration_days": 200, "lp_burned": False, "buy_sell_ratio": 1.0}
+        hld = {**self._make_result(10, red_flags=["whale_concentration"]), "top10_pct": 55.0, "deployer_pct": 4.0, "unique_holders": 300, "whale_count": 3}
+        dep = {**self._make_result(10), "age_days": 200, "total_tokens_deployed": 3, "rug_count": 0, "cross_chain_activity": False}
+        txf = {**self._make_result(8, green_flags=["organic_trading"]), "organic_score": 0.85, "unique_buyers_24h": 120, "unique_sellers_24h": 90, "avg_tx_size": 400.0}
+        for_ = {**self._make_result(15), "bundled_wallets": [], "sybil_clusters": [], "wash_trading_detected": False, "same_funding_source": False}
+        result = agent._compute_verdict("dep", "tok", "solana", "standard", liq, hld, dep, txf, for_)
+        assert "lp_locked_long" in result["green_flags"]
+        assert "organic_trading" in result["green_flags"]
+        assert "whale_concentration" in result["red_flags"]
+
+    def test_caution_verdict(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path))
+        agent = WalletAgent()
+        liq = {**self._make_result(15), "total_liquidity": 200000, "lp_locked": True, "lp_lock_duration_days": 100, "lp_burned": False, "buy_sell_ratio": 1.2}
+        hld = {**self._make_result(12), "top10_pct": 28.0, "deployer_pct": 6.0, "unique_holders": 400, "whale_count": 2}
+        dep = {**self._make_result(10), "age_days": 200, "total_tokens_deployed": 3, "rug_count": 0, "cross_chain_activity": False}
+        txf = {**self._make_result(8), "organic_score": 0.6, "unique_buyers_24h": 70, "unique_sellers_24h": 50, "avg_tx_size": 300.0}
+        for_ = {**self._make_result(10), "bundled_wallets": [], "sybil_clusters": [], "wash_trading_detected": False, "same_funding_source": False}
+        result = agent._compute_verdict("dep", "tok", "solana", "standard", liq, hld, dep, txf, for_)
+        assert 35 <= result["wallet_score"] < 80
