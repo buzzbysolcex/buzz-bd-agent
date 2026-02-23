@@ -41,5 +41,100 @@ class WalletAgent(BaseAgent):
     def __init__(self):
         super().__init__(name="wallet")
 
+    def _empty_result(self, deployer: str = "", token: str = "", chain: str = "", depth: str = "standard") -> Dict:
+        return {
+            "deployer_address": deployer,
+            "token_address": token,
+            "chain": chain,
+            "depth": depth,
+            "wallet_score": 0,
+            "risk_level": "critical",
+            "verdict": "RUG_RISK",
+            "breakdown": {"liquidity": 0, "holders": 0, "deployer": 0, "tx_flow": 0, "forensics": 0},
+            "liquidity_health": {"total_liquidity": 0.0, "lp_locked": False, "lp_lock_duration_days": None, "lp_burned": False, "buy_sell_ratio": 0.0, "available": False},
+            "holder_distribution": {"top10_pct": 0.0, "deployer_pct": 0.0, "unique_holders": 0, "whale_count": 0, "available": False},
+            "deployer_reputation": {"age_days": 0, "total_tokens_deployed": 0, "rug_count": 0, "cross_chain_activity": False, "available": False},
+            "tx_flow": {"organic_score": 0.0, "unique_buyers_24h": 0, "unique_sellers_24h": 0, "avg_tx_size": 0.0, "available": False},
+            "forensics": {"bundled_wallets": [], "sybil_clusters": [], "wash_trading_detected": False, "same_funding_source": False, "available": False},
+            "red_flags": [],
+            "green_flags": [],
+            "sources_used": [],
+        }
+
     async def execute(self, params: Dict) -> Dict:
-        raise NotImplementedError("TODO")
+        deployer = params.get("deployer_address", "")
+        token = params.get("token_address", "")
+        chain = params.get("chain", "")
+        depth = params.get("depth", "standard")
+
+        if depth not in VALID_DEPTHS:
+            depth = "standard"
+
+        if not deployer or not token or not chain:
+            self.log_event("error", "Missing deployer_address, token_address, or chain")
+            return self._empty_result(deployer, token, chain, depth)
+
+        self.log_event("action", f"Starting wallet analysis for {token} (deployer: {deployer}) on {chain}", {"depth": depth})
+
+        liquidity_r, holders_r, deployer_r, tx_flow_r, forensics_r = await asyncio.gather(
+            self._analyze_liquidity(token, chain, depth),
+            self._analyze_holders(token, deployer, chain, depth),
+            self._analyze_deployer(deployer, chain, depth),
+            self._analyze_tx_flow(token, chain, depth),
+            self._run_forensics(token, deployer, chain, depth),
+        )
+
+        result = self._compute_verdict(
+            deployer, token, chain, depth,
+            liquidity_r, holders_r, deployer_r, tx_flow_r, forensics_r,
+        )
+
+        if depth == "quick" and params.get("depth", "standard") == "quick" and len(result["red_flags"]) >= 2:
+            self.log_event("decision", f"Auto-escalating from quick to standard: {len(result['red_flags'])} red flags")
+            depth = "standard"
+            liquidity_r, holders_r, deployer_r, tx_flow_r, forensics_r = await asyncio.gather(
+                self._analyze_liquidity(token, chain, depth),
+                self._analyze_holders(token, deployer, chain, depth),
+                self._analyze_deployer(deployer, chain, depth),
+                self._analyze_tx_flow(token, chain, depth),
+                self._run_forensics(token, deployer, chain, depth),
+            )
+            result = self._compute_verdict(
+                deployer, token, chain, depth,
+                liquidity_r, holders_r, deployer_r, tx_flow_r, forensics_r,
+            )
+
+        self.log_event("decision", f"Wallet score: {result['wallet_score']} ({result['verdict']})", {
+            "wallet_score": result["wallet_score"],
+            "verdict": result["verdict"],
+            "red_flags": result["red_flags"],
+        })
+
+        self.write_scratchpad(f"wallet_{token}", result)
+        return result
+
+    async def _analyze_liquidity(self, token: str, chain: str, depth: str) -> Dict:
+        return {"available": False, "score": 0}
+
+    async def _analyze_holders(self, token: str, deployer: str, chain: str, depth: str) -> Dict:
+        if depth == "quick":
+            return {"available": False, "score": 0}
+        return {"available": False, "score": 0}
+
+    async def _analyze_deployer(self, deployer: str, chain: str, depth: str) -> Dict:
+        if depth == "quick":
+            return {"available": False, "score": 0}
+        return {"available": False, "score": 0}
+
+    async def _analyze_tx_flow(self, token: str, chain: str, depth: str) -> Dict:
+        return {"available": False, "score": 0}
+
+    async def _run_forensics(self, token: str, deployer: str, chain: str, depth: str) -> Dict:
+        if depth == "quick":
+            return {"available": False, "score": 0}
+        return {"available": False, "score": 0}
+
+    def _compute_verdict(self, deployer: str, token: str, chain: str, depth: str,
+                         liquidity_r: Dict, holders_r: Dict, deployer_r: Dict,
+                         tx_flow_r: Dict, forensics_r: Dict) -> Dict:
+        return self._empty_result(deployer, token, chain, depth)
