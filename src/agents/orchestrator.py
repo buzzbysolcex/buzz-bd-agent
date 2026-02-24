@@ -9,6 +9,7 @@ from src.agents.safety_agent import SafetyAgent
 from src.agents.wallet_agent import WalletAgent
 from src.agents.social_agent import SocialAgent
 from src.agents.deploy_agent import DeployAgent
+from src.agents.task_registry import TaskRegistry
 
 
 class OrchestratorAgent(BaseAgent):
@@ -43,7 +44,7 @@ class OrchestratorAgent(BaseAgent):
         "deploy": "deploy_score",
     }
 
-    def __init__(self):
+    def __init__(self, task_registry_path: Optional[str] = None):
         super().__init__(name="orchestrator")
         self._scanner = ScannerAgent()
         self._agents = {
@@ -53,6 +54,11 @@ class OrchestratorAgent(BaseAgent):
             "social": SocialAgent(),
             "deploy": DeployAgent(),
         }
+        self._task_registry = TaskRegistry(task_registry_path) if task_registry_path else None
+
+    @property
+    def task_registry(self) -> Optional[TaskRegistry]:
+        return self._task_registry
 
     async def execute(self, params: Dict) -> Dict:
         mode = params.get("mode", "scan")
@@ -182,18 +188,33 @@ class OrchestratorAgent(BaseAgent):
         }
 
     async def _run_agents_parallel(self, agent_params: Dict[str, Dict]) -> Dict[str, Optional[Dict]]:
+        task_ids = {}
+        if self._task_registry:
+            for name, params in agent_params.items():
+                task = self._task_registry.create_task(name, params)
+                task_ids[name] = task["id"]
+
         async def _run_with_timeout(name: str, params: Dict):
             try:
                 result = await asyncio.wait_for(
                     self._agents[name].run(params),
                     timeout=self.AGENT_TIMEOUT,
                 )
+                if self._task_registry and name in task_ids:
+                    summary = str(result)[:200] if result else ""
+                    self._task_registry.update_status(task_ids[name], "done", result_summary=summary)
                 return (name, result)
             except asyncio.TimeoutError:
                 self.log_event("error", f"{name} timed out after {self.AGENT_TIMEOUT}s")
+                if self._task_registry and name in task_ids:
+                    self._task_registry.update_status(
+                        task_ids[name], "failed", error=f"Timed out after {self.AGENT_TIMEOUT}s"
+                    )
                 return (name, None)
             except Exception as e:
                 self.log_event("error", f"{name} failed: {str(e)}")
+                if self._task_registry and name in task_ids:
+                    self._task_registry.update_status(task_ids[name], "failed", error=str(e))
                 return (name, None)
 
         tasks = [_run_with_timeout(name, params) for name, params in agent_params.items()]
