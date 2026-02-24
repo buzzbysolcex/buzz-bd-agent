@@ -10,6 +10,8 @@ from src.agents.wallet_agent import WalletAgent
 from src.agents.social_agent import SocialAgent
 from src.agents.deploy_agent import DeployAgent
 from src.agents.task_registry import TaskRegistry
+from src.agents.memory_manager import MemoryManager
+from src.agents.health_monitor import HealthMonitor
 
 
 class OrchestratorAgent(BaseAgent):
@@ -44,7 +46,14 @@ class OrchestratorAgent(BaseAgent):
         "deploy": "deploy_score",
     }
 
-    def __init__(self, task_registry_path: Optional[str] = None):
+    PIPELINE_SCORE_THRESHOLD = 70
+
+    def __init__(
+        self,
+        task_registry_path: Optional[str] = None,
+        memory_manager_dir: Optional[str] = None,
+        health_monitor_paths: Optional[Dict[str, str]] = None,
+    ):
         super().__init__(name="orchestrator")
         self._scanner = ScannerAgent()
         self._agents = {
@@ -55,10 +64,22 @@ class OrchestratorAgent(BaseAgent):
             "deploy": DeployAgent(),
         }
         self._task_registry = TaskRegistry(task_registry_path) if task_registry_path else None
+        self._memory_manager = MemoryManager(memory_manager_dir) if memory_manager_dir else None
+        self._health_monitor = (
+            HealthMonitor(**health_monitor_paths) if health_monitor_paths else None
+        )
 
     @property
     def task_registry(self) -> Optional[TaskRegistry]:
         return self._task_registry
+
+    @property
+    def memory_manager(self) -> Optional[MemoryManager]:
+        return self._memory_manager
+
+    @property
+    def health_monitor(self) -> Optional[HealthMonitor]:
+        return self._health_monitor
 
     async def execute(self, params: Dict) -> Dict:
         mode = params.get("mode", "scan")
@@ -69,6 +90,14 @@ class OrchestratorAgent(BaseAgent):
                 params["token_data"],
                 depth=params.get("depth", "quick"),
             )
+        elif mode == "health":
+            if not self._health_monitor:
+                raise ValueError("health_monitor not configured")
+            return self._health_monitor.full_health_check()
+        elif mode == "boot":
+            if not self._memory_manager:
+                raise ValueError("memory_manager not configured")
+            return self._memory_manager.on_boot()
         else:
             raise ValueError(f"Unknown mode: {mode}")
 
@@ -101,6 +130,20 @@ class OrchestratorAgent(BaseAgent):
 
         summary = self._build_summary(results)
         self.log_event("observation", f"Scan complete: {summary}")
+
+        if self._memory_manager:
+            self._memory_manager.write_daily_log(
+                "SCAN", f"{len(tokens)} tokens scanned, avg_score={summary.get('avg_score', 0)}"
+            )
+            for result in results:
+                if result.get("unified_score", 0) >= self.PIPELINE_SCORE_THRESHOLD:
+                    self._memory_manager.update_pipeline({
+                        "contract_address": result.get("token_address", ""),
+                        "score": result["unified_score"],
+                        "stage": "DISCOVERED",
+                        "chain": result.get("chain", ""),
+                        "project_name": result.get("project_name", ""),
+                    })
 
         return {
             "tokens_scanned": len(tokens),
