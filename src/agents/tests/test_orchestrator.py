@@ -1,11 +1,15 @@
 # src/agents/tests/test_orchestrator.py
 import asyncio
 import json
+import time
 import pytest
+from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, patch, MagicMock
 from src.agents.orchestrator import OrchestratorAgent
 from src.agents.base_agent import BaseAgent
 from src.agents.task_registry import TaskRegistry
+from src.agents.memory_manager import MemoryManager
+from src.agents.health_monitor import HealthMonitor
 
 
 class TestOrchestratorInit:
@@ -819,3 +823,190 @@ class TestTaskRegistryIntegration:
         summary = agent.task_registry.get_summary()
         assert summary["done"] == 3
         assert summary["failed"] == 2
+
+
+# ---------------------------------------------------------------------------
+# Helpers for MemoryManager/HealthMonitor wiring tests
+# ---------------------------------------------------------------------------
+
+def _make_orchestrator_with_memory(tmp_path, monkeypatch):
+    """Create an OrchestratorAgent with MemoryManager and HealthMonitor wired in."""
+    mem_dir = str(tmp_path / "memory")
+    tasks_path = str(tmp_path / "memory" / "active-tasks.json")
+    crons_path = str(tmp_path / "memory" / "cron-schedule.json")
+    pipeline_path = str(tmp_path / "memory" / "pipeline" / "active.json")
+    monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path / "scratchpad"))
+    agent = OrchestratorAgent(
+        memory_manager_dir=mem_dir,
+        health_monitor_paths={
+            "tasks_path": tasks_path,
+            "crons_path": crons_path,
+            "pipeline_path": pipeline_path,
+            "memory_dir": mem_dir,
+        },
+    )
+    return agent
+
+
+class TestMemoryManagerProperty:
+    def test_has_memory_manager_when_dir_provided(self, tmp_path, monkeypatch):
+        agent = _make_orchestrator_with_memory(tmp_path, monkeypatch)
+        assert isinstance(agent.memory_manager, MemoryManager)
+
+    def test_no_memory_manager_by_default(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path / "scratchpad"))
+        agent = OrchestratorAgent()
+        assert agent.memory_manager is None
+
+
+class TestHealthMonitorProperty:
+    def test_has_health_monitor_when_paths_provided(self, tmp_path, monkeypatch):
+        agent = _make_orchestrator_with_memory(tmp_path, monkeypatch)
+        assert isinstance(agent.health_monitor, HealthMonitor)
+
+    def test_no_health_monitor_by_default(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path / "scratchpad"))
+        agent = OrchestratorAgent()
+        assert agent.health_monitor is None
+
+
+class TestScanModeWritesDailyLog:
+    @pytest.mark.asyncio
+    async def test_scan_writes_daily_log(self, tmp_path, monkeypatch):
+        agent = _make_orchestrator_with_memory(tmp_path, monkeypatch)
+        agent._scanner.run = AsyncMock(return_value={
+            "tokens": [
+                {"contract_address": "0xtok1", "chain": "solana", "name": "T1",
+                 "mcap": 100, "volume_24h": 100, "liquidity": 100},
+            ],
+            "total": 1,
+            "source_counts": {},
+        })
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 30))
+
+        await agent.execute({"mode": "scan"})
+        log = agent.memory_manager.read_daily_log()
+        assert log is not None
+        assert "SCAN" in log
+
+    @pytest.mark.asyncio
+    async def test_scan_log_contains_summary(self, tmp_path, monkeypatch):
+        agent = _make_orchestrator_with_memory(tmp_path, monkeypatch)
+        agent._scanner.run = AsyncMock(return_value={
+            "tokens": [
+                {"contract_address": "0xt1", "chain": "solana", "name": "T1",
+                 "mcap": 100, "volume_24h": 100, "liquidity": 100},
+                {"contract_address": "0xt2", "chain": "solana", "name": "T2",
+                 "mcap": 200, "volume_24h": 200, "liquidity": 200},
+            ],
+            "total": 2,
+            "source_counts": {},
+        })
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 30))
+
+        await agent.execute({"mode": "scan"})
+        log = agent.memory_manager.read_daily_log()
+        # Should mention how many tokens were scanned
+        assert "2" in log
+
+
+class TestScanModeUpdatesPipeline:
+    @pytest.mark.asyncio
+    async def test_high_score_prospects_added_to_pipeline(self, tmp_path, monkeypatch):
+        agent = _make_orchestrator_with_memory(tmp_path, monkeypatch)
+        agent._scanner.run = AsyncMock(return_value={
+            "tokens": [
+                {"contract_address": "0xhigh", "chain": "solana", "name": "HighToken",
+                 "mcap": 100, "volume_24h": 100, "liquidity": 100},
+            ],
+            "total": 1,
+            "source_counts": {},
+        })
+        # Score 80 => unified_score=80 => above 70 threshold
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 80))
+
+        await agent.execute({"mode": "scan"})
+        pipeline = agent.memory_manager.read_pipeline()
+        assert len(pipeline) >= 1
+        addrs = [p.get("contract_address") or p.get("token_address") for p in pipeline]
+        assert "0xhigh" in addrs
+
+    @pytest.mark.asyncio
+    async def test_low_score_prospects_not_in_pipeline(self, tmp_path, monkeypatch):
+        agent = _make_orchestrator_with_memory(tmp_path, monkeypatch)
+        agent._scanner.run = AsyncMock(return_value={
+            "tokens": [
+                {"contract_address": "0xlow", "chain": "solana", "name": "LowToken",
+                 "mcap": 100, "volume_24h": 100, "liquidity": 100},
+            ],
+            "total": 1,
+            "source_counts": {},
+        })
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 30))
+
+        await agent.execute({"mode": "scan"})
+        pipeline = agent.memory_manager.read_pipeline()
+        assert len(pipeline) == 0
+
+
+class TestHealthMode:
+    @pytest.mark.asyncio
+    async def test_health_mode_returns_report(self, tmp_path, monkeypatch):
+        agent = _make_orchestrator_with_memory(tmp_path, monkeypatch)
+        # Write crons so health check can find them
+        crons_path = tmp_path / "memory" / "cron-schedule.json"
+        crons_path.write_text(json.dumps(
+            [{"name": f"job_{i}", "schedule": "*/5 * * * *"} for i in range(36)]
+        ))
+        # Write a daily log so scan check isn't red
+        mem_dir = tmp_path / "memory"
+        (mem_dir / "daily-log.json").write_text(json.dumps(
+            [{"type": "scan", "timestamp": time.time()}]
+        ))
+
+        result = await agent.execute({"mode": "health"})
+        assert "overall" in result
+        assert "components" in result
+        assert result["overall"] in ("green", "yellow", "red")
+
+    @pytest.mark.asyncio
+    async def test_health_mode_without_monitor_raises(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path / "scratchpad"))
+        agent = OrchestratorAgent()
+        with pytest.raises(ValueError, match="health_monitor"):
+            await agent.execute({"mode": "health"})
+
+
+class TestBootMode:
+    @pytest.mark.asyncio
+    async def test_boot_mode_returns_report(self, tmp_path, monkeypatch):
+        agent = _make_orchestrator_with_memory(tmp_path, monkeypatch)
+        crons_path = tmp_path / "memory" / "cron-schedule.json"
+        crons_path.write_text(json.dumps(
+            [{"name": f"job_{i}", "schedule": "*/5 * * * *"} for i in range(36)]
+        ))
+
+        result = await agent.execute({"mode": "boot"})
+        assert "crons_ok" in result
+        assert "status" in result
+        assert result["crons_ok"] is True
+        assert result["status"] == "green"
+
+    @pytest.mark.asyncio
+    async def test_boot_mode_without_manager_raises(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("BUZZ_SCRATCHPAD_DIR", str(tmp_path / "scratchpad"))
+        agent = OrchestratorAgent()
+        with pytest.raises(ValueError, match="memory_manager"):
+            await agent.execute({"mode": "boot"})
+
+    @pytest.mark.asyncio
+    async def test_boot_mode_red_with_missing_crons(self, tmp_path, monkeypatch):
+        agent = _make_orchestrator_with_memory(tmp_path, monkeypatch)
+        # No cron file exists
+        result = await agent.execute({"mode": "boot"})
+        assert result["status"] == "red"
+        assert result["crons_ok"] is False
