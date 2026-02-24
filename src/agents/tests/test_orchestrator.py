@@ -1,9 +1,11 @@
 # src/agents/tests/test_orchestrator.py
 import asyncio
+import json
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 from src.agents.orchestrator import OrchestratorAgent
 from src.agents.base_agent import BaseAgent
+from src.agents.task_registry import TaskRegistry
 
 
 class TestOrchestratorInit:
@@ -712,3 +714,108 @@ class TestTelegramFormatting:
         assert "Failed" in text
         assert "social" in text
         assert "deploy" in text
+
+
+class TestTaskRegistryProperty:
+    def test_has_task_registry_property(self, tmp_path):
+        agent = OrchestratorAgent(task_registry_path=str(tmp_path / "tasks.json"))
+        assert isinstance(agent.task_registry, TaskRegistry)
+
+    def test_task_registry_uses_configured_path(self, tmp_path):
+        path = str(tmp_path / "custom.json")
+        agent = OrchestratorAgent(task_registry_path=path)
+        assert agent.task_registry._path == path
+
+
+class TestTaskRegistryIntegration:
+    @pytest.mark.asyncio
+    async def test_creates_task_per_agent(self, tmp_path):
+        path = str(tmp_path / "tasks.json")
+        agent = OrchestratorAgent(task_registry_path=path)
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 75))
+
+        params = {name: {} for name in agent._agents}
+        await agent._run_agents_parallel(params)
+        data = json.loads((tmp_path / "tasks.json").read_text())
+        agent_names = [t["agent_name"] for t in data]
+        for name in agent._agents:
+            assert name in agent_names
+
+    @pytest.mark.asyncio
+    async def test_successful_agents_marked_done(self, tmp_path):
+        path = str(tmp_path / "tasks.json")
+        agent = OrchestratorAgent(task_registry_path=path)
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 75))
+
+        params = {name: {} for name in agent._agents}
+        await agent._run_agents_parallel(params)
+        data = json.loads((tmp_path / "tasks.json").read_text())
+        for task in data:
+            assert task["status"] == "done"
+
+    @pytest.mark.asyncio
+    async def test_successful_agent_has_result_summary(self, tmp_path):
+        path = str(tmp_path / "tasks.json")
+        agent = OrchestratorAgent(task_registry_path=path)
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 75))
+
+        params = {name: {} for name in agent._agents}
+        await agent._run_agents_parallel(params)
+        data = json.loads((tmp_path / "tasks.json").read_text())
+        for task in data:
+            assert task["result_summary"] != ""
+
+    @pytest.mark.asyncio
+    async def test_timed_out_agent_marked_failed(self, tmp_path):
+        path = str(tmp_path / "tasks.json")
+        agent = OrchestratorAgent(task_registry_path=path)
+        agent.AGENT_TIMEOUT = 0.05
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 75))
+
+        async def hang(*args, **kwargs):
+            await asyncio.sleep(999)
+
+        agent._agents["safety"].run = hang
+
+        params = {name: {} for name in agent._agents}
+        await agent._run_agents_parallel(params)
+        data = json.loads((tmp_path / "tasks.json").read_text())
+        safety_tasks = [t for t in data if t["agent_name"] == "safety"]
+        assert len(safety_tasks) == 1
+        assert safety_tasks[0]["status"] == "failed"
+        assert safety_tasks[0]["error"] is not None
+
+    @pytest.mark.asyncio
+    async def test_exception_agent_marked_failed(self, tmp_path):
+        path = str(tmp_path / "tasks.json")
+        agent = OrchestratorAgent(task_registry_path=path)
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 75))
+        agent._agents["wallet"].run = AsyncMock(side_effect=RuntimeError("API down"))
+
+        params = {name: {} for name in agent._agents}
+        await agent._run_agents_parallel(params)
+        data = json.loads((tmp_path / "tasks.json").read_text())
+        wallet_tasks = [t for t in data if t["agent_name"] == "wallet"]
+        assert len(wallet_tasks) == 1
+        assert wallet_tasks[0]["status"] == "failed"
+        assert "API down" in wallet_tasks[0]["error"]
+
+    @pytest.mark.asyncio
+    async def test_registry_summary_after_mixed_results(self, tmp_path):
+        path = str(tmp_path / "tasks.json")
+        agent = OrchestratorAgent(task_registry_path=path)
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 75))
+        agent._agents["safety"].run = AsyncMock(side_effect=RuntimeError("fail"))
+        agent._agents["deploy"].run = AsyncMock(side_effect=RuntimeError("fail"))
+
+        params = {name: {} for name in agent._agents}
+        await agent._run_agents_parallel(params)
+        summary = agent.task_registry.get_summary()
+        assert summary["done"] == 3
+        assert summary["failed"] == 2
