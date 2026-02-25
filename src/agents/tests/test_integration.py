@@ -829,7 +829,7 @@ class TestTelegramBridgeIntegration:
         # Write crons so health check passes
         crons_path = tmp_path / "memory" / "cron-schedule.json"
         crons_path.write_text(json.dumps(
-            [{"name": f"job_{i}", "schedule": "*/5 * * * *"} for i in range(36)]
+            [{"name": f"job_{i}", "schedule": "0 */5 * * * *"} for i in range(36)]
         ))
 
         bridge = TelegramBridge(orchestrator=agent, chat_id=12345)
@@ -844,7 +844,7 @@ class TestTelegramBridgeIntegration:
         # Write crons for health
         crons_path = tmp_path / "memory" / "cron-schedule.json"
         crons_path.write_text(json.dumps(
-            [{"name": f"job_{i}", "schedule": "*/5 * * * *"} for i in range(36)]
+            [{"name": f"job_{i}", "schedule": "0 */5 * * * *"} for i in range(36)]
         ))
 
         bridge = TelegramBridge(orchestrator=agent, chat_id=12345)
