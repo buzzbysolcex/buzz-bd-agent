@@ -13,6 +13,29 @@ from src.agents.task_registry import TaskRegistry
 from src.agents.memory_manager import MemoryManager
 from src.agents.health_monitor import HealthMonitor
 
+import time
+from dataclasses import dataclass
+
+
+@dataclass
+class AgentOutcome:
+    agent_name: str
+    score: Optional[int]
+    result: Optional[Dict]
+    elapsed_ms: float
+    error: Optional[str]
+
+
+@dataclass
+class DelegationResult:
+    agent_outcomes: Dict[str, 'AgentOutcome']
+    depth: str
+    timeout_used: int
+    started_at: float
+    elapsed_ms: float
+    escalation_path: List[str]
+
+
 
 class OrchestratorAgent(BaseAgent):
     AGENT_WEIGHTS = {
@@ -31,6 +54,7 @@ class OrchestratorAgent(BaseAgent):
     DEEP_ESCALATION = 70
 
     AGENT_TIMEOUT = 30  # seconds
+    DEPTH_TIMEOUTS = {"quick": 10, "standard": 20, "deep": 45}
 
     CRITICAL_FLAGS = frozenset({
         "safety:honeypot_detected",
@@ -230,7 +254,8 @@ class OrchestratorAgent(BaseAgent):
             },
         }
 
-    async def _run_agents_parallel(self, agent_params: Dict[str, Dict]) -> Dict[str, Optional[Dict]]:
+    async def _run_agents_parallel(self, agent_params: Dict[str, Dict], timeout: Optional[int] = None) -> Dict[str, Optional[Dict]]:
+        effective_timeout = timeout if timeout is not None else self.AGENT_TIMEOUT
         task_ids = {}
         if self._task_registry:
             for name, params in agent_params.items():
@@ -241,17 +266,17 @@ class OrchestratorAgent(BaseAgent):
             try:
                 result = await asyncio.wait_for(
                     self._agents[name].run(params),
-                    timeout=self.AGENT_TIMEOUT,
+                    timeout=effective_timeout,
                 )
                 if self._task_registry and name in task_ids:
                     summary = str(result)[:200] if result else ""
                     self._task_registry.update_status(task_ids[name], "done", result_summary=summary)
                 return (name, result)
             except asyncio.TimeoutError:
-                self.log_event("error", f"{name} timed out after {self.AGENT_TIMEOUT}s")
+                self.log_event("error", f"{name} timed out after {effective_timeout}s")
                 if self._task_registry and name in task_ids:
                     self._task_registry.update_status(
-                        task_ids[name], "failed", error=f"Timed out after {self.AGENT_TIMEOUT}s"
+                        task_ids[name], "failed", error=f"Timed out after {effective_timeout}s"
                     )
                 return (name, None)
             except Exception as e:
@@ -300,25 +325,134 @@ class OrchestratorAgent(BaseAgent):
             },
         }
 
-    async def _evaluate_single_token(self, token_data: Dict, depth: str = "quick") -> Dict:
-        self.log_event("action", f"Evaluating {token_data.get('token_address', '?')} at depth={depth}")
+
+    async def delegate(
+        self,
+        token_data: Dict,
+        depth: str = "quick",
+        agents: Optional[List[str]] = None,
+    ) -> 'DelegationResult':
+        if agents is not None:
+            unknown = set(agents) - set(self._agents.keys())
+            if unknown:
+                raise ValueError(f"Unknown agents: {unknown}")
+
+        timeout = self.DEPTH_TIMEOUTS.get(depth, self.AGENT_TIMEOUT)
+        started_at = time.monotonic()
 
         agent_params = self._build_agent_params(token_data, depth)
-        agent_results = await self._run_agents_parallel(agent_params)
+        if agents is not None:
+            agent_params = {k: v for k, v in agent_params.items() if k in agents}
+
+        agent_timings: Dict[str, float] = {}
+        agent_errors: Dict[str, str] = {}
+
+        task_ids = {}
+        if self._task_registry:
+            for name, params in agent_params.items():
+                task = self._task_registry.create_task(name, params)
+                task_ids[name] = task["id"]
+
+        async def _run_one(name, params):
+            t0 = time.monotonic()
+            try:
+                result = await asyncio.wait_for(
+                    self._agents[name].run(params),
+                    timeout=timeout,
+                )
+                agent_timings[name] = (time.monotonic() - t0) * 1000
+                if self._task_registry and name in task_ids:
+                    summary = str(result)[:200] if result else ""
+                    self._task_registry.update_status(task_ids[name], "done", result_summary=summary)
+                return (name, result)
+            except asyncio.TimeoutError:
+                agent_timings[name] = (time.monotonic() - t0) * 1000
+                agent_errors[name] = f"Timed out after {timeout}s"
+                self.log_event("error", f"{name} timed out after {timeout}s")
+                if self._task_registry and name in task_ids:
+                    self._task_registry.update_status(
+                        task_ids[name], "failed", error=f"Timed out after {timeout}s"
+                    )
+                return (name, None)
+            except Exception as e:
+                agent_timings[name] = (time.monotonic() - t0) * 1000
+                agent_errors[name] = str(e)
+                self.log_event("error", f"{name} failed: {str(e)}")
+                if self._task_registry and name in task_ids:
+                    self._task_registry.update_status(task_ids[name], "failed", error=str(e))
+                return (name, None)
+
+        tasks = [_run_one(name, params) for name, params in agent_params.items()]
+        raw = await asyncio.gather(*tasks)
+        raw_results = dict(raw)
+
+        elapsed_ms = (time.monotonic() - started_at) * 1000
+
+        agent_outcomes = {}
+        for name in agent_params:
+            result = raw_results.get(name)
+            score = None
+            if result is not None:
+                score_key = self.SCORE_KEYS.get(name)
+                if score_key:
+                    score = result.get(score_key)
+            agent_outcomes[name] = AgentOutcome(
+                agent_name=name,
+                score=score,
+                result=result,
+                elapsed_ms=agent_timings.get(name, 0.0),
+                error=agent_errors.get(name),
+            )
+
+        return DelegationResult(
+            agent_outcomes=agent_outcomes,
+            depth=depth,
+            timeout_used=timeout,
+            started_at=started_at,
+            elapsed_ms=elapsed_ms,
+            escalation_path=[depth],
+        )
+
+    async def _evaluate_single_token(
+        self, token_data: Dict, depth: str = "quick", _escalation_path: Optional[List[str]] = None,
+    ) -> Dict:
+        self.log_event("action", f"Evaluating {token_data.get('token_address', '?')} at depth={depth}")
+
+        escalation_path = list(_escalation_path) if _escalation_path else []
+        escalation_path.append(depth)
+
+        dr = await self.delegate(token_data, depth=depth)
+        # Convert DelegationResult back to raw dict for _merge_results
+        agent_results = {
+            name: outcome.result
+            for name, outcome in dr.agent_outcomes.items()
+        }
         merged = self._merge_results(agent_results, token_data)
 
         # Depth escalation (only from quick)
         if depth == "quick" and merged["unified_score"] >= self.DEEP_ESCALATION:
             self.log_event("decision", f"Escalating to deep (score={merged['unified_score']})")
-            return await self._evaluate_single_token(token_data, depth="deep")
+            return await self._evaluate_single_token(
+                token_data, depth="deep", _escalation_path=escalation_path,
+            )
         elif depth == "quick" and merged["unified_score"] >= self.STANDARD_ESCALATION:
             self.log_event("decision", f"Escalating to standard (score={merged['unified_score']})")
-            return await self._evaluate_single_token(token_data, depth="standard")
+            return await self._evaluate_single_token(
+                token_data, depth="standard", _escalation_path=escalation_path,
+            )
+
+        merged["escalation_path"] = escalation_path
+        merged["delegation_meta"] = {
+            "depth": dr.depth,
+            "timeout_used": dr.timeout_used,
+            "elapsed_ms": dr.elapsed_ms,
+        }
 
         addr = token_data.get("token_address", "unknown")
         self.write_scratchpad(f"eval_{addr}", merged)
 
         return merged
+
 
     def format_scan_result(self, scan_result: Dict) -> str:
         summary = scan_result.get("summary", {})
