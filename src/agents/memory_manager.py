@@ -22,6 +22,11 @@ PURGE_AGE_HOURS = 48
 HIGH_SCORE_THRESHOLD = 70
 EXPECTED_CRONS = 36
 
+# 6-field cron format: seconds minutes hours dom month dow
+# The OpenClaw gateway uses node-cron which requires the seconds field.
+# Previous 5-field format ("*/5 * * * *") was silently rejected.
+DEFAULT_CRON_EXPRESSION = "0 */5 * * * *"
+
 # AST = UTC-4
 AST_OFFSET = timedelta(hours=-4)
 
@@ -170,6 +175,12 @@ class MemoryManager:
     # ------------------------------------------------------------------
     # Never-purge keys
     # ------------------------------------------------------------------
+
+    def generate_default_crons(self, count: int = EXPECTED_CRONS) -> List[Dict]:
+        return [
+            {"name": f"job_{i}", "schedule": DEFAULT_CRON_EXPRESSION}
+            for i in range(count)
+        ]
 
     def get_never_purge_keys(self) -> frozenset:
         return NEVER_PURGE_KEYS
