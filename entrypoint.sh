@@ -53,6 +53,12 @@ cat > "$CONFIG" << JSONEOF
   }
 }
 JSONEOF
+
+if [ -n "$DISCORD_BOT_TOKEN" ]; then
+  echo "[entrypoint] DISCORD_BOT_TOKEN found — adding Discord channel..."
+  jq '.channels.discord = {"enabled": true, "botToken": "'"$DISCORD_BOT_TOKEN"'", "appId": "1475792150380941372"}' "$CONFIG" > "${CONFIG}.tmp" && mv "${CONFIG}.tmp" "$CONFIG"
+fi
+
 echo "[entrypoint] Config generated at $CONFIG"
 
 echo "[entrypoint] Setting up ClawRouter..."
@@ -80,6 +86,7 @@ echo "[entrypoint] ENV check:"
 echo "  MINIMAX_API_KEY=$([ -n "$MINIMAX_API_KEY" ] && echo 'SET' || echo 'NOT SET')"
 echo "  BLOCKRUN_WALLET_KEY=$([ -n "$BLOCKRUN_WALLET_KEY" ] && echo 'SET' || echo 'NOT SET')"
 echo "  TELEGRAM_BOT_TOKEN=$([ -n "$TELEGRAM_BOT_TOKEN" ] && echo 'SET' || echo 'NOT SET')"
+echo "  DISCORD_BOT_TOKEN=$([ -n "$DISCORD_BOT_TOKEN" ] && echo 'SET' || echo 'NOT SET')"
 echo "  OpenRouter: REMOVED (using BlockRun via ClawRouter)"
 
 echo "[entrypoint] Starting gateway..."
