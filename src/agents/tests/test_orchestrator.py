@@ -6,6 +6,7 @@ import pytest
 from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, patch, MagicMock
 from src.agents.orchestrator import OrchestratorAgent
+from src.agents.orchestrator import AgentOutcome, DelegationResult
 from src.agents.base_agent import BaseAgent
 from src.agents.task_registry import TaskRegistry
 from src.agents.memory_manager import MemoryManager
@@ -40,6 +41,62 @@ class TestOrchestratorInit:
         assert OrchestratorAgent.STANDARD_ESCALATION == 50
         assert OrchestratorAgent.DEEP_ESCALATION == 70
         assert OrchestratorAgent.AGENT_TIMEOUT == 30
+
+
+
+class TestDataclasses:
+    def test_agent_outcome_fields(self):
+        outcome = AgentOutcome(
+            agent_name="safety",
+            score=85,
+            result={"safety_score": 85},
+            elapsed_ms=123.4,
+            error=None,
+        )
+        assert outcome.agent_name == "safety"
+        assert outcome.score == 85
+        assert outcome.result == {"safety_score": 85}
+        assert outcome.elapsed_ms == 123.4
+        assert outcome.error is None
+
+    def test_agent_outcome_failed(self):
+        outcome = AgentOutcome(
+            agent_name="wallet",
+            score=None,
+            result=None,
+            elapsed_ms=30000.0,
+            error="Timed out after 30s",
+        )
+        assert outcome.score is None
+        assert outcome.result is None
+        assert outcome.error == "Timed out after 30s"
+
+    def test_delegation_result_fields(self):
+        outcome = AgentOutcome("safety", 85, {"safety_score": 85}, 100.0, None)
+        dr = DelegationResult(
+            agent_outcomes={"safety": outcome},
+            depth="quick",
+            timeout_used=10,
+            started_at=1000.0,
+            elapsed_ms=150.0,
+            escalation_path=["quick"],
+        )
+        assert dr.depth == "quick"
+        assert dr.timeout_used == 10
+        assert dr.elapsed_ms == 150.0
+        assert dr.escalation_path == ["quick"]
+        assert "safety" in dr.agent_outcomes
+
+    def test_delegation_result_escalation_path(self):
+        dr = DelegationResult(
+            agent_outcomes={},
+            depth="deep",
+            timeout_used=45,
+            started_at=1000.0,
+            elapsed_ms=500.0,
+            escalation_path=["quick", "deep"],
+        )
+        assert dr.escalation_path == ["quick", "deep"]
 
 
 class TestRedistributeWeights:

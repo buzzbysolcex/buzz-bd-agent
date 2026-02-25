@@ -13,6 +13,29 @@ from src.agents.task_registry import TaskRegistry
 from src.agents.memory_manager import MemoryManager
 from src.agents.health_monitor import HealthMonitor
 
+import time
+from dataclasses import dataclass
+
+
+@dataclass
+class AgentOutcome:
+    agent_name: str
+    score: Optional[int]
+    result: Optional[Dict]
+    elapsed_ms: float
+    error: Optional[str]
+
+
+@dataclass
+class DelegationResult:
+    agent_outcomes: Dict[str, 'AgentOutcome']
+    depth: str
+    timeout_used: int
+    started_at: float
+    elapsed_ms: float
+    escalation_path: List[str]
+
+
 
 class OrchestratorAgent(BaseAgent):
     AGENT_WEIGHTS = {
