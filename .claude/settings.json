@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/prompt-injection-defender/post-tool-defender.py"
+          }
+        ]
+      }
+    ]
+  }
+}
