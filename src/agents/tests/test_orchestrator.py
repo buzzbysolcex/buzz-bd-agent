@@ -960,7 +960,7 @@ class TestHealthMode:
         # Write crons so health check can find them
         crons_path = tmp_path / "memory" / "cron-schedule.json"
         crons_path.write_text(json.dumps(
-            [{"name": f"job_{i}", "schedule": "*/5 * * * *"} for i in range(36)]
+            [{"name": f"job_{i}", "schedule": "0 */5 * * * *"} for i in range(36)]
         ))
         # Write a daily log so scan check isn't red
         mem_dir = tmp_path / "memory"
@@ -987,7 +987,7 @@ class TestBootMode:
         agent = _make_orchestrator_with_memory(tmp_path, monkeypatch)
         crons_path = tmp_path / "memory" / "cron-schedule.json"
         crons_path.write_text(json.dumps(
-            [{"name": f"job_{i}", "schedule": "*/5 * * * *"} for i in range(36)]
+            [{"name": f"job_{i}", "schedule": "0 */5 * * * *"} for i in range(36)]
         ))
 
         result = await agent.execute({"mode": "boot"})
