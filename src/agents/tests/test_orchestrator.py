@@ -42,6 +42,9 @@ class TestOrchestratorInit:
         assert OrchestratorAgent.DEEP_ESCALATION == 70
         assert OrchestratorAgent.AGENT_TIMEOUT == 30
 
+    def test_depth_timeouts_constant(self):
+        assert OrchestratorAgent.DEPTH_TIMEOUTS == {"quick": 10, "standard": 20, "deep": 45}
+
 
 
 class TestDataclasses:
@@ -419,6 +422,22 @@ class TestRunAgentsParallel:
         await agent._run_agents_parallel(params)
         elapsed = time.monotonic() - start
         assert elapsed < 0.3
+
+    @pytest.mark.asyncio
+    async def test_respects_timeout_parameter(self):
+        agent = OrchestratorAgent()
+        async def hang(*args, **kwargs):
+            await asyncio.sleep(999)
+        for name, sub in agent._agents.items():
+            sub.run = hang
+
+        params = {name: {} for name in agent._agents}
+        start = time.monotonic()
+        results = await agent._run_agents_parallel(params, timeout=0.05)
+        elapsed = time.monotonic() - start
+        assert elapsed < 1.0
+        for name in agent._agents:
+            assert results[name] is None
 
 
 class TestBuildAgentParams:

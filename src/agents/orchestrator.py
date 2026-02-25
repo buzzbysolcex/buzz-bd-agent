@@ -54,6 +54,7 @@ class OrchestratorAgent(BaseAgent):
     DEEP_ESCALATION = 70
 
     AGENT_TIMEOUT = 30  # seconds
+    DEPTH_TIMEOUTS = {"quick": 10, "standard": 20, "deep": 45}
 
     CRITICAL_FLAGS = frozenset({
         "safety:honeypot_detected",
@@ -253,7 +254,8 @@ class OrchestratorAgent(BaseAgent):
             },
         }
 
-    async def _run_agents_parallel(self, agent_params: Dict[str, Dict]) -> Dict[str, Optional[Dict]]:
+    async def _run_agents_parallel(self, agent_params: Dict[str, Dict], timeout: Optional[int] = None) -> Dict[str, Optional[Dict]]:
+        effective_timeout = timeout if timeout is not None else self.AGENT_TIMEOUT
         task_ids = {}
         if self._task_registry:
             for name, params in agent_params.items():
@@ -264,17 +266,17 @@ class OrchestratorAgent(BaseAgent):
             try:
                 result = await asyncio.wait_for(
                     self._agents[name].run(params),
-                    timeout=self.AGENT_TIMEOUT,
+                    timeout=effective_timeout,
                 )
                 if self._task_registry and name in task_ids:
                     summary = str(result)[:200] if result else ""
                     self._task_registry.update_status(task_ids[name], "done", result_summary=summary)
                 return (name, result)
             except asyncio.TimeoutError:
-                self.log_event("error", f"{name} timed out after {self.AGENT_TIMEOUT}s")
+                self.log_event("error", f"{name} timed out after {effective_timeout}s")
                 if self._task_registry and name in task_ids:
                     self._task_registry.update_status(
-                        task_ids[name], "failed", error=f"Timed out after {self.AGENT_TIMEOUT}s"
+                        task_ids[name], "failed", error=f"Timed out after {effective_timeout}s"
                     )
                 return (name, None)
             except Exception as e:
