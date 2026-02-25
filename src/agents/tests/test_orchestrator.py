@@ -489,6 +489,102 @@ class TestBuildAgentParams:
         assert params["deploy"]["depth"] == "standard"
 
 
+
+class TestDelegate:
+    @pytest.mark.asyncio
+    async def test_returns_delegation_result(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 75))
+        td = _make_token_data()
+        dr = await agent.delegate(td, depth="quick")
+        assert isinstance(dr, DelegationResult)
+        assert dr.depth == "quick"
+        assert dr.timeout_used == 10
+        assert dr.escalation_path == ["quick"]
+        assert len(dr.agent_outcomes) == 5
+
+    @pytest.mark.asyncio
+    async def test_agent_outcomes_have_scores(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 80))
+        td = _make_token_data()
+        dr = await agent.delegate(td, depth="standard")
+        for name, outcome in dr.agent_outcomes.items():
+            assert isinstance(outcome, AgentOutcome)
+            assert outcome.score == 80
+            assert outcome.error is None
+            assert outcome.elapsed_ms >= 0
+
+    @pytest.mark.asyncio
+    async def test_agent_subset(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 70))
+        td = _make_token_data()
+        dr = await agent.delegate(td, depth="quick", agents=["safety", "wallet"])
+        assert set(dr.agent_outcomes.keys()) == {"safety", "wallet"}
+        agent._agents["scorer"].run.assert_not_called()
+        agent._agents["social"].run.assert_not_called()
+        agent._agents["deploy"].run.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_failed_agent_outcome(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 70))
+        agent._agents["wallet"].run = AsyncMock(side_effect=RuntimeError("API down"))
+        td = _make_token_data()
+        dr = await agent.delegate(td, depth="quick")
+        assert dr.agent_outcomes["wallet"].score is None
+        assert dr.agent_outcomes["wallet"].result is None
+        assert dr.agent_outcomes["wallet"].error == "API down"
+
+    @pytest.mark.asyncio
+    async def test_timed_out_agent_outcome(self):
+        agent = OrchestratorAgent()
+        agent.DEPTH_TIMEOUTS = {"quick": 0.05, "standard": 0.1, "deep": 0.2}
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 70))
+        async def hang(*args, **kwargs):
+            await asyncio.sleep(999)
+        agent._agents["safety"].run = hang
+        td = _make_token_data()
+        dr = await agent.delegate(td, depth="quick")
+        assert dr.agent_outcomes["safety"].score is None
+        assert dr.agent_outcomes["safety"].error is not None
+        assert "imed out" in dr.agent_outcomes["safety"].error
+
+    @pytest.mark.asyncio
+    async def test_uses_depth_specific_timeout(self):
+        agent = OrchestratorAgent()
+        td = _make_token_data()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 70))
+        dr_quick = await agent.delegate(td, depth="quick")
+        assert dr_quick.timeout_used == 10
+        dr_deep = await agent.delegate(td, depth="deep")
+        assert dr_deep.timeout_used == 45
+
+    @pytest.mark.asyncio
+    async def test_elapsed_ms_populated(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 70))
+        td = _make_token_data()
+        dr = await agent.delegate(td, depth="quick")
+        assert dr.elapsed_ms >= 0
+        assert dr.started_at > 0
+
+    @pytest.mark.asyncio
+    async def test_invalid_agent_name_raises(self):
+        agent = OrchestratorAgent()
+        td = _make_token_data()
+        with pytest.raises(ValueError, match="Unknown agents"):
+            await agent.delegate(td, depth="quick", agents=["nonexistent"])
+
+
 class TestEvaluateSingleToken:
     @pytest.mark.asyncio
     async def test_returns_merged_result(self):
