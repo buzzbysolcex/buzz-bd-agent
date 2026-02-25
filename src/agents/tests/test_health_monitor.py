@@ -44,7 +44,7 @@ def _make_task(status="queued", started_at=None, agent_name="scorer"):
 
 
 def _make_cron_jobs(count=36):
-    return [{"name": f"job_{i}", "schedule": "*/5 * * * *"} for i in range(count)]
+    return [{"name": f"job_{i}", "schedule": "0 */5 * * * *"} for i in range(count)]
 
 
 def _make_pipeline_entries(stages=None):

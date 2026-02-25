@@ -37,7 +37,7 @@ def _make_prospect(contract_address, score=75, stage="DISCOVERED", timestamp=Non
 
 
 def _make_cron_jobs(count=36):
-    return [{"name": f"job_{i}", "schedule": "*/5 * * * *"} for i in range(count)]
+    return [{"name": f"job_{i}", "schedule": "0 */5 * * * *"} for i in range(count)]
 
 
 # ---------------------------------------------------------------------------
@@ -516,3 +516,76 @@ class TestEdgeCases:
         content = mgr.read_daily_log()
         assert "0x123" in content
         assert "solana" in content
+
+
+# ---------------------------------------------------------------------------
+# TestCronFormat
+# ---------------------------------------------------------------------------
+
+class TestCronFormat:
+    def test_default_cron_expression_has_six_fields(self, tmp_path):
+        """OpenClaw gateway expects 6-field cron (with seconds)."""
+        from src.agents.memory_manager import DEFAULT_CRON_EXPRESSION
+        fields = DEFAULT_CRON_EXPRESSION.strip().split()
+        assert len(fields) == 6, (
+            f"Expected 6-field cron (sec min hr dom mon dow), got {len(fields)}: "
+            f"'{DEFAULT_CRON_EXPRESSION}'"
+        )
+
+    def test_default_cron_expression_starts_with_zero_seconds(self, tmp_path):
+        """First field (seconds) should be '0' so cron fires at top of interval."""
+        from src.agents.memory_manager import DEFAULT_CRON_EXPRESSION
+        seconds_field = DEFAULT_CRON_EXPRESSION.strip().split()[0]
+        assert seconds_field == "0", f"Seconds field should be '0', got '{seconds_field}'"
+
+    def test_generate_default_crons_returns_expected_count(self, tmp_path):
+        mgr = _make_manager(tmp_path)
+        crons = mgr.generate_default_crons()
+        assert len(crons) == 36
+
+    def test_generate_default_crons_uses_six_field_format(self, tmp_path):
+        mgr = _make_manager(tmp_path)
+        crons = mgr.generate_default_crons()
+        for job in crons:
+            fields = job["schedule"].strip().split()
+            assert len(fields) == 6, (
+                f"Job '{job['name']}' has {len(fields)}-field cron, expected 6"
+            )
+
+    def test_generate_default_crons_has_name_and_schedule(self, tmp_path):
+        mgr = _make_manager(tmp_path)
+        crons = mgr.generate_default_crons()
+        for job in crons:
+            assert "name" in job
+            assert "schedule" in job
+
+    def test_cron_fires_at_expected_interval(self, tmp_path):
+        """Verify the default cron expression fires every 5 minutes.
+
+        Parse the 6-field cron '0 */5 * * * *' and confirm that within a
+        60-minute window there are exactly 12 fire times (every 5 min).
+        """
+        from src.agents.memory_manager import DEFAULT_CRON_EXPRESSION
+        fields = DEFAULT_CRON_EXPRESSION.strip().split()
+        # fields: [seconds, minutes, hours, dom, month, dow]
+        seconds_field = fields[0]
+        minutes_field = fields[1]
+
+        # Parse minutes that match the expression
+        fire_minutes = _expand_cron_field(minutes_field, 0, 59)
+
+        # Should fire at 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55
+        assert fire_minutes == list(range(0, 60, 5))
+        assert seconds_field == "0"
+
+
+def _expand_cron_field(field: str, min_val: int, max_val: int) -> list:
+    """Expand a single cron field into the list of matching values."""
+    if field == "*":
+        return list(range(min_val, max_val + 1))
+    if field.startswith("*/"):
+        step = int(field[2:])
+        return list(range(min_val, max_val + 1, step))
+    if "," in field:
+        return sorted(int(v) for v in field.split(","))
+    return [int(field)]
