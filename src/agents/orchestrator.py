@@ -347,6 +347,12 @@ class OrchestratorAgent(BaseAgent):
         agent_timings: Dict[str, float] = {}
         agent_errors: Dict[str, str] = {}
 
+        task_ids = {}
+        if self._task_registry:
+            for name, params in agent_params.items():
+                task = self._task_registry.create_task(name, params)
+                task_ids[name] = task["id"]
+
         async def _run_one(name, params):
             t0 = time.monotonic()
             try:
@@ -355,16 +361,25 @@ class OrchestratorAgent(BaseAgent):
                     timeout=timeout,
                 )
                 agent_timings[name] = (time.monotonic() - t0) * 1000
+                if self._task_registry and name in task_ids:
+                    summary = str(result)[:200] if result else ""
+                    self._task_registry.update_status(task_ids[name], "done", result_summary=summary)
                 return (name, result)
             except asyncio.TimeoutError:
                 agent_timings[name] = (time.monotonic() - t0) * 1000
                 agent_errors[name] = f"Timed out after {timeout}s"
                 self.log_event("error", f"{name} timed out after {timeout}s")
+                if self._task_registry and name in task_ids:
+                    self._task_registry.update_status(
+                        task_ids[name], "failed", error=f"Timed out after {timeout}s"
+                    )
                 return (name, None)
             except Exception as e:
                 agent_timings[name] = (time.monotonic() - t0) * 1000
                 agent_errors[name] = str(e)
                 self.log_event("error", f"{name} failed: {str(e)}")
+                if self._task_registry and name in task_ids:
+                    self._task_registry.update_status(task_ids[name], "failed", error=str(e))
                 return (name, None)
 
         tasks = [_run_one(name, params) for name, params in agent_params.items()]
