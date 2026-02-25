@@ -701,6 +701,67 @@ class TestDepthEscalation:
         assert "standard" in captured_params
 
 
+
+class TestEscalationPath:
+    @pytest.mark.asyncio
+    async def test_no_escalation_path_is_single_depth(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 30))
+        td = _make_token_data()
+        result = await agent._evaluate_single_token(td, depth="quick")
+        assert result["escalation_path"] == ["quick"]
+
+    @pytest.mark.asyncio
+    async def test_escalation_to_standard_tracked(self):
+        agent = OrchestratorAgent()
+        call_count = {"n": 0}
+        def _make_mock(agent_name):
+            async def mock_run(params):
+                call_count["n"] += 1
+                return _make_agent_result(agent_name, 55)
+            return mock_run
+        for name, sub in agent._agents.items():
+            sub.run = _make_mock(name)
+        td = _make_token_data()
+        result = await agent._evaluate_single_token(td, depth="quick")
+        assert result["escalation_path"] == ["quick", "standard"]
+
+    @pytest.mark.asyncio
+    async def test_escalation_to_deep_tracked(self):
+        agent = OrchestratorAgent()
+        def _make_mock(agent_name):
+            async def mock_run(params):
+                return _make_agent_result(agent_name, 75)
+            return mock_run
+        for name, sub in agent._agents.items():
+            sub.run = _make_mock(name)
+        td = _make_token_data()
+        result = await agent._evaluate_single_token(td, depth="quick")
+        assert result["escalation_path"] == ["quick", "deep"]
+
+    @pytest.mark.asyncio
+    async def test_standard_depth_no_escalation_path(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 90))
+        td = _make_token_data()
+        result = await agent._evaluate_single_token(td, depth="standard")
+        assert result["escalation_path"] == ["standard"]
+
+    @pytest.mark.asyncio
+    async def test_delegation_meta_in_result(self):
+        agent = OrchestratorAgent()
+        for name, sub in agent._agents.items():
+            sub.run = AsyncMock(return_value=_make_agent_result(name, 30))
+        td = _make_token_data()
+        result = await agent._evaluate_single_token(td, depth="quick")
+        assert "delegation_meta" in result
+        assert result["delegation_meta"]["depth"] == "quick"
+        assert result["delegation_meta"]["timeout_used"] == 10
+        assert result["delegation_meta"]["elapsed_ms"] >= 0
+
+
 class TestExecute:
     @pytest.mark.asyncio
     async def test_scan_mode(self):

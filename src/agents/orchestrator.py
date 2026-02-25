@@ -398,25 +398,46 @@ class OrchestratorAgent(BaseAgent):
             escalation_path=[depth],
         )
 
-    async def _evaluate_single_token(self, token_data: Dict, depth: str = "quick") -> Dict:
+    async def _evaluate_single_token(
+        self, token_data: Dict, depth: str = "quick", _escalation_path: Optional[List[str]] = None,
+    ) -> Dict:
         self.log_event("action", f"Evaluating {token_data.get('token_address', '?')} at depth={depth}")
 
-        agent_params = self._build_agent_params(token_data, depth)
-        agent_results = await self._run_agents_parallel(agent_params)
+        escalation_path = list(_escalation_path) if _escalation_path else []
+        escalation_path.append(depth)
+
+        dr = await self.delegate(token_data, depth=depth)
+        # Convert DelegationResult back to raw dict for _merge_results
+        agent_results = {
+            name: outcome.result
+            for name, outcome in dr.agent_outcomes.items()
+        }
         merged = self._merge_results(agent_results, token_data)
 
         # Depth escalation (only from quick)
         if depth == "quick" and merged["unified_score"] >= self.DEEP_ESCALATION:
             self.log_event("decision", f"Escalating to deep (score={merged['unified_score']})")
-            return await self._evaluate_single_token(token_data, depth="deep")
+            return await self._evaluate_single_token(
+                token_data, depth="deep", _escalation_path=escalation_path,
+            )
         elif depth == "quick" and merged["unified_score"] >= self.STANDARD_ESCALATION:
             self.log_event("decision", f"Escalating to standard (score={merged['unified_score']})")
-            return await self._evaluate_single_token(token_data, depth="standard")
+            return await self._evaluate_single_token(
+                token_data, depth="standard", _escalation_path=escalation_path,
+            )
+
+        merged["escalation_path"] = escalation_path
+        merged["delegation_meta"] = {
+            "depth": dr.depth,
+            "timeout_used": dr.timeout_used,
+            "elapsed_ms": dr.elapsed_ms,
+        }
 
         addr = token_data.get("token_address", "unknown")
         self.write_scratchpad(f"eval_{addr}", merged)
 
         return merged
+
 
     def format_scan_result(self, scan_result: Dict) -> str:
         summary = scan_result.get("summary", {})
