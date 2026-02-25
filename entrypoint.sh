@@ -31,6 +31,7 @@ cat > "$CONFIG" << JSONEOF
   "channels": {
     "telegram": {
       "enabled": true,
+      "dmPolicy": "open",
       "botToken": "$TELEGRAM_BOT_TOKEN"
     }
   },
