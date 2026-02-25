@@ -325,6 +325,79 @@ class OrchestratorAgent(BaseAgent):
             },
         }
 
+
+    async def delegate(
+        self,
+        token_data: Dict,
+        depth: str = "quick",
+        agents: Optional[List[str]] = None,
+    ) -> 'DelegationResult':
+        if agents is not None:
+            unknown = set(agents) - set(self._agents.keys())
+            if unknown:
+                raise ValueError(f"Unknown agents: {unknown}")
+
+        timeout = self.DEPTH_TIMEOUTS.get(depth, self.AGENT_TIMEOUT)
+        started_at = time.monotonic()
+
+        agent_params = self._build_agent_params(token_data, depth)
+        if agents is not None:
+            agent_params = {k: v for k, v in agent_params.items() if k in agents}
+
+        agent_timings: Dict[str, float] = {}
+        agent_errors: Dict[str, str] = {}
+
+        async def _run_one(name, params):
+            t0 = time.monotonic()
+            try:
+                result = await asyncio.wait_for(
+                    self._agents[name].run(params),
+                    timeout=timeout,
+                )
+                agent_timings[name] = (time.monotonic() - t0) * 1000
+                return (name, result)
+            except asyncio.TimeoutError:
+                agent_timings[name] = (time.monotonic() - t0) * 1000
+                agent_errors[name] = f"Timed out after {timeout}s"
+                self.log_event("error", f"{name} timed out after {timeout}s")
+                return (name, None)
+            except Exception as e:
+                agent_timings[name] = (time.monotonic() - t0) * 1000
+                agent_errors[name] = str(e)
+                self.log_event("error", f"{name} failed: {str(e)}")
+                return (name, None)
+
+        tasks = [_run_one(name, params) for name, params in agent_params.items()]
+        raw = await asyncio.gather(*tasks)
+        raw_results = dict(raw)
+
+        elapsed_ms = (time.monotonic() - started_at) * 1000
+
+        agent_outcomes = {}
+        for name in agent_params:
+            result = raw_results.get(name)
+            score = None
+            if result is not None:
+                score_key = self.SCORE_KEYS.get(name)
+                if score_key:
+                    score = result.get(score_key)
+            agent_outcomes[name] = AgentOutcome(
+                agent_name=name,
+                score=score,
+                result=result,
+                elapsed_ms=agent_timings.get(name, 0.0),
+                error=agent_errors.get(name),
+            )
+
+        return DelegationResult(
+            agent_outcomes=agent_outcomes,
+            depth=depth,
+            timeout_used=timeout,
+            started_at=started_at,
+            elapsed_ms=elapsed_ms,
+            escalation_path=[depth],
+        )
+
     async def _evaluate_single_token(self, token_data: Dict, depth: str = "quick") -> Dict:
         self.log_event("action", f"Evaluating {token_data.get('token_address', '?')} at depth={depth}")
 
