@@ -23,6 +23,8 @@ services:
       - TELEGRAM_BOT_TOKEN=<SET_ON_DEPLOY>
       - MINIMAX_API_KEY=<SET_ON_DEPLOY>
       - BLOCKRUN_WALLET_KEY=<SET_ON_DEPLOY>
+      - BANKR_API_KEY=<SET_ON_DEPLOY>
+      - DISCORD_BOT_TOKEN=<SET_ON_DEPLOY>
     params:
       storage:
         data:
