@@ -2,15 +2,15 @@ FROM node:22-slim
 
 LABEL maintainer="Ogie @ SolCex Exchange"
 LABEL description="Buzz BD Agent — Autonomous AI Business Development on Akash Network"
-LABEL version="5.3.2"
-LABEL openclaw.version="2026.2.23"
+LABEL version="6.0.4"
+LABEL openclaw.version="2026.2.25"
 LABEL clawrouter.version="0.9.39"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tini curl ca-certificates git jq \
     && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g openclaw@2026.2.24
+RUN npm install -g openclaw@2026.2.25
 
 RUN mkdir -p /data/.openclaw \
     && mkdir -p /data/workspace/memory \
@@ -20,11 +20,14 @@ RUN mkdir -p /data/.openclaw \
     && mkdir -p /opt/buzz-config \
     && mkdir -p /opt/buzz-clawrouter
 
-RUN mkdir -p /tmp/clawrouter-install/.openclaw && \
-    HOME=/tmp/clawrouter-install openclaw plugins install @blockrun/clawrouter && \
-    cp -r /tmp/clawrouter-install/.openclaw/extensions/clawrouter /opt/buzz-clawrouter/ && \
-    rm -rf /tmp/clawrouter-install && \
-    echo "[docker] ClawRouter pre-installed"
+# RUN mkdir -p /tmp/clawrouter-install/.openclaw && \
+#     HOME=/tmp/clawrouter-install openclaw plugins install @blockrun/clawrouter && \
+#     cp -r /tmp/clawrouter-install/.openclaw/extensions/clawrouter /opt/buzz-clawrouter/ && \
+#     rm -rf /tmp/clawrouter-install && \
+#     echo "[docker] ClawRouter pre-installed"
+
+# ClawRouter: install at runtime (npm timeout in Docker build)
+RUN mkdir -p /opt/buzz-clawrouter && echo "[docker] ClawRouter will install at runtime on Akash"
 
 COPY skills/ /opt/buzz-skills/
 COPY openclaw.json.template /opt/buzz-config/openclaw.json.template
