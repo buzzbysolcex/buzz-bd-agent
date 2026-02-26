@@ -1,21 +1,16 @@
 # 🐝 Buzz BD Agent — Autonomous Token Discovery & Listing for SolCex Exchange
 
-> The first AI Business Development agent operating autonomously 24/7 for a centralized exchange, powered by MiniMax M2.5 on decentralized compute.
+The first AI Business Development agent operating autonomously 24/7 for a centralized exchange, powered by MiniMax M2.5 on decentralized compute.
 
-[![ERC-8004](https://img.shields.io/badge/ERC--8004-Verified-blue)](https://8004scan.io)
-[![Akash](https://img.shields.io/badge/Akash-Deployed-red)](https://akash.network)
-[![OpenClaw](https://img.shields.io/badge/OpenClaw-2026.2.24-green)](https://openclaw.com)
-[![Docker](https://img.shields.io/badge/Docker-v6.0.2-blue)](https://ghcr.io/buzzbysolcex/buzz-bd-agent)
-[![npm](https://img.shields.io/badge/npm-plugin--solcex--bd-red)](https://npmjs.com/package/@buzzbd/plugin-solcex-bd)
-[![Tests](https://img.shields.io/badge/Tests-602%20Passing-brightgreen)](#)
+![ERC-8004](https://img.shields.io/badge/ERC--8004-Verified-blue) ![Akash](https://img.shields.io/badge/Akash-Deployed-green) ![OpenClaw](https://img.shields.io/badge/OpenClaw-2026.2.24-purple) ![Docker](https://img.shields.io/badge/Docker-ghcr.io-blue) ![npm](https://img.shields.io/badge/npm-published-red) ![Tests](https://img.shields.io/badge/Tests-602%20passing-brightgreen)
 
 ## What Buzz Does
 
-Buzz scans 30+ tokens per session across multiple DEX data sources, runs them through a **4-layer intelligence pipeline**, scores them on a **100-point system**, and delivers qualified listing prospects to human BD leads via Telegram — all autonomously, 4x daily.
+Buzz scans 30+ tokens per session across multiple DEX data sources, runs them through a 4-layer intelligence pipeline, scores them on a 100-point system, and delivers qualified listing prospects to human BD leads via Telegram — all autonomously, 4x daily.
 
-**NEW in v6.0.2:** Buzz can now **deploy tokens on Base chain** via the Bankr Partner API directly from Telegram, with automatic fee collection (75.05% creator share on all swaps).
+**NEW in v6.0.4:** ATV Web3 Identity API fixed and operational with 3x daily batch verification. Bankr skill installed for token deployment on Base chain. 48 Telegram commands registered. Full pipeline tested with live tokens.
 
-> **SolCex Listing Package:** 15K USDT total (5K fee + 10K liquidity) with professional market making ($450K+ depth), 450+ whale trader airdrop, AMA, and 10-14 day fast-track to go-live.
+**SolCex Listing Package:** 15K USDT total (5K fee + 10K liquidity) with professional market making ($450K+ depth), 450+ whale trader airdrop, AMA, and 10-14 day fast-track to go-live.
 
 ---
 
@@ -42,12 +37,13 @@ Buzz scans 30+ tokens per session across multiple DEX data sources, runs them th
 │  └────────────────────────┬──────────────────────────────────┘  │
 │                           ▼                                      │
 │  ┌───────────────────────────────────────────────────────────┐  │
-│  │              BUZZ BD AGENT v6.0.2                          │  │
+│  │              BUZZ BD AGENT v6.0.4                          │  │
 │  │                                                             │  │
 │  │  LLM: MiniMax M2.5 + ClawRouter/BlockRun x402 fallback    │  │
 │  │  Skills: ClawRouter (LLM routing) + QuillShield (safety)   │  │
-│  │  Intel: 16/16 Sources | Crons: 36/36 | 36 TG Commands     │  │
+│  │  Intel: 15/16 Sources | Crons: 36/36 | 48 TG Commands     │  │
 │  │  Score: 100-pt System | Forensics: Helius + DexScreener    │  │
+│  │  Identity: ATV Web3 (api.web3identity.com) — 3x daily      │  │
 │  │  Deploy: Bankr Partner API (Base chain token deployment)   │  │
 │  │  Cred: Clawbal On-Chain | ERC-8004 Verified                │  │
 │  │  v6.0: 7 Sub-Agents | 602 Tests Passing                   │  │
@@ -64,11 +60,53 @@ Buzz scans 30+ tokens per session across multiple DEX data sources, runs them th
 
 ---
 
-## v6.0.2 — What's New (Sprint Day 2, Feb 26 2026)
+## v6.0.4 — What's New (Sprint Day 2, Feb 26 2026)
 
-### 🚀 Bankr Partner API — Token Deployment from Telegram
+### 🔧 ATV Web3 Identity — FIXED & Operational
 
-Buzz can now deploy ERC-20 tokens on Base chain with a single Telegram command:
+Previous endpoints (api.atv.ai, api.atv.app, etc.) were all dead. Discovered correct endpoint and integrated:
+
+- **Base URL:** `https://api.web3identity.com`
+- **Endpoint:** `GET /api/ens/batch-resolve`
+- **Free tier:** 100 addresses/day, x402 auto-pay for overflow
+- **Batch mode:** Up to 100 addresses per request
+- **3x daily verification passes:** 09:00, 15:00, 22:00 WIB
+
+Verified working: vitalik.eth returns full identity (ENS + Twitter + GitHub).
+
+**Chain limitation:** ATV resolves ETH addresses only. Solana deployers use Helius forensics and are tagged UNVERIFIED-IDENTITY (not auto-COMMUNITY).
+
+### 🏦 Bankr Skill — Installed & Authenticated
+
+Full bankr skill installed from `github.com/BankrBot/openclaw-skills`:
+- Wallet: `0xfa04c7d627ba707a1ad17e72e094b45150665593`
+- Referral: VFJ23TVS-BNKR
+- Rate limit: 100 messages/day
+- Token deployment on Base via `/launch` command
+
+### 📡 48 Telegram Commands (up from 47)
+
+New commands added:
+- **Bankr Deploy (3):** `/launch`, `/deploys`, `/deploy_stats`
+- **Twitter/X (3):** `/tweet`, `/thread`, `/engage`
+
+### 📊 Pipeline Discipline Rules (Learned from Live Testing)
+
+1. LP verification fails = 2 attempts max → flag HIGH RISK, 48h WATCH
+2. PumpFun migrations go to Meteora DLMM pools (not just Raydium/PumpSwap)
+3. GeckoTerminal returns better pair data than DexScreener for pre-DEX tokens
+4. Opportunity cost: don't chase one token endlessly, next scan has fresh prospects
+
+### 🔍 First Pipeline Test Results
+
+- **$NIRE** — Score 78 ✅ QUALIFIED, WATCH 48h (LP unverified, Meteora DLMM)
+- **$BABYCLAW** — Score 51-56 👀 WATCH (ATV confirmed no identity → COMMUNITY)
+
+---
+
+## 🚀 Bankr Partner API — Token Deployment from Telegram
+
+Buzz can deploy ERC-20 tokens on Base chain with a single Telegram command:
 
 ```
 /launch SolCexGold SGOLD "Gold-backed token by SolCex Exchange"
@@ -95,35 +133,7 @@ Buzz can now deploy ERC-20 tokens on Base chain with a single Telegram command:
 - **Internal:** SolCex captures 75.05% of swap fees
 - **Client:** Client gets creator share, SolCex keeps 18.05% partner share
 
-**First deploy:** BuzzTestCoin (BZTC) — [View on BaseScan](https://basescan.org/token/0x21703579fd104ccd463c47b68e5673bf1b2efba3)
-
-### 🔧 Infrastructure Fixes
-
-- **DexScreener API:** Switched from website scraping to official REST API (no more Cloudflare blocks)
-- **Firecrawl:** Fixed endpoint URL — now working for website research
-- **Cron env passthrough:** `.env` file auto-generated on boot for cron sub-agent access
-- **Model stability:** Locked to MiniMax M2.5 via env var — no more fallback loops to nvidia/gpt-oss-120b
-- **Perplexity disabled:** Kill switch prevents crash loops from exhausted OpenRouter credits
-
-### 📊 Scan Filter Upgrade
-
-Tokens now tagged as **TEAM** or **COMMUNITY**:
-- **TEAM TOKEN (+10 pts):** Identifiable team member, website with team page, active Telegram admin → Priority for listing outreach
-- **COMMUNITY TOKEN (-10 pts):** No identifiable lead → Brand tweets only
-
----
-
-## v6.0 Sub-Agent Architecture (602 Tests Passing)
-
-| Agent | Purpose | Tests |
-|-------|---------|-------|
-| TokenAgent | DexScreener scanning, filtering | ✅ |
-| SafetyAgent | RugCheck, contract verification | ✅ |
-| LiquidityAgent | Helius, DFlow MCP integration | ✅ |
-| SocialAgent | Grok/xAI Twitter, ATV Web3 Identity, Serper | ✅ |
-| DeployAgent | Deployer cross-chain intelligence | ✅ |
-| ScoringAgent | 100-point composite scoring | ✅ |
-| Orchestrator | Parallel execution coordinator | ✅ |
+First deploy: BuzzTestCoin (BZTC) — [View on BaseScan](https://basescan.org)
 
 ---
 
@@ -139,46 +149,49 @@ Tokens now tagged as **TEAM** or **COMMUNITY**:
 ╠══════════════════════════════════════════════════════════════════╣
 ║  LAYER 2 — FILTER (Safety & Liquidity Verification)             ║
 ║  RugCheck + Helius Forensics + DFlow MCP                        ║
+║  Instant Kills: Mint not revoked, LP unprotected, mixer-funded   ║
 ║  → Kill bad tokens fast, 10-20 survive                          ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║                           ↓ RESEARCH                             ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║  LAYER 3 — RESEARCH (Deep Intelligence)                          ║
-║  Firecrawl + ATV Identity + Grok Sentiment + Serper              ║
+║  Firecrawl + ATV Web3 Identity + Grok Sentiment + Serper         ║
+║  TEAM/COMMUNITY tagging based on deployer identity               ║
 ║  → Full research dossier per token                               ║
 ╠══════════════════════════════════════════════════════════════════╣
-║                           ↓ SCORE                                ║
+║                           ↓ SCORE & ROUTE                        ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║  LAYER 4 — SCORE & ACT (100-Point System)                        ║
 ║  85-100 🔥 HOT    → Immediate outreach + full forensics          ║
 ║  70-84  ✅ QUAL   → Priority queue + forensics                   ║
 ║  50-69  👀 WATCH  → Monitor 48h, rescan                          ║
 ║  0-49   ❌ SKIP   → No action                                    ║
+║  Route: Path A (SolCex listing) or Path B (Bankr deploy)         ║
 ╚══════════════════════════════════════════════════════════════════╝
 ```
 
 ---
 
-## Intelligence Sources (16 Active)
+## Intelligence Sources (15/16 Active)
 
 | # | Source | Layer | Status | Data |
 |---|--------|-------|--------|------|
-| 1 | DexScreener API | Discovery | ✅ Working | Token profiles, pairs, boosts, trending |
-| 2 | GeckoTerminal | Discovery | ✅ Working | Market data, volume, liquidity |
-| 3 | AIXBT | Discovery | ✅ Working | Momentum scoring, catalysts |
-| 4 | RugCheck | Filter | ✅ Working | Contract safety, honeypot detection |
-| 5 | Helius | Filter | ✅ Working | Solana wallet forensics, deployer history |
-| 6 | Allium | Filter | ❌ 404 | 16-chain wallet PnL (endpoint changed) |
-| 7 | leak.me | Research | ✅ Working | KOL/smart money tracking |
-| 8 | Firecrawl | Research | ✅ Working | Website scraping for team/roadmap |
-| 9 | Grok x_search | Research | ✅ Working | Real-time X/Twitter sentiment |
-| 10 | Serper | Research | ✅ Working | Web search verification |
-| 11 | ATV Web3 Identity | Research | ✅ Working | ENS, Farcaster/Lens, Gitcoin Passport |
-| 12 | DFlow MCP | Filter | ✅ Working | DEX swap routes, liquidity depth |
-| 13 | Moltbook | Supporting | ✅ Working | Agent social network |
-| 14 | Colosseum | Supporting | ✅ Working | Hackathon community |
-| 15 | OpenClaw Sub-agents | Supporting | ✅ Working | Delegated intelligence via sub-agents |
-| 16 | Bankr Partner API | Deploy | ✅ Working | Token deployment on Base chain |
+| 1 | **DexScreener API** | Discovery | ✅ Working | Token profiles, pairs, boosts, trending |
+| 2 | **GeckoTerminal** | Discovery | ✅ Working | Market data, volume, liquidity |
+| 3 | **AIXBT** | Discovery | ✅ Working | Momentum scoring, catalysts |
+| 4 | **DexScreener Boosts** | Discovery | ✅ Working | Promoted tokens |
+| 5 | **RugCheck** | Filter | ✅ Working | Contract safety, honeypot detection |
+| 6 | **Helius** | Filter | ✅ Working | Solana wallet forensics, deployer history, LP tracing |
+| 7 | **Allium** | Filter | ❌ 404 | 16-chain wallet PnL (endpoint changed) |
+| 8 | **DFlow MCP** | Filter | ✅ Working | DEX swap routes, liquidity depth |
+| 9 | **Firecrawl** | Research | ✅ Working | Website scraping for team/roadmap |
+| 10 | **ATV Web3 Identity** | Research | ✅ FIXED | ENS, Twitter, GitHub, Discord (ETH addresses only) |
+| 11 | **Grok x_search** | Research | ✅ Working | Real-time X/Twitter sentiment |
+| 12 | **Serper** | Research | ✅ Working | Web search verification |
+| 13 | **X API v2** | Amplification | ✅ NEW | Tweet/thread drafting |
+| 14 | **Bankr Partner API** | Deploy | ✅ NEW | Token deployment on Base |
+| 15 | **Moltbook** | Supporting | ✅ Working | Agent social network |
+| 16 | **OpenClaw Sub-agents** | Supporting | ✅ Working | Delegated intelligence |
 
 ---
 
@@ -229,7 +242,7 @@ Monthly Target (Conservative):
 |------|-------|---------|
 | anet (fee recipient) | Base (EVM) | 0x2Dc03124091104E7798C0273D96FC5ED65F05aA9 |
 | Deploy wallet | Base (EVM) | 0xfa04c7d627ba707a1ad17e72e094b45150665593 |
-| ClawRouter (x402) | Base (EVM) | 0x56f76494a60eBb52325630e69F7d8C0635E5C980 |
+| ClawRouter | Base (EVM) | 0x56f76494a60eBb52325630e69F7d8C0635E5C980 |
 | Buzz Base | Base (EVM) | 0x4b362B7db6904A72180A37307191fdDc4eD282Ab |
 | BlockRun x402 | Base (EVM) | 0x6ea362d34238089Ec3226A256F25CbD14f35493b |
 | Lobster | Solana | 5iC7pGyzqpXD2xTK4Ww7zKRDVo9cceyHNeKBTiemo5Jp |
@@ -239,18 +252,19 @@ Monthly Target (Conservative):
 ## Deployment Stack
 
 | Component | Technology |
-|-----------|-----------|
+|-----------|------------|
 | Compute | Akash Network — 2 CPU, 4GB RAM, 10GB persistent storage (~$5/mo) |
-| Container | Docker on ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.2 |
+| Container | Docker on ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.4 |
 | Base Image | node:22-slim + tini PID 1 |
 | Runtime | OpenClaw v2026.2.24 |
 | Primary LLM | MiniMax M2.5 (229B params) |
 | Smart Fallback | ClawRouter + BlockRun x402 (30+ models via micropayments) |
 | Token Deploy | Bankr Partner API (Base chain, zero gas cost) |
+| Identity Verify | ATV Web3 Identity (api.web3identity.com, 3x daily batch) |
 | LLM Cost | ~$41/mo (down from $1,320/day — 99.9% reduction) |
 | Compute Cost | ~$5/mo |
 | Total Cost | ~$46/mo for 24/7 autonomous BD + token deployment agent |
-| Bot | @BuzzBySolCex_bot (Telegram, 36 registered commands) |
+| Bot | @BuzzBySolCex_bot (Telegram, 48 registered commands) |
 | Crons | 36 autonomous scheduled jobs |
 | Tests | 602 passing |
 
@@ -268,7 +282,11 @@ Monthly Target (Conservative):
 │   └── drafts/                 ← Draft messages for review
 ├── logs/                       ← Operation logs
 ├── workspace/
-│   ├── memory/                 ← Cron schedules, agent memory
+│   ├── memory/                 ← Cron schedules, agent memory, rules
+│   │   ├── cron-schedule.json  ← 36 jobs backup
+│   │   ├── web3-identity-api.md ← ATV endpoint config
+│   │   ├── pipeline-rules.md   ← Pipeline discipline rules
+│   │   └── solana-deployer-verification.md
 │   ├── skills/                 ← Baked skills (synced from image)
 │   └── .env                    ← Env passthrough for cron jobs
 └── .openclaw/
@@ -277,24 +295,25 @@ Monthly Target (Conservative):
 
 ---
 
-## Telegram Commands (36)
+## Telegram Commands (48)
 
 | Category | Commands |
 |----------|----------|
-| Scanning (8) | scan, score, verify, trending, boosts, aixbt, rugcheck, forensics |
-| Pipeline (7) | pipeline, report, weekly, digest, alpha, warmup, followup |
-| Wallet/Intel (5) | wallet, whales, dflow, bankr, budget |
-| Outreach (5) | outreach, approve, reject, breakup, dealsheet |
+| System (8) | help, status, health, version, config, memory, crons, experience |
+| Scanning (8) | scan, score, search, verify, trending, boosts, aixbt, rugcheck, socials |
+| Pipeline (7) | pipeline, report, weekly, digest, alpha, listings, competitors |
+| Wallet/Intel (5) | wallet, forensics, whales, dflow, budget |
+| Outreach (7) | outreach, approve, reject, warmup, followup, breakup, dealsheet, postlisting |
 | Bankr Deploy (3) | launch, deploys, deploy_stats |
-| System (4) | health, sprint, prayer, postlisting |
-| Emergency (4) | sos, stop, resume, crons |
+| Twitter/X (3) | tweet, thread, engage |
+| Personal (2) | prayer, sprint |
+| Emergency (5) | sos, stop, stop_email, stop_scan, resume |
 
 ---
 
 ## Scoring Engine (100-Point System)
 
 ### Instant Kill (Score = 0)
-
 - Mint authority NOT revoked
 - LP not locked AND not burned
 - Deployer funded from mixer
@@ -318,11 +337,13 @@ Monthly Target (Conservative):
 
 | Flag | Points |
 |------|--------|
-| COMMUNITY TOKEN (no team) | -10 |
+| COMMUNITY TOKEN (confirmed no team) | -10 |
+| UNVERIFIED-IDENTITY (Solana/ATV gap) | -10 |
 | Freeze authority active | -15 |
 | Top 10 holders >50% | -15 |
 | CEX already listed | -15 |
 | Token age <24h | -10 |
+| LP UNVERIFIED (API failure) | -15 |
 
 ---
 
@@ -335,9 +356,8 @@ Monthly Target (Conservative):
 | PARTNERSHIPS | 10% | Market makers, launchpads, agents refer deals |
 
 ### Pipeline Stages
-
 ```
-DISCOVERED → SCORED → QUALIFIED → WARM_UP → OUTREACH_SENT → 
+DISCOVERED → SCORED → QUALIFIED → WARM_UP → OUTREACH_SENT →
 FOLLOW_UP_1 → FOLLOW_UP_2 → RESPONDED → NEGOTIATING → LISTED → POST_LISTING
 ```
 
@@ -348,14 +368,14 @@ FOLLOW_UP_1 → FOLLOW_UP_2 → RESPONDED → NEGOTIATING → LISTED → POST_LI
 ### Tier 1 — Active Integrations
 
 | Partner | Integration |
-|---------|------------|
+|---------|-------------|
 | Bankr / @bankrbot | Token launch partner API — 75.05% creator / 18.05% partner fee split |
 | ClawRouter / @1bcmax | Smart LLM routing + BlockRun x402 (30+ models) |
-| ATV Web3 Identity / Gary Palmer | ENS + deployer identity verification |
-| Helius | Solana wallet forensics |
+| ATV Web3 Identity / Gary Palmer | ENS + deployer identity verification (api.web3identity.com) |
+| Helius | Solana wallet forensics + LP tracing |
 | MiniMax | Primary LLM provider |
 | DexScreener | Token discovery API |
-| GeckoTerminal | Market data |
+| GeckoTerminal | Market data (better pair data for pre-DEX tokens) |
 | Firecrawl | Website intelligence |
 
 ### Tier 2 — Active Relationships
@@ -367,6 +387,8 @@ FOLLOW_UP_1 → FOLLOW_UP_2 → RESPONDED → NEGOTIATING → LISTED → POST_LI
 | OpenClaw | ClawHub marketplace — Buzz-as-a-Service |
 | Virtuals Protocol | ACP registered — 18K+ agent network |
 | elizaOS | PR #263 + npm published |
+| Vitto Rivabella (EF dAI) | ERC-8004 article collaboration |
+| AgentProof / Builder Benv1 | Exploring — auto-indexes Buzz on ERC-8004 |
 | Hummingbot | Market-making integration (planned Week 3-4) |
 
 ---
@@ -385,8 +407,9 @@ FOLLOW_UP_1 → FOLLOW_UP_2 → RESPONDED → NEGOTIATING → LISTED → POST_LI
 ## Version History
 
 | Version | Date | Highlights |
-|---------|------|-----------|
-| **v6.0.2** | **Feb 26, 2026** | **Bankr Partner API live, token deployment from Telegram, DexScreener API fix, persistent storage structure, cron env passthrough, Perplexity kill switch, scan filter upgrade (TEAM/COMMUNITY)** |
+|---------|------|------------|
+| **v6.0.4** | **Feb 26, 2026** | **ATV Web3 Identity FIXED (api.web3identity.com). 48 Telegram commands. 3x daily ATV batch verification. Bankr skill installed. First pipeline test ($NIRE 78pts, $BABYCLAW 51pts). Pipeline discipline rules. Deployer identity verification rules. Meteora DLMM detection. WIB timezone + Ramadan crons.** |
+| v6.0.2 | Feb 26, 2026 | Bankr Partner API live, DexScreener API fix, persistent storage, cron env passthrough |
 | v6.0.1a | Feb 25, 2026 | OpenClaw 2026.2.24, ClawRouter/BlockRun x402, 47 commands, 602 tests |
 | v6.0-alpha | Feb 24, 2026 | 602 tests, 7 sub-agents, dmPolicy debugging |
 | v5.3.8-hotfix6 | Feb 22, 2026 | MiniMax anthropic-messages fix, tool calling restored |
@@ -402,10 +425,10 @@ FOLLOW_UP_1 → FOLLOW_UP_2 → RESPONDED → NEGOTIATING → LISTED → POST_LI
 cd ~/buzz-bd-agent
 
 # Build (ALWAYS --no-cache for config/version changes)
-docker build --no-cache -t ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.2 .
+docker build --no-cache -t ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.4 .
 
 # Push to GitHub Container Registry
-docker push ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.2
+docker push ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.4
 
 # Deploy: Paste SDL in Akash Console → Create New Deployment
 # ⚠️ ALWAYS use unique image tags — Akash providers cache by tag name
@@ -418,24 +441,25 @@ docker push ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.2
 
 | Resource | URL |
 |----------|-----|
-| SolCex Exchange | [solcex.io](https://solcex.io) |
-| List with Us | [solcex.cc/list-with-us](https://solcex.cc/list-with-us) |
-| Buzz Twitter | [@BuzzBySolCex](https://x.com/BuzzBySolCex) |
-| SolCex Twitter | [@SolCex_Exchange](https://x.com/SolCex_Exchange) |
-| ERC-8004 Registry | [8004scan.io](https://8004scan.io) |
-| First Token Deploy | [BuzzTestCoin on BaseScan](https://basescan.org/token/0x21703579fd104ccd463c47b68e5673bf1b2efba3) |
+| SolCex Exchange | solcex.io |
+| List with Us | solcex.cc/list-with-us |
+| Buzz Twitter | @BuzzBySolCex |
+| SolCex Twitter | @SolCex_Exchange |
+| ERC-8004 Registry | 8004scan.io |
+| ATV Web3 Identity | api.web3identity.com |
+| First Token Deploy | BuzzTestCoin on BaseScan |
 | Colosseum Entry | Agent #3734 |
-| npm Plugin | [@buzzbd/plugin-solcex-bd](https://npmjs.com/package/@buzzbd/plugin-solcex-bd) |
-| Bankr | [bankr.bot](https://bankr.bot) |
-| ClawRouter | [@1bcmax](https://x.com/1bcmax) |
-| x402 Protocol | [x402.org](https://x402.org) |
+| npm Plugin | @buzzbd/plugin-solcex-bd |
+| Bankr | bankr.bot |
+| ClawRouter | @1bcmax |
+| x402 Protocol | x402.org |
 
 ---
 
 ## Team
 
 | Role | Handle | Responsibility |
-|------|--------|---------------|
+|------|--------|----------------|
 | BD Lead | @hidayahanka1 | Strategy, approvals, manual Twitter, partnerships |
 | Strategy | Claude Opus 4.6 | Documentation, analysis, planning, outreach drafts |
 | Autonomous Agent | Buzz 🐝 | Token scanning, scoring, pipeline management, deployment |
@@ -444,20 +468,23 @@ docker push ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.2
 
 ## Principles
 
-> **Free first, pay for alpha.** — Free intelligence sources before paid  
-> **On-chain track record IS credibility.** — Clawbal, ERC-8004, verifiable  
-> **Inbound > Warm > Cold. Always.** — Build reputation so projects come to us  
-> **The intel is the hook. The relationship is the close.** — Buzz discovers, Ogie closes  
-> **Layer the intelligence. Don't spray and pray.** — 4 layers, every token through all  
-> **Partnership not dependency.** — Distribution channels, not platform locks  
-> **USDC primary.** — Other tokens for utility only  
-> **Deploy from Telegram.** — Token launch is now a single command  
-> **Agent-to-agent = the multiplier.** — Sub-agents extend reach  
-> **Ship from anywhere.** — Docker + Akash + Telegram = deploy from any timezone  
+1. **Free first, pay for alpha.** — Free intelligence sources before paid
+2. **On-chain track record IS credibility.** — Clawbal, ERC-8004, verifiable
+3. **Inbound > Warm > Cold. Always.** — Build reputation so projects come to us
+4. **The intel is the hook. The relationship is the close.** — Buzz discovers, Ogie closes
+5. **Layer the intelligence. Don't spray and pray.** — 4 layers, every token through all
+6. **Partnership not dependency.** — Distribution channels, not platform locks
+7. **USDC primary.** — Other tokens for utility only
+8. **Deploy from Telegram.** — Token launch is now a single command
+9. **Agent-to-agent = the multiplier.** — Sub-agents extend reach
+10. **Ship from anywhere.** — Docker + Akash + Telegram = deploy from any timezone
+11. **Pipeline discipline > chasing one token.** — Flag, WATCH, move on
+12. **Talk is cheap, just go build.** — @1bcmax wisdom
 
 ---
 
-Powered by [OpenClaw](https://openclaw.com) • Deployed on [Akash Network](https://akash.network) • ERC-8004 Verified  
+Powered by [OpenClaw](https://openclaw.ai) • Deployed on [Akash Network](https://akash.network) • ERC-8004 Verified
+
 *"Identity first. Intelligence deep. Commerce autonomous. Cost disciplined. Deploy from Telegram."*
 
 #USDC #AgenticCommerce #Solana #AI #SolCex #BuzzBD #Base #ERC8004 #MachineEconomy #OpenClaw #Bankr
