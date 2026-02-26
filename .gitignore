@@ -58,3 +58,4 @@ temp/
 # OpenClaw config (contains API keys and tokens)
 openclaw.json
 .openclaw/
+workspace-init/.config/buzz/intel-sources.json
