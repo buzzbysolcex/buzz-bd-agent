@@ -1,0 +1,46 @@
+{
+  "version": "5.3.8",
+  "lastUpdated": "",
+  "sourceHitRate": {
+    "dexscreener": {"scans": 0, "qualifiedFound": 0, "hitRate": 0},
+    "aixbt": {"scans": 0, "qualifiedFound": 0, "hitRate": 0},
+    "coingecko": {"scans": 0, "qualifiedFound": 0, "hitRate": 0},
+    "dsBoosts": {"scans": 0, "qualifiedFound": 0, "hitRate": 0},
+    "clawpump": {"scans": 0, "qualifiedFound": 0, "hitRate": 0}
+  },
+  "safetyPatterns": {
+    "rugsCaught": [],
+    "falsePositives": [],
+    "commonRedFlags": [],
+    "rugcheckScans": 0
+  },
+  "scoringAccuracy": {
+    "scored70Plus": 0,
+    "outreachSent": 0,
+    "responses": 0,
+    "listings": 0,
+    "conversionRate": 0
+  },
+  "outreachPatterns": {
+    "dmResponseRate": 0,
+    "emailResponseRate": 0,
+    "warmUpConversion": 0,
+    "bestHookType": ""
+  },
+  "pipelineVelocity": {
+    "avgDiscoveryToOutreach": 0,
+    "avgOutreachToResponse": 0,
+    "bottleneck": "no_data_yet"
+  },
+  "walletForensics": {
+    "serialCreators": [],
+    "verifiedTeams": [],
+    "suspiciousPatterns": []
+  },
+  "bankrDeploys": {
+    "simulations": 0,
+    "liveDeploys": 0,
+    "feeRevenue": 0
+  },
+  "experienceLearnings": []
+}

@@ -1,0 +1,16 @@
+skills:
+  token-scanning:
+    description: Scan and score Solana/ETH/BSC tokens with 25 on-chain safety checks, liquidity analysis, and holder distribution. Returns 0-100 score with detailed breakdown.
+    handler: placeholder
+    price: $0.10
+  listing-evaluation:
+    description: Full CEX listing readiness evaluation. RugCheck + deployer forensics + community sentiment + BD readiness assessment. Pre-CEX tokens only.
+    handler: placeholder
+    price: $0.25
+  alpha-report:
+    description: Weekly alpha report on top trending pre-CEX tokens across Solana, Ethereum, and BSC. Includes scores, narratives, and timing analysis.
+    handler: placeholder
+    price: $0.50
+  wallet-forensics:
+    description: Free deployer wallet analysis. Check for serial rug deployers, mixer funding, and suspicious patterns via Helius + Allium.
+    handler: placeholder

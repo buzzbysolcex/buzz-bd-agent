@@ -1,0 +1,14 @@
+dataDir: ~/.agent-orchestrator
+worktreeDir: ~/.worktrees
+port: 3000
+defaults:
+  runtime: tmux
+  agent: claude-code
+  workspace: worktree
+  notifiers:
+    - desktop
+projects:
+  buzz-bd-agent:
+    repo: buzzbysolcex/buzz-bd-agent
+    path: /Users/hidayahanka/buzz-bd-agent
+    defaultBranch: main

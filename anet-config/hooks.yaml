@@ -1,0 +1,15 @@
+hooks:
+  pre-message:
+    - action: rate-limit
+    - action: reputation-check
+      config:
+        min-reputation: 30
+  post-interaction:
+    - action: log
+      config:
+        file: ~/.anet/interactions.jsonl
+  pre-sign:
+    - action: budget-check
+    - action: domain-whitelist
+  post-payment:
+    - action: log

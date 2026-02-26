@@ -1,0 +1,26 @@
+agent:
+  name: buzz-solcex
+  port: 3000
+network: mainnet
+signing:
+  policy: prompt
+  domain-whitelist: []
+  max-value-auto: 0.1
+social:
+  min-friend-rep: 50
+  auto-accept-friends: false
+  default-room-min-rep: 30
+messaging:
+  webhook: ''
+  rate-limit: 10
+  text-webhook: ''
+  text-script: ''
+payments:
+  max-per-tx: 1
+  max-per-session: 10
+  currency: USDC
+reputation:
+  auto-feedback: true
+discovery:
+  sync-interval: 3600
+  auto-sync: true
