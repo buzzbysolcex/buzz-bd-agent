@@ -243,4 +243,8 @@ echo "[entrypoint] └───────────────────�
 echo "[entrypoint] Starting gateway..."
 echo "[entrypoint] dmPolicy patch scheduled (20s background)"
 echo "[entrypoint] $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+# ── Twitter Bot v2.1 — 4-Layer Intelligence (PID 2) ──
+echo "[entrypoint] 🐝 Starting Twitter Bot v2.1..."
+nohup node /opt/buzz-scripts/twitter-bot.js >> /data/workspace/twitter-bot.log 2>&1 &
+echo "[entrypoint] Twitter Bot PID: $!"
 exec openclaw gateway --port 18789 --allow-unconfigured
