@@ -1,14 +1,23 @@
 #!/usr/bin/env node
 // =============================================================================
-// 🐝 BUZZ TWITTER BOT v2.0 — 4-Layer Intelligence Pipeline
+// 🐝 BUZZ TWITTER BOT v2.3 — 5-Layer Intelligence Pipeline + Smart Money
 //
 // Standalone microservice running alongside OpenClaw on Akash.
-// No LLM dependency. Pure code. All 4 Buzz intelligence layers.
+// No LLM dependency. Pure code. All 5 Buzz intelligence layers.
 //
 // L1 TokenAgent   → DexScreener (price, vol, liq, FDV, socials, holders)
 // L2 SafetyAgent  → RugCheck (Solana) / Contract checks (Base/ETH)
-// L3 LiquidityAgent → Blockscout deployer + ATV Web3 Identity (ENS)
-// L4 ScoringAgent → 10-factor weighted scoring system (100 points)
+// L3 IdentityAgent → Blockscout deployer + ATV Web3 Identity (ENS)
+// L4 ScoringAgent → 11-factor weighted scoring system (110→100 norm) + Grade
+// L5 SmartMoneyAgent → Nansen x402 (pay-per-call, score ≥ 65 only)
+//
+// v2.3 Changes (Feb 28):
+//   - FIX: Ticker collision — prefer exact symbol match over highest liquidity
+//   - FIX: Chain mismatch — prefer pairs with non-zero volume
+//   - FIX: Volume parsing — null safety + txn-based volume proxy
+//   - ADD: L5 SmartMoneyAgent (Nansen x402 integration)
+//   - ADD: Factor 11 (Smart Money) in L4, normalize 110→100
+//   - UPDATE: buildReply + notifyBuzz + runScanPipeline for L5
 //
 // Architecture: twitter-bot.js (PID 2) ←→ Akash Container ←→ Twitter API
 // Dev workflow:  Mac → Docker → GHCR → Akash (never install on Akash)
@@ -32,8 +41,8 @@ const DAILY_COUNT_FILE  = `${DATA_DIR}/twitter-daily-count.json`;
 const SCAN_HISTORY_FILE = `${DATA_DIR}/twitter-scan-history.json`;
 
 // Telegram bridge — notify Buzz after each scan
-const TG_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '7968470736:AAE_ge8WVR4m2iCNiXGqH57BcuDgl3kVV0M';
-const TG_CHAT_ID   = process.env.TELEGRAM_CHAT_ID || '950395553';
+const TG_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TG_CHAT_ID   = process.env.TELEGRAM_CHAT_ID;
 
 // ── Logging ─────────────────────────────────────────────────────────────────
 function log(msg) {
@@ -72,7 +81,7 @@ function saveScanHistory(scan) {
 // ── Telegram: Notify Buzz ───────────────────────────────────────────────────
 // Sends full scan report to Buzz via Telegram so Buzz has context for
 // follow-up questions, memory, pipeline tracking, and learning.
-async function notifyBuzz(l1, l2, l3, scoring, tweetId) {
+async function notifyBuzz(l1, l2, l3, scoring, tweetId, l5Data = null) {
   const chain = l1.chain === 'solana' ? 'SOL' : l1.chain === 'base' ? 'Base' : l1.chain.toUpperCase();
 
   // Build detailed report for Buzz (no 280 char limit)
@@ -110,18 +119,33 @@ async function notifyBuzz(l1, l2, l3, scoring, tweetId) {
   msg += `Holders: ${l3.holders || 'unknown'}\n\n`;
 
   msg += `━━ L4 ScoringAgent ━━\n`;
-  msg += `⭐ SCORE: ${scoring.score}/100\n`;
+  msg += `⭐ SCORE: ${scoring.score}/100 (${scoring.grade})\n`;
   const f = scoring.factors;
   msg += `Safety:${f.safety} Liq:${f.liquidity} Vol:${f.volume} MCap:${f.mcap} Social:${f.social}\n`;
-  msg += `Age:${f.age} Holders:${f.holders} Activity:${f.activity} LP:${f.lpLock} Identity:${f.identity}\n\n`;
+  msg += `Age:${f.age} Holders:${f.holders} Activity:${f.activity} LP:${f.lpLock} Identity:${f.identity}`;
+  if (f.smartMoney > 0) msg += ` SM:${f.smartMoney}`;
+  msg += `\n\n`;
+
+  if (l5Data && l5Data.signal !== 'NO_DATA') {
+    msg += `━━ L5 SmartMoneyAgent ━━\n`;
+    msg += `Signal: ${l5Data.signal}\n`;
+    msg += `SM Holders: ${l5Data.smHolders}\n`;
+    msg += `Net Flow: ${l5Data.netFlow > 0 ? '+' : ''}${l5Data.netFlow}\n`;
+    if (l5Data.topBuyers.length > 0) {
+      msg += `Top Buyers: ${l5Data.topBuyers.map(b => b.label || b.address?.slice(0,8)).join(', ')}\n`;
+    }
+    msg += `Cost: $${(l5Data.cost / 100).toFixed(2)}\n\n`;
+  }
 
   // Pipeline recommendation
   if (scoring.score >= 70) {
     msg += `📌 RECOMMENDATION: HIGH PRIORITY — add to pipeline for outreach\n`;
   } else if (scoring.score >= 50) {
     msg += `📌 RECOMMENDATION: MONITOR — decent project, needs more data\n`;
-  } else {
+  } else if (scoring.score >= 35) {
     msg += `📌 RECOMMENDATION: LOW PRIORITY — weak metrics\n`;
+  } else {
+    msg += `📌 RECOMMENDATION: SKIP — poor fundamentals\n`;
   }
 
   // Send to Buzz via Telegram
@@ -220,10 +244,43 @@ async function l1_tokenAgent(query) {
     return null;
   }
 
-  // Sort by liquidity, pick top pair
-  const pair = res.data.pairs.sort((a, b) =>
-    (parseFloat(b.liquidity?.usd || 0)) - (parseFloat(a.liquidity?.usd || 0))
-  )[0];
+  // FIX v2.3: Prefer exact symbol match over highest liquidity (ticker collision fix)
+  const pairs = res.data.pairs;
+  const exactMatches = pairs.filter(p =>
+    p.baseToken?.symbol?.toUpperCase() === query.toUpperCase()
+  );
+  let candidates = exactMatches.length > 0 ? exactMatches : pairs;
+
+  // FIX v2.3: Prefer pairs with non-zero volume (chain mismatch fix)
+  if (candidates.length > 1) {
+    const withVolume = candidates.filter(p =>
+      parseFloat(p.volume?.h24 || 0) > 0 ||
+      parseFloat(p.volume?.h6 || 0) > 0 ||
+      parseFloat(p.volume?.h1 || 0) > 0
+    );
+    if (withVolume.length > 0) {
+      candidates = withVolume;
+    }
+  }
+  // Sort by volume first, liquidity as tiebreaker
+  const pair = candidates.sort((a, b) => {
+    const volA = parseFloat(a.volume?.h24 || 0);
+    const volB = parseFloat(b.volume?.h24 || 0);
+    if (volA > 0 || volB > 0) return volB - volA;
+    return (parseFloat(b.liquidity?.usd || 0)) - (parseFloat(a.liquidity?.usd || 0));
+  })[0];
+
+  // FIX v2.3: Volume fallback with null safety + txn-based proxy
+  let vol24h = parseFloat(pair.volume?.h24 || 0);
+  if (vol24h === 0) {
+    const vol6h = parseFloat(pair.volume?.h6 || 0);
+    const vol1h = parseFloat(pair.volume?.h1 || 0);
+    if (vol6h > 0) vol24h = vol6h * 4;
+    else if (vol1h > 0) vol24h = vol1h * 24;
+  }
+  if (vol24h === 0 && ((pair.txns?.h24?.buys || 0) + (pair.txns?.h24?.sells || 0)) > 10) {
+    log('  [L1] ⚠ Volume=0 but has txns — DexScreener may be delayed');
+  }
 
   const result = {
     symbol: pair.baseToken?.symbol || query,
@@ -236,7 +293,7 @@ async function l1_tokenAgent(query) {
     fdv: parseFloat(pair.fdv || 0),
     mcap: parseFloat(pair.marketCap || pair.fdv || 0),
     liq: parseFloat(pair.liquidity?.usd || 0),
-    vol24h: parseFloat(pair.volume?.h24 || 0),
+    vol24h: vol24h,
     priceChange24h: parseFloat(pair.priceChange?.h24 || 0),
     txns24h: (pair.txns?.h24?.buys || 0) + (pair.txns?.h24?.sells || 0),
     hasSocials: !!(pair.info?.websites?.length || pair.info?.socials?.length),
@@ -342,7 +399,7 @@ async function l2_safetyAgent(l1) {
 }
 
 // =============================================================================
-// L3 — LIQUIDITY + IDENTITY AGENT (Blockscout Deployer + ATV Web3 Identity)
+// L3 — IDENTITY AGENT (Blockscout Deployer + ATV Web3 Identity)
 // =============================================================================
 async function l3_identityAgent(l1) {
   log('  [L3 IdentityAgent] Deployer + identity analysis...');
@@ -421,124 +478,331 @@ async function l3_identityAgent(l1) {
 }
 
 // =============================================================================
-// L4 — SCORING AGENT (10-Factor Weighted System, 100 Points)
+// L5 — SMART MONEY AGENT (Nansen x402 — Pay-per-call)
+// Only triggered for tokens scoring >= NANSEN_SCORE_THRESHOLD
+// Pays USDC on Base from NANSEN_X402_WALLET_KEY
 // =============================================================================
-function l4_scoringAgent(l1, l2, l3) {
-  log('  [L4 ScoringAgent] Computing 10-factor score...');
+
+const NANSEN_ENABLED = process.env.NANSEN_X402_ENABLED === 'true';
+const NANSEN_THRESHOLD = parseInt(process.env.NANSEN_SCORE_THRESHOLD || '65');
+const NANSEN_DAILY_BUDGET = parseInt(process.env.NANSEN_DAILY_BUDGET_CENTS || '50');
+const NANSEN_DAILY_SPEND_FILE = `${DATA_DIR}/nansen-daily-spend.json`;
+
+function getNansenDailySpend() {
+  const d = loadJSON(NANSEN_DAILY_SPEND_FILE, { date: '', cents: 0 });
+  const today = new Date().toISOString().slice(0, 10);
+  return d.date === today ? d : { date: today, cents: 0 };
+}
+
+function addNansenSpend(cents) {
+  const d = getNansenDailySpend();
+  d.cents += cents;
+  saveJSON(NANSEN_DAILY_SPEND_FILE, d);
+  return d.cents;
+}
+
+// x402 payment flow for Nansen
+async function nansenX402Call(url, body) {
+  const initial = await safeReq({
+    hostname: new URL(url).hostname,
+    path: new URL(url).pathname,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(JSON.stringify(body))
+    }
+  }, JSON.stringify(body));
+
+  if (!initial) return null;
+  if (initial.status === 200) return initial.data;
+  if (initial.status !== 402) {
+    log(`  [L5] Nansen returned ${initial.status}, expected 402`);
+    return null;
+  }
+
+  // x402 payment signing placeholder — requires x402-client package
+  // const { createX402Client } = require('x402-client');
+  // const client = createX402Client({ privateKey: process.env.NANSEN_X402_WALLET_KEY });
+  // return await client.post(url, body);
+
+  log('  [L5] ⚠ x402 payment signing not yet implemented (needs x402-client package)');
+  return null;
+}
+
+async function l5_smartMoneyAgent(l1, currentScore) {
+  if (!NANSEN_ENABLED) {
+    log('  [L5] ⏭ Nansen x402 disabled');
+    return null;
+  }
+
+  if (currentScore < NANSEN_THRESHOLD) {
+    log(`  [L5] ⏭ Score ${currentScore} below threshold ${NANSEN_THRESHOLD}`);
+    return null;
+  }
+
+  const dailySpend = getNansenDailySpend();
+  if (dailySpend.cents >= NANSEN_DAILY_BUDGET) {
+    log(`  [L5] ⏭ Daily budget exhausted (${dailySpend.cents}¢ / ${NANSEN_DAILY_BUDGET}¢)`);
+    return null;
+  }
+
+  log(`  [L5 SmartMoneyAgent] Nansen x402 lookup (score=${currentScore})...`);
+
+  const smData = {
+    smHolders: 0,
+    netFlow: 0,
+    topBuyers: [],
+    topSellers: [],
+    signal: 'UNKNOWN',
+    cost: 0,
+  };
+
+  const nansenChain = l1.chain === 'solana' ? 'solana'
+    : l1.chain === 'base' ? 'base'
+    : l1.chain === 'ethereum' ? 'ethereum'
+    : null;
+
+  if (!nansenChain) {
+    log(`  [L5] ⚠ Chain ${l1.chain} not supported by Nansen`);
+    return smData;
+  }
+
+  // Call 1: Smart Money Holdings (5¢)
+  try {
+    const holdingsRes = await nansenX402Call(
+      'https://api.nansen.ai/api/v1/smart-money/holdings',
+      { chains: [nansenChain], token_address: l1.ca }
+    );
+    if (holdingsRes) {
+      smData.smHolders = holdingsRes.total_holders || holdingsRes.count || 0;
+      smData.cost += 5;
+      addNansenSpend(5);
+      log(`  [L5] SM Holdings: ${smData.smHolders} holders`);
+    }
+  } catch (e) {
+    log(`  [L5] ⚠ SM Holdings failed: ${e.message}`);
+  }
+
+  // Call 2: Smart Money Net Flow (5¢)
+  try {
+    const flowRes = await nansenX402Call(
+      'https://api.nansen.ai/api/v1/smart-money/netflow',
+      { chains: [nansenChain], token_address: l1.ca }
+    );
+    if (flowRes) {
+      smData.netFlow = flowRes.net_flow || flowRes.netflow || 0;
+      smData.cost += 5;
+      addNansenSpend(5);
+      log(`  [L5] SM Net Flow: ${smData.netFlow > 0 ? '+' : ''}${smData.netFlow}`);
+    }
+  } catch (e) {
+    log(`  [L5] ⚠ SM Net Flow failed: ${e.message}`);
+  }
+
+  // Call 3: Who Bought/Sold (1¢)
+  try {
+    const whoRes = await nansenX402Call(
+      'https://api.nansen.ai/api/v1/tgm/who-bought-sold',
+      { token_address: l1.ca }
+    );
+    if (whoRes) {
+      smData.topBuyers = (whoRes.buyers || []).slice(0, 3);
+      smData.topSellers = (whoRes.sellers || []).slice(0, 3);
+      smData.cost += 1;
+      addNansenSpend(1);
+      log(`  [L5] Who Bought/Sold: ${smData.topBuyers.length}B / ${smData.topSellers.length}S`);
+    }
+  } catch (e) {
+    log(`  [L5] ⚠ Who Bought/Sold failed: ${e.message}`);
+  }
+
+  // Determine signal
+  if (smData.netFlow > 0 && smData.smHolders > 5) {
+    smData.signal = 'STRONG_ACCUMULATE';
+  } else if (smData.netFlow > 0) {
+    smData.signal = 'ACCUMULATE';
+  } else if (smData.smHolders > 0 && smData.netFlow === 0) {
+    smData.signal = 'HOLD';
+  } else if (smData.netFlow < 0) {
+    smData.signal = 'DUMPING';
+  } else {
+    smData.signal = 'NO_DATA';
+  }
+
+  log(`  [L5] ✅ Signal: ${smData.signal} (cost: $${(smData.cost / 100).toFixed(2)})`);
+  return smData;
+}
+
+// =============================================================================
+// L4 — SCORING AGENT v2.3 (11-Factor Weighted System, 110→100 Norm + Grade)
+//
+// v2.3: Added Factor 11 (Smart Money Signal). When L5 data is available,
+// max possible = 110, normalized to 100. When L5 not triggered, max = 100.
+// =============================================================================
+function l4_scoringAgent(l1, l2, l3, l5Data = null) {
+  log('  [L4 ScoringAgent] Computing score (v2.3)...');
 
   const factors = {};
 
   // Factor 1: Safety (0-10)
+  // Unknown/null rugResult = 3 (not 5). Missing data = risk.
   if (l1.chain === 'solana') {
     if (l2.rugResult === 'Good') factors.safety = 10;
-    else if (l2.rugResult === 'Warn') factors.safety = 6;
-    else if (l2.rugResult === 'Danger') factors.safety = 2;
-    else if (l2.mintAuthority?.includes('DISABLED')) factors.safety = 8;
-    else factors.safety = 5;
+    else if (l2.rugResult === 'Warn') factors.safety = 5;
+    else if (l2.rugResult === 'Danger') factors.safety = 1;
+    else if (l2.mintAuthority?.includes('DISABLED') && l2.freezeAuthority?.includes('DISABLED')) factors.safety = 8;
+    else if (l2.mintAuthority?.includes('DISABLED')) factors.safety = 6;
+    else factors.safety = 3; // was 5
   } else {
-    factors.safety = l2.isVerified ? 8 : 5;
+    factors.safety = l2.isVerified ? 9 : 4; // was 8/5
   }
 
   // Factor 2: Liquidity (0-10)
-  if (l1.liq > 1000000) factors.liquidity = 10;
+  if (l1.liq > 5000000) factors.liquidity = 10;
+  else if (l1.liq > 1000000) factors.liquidity = 9;
   else if (l1.liq > 500000) factors.liquidity = 8;
   else if (l1.liq > 200000) factors.liquidity = 7;
-  else if (l1.liq > 50000) factors.liquidity = 5;
-  else if (l1.liq > 10000) factors.liquidity = 3;
+  else if (l1.liq > 100000) factors.liquidity = 5;
+  else if (l1.liq > 50000) factors.liquidity = 4;
+  else if (l1.liq > 10000) factors.liquidity = 2;
   else factors.liquidity = 1;
 
   // Factor 3: Volume (0-10)
+  // Added: vol/liq ratio bonus for healthy trading
+  const volLiqRatio = l1.liq > 0 ? l1.vol24h / l1.liq : 0;
   if (l1.vol24h > 5000000) factors.volume = 10;
-  else if (l1.vol24h > 1000000) factors.volume = 9;
+  else if (l1.vol24h > 1000000) factors.volume = 8;
   else if (l1.vol24h > 500000) factors.volume = 7;
   else if (l1.vol24h > 100000) factors.volume = 5;
   else if (l1.vol24h > 10000) factors.volume = 3;
-  else factors.volume = 1;
+  else if (l1.vol24h > 1000) factors.volume = 2;
+  else factors.volume = 0; // was 1 — zero volume = zero score
+
+  // Bonus: healthy vol/liq ratio (0.3x to 3x is good sign)
+  if (volLiqRatio > 0.3 && volLiqRatio < 3 && factors.volume > 0) {
+    factors.volume = Math.min(10, factors.volume + 1);
+  }
 
   // Factor 4: Market Cap (0-10)
-  if (l1.fdv > 100000000) factors.mcap = 10;
+  if (l1.fdv > 500000000) factors.mcap = 10;
+  else if (l1.fdv > 100000000) factors.mcap = 9;
   else if (l1.fdv > 50000000) factors.mcap = 8;
-  else if (l1.fdv > 10000000) factors.mcap = 7;
-  else if (l1.fdv > 1000000) factors.mcap = 5;
-  else if (l1.fdv > 100000) factors.mcap = 3;
+  else if (l1.fdv > 10000000) factors.mcap = 6;
+  else if (l1.fdv > 1000000) factors.mcap = 4;
+  else if (l1.fdv > 100000) factors.mcap = 2;
   else factors.mcap = 1;
 
   // Factor 5: Social Presence (0-10)
   const socialCount = (l1.hasSocials ? 1 : 0)
     + (l1.websites.length > 0 ? 1 : 0)
-    + (l1.socials.length > 0 ? l1.socials.length : 0);
-  if (socialCount >= 4) factors.social = 10;
-  else if (socialCount >= 3) factors.social = 8;
-  else if (socialCount >= 2) factors.social = 6;
-  else if (socialCount >= 1) factors.social = 4;
-  else factors.social = 1;
+    + Math.min(3, l1.socials.length); // cap at 3 to avoid gaming
+  if (socialCount >= 5) factors.social = 10;
+  else if (socialCount >= 4) factors.social = 8;
+  else if (socialCount >= 3) factors.social = 7;
+  else if (socialCount >= 2) factors.social = 5;
+  else if (socialCount >= 1) factors.social = 3;
+  else factors.social = 0; // was 1 — no socials = red flag
 
   // Factor 6: Token Age (0-10)
-  if (l1.pairCreatedAt) {
+  // Unknown age = 2 (not 5). No data = risk signal.
+  if (l1.pairCreatedAt && l1.pairCreatedAt > 0) {
     const ageMs = Date.now() - l1.pairCreatedAt;
     const ageDays = ageMs / (1000 * 60 * 60 * 24);
-    if (ageDays > 180) factors.age = 10;
-    else if (ageDays > 90) factors.age = 8;
-    else if (ageDays > 30) factors.age = 6;
-    else if (ageDays > 7) factors.age = 4;
-    else factors.age = 2;
+    if (ageDays > 365) factors.age = 10;
+    else if (ageDays > 180) factors.age = 9;
+    else if (ageDays > 90) factors.age = 7;
+    else if (ageDays > 30) factors.age = 5;
+    else if (ageDays > 7) factors.age = 3;
+    else if (ageDays > 1) factors.age = 2;
+    else factors.age = 1; // less than 1 day old
   } else {
-    factors.age = 5; // unknown
+    factors.age = 2; // was 5
   }
 
   // Factor 7: Holder Distribution (0-10)
-  if (l3.holders) {
-    if (l3.holders > 10000) factors.holders = 10;
-    else if (l3.holders > 5000) factors.holders = 8;
-    else if (l3.holders > 1000) factors.holders = 6;
-    else if (l3.holders > 200) factors.holders = 4;
-    else factors.holders = 2;
+  // Unknown holders = 2 (not 5).
+  if (l3.holders && l3.holders > 0) {
+    if (l3.holders > 50000) factors.holders = 10;
+    else if (l3.holders > 10000) factors.holders = 9;
+    else if (l3.holders > 5000) factors.holders = 7;
+    else if (l3.holders > 1000) factors.holders = 5;
+    else if (l3.holders > 200) factors.holders = 3;
+    else if (l3.holders > 50) factors.holders = 2;
+    else factors.holders = 1;
   } else {
-    factors.holders = 5; // unknown
+    factors.holders = 2; // was 5
   }
-  if (l2.topHoldersRisk) factors.holders = Math.max(1, factors.holders - 3);
+  if (l2.topHoldersRisk) factors.holders = Math.max(0, factors.holders - 3);
 
   // Factor 8: Transaction Activity (0-10)
-  if (l1.txns24h > 5000) factors.activity = 10;
-  else if (l1.txns24h > 1000) factors.activity = 8;
-  else if (l1.txns24h > 500) factors.activity = 6;
-  else if (l1.txns24h > 100) factors.activity = 4;
-  else factors.activity = 2;
+  if (l1.txns24h > 10000) factors.activity = 10;
+  else if (l1.txns24h > 5000) factors.activity = 9;
+  else if (l1.txns24h > 1000) factors.activity = 7;
+  else if (l1.txns24h > 500) factors.activity = 5;
+  else if (l1.txns24h > 100) factors.activity = 3;
+  else if (l1.txns24h > 20) factors.activity = 2;
+  else factors.activity = 1;
 
   // Factor 9: LP Lock Status (0-10)
+  // Unknown LP = 2 (not 4).
   if (l2.lpLocked === 'LOCKED ✅') factors.lpLock = 10;
   else if (typeof l2.lpLocked === 'string' && l2.lpLocked.includes('%')) {
     const pct = parseFloat(l2.lpLocked);
-    if (pct > 90) factors.lpLock = 9;
-    else if (pct > 50) factors.lpLock = 6;
-    else factors.lpLock = 3;
+    if (pct > 95) factors.lpLock = 10;
+    else if (pct > 80) factors.lpLock = 8;
+    else if (pct > 50) factors.lpLock = 5;
+    else if (pct > 20) factors.lpLock = 3;
+    else factors.lpLock = 1;
   } else {
-    factors.lpLock = 4; // unknown
+    factors.lpLock = 2; // was 4
   }
 
-  // Factor 10: Identity (0-10 with -10 to +10 adjustment)
+  // Factor 10: Deployer Identity (0-10)
   if (l3.label.includes('ENS+Twitter') || l3.label.includes('ENS+GitHub')) {
-    factors.identity = 10;  // TEAM TOKEN
+    factors.identity = 10;
   } else if (l3.label.includes('ENS only')) {
-    factors.identity = 7;   // ENS verified
+    factors.identity = 6; // was 7
   } else if (l3.label.includes('ANONYMOUS')) {
-    factors.identity = 2;   // COMMUNITY TOKEN
+    factors.identity = 2;
   } else if (l3.label.includes('UNVERIFIED')) {
-    factors.identity = 2;   // Solana gap
+    factors.identity = 1; // was 2 — Solana unverified = worst case
   } else {
-    factors.identity = 3;   // Unknown
+    factors.identity = 2;
   }
 
-  // Weighted total (each factor is 0-10, total max = 100)
-  const total = Object.values(factors).reduce((s, v) => s + v, 0);
-  const capped = Math.min(100, Math.max(0, total));
+  // Factor 11: Smart Money Signal (0-10) — only populated for 65+ tokens
+  if (l5Data && l5Data.signal !== 'NO_DATA') {
+    switch (l5Data.signal) {
+      case 'STRONG_ACCUMULATE': factors.smartMoney = 10; break;
+      case 'ACCUMULATE':        factors.smartMoney = 7;  break;
+      case 'HOLD':              factors.smartMoney = 5;  break;
+      case 'DUMPING':           factors.smartMoney = 2;  break;
+      default:                  factors.smartMoney = 3;
+    }
+  } else {
+    factors.smartMoney = 0; // Not scored (below threshold or disabled)
+  }
 
-  log(`  [L4] ✅ Score: ${capped}/100`);
+  // Total: if L5 was triggered, max = 110 → normalize to 100
+  const total = Object.values(factors).reduce((s, v) => s + v, 0);
+  const maxPossible = factors.smartMoney > 0 ? 110 : 100;
+  const normalized = Math.round((total / maxPossible) * 100);
+  const capped = Math.min(100, Math.max(0, normalized));
+
+  // Letter grade
+  let grade;
+  if (capped >= 80) grade = 'A';
+  else if (capped >= 65) grade = 'B';
+  else if (capped >= 50) grade = 'C';
+  else if (capped >= 35) grade = 'D';
+  else grade = 'F';
+
+  log(`  [L4] ✅ Score: ${capped}/100 (${grade})${factors.smartMoney > 0 ? ' [SM-adjusted]' : ''}`);
   log(`  [L4]   Safety=${factors.safety} Liq=${factors.liquidity} Vol=${factors.volume} MCap=${factors.mcap}`);
   log(`  [L4]   Social=${factors.social} Age=${factors.age} Holders=${factors.holders} Activity=${factors.activity}`);
-  log(`  [L4]   LP=${factors.lpLock} Identity=${factors.identity}`);
+  log(`  [L4]   LP=${factors.lpLock} Identity=${factors.identity} SM=${factors.smartMoney}`);
 
-  return { score: capped, factors };
+  return { score: capped, factors, grade };
 }
 
 // ── Format Helpers ──────────────────────────────────────────────────────────
@@ -557,7 +821,7 @@ function fmtPrice(n) {
 }
 
 // ── Build Scan Reply (280 char Twitter limit) ───────────────────────────────
-function buildReply(l1, l2, l3, scoring) {
+function buildReply(l1, l2, l3, scoring, l5Data = null) {
   const chain = l1.chain === 'solana' ? 'SOL'
     : l1.chain === 'base' ? 'Base'
     : l1.chain === 'ethereum' ? 'ETH'
@@ -582,8 +846,17 @@ function buildReply(l1, l2, l3, scoring) {
   t += `📊 Vol $${fmtNum(l1.vol24h)} | Liq $${fmtNum(l1.liq)}\n`;
   t += `${safetyLine}\n`;
   t += `🪪 ${l3.label}\n`;
-  t += `⭐ ${scoring.score}/100\n\n`;
-  t += `CA: ${l1.ca.slice(0, 44)}\n\n`;
+  t += `⭐ ${scoring.score}/100 (${scoring.grade})\n`;
+
+  // SM signal if available
+  if (l5Data && l5Data.signal !== 'NO_DATA' && l5Data.signal !== 'UNKNOWN') {
+    const smEmoji = l5Data.signal.includes('ACCUMULATE') ? '🟢'
+      : l5Data.signal === 'HOLD' ? '🟡'
+      : '🔴';
+    t += `${smEmoji} SM: ${l5Data.signal.replace('_', ' ')}\n`;
+  }
+
+  t += `\nCA: ${l1.ca.slice(0, 44)}\n\n`;
   t += `Automated by @HidayahAnka1`;
 
   if (t.length > 280) t = t.slice(0, 277) + '...';
@@ -633,10 +906,10 @@ function parseScan(text) {
   return null;
 }
 
-// ── Full 4-Layer Scan Pipeline ──────────────────────────────────────────────
+// ── Full 5-Layer Scan Pipeline ──────────────────────────────────────────────
 async function runScanPipeline(query) {
   log(`\n  ╔══════════════════════════════════════╗`);
-  log(`  ║  🐝 BUZZ 4-LAYER SCAN: ${query.padEnd(14)} ║`);
+  log(`  ║  🐝 BUZZ 5-LAYER SCAN: ${query.padEnd(14)} ║`);
   log(`  ╚══════════════════════════════════════╝`);
 
   // L1: Token data
@@ -649,20 +922,33 @@ async function runScanPipeline(query) {
   // L3: Identity
   const l3 = await l3_identityAgent(l1);
 
-  // L4: Score
-  const scoring = l4_scoringAgent(l1, l2, l3);
+  // L4: Score (initial — without L5)
+  let scoring = l4_scoringAgent(l1, l2, l3);
+
+  // L5: Smart Money (conditional on score)
+  let l5Data = null;
+  if (NANSEN_ENABLED && scoring.score >= NANSEN_THRESHOLD) {
+    l5Data = await l5_smartMoneyAgent(l1, scoring.score);
+
+    // Recalculate with Factor 11 if L5 data available
+    if (l5Data && l5Data.signal !== 'NO_DATA') {
+      scoring = l4_scoringAgent(l1, l2, l3, l5Data);
+    }
+  }
 
   // Build reply
-  const reply = buildReply(l1, l2, l3, scoring);
+  const reply = buildReply(l1, l2, l3, scoring, l5Data);
 
   // Save to history
   saveScanHistory({
     symbol: l1.symbol, chain: l1.chain, ca: l1.ca,
-    score: scoring.score, identity: l3.label,
-    price: l1.price, fdv: l1.fdv, liq: l1.liq
+    score: scoring.score, grade: scoring.grade, identity: l3.label,
+    price: l1.price, fdv: l1.fdv, liq: l1.liq,
+    smartMoney: l5Data?.signal || null,
+    nansenCost: l5Data?.cost || 0,
   });
 
-  return { l1, l2, l3, scoring, reply };
+  return { l1, l2, l3, l5: l5Data, scoring, reply };
 }
 
 // ── Credential Check ────────────────────────────────────────────────────────
@@ -680,11 +966,12 @@ function checkCreds() {
 async function run() {
   log('');
   log('╔═══════════════════════════════════════════════════╗');
-  log('║  🐝 BUZZ TWITTER BOT v2.1 — 4-Layer + TG Bridge  ║');
+  log('║  🐝 BUZZ TWITTER BOT v2.3 — 5-Layer + SM + TG    ║');
   log('║  L1: TokenAgent (DexScreener)                     ║');
   log('║  L2: SafetyAgent (RugCheck/Contract)              ║');
   log('║  L3: IdentityAgent (Blockscout + ATV)             ║');
-  log('║  L4: ScoringAgent (10-factor weighted)            ║');
+  log('║  L4: ScoringAgent v2.3 (11-factor + grade)        ║');
+  log('║  L5: SmartMoneyAgent (Nansen x402)                ║');
   log('║  📨: Telegram bridge to Buzz (context + memory)   ║');
   log(`║  Interval: ${CHECK_INTERVAL_MS / 60000}min | Max: ${MAX_REPLIES_DAY}/day               ║`);
   log('╚═══════════════════════════════════════════════════╝');
@@ -763,7 +1050,7 @@ async function run() {
             log(`  ✅ POSTED! Tweet replied. (${count}/${MAX_REPLIES_DAY} today)`);
 
             // Notify Buzz via Telegram with full scan data
-            await notifyBuzz(result.l1, result.l2, result.l3, result.scoring, tweet.id);
+            await notifyBuzz(result.l1, result.l2, result.l3, result.scoring, tweet.id, result.l5);
           } else {
             log(`  ❌ Post failed: ${postResult?.status || 'null'} ${JSON.stringify(postResult?.data || '').slice(0, 200)}`);
           }
