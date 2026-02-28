@@ -2,7 +2,7 @@ FROM node:22-slim
 
 LABEL maintainer="Ogie @ SolCex Exchange"
 LABEL description="Buzz BD Agent v6.0.6 — 4-Layer Twitter Scanner + 7 Sub-Agents"
-LABEL version="6.0.6"
+LABEL version="6.0.9"
 LABEL openclaw.version="2026.2.26"
 
 # System dependencies
