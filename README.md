@@ -2,53 +2,58 @@
 
 **The first AI Business Development agent operating autonomously 24/7 for a centralized exchange, powered by MiniMax M2.5 on decentralized compute.**
 
-[![ERC-8004](https://img.shields.io/badge/ERC--8004-Verified-blue)](#on-chain-identity-erc-8004)
-[![Akash](https://img.shields.io/badge/Akash-Deployed-red)](https://akash.network)
-[![OpenClaw](https://img.shields.io/badge/OpenClaw-v2026.2.26-purple)](#deployment-stack)
-[![Docker](https://img.shields.io/badge/Docker-GHCR-blue)](https://ghcr.io/buzzbysolcex/buzz-bd-agent)
-[![npm](https://img.shields.io/badge/npm-@buzzbd/plugin--solcex--bd-red)](https://www.npmjs.com/package/@buzzbd/plugin-solcex-bd)
-[![Tests](https://img.shields.io/badge/Tests-602%20Passing-brightgreen)](#)
-
----
+![ERC-8004](https://img.shields.io/badge/ERC--8004-Verified-blue) ![Akash](https://img.shields.io/badge/Akash-Deployed-green) ![OpenClaw](https://img.shields.io/badge/OpenClaw-2026.2.26-purple) ![Docker](https://img.shields.io/badge/Docker-v6.0.17-blue) ![npm](https://img.shields.io/badge/npm-%40buzzbd%2Fplugin--solcex--bd-red) ![Tests](https://img.shields.io/badge/Tests-602%20passing-brightgreen)
 
 ## What Buzz Does
 
-Buzz scans 30+ tokens per session across multiple DEX data sources, runs them through a **5-layer intelligence pipeline**, scores them on a **100-point system** (11 scoring factors), and delivers qualified listing prospects to human BD leads via Telegram — all autonomously, 4x daily.
+Buzz scans 30+ tokens per session across multiple DEX data sources, runs them through a 5-layer intelligence pipeline, scores them on a 100-point system (11 scoring factors), and delivers qualified listing prospects to human BD leads via Telegram — all autonomously, 4x daily.
 
 **SolCex Listing Package:** 15K USDT total (5K fee + 10K liquidity) with professional market making ($450K+ depth), 450+ whale trader airdrop, AMA, and 10-14 day fast-track to go-live.
 
 ---
 
-## 🆕 v6.0.9 — What's New (Sprint Day 4, Feb 28, 2026)
+## 🆕 v6.0.17 — What's New (Sprint Day 5, Mar 1, 2026)
+
+### 🏦 Bankr LLM Gateway — Self-Sustaining Inference
+- **Bankr LLM Gateway** integrated as multi-model fallback provider
+- **8 models available:** Gemini 3 Flash, Claude Haiku 4.5, GPT-5 Nano, Claude Sonnet 4.6, Qwen3 Coder, GPT-5 Mini, Gemini 3 Pro, Kimi K2.5
+- **Fallback cascade:** MiniMax M2.5 → Gemini 3 Flash → Claude Haiku 4.5 → GPT-5 Nano
+- **Self-sustaining loop:** Token deploy fees → fund LLM credits → power inference → discover more tokens
+- **$15 LLM credits** funded and active
+- **Removed:** ClawRouter/BlockRun x402, OpenRouter (dead key), AkashML (401 error)
+- **Cost:** ~$2-5/mo fallback vs ~$10-15/mo previous multi-provider stack
+
+### 🧹 Infrastructure Cleanup
+- Removed port 8402 (ClawRouter proxy — no longer needed)
+- Removed `OPENROUTER_API_KEY` and `CLAWROUTER_WALLET` from SDL
+- Consolidated Bankr section: Partner API + LLM Gateway under single API key
+- Docker image: `ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.17`
 
 ### 🧠 L5 Smart Money Intelligence (Nansen x402)
-- **5th intelligence layer added** — Nansen Smart Money lookups via x402 micropayments
+- 5th intelligence layer — Nansen Smart Money lookups via x402 micropayments
 - Triggers only when L4 score ≥ 65 (budget-aware activation)
-- Score now 100-point system with **11 factors** (10 original + Smart Money 0-10)
+- Score now 100-point system with 11 factors (10 original + Smart Money 0-10)
 - Daily budget: $0.50/day ($15/month max)
-- **Status:** Environment configured, awaiting `x402-client` package install for live payments
+- Status: Environment configured, awaiting x402-client package install for live payments
 
 ### 🐦 Twitter Bot v2.3 — Auto-Reply LIVE
 - Auto-reply to mentions every 15 minutes
 - Daily cap: 10 tweets, 5 DMs
 - All 5 X API keys regenerated (API Key, Secret, Access Token, Access Secret, Bearer)
-- `pkill` guard added to entrypoint for clean bot restarts
-- **Verified:** `scan $VIRTUAL` → 5-layer scan + Twitter reply posted ✅
-- **Verified:** `scan $PENGU` → auto-reply working (65/100 B-tier) ✅
+- pkill guard added to entrypoint for clean bot restarts
 
 ### 🔧 OpenClaw v2026.2.26
 - MiniMax auth fix (no more 401 errors)
 - Telegram fixes + cron reliability improvements
-- Dockerfile, entrypoint, and labels all bumped to v6.0.9
 
 ### 🆔 ATV Web3 Identity — Enabled in SDL
-- `ATV_API_URL=https://api.web3identity.com`
-- Batch endpoint: `/api/ens/batch-resolve`
+- ATV_API_URL=https://api.web3identity.com
+- Batch endpoint: /api/ens/batch-resolve
 - Daily limit: 100 addresses
 - 3x daily verification passes: 09:00, 15:00, 22:00 WIB
 
 ### 📋 48 Telegram Commands
-Aligned with Master Ops — includes Bankr deploy commands, Twitter/X commands, and all system operations.
+- Aligned with Master Ops — includes Bankr deploy commands, Twitter/X commands, and all system operations.
 
 ---
 
@@ -62,7 +67,7 @@ Aligned with Master Ops — includes Bankr deploy commands, Twitter/X commands, 
 │  │  IDENTITY     │  │  PAYMENTS    │  │    INTEROP             │ │
 │  │  ERC-8004     │  │  x402 USDC   │  │  elizaOS plugin        │ │
 │  │  ETH #25045   │  │  zauthx402   │  │  Virtuals ACP          │ │
-│  │  Base #17483  │  │  BlockRun    │  │  ClawHub Skill         │ │
+│  │  Base #17483  │  │  Bankr LLM   │  │  ClawHub Skill         │ │
 │  │  Base #18709  │  │  Bankr API   │  │  Agent Bounty Board    │ │
 │  └──────┬───────┘  └──────┬───────┘  └────────┬───────────────┘ │
 │         └─────────────────┼────────────────────┘                 │
@@ -75,11 +80,11 @@ Aligned with Master Ops — includes Bankr deploy commands, Twitter/X commands, 
 │  └────────────────────────┬──────────────────────────────────┘  │
 │                           ▼                                      │
 │  ┌───────────────────────────────────────────────────────────┐  │
-│  │              BUZZ BD AGENT v6.0.9                          │  │
+│  │              BUZZ BD AGENT v6.0.17                         │  │
 │  │                                                             │  │
-│  │  LLM: MiniMax M2.5 + ClawRouter/BlockRun x402 fallback    │  │
-│  │  Skills: ClawRouter (LLM routing) + QuillShield (safety)   │  │
-│  │  Intel: 16 Sources (L5 Smart Money) | Crons: 36/36         │  │
+│  │  LLM: MiniMax M2.5 + Bankr LLM Gateway (8 model fallback) │  │
+│  │  Skills: Bankr (LLM+Deploy) + QuillShield (safety)         │  │
+│  │  Intel: 16 Sources (L5 Smart Money) | Crons: 40            │  │
 │  │  Score: 100-pt System (11 factors) | 48 TG Commands        │  │
 │  │  Forensics: Helius + DexScreener + Nansen x402             │  │
 │  │  Identity: ATV Web3 (api.web3identity.com) — 3x daily      │  │
@@ -97,8 +102,6 @@ Aligned with Master Ops — includes Bankr deploy commands, Twitter/X commands, 
 │  └───────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
 ```
-
----
 
 ## 5-Layer Intelligence Pipeline
 
@@ -141,8 +144,6 @@ Aligned with Master Ops — includes Bankr deploy commands, Twitter/X commands, 
 ╚══════════════════════════════════════════════════════════════════╝
 ```
 
----
-
 ## Intelligence Sources (16 Sources)
 
 | # | Source | Layer | Status | Data |
@@ -165,7 +166,21 @@ Aligned with Master Ops — includes Bankr deploy commands, Twitter/X commands, 
 | 16 | Moltbook | Supporting | ✅ Working | Agent social network |
 | — | OpenClaw Sub-agents | Supporting | ✅ Working | Delegated intelligence |
 
----
+## LLM Providers
+
+| Provider | Model | Role | Cost (per 1M tokens) |
+|----------|-------|------|---------------------|
+| MiniMax | M2.5 (229B) | **Primary** | ~$41/mo flat |
+| Bankr/gemini-3-flash | Gemini 3 Flash | Fallback #1 | $0.15 in / $0.60 out |
+| Bankr/claude-haiku-4.5 | Claude Haiku 4.5 | Fallback #2 | $0.80 in / $4.00 out |
+| Bankr/gpt-5-nano | GPT-5 Nano | Fallback #3 | $0.10 in / $0.40 out |
+| Bankr/claude-sonnet-4.6 | Claude Sonnet 4.6 | Premium tasks | $3.00 in / $15.00 out |
+| Bankr/qwen3-coder | Qwen3 Coder | Code tasks | $0.30 in / $1.20 out |
+| Bankr/gpt-5-mini | GPT-5 Mini | General | $0.40 in / $1.60 out |
+| Bankr/gemini-3-pro | Gemini 3 Pro | Complex reasoning | $1.25 in / $10.00 out |
+| Bankr/kimi-k2.5 | Kimi K2.5 | Long context | $0.60 in / $2.40 out |
+
+**Self-sustaining loop:** Token deploy fees → fund LLM credits → power inference → discover more tokens → loop
 
 ## Scoring Engine (100-Point System, 11 Factors)
 
@@ -177,6 +192,7 @@ Aligned with Master Ops — includes Bankr deploy commands, Twitter/X commands, 
 - Already listed on Tier 1/2 CEX
 
 ### Key Bonuses
+
 | Signal | Points |
 |--------|--------|
 | TEAM TOKEN (identifiable team) | +10 |
@@ -187,9 +203,10 @@ Aligned with Master Ops — includes Bankr deploy commands, Twitter/X commands, 
 | Mint + Freeze revoked | +5 |
 | LP burned | +5 |
 | Audited | +5 |
-| **Smart Money signal (Nansen L5)** 🆕 | **+0-10** |
+| Smart Money signal (Nansen L5) 🆕 | +0-10 |
 
 ### Key Penalties
+
 | Flag | Points |
 |------|--------|
 | COMMUNITY TOKEN (confirmed no team) | -10 |
@@ -199,8 +216,6 @@ Aligned with Master Ops — includes Bankr deploy commands, Twitter/X commands, 
 | CEX already listed | -15 |
 | Token age <24h | -10 |
 | LP UNVERIFIED (API failure) | -15 |
-
----
 
 ## Revenue Stack
 
@@ -227,10 +242,8 @@ Monthly Target (Conservative):
   Bankr partner fees:   $325 (1 active token, $5K/day volume)
   Creator fees:         $200 (internal deploys)
   ─────────────────────────────────────────────
-  TOTAL:                $2,525/mo vs $46/mo costs = 55x ROI
+  TOTAL:                $2,525/mo vs $48/mo costs = 53x ROI
 ```
-
----
 
 ## Bankr Partner API — Token Deployment from Telegram
 
@@ -261,56 +274,46 @@ Buzz can deploy ERC-20 tokens on Base chain with a single Telegram command:
 - **Internal:** SolCex captures 75.05% of swap fees
 - **Client:** Client gets creator share, SolCex keeps 18.05% partner share
 
-**First deploy:** BuzzTestCoin (BZTC) — [View on BaseScan](https://basescan.org)
-
----
+First deploy: [BuzzTestCoin (BZTC) — View on BaseScan](https://basescan.org)
 
 ## On-Chain Identity (ERC-8004)
 
 | Chain | Agent ID | Registry |
 |-------|----------|----------|
-| Ethereum | #25045 | `0x8004A818BFB912233c491871b3d84c89A494BD9e` |
-| Base | #17483 | `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432` |
-| Base (anet) | #18709 | `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432` |
+| Ethereum | #25045 | 0x8004A818BFB912233c491871b3d84c89A494BD9e |
+| Base | #17483 | 0x8004A169FB4a3325136EB29fA0ceB6D2e539a432 |
+| Base (anet) | #18709 | 0x8004A169FB4a3325136EB29fA0ceB6D2e539a432 |
 | Colosseum | #3734 | Agent Hackathon entry |
-
----
 
 ## Wallets
 
 | Name | Chain | Address | Purpose |
 |------|-------|---------|---------|
-| anet (fee recipient) | Base (EVM) | `0x2Dc03124091104E7798C0273D96FC5ED65F05aA9` | Nansen x402 + Bankr fees |
-| Deploy wallet | Base (EVM) | `0xfa04c7d627ba707a1ad17e72e094b45150665593` | Bankr token deploy |
-| ClawRouter | Base (EVM) | `0x56f76494a60eBb52325630e69F7d8C0635E5C980` | LLM routing |
-| Buzz Base | Base (EVM) | `0x4b362B7db6904A72180A37307191fdDc4eD282Ab` | General ops |
-| BlockRun x402 | Base (EVM) | `0x6ea362d34238089Ec3226A256F25CbD14f35493b` | x402 LLM (FREE tier) |
-| Lobster | Solana | `5iC7pGyzqpXD2xTK4Ww7zKRDVo9cceyHNeKBTiemo5Jp` | Solana ops |
-
----
+| anet (fee recipient) | Base (EVM) | 0x2Dc03124091104E7798C0273D96FC5ED65F05aA9 | Nansen x402 + Bankr fees |
+| Deploy wallet | Base (EVM) | 0xfa04c7d627ba707a1ad17e72e094b45150665593 | Bankr token deploy |
+| Buzz Base | Base (EVM) | 0x4b362B7db6904A72180A37307191fdDc4eD282Ab | General ops |
+| Lobster | Solana | 5iC7pGyzqpXD2xTK4Ww7zKRDVo9cceyHNeKBTiemo5Jp | Solana ops |
 
 ## Deployment Stack
 
 | Component | Technology |
 |-----------|------------|
 | Compute | Akash Network — 2 CPU, 4GB RAM, 10GB persistent storage (~$5/mo) |
-| Container | Docker on `ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.9` |
+| Container | Docker on `ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.17` |
 | Base Image | node:22-slim + tini PID 1 |
 | Runtime | OpenClaw v2026.2.26 |
 | Primary LLM | MiniMax M2.5 (229B params) |
-| Smart Fallback | ClawRouter + BlockRun x402 (30+ models via micropayments) |
+| Smart Fallback | Bankr LLM Gateway (8 models, self-sustaining credits) |
 | Token Deploy | Bankr Partner API (Base chain, zero gas cost) |
 | Identity Verify | ATV Web3 Identity (api.web3identity.com, 3x daily batch) |
 | Smart Money | Nansen x402 (L5, budget $0.50/day) |
 | Twitter | Bot v2.3 — Auto-reply every 15min (10 tweets/5 DMs daily) |
-| LLM Cost | ~$41/mo (down from $1,320/day — 99.9% reduction) |
+| LLM Cost | ~$41/mo MiniMax + ~$2-5/mo Bankr fallback |
 | Compute Cost | ~$5/mo |
-| Total Cost | ~$46/mo for 24/7 autonomous BD + token deployment agent |
+| **Total Cost** | **~$48/mo for 24/7 autonomous BD + token deployment agent** |
 | Bot | @BuzzBySolCex_bot (Telegram, 48 registered commands) |
-| Crons | 36 autonomous scheduled jobs |
+| Crons | 40 autonomous scheduled jobs |
 | Tests | 602 passing |
-
----
 
 ## Telegram Commands (48)
 
@@ -326,8 +329,6 @@ Buzz can deploy ERC-20 tokens on Base chain with a single Telegram command:
 | Personal (2) | `prayer` `sprint` |
 | Emergency (5) | `sos` `stop` `stop_email` `stop_scan` `resume` |
 
----
-
 ## BD Strategy — Inbound First
 
 | Channel | Target % | Method |
@@ -342,16 +343,13 @@ DISCOVERED → SCORED → QUALIFIED → WARM_UP → OUTREACH_SENT →
 FOLLOW_UP_1 → FOLLOW_UP_2 → RESPONDED → NEGOTIATING → LISTED → POST_LISTING
 ```
 
----
-
 ## Integrations & Partnerships
 
 ### Tier 1 — Active Integrations
 
 | Partner | Integration |
 |---------|-------------|
-| Bankr / @bankrbot | Token launch partner API — 75.05% creator / 18.05% partner fee split |
-| ClawRouter / @1bcmax | Smart LLM routing + BlockRun x402 (30+ models) |
+| Bankr / @bankrbot | Token launch partner API + LLM Gateway (8 models, self-sustaining) |
 | ATV Web3 Identity / Gary Palmer | ENS + deployer identity verification (api.web3identity.com) |
 | Nansen x402 🆕 | L5 Smart Money wallet intelligence (budget-aware) |
 | Helius | Solana wallet forensics + LP tracing |
@@ -373,8 +371,6 @@ FOLLOW_UP_1 → FOLLOW_UP_2 → RESPONDED → NEGOTIATING → LISTED → POST_LI
 | AgentProof / Builder Benv1 | Exploring — auto-indexes Buzz on ERC-8004 |
 | Hummingbot | Market-making integration (planned Week 3-4) |
 
----
-
 ## Persistent Storage Layout
 
 ```
@@ -388,7 +384,7 @@ FOLLOW_UP_1 → FOLLOW_UP_2 → RESPONDED → NEGOTIATING → LISTED → POST_LI
 ├── logs/                       ← Operation logs
 ├── workspace/
 │   ├── memory/                 ← Cron schedules, agent memory, rules
-│   │   ├── cron-schedule.json  ← 36 jobs backup
+│   │   ├── cron-schedule.json  ← 40 jobs backup
 │   │   ├── web3-identity-api.md ← ATV endpoint config
 │   │   ├── pipeline-rules.md   ← Pipeline discipline rules
 │   │   └── solana-deployer-verification.md
@@ -398,29 +394,25 @@ FOLLOW_UP_1 → FOLLOW_UP_2 → RESPONDED → NEGOTIATING → LISTED → POST_LI
     └── openclaw.json           ← Gateway config (generated on boot)
 ```
 
----
-
 ## Development Workflow
 
 ```bash
 # Standard: Mac → Docker → GHCR → Akash (never install on Akash)
 cd ~/buzz-bd-agent
 
-# ⚠️ CRITICAL: Always prune before building (Docker Desktop context caching issue)
+# CRITICAL: Always prune before building (Docker Desktop context caching issue)
 docker builder prune -f
 
 # Build (ALWAYS --no-cache for config/version changes)
-docker build --no-cache -t ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.9 .
+docker build --no-cache -t ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.17 .
 
 # Push to GitHub Container Registry
-docker push ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.9
+docker push ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.17
 
 # Deploy: Akash Console → Close → Create New Deployment → paste SDL → accept bid
-# ⚠️ ALWAYS use unique image tags — Akash providers cache by tag name
-# ⚠️ Close + New Deployment for clean persistent volume
+# ALWAYS use unique image tags — Akash providers cache by tag name
+# Close + New Deployment for clean persistent volume
 ```
-
----
 
 ## Cost History
 
@@ -429,24 +421,22 @@ docker push ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.9
 | Feb 3-14 | Claude Opus 4.5 | ~$1,320/day | Prayer reminders costing $5 each |
 | Feb 14-15 | Haiku + Opus fallback | ~$5-10/day | First optimization |
 | Feb 15+ | MiniMax M2.5 | ~$1.37/day | 99.9% cost reduction |
-| Current | MiniMax + ClawRouter | ~$46/mo | Full autonomous BD + deploy + Twitter agent |
-
----
+| Feb 15-28 | MiniMax + ClawRouter | ~$46/mo | Full autonomous BD + deploy + Twitter agent |
+| **Mar 1+** | **MiniMax + Bankr Gateway** | **~$48/mo** | **Self-sustaining LLM via Bankr (8 model fallback)** |
 
 ## Version History
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| **v6.0.9** | **Feb 28, 2026** | **L5 Smart Money (Nansen x402). Twitter Bot v2.3 auto-reply LIVE. OpenClaw v2026.2.26 (MiniMax auth fix). All X API keys regenerated. ATV enabled in SDL. pkill guard. 11 scoring factors. 48 TG commands aligned with Master Ops.** |
-| v6.0.4 | Feb 26, 2026 | ATV Web3 Identity FIXED (api.web3identity.com). 48 Telegram commands. 3x daily ATV batch verification. Bankr skill installed. First pipeline test ($NIRE 78pts, $BABYCLAW 51pts). Pipeline discipline rules. |
+| **v6.0.17** | **Mar 1, 2026** | **Bankr LLM Gateway (8 models, self-sustaining). Removed ClawRouter/OpenRouter/AkashML. SDL cleanup (port 8402, dead env vars). Fallback cascade: MiniMax → Gemini 3 Flash → Haiku → GPT-5 Nano.** |
+| v6.0.9 | Feb 28, 2026 | L5 Smart Money (Nansen x402). Twitter Bot v2.3 auto-reply LIVE. OpenClaw v2026.2.26 (MiniMax auth fix). All X API keys regenerated. ATV enabled in SDL. 11 scoring factors. 48 TG commands. |
+| v6.0.4 | Feb 26, 2026 | ATV Web3 Identity FIXED. 48 Telegram commands. 3x daily ATV batch. Bankr skill installed. First pipeline test ($NIRE 78pts, $BABYCLAW 51pts). |
 | v6.0.2 | Feb 26, 2026 | Bankr Partner API live, DexScreener API fix, persistent storage, cron env passthrough |
 | v6.0.1a | Feb 25, 2026 | OpenClaw 2026.2.24, ClawRouter/BlockRun x402, 47 commands, 602 tests |
 | v6.0-alpha | Feb 24, 2026 | 602 tests, 7 sub-agents, dmPolicy debugging |
 | v5.3.8-hotfix6 | Feb 22, 2026 | MiniMax anthropic-messages fix, tool calling restored |
 | v5.3.5 | Feb 21, 2026 | ClawRouter removed (temp), clean deploy |
 | v5.3.1 | Feb 20, 2026 | DFlow MCP, 4-Layer Architecture |
-
----
 
 ## Pipeline Discipline Rules
 
@@ -455,8 +445,6 @@ docker push ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.9
 - GeckoTerminal returns better pair data than DexScreener for pre-DEX tokens
 - Opportunity cost: don't chase one token endlessly, next scan has fresh prospects
 - Chain limitation: ATV resolves ETH addresses only. Solana deployers use Helius forensics and are tagged UNVERIFIED-IDENTITY
-
----
 
 ## Links
 
@@ -472,20 +460,16 @@ docker push ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.9
 | Colosseum Entry | Agent #3734 |
 | npm Plugin | [@buzzbd/plugin-solcex-bd](https://www.npmjs.com/package/@buzzbd/plugin-solcex-bd) |
 | Bankr | [bankr.bot](https://bankr.bot) |
-| ClawRouter | [@1bcmax](https://twitter.com/1bcmax) |
+| Bankr LLM Gateway | [bankr.bot/llm](https://bankr.bot/llm) |
 | x402 Protocol | [x402.org](https://x402.org) |
-
----
 
 ## Team
 
 | Role | Handle | Responsibility |
 |------|--------|----------------|
-| BD Lead | [@hidayahanka1](https://twitter.com/hidayahanka1) | Strategy, approvals, manual Twitter, partnerships |
+| BD Lead | @hidayahanka1 | Strategy, approvals, manual Twitter, partnerships |
 | Strategy | Claude Opus 4.6 | Documentation, analysis, planning, outreach drafts |
 | Autonomous Agent | Buzz 🐝 | Token scanning, scoring, pipeline management, deployment, Twitter auto-reply |
-
----
 
 ## Principles
 
@@ -511,12 +495,14 @@ docker push ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.9
 >
 > **Pipeline discipline > chasing one token.** — Flag, WATCH, move on
 >
+> **Self-sustaining inference.** — Revenue funds LLM credits, LLM powers revenue
+>
 > **Talk is cheap, just go build.** — @1bcmax wisdom
 
 ---
 
-Powered by [OpenClaw](https://openclaw.org) • Deployed on [Akash Network](https://akash.network) • [ERC-8004](https://8004scan.io) Verified
+Powered by [OpenClaw](https://openclaw.ai) • Deployed on [Akash Network](https://akash.network) • ERC-8004 Verified
 
-*"Identity first. Intelligence deep. Commerce autonomous. Cost disciplined. Deploy from Telegram."*
+*"Identity first. Intelligence deep. Commerce autonomous. Cost disciplined. Self-sustaining. Deploy from Telegram."*
 
-#USDC #AgenticCommerce #Solana #AI #SolCex #BuzzBD #Base #ERC8004 #MachineEconomy #OpenClaw #Bankr #NansenX402
+`#USDC #AgenticCommerce #Solana #AI #SolCex #BuzzBD #Base #ERC8004 #MachineEconomy #OpenClaw #Bankr #NansenX402`
