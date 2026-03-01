@@ -21,6 +21,7 @@ RUN mkdir -p /data/.openclaw \
 
 COPY skills/ /opt/buzz-skills/
 COPY openclaw.json.template /opt/buzz-config/openclaw.json.template
+COPY scripts/ /opt/buzz-scripts/
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
