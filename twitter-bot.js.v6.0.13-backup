@@ -155,10 +155,16 @@ function parseTokenDetails(text) {
 // ── v3.0: Reply Builders ────────────────────────────────────────────────────
 function buildListReply() {
   let t = `Thanks for your interest! 🐝\n\n`;
-  t += `SolCex Exchange offers fast-track listing with full market making support.\n\n`;
-  t += `📩 DM hidayahanka1 on X for details\n`;
-  t += `📱 Or TG: Ogie2\n\n`;
-  t += `🐝 Powered by Buzz BD Agent`;
+  t += `🔥 LIMITED OFFER:\n`;
+  t += `List on SolCex Exchange\n`;
+  t += `5K USDT fee + liquidity\n`;
+  t += `(5K USDT + 5K of your tokens)\n\n`;
+  t += `✅ Free market making 3 months\n`;
+  t += `✅ 450+ whale airdrop\n`;
+  t += `✅ 10-14 day fast-track\n\n`;
+  t += `📩 DM hidayahanka1 on X\n`;
+  t += `📱 TG: Ogie2\n\n`;
+  t += `🐝 Best ROI for your project`;
   if (t.length > 280) t = t.slice(0, 277) + '...';
   return t;
 }
