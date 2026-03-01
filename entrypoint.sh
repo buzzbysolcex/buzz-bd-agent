@@ -156,21 +156,6 @@ cat > "$CONFIG" << JSONEOF
         ]
       }
     }
-        "baseUrl": "https://llm.bankr.bot",
-        "apiKey": "$BANKR_API_KEY",
-        "api": "openai-completions",
-        "models": [
-          { "id": "gemini-3-flash", "name": "Gemini 3 Flash", "input": ["text","image"], "contextWindow": 1048576, "maxTokens": 65535, "cost": { "input": 0.15, "output": 0.6 } },
-          { "id": "claude-haiku-4.5", "name": "Claude Haiku 4.5", "input": ["text","image"], "contextWindow": 200000, "maxTokens": 64000, "api": "anthropic-messages", "cost": { "input": 0.8, "output": 4.0 } },
-          { "id": "gpt-5-nano", "name": "GPT-5 Nano", "input": ["text"], "contextWindow": 400000, "maxTokens": 128000, "cost": { "input": 0.1, "output": 0.4 } },
-          { "id": "claude-sonnet-4.6", "name": "Claude Sonnet 4.6", "input": ["text","image"], "contextWindow": 200000, "maxTokens": 64000, "api": "anthropic-messages", "cost": { "input": 3.0, "output": 15.0 } },
-          { "id": "qwen3-coder", "name": "Qwen3 Coder", "input": ["text"], "contextWindow": 262144, "maxTokens": 65536, "cost": { "input": 0.3, "output": 1.2 } },
-          { "id": "gpt-5-mini", "name": "GPT-5 Mini", "input": ["text"], "contextWindow": 400000, "maxTokens": 128000, "cost": { "input": 0.4, "output": 1.6 } },
-          { "id": "gemini-3-pro", "name": "Gemini 3 Pro", "input": ["text","image"], "contextWindow": 1048576, "maxTokens": 65536, "cost": { "input": 1.25, "output": 10.0 } },
-          { "id": "kimi-k2.5", "name": "Kimi K2.5", "input": ["text"], "contextWindow": 262144, "maxTokens": 65535, "cost": { "input": 0.6, "output": 2.4 } }
-        ]
-      }
-    }
   },
   "agents": {
     "defaults": {
