@@ -60,3 +60,5 @@ openclaw.json
 .openclaw/
 workspace-init/.config/buzz/intel-sources.json
 workspace-init/.config/buzz/intel-sources.json
+deploy.yaml
+*.bak
