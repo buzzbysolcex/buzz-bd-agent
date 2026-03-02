@@ -1,10 +1,9 @@
 #!/bin/bash
 
 # ============================================
-# Buzz BD Agent v6.1.0 — 5 Parallel Sub-Agents + Orchestrator
-# OpenClaw v2026.3.1 | Bankr LLM Gateway
+# Buzz BD Agent v6.0.15 — 7 Sub-Agent Architecture
 # Entrypoint for Akash Network deployment
-# Indonesia Sprint — Mar 2, 2026
+# Indonesia Sprint — Feb 27, 2026
 # ============================================
 
 export OPENCLAW_STATE_DIR=/data/.openclaw
@@ -13,10 +12,9 @@ export NPM_CONFIG_PREFIX=/data/.npm-global
 export PATH="/data/.npm-global/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
 
 echo "============================================"
-echo "  🐝 Buzz BD Agent v6.1.0"
-echo "  5 Parallel Sub-Agents + Orchestrator"
-echo "  OpenClaw v2026.3.1 | MiniMax M2.5"
-echo "  Bankr LLM Gateway (8 models, dual keys)"
+echo "  🐝 Buzz BD Agent v6.0.15"
+echo "  7 Sub-Agent Architecture + Autonomy Mode"
+echo "  OpenClaw v2026.2.26 | MiniMax M2.5"
 echo "  State:     $OPENCLAW_STATE_DIR"
 echo "  Workspace: $OPENCLAW_WORKSPACE_DIR"
 echo "============================================"
@@ -25,7 +23,7 @@ echo "============================================"
 mkdir -p /data/.openclaw \
          /data/workspace \
          /data/workspace/skills \
-         /data/workspace/memory/pipeline \
+         /data/workspace/memory \
          /data/.npm-global \
          /data/pipeline \
          /data/bankr \
@@ -40,7 +38,6 @@ if [ -d "/opt/buzz-skills" ]; then
   SKILL_COUNT=$(ls -d /opt/buzz-skills/*/ 2>/dev/null | wc -l)
   echo "[entrypoint] Skills synced: $SKILL_COUNT skills"
 fi
-
 # ═══════════════════════════════════════════════════════════
 # 📡 GITHUB SKILL SYNC — Auto-pull if missing or stale
 # ═══════════════════════════════════════════════════════════
@@ -81,7 +78,6 @@ else
   echo "│  L5 Directive: ✅ Exists"
 fi
 echo "└─────────────────────────────────────────┘"
-
 # === Generate OpenClaw config from env vars ===
 CONFIG="/data/.openclaw/openclaw.json"
 echo "[entrypoint] Generating config from env vars..."
@@ -93,21 +89,13 @@ cat > "$CONFIG" << JSONEOF
       "enabled": true,
       "botToken": "$TELEGRAM_BOT_TOKEN",
       "dmPolicy": "open",
-      "allowFrom": ["*"],
-      "direct": {
-        "950395553": {
-          "dmPolicy": "open",
-          "skills": ["*"],
-          "systemPrompt": "You are Buzz BD Agent for SolCex Exchange. Ogie is your operator. Chat ID: 950395553."
-        }
-      }
+      "allowFrom": ["*"]
     }
   },
   "env": {
     "MINIMAX_API_KEY": "$MINIMAX_API_KEY",
     "OPENROUTER_API_KEY": "$OPENROUTER_API_KEY",
     "BANKR_API_KEY": "$BANKR_API_KEY",
-    "BANKR_LLM_KEY": "$BANKR_LLM_KEY",
     "BANKR_API_URL": "${BANKR_API_URL:-https://api.bankr.bot}",
     "BANKR_API_ENDPOINT": "${BANKR_API_ENDPOINT:-https://api.bankr.bot/token-launches/deploy}",
     "BANKR_FEE_WALLET": "$BANKR_FEE_WALLET",
@@ -154,7 +142,7 @@ cat > "$CONFIG" << JSONEOF
       },
       "bankr": {
         "baseUrl": "https://llm.bankr.bot",
-        "apiKey": "$BANKR_LLM_KEY",
+        "apiKey": "$BANKR_API_KEY",
         "api": "openai-completions",
         "models": [
           { "id": "gemini-3-flash", "name": "Gemini 3 Flash", "input": ["text","image"], "contextWindow": 1048576, "maxTokens": 65535, "cost": { "input": 0.15, "output": 0.6 } },
@@ -182,14 +170,7 @@ cat > "$CONFIG" << JSONEOF
         "primary": "minimax/MiniMax-M2.5",
         "fallbacks": ["bankr/gemini-3-flash","bankr/claude-haiku-4.5","bankr/gpt-5-nano"]
       },
-      "subagents": {
-        "model": "bankr/gpt-5-nano",
-        "runTimeoutSeconds": 120,
-        "archiveAfterMinutes": 60,
-        "maxConcurrent": 8,
-        "maxChildrenPerAgent": 5,
-        "maxSpawnDepth": 1
-      }
+      "subagents": { "maxConcurrent": 8 }
     }
   }
 }
@@ -226,25 +207,10 @@ else
   echo "[entrypoint] ⚠️  cron-schedule.json not found — Buzz will restore 40 crons on first boot"
 fi
 
-# Check orchestrator skill
-if [ -f "/data/workspace/skills/orchestrator/orchestrate.js" ]; then
-  echo "[entrypoint] Orchestrator skill: ✅ FOUND"
-else
-  echo "[entrypoint] Orchestrator skill: ⚠️  Not found — will be created by Buzz"
-fi
-
-# Check pipeline scan skill
-if [ -f "/data/workspace/skills/buzz-pipeline-scan/scan.js" ]; then
-  echo "[entrypoint] Pipeline scan skill: ✅ FOUND"
-else
-  echo "[entrypoint] Pipeline scan skill: ⚠️  Not found — will be created by Buzz"
-fi
-
 # === ENV check ===
 echo "[entrypoint] ┌─── ENV CHECK ───────────────────────────────────┐"
 echo "[entrypoint] │ LLM:"
 echo "[entrypoint] │   MINIMAX_API_KEY=$([ -n "$MINIMAX_API_KEY" ] && echo '✅ SET' || echo '❌ NOT SET')"
-echo "[entrypoint] │   BANKR_LLM_KEY=$([ -n "$BANKR_LLM_KEY" ] && echo '✅ SET' || echo '❌ NOT SET')"
 echo "[entrypoint] │   DEFAULT_MODEL=${DEFAULT_MODEL:-minimax/MiniMax-M2.5}"
 echo "[entrypoint] │ Telegram:"
 echo "[entrypoint] │   TELEGRAM_BOT_TOKEN=$([ -n "$TELEGRAM_BOT_TOKEN" ] && echo '✅ SET' || echo '❌ NOT SET')"
@@ -297,50 +263,37 @@ echo "[entrypoint] │   MIN_SOURCES=${MIN_SOURCES_FOR_VALID_DATA:-1}"
 echo "[entrypoint] └──────────────────────────────────────────────────┘"
 
 # === Sub-agent banner ===
-echo "[entrypoint] ┌─── 5 PARALLEL SUB-AGENTS + ORCHESTRATOR ─────────┐"
-echo "[entrypoint] │ 1. scanner-agent  — L1 Discovery (DexScreener+)   │"
-echo "[entrypoint] │ 2. safety-agent   — L2 RugCheck + DFlow MCP       │"
-echo "[entrypoint] │ 3. wallet-agent   — L2 Helius + Allium forensics  │"
-echo "[entrypoint] │ 4. social-agent   — L3 Grok + Serper + ATV        │"
-echo "[entrypoint] │ 5. scorer-agent   — L4 100-Point composite score  │"
-echo "[entrypoint] │ + Orchestrator    — MiniMax M2.5 (dispatch+agg)   │"
-echo "[entrypoint] │                                                    │"
-echo "[entrypoint] │ Sub-agent model: bankr/gpt-5-nano                 │"
-echo "[entrypoint] │ Sub-agent fallback: bankr/claude-haiku-4.5        │"
-echo "[entrypoint] │ Sub-agent timeout: 120s (FIX #1)                  │"
-echo "[entrypoint] │ gemini-3-flash: EXCLUDED from sub-agents          │"
-echo "[entrypoint] │ maxConcurrent: 8 | maxSpawnDepth: 1               │"
-echo "[entrypoint] └──────────────────────────────────────────────────┘"
-
-# === OpenClaw v2026.3.1 features ===
-echo "[entrypoint] ┌─── OpenClaw v2026.3.1 NEW FEATURES ──────────────┐"
-echo "[entrypoint] │ • Telegram DM topics (native per-DM dmPolicy)     │"
-echo "[entrypoint] │ • Cron light-context (--light-context bootstrap)  │"
-echo "[entrypoint] │ • Sub-agent typed task_completion events          │"
-echo "[entrypoint] │ • Health endpoints (/health, /healthz, /ready)    │"
-echo "[entrypoint] │ • Thinking fallback (think=off retry)             │"
-echo "[entrypoint] │ • Telegram outbound chunking fix (sub-agents)     │"
-echo "[entrypoint] │ • Cron delivery mode fix (mode:none works)        │"
+echo "[entrypoint] ┌─── 7 SUB-AGENTS ─────────────────────────────────┐"
+echo "[entrypoint] │ 1. TokenAgent     — L1 Discovery + Data Failover  │"
+echo "[entrypoint] │ 2. SafetyAgent    — L2 RugCheck + Self-Heal       │"
+echo "[entrypoint] │ 3. LiquidityAgent — L2 Helius/DFlow + DLMM Fix   │"
+echo "[entrypoint] │ 4. SocialAgent    — L3 Research + Twitter + DMs   │"
+echo "[entrypoint] │ 5. DeployAgent    — L3 Bankr Deploy + Upsell      │"
+echo "[entrypoint] │ 6. ScoringAgent   — L4 100-Point Score & Route    │"
+echo "[entrypoint] │ 7. Orchestrator   — Pipeline + Budget + 40 Crons  │"
+echo "[entrypoint] │ maxConcurrent: 8 | Hybrid routing | $30/mo X API  │"
 echo "[entrypoint] └──────────────────────────────────────────────────┘"
 
 # === CRITICAL: dmPolicy post-boot patch ===
-# Belt-and-suspenders: config sets dmPolicy:"open" + direct config (v2026.3.1)
-# But OpenClaw doctor may still overwrite on startup
+# OpenClaw doctor overwrites config on startup, resetting dmPolicy
+# This background process re-patches dmPolicy after gateway starts
+# Without this: Telegram won't accept messages from anyone
 (
-  sleep 25
+  sleep 20
   CONFIG="/data/.openclaw/openclaw.json"
   if [ -f "$CONFIG" ]; then
+    # Check if dmPolicy got overwritten by doctor
     CURRENT_DM=$(cat "$CONFIG" | jq -r '.channels.telegram.dmPolicy // "not set"' 2>/dev/null)
     if [ "$CURRENT_DM" != "open" ]; then
       echo "[dmPolicy-patch] dmPolicy was '$CURRENT_DM' — patching to 'open'..."
       TMP=$(mktemp)
       jq '.channels.telegram.dmPolicy = "open" | .channels.telegram.allowFrom = ["*"]' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
-      echo "[dmPolicy-patch] ✅ dmPolicy patched to 'open'"
+      echo "[dmPolicy-patch] ✅ dmPolicy patched to 'open' + allowFrom: ['*']"
     else
       echo "[dmPolicy-patch] ✅ dmPolicy already 'open' — no patch needed"
     fi
   fi
-  # Clean stale Telegram offset file
+  # Also clean stale Telegram offset file that can block reconnection
   if [ -f "/data/.openclaw/telegram/update-offset-default.json" ]; then
     OFFSET_AGE=$(find /data/.openclaw/telegram/update-offset-default.json -mmin +1440 2>/dev/null)
     if [ -n "$OFFSET_AGE" ]; then
@@ -348,33 +301,25 @@ echo "[entrypoint] └───────────────────�
       echo "[dmPolicy-patch] Removed stale Telegram offset file (>24h old)"
     fi
   fi
-  # Second patch at 90s
-  sleep 65
-  if [ -f "$CONFIG" ]; then
-    CURRENT_DM=$(cat "$CONFIG" | jq -r '.channels.telegram.dmPolicy // "not set"' 2>/dev/null)
-    if [ "$CURRENT_DM" != "open" ]; then
-      TMP=$(mktemp)
-      jq '.channels.telegram.dmPolicy = "open" | .channels.telegram.allowFrom = ["*"]' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
-      echo "[dmPolicy-patch] ✅ Second patch applied at 90s"
-    fi
-  fi
 ) &
 
-# === Twitter Bot v3.0 Sales Funnel ===
-echo "[entrypoint] 🐝 Starting Twitter Bot v3.0 Sales Funnel..."
+echo "[entrypoint] Starting gateway..."
+echo "[entrypoint] dmPolicy patch scheduled (20s background)"
+echo "[entrypoint] $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+# ── Twitter Bot v2.3 — 4-Layer Intelligence (PID 2) ──
+echo "[entrypoint] 🐝 Starting Twitter Bot v2.3..."
 pkill -f twitter-bot.js 2>/dev/null || true
 sleep 1
-if [ -f "/opt/buzz-scripts/twitter-bot.js" ]; then
-  nohup node /opt/buzz-scripts/twitter-bot.js >> /data/logs/twitter-bot.log 2>&1 &
-  echo "[entrypoint] Twitter Bot PID: $! (log: /data/logs/twitter-bot.log)"
-else
-  echo "[entrypoint] ⚠️  twitter-bot.js not found at /opt/buzz-scripts/"
-fi
+nohup node /opt/buzz-scripts/twitter-bot.js >> /data/workspace/twitter-bot.log 2>&1 &
+echo "[entrypoint] Twitter Bot PID: $!"
 
-# === Post-boot GitHub skill sync ===
+# ═══════════════════════════════════════════════════════════
+# 📡 GITHUB SKILL SYNC — Auto-pull if missing or stale
+# ═══════════════════════════════════════════════════════════
 MASTER_OPS_PATH="/data/workspace/skills/master-ops/SKILL.md"
 MASTER_OPS_URL="https://raw.githubusercontent.com/buzzbysolcex/buzz-bd-agent/main/skills/master-ops/SKILL.md"
 mkdir -p /data/workspace/skills/master-ops
+mkdir -p /data/workspace/memory
 if [ ! -f "$MASTER_OPS_PATH" ] || [ "$(find "$MASTER_OPS_PATH" -mtime +1 2>/dev/null)" ]; then
   echo "[entrypoint] 📡 Master Ops: Pulling from GitHub..."
   curl -sL "$MASTER_OPS_URL" -o "$MASTER_OPS_PATH" 2>/dev/null && echo "[entrypoint] ✅ Master Ops updated" || echo "[entrypoint] ⚠️ Master Ops pull failed"
@@ -382,7 +327,4 @@ else
   echo "[entrypoint] ✅ Master Ops: Current (< 24h old)"
 fi
 
-echo "[entrypoint] Starting gateway..."
-echo "[entrypoint] dmPolicy: open (config + background patch at 25s + 90s)"
-echo "[entrypoint] $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 exec openclaw gateway --port 18789 --allow-unconfigured
