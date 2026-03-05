@@ -1,0 +1,6 @@
+{
+  "name": "exchange_listing_readiness",
+  "description": "Full exchange listing readiness assessment for SolCex Exchange. Evaluates token against listing criteria including liquidity, safety, team verification, and community strength.",
+  "price": "0.02",
+  "currency": "USDC"
+}

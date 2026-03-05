@@ -62,3 +62,7 @@ workspace-init/.config/buzz/intel-sources.json
 workspace-init/.config/buzz/intel-sources.json
 deploy.yaml
 *.bak
+deploy*.yaml
+*.db
+*.db-shm
+*.db-wal

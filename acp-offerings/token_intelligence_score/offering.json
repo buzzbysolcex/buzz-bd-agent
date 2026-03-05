@@ -1,0 +1,6 @@
+{
+  "name": "token_intelligence_score",
+  "description": "Comprehensive 100-point token scoring using 17 intelligence sources across market metrics, safety verification, and social analysis. Returns score, grade, and listing readiness assessment.",
+  "price": "0.01",
+  "currency": "USDC"
+}

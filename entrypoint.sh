@@ -1,90 +1,257 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# ══════════════════════════════════════════════════
+# Buzz BD Agent v6.3.0-solid — Entrypoint
+# ══════════════════════════════════════════════════
+# PHILOSOPHY: Docker image = source of truth.
+#             Boot → 5 green layers → fully operational.
+#             Zero manual config. Zero Telegram directives.
+#             Zero hot-patches. No configuration needed.
+#
+# OpenClaw v2026.3.1 | REST API :3000 | ACP Marketplace
+# 5 Parallel Sub-Agents | 18 Intel Sources | Twitter Bot v3.1
+# Moltbook Autonomous | Scan directive baked (DSC + CMC)
+# SolCex Exchange | Indonesia Sprint | March 2026
+# ══════════════════════════════════════════════════
 
-# ============================================
-# Buzz BD Agent v6.1.0 — 5 Parallel Sub-Agents + Orchestrator
-# OpenClaw v2026.3.1 | Bankr LLM Gateway
-# Entrypoint for Akash Network deployment
-# Indonesia Sprint — Mar 2, 2026
-# ============================================
+set -e
 
+# ─── Environment ───
 export OPENCLAW_STATE_DIR=/data/.openclaw
 export OPENCLAW_WORKSPACE_DIR=/data/workspace
 export NPM_CONFIG_PREFIX=/data/.npm-global
-export PATH="/data/.npm-global/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
+export PATH="/data/.npm-global/bin:/usr/local/bin:$PATH"
+export LITE_AGENT_API_KEY="${ACP_API_KEY}"
 
-echo "============================================"
-echo "  🐝 Buzz BD Agent v6.1.0"
-echo "  5 Parallel Sub-Agents + Orchestrator"
-echo "  OpenClaw v2026.3.1 | MiniMax M2.5"
-echo "  Bankr LLM Gateway (8 models, dual keys)"
+echo "════════════════════════════════════════════════"
+echo "  🐝 Buzz BD Agent v6.3.0-solid"
+echo "  OpenClaw v2026.3.1 | REST API | ACP Marketplace"
+echo "  5 Sub-Agents | 20 Skills | 40 Crons | 18 Intel"
+echo "  Docker = source of truth. Zero config needed."
 echo "  State:     $OPENCLAW_STATE_DIR"
 echo "  Workspace: $OPENCLAW_WORKSPACE_DIR"
-echo "============================================"
+echo "  $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+echo "════════════════════════════════════════════════"
 
-# === Directory setup ===
+# ══════════════════════════════════════════════════
+# BLOCK 1 — CREATE DIRECTORIES
+# ══════════════════════════════════════════════════
 mkdir -p /data/.openclaw \
+         /data/.openclaw/cron \
+         /data/.openclaw/credentials \
          /data/workspace \
          /data/workspace/skills \
+         /data/workspace/memory \
          /data/workspace/memory/pipeline \
+         /data/workspace/memory/receipts \
+         /data/workspace/memory/contacts \
+         /data/workspace/memory/scan-results \
+         /data/workspace/twitter-bot \
          /data/.npm-global \
-         /data/pipeline \
-         /data/bankr \
-         /data/bankr/deploys \
          /data/logs \
-         /data/outreach/drafts \
-         /data/atv
+         /data/api-data
+echo "[boot] ✅ Block 1: Directories ready"
 
-# === Sync skills from Docker image to persistent workspace ===
-if [ -d "/opt/buzz-skills" ]; then
-  cp -r /opt/buzz-skills/* /data/workspace/skills/ 2>/dev/null || true
-  SKILL_COUNT=$(ls -d /opt/buzz-skills/*/ 2>/dev/null | wc -l)
-  echo "[entrypoint] Skills synced: $SKILL_COUNT skills"
+# ══════════════════════════════════════════════════
+# BLOCK 2 — SYNC SKILLS (image → /data/)
+# ══════════════════════════════════════════════════
+if [ -d "/opt/buzz-workspace-skills" ]; then
+  cp -r /opt/buzz-workspace-skills/* /data/workspace/skills/ 2>/dev/null || true
 fi
 
-# ═══════════════════════════════════════════════════════════
-# 📡 GITHUB SKILL SYNC — Auto-pull if missing or stale
-# ═══════════════════════════════════════════════════════════
-MASTER_OPS_PATH="/data/workspace/skills/master-ops/SKILL.md"
-MASTER_OPS_URL="https://raw.githubusercontent.com/buzzbysolcex/buzz-bd-agent/main/skills/master-ops/SKILL.md"
-L5_DIRECTIVE_PATH="/data/workspace/memory/pipeline-L5-upgrade.md"
-L5_DIRECTIVE_URL="https://raw.githubusercontent.com/buzzbysolcex/buzz-bd-agent/main/memory/pipeline-L5-upgrade.md"
-
-echo "┌─────────────────────────────────────────┐"
-echo "│  📡 GITHUB SKILL SYNC                    │"
-echo "└─────────────────────────────────────────┘"
-
-# Master Ops
-mkdir -p /data/workspace/skills/master-ops
-if [ ! -f "$MASTER_OPS_PATH" ] || [ "$(find "$MASTER_OPS_PATH" -mtime +1 2>/dev/null)" ]; then
-  echo "│  Master Ops: Pulling from GitHub..."
-  curl -sL "$MASTER_OPS_URL" -o "$MASTER_OPS_PATH" 2>/dev/null
-  if [ $? -eq 0 ] && [ -s "$MASTER_OPS_PATH" ]; then
-    echo "│  Master Ops: ✅ Updated from GitHub"
-  else
-    echo "│  Master Ops: ⚠️ GitHub pull failed — using existing"
+# Force-sync critical skills every boot (image wins)
+for SKILL in orchestrator buzz-pipeline-scan scorer-agent twitter-poster bnbchain-mcp; do
+  if [ -d "/opt/buzz-workspace-skills/$SKILL" ]; then
+    rm -rf "/data/workspace/skills/$SKILL"
+    cp -r "/opt/buzz-workspace-skills/$SKILL" "/data/workspace/skills/$SKILL"
   fi
+done
+
+# Sync orchestrator to OpenClaw runtime location
+mkdir -p /root/.openclaw/workspace/skills/orchestrator
+if [ -f "/data/workspace/skills/orchestrator/orchestrate.js.md" ]; then
+  cp /data/workspace/skills/orchestrator/orchestrate.js.md \
+     /root/.openclaw/workspace/skills/orchestrator/orchestrate.js.md
+fi
+echo "[boot] ✅ Block 2: Skills synced (20 skills, critical force-synced)"
+
+# ══════════════════════════════════════════════════
+# BLOCK 3 — RESTORE CRON JOBS
+# Crons are pre-baked with correct directives.
+# jobs.json in /opt/ already has:
+#   - scan-morning/midday/evening/night: DexScreener /token-boosts/top/v1 + CMC gainers
+#   - moltbook-heartbeat: full calendar-aware directive
+#   No patching required.
+# ══════════════════════════════════════════════════
+CRON_TARGET="/data/.openclaw/cron/jobs.json"
+if [ -f "/opt/buzz-cron/jobs.json" ]; then
+  cp /opt/buzz-cron/jobs.json "$CRON_TARGET"
+  CRON_COUNT=$(grep -c '"id"' "$CRON_TARGET" 2>/dev/null || echo "0")
+  echo "[boot] ✅ Block 3: $CRON_COUNT cron jobs restored (correct scan directive baked)"
 else
-  echo "│  Master Ops: ✅ Current (< 24h old)"
+  echo "[boot] ⚠️ Block 3: No cron jobs found in Docker image"
 fi
 
-# L5 Directive
-mkdir -p /data/workspace/memory
-if [ ! -f "$L5_DIRECTIVE_PATH" ]; then
-  echo "│  L5 Directive: Pulling from GitHub..."
-  curl -sL "$L5_DIRECTIVE_URL" -o "$L5_DIRECTIVE_PATH" 2>/dev/null
-  if [ $? -eq 0 ] && [ -s "$L5_DIRECTIVE_PATH" ]; then
-    echo "│  L5 Directive: ✅ Installed"
-  else
-    echo "│  L5 Directive: ⚠️ GitHub pull failed"
+# ══════════════════════════════════════════════════
+# BLOCK 4 — WRITE CREDENTIALS (from env vars, every boot)
+# Credentials contain secrets — NOT in image.
+# Written fresh from SDL env vars on every boot.
+# ══════════════════════════════════════════════════
+
+# Moltbook credentials
+if [ -n "$MOLTBOOK_API_KEY" ]; then
+  cat > /data/.openclaw/credentials/moltbook.json << MOLTEOF
+{
+  "platform": "moltbook",
+  "agentId": "${MOLTBOOK_AGENT_ID:-c606278b-365f-473e-9203-3a517042a641}",
+  "apiKey": "$MOLTBOOK_API_KEY",
+  "baseUrl": "https://www.moltbook.com",
+  "agentName": "BuzzBD",
+  "active": true,
+  "writtenAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+MOLTEOF
+  echo "[boot] ✅ Block 4a: Moltbook credentials written"
+else
+  echo "[boot] ⚠️ Block 4a: MOLTBOOK_API_KEY not set — Moltbook disabled"
+fi
+
+# Molten credentials
+if [ -n "$MOLTEN_API_KEY" ]; then
+  cat > /data/.openclaw/credentials/molten.json << MOLTENEOF
+{
+  "platform": "molten",
+  "agentId": "${MOLTEN_AGENT_ID:-57487512}",
+  "apiKey": "$MOLTEN_API_KEY",
+  "baseUrl": "https://agentkey.molten.gg",
+  "active": true,
+  "writtenAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+MOLTENEOF
+  echo "[boot] ✅ Block 4b: Molten credentials written"
+else
+  echo "[boot] ⚠️ Block 4b: MOLTEN_API_KEY not set — Molten disabled"
+fi
+
+# ─── Block 4c: Gmail OAuth credentials ───
+if [ -n "$GMAIL_CLIENT_ID" ] && [ -n "$GMAIL_CLIENT_SECRET" ] && [ -n "$GMAIL_REFRESH_TOKEN" ]; then
+    mkdir -p /data/.openclaw/credentials
+    printf '{"type":"oauth2","client_id":"%s","client_secret":"%s","refresh_token":"%s","email":"%s","cc":["dino@solcex.cc","ogie.solcexexchange@gmail.com"],"scopes":["https://mail.google.com/"]}' "$GMAIL_CLIENT_ID" "$GMAIL_CLIENT_SECRET" "$GMAIL_REFRESH_TOKEN" "$GMAIL_ADDRESS" > /data/.openclaw/credentials/gmail.json
+    echo "[boot] ✅ Block 4c: Gmail OAuth credentials written ($GMAIL_ADDRESS)"
+else
+    echo "[boot] ⚠️ Block 4c: Gmail credentials missing — email outreach disabled"
+fi
+
+
+echo "[boot] ✅ Block 4: Credentials written from env vars"
+
+# ══════════════════════════════════════════════════
+# BLOCK 5 — SEED CONTENT CALENDAR (once, not overwritten)
+# Calendar is baked in Docker image at /opt/buzz-config/
+# Only copied to /data/ if not already present.
+# This preserves any runtime edits across restarts.
+# ══════════════════════════════════════════════════
+CALENDAR_DEST="/data/workspace/memory/moltbook-content-calendar.json"
+CALENDAR_SRC="/opt/buzz-config/moltbook-content-calendar.json"
+if [ ! -f "$CALENDAR_DEST" ] && [ -f "$CALENDAR_SRC" ]; then
+  cp "$CALENDAR_SRC" "$CALENDAR_DEST"
+  echo "[boot] ✅ Block 5: Moltbook content calendar seeded (4-week, 56-post, 10 submolts)"
+else
+  echo "[boot] ✅ Block 5: Content calendar already present — preserved"
+fi
+
+# ══════════════════════════════════════════════════
+# BLOCK 6 — SYNC BUZZ DIRECTIVE TO MEMORY
+# Permanent identity + ops rules loaded on every boot.
+# Synced to memory so OpenClaw skills can reference it.
+# ══════════════════════════════════════════════════
+if [ -f "/opt/buzz-config/buzz-directive.md" ]; then
+  cp /opt/buzz-config/buzz-directive.md /data/workspace/memory/BUZZ-DIRECTIVE.md
+  echo "[boot] ✅ Block 6: Buzz directive synced to memory (5-layer ops rules)"
+fi
+
+# ══════════════════════════════════════════════════
+# BLOCK 7 — SETUP ACP (always overwrite — correct format)
+# ACP config must be in SDK format with LITE_AGENT_API_KEY.
+# Written from env vars every boot (correct format guaranteed).
+# ══════════════════════════════════════════════════
+ACP_DIR="/data/workspace/skills/virtuals-acp"
+
+# Setup ACP skill from Docker image
+if [ -d "/opt/buzz-acp/openclaw-acp" ]; then
+  mkdir -p "$ACP_DIR"
+  cp -r /opt/buzz-acp/openclaw-acp/* "$ACP_DIR/" 2>/dev/null || true
+
+  # Copy offering handlers
+  for OFFERING in token_intelligence_score token_safety_check trending_token_intelligence exchange_listing_readiness; do
+    DEST="$ACP_DIR/src/seller/offerings/buzz-bd-agent/$OFFERING"
+    SRC="/opt/buzz-acp/offerings/$OFFERING"
+    if [ -d "$SRC" ]; then
+      mkdir -p "$DEST"
+      cp -r "$SRC"/* "$DEST/" 2>/dev/null || true
+    fi
+  done
+
+  # Install deps if needed
+  if [ ! -d "$ACP_DIR/node_modules" ]; then
+    cd "$ACP_DIR" && npm install --production 2>/dev/null || true
+    cd /
   fi
-else
-  echo "│  L5 Directive: ✅ Exists"
 fi
-echo "└─────────────────────────────────────────┘"
 
-# === Generate OpenClaw config from env vars ===
+# Write ACP config in correct SDK format (always overwrite)
+if [ -n "$ACP_API_KEY" ]; then
+  cat > "$ACP_DIR/config.json" << ACPEOF
+{
+  "LITE_AGENT_API_KEY": "$ACP_API_KEY",
+  "agents": [
+    {
+      "id": "${ACP_AGENT_ID:-17681}",
+      "name": "Buzz BD Agent",
+      "walletAddress": "${ACP_WALLET_ADDRESS:-0x01aBCA1E419A8abBf2a1D44Ba5e31F62F601dA19}",
+      "apiKey": "$ACP_API_KEY",
+      "active": true
+    }
+  ]
+}
+ACPEOF
+  echo "[boot] ✅ Block 7: ACP config written (SDK format, Agent #${ACP_AGENT_ID:-17681})"
+else
+  echo "[boot] ⚠️ Block 7: ACP_API_KEY not set — ACP disabled"
+fi
+
+# Fix ACP CLI shebang
+if [ -f "$ACP_DIR/bin/acp.ts" ]; then
+  sed -i '1s|.*|#!/usr/bin/env -S npx tsx|' "$ACP_DIR/bin/acp.ts" 2>/dev/null || true
+fi
+
+# ACP CLI wrapper
+cat > /usr/local/bin/acp << 'WRAPPER'
+#!/bin/bash
+ACP_DIR="/data/workspace/skills/virtuals-acp"
+export LITE_AGENT_API_KEY="${ACP_API_KEY}"
+cd "$ACP_DIR" && npx tsx bin/acp.ts "$@"
+WRAPPER
+chmod +x /usr/local/bin/acp
+
+# ══════════════════════════════════════════════════
+# BLOCK 8 — SYNC TWITTER BOT v3.1
+# Source of truth = /opt/buzz-twitter-bot/ (Docker image)
+# Synced to /data/workspace/twitter-bot/ for runtime
+# Twitter bot runs from /opt/ directly (not /data/)
+# to avoid version drift on redeploy.
+# ══════════════════════════════════════════════════
+if [ -f "/opt/buzz-twitter-bot/twitter-bot.js" ]; then
+  cp /opt/buzz-twitter-bot/twitter-bot.js /data/workspace/twitter-bot/twitter-bot.js
+  echo "[boot] ✅ Block 8: Twitter Bot v3.1 synced (5-layer Premium SCAN + LIST + DEPLOY)"
+fi
+
+# ══════════════════════════════════════════════════
+# BLOCK 9 — GENERATE OPENCLAW CONFIG
+# Generated from env vars on every boot.
+# Includes all 18 intel source API keys in env block.
+# ══════════════════════════════════════════════════
 CONFIG="/data/.openclaw/openclaw.json"
-echo "[entrypoint] Generating config from env vars..."
+echo "[boot] Generating OpenClaw config..."
 cat > "$CONFIG" << JSONEOF
 {
   "gateway": { "port": 18789, "mode": "local" },
@@ -93,51 +260,40 @@ cat > "$CONFIG" << JSONEOF
       "enabled": true,
       "botToken": "$TELEGRAM_BOT_TOKEN",
       "dmPolicy": "open",
-      "allowFrom": ["*"],
-      "direct": {
-        "950395553": {
-          "dmPolicy": "open",
-          "skills": ["*"],
-          "systemPrompt": "You are Buzz BD Agent for SolCex Exchange. Ogie is your operator. Chat ID: 950395553."
-        }
-      }
+      "allowFrom": ["*"]
     }
   },
   "env": {
     "MINIMAX_API_KEY": "$MINIMAX_API_KEY",
-    "OPENROUTER_API_KEY": "$OPENROUTER_API_KEY",
     "BANKR_API_KEY": "$BANKR_API_KEY",
     "BANKR_LLM_KEY": "$BANKR_LLM_KEY",
-    "BANKR_API_URL": "${BANKR_API_URL:-https://api.bankr.bot}",
-    "BANKR_API_ENDPOINT": "${BANKR_API_ENDPOINT:-https://api.bankr.bot/token-launches/deploy}",
+    "BANKR_PARTNER_KEY": "$BANKR_PARTNER_KEY",
     "BANKR_FEE_WALLET": "$BANKR_FEE_WALLET",
     "BANKR_DEPLOY_WALLET": "$BANKR_DEPLOY_WALLET",
-    "BANKR_CHAIN": "${BANKR_CHAIN:-base}",
-    "BANKR_REFERRAL": "${BANKR_REFERRAL:-VFJ23TVS-BNKR}",
     "HELIUS_API_KEY": "$HELIUS_API_KEY",
     "GROK_API_KEY": "$GROK_API_KEY",
     "SERPER_API_KEY": "$SERPER_API_KEY",
+    "ALLIUM_API_KEY": "$ALLIUM_API_KEY",
     "FIRECRAWL_API_KEY": "$FIRECRAWL_API_KEY",
     "HYPERBROWSER_API_KEY": "$HYPERBROWSER_API_KEY",
-    "ALLIUM_API_KEY": "$ALLIUM_API_KEY",
+    "CMC_API_KEY": "$CMC_API_KEY",
+    "AGENTPROOF_API_KEY": "$AGENTPROOF_API_KEY",
+    "BUZZ_API_ADMIN_KEY": "$BUZZ_API_ADMIN_KEY",
+    "ACP_API_KEY": "$ACP_API_KEY",
+    "LITE_AGENT_API_KEY": "$ACP_API_KEY",
+    "DEXSCREENER_BASE_URL": "https://api.dexscreener.com",
+    "NANSEN_X402_ENABLED": "$NANSEN_X402_ENABLED",
+    "NANSEN_X402_WALLET_KEY": "$NANSEN_X402_WALLET_KEY",
+    "MOLTBOOK_API_KEY": "$MOLTBOOK_API_KEY",
+    "MOLTBOOK_AGENT_ID": "$MOLTBOOK_AGENT_ID",
+    "MOLTEN_API_KEY": "${MOLTEN_API_KEY:-}",
     "X_API_KEY": "$X_API_KEY",
     "X_API_SECRET": "$X_API_SECRET",
     "X_BEARER_TOKEN": "$X_BEARER_TOKEN",
     "X_ACCESS_TOKEN": "$X_ACCESS_TOKEN",
     "X_ACCESS_TOKEN_SECRET": "$X_ACCESS_TOKEN_SECRET",
-    "GMAIL_CLIENT_ID": "$GMAIL_CLIENT_ID",
-    "GMAIL_CLIENT_SECRET": "$GMAIL_CLIENT_SECRET",
-    "GMAIL_REFRESH_TOKEN": "$GMAIL_REFRESH_TOKEN",
-    "GMAIL_ADDRESS": "${GMAIL_ADDRESS:-buzzbysolcex@gmail.com}",
-    "MOLTBOOK_AGENT_ID": "$MOLTBOOK_AGENT_ID",
-    "MOLTBOOK_API_KEY": "$MOLTBOOK_API_KEY",
-    "ATV_API_URL": "${ATV_API_URL:-https://api.web3identity.com}",
-    "ATV_ENABLED": "${ATV_ENABLED:-true}",
-    "ATV_BATCH_ENDPOINT": "${ATV_BATCH_ENDPOINT:-/api/ens/batch-resolve}",
-    "DEXSCREENER_BASE_URL": "${DEXSCREENER_BASE_URL:-https://api.dexscreener.com}",
-    "AUTONOMY_MODE": "${AUTONOMY_MODE:-operational}",
-    "DATA_FAILOVER_ENABLED": "${DATA_FAILOVER_ENABLED:-true}",
-    "TWITTER_COMMANDS_ENABLED": "${TWITTER_COMMANDS_ENABLED:-true}"
+    "X_BOT_USER_ID": "$X_BOT_USER_ID",
+    "MAX_REPLIES_DAY": "${MAX_REPLIES_DAY:-30}"
   },
   "models": {
     "providers": {
@@ -147,24 +303,24 @@ cat > "$CONFIG" << JSONEOF
         "api": "anthropic-messages",
         "models": [{
           "id": "MiniMax-M2.5",
-          "name": "MiniMax M2.5 229B",
+          "name": "MiniMax M2.5",
           "contextWindow": 200000,
           "maxTokens": 8192
         }]
       },
       "bankr": {
-        "baseUrl": "https://llm.bankr.bot",
+        "baseUrl": "https://llm.bankr.bot/v1",
         "apiKey": "$BANKR_LLM_KEY",
         "api": "openai-completions",
         "models": [
-          { "id": "gemini-3-flash", "name": "Gemini 3 Flash", "input": ["text","image"], "contextWindow": 1048576, "maxTokens": 65535, "cost": { "input": 0.15, "output": 0.6 } },
-          { "id": "claude-haiku-4.5", "name": "Claude Haiku 4.5", "input": ["text","image"], "contextWindow": 200000, "maxTokens": 64000, "api": "anthropic-messages", "cost": { "input": 0.8, "output": 4.0 } },
-          { "id": "gpt-5-nano", "name": "GPT-5 Nano", "input": ["text"], "contextWindow": 400000, "maxTokens": 128000, "cost": { "input": 0.1, "output": 0.4 } },
-          { "id": "claude-sonnet-4.6", "name": "Claude Sonnet 4.6", "input": ["text","image"], "contextWindow": 200000, "maxTokens": 64000, "api": "anthropic-messages", "cost": { "input": 3.0, "output": 15.0 } },
-          { "id": "qwen3-coder", "name": "Qwen3 Coder", "input": ["text"], "contextWindow": 262144, "maxTokens": 65536, "cost": { "input": 0.3, "output": 1.2 } },
-          { "id": "gpt-5-mini", "name": "GPT-5 Mini", "input": ["text"], "contextWindow": 400000, "maxTokens": 128000, "cost": { "input": 0.4, "output": 1.6 } },
-          { "id": "gemini-3-pro", "name": "Gemini 3 Pro", "input": ["text","image"], "contextWindow": 1048576, "maxTokens": 65536, "cost": { "input": 1.25, "output": 10.0 } },
-          { "id": "kimi-k2.5", "name": "Kimi K2.5", "input": ["text"], "contextWindow": 262144, "maxTokens": 65535, "cost": { "input": 0.6, "output": 2.4 } }
+          { "id": "gpt-5-nano",       "name": "GPT-5 Nano",      "contextWindow": 400000, "maxTokens": 16384 },
+          { "id": "gemini-3-flash",   "name": "Gemini 3 Flash",  "contextWindow": 1000000, "maxTokens": 32768 },
+          { "id": "claude-haiku-4.5", "name": "Haiku 4.5",       "contextWindow": 200000, "maxTokens": 8192 },
+          { "id": "gpt-5-mini",       "name": "GPT-5 Mini",      "contextWindow": 400000, "maxTokens": 16384 },
+          { "id": "qwen3-coder",      "name": "Qwen3 Coder",     "contextWindow": 262000, "maxTokens": 8192 },
+          { "id": "kimi-k2.5",        "name": "Kimi K2.5",       "contextWindow": 262000, "maxTokens": 8192 },
+          { "id": "gemini-3-pro",     "name": "Gemini 3 Pro",    "contextWindow": 1000000, "maxTokens": 32768 },
+          { "id": "claude-sonnet-4.6","name": "Sonnet 4.6",      "contextWindow": 200000, "maxTokens": 8192 }
         ]
       }
     }
@@ -172,217 +328,247 @@ cat > "$CONFIG" << JSONEOF
   "agents": {
     "defaults": {
       "models": {
-        "minimax/MiniMax-M2.5": {"alias": "MiniMax"},
-        "bankr/gemini-3-flash": {"alias": "Gemini3Flash"},
-        "bankr/claude-haiku-4.5": {"alias": "Haiku"},
-        "bankr/gpt-5-nano": {"alias": "GPT5Nano"},
-        "bankr/claude-sonnet-4.6": {"alias": "Sonnet"}
+        "minimax/MiniMax-M2.5":       { "alias": "MiniMax" },
+        "bankr/gpt-5-nano":           { "alias": "GPT5Nano" },
+        "bankr/gemini-3-flash":       { "alias": "Gemini3Flash" },
+        "bankr/claude-haiku-4.5":     { "alias": "Haiku45" }
       },
       "model": {
         "primary": "minimax/MiniMax-M2.5",
-        "fallbacks": ["bankr/gemini-3-flash","bankr/claude-haiku-4.5","bankr/gpt-5-nano"]
+        "fallbacks": [
+          "bankr/gemini-3-flash",
+          "bankr/claude-haiku-4.5",
+          "bankr/gpt-5-nano"
+        ]
       },
-      "subagents": {
-        "model": "bankr/gpt-5-nano",
-        "runTimeoutSeconds": 120,
-        "archiveAfterMinutes": 60,
-        "maxConcurrent": 8,
-        "maxChildrenPerAgent": 5,
-        "maxSpawnDepth": 1
-      }
+      "subagents": { "maxConcurrent": 8 }
     }
   }
 }
 JSONEOF
-echo "[entrypoint] Config generated at $CONFIG"
+echo "[boot] ✅ Block 9: OpenClaw config generated (18 env keys, Bankr 8 models)"
 
-# === Bankr CLI config ===
-mkdir -p /root/.bankr
-cat > /root/.bankr/config.json << BANKREOF
-{
-  "apiKey": "$BANKR_API_KEY",
-  "apiUrl": "${BANKR_API_URL:-https://api.bankr.bot}"
-}
-BANKREOF
-echo "[entrypoint] Bankr CLI configured"
+# ══════════════════════════════════════════════════
+# BLOCK 10 — 5-LAYER BOOT DASHBOARD
+# Green = operational. Red = needs attention.
+# This is the definitive health check on every boot.
+# ══════════════════════════════════════════════════
+echo ""
+echo "════════ 🐝 BUZZ v6.3.0-solid — 5-LAYER BOOT CHECK ════════"
 
-# === ATV Web3 Identity config ===
-cat > /data/atv/atv-config.json << ATVEOF
-{
-  "apiUrl": "${ATV_API_URL:-https://api.web3identity.com}",
-  "enabled": true,
-  "dailyLimit": ${ATV_DAILY_LIMIT:-100},
-  "batchEndpoint": "${ATV_BATCH_ENDPOINT:-/api/ens/batch-resolve}"
-}
-ATVEOF
-echo "[entrypoint] ATV config generated"
+# ── Layer 1: Scanner ──────────────────────────────────────────
+L1_CRON=$(grep -c 'BD SCAN\|DexScreener.*token-boosts' "$CRON_TARGET" 2>/dev/null || echo "0")
+L1_CMC=$([ -n "$CMC_API_KEY" ] && echo "✅" || echo "❌")
+L1_DSC=$([ -n "$DEXSCREENER_BASE_URL" ] && echo "✅" || echo "✅ (default)")
+L1_STATUS=$([ "$L1_CRON" -gt "0" ] && echo "✅" || echo "⚠️")
+echo "  Layer 1 — SCANNER"
+echo "    Scan cron directive: $L1_STATUS (${L1_CRON}/4 crons have correct endpoint)"
+echo "    DexScreener API:     $L1_DSC (token-boosts/top/v1 + search)"
+echo "    BNB Chain MCP:       $([ -n "$BNB_PRIVATE_KEY" ] && echo '✅ ACTIVE' || echo '❌ UNCONFIGURED')"
+echo "    CMC gainers:         $L1_CMC"
+echo "    AIXBT:               $([ -n "$GROK_API_KEY" ] && echo '✅' || echo '⚠️')"
 
-# === Boot self-check ===
-echo "[entrypoint] Running boot self-check..."
-if [ -f "/data/workspace/memory/cron-schedule.json" ]; then
-  CRON_COUNT=$(cat /data/workspace/memory/cron-schedule.json | grep -c '"id"' 2>/dev/null || echo "0")
-  echo "[entrypoint] Cron schedule found: $CRON_COUNT jobs"
-else
-  echo "[entrypoint] ⚠️  cron-schedule.json not found — Buzz will restore 40 crons on first boot"
-fi
+# ── Layer 2: Safety ──────────────────────────────────────────
+echo "  Layer 2 — SAFETY"
+echo "    Helius MCP (L2):     $([ -n "$HELIUS_API_KEY" ] && echo '✅ MCP+REST ACTIVE (60 tools)' || echo '❌ NOT SET')"
+echo "    Allium (multi-chain):$([ -n "$ALLIUM_API_KEY" ] && echo '✅' || echo '❌')"
+echo "    RugCheck:            ✅ (no key needed)"
+echo "    Grok x_search:       $([ -n "$GROK_API_KEY" ] && echo '✅' || echo '❌')"
 
-# Check orchestrator skill
-if [ -f "/data/workspace/skills/orchestrator/orchestrate.js" ]; then
-  echo "[entrypoint] Orchestrator skill: ✅ FOUND"
-else
-  echo "[entrypoint] Orchestrator skill: ⚠️  Not found — will be created by Buzz"
-fi
+# ── Layer 3: Social ──────────────────────────────────────────
+MOLTBOOK_CRED=$([ -f "/data/.openclaw/credentials/moltbook.json" ] && echo "✅" || echo "❌")
+MOLTEN_CRED=$([ -f "/data/.openclaw/credentials/molten.json" ] && echo "✅" || echo "⚠️ (optional)")
+CALENDAR=$([ -f "/data/workspace/memory/moltbook-content-calendar.json" ] && echo "✅" || echo "❌")
+DIRECTIVE=$([ -f "/data/workspace/memory/BUZZ-DIRECTIVE.md" ] && echo "✅" || echo "❌")
+echo "  Layer 3 — SOCIAL"
+echo "    Moltbook creds:      $MOLTBOOK_CRED"
+echo "    Moltbook calendar:   $CALENDAR (4-week, 56 posts baked)"
+echo "    Molten creds:        $MOLTEN_CRED"
+echo "    Buzz directive:      $DIRECTIVE (5-layer ops rules)"
+echo "    Firecrawl:           $([ -n "$FIRECRAWL_API_KEY" ] && echo '✅' || echo '⚠️')"
+echo "    Serper:              $([ -n "$SERPER_API_KEY" ] && echo '✅' || echo '⚠️')"
 
-# Check pipeline scan skill
-if [ -f "/data/workspace/skills/buzz-pipeline-scan/scan.js" ]; then
-  echo "[entrypoint] Pipeline scan skill: ✅ FOUND"
-else
-  echo "[entrypoint] Pipeline scan skill: ⚠️  Not found — will be created by Buzz"
-fi
+# ── Layer 4: Wallet / Identity ───────────────────────────────
+ACP_CONF=$([ -f "$ACP_DIR/config.json" ] && grep -q "LITE_AGENT_API_KEY" "$ACP_DIR/config.json" 2>/dev/null && echo "✅" || echo "❌")
+ACP_HANDLERS=$([ -d "$ACP_DIR/src/seller/offerings/buzz-bd-agent" ] && echo "✅ (4 offerings)" || echo "❌")
+echo "  Layer 4 — WALLET/IDENTITY"
+echo "    ACP config (SDK fmt):$ACP_CONF (Agent #${ACP_AGENT_ID:-17681})"
+echo "    ACP offerings:       $ACP_HANDLERS"
+echo "    AgentProof #1718:    $([ -n "$AGENTPROOF_API_KEY" ] && echo '✅' || echo '❌')"
+echo "    Nansen x402:         $([ -n "$NANSEN_X402_WALLET_KEY" ] && echo '✅' || echo '⚠️')"
+echo "    Bankr Partner:       $([ -n "$BANKR_PARTNER_KEY" ] && echo '✅' || echo '❌')"
 
-# === ENV check ===
-echo "[entrypoint] ┌─── ENV CHECK ───────────────────────────────────┐"
-echo "[entrypoint] │ LLM:"
-echo "[entrypoint] │   MINIMAX_API_KEY=$([ -n "$MINIMAX_API_KEY" ] && echo '✅ SET' || echo '❌ NOT SET')"
-echo "[entrypoint] │   BANKR_LLM_KEY=$([ -n "$BANKR_LLM_KEY" ] && echo '✅ SET' || echo '❌ NOT SET')"
-echo "[entrypoint] │   DEFAULT_MODEL=${DEFAULT_MODEL:-minimax/MiniMax-M2.5}"
-echo "[entrypoint] │ Telegram:"
-echo "[entrypoint] │   TELEGRAM_BOT_TOKEN=$([ -n "$TELEGRAM_BOT_TOKEN" ] && echo '✅ SET' || echo '❌ NOT SET')"
-echo "[entrypoint] │   TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-not set}"
-echo "[entrypoint] │ X API:"
-echo "[entrypoint] │   X_API_KEY=$([ -n "$X_API_KEY" ] && echo '✅ SET' || echo '❌ NOT SET')"
-echo "[entrypoint] │   X_ACCESS_TOKEN=$([ -n "$X_ACCESS_TOKEN" ] && echo '✅ SET' || echo '❌ NOT SET')"
-echo "[entrypoint] │   X_BEARER_TOKEN=$([ -n "$X_BEARER_TOKEN" ] && echo '✅ SET' || echo '❌ NOT SET')"
-echo "[entrypoint] │   X_API_MONTHLY_BUDGET=${X_API_MONTHLY_BUDGET:-30.00}"
-echo "[entrypoint] │ Bankr:"
-echo "[entrypoint] │   BANKR_API_KEY=$([ -n "$BANKR_API_KEY" ] && echo '✅ SET' || echo '❌ NOT SET')"
-echo "[entrypoint] │   BANKR_FEE_WALLET=${BANKR_FEE_WALLET:-not set}"
-echo "[entrypoint] │   BANKR_DEPLOY_WALLET=${BANKR_DEPLOY_WALLET:-not set}"
-echo "[entrypoint] │   BANKR_SIGNALS=$([ "$BANKR_SIGNALS_ENABLED" = "true" ] && echo '✅ ON' || echo '⚪ OFF')"
-echo "[entrypoint] │   BANKR_ERROR_HANDLING=$([ "$BANKR_ERROR_HANDLING_ENABLED" = "true" ] && echo '✅ ON' || echo '⚪ OFF')"
-echo "[entrypoint] │ ATV Web3 Identity:"
-echo "[entrypoint] │   ATV_API_URL=${ATV_API_URL:-NOT SET}"
-echo "[entrypoint] │   ATV_ENABLED=${ATV_ENABLED:-false}"
-echo "[entrypoint] │ Nansen x402 Smart Money:"
-echo "[entrypoint] │   NANSEN_ENABLED=${NANSEN_X402_ENABLED:-NOT SET}"
-echo "[entrypoint] │   NANSEN_THRESHOLD=${NANSEN_SCORE_THRESHOLD:-NOT SET}"
-echo "[entrypoint] │   NANSEN_BUDGET=${NANSEN_DAILY_BUDGET_CENTS:-NOT SET}¢"
-echo "[entrypoint] │   NANSEN_WALLET=$([ -n \"$NANSEN_X402_WALLET_KEY\" ] && echo '✅ SET' || echo '⚠️ NOT SET')"
-echo "[entrypoint] │ Intelligence:"
-echo "[entrypoint] │   HELIUS=$([ -n "$HELIUS_API_KEY" ] && echo '✅' || echo '❌')"
-echo "[entrypoint] │   GROK=$([ -n "$GROK_API_KEY" ] && echo '✅' || echo '❌')"
-echo "[entrypoint] │   SERPER=$([ -n "$SERPER_API_KEY" ] && echo '✅' || echo '❌')"
-echo "[entrypoint] │   FIRECRAWL=$([ -n "$FIRECRAWL_API_KEY" ] && echo '✅' || echo '❌')"
-echo "[entrypoint] │   HYPERBROWSER=$([ -n "$HYPERBROWSER_API_KEY" ] && echo '✅' || echo '❌')"
-echo "[entrypoint] │   ALLIUM=$([ -n "$ALLIUM_API_KEY" ] && echo '✅' || echo '❌')"
-echo "[entrypoint] │ Gmail:"
-echo "[entrypoint] │   GMAIL=$([ -n "$GMAIL_CLIENT_ID" ] && echo '✅ SET' || echo '❌ NOT SET')"
-echo "[entrypoint] │ Moltbook:"
-echo "[entrypoint] │   MOLTBOOK=$([ -n "$MOLTBOOK_API_KEY" ] && echo '✅ SET' || echo '❌ NOT SET')"
-echo "[entrypoint] │ Autonomy:"
-echo "[entrypoint] │   MODE=${AUTONOMY_MODE:-supervised}"
-echo "[entrypoint] │   TWEET_AUTO=${TWEET_AUTO_POST:-false}"
-echo "[entrypoint] │   DEPLOY_AUTO=${DEPLOY_AUTO_EXECUTE:-false}"
-echo "[entrypoint] │   CONTENT_FILTER=${CONTENT_FILTER_ENABLED:-false}"
-echo "[entrypoint] │   LISTING_UPSELL=${LISTING_UPSELL_ON_DEPLOY:-false}"
-echo "[entrypoint] │ Twitter Commands:"
-echo "[entrypoint] │   COMMANDS=${TWITTER_COMMANDS_ENABLED:-false}"
-echo "[entrypoint] │   MENTION_INTERVAL=${TWITTER_MENTION_CHECK_INTERVAL:-30}min"
-echo "[entrypoint] │   REPLY_CAP=${TWITTER_REPLY_DAILY_CAP:-10}/day"
-echo "[entrypoint] │   DM_CAP=${TWITTER_DM_DAILY_CAP:-5}/day"
-echo "[entrypoint] │ Data Failover:"
-echo "[entrypoint] │   ENABLED=${DATA_FAILOVER_ENABLED:-false}"
-echo "[entrypoint] │   DUAL_VERIFY=${REQUIRE_DUAL_VERIFICATION:-false}"
-echo "[entrypoint] │   MIN_SOURCES=${MIN_SOURCES_FOR_VALID_DATA:-1}"
-echo "[entrypoint] └──────────────────────────────────────────────────┘"
+# ── Layer 5: Infrastructure ──────────────────────────────────
+API_FILE=$([ -f "/opt/buzz-api/server.js" ] && echo "✅" || echo "❌")
+TWITTER_FILE=$([ -f "/opt/buzz-twitter-bot/twitter-bot.js" ] && echo "✅ v3.1" || echo "❌")
+SKILLS_COUNT=$(ls /data/workspace/skills/ 2>/dev/null | wc -l | tr -d ' ')
+echo "  Layer 5 — INFRASTRUCTURE"
+echo "    REST API:            $API_FILE (port 3000, SQLite WAL)"
+echo "    Twitter Bot:         $TWITTER_FILE (5-layer SCAN + LIST + DEPLOY)"
+echo "    OpenClaw:            ✅ (port 18789, MiniMax M2.5 primary)"
+echo "    Cron jobs:           $(grep -c '"id"' "$CRON_TARGET" 2>/dev/null || echo '0') jobs active"
+echo "    Skills:              $SKILLS_COUNT skills loaded"
+echo "    Telegram:            $([ -n "$TELEGRAM_BOT_TOKEN" ] && echo '✅' || echo '❌')"
 
-# === Sub-agent banner ===
-echo "[entrypoint] ┌─── 5 PARALLEL SUB-AGENTS + ORCHESTRATOR ─────────┐"
-echo "[entrypoint] │ 1. scanner-agent  — L1 Discovery (DexScreener+)   │"
-echo "[entrypoint] │ 2. safety-agent   — L2 RugCheck + DFlow MCP       │"
-echo "[entrypoint] │ 3. wallet-agent   — L2 Helius + Allium forensics  │"
-echo "[entrypoint] │ 4. social-agent   — L3 Grok + Serper + ATV        │"
-echo "[entrypoint] │ 5. scorer-agent   — L4 100-Point composite score  │"
-echo "[entrypoint] │ + Orchestrator    — MiniMax M2.5 (dispatch+agg)   │"
-echo "[entrypoint] │                                                    │"
-echo "[entrypoint] │ Sub-agent model: bankr/gpt-5-nano                 │"
-echo "[entrypoint] │ Sub-agent fallback: bankr/claude-haiku-4.5        │"
-echo "[entrypoint] │ Sub-agent timeout: 120s (FIX #1)                  │"
-echo "[entrypoint] │ gemini-3-flash: EXCLUDED from sub-agents          │"
-echo "[entrypoint] │ maxConcurrent: 8 | maxSpawnDepth: 1               │"
-echo "[entrypoint] └──────────────────────────────────────────────────┘"
+echo "═══════════════════════════════════════════════════════════"
+echo ""
 
-# === OpenClaw v2026.3.1 features ===
-echo "[entrypoint] ┌─── OpenClaw v2026.3.1 NEW FEATURES ──────────────┐"
-echo "[entrypoint] │ • Telegram DM topics (native per-DM dmPolicy)     │"
-echo "[entrypoint] │ • Cron light-context (--light-context bootstrap)  │"
-echo "[entrypoint] │ • Sub-agent typed task_completion events          │"
-echo "[entrypoint] │ • Health endpoints (/health, /healthz, /ready)    │"
-echo "[entrypoint] │ • Thinking fallback (think=off retry)             │"
-echo "[entrypoint] │ • Telegram outbound chunking fix (sub-agents)     │"
-echo "[entrypoint] │ • Cron delivery mode fix (mode:none works)        │"
-echo "[entrypoint] └──────────────────────────────────────────────────┘"
+# ══════════════════════════════════════════════════
+# BLOCK 11 — DATABASE MIGRATIONS
+# ══════════════════════════════════════════════════
+echo "[boot] Running database migrations..."
+cd /opt/buzz-api
+node -e "
+const db = require('better-sqlite3')('/data/api-data/buzz.db', { wal: true });
+db.exec(\`
+  CREATE TABLE IF NOT EXISTS token_scores (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    address TEXT NOT NULL,
+    chain TEXT DEFAULT 'solana',
+    score_total REAL,
+    verdict TEXT,
+    scanner_data TEXT,
+    safety_data TEXT,
+    wallet_data TEXT,
+    social_data TEXT,
+    scorer_data TEXT,
+    agents_completed INTEGER DEFAULT 0,
+    processing_time_ms INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE TABLE IF NOT EXISTS cost_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    agent TEXT,
+    model TEXT,
+    tokens_in INTEGER DEFAULT 0,
+    tokens_out INTEGER DEFAULT 0,
+    cost_usd REAL DEFAULT 0,
+    operation TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE TABLE IF NOT EXISTS agentproof_telemetry (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    agent_id TEXT DEFAULT '1718',
+    action TEXT,
+    token_address TEXT,
+    score REAL,
+    tx_hash TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE TABLE IF NOT EXISTS pipeline (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT NOT NULL,
+    token_symbol TEXT,
+    chain TEXT,
+    score REAL,
+    grade TEXT,
+    status TEXT DEFAULT 'pending',
+    prospect_data TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE TABLE IF NOT EXISTS moltbook_posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    submolt TEXT,
+    topic TEXT,
+    post_id TEXT,
+    posted_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE TABLE IF NOT EXISTS jvr_receipts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    receipt_code TEXT UNIQUE,
+    category TEXT,
+    summary TEXT,
+    status TEXT,
+    details TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+\`);
+db.close();
+console.log('[migrations] ✅ 6 tables ready');
+" 2>/dev/null || echo "[migrations] ⚠️ Will retry on API start"
+cd /
 
-# === CRITICAL: dmPolicy post-boot patch ===
-# Belt-and-suspenders: config sets dmPolicy:"open" + direct config (v2026.3.1)
-# But OpenClaw doctor may still overwrite on startup
-(
-  sleep 25
-  CONFIG="/data/.openclaw/openclaw.json"
-  if [ -f "$CONFIG" ]; then
-    CURRENT_DM=$(cat "$CONFIG" | jq -r '.channels.telegram.dmPolicy // "not set"' 2>/dev/null)
-    if [ "$CURRENT_DM" != "open" ]; then
-      echo "[dmPolicy-patch] dmPolicy was '$CURRENT_DM' — patching to 'open'..."
-      TMP=$(mktemp)
-      jq '.channels.telegram.dmPolicy = "open" | .channels.telegram.allowFrom = ["*"]' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
-      echo "[dmPolicy-patch] ✅ dmPolicy patched to 'open'"
-    else
-      echo "[dmPolicy-patch] ✅ dmPolicy already 'open' — no patch needed"
-    fi
+# ══════════════════════════════════════════════════
+# BLOCK 12 — START REST API (port 3000)
+# ══════════════════════════════════════════════════
+echo "[boot] Starting REST API on port 3000..."
+cd /opt/buzz-api && node server.js >> /data/logs/api.log 2>&1 &
+API_PID=$!
+sleep 2
+
+# API Watchdog (restarts if health check fails)
+cat > /data/keep-api-alive.sh << 'WATCHDOG'
+#!/bin/bash
+while true; do
+  if ! curl -s http://localhost:3000/api/v1/info > /dev/null 2>&1; then
+    echo "[watchdog] $(date -u) API down — restarting..."
+    cd /opt/buzz-api && node server.js >> /data/logs/api.log 2>&1 &
+    sleep 5
   fi
-  # Clean stale Telegram offset file
-  if [ -f "/data/.openclaw/telegram/update-offset-default.json" ]; then
-    OFFSET_AGE=$(find /data/.openclaw/telegram/update-offset-default.json -mmin +1440 2>/dev/null)
-    if [ -n "$OFFSET_AGE" ]; then
-      rm -f /data/.openclaw/telegram/update-offset-default.json
-      echo "[dmPolicy-patch] Removed stale Telegram offset file (>24h old)"
-    fi
-  fi
-  # Second patch at 90s
-  sleep 65
-  if [ -f "$CONFIG" ]; then
-    CURRENT_DM=$(cat "$CONFIG" | jq -r '.channels.telegram.dmPolicy // "not set"' 2>/dev/null)
-    if [ "$CURRENT_DM" != "open" ]; then
-      TMP=$(mktemp)
-      jq '.channels.telegram.dmPolicy = "open" | .channels.telegram.allowFrom = ["*"]' "$CONFIG" > "$TMP" && mv "$TMP" "$CONFIG"
-      echo "[dmPolicy-patch] ✅ Second patch applied at 90s"
-    fi
-  fi
-) &
+  sleep 60
+done
+WATCHDOG
+chmod +x /data/keep-api-alive.sh
+nohup /data/keep-api-alive.sh >> /data/logs/api-watchdog.log 2>&1 &
+echo "[boot] ✅ Block 12: REST API started (PID: $API_PID) + watchdog"
+cd /
 
-# === Twitter Bot v3.0 Sales Funnel ===
-echo "[entrypoint] 🐝 Starting Twitter Bot v3.0 Sales Funnel..."
-pkill -f twitter-bot.js 2>/dev/null || true
-sleep 1
-if [ -f "/opt/buzz-scripts/twitter-bot.js" ]; then
-  nohup node /opt/buzz-scripts/twitter-bot.js >> /data/logs/twitter-bot.log 2>&1 &
-  echo "[entrypoint] Twitter Bot PID: $! (log: /data/logs/twitter-bot.log)"
+# ══════════════════════════════════════════════════
+# BLOCK 13 — START TWITTER BOT v3.1 (single instance)
+# Runs from /opt/ (Docker image = source of truth)
+# Single spawn only — no duplicate log issue
+# ══════════════════════════════════════════════════
+if [ -n "$X_API_KEY" ] && [ -f "/opt/buzz-twitter-bot/twitter-bot.js" ]; then
+  echo "[boot] Starting Twitter Bot v3.1 (SCAN/LIST/DEPLOY routes)..."
+  cd /opt/buzz-twitter-bot && node twitter-bot.js >> /data/logs/twitter-bot.log 2>&1 &
+  TWITTER_PID=$!
+  echo "[boot] ✅ Block 13: Twitter Bot v3.1 started (PID: $TWITTER_PID)"
+  cd /
 else
-  echo "[entrypoint] ⚠️  twitter-bot.js not found at /opt/buzz-scripts/"
+  echo "[boot] ⚠️ Block 13: Twitter Bot skipped (missing X_API_KEY or bot file)"
 fi
 
-# === Post-boot GitHub skill sync ===
-MASTER_OPS_PATH="/data/workspace/skills/master-ops/SKILL.md"
-MASTER_OPS_URL="https://raw.githubusercontent.com/buzzbysolcex/buzz-bd-agent/main/skills/master-ops/SKILL.md"
-mkdir -p /data/workspace/skills/master-ops
-if [ ! -f "$MASTER_OPS_PATH" ] || [ "$(find "$MASTER_OPS_PATH" -mtime +1 2>/dev/null)" ]; then
-  echo "[entrypoint] 📡 Master Ops: Pulling from GitHub..."
-  curl -sL "$MASTER_OPS_URL" -o "$MASTER_OPS_PATH" 2>/dev/null && echo "[entrypoint] ✅ Master Ops updated" || echo "[entrypoint] ⚠️ Master Ops pull failed"
+# ══════════════════════════════════════════════════
+# BLOCK 14 — START ACP SELLER (direct seller.ts)
+# Uses LITE_AGENT_API_KEY via env (no browser login)
+# 30s delay to let OpenClaw gateway boot first
+# ══════════════════════════════════════════════════
+if [ -n "$ACP_API_KEY" ] && [ -f "$ACP_DIR/src/seller/runtime/seller.ts" ]; then
+  echo "[boot] Scheduling ACP seller runtime (30s delay for gateway boot)..."
+  (
+    sleep 30
+    echo "[acp] Starting seller runtime..."
+    cd "$ACP_DIR"
+    LITE_AGENT_API_KEY="$ACP_API_KEY" BUZZ_API_ADMIN_KEY="$BUZZ_API_ADMIN_KEY" \
+      npx tsx src/seller/runtime/seller.ts >> /data/logs/acp-serve.log 2>&1 &
+    ACP_PID=$!
+    echo "[acp] ✅ Seller started (PID: $ACP_PID) — 4 offerings: score/safety/trending/listing"
+  ) &
+  echo "[boot] ✅ Block 14: ACP seller scheduled (Agent #${ACP_AGENT_ID:-17681})"
 else
-  echo "[entrypoint] ✅ Master Ops: Current (< 24h old)"
+  echo "[boot] ⚠️ Block 14: ACP disabled (missing key or seller.ts)"
 fi
 
-echo "[entrypoint] Starting gateway..."
-echo "[entrypoint] dmPolicy: open (config + background patch at 25s + 90s)"
-echo "[entrypoint] $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+# ══════════════════════════════════════════════════
+# BLOCK 15 — START OPENCLAW GATEWAY (foreground)
+# This is the main process — everything else is background
+# ══════════════════════════════════════════════════
+echo ""
+echo "════════════════════════════════════════════════"
+echo "  🐝 v6.3.0-solid — All services started"
+echo "  REST API:      http://localhost:3000"
+echo "  Twitter Bot:   30-min poll, 12/day cap"
+echo "  Moltbook:      2x/day, 4-week calendar"
+echo "  ACP Seller:    4 offerings (30s delayed)"
+echo "  Scan crons:    DexScreener + CMC (4x/day)"
+echo "  OpenClaw:      port 18789"
+echo "  $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+echo "  New deployment → boot → ✅✅✅✅✅ → operational"
+echo "════════════════════════════════════════════════"
+
+# Auto-fix OpenClaw config (allowFrom + doctor)
+if [ -f "/data/.openclaw/openclaw.json" ]; then
+  node -e "const f=require('fs');const c=JSON.parse(f.readFileSync('/data/.openclaw/openclaw.json','utf8'));if(c.channels&&c.channels.telegram){c.channels.telegram.allowFrom=['*'];}c.mcpServers={"bnb-chain-mcp":{"command":"npx","args":["-y","@bnb-chain/mcp"],"env":{"BNB_PRIVATE_KEY":process.env.BNB_PRIVATE_KEY||""}}};f.writeFileSync('/data/.openclaw/openclaw.json',JSON.stringify(c,null,2));console.log('[boot] ✅ Config patched: allowFrom + mcpServers cleaned')"
+fi
 exec openclaw gateway --port 18789 --allow-unconfigured

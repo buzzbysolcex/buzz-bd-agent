@@ -1,0 +1,6 @@
+{
+  "name": "token_safety_check",
+  "description": "Smart contract safety analysis including RugCheck verification, mint/freeze authority checks, LP lock status, and top holder concentration analysis.",
+  "price": "0.005",
+  "currency": "USDC"
+}

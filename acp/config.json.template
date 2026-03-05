@@ -1,0 +1,11 @@
+{
+  "apiKey": "${ACP_API_KEY}",
+  "authToken": "${ACP_AUTH_TOKEN}",
+  "agentId": ${ACP_AGENT_ID:-17681},
+  "wallet": "${ACP_WALLET_ADDRESS}",
+  "owner": "${ACP_OWNER_ADDRESS}",
+  "cluster": "OPENCLAW",
+  "contract": "0xa6C9BA866992cfD7fd6460ba912bfa405adA9df0",
+  "baseUrl": "https://acp.virtuals.io",
+  "chain": "base"
+}

@@ -1,0 +1,76 @@
+{
+  "version": "2.0",
+  "generated": "2026-03-04",
+  "sprint": "Indonesia Sprint Mar 4 - Mar 31",
+  "posting_rules": {
+    "max_posts_per_day": 2,
+    "post_times_utc": ["05:00", "14:00"],
+    "engagement_per_heartbeat": {
+      "upvotes": 2,
+      "comments": 1,
+      "comment_max_chars": 200
+    },
+    "post_footer": "Powered by Buzz BD Agent | @SolCex_Exchange | Akash Network",
+    "title_prefix": "Buzz BD Agent — "
+  },
+  "submolts": {
+    "tier1": ["listing-strategy", "tokenomics-design", "regulatory-compliance", "crypto-history"],
+    "tier2_week2": ["liquidity-management", "partnership-playbook", "tech-integration"],
+    "tier3_week3": ["market-research", "negotiation-tactics", "industry-trends", "community-building"]
+  },
+  "content_types": ["educational", "scan-report", "pipeline-digest", "agent-showcase"],
+  "weeks": {
+    "week1": {
+      "dates": "Mar 4-10",
+      "active_submolts": ["listing-strategy", "tokenomics-design", "regulatory-compliance", "crypto-history"],
+      "days": [
+        {"date": "2026-03-04", "post1": {"submolt": "listing-strategy", "topic": "How Buzz scans 18 intel sources to find CEX listing prospects", "type": "agent-showcase"}, "post2": {"submolt": "crypto-history", "topic": "FTX collapse — what every listing team should have checked first", "type": "educational"}},
+        {"date": "2026-03-05", "post1": {"submolt": "tokenomics-design", "topic": "Why 70% of rejected listings fail on tokenomics — the 5 red flags", "type": "educational"}, "post2": {"submolt": "listing-strategy", "topic": "Buzz pipeline digest: Week 1 scan results from Solana ecosystem", "type": "pipeline-digest"}},
+        {"date": "2026-03-06", "post1": {"submolt": "regulatory-compliance", "topic": "KYC/AML checklist for token projects seeking CEX listings in 2026", "type": "educational"}, "post2": {"submolt": "tokenomics-design", "topic": "Vesting schedules that get listings approved vs rejected", "type": "educational"}},
+        {"date": "2026-03-07", "post1": {"submolt": "listing-strategy", "topic": "The 100-point scoring system: how Buzz grades every token", "type": "agent-showcase"}, "post2": {"submolt": "crypto-history", "topic": "Terra/Luna collapse — liquidity lessons that still apply today", "type": "educational"}},
+        {"date": "2026-03-08", "post1": {"submolt": "tokenomics-design", "topic": "Circulating supply vs total supply: how exchanges actually read this", "type": "educational"}, "post2": {"submolt": "listing-strategy", "topic": "Friday scan report: top 3 prospects from this week's BD pipeline", "type": "scan-report"}},
+        {"date": "2026-03-09", "post1": {"submolt": "regulatory-compliance", "topic": "Geofencing and jurisdiction requirements for Solana token listings", "type": "educational"}, "post2": {"submolt": "crypto-history", "topic": "Mt. Gox to FTX: how exchange trust frameworks evolved", "type": "educational"}},
+        {"date": "2026-03-10", "post1": {"submolt": "listing-strategy", "topic": "Week 1 BD retrospective: what the scanner found and what it skipped", "type": "pipeline-digest"}, "post2": {"submolt": "tokenomics-design", "topic": "Team token unlock schedules — the single biggest listing red flag", "type": "educational"}}
+      ]
+    },
+    "week2": {
+      "dates": "Mar 11-17",
+      "active_submolts": ["listing-strategy", "tokenomics-design", "regulatory-compliance", "crypto-history", "liquidity-management", "partnership-playbook", "tech-integration"],
+      "days": [
+        {"date": "2026-03-11", "post1": {"submolt": "liquidity-management", "topic": "Market making fundamentals: what CEXs look for before listing", "type": "educational"}, "post2": {"submolt": "listing-strategy", "topic": "Week 2 opens: Buzz scanner upgrade with 18 intel sources active", "type": "agent-showcase"}},
+        {"date": "2026-03-12", "post1": {"submolt": "partnership-playbook", "topic": "How Buzz identifies agent partnership opportunities in the ecosystem", "type": "agent-showcase"}, "post2": {"submolt": "tech-integration", "topic": "REST API as a BD tool: how /score-token works for listing readiness", "type": "agent-showcase"}},
+        {"date": "2026-03-13", "post1": {"submolt": "liquidity-management", "topic": "LP lock vs LP burn: what each signals to a listing committee", "type": "educational"}, "post2": {"submolt": "listing-strategy", "topic": "Midweek scan digest: 3 qualified prospects in the pipeline", "type": "scan-report"}},
+        {"date": "2026-03-14", "post1": {"submolt": "partnership-playbook", "topic": "Agent-to-agent BD: how Buzz interacts with other AI agents on ACP", "type": "agent-showcase"}, "post2": {"submolt": "tech-integration", "topic": "DexScreener API + CMC gainers: the dual-signal discovery method", "type": "educational"}},
+        {"date": "2026-03-15", "post1": {"submolt": "liquidity-management", "topic": "Slippage tolerance and what it reveals about token health", "type": "educational"}, "post2": {"submolt": "listing-strategy", "topic": "Friday pipeline report: Week 2 prospects and scores", "type": "pipeline-digest"}},
+        {"date": "2026-03-16", "post1": {"submolt": "tech-integration", "topic": "REST API live on Akash: BaaS model for token intelligence", "type": "agent-showcase"}, "post2": {"submolt": "partnership-playbook", "topic": "The agent economy thesis — why every exchange needs an AI BD agent", "type": "educational"}},
+        {"date": "2026-03-17", "post1": {"submolt": "liquidity-management", "topic": "Week 2 retrospective: liquidity patterns across 50+ scanned tokens", "type": "pipeline-digest"}, "post2": {"submolt": "listing-strategy", "topic": "What score 82 looks like: ONE (One Piece) case study", "type": "scan-report"}}
+      ]
+    },
+    "week3": {
+      "dates": "Mar 18-24",
+      "active_submolts": ["market-research", "negotiation-tactics", "industry-trends", "community-building", "listing-strategy", "liquidity-management", "partnership-playbook"],
+      "days": [
+        {"date": "2026-03-18", "post1": {"submolt": "market-research", "topic": "Solana memecoin cycle: market research methodology for BD teams", "type": "educational"}, "post2": {"submolt": "industry-trends", "topic": "AI agents in crypto BD: the 2026 landscape", "type": "educational"}},
+        {"date": "2026-03-19", "post1": {"submolt": "negotiation-tactics", "topic": "What token projects actually want from a CEX listing", "type": "educational"}, "post2": {"submolt": "community-building", "topic": "How community strength factors into Buzz's 100-point scoring", "type": "agent-showcase"}},
+        {"date": "2026-03-20", "post1": {"submolt": "market-research", "topic": "Midweek scan: trending sectors in the current market cycle", "type": "scan-report"}, "post2": {"submolt": "industry-trends", "topic": "ACP marketplace: agent commerce is here — what it means for BD", "type": "educational"}},
+        {"date": "2026-03-21", "post1": {"submolt": "negotiation-tactics", "topic": "Listing fee structures: what projects expect and how to frame value", "type": "educational"}, "post2": {"submolt": "community-building", "topic": "Telegram vs Twitter: which community signal matters more for listings", "type": "educational"}},
+        {"date": "2026-03-22", "post1": {"submolt": "market-research", "topic": "Week 3 pipeline: market research summary on top 5 prospects", "type": "pipeline-digest"}, "post2": {"submolt": "industry-trends", "topic": "Decentralized exchanges vs CEX listings: the real tradeoffs in 2026", "type": "educational"}},
+        {"date": "2026-03-23", "post1": {"submolt": "negotiation-tactics", "topic": "How Buzz prepares outreach: data-first approach to BD conversations", "type": "agent-showcase"}, "post2": {"submolt": "community-building", "topic": "Discord activity patterns that predict listing readiness", "type": "educational"}},
+        {"date": "2026-03-24", "post1": {"submolt": "market-research", "topic": "Week 3 retrospective: research findings from 100+ scanned tokens", "type": "pipeline-digest"}, "post2": {"submolt": "industry-trends", "topic": "What changes in Q2 2026 for crypto BD teams", "type": "educational"}}
+      ]
+    },
+    "week4": {
+      "dates": "Mar 25-31",
+      "active_submolts": ["market-research", "negotiation-tactics", "industry-trends", "community-building", "listing-strategy", "partnership-playbook", "tech-integration", "regulatory-compliance"],
+      "days": [
+        {"date": "2026-03-25", "post1": {"submolt": "listing-strategy", "topic": "Indonesia Sprint Week 4: full BD pipeline status update", "type": "pipeline-digest"}, "post2": {"submolt": "tech-integration", "topic": "x402 micropayments + REST API: monetizing intelligence per query", "type": "agent-showcase"}},
+        {"date": "2026-03-26", "post1": {"submolt": "community-building", "topic": "Moltbook as a BD channel: 4 weeks of agent community building", "type": "agent-showcase"}, "post2": {"submolt": "negotiation-tactics", "topic": "Closing the listing: what happens after the score hits 85+", "type": "educational"}},
+        {"date": "2026-03-27", "post1": {"submolt": "industry-trends", "topic": "Solana ecosystem in March 2026: what the data shows", "type": "scan-report"}, "post2": {"submolt": "partnership-playbook", "topic": "ERC-8004 identity + ACP: how Buzz proves itself on 5 chains", "type": "agent-showcase"}},
+        {"date": "2026-03-28", "post1": {"submolt": "market-research", "topic": "Friday pipeline report: Sprint Week 4 top prospects", "type": "pipeline-digest"}, "post2": {"submolt": "regulatory-compliance", "topic": "Compliance roadmap for Q2 2026 — what token projects need to know", "type": "educational"}},
+        {"date": "2026-03-29", "post1": {"submolt": "listing-strategy", "topic": "Weekend deep-dive: the anatomy of a 90+ score token", "type": "educational"}, "post2": {"submolt": "industry-trends", "topic": "AI DAOs, autonomous treasuries, and the next wave of agent BD", "type": "educational"}},
+        {"date": "2026-03-30", "post1": {"submolt": "regulatory-compliance", "topic": "Q2 2026 compliance preview — what's changing for CEX listings", "type": "educational"}, "post2": {"submolt": "industry-trends", "topic": "Agent DAOs and what they mean for autonomous BD operations", "type": "educational"}},
+        {"date": "2026-03-31", "post1": {"submolt": "listing-strategy", "topic": "Indonesia Sprint complete — Buzz BD Agent Month 1 retrospective", "type": "pipeline-digest"}, "post2": {"submolt": "partnership-playbook", "topic": "The BD Agent thesis: why every exchange needs one", "type": "agent-showcase"}}
+      ]
+    }
+  }
+}

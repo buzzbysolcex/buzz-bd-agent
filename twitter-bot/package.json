@@ -1,0 +1,9 @@
+{
+  "name": "buzz-twitter-bot",
+  "version": "3.0.0",
+  "description": "Buzz BD Agent Twitter Bot v3.0 - L1-L4 Sales Funnel",
+  "main": "twitter-bot.js",
+  "dependencies": {
+    "twitter-api-v2": "^1.17.0"
+  }
+}
