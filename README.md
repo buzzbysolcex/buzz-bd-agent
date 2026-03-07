@@ -1,516 +1,316 @@
-# 🐝 Buzz BD Agent — Autonomous Token Discovery & Listing for SolCex Exchange
+---
+name: solcex-ops-master
+description: >
+  System Operations Manual for Akash container services at SolCex Exchange.
+  v7.1.0 — Indonesia Sprint Day 15 Edition (Mar 7, 2026).
+  OpenClaw 2026.3.2 | 5 Parallel Sub-Agents | Strategic Orchestrator LIVE
+  Decision Engine 12 rules | Playbook Engine PB-001→004 | Context Engine + Supermemory
+  Cost Guard $10/day MiniMax cap | Context Slim 96% token reduction | Cache Pin
+  Notification Filter (18 send / 11 silent) | 18 Crons (trimmed from 38)
+  Twitter Bot v3.1 Sales Funnel | MiniMax M2.5 primary + bankr/gpt-5-nano sub-agents
+  Bankr LLM Gateway (8 models, dual API keys) | 18 cron jobs | 19 intel sources
+  REST API v3.0.0 (72/72 endpoints) LIVE | Sentinel v1.0.2 LIVE + wired
+  JVR receipt system | ACP #17681 | AgentProof #1718 | BSC/BNB Chain MCP
+  Gmail OAuth outreach active | Contract Auditor (L2) | 3-chain pipeline (SOL/BASE/BSC)
+  Supermemory semantic memory LIVE (container: buzz_bd_agent)
+  Reporting rule: every completed task reports to Telegram via JVR receipts.
+---
 
-The first AI Business Development agent operating autonomously 24/7 for a centralized exchange, powered by MiniMax M2.5 on decentralized compute.
+# SYSTEM OPERATIONS MANUAL v7.1.0 — Indonesia Sprint Day 15
 
-![ERC-8004](https://img.shields.io/badge/ERC--8004-Verified-blue) ![Akash](https://img.shields.io/badge/Akash-Deployed-green) ![OpenClaw](https://img.shields.io/badge/OpenClaw-2026.2.26-purple) ![Docker](https://img.shields.io/badge/Docker-GHCR-blue) ![npm](https://img.shields.io/badge/npm-published-red) ![Tests](https://img.shields.io/badge/Tests-602%20passing-brightgreen)
-
-## What Buzz Does
-
-Buzz scans 80+ tokens per session across multiple DEX data sources, runs them through a **5-layer intelligence pipeline** with **5 parallel sub-agents**, scores them on a 100-point system (11 scoring factors), and delivers qualified listing prospects to human BD leads via Telegram — all autonomously, 4x daily.
-
-**SolCex Listing Package:** 15K USDT total (5K fee + 10K liquidity) with professional market making ($450K+ depth), 450+ whale trader airdrop, AMA, and 10-14 day fast-track to go-live.
+> **Technical reference documentation** for all services running in this Akash stack.
+> Updated Mar 7, 2026 from Jakarta, Indonesia.
+> v7.1.0 = Strategic Orchestrator + Supermemory + Cost Guard + Notification Filter
 
 ---
 
-## 🆕 v6.0.19 — What's New (Sprint Day 8, Mar 2, 2026)
+## 1. TEAM CONTACTS
 
-### 🤖 Orchestrated Sub-Agent Pipeline — LIVE ON PRODUCTION
-
-5 parallel sub-agents running autonomously on Akash via OpenClaw `sessions_spawn`:
-
-| Agent | Layer | Function | Model | Weight |
-|-------|-------|----------|-------|--------|
-| **scanner-agent** | L1 Discovery | DexScreener, GeckoTerminal, AIXBT, Boosts | bankr/gpt-5-nano | Entry point |
-| **safety-agent** | L2 Filter | RugCheck, contract verification, instant kills | bankr/gpt-5-nano | 0.30 |
-| **wallet-agent** | L2 Filter | Helius forensics, holder analysis, LP verify | bankr/gpt-5-nano | 0.30 |
-| **social-agent** | L3 Research | Grok sentiment, Serper web search, ATV identity | bankr/gpt-5-nano | 0.20 |
-| **scorer-agent** | L4 Score | 100-point composite aggregation | bankr/gpt-5-nano | 0.20 |
-
-**Orchestrator** (Buzz main on MiniMax M2.5) dispatches all 5 in parallel via `sessions_spawn`, collects announcements, compiles final report to Telegram.
-
-- Sub-agents use **bankr/gpt-5-nano** ($0.10/$0.40 per 1M tokens) — cheapest working model
-- Orchestrator uses **MiniMax M2.5** — reserved for final scoring decisions
-- Fallback chain: gpt-5-nano → claude-haiku-4.5 (no gemini-3-flash — 0 output bug)
-- All 4 scan crons wired to orchestrator: `node /root/.openclaw/workspace/skills/orchestrator/orchestrate.js`
-- First full orchestrated scan: 4/5 agents completed, $GORK scored 48/100 → SKIP
-
-### 🔍 Buzz Pipeline Scan Skill — Created & Wired
-
-- New skill: `/root/.openclaw/workspace/skills/buzz-pipeline-scan/scan.js`
-- L1-L5 pipeline implemented as OpenClaw skill
-- Multi-query DexScreener discovery (new, pump, meme, ai, cat, dog keywords)
-- Filters: MC $10K-$100M, Liquidity >$1K, excludes base assets (SOL, ETH, USDC, etc.)
-- RugCheck integrated for L2 safety
-- Grok + Serper configured for L3 research
-- Results saved to `/data/workspace/memory/pipeline/latest-scan.json`
-- First scan: 81 tokens scanned, 3 WATCH ($GORK, $SPSC, $AI)
-
-### 🏦 Bankr LLM Gateway — Dual API Key Setup
-
-- **Key 1** (`bk_JSCN...`): Partner API (token deploys, agent API)
-- **Key 2** (`bk_M94Y...`): LLM Gateway (sub-agent inference, $15 credits)
-- 8 models available, gpt-5-nano locked as sub-agent default
-- Self-sustaining loop: Token deploy fees → fund LLM credits → power inference → discover more tokens
-
-### 🛡️ AgentProof Integration — In Progress
-
-- Builder Benv1 providing Avalanche contract address for registration
-- API access for live telemetry (task completion rates, uptime, response consistency)
-- Case study collaboration — live autonomous BD agent with cross-chain ERC-8004
-- AVAX funded (0.657 AVAX) for 0.1 AVAX registration bond
-
-### Previous (v6.0.17)
-
-- Bankr LLM Gateway (8 models, self-sustaining inference)
-- Twitter Bot v3.0 Sales Funnel (SCAN/LIST/DEPLOY/TOKEN routes)
-- Removed ClawRouter/OpenRouter/AkashML
-- 40 cron jobs (WIB timezone + Ramadan prayer times)
+| Role | Identity | Responsibility |
+|------|----------|----------------|
+| **Ogie** | Operations Lead, Inflight Chef (Saudia) + BD Lead (SolCex) | Strategy, approvals, manual Twitter, partnerships |
+| **Claude Opus 4.6** | Strategy/ops advisor + dev partner | Documentation, analysis, planning, code, outreach drafts |
+| **Buzz** | Autonomous BD Agent | 24/7 scanning, scoring, strategic decisions, pipeline management |
+| **Sentinel** | Ops Watchdog Agent | 24/7 monitoring of Buzz REST API, alerts on failures |
 
 ---
 
-## Architecture
+## 2. INFRASTRUCTURE
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    MACHINE ECONOMY LAYER                         │
-│                                                                  │
-│  ┌──────────────┐  ┌──────────────┐  ┌────────────────────────┐ │
-│  │  IDENTITY     │  │  PAYMENTS    │  │    INTEROP             │ │
-│  │  ERC-8004     │  │  x402 USDC   │  │  elizaOS plugin        │ │
-│  │  ETH #25045   │  │  zauthx402   │  │  Virtuals ACP          │ │
-│  │  Base #17483  │  │  Bankr LLM   │  │  ClawHub Skill         │ │
-│  │  AVAX (soon)  │  │  Bankr API   │  │  AgentProof (scoring)  │ │
-│  └──────┬───────┘  └──────┬───────┘  └────────┬───────────────┘ │
-│         └─────────────────┼────────────────────┘                 │
-│                           ▼                                      │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │              ORCHESTRATOR (Buzz Main — MiniMax M2.5)       │  │
-│  │                                                             │  │
-│  │  sessions_spawn → 5 parallel sub-agents                    │  │
-│  │  Weighted aggregation → Final score & verdict              │  │
-│  │  Crons #1-4 trigger orchestrated scans 4x daily            │  │
-│  │                                                             │  │
-│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐     │  │
-│  │  │ scanner  │ │ safety   │ │ wallet   │ │ social   │     │  │
-│  │  │ -agent   │ │ -agent   │ │ -agent   │ │ -agent   │     │  │
-│  │  │ L1 Disc. │ │ L2 Filt. │ │ L2 Filt. │ │ L3 Res.  │     │  │
-│  │  │ gpt-5-n  │ │ gpt-5-n  │ │ gpt-5-n  │ │ gpt-5-n  │     │  │
-│  │  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘     │  │
-│  │       └─────────────┴─────────────┴────────────┘            │  │
-│  │                           ▼                                  │  │
-│  │  ┌────────────────────────────────────────────────────┐     │  │
-│  │  │ scorer-agent (L4) → 100-point composite → Verdict  │     │  │
-│  │  │ gpt-5-nano | Weights: safety(0.30) wallet(0.30)    │     │  │
-│  │  │            | social(0.20) scorer(0.20)              │     │  │
-│  │  └────────────────────────────────────────────────────┘     │  │
-│  └────────────────────────┬──────────────────────────────────┘  │
-│                           ▼                                      │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │              BUZZ BD AGENT v6.0.19                         │  │
-│  │                                                             │  │
-│  │  LLM: MiniMax M2.5 + Bankr LLM Gateway (8 model fallback) │  │
-│  │  Sub-agents: 5 parallel (gpt-5-nano) + Orchestrator        │  │
-│  │  Skills: buzz-pipeline-scan + orchestrator + Bankr + more   │  │
-│  │  Intel: 16 Sources (L5 Smart Money) | Crons: 40            │  │
-│  │  Score: 100-pt System (11 factors) | 48 TG Commands        │  │
-│  │  Forensics: Helius + DexScreener + Nansen x402             │  │
-│  │  Identity: ATV Web3 + AgentProof (Avalanche scoring)       │  │
-│  │  Deploy: Bankr Partner API (Base chain token deployment)    │  │
-│  │  Twitter: Bot v3.0 — Sales Funnel (SCAN/LIST/DEPLOY)       │  │
-│  │  Trust: AgentProof 6-signal scoring (integration pending)   │  │
-│  └────────────────────────┬──────────────────────────────────┘  │
-│                           ▼                                      │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │              SOLCEX EXCHANGE                                │  │
-│  │  15K USDT Listing | Market Making | Whale Airdrop          │  │
-│  │  Multi-chain: Solana, Ethereum, BSC, Base                  │  │
-│  │  10-14 Day Fast-Track | Token Deploy via Bankr             │  │
-│  └───────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-```
+| Agent | Version | Provider | External URL | Cost |
+|-------|---------|----------|-------------|------|
+| **Buzz BD Agent** | v7.1.0 | provider.akash-palmito.org | :30299 (API) :30233 (OpenClaw) | ~$5.27/mo |
+| **Sentinel Ops** | v1.0.2 | provider.akashprovid.com | :31949 (API) :31336 (OpenClaw) | ~$1.51/mo |
+| **Total** | | | | **~$7/mo** |
+
+### Buzz v7.1.0 Infrastructure
+
+| Component | Value |
+|-----------|-------|
+| Image | ghcr.io/buzzbysolcex/buzz-bd-agent:v7.1.0 |
+| Runtime | OpenClaw v2026.3.2 |
+| CPU/RAM | 2 cores / 4 GB |
+| Storage | 2 GB root + 10 GB persistent (/data/) |
+| Port 18789 → 30233 | OpenClaw gateway (Telegram) |
+| Port 3000 → 30299 | REST API v3.0.0 (Express + SQLite WAL) |
+| Database | 20 tables (13 core + 5 strategic + 2 system) |
+| REST Endpoints | 72 (64 base + 8 strategy) |
+| Crons | 18 essential |
+| Skills | 20 loaded |
 
 ---
 
-## 5-Layer Intelligence Pipeline
+## 3. STRATEGIC ORCHESTRATOR (v7.1.0 — NEW)
 
-```
-╔══════════════════════════════════════════════════════════════════╗
-║  LAYER 1 — CAST THE NET (Discovery) → scanner-agent            ║
-║  DexScreener API + GeckoTerminal + AIXBT + DexScreener Boosts   ║
-║  Multi-query: new, pump, meme, ai, cat, dog keywords            ║
-║  → 80+ raw candidates per scan (4x daily)                       ║
-╠══════════════════════════════════════════════════════════════════╣
-║                           ↓ FILTER                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║  LAYER 2 — FILTER (Safety & Liquidity) → safety-agent +        ║
-║                                           wallet-agent           ║
-║  RugCheck + Helius Forensics + DFlow MCP                        ║
-║  Instant Kills: Mint not revoked, LP unprotected, mixer-funded   ║
-║  Wallet forensics: deployer age, history, holder concentration   ║
-║  → Kill bad tokens fast, 10-20 survive                          ║
-╠══════════════════════════════════════════════════════════════════╣
-║                           ↓ RESEARCH                             ║
-╠══════════════════════════════════════════════════════════════════╣
-║  LAYER 3 — RESEARCH (Deep Intelligence) → social-agent          ║
-║  Firecrawl + ATV Web3 Identity + Grok Sentiment + Serper         ║
-║  TEAM/COMMUNITY tagging based on deployer identity               ║
-║  → Full research dossier per token                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║                           ↓ SCORE & ROUTE                        ║
-╠══════════════════════════════════════════════════════════════════╣
-║  LAYER 4 — SCORE & ACT (100-Point System) → scorer-agent        ║
-║  85-100 🔥 HOT    → Immediate outreach + full forensics          ║
-║  70-84  ✅ QUAL   → Priority queue + forensics                   ║
-║  50-69  👀 WATCH  → Monitor 48h, rescan                          ║
-║  0-49   ❌ SKIP   → No action                                    ║
-║  Route: Path A (SolCex listing) or Path B (Bankr deploy)         ║
-╠══════════════════════════════════════════════════════════════════╣
-║                           ↓ SMART MONEY (score ≥ 65)             ║
-╠══════════════════════════════════════════════════════════════════╣
-║  LAYER 5 — SMART MONEY (Nansen x402)                            ║
-║  Nansen wallet intelligence via x402 micropayments               ║
-║  Triggers ONLY when L4 score ≥ 65 (budget-aware)                 ║
-║  Adds 0-10 Smart Money bonus to final score                      ║
-║  Daily budget: $0.50/day | Threshold: score ≥ 65                 ║
-╚══════════════════════════════════════════════════════════════════╝
-```
+### 3.1 Decision Engine — 12 Rules
 
----
+| ID | Name | Condition | Action | Auto? |
+|----|------|-----------|--------|-------|
+| R001 | HOT_IMMEDIATE_OUTREACH | Score 85-100, safety PASS | Trigger PB-002 immediately | Yes |
+| R002 | QUALIFIED_PRIORITY_QUEUE | Score 70-84, safety PASS | Queue outreach 24h | Yes |
+| R003 | QUALIFIED_SAFETY_WARNING | Score 70-84, safety WARN | Re-scan + escalate | No → Ogie |
+| R004 | WATCH_MONITOR | Score 50-69 | Watch 48h, rescan | Yes |
+| R005 | SKIP_LOW_SCORE | Score 0-49 | Archive | Yes |
+| R006 | SKIP_SAFETY_FAIL | Safety FAIL any score | Immediate skip | Yes |
+| R007 | FOLLOWUP_NO_REPLY_48H | Contacted 48h, no reply | Follow-up email | Yes |
+| R008 | BREAKUP_NO_REPLY_96H | Contacted 96h, no reply | Breakup email | Yes |
+| R009 | COLD_NO_REPLY_144H | Contacted 144h, no reply | Archive cold, revisit 30d | Yes |
+| R010 | PRICE_DROP_PAUSE | Price -40% 24h | Pause outreach, rescan | Yes → Alert |
+| R011 | NEGOTIATION_REPLY | Reply received | Escalate + PB-003 | No → Ogie |
+| R012 | LISTING_APPROVAL | Terms agreed | Escalate for approval | No → Ogie |
 
-## Sub-Agent Architecture (v6.0.19)
+### 3.2 Playbook Engine — 4 State Machines
 
-Built with **Claude Code + Superpowers** (obra/superpowers) using TDD workflow. 602 tests passing.
+| Playbook | Name | States | Chains To |
+|----------|------|--------|-----------|
+| PB-001 | Discovery → Qualification | DISCOVERED → DEDUP → SCANNING → SCORED → PROSPECT/WATCH/SKIP | PB-002 |
+| PB-002 | Outreach Sequence | PROSPECT → CONTACT_SEARCH → CONTACTED → FOLLOW_UP → BREAKUP → COLD/NEGOTIATING | PB-003 |
+| PB-003 | Negotiation Support | NEGOTIATING → REPLY_ANALYSIS → POSITIVE/QUESTIONS/PUSHBACK/NEGATIVE → DEAL_SHEET → APPROVED | PB-004 |
+| PB-004 | Post-Listing Lifecycle | LISTED → ANNOUNCEMENT → MONITORING → UPSELL/WARNING/STABLE | — |
 
-### How It Works
+### 3.3 Context Engine + Supermemory
 
-1. Cron fires (scan-morning/midday/evening/night)
-2. Orchestrator runs `buzz-pipeline-scan` for L1 discovery
-3. For top candidates, Orchestrator spawns 5 sub-agents via `sessions_spawn`
-4. Each sub-agent runs in isolated session with 60-120s timeout
-5. Sub-agents announce results back to Orchestrator
-6. Orchestrator aggregates weighted scores and compiles Telegram report
+Assembles max 8K tokens per LLM call (was 50K+):
+1. Decision rules (relevant to current stage)
+2. Scoring rubric (condensed)
+3. Token pipeline history
+4. Similar recent tokens
+5. **Supermemory semantic recall (50ms, zero LLM cost)**
+6. Outreach capacity (active/10)
+7. Sub-agent outputs
+8. Listing package (outreach stages only)
 
-### Sub-Agent Config
-
-```json
-{
-  "agents": {
-    "defaults": {
-      "subagents": {
-        "model": "bankr/gpt-5-nano",
-        "runTimeoutSeconds": 60,
-        "archiveAfterMinutes": 60
-      }
-    }
-  }
-}
-```
-
-### Cost Architecture
-
-| Component | Model | Cost | Purpose |
-|-----------|-------|------|---------|
-| Orchestrator | MiniMax M2.5 | ~$41/mo flat | Final decisions, scoring |
-| 5 Sub-agents | bankr/gpt-5-nano | ~$0.10/1M in | Data fetching, parallel work |
-| Fallback | bankr/claude-haiku-4.5 | ~$0.80/1M in | Quality fallback |
-| **Total** | | **~$48/mo** | **Full autonomous BD + parallel intelligence** |
-
----
-
-## Intelligence Sources (16 Sources)
-
-| # | Source | Layer | Status | Data |
-|---|--------|-------|--------|------|
-| 1 | DexScreener API | Discovery | ✅ Working | Token profiles, pairs, boosts, trending |
-| 2 | GeckoTerminal | Discovery | ✅ Working | Market data, volume, liquidity |
-| 3 | AIXBT | Discovery | ✅ Working | Momentum scoring, catalysts |
-| 4 | DexScreener Boosts | Discovery | ✅ Working | Promoted tokens |
-| 5 | RugCheck | Filter | ✅ Working | Contract safety, honeypot detection |
-| 6 | Helius | Filter | ✅ Working | Solana wallet forensics, deployer history |
-| 7 | Allium | Filter | ❌ 404 | 16-chain wallet PnL (endpoint changed) |
-| 8 | DFlow MCP | Filter | ✅ Working | DEX swap routes, liquidity depth |
-| 9 | Firecrawl | Research | ✅ Working | Website scraping for team/roadmap |
-| 10 | ATV Web3 Identity | Research | ✅ LIVE | ENS, Twitter, GitHub, Discord (ETH only) |
-| 11 | Grok x_search | Research | ✅ Working | Real-time X/Twitter sentiment |
-| 12 | Serper | Research | ✅ Working | Web search verification |
-| 13 | X API v2 | Amplification | ✅ LIVE | Tweet/thread auto-reply (Bot v3.0) |
-| 14 | Bankr Partner API | Deploy | ✅ LIVE | Token deployment on Base |
-| 15 | Moltbook | Supporting | ✅ Working | Agent social network |
-| 16 | OpenClaw Sub-agents | Supporting | ✅ **LIVE** | 5 parallel sub-agents via sessions_spawn |
-| 17 | Nansen x402 Smart Money | L5 | ⚠️ ENV Ready | Smart money wallet intelligence |
-
----
-
-## LLM Providers
-
-| Provider | Model | Role | Cost (per 1M tokens) |
-|----------|-------|------|---------------------|
-| MiniMax | M2.5 (229B) | Primary (Orchestrator) | ~$41/mo flat |
-| Bankr/gpt-5-nano | GPT-5 Nano | **Sub-agents default** | $0.10 in / $0.40 out |
-| Bankr/claude-haiku-4.5 | Claude Haiku 4.5 | Sub-agent fallback | $0.80 in / $4.00 out |
-| Bankr/gemini-3-flash | Gemini 3 Flash | ⚠️ 0 output bug | $0.15 in / $0.60 out |
-| Bankr/claude-sonnet-4.6 | Claude Sonnet 4.6 | Premium tasks | $3.00 in / $15.00 out |
-| Bankr/qwen3-coder | Qwen3 Coder | Code tasks | $0.30 in / $1.20 out |
-| Bankr/gpt-5-mini | GPT-5 Mini | General | $0.40 in / $1.60 out |
-| Bankr/gemini-3-pro | Gemini 3 Pro | Complex reasoning | $1.25 in / $10.00 out |
-| Bankr/kimi-k2.5 | Kimi K2.5 | Long context | $0.60 in / $2.40 out |
-
-**Self-sustaining loop:** Token deploy fees → fund LLM credits → power inference → discover more tokens → loop
-
----
-
-## Scoring Engine (100-Point System, 11 Factors)
-
-### Instant Kill (Score = 0)
-- Mint authority NOT revoked
-- LP not locked AND not burned
-- Deployer funded from mixer
-- Deployer has 3+ previous rugs
-- Already listed on Tier 1/2 CEX
-
-### Key Bonuses
-
-| Signal | Points |
-|--------|--------|
-| TEAM TOKEN (identifiable team) | +10 |
-| AIXBT HIGH CONVICTION | +10 |
-| Hackathon/Competition | +10 |
-| Viral moment / KOL mention | +10 |
-| Identity verified (ENS+socials) | +5 |
-| Mint + Freeze revoked | +5 |
-| LP burned | +5 |
-| Audited | +5 |
-| Smart Money signal (Nansen L5) | +0-10 |
-
-### Key Penalties
-
-| Flag | Points |
-|------|--------|
-| COMMUNITY TOKEN (confirmed no team) | -10 |
-| UNVERIFIED-IDENTITY (Solana/ATV gap) | -10 |
-| Freeze authority active | -15 |
-| Top 10 holders >50% | -15 |
-| CEX already listed | -15 |
-| Token age <24h | -10 |
-| LP UNVERIFIED (API failure) | -15 |
-
----
-
-## Twitter Bot v3.0 — Sales Funnel
-
-The Twitter Bot is a **standalone Node.js microservice** running alongside OpenClaw as a background process.
+### 3.4 Supermemory Configuration
 
 | Setting | Value |
 |---------|-------|
-| Scan interval | 15 minutes |
-| Reply cap | 30/day (stress testing) |
-| Deploy cap | 3/day |
-| Rate limit | 30s between replies |
-
-### Four Routes
-
-**ROUTE 1 — SCAN:** `@BuzzBySolCex scan $TICKER` → Full 5-layer Premium report
-
-**ROUTE 2 — LIST:** Reply `LIST` to scan → SolCex listing benefits (pricing in DM only)
-
-**ROUTE 3 — DEPLOY:** Reply `DEPLOY` to scan → Bankr deploy instructions
-
-**ROUTE 4 — TOKEN DETAILS:** Reply `TokenName TICKER "description"` → Bankr CLI executes → Contract address
+| Container | buzz_bd_agent |
+| Auto-Recall | true (5 results per query) |
+| Auto-Capture | true (with security filter) |
+| Profile Frequency | Every 25 turns |
+| Capture Mode | all (filters noise) |
+| Security | 12 regex patterns block: commission, fees, API keys, wallet keys |
+| Plan | Free tier (1M tokens/mo, 10K queries/mo) |
 
 ---
 
-## Revenue Stack
+## 4. COST GUARD
 
-```
-┌─────────────────────────────────────────────────────┐
-│  1. LISTING COMMISSION          $1,000/listing       │
-│     └─ Standard SolCex BD pipeline                   │
-├─────────────────────────────────────────────────────┤
-│  2. BANKR PARTNER FEES          18.05% of 1.2%       │
-│     └─ On every swap of deployed tokens              │
-├─────────────────────────────────────────────────────┤
-│  3. CREATOR FEES (internal)     75.05% of 1.2%       │
-│     └─ When deploying SolCex's own tokens            │
-├─────────────────────────────────────────────────────┤
-│  4. MARKET MAKING (planned)     Spread income         │
-│     └─ Hummingbot integration — Week 3-4             │
-├─────────────────────────────────────────────────────┤
-│  5. BAAS (planned)              Subscription          │
-│     └─ Buzz-as-a-Service for other exchanges         │
-└─────────────────────────────────────────────────────┘
+| Setting | Value |
+|---------|-------|
+| Daily MiniMax cap | $10.00 |
+| Alert threshold | 70% ($7.00) |
+| Throttle model | bankr/gpt-5-nano |
+| Fallback model | bankr/claude-haiku-4.5 |
+| Tracker file | /data/workspace/memory/cost-tracker.json |
+| Cache pin | System prompt warmed on boot |
+| Reset | UTC midnight |
 
-Monthly Target (Conservative):
-  Listing commissions:  $2,000 (2 listings × $1K)
-  Bankr partner fees:   $325 (1 active token, $5K/day volume)
-  Creator fees:         $200 (internal deploys)
-  ─────────────────────────────────────────────
-  TOTAL:                $2,525/mo vs $48/mo costs = 53x ROI
-```
+### Cost Reduction Stack
+
+| Optimization | Before | After | Savings |
+|-------------|--------|-------|---------|
+| Crons | 38 | 18 | 50% fewer orchestrator calls |
+| Input tokens per scan | ~250K | ~9K | 96% reduction |
+| Decision Engine | LLM every time | Rules match (no LLM) | 90% fewer LLM calls |
+| Cache efficiency | 42% reuse | 80%+ reuse | 12.5x cheaper reads |
+| **Daily MiniMax cost** | **$13.49** | **~$3-5 (cap $10)** | **60-75% reduction** |
 
 ---
 
-## On-Chain Identity (ERC-8004)
+## 5. NOTIFICATION FILTER
 
-| Chain | Agent ID | Registry |
-|-------|----------|----------|
-| Ethereum | #25045 | 0x8004A818BFB912233c491871b3d84c89A494BD9e |
-| Base | #17483 | 0x8004A169FB4a3325136EB29fA0ceB6D2e539a432 |
-| Base (anet) | #18709 | 0x8004A169FB4a3325136EB29fA0ceB6D2e539a432 |
-| Avalanche | Pending | AgentProof registration (0.1 AVAX bond funded) |
-| Colosseum | #3734 | Agent Hackathon entry |
+### SEND to Telegram (18 rules)
+- Token scored 70+ (QUALIFIED or HOT)
+- Pipeline stage change
+- Outreach sent / reply received / follow-up due
+- ACP service purchased
+- Cost Guard cap triggered
+- Sentinel HIGH alert
+- Prayer reminders
+- Sprint daily briefing + evening review
 
----
+### SILENT — JVR Only (11 rules)
+- Routine scans below 70
+- Health checks, heartbeats
+- Cron completion confirmations
+- Moltbook/Molten routine posts
+- Pipeline checks with no changes
 
-## Wallets
-
-| Name | Chain | Address | Purpose |
-|------|-------|---------|---------|
-| anet (fee recipient) | Base (EVM) | 0x2Dc03124091104E7798C0273D96FC5ED65F05aA9 | Nansen x402 + Bankr fees + LLM credits |
-| Deploy wallet | Base (EVM) | 0xfa04c7d627ba707a1ad17e72e094b45150665593 | Bankr token deploy |
-| Buzz Base | Base (EVM) | 0x4b362B7db6904A72180A37307191fdDc4eD282Ab | General ops |
-| Lobster | Solana | 5iC7pGyzqpXD2xTK4Ww7zKRDVo9cceyHNeKBTiemo5Jp | Solana ops |
-| AgentProof | Avalanche | (MetaMask — 0.657 AVAX funded) | AgentProof registration |
-
----
-
-## Deployment Stack
-
-| Component | Technology |
-|-----------|------------|
-| Compute | Akash Network — 2 CPU, 4GB RAM, 10GB persistent storage (~$5/mo) |
-| Container | Docker on ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.19 |
-| Base Image | node:22-slim + tini PID 1 |
-| Runtime | OpenClaw v2026.2.26 |
-| Primary LLM | MiniMax M2.5 (229B params) — Orchestrator |
-| Sub-agent LLM | Bankr/gpt-5-nano — 5 parallel agents |
-| Smart Fallback | Bankr LLM Gateway (8 models, $15 credits) |
-| Token Deploy | Bankr Partner API (Base chain, zero gas cost) |
-| Identity Verify | ATV Web3 Identity (3x daily) + AgentProof (Avalanche scoring) |
-| Smart Money | Nansen x402 (L5, budget $0.50/day) |
-| Twitter | Bot v3.0 — Sales Funnel (SCAN/LIST/DEPLOY) |
-| Trust Scoring | AgentProof 6-signal composite (integration pending) |
-| LLM Cost | ~$41/mo MiniMax + ~$2-5/mo Bankr sub-agents |
-| Compute Cost | ~$5/mo |
-| **Total Cost** | **~$48/mo for 24/7 autonomous BD + parallel sub-agents** |
-| Bot | @BuzzBySolCex_bot (Telegram, 48 registered commands) |
-| Crons | 40 autonomous scheduled jobs |
-| Tests | 602 passing |
-| Sub-agents | 5 parallel (scanner, safety, wallet, social, scorer) |
+### Dedup: Same notification not sent twice within 60 minutes
 
 ---
 
-## Telegram Commands (48)
+## 6. SUB-AGENT ARCHITECTURE
 
-| Category | Commands |
-|----------|----------|
-| System (8) | help status health version config memory crons experience |
-| Scanning (8) | scan score search verify trending boosts aixbt rugcheck socials |
-| Pipeline (7) | pipeline report weekly digest alpha listings competitors |
-| Wallet/Intel (5) | wallet forensics whales dflow budget |
-| Outreach (7) | outreach approve reject warmup followup breakup dealsheet postlisting |
-| Bankr Deploy (3) | launch deploys deploy_stats |
-| Twitter/X (3) | tweet thread engage |
-| Personal (2) | prayer sprint |
-| Emergency (5) | sos stop stop_email stop_scan resume |
+| Agent | Layer | Sources | Model | Context |
+|-------|-------|---------|-------|---------|
+| scanner-agent | L1 Discovery | DexScreener, GeckoTerminal, AIXBT, Boosts, CMC, BNB MCP | bankr/gpt-5-nano | ~2K tokens |
+| safety-agent | L2 Filter | RugCheck, DFlow MCP, Contract Auditor (BSC) | bankr/gpt-5-nano | ~1.5K tokens |
+| wallet-agent | L2 Filter | Helius, Allium | bankr/gpt-5-nano | ~1K tokens |
+| social-agent | L3 Research | Grok, Serper, ATV, Firecrawl | bankr/gpt-5-nano | ~1.5K tokens |
+| scorer-agent | L4 Score | 100-point composite (11 factors) | bankr/gpt-5-nano | ~3K tokens |
+
+Context slim files at: /data/workspace/skills/agent-contexts/*.md
 
 ---
 
-## Development Workflow
+## 7. CRON SCHEDULE (18 Active)
+
+### Scanning (8 jobs)
+| Job | Schedule | Description |
+|-----|----------|-------------|
+| scan-trending-00 | 0 0 * * * | Trending tokens (midnight WIB) |
+| scan-trending-06 | 0 6 * * * | Trending tokens (6am WIB) |
+| scan-trending-12 | 0 12 * * * | Trending tokens (noon WIB) |
+| scan-trending-18 | 0 18 * * * | Trending tokens (6pm WIB) |
+| scan-new-pairs | 0 */4 * * * | New token pairs |
+| scan-solana-dex | 30 */4 * * * | Solana DEX scan |
+| scan-base-dex | 30 */6 * * * | Base DEX scan |
+| scan-bsc-dex | 0 */6 * * * | BSC DEX scan |
+
+### Operations (5 jobs)
+| Job | Schedule | Description |
+|-----|----------|-------------|
+| pipeline-status | 0 1 * * * | Daily pipeline report |
+| pipeline-weekly | 0 12 * * 0 | Weekly summary |
+| daily-pipeline | 0 */2 * * * | Pipeline check |
+| morning-reminder | 0 5 * * * | Daily briefing |
+| evening-review | 0 18 * * * | End of day review |
+
+### Prayer (5 jobs)
+| Prayer | WIB | UTC Cron |
+|--------|-----|----------|
+| Fajr | 04:30 | 30 21 * * * |
+| Dhuhr | 11:45 | 45 4 * * * |
+| Asr | 15:00 | 0 8 * * * |
+| Maghrib | 17:45 | 45 10 * * * |
+| Isha | 19:00 | 0 12 * * * |
+
+---
+
+## 8. REST API v3.0.0 — 72 Endpoints
+
+Base URL: http://provider.akash-palmito.org:30299/api/v1
+Auth: X-API-Key: bzz_0S4j71ZWSqTgd_m8JyydXp1uqwmhN6GADi_9MEJmAg0
+
+| Category | Count |
+|----------|-------|
+| Health & System | 6 |
+| Agents | 5 |
+| Pipeline | 9 |
+| Costs | 5 |
+| Crons | 7 |
+| Score Token | 1 |
+| Scoring | 5 |
+| Intel | 5 |
+| Twitter | 5 |
+| Wallets | 6 |
+| Webhooks | 5 |
+| Receipts | 5 |
+| **Strategy (NEW)** | **8** |
+| **Total** | **72** |
+
+### Strategy Endpoints (NEW)
+- POST /strategy/decide — Submit sub-agent outputs, get decision
+- GET /strategy/playbook/:id — Playbook instance state
+- POST /strategy/playbook/:id/advance — Advance playbook
+- GET /strategy/context/:token — Assembled context preview
+- GET /strategy/rules — List 12 decision rules
+- PUT /strategy/rules — Update rules
+- GET /strategy/history — Decision history with reasoning
+- GET /strategy/analytics — Decision quality metrics
+
+---
+
+## 9. REVENUE STACK
+
+| Channel | Rate | Status |
+|---------|------|--------|
+| Listing Commission | $1,000/listing | ✅ Active |
+| Bankr Partner Fees | 18.05% of 1.2% swap | ✅ Active |
+| Creator Fees | 75.05% of 1.2% (own tokens) | ✅ Active |
+| ACP Marketplace | Per-query USDC (4 services) | ✅ Active |
+| BaaS (planned) | Subscription | 🔵 Month 3-6 |
+
+Monthly ops cost: ~$7/mo (Buzz $5.27 + Sentinel $1.51) + ~$3-5/day MiniMax (capped $10)
+Monthly Target: $2,575/mo
+
+---
+
+## 10. SCORING ENGINE (100-Point, 11 Factors)
+
+### Verdicts
+| Score | Verdict | Decision Engine Action |
+|-------|---------|----------------------|
+| 85-100 | HOT | R001: Immediate outreach via PB-002 |
+| 70-84 | QUALIFIED | R002: Queue outreach 24h |
+| 50-69 | WATCH | R004: Monitor 48h, auto-rescan |
+| 0-49 | SKIP | R005: Archive, no action |
+
+---
+
+## 11. SENTINEL OPS AGENT
+
+| Field | Value |
+|-------|-------|
+| Version | v1.0.2 |
+| Provider | provider.akashprovid.com |
+| Buzz target | http://provider.akash-palmito.org:30299 |
+| Crons | 10 health checks |
+| Alert tiers | Silent (all pass) / MEDIUM (something broke) / HIGH (Buzz down) |
+| JVR prefix | SNT- |
+
+---
+
+## 12. DEPLOYMENT WORKFLOW
 
 ```bash
-# Standard: Mac → Docker → GHCR → Akash (never install on Akash)
 cd ~/buzz-bd-agent
-
-# CRITICAL: Always prune before building (Docker Desktop context caching issue)
-docker builder prune -f
-
-# Build (ALWAYS --no-cache for config/version changes)
-docker build --no-cache -t ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.19 .
-
-# Push to GitHub Container Registry
-docker push ghcr.io/buzzbysolcex/buzz-bd-agent:v6.0.19
-
-# Deploy: Akash Console → Close → Create New Deployment → paste SDL → accept bid
-# ALWAYS use unique image tags — Akash providers cache by tag name
+rm -rf api/node_modules api/package-lock.json
+docker build --no-cache -t ghcr.io/buzzbysolcex/buzz-bd-agent:TAG .
+docker push ghcr.io/buzzbysolcex/buzz-bd-agent:TAG
+# Akash Console → Update Deployment (same env) or Close + New (new env vars)
 ```
 
----
-
-## Integrations & Partnerships
-
-### Tier 1 — Active Integrations
-
-| Partner | Integration |
-|---------|------------|
-| Bankr / @bankrbot | Token launch partner API + LLM Gateway (8 models, self-sustaining) |
-| ATV Web3 Identity / Gary Palmer | ENS + deployer identity verification |
-| AgentProof / Builder Benv1 | Trust scoring (Avalanche, 6-signal composite) — integrating |
-| Nansen x402 | L5 Smart Money wallet intelligence (budget-aware) |
-| Helius | Solana wallet forensics |
-| MiniMax | Primary LLM provider |
-| DexScreener | Token discovery API |
-
-### Tier 2 — Active Relationships
-
-| Partner | Status |
-|---------|--------|
-| DFlow | MCP integrated — DEX route verification |
-| ClawdBotATG | Agent Bounty Board — 3 bounties live |
-| OpenClaw | ClawHub marketplace — Buzz-as-a-Service |
-| Virtuals Protocol | ACP registered — 18K+ agent network |
-| elizaOS | PR #263 + npm published |
-| Vitto Rivabella (EF dAI) | ERC-8004 article collaboration |
-| Hummingbot | Market-making integration (planned Week 3-4) |
+Rules: Always increment tag. Always --no-cache. Always delete node_modules before build.
+New ENV vars require Close + New Deployment (Update won't apply new ENV).
 
 ---
 
-## Cost History
-
-| Period | LLM | Daily Cost | Notes |
-|--------|-----|-----------|-------|
-| Feb 3-14 | Claude Opus 4.5 | ~$1,320/day | Prayer reminders costing $5 each |
-| Feb 14-15 | Haiku + Opus fallback | ~$5-10/day | First optimization |
-| Feb 15+ | MiniMax M2.5 | ~$1.37/day | 99.9% cost reduction |
-| Feb 15-28 | MiniMax + ClawRouter | ~$46/mo | Full autonomous BD + deploy |
-| Mar 1+ | MiniMax + Bankr Gateway | ~$48/mo | Self-sustaining LLM (8 model fallback) |
-| **Mar 2+** | **MiniMax + Bankr Sub-agents** | **~$48/mo** | **5 parallel sub-agents on gpt-5-nano** |
-
----
-
-## Version History
+## 13. VERSION HISTORY
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| **v6.0.19** | **Mar 2, 2026** | **5 parallel sub-agents LIVE (scanner/safety/wallet/social/scorer). Orchestrator wired to 4 scan crons. buzz-pipeline-scan skill created. Dual Bankr API keys (Partner + LLM). AgentProof integration started. gpt-5-nano locked for sub-agents. First orchestrated scan: 81 tokens, 4/5 agents completed.** |
-| v6.0.17 | Mar 1, 2026 | Bankr LLM Gateway (8 models). Removed ClawRouter/OpenRouter/AkashML. 40 cron jobs. Self-sustaining inference. |
-| v6.0.13 | Feb 28, 2026 | Twitter Bot v3.0 Sales Funnel. RugCheck scoring fixed. LIST→DM pricing. |
-| v6.0.9 | Feb 28, 2026 | L5 Smart Money (Nansen x402). Twitter Bot v2.3. OpenClaw v2026.2.26. |
-| v6.0.4 | Feb 26, 2026 | ATV Web3 Identity FIXED. 48 Telegram commands. First pipeline test. |
-| v6.0.2 | Feb 26, 2026 | Bankr Partner API live, DexScreener API fix, persistent storage. |
-| v6.0-alpha | Feb 24, 2026 | 602 tests, 7 sub-agents built with Claude Code + Superpowers. |
+| **v7.1.0** | **Mar 7, 2026** | **Strategic Orchestrator + Supermemory + Cost Guard + Context Slim + Notification Filter + Cron cleanup 38→18. 72 endpoints, 20 tables. Full autonomous BD pipeline.** |
+| v6.3.6 | Mar 7, 2026 | Pipeline auto-persist fix, health/db bug fix |
+| v6.3.5 | Mar 5, 2026 | REST API 64/64 LIVE, Gmail OAuth, Sentinel wired |
+| v6.3.0 | Mar 4, 2026 | Solid foundation, 40 crons, Twitter Bot v3.1 |
+| v6.0.19 | Mar 2, 2026 | 5 parallel sub-agents LIVE, orchestrator |
+| v6.0.17 | Mar 1, 2026 | Bankr LLM Gateway, self-sustaining inference |
 
 ---
 
-## Principles
+*"Identity first. Intelligence deep. Commerce autonomous. Cost disciplined. Strategy embedded. Memory persistent."*
 
-1. **Free first, pay for alpha.** — Free intelligence sources before paid
-2. **On-chain track record IS credibility.** — Clawbal, ERC-8004, AgentProof, verifiable
-3. **Inbound > Warm > Cold. Always.** — Build reputation so projects come to us
-4. **The intel is the hook. The relationship is the close.** — Buzz discovers, Ogie closes
-5. **Layer the intelligence. Don't spray and pray.** — 5 layers, every token through all
-6. **Partnership not dependency.** — Distribution channels, not platform locks
-7. **USDC primary.** — Other tokens for utility only
-8. **Deploy from Telegram.** — Token launch is now a single command
-9. **Parallelize the intelligence. Orchestrate the action.** — 5 sub-agents, 1 orchestrator
-10. **Self-sustaining inference.** — Revenue funds LLM credits, LLM powers revenue
-11. **Ship from anywhere.** — Docker + Akash + Telegram = deploy from any timezone
-12. **Pipeline discipline > chasing one token.** — Flag, WATCH, move on
-13. **Talk is cheap, just go build.** — @1bcmax wisdom
-
----
-
-Powered by [OpenClaw](https://openclaw.ai) • Deployed on [Akash Network](https://akash.network) • ERC-8004 Verified • AgentProof Scored
-
-*"Identity first. Intelligence deep. Commerce autonomous. Cost disciplined. Self-sustaining. Parallel. Deploy from Telegram."*
-
-#USDC #AgenticCommerce #Solana #AI #SolCex #BuzzBD #Base #ERC8004 #MachineEconomy #OpenClaw #Bankr #NansenX402 #AgentProof
+*Updated: Mar 7, 2026 | Jakarta, Indonesia | Sprint Day 15*
