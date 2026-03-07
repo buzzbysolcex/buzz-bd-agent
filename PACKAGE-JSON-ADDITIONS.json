@@ -1,0 +1,26 @@
+{
+  "NOTE": "MERGE these into your existing api/package.json — do NOT replace it",
+  
+  "scripts_to_add": {
+    "test": "jest --verbose",
+    "test:strategic": "jest api/__tests__/strategic.test.js --verbose",
+    "test:watch": "jest --watch"
+  },
+  
+  "devDependencies_to_add": {
+    "jest": "^29.7.0"
+  },
+  
+  "dependencies_already_present": {
+    "better-sqlite3": "should already be in your package.json",
+    "express": "should already be in your package.json"
+  },
+  
+  "jest_config_to_add_to_package_json": {
+    "jest": {
+      "testEnvironment": "node",
+      "testMatch": ["**/__tests__/**/*.test.js"],
+      "verbose": true
+    }
+  }
+}

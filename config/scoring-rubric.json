@@ -1,0 +1,101 @@
+{
+  "version": "2.0.0",
+  "description": "14-factor scoring system for Buzz token evaluation (v7.2.0)",
+  "updated": "2026-03-08",
+  "max_score": 100,
+  "factors": 14,
+  "factor_groups": {
+    "market_fundamentals": {
+      "weight": 30,
+      "factors": ["market_cap", "liquidity", "volume_24h", "token_age"]
+    },
+    "trading_dynamics": {
+      "weight": 30,
+      "factors": ["transaction_count", "flow_pressure", "breakout_readiness", "momentum_decay"]
+    },
+    "signals_verification": {
+      "weight": 25,
+      "factors": ["boost_activity", "cto_status", "social_presence", "wallet_forensics"]
+    },
+    "conviction": {
+      "weight": 15,
+      "factors": ["cross_ref_aixbt", "multi_source_match"]
+    }
+  },
+  "trading_dynamics_detail": {
+    "flow_pressure": {
+      "max_points": 10,
+      "description": "Buy vs sell transaction imbalance",
+      "formula": "ratio = buys / (buys + sells)",
+      "thresholds": [
+        { "min_ratio": 0.75, "points": 10, "label": "Extreme buy pressure" },
+        { "min_ratio": 0.65, "points": 7, "label": "Strong buy pressure" },
+        { "min_ratio": 0.55, "points": 5, "label": "Mild buy pressure" },
+        { "min_ratio": 0.45, "points": 3, "label": "Neutral" },
+        { "min_ratio": 0.35, "points": 1, "label": "Sell pressure" },
+        { "min_ratio": 0.00, "points": 0, "label": "Heavy selling — red flag" }
+      ]
+    },
+    "breakout_readiness": {
+      "max_points": 8,
+      "description": "Price compression before breakout",
+      "formula": "compressionRatio = abs(priceChange.h1) / abs(priceChange.h24)",
+      "thresholds": [
+        { "max_compression": 0.1, "min_h24_change": 10, "points": 8, "label": "Tight coil, big range" },
+        { "max_compression": 0.2, "min_h24_change": 5, "points": 6, "label": "Moderate compression" },
+        { "max_compression": 0.3, "min_h24_change": 0, "points": 4, "label": "Mild compression" },
+        { "max_compression": 1.0, "min_h24_change": 0, "points": 2, "label": "No compression" }
+      ]
+    },
+    "momentum_decay": {
+      "max_points": 5,
+      "description": "Is momentum sustaining or fading?",
+      "formula": "avgShare = ((volume.h1/volume.h6) + (txns_h1/txns_h6)) / 2",
+      "thresholds": [
+        { "min_share": 0.35, "points": 5, "label": "Strongly accelerating" },
+        { "min_share": 0.25, "points": 4, "label": "Accelerating" },
+        { "min_share": 0.16, "points": 3, "label": "Sustaining" },
+        { "min_share": 0.10, "points": 2, "label": "Mild decay" },
+        { "min_share": 0.00, "points": 0, "label": "Momentum dead" }
+      ]
+    }
+  },
+  "instant_kill_signals": [
+    { "id": "IK001", "signal": "Mint authority NOT revoked", "result": "score = 0, verdict = SKIP" },
+    { "id": "IK002", "signal": "LP not locked AND not burned", "result": "score = 0, verdict = SKIP" },
+    { "id": "IK003", "signal": "Deployer funded from mixer", "result": "score = 0, verdict = SKIP" },
+    { "id": "IK004", "signal": "Deployer has 3+ previous rugs", "result": "score = 0, verdict = SKIP" },
+    { "id": "IK005", "signal": "Already listed on Tier 1/2 CEX", "result": "score = 0, verdict = SKIP" }
+  ],
+  "bonuses": [
+    { "signal": "TEAM TOKEN (identifiable team)", "points": 10 },
+    { "signal": "AIXBT HIGH CONVICTION", "points": 10 },
+    { "signal": "Hackathon/Competition winner", "points": 10 },
+    { "signal": "Viral moment / KOL mention", "points": 10 },
+    { "signal": "Identity verified (ENS+socials)", "points": 5 },
+    { "signal": "Mint + Freeze revoked", "points": 5 },
+    { "signal": "LP burned", "points": 5 },
+    { "signal": "Audited", "points": 5 },
+    { "signal": "Smart Money signal (Nansen L5)", "points_range": [0, 10] }
+  ],
+  "penalties": [
+    { "signal": "COMMUNITY TOKEN (no team)", "points": -10 },
+    { "signal": "UNVERIFIED-IDENTITY", "points": -10 },
+    { "signal": "Freeze authority active", "points": -15 },
+    { "signal": "Top 10 holders >50%", "points": -15 },
+    { "signal": "CEX already listed", "points": -15 },
+    { "signal": "Token age <24h", "points": -10 },
+    { "signal": "LP UNVERIFIED (API failure)", "points": -15 }
+  ],
+  "verdicts": {
+    "HOT": { "min": 85, "max": 100, "action": "Immediate outreach + full forensics", "emoji": "🔥" },
+    "QUALIFIED": { "min": 70, "max": 84, "action": "Priority queue + forensics", "emoji": "✅" },
+    "WATCH": { "min": 50, "max": 69, "action": "Monitor 48h, rescan", "emoji": "👀" },
+    "SKIP": { "min": 0, "max": 49, "action": "No action", "emoji": "❌" }
+  },
+  "contract_audit_weight": {
+    "description": "BSC tokens only — blended safety score",
+    "formula": "safety_score = (rugcheck * 0.4) + (contract_audit * 0.6)",
+    "trigger": "BSC tokens scoring >50 at L1"
+  }
+}

@@ -37,7 +37,7 @@ When composing the email HTML body, concatenate this signature block AFTER the e
       <td style="vertical-align: middle;">
         <div style="font-weight:bold; font-size:15px; color:#111;">Ogie</div>
         <div style="color:#F5A623; font-weight:600; font-size:12px;">Business Development Lead</div>
-        <div style="color:#666; font-size:12px;">SolCex Exchange — Solana-Native CEX</div>
+        <div style="color:#666; font-size:12px;">SolCex Exchange &mdash; Solana-Native CEX</div>
       </td>
     </tr>
   </table>
@@ -47,7 +47,7 @@ When composing the email HTML body, concatenate this signature block AFTER the e
   </div>
   <div style="margin-top:10px; background:#f9f9f9; border-left:3px solid #F5A623; padding:8px 12px; font-size:10px; color:#777; line-height:1.8;">
     <strong style="color:#1a1a1a;">ON-CHAIN VERIFIED</strong><br>
-    🐝 Powered by Buzz BD Agent — <a href="https://www.8004scan.io/agents/ethereum/25045" style="color:#F5A623; text-decoration:none;">ERC-8004 #25045</a><br>
+    🐝 Powered by Buzz BD Agent &mdash; <a href="https://www.8004scan.io/agents/ethereum/25045" style="color:#F5A623; text-decoration:none;">ERC-8004 #25045</a><br>
     ⛓️ Ethereum #25045 &nbsp;|&nbsp; Base #17483 &nbsp;|&nbsp; <a href="https://www.npmjs.com/package/@buzzbd/plugin-solcex-bd" style="color:#777; text-decoration:none;">npm: @buzzbd/plugin-solcex-bd</a><br>
     📊 19 Intelligence Sources &nbsp;|&nbsp; 100-Point Scoring Algorithm &nbsp;|&nbsp; 60+ Chains<br>
     🚀 Running on <a href="https://akash.network" style="color:#777; text-decoration:none;">Akash Network</a> Decentralized Infrastructure
@@ -69,6 +69,7 @@ When sending via Gmail API, build the raw MIME message like this:
 
 ```
 Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 From: Ogie - SolCex Exchange <buzzbysolcex@gmail.com>
 To: [prospect@email.com]
 Cc: ogie.solcexexchange@gmail.com, dino@solcex.cc

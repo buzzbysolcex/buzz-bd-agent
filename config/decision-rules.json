@@ -1,0 +1,243 @@
+{
+  "version": "2.0.0",
+  "description": "Decision rules for Buzz Strategic Orchestrator v7.2.0",
+  "updated": "2026-03-08",
+  "rules": [
+    {
+      "id": "R001",
+      "name": "HOT_IMMEDIATE_OUTREACH",
+      "priority": 1,
+      "condition": {
+        "score_min": 85,
+        "score_max": 100,
+        "safety_status": "PASS",
+        "pipeline_stage": "scored"
+      },
+      "action": "IMMEDIATE_OUTREACH",
+      "playbook": "PB-002",
+      "description": "Score 85-100 with safety PASS = trigger outreach sequence immediately",
+      "auto_execute": true,
+      "escalate_to_ogie": false
+    },
+    {
+      "id": "R002",
+      "name": "QUALIFIED_PRIORITY_QUEUE",
+      "priority": 2,
+      "condition": {
+        "score_min": 70,
+        "score_max": 84,
+        "safety_status": "PASS",
+        "pipeline_stage": "scored"
+      },
+      "action": "QUEUE_PRIORITY",
+      "playbook": "PB-002",
+      "description": "Score 70-84 with safety PASS = queue for outreach within 24h",
+      "auto_execute": true,
+      "escalate_to_ogie": false,
+      "delay_hours": 24
+    },
+    {
+      "id": "R003",
+      "name": "QUALIFIED_SAFETY_WARNING",
+      "priority": 3,
+      "condition": {
+        "score_min": 70,
+        "score_max": 84,
+        "safety_status": "WARN",
+        "pipeline_stage": "scored"
+      },
+      "action": "INVESTIGATE",
+      "playbook": null,
+      "description": "Score 70-84 but safety WARN = re-run safety + wallet with deeper scan, escalate",
+      "auto_execute": false,
+      "escalate_to_ogie": true,
+      "re_scan_agents": [
+        "safety-agent",
+        "wallet-agent"
+      ]
+    },
+    {
+      "id": "R004",
+      "name": "WATCH_MONITOR",
+      "priority": 4,
+      "condition": {
+        "score_min": 50,
+        "score_max": 69,
+        "safety_status": "*",
+        "pipeline_stage": "scored"
+      },
+      "action": "WATCH_48H",
+      "playbook": null,
+      "description": "Score 50-69 = set rescan timer, monitor price/volume for 48h",
+      "auto_execute": true,
+      "escalate_to_ogie": false,
+      "rescan_hours": 48
+    },
+    {
+      "id": "R005",
+      "name": "SKIP_LOW_SCORE",
+      "priority": 5,
+      "condition": {
+        "score_min": 0,
+        "score_max": 49,
+        "safety_status": "*",
+        "pipeline_stage": "scored"
+      },
+      "action": "SKIP",
+      "playbook": null,
+      "description": "Score below 50 = archive to rejected, log reason",
+      "auto_execute": true,
+      "escalate_to_ogie": false
+    },
+    {
+      "id": "R006",
+      "name": "SKIP_SAFETY_FAIL",
+      "priority": 0,
+      "condition": {
+        "score_min": 0,
+        "score_max": 100,
+        "safety_status": "FAIL",
+        "pipeline_stage": "*"
+      },
+      "action": "SKIP",
+      "playbook": null,
+      "description": "Safety FAIL at any score = immediate skip, no exceptions",
+      "auto_execute": true,
+      "escalate_to_ogie": false
+    },
+    {
+      "id": "R007",
+      "name": "FOLLOWUP_NO_REPLY_48H",
+      "priority": 6,
+      "condition": {
+        "pipeline_stage": "contacted",
+        "hours_since_contact_min": 48,
+        "hours_since_contact_max": 95,
+        "reply_received": false
+      },
+      "action": "FOLLOW_UP",
+      "playbook": "PB-002",
+      "description": "Contacted but no reply after 48h = send follow-up email (template 2)",
+      "auto_execute": true,
+      "escalate_to_ogie": false,
+      "email_template": "follow-up"
+    },
+    {
+      "id": "R008",
+      "name": "BREAKUP_NO_REPLY_96H",
+      "priority": 7,
+      "condition": {
+        "pipeline_stage": "contacted",
+        "hours_since_contact_min": 96,
+        "hours_since_contact_max": 143,
+        "reply_received": false
+      },
+      "action": "BREAKUP",
+      "playbook": "PB-002",
+      "description": "No reply after 96h = send breakup email (template 3)",
+      "auto_execute": true,
+      "escalate_to_ogie": false,
+      "email_template": "breakup"
+    },
+    {
+      "id": "R009",
+      "name": "COLD_NO_REPLY_144H",
+      "priority": 8,
+      "condition": {
+        "pipeline_stage": "contacted",
+        "hours_since_contact_min": 144,
+        "reply_received": false
+      },
+      "action": "ARCHIVE_COLD",
+      "playbook": null,
+      "description": "No reply after 144h (6 days) = archive as cold, revisit in 30 days",
+      "auto_execute": true,
+      "escalate_to_ogie": false,
+      "revisit_days": 30
+    },
+    {
+      "id": "R010",
+      "name": "PRICE_DROP_PAUSE",
+      "priority": 0,
+      "condition": {
+        "price_change_24h_max": -40,
+        "pipeline_stage": [
+          "prospect",
+          "contacted"
+        ]
+      },
+      "action": "PAUSE_OUTREACH",
+      "playbook": null,
+      "description": "Token price drops >40% in 24h = hold all comms, rescan in 24h",
+      "auto_execute": true,
+      "escalate_to_ogie": true,
+      "rescan_hours": 24
+    },
+    {
+      "id": "R011",
+      "name": "NEGOTIATION_REPLY",
+      "priority": 1,
+      "condition": {
+        "pipeline_stage": "contacted",
+        "reply_received": true
+      },
+      "action": "ESCALATE_NEGOTIATION",
+      "playbook": "PB-003",
+      "description": "Reply received from token team = escalate to Ogie + trigger PB-003",
+      "auto_execute": false,
+      "escalate_to_ogie": true
+    },
+    {
+      "id": "R012",
+      "name": "LISTING_APPROVAL",
+      "priority": 0,
+      "condition": {
+        "pipeline_stage": "negotiating",
+        "terms_agreed": true
+      },
+      "action": "ESCALATE_LISTING",
+      "playbook": "PB-004",
+      "description": "Terms agreed during negotiation = ALWAYS escalate to Ogie for final approval",
+      "auto_execute": false,
+      "escalate_to_ogie": true
+    },
+    {
+      "id": "R013",
+      "name": "BREAKOUT_ALERT",
+      "priority": 1,
+      "condition": {
+        "breakout_readiness_min": 8,
+        "score_min": 70,
+        "safety_status": "PASS",
+        "pipeline_stage": "scored"
+      },
+      "action": "FAST_TRACK_OUTREACH",
+      "playbook": "PB-002",
+      "description": "Breakout readiness >= 8 AND score >= 70 = fast-track to outreach, skip 24h queue",
+      "auto_execute": true,
+      "escalate_to_ogie": false
+    }
+  ],
+  "global_constraints": {
+    "max_active_outreach": 10,
+    "max_emails_per_day": 5,
+    "min_score_for_outreach": 70,
+    "min_score_for_watch": 50,
+    "ogie_approval_required": [
+      "listing",
+      "terms_commitment",
+      "price_negotiation"
+    ],
+    "never_share_publicly": [
+      "commission_rate",
+      "internal_pricing",
+      "api_keys",
+      "wallet_private_keys"
+    ],
+    "chains_supported": [
+      "solana",
+      "base",
+      "bsc"
+    ]
+  }
+}
