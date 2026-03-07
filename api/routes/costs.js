@@ -9,8 +9,47 @@
  */
 
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const router = express.Router();
 const { getDB } = require('../db');
+
+// ─── Helper: read cost-tracker.json ─────────────
+function readCostTracker() {
+  const base = process.env.BUZZ_DATA_DIR || '/data';
+  const trackerPath = path.join(base, 'workspace/memory/cost-tracker.json');
+  try {
+    return JSON.parse(fs.readFileSync(trackerPath, 'utf8'));
+  } catch {
+    return {
+      date: new Date().toISOString().slice(0, 10),
+      daily_total: 0,
+      calls_minimax: 0,
+      calls_bankr_fallback: 0,
+      alert_70pct_sent: false,
+      alert_cap_sent: false,
+      by_agent: {}
+    };
+  }
+}
+
+// ─── GET /summary ───────────────────────────────
+router.get('/summary', (req, res) => {
+  const tracker = readCostTracker();
+  const dailyCap = 10.00;
+  const dailyTotal = tracker.daily_total || 0;
+
+  res.json({
+    date: tracker.date,
+    daily_total: dailyTotal,
+    daily_cap: dailyCap,
+    remaining: Math.max(0, dailyCap - dailyTotal),
+    pct_used: dailyCap > 0 ? Math.round((dailyTotal / dailyCap) * 10000) / 100 : 0,
+    throttled: tracker.alert_cap_sent || dailyTotal >= dailyCap,
+    calls_minimax: tracker.calls_minimax || 0,
+    calls_bankr: tracker.calls_bankr_fallback || 0
+  });
+});
 
 // ─── GET / ───────────────────────────────────────────
 router.get('/', (req, res) => {
@@ -68,26 +107,12 @@ router.get('/by-model', (req, res) => {
 
 // ─── GET /by-agent ───────────────────────────────────
 router.get('/by-agent', (req, res) => {
-  const db = getDB();
-  const period = req.query.period || '24h';
-  const periodMap = { '1h': '-1 hour', '24h': '-1 day', '7d': '-7 days', '30d': '-30 days', 'all': '-100 years' };
-  const interval = periodMap[period] || '-1 day';
+  const tracker = readCostTracker();
+  const byAgent = tracker.by_agent || {};
 
-  const agents = db.prepare(`
-    SELECT 
-      agent_name,
-      COUNT(*) as requests,
-      SUM(input_tokens + output_tokens) as total_tokens,
-      ROUND(SUM(cost_usd), 4) as cost_usd,
-      ROUND(AVG(duration_ms), 0) as avg_ms,
-      MAX(created_at) as last_activity
-    FROM cost_logs 
-    WHERE created_at > datetime('now', ?)
-    GROUP BY agent_name
-    ORDER BY cost_usd DESC
-  `).all(interval);
+  const agents = Object.entries(byAgent).map(([name, cost]) => ({ name, cost }));
 
-  res.json({ period, agents });
+  res.json({ period: tracker.date, agents });
 });
 
 // ─── GET /trends ─────────────────────────────────────

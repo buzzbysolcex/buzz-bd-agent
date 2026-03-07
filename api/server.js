@@ -1,6 +1,6 @@
 /**
  * Buzz BD Agent — REST API Server
- * v2.1.0 | Express + SQLite WAL | 64 Endpoints
+ * v3.0.0 | Express + SQLite WAL | 72 Endpoints
  * 
  * Runs alongside OpenClaw gateway on port 3000
  * OpenClaw handles agent orchestration on 18789
@@ -11,6 +11,9 @@
  * v2.1.0 → Boot sync fix (Day 11) — pipeline + crons populate from persistent storage
  *          FIX: /api/v1/pipeline/ no longer returns empty
  *          FIX: /api/v1/crons/ no longer returns empty
+ * v3.0.0 → 72 endpoints (Day 14) — Strategic Orchestrator v7.0
+ *          8 new /api/v1/strategy/* endpoints
+ *          Decision Engine + Playbook Engine + Context Engine
  */
 
 const express = require('express');
@@ -21,7 +24,7 @@ const { initDB, getDB } = require('./db');
 const { apiKeyAuth } = require('./middleware/auth');
 const { rateLimit } = require('./middleware/rateLimit');
 
-// Route imports — ALL 11 route files
+// Route imports — ALL 12 route files
 const healthRoutes = require('./routes/health');
 const agentRoutes = require('./routes/agents');
 const pipelineRoutes = require('./routes/pipeline');
@@ -33,6 +36,12 @@ const twitterRoutes = require('./routes/twitter');
 const walletRoutes = require('./routes/wallets');
 const webhookRoutes = require('./routes/webhooks');
 const receiptRoutes = require('./routes/receipts');
+const strategyRoutes = require('./routes/strategy');
+
+// v7.0 Strategic Orchestrator engines
+const ContextEngine = require('./lib/context-engine');
+const DecisionEngine = require('./lib/decision-engine');
+const PlaybookEngine = require('./lib/playbook-engine');
 
 const app = express();
 const PORT = process.env.BUZZ_API_PORT || 3000;
@@ -57,7 +66,7 @@ app.use('/api/v1/health', healthRoutes);
 app.get('/api/v1/info', (req, res) => {
   res.json({
     name: 'Buzz BD Agent API',
-    version: '2.1.0',
+    version: '3.0.0',
     agent: 'Buzz by SolCex',
     architecture: '5 parallel sub-agents + orchestrator',
     sub_agents: ['scanner-agent', 'safety-agent', 'wallet-agent', 'social-agent', 'scorer-agent'],
@@ -67,7 +76,7 @@ app.get('/api/v1/info', (req, res) => {
     intel_sources: '19/19 connected',
     cron_jobs: 40,
     endpoints: {
-      total: 64,
+      total: 72,
       categories: {
         health: 5,
         info: 1,
@@ -81,7 +90,8 @@ app.get('/api/v1/info', (req, res) => {
         twitter: 5,
         wallets: 6,
         webhooks: 5,
-        receipts: 5
+        receipts: 5,
+        strategy: 8
       }
     },
     documentation: 'https://github.com/buzzbysolcex/buzz-bd-agent',
@@ -109,23 +119,7 @@ app.use('/api/v1/wallets', apiKeyAuth, walletRoutes);
 app.use('/api/v1/webhooks', apiKeyAuth, webhookRoutes);
 app.use('/api/v1/receipts', apiKeyAuth, receiptRoutes);
 
-// ─── 404 Handler ─────────────────────────────────────
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'not_found',
-    message: `Route ${req.method} ${req.path} does not exist`,
-    docs: '/api/v1/info'
-  });
-});
-
-// ─── Error Handler ───────────────────────────────────
-app.use((err, req, res, next) => {
-  console.error(`[API ERROR] ${err.message}`, err.stack);
-  res.status(err.status || 500).json({
-    error: 'internal_error',
-    message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message
-  });
-});
+// NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 
 // ═════════════════════════════════════════════════════
 // BOOT SYNC — v2.1.0 fix
@@ -308,11 +302,39 @@ async function start() {
     const cronsSynced = syncCronsOnBoot();
     console.log(`[Boot Sync] ✓ Complete — ${pipelineSynced} pipeline tokens, ${cronsSynced} cron jobs`);
 
+    // v7.0: Initialize Strategic Orchestrator engines
+    const db = getDB();
+    const contextEngine = new ContextEngine(db);
+    const decisionEngine = new DecisionEngine(db, contextEngine);
+    const playbookEngine = new PlaybookEngine(db);
+    console.log('[v7.0] ✓ Strategic Orchestrator engines initialized');
+
+    // v7.0: Strategy routes (8 endpoints)
+    app.use('/api/v1/strategy', apiKeyAuth, strategyRoutes(db, { decisionEngine, playbookEngine, contextEngine }));
+
+    // ─── 404 Handler (must be after all route registrations) ───
+    app.use((req, res) => {
+      res.status(404).json({
+        error: 'not_found',
+        message: `Route ${req.method} ${req.path} does not exist`,
+        docs: '/api/v1/info'
+      });
+    });
+
+    // ─── Error Handler ───
+    app.use((err, req, res, next) => {
+      console.error(`[API ERROR] ${err.message}`, err.stack);
+      res.status(err.status || 500).json({
+        error: 'internal_error',
+        message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message
+      });
+    });
+
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`[Buzz API] ✓ v2.1.0 — 64/64 endpoints on port ${PORT}`);
+      console.log(`[Buzz API] ✓ v3.0.0 — 72/72 endpoints on port ${PORT}`);
       console.log(`[Buzz API] ✓ Health: http://0.0.0.0:${PORT}/api/v1/health`);
       console.log(`[Buzz API] ✓ Info:   http://0.0.0.0:${PORT}/api/v1/info`);
-      console.log(`[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts`);
+      console.log(`[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts, strategy`);
     });
   } catch (err) {
     console.error('[Buzz API] ✗ Failed to start:', err.message);

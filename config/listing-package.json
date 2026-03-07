@@ -1,0 +1,44 @@
+{
+  "version": "1.0.0",
+  "description": "SolCex Exchange listing package details — safe for outreach use",
+  "updated": "2026-03-07",
+  "exchange": {
+    "name": "SolCex Exchange",
+    "type": "Solana-native centralized exchange",
+    "website": "https://solcex.cc",
+    "twitter": "@SolCex_Exchange"
+  },
+  "listing_package": {
+    "total_cost": "15K USDT",
+    "breakdown": {
+      "listing_fee": "5K USDT",
+      "liquidity_provision": "10K USDT"
+    },
+    "includes": [
+      "Market making (3-month, $450K+ depth, 0.15% spread)",
+      "Whale airdrop (450+ whale traders, avg portfolio $500K+)",
+      "Fast-track listing timeline (10-14 days)",
+      "Full exchange integration support"
+    ]
+  },
+  "benefits_for_outreach": {
+    "headline": "SolCex offers deep liquidity, whale exposure, and fast-track listing for promising projects",
+    "key_points": [
+      "Professional market making with tight spreads from day one",
+      "Instant exposure to 450+ whale traders with significant portfolios",
+      "10-14 day fast-track from agreement to live trading",
+      "Dedicated listing support team"
+    ]
+  },
+  "supported_chains": ["Solana", "Base", "BSC"],
+  "contact": {
+    "email": "ogie.solcexexchange@gmail.com",
+    "note": "All outreach CC to this address"
+  },
+  "NEVER_SHARE": [
+    "Internal commission rates",
+    "BD agent existence/capabilities",
+    "Automated scoring details",
+    "Partner-specific pricing"
+  ]
+}

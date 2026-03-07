@@ -1,16 +1,25 @@
 {
   "name": "buzz-api",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Buzz BD Agent REST API — Token intelligence and pipeline management",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test": "jest --verbose",
+    "test:strategic": "jest __tests__/strategic.test.js --verbose"
   },
   "dependencies": {
     "express": "^4.21.0",
     "better-sqlite3": "^11.7.0",
     "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": ["**/__tests__/**/*.test.js"]
   },
   "author": "Ogie @ SolCex Exchange",
   "license": "MIT"

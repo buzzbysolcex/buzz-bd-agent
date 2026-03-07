@@ -2,9 +2,9 @@ FROM node:22-slim
 
 LABEL maintainer="Ogie @ SolCex Exchange"
 LABEL description="Buzz BD Agent — Autonomous AI Business Development on Akash Network"
-LABEL version="6.2.5"
-LABEL openclaw.version="2026.3.1"
-LABEL features="5-sub-agents, REST API, ACP marketplace, AgentProof telemetry"
+LABEL version="7.2.0"
+LABEL openclaw.version="2026.3.2"
+LABEL features="5-sub-agents, Strategic Orchestrator, 14-factor scoring, Helius MCP, REST API 72 endpoints, ACP marketplace"
 
 # ══════════════════════════════════════════════════
 # SYSTEM DEPENDENCIES
@@ -16,10 +16,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ══════════════════════════════════════════════════
 # GLOBAL NPM PACKAGES
 # ══════════════════════════════════════════════════
-RUN npm install -g openclaw@2026.3.1 \
+RUN npm install -g openclaw@2026.3.2 \
     && npm install -g @bankr/cli \
     && npm install -g tsx \
-    && npm install -g @bnb-chain/mcp
+    && npm install -g @bnb-chain/mcp \
+    && npm install -g helius-mcp
 
 # Solana 8004 SDK (install separately — large dependency tree)
 RUN npm install -g 8004-solana @solana/web3.js 2>/dev/null || echo "⚠️ 8004-solana install failed — will install at runtime"
@@ -37,6 +38,7 @@ RUN mkdir -p /data/.openclaw \
     && mkdir -p /data/logs \
     && mkdir -p /opt/buzz-skills \
     && mkdir -p /opt/buzz-config \
+    && mkdir -p /opt/buzz-prompts \
     && mkdir -p /opt/buzz-api \
     && mkdir -p /opt/buzz-acp
 
@@ -66,6 +68,15 @@ COPY bake/twitter-bot/ /opt/buzz-twitter-bot/
 # BAKE: OpenClaw config reference (character, agent config)
 # ══════════════════════════════════════════════════
 COPY bake/config/ /opt/buzz-config/
+
+# ══════════════════════════════════════════════════
+# v7.0: Strategic Orchestrator config, prompts, skills
+# ══════════════════════════════════════════════════
+COPY config/ /opt/buzz-config/
+COPY prompts/ /opt/buzz-prompts/
+COPY skills/cost-guard/ /opt/buzz-workspace-skills/cost-guard/
+COPY skills/agent-contexts/ /opt/buzz-workspace-skills/agent-contexts/
+COPY skills/notification-filter/ /opt/buzz-workspace-skills/notification-filter/
 
 # ══════════════════════════════════════════════════
 # REST API — Express + SQLite (baked into image)
