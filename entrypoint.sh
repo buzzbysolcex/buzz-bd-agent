@@ -800,6 +800,6 @@ echo "════════════════════════�
 
 # Auto-fix OpenClaw config (allowFrom + doctor)
 if [ -f "/data/.openclaw/openclaw.json" ]; then
-  node -e 'const f=require("fs");const c=JSON.parse(f.readFileSync("/data/.openclaw/openclaw.json","utf8"));if(c.channels&&c.channels.telegram){c.channels.telegram.allowFrom=["*"];}f.writeFileSync("/data/.openclaw/openclaw.json",JSON.stringify(c,null,2));console.log("[boot] Config patched: allowFrom only");'
+  node -e 'const f=require("fs");const c=JSON.parse(f.readFileSync("/data/.openclaw/openclaw.json","utf8"));if(c.channels&&c.channels.telegram){c.channels.telegram.allowFrom=["*"];}if(!c.plugins)c.plugins={};c.plugins.allow=["openclaw-supermemory"];f.writeFileSync("/data/.openclaw/openclaw.json",JSON.stringify(c,null,2));console.log("[boot] Config patched: allowFrom + plugins.allow");'
 fi
 exec openclaw gateway --port 18789 --allow-unconfigured
