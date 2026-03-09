@@ -131,34 +131,82 @@ async function runSocialAgent({ address, chain, requestId }) {
  * ATV Web3 Identity check
  */
 async function checkAtvIdentity(address, chain, factors, requestId) {
-  const ATV_KEY = process.env.ATV_API_KEY;
-  if (!ATV_KEY) {
-    factors.push({ name: 'atv_unavailable', impact: 0, detail: 'ATV API key not configured' });
+  // ATV ENS Batch Resolve — FREE public endpoint (100 addresses/day)
+  // No API key needed. Uses env vars ATV_API_URL + ATV_BATCH_ENDPOINT
+  // Spec: ENS-DEPLOYER-VERIFICATION-SPEC-V2.md
+
+  if (!address || !address.startsWith('0x')) {
+    factors.push({ name: 'atv_skipped', impact: 0, detail: `ATV ENS only supports EVM addresses (got ${chain})` });
+    return { found: false, verified: false };
+  }
+
+  const atvEnabled = process.env.ATV_ENABLED !== 'false';
+  if (!atvEnabled) {
+    factors.push({ name: 'atv_disabled', impact: 0, detail: 'ATV_ENABLED=false' });
     return { found: false, verified: false };
   }
 
   try {
-    const url = `${ATV_BASE}/v1/identity?address=${address}&chain=${chain}`;
+    const baseUrl = process.env.ATV_API_URL || ATV_BASE || 'https://api.web3identity.com';
+    const endpoint = process.env.ATV_BATCH_ENDPOINT || '/api/ens/batch-resolve';
+    const url = `${baseUrl}${endpoint}?addresses=${address}&include=name,twitter,github`;
+
+    console.log(`[${requestId}] [ATV] Resolving ENS for ${address}...`);
+
     const res = await fetch(url, {
-      headers: { 
-        'Authorization': `Bearer ${ATV_KEY}`,
-        'Accept': 'application/json'
-      },
-      signal: AbortSignal.timeout(10000)
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(8000)
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      return {
-        found: !!data.identity,
-        verified: data.identity?.verified || false,
-        name: data.identity?.name || null,
-        socials: data.identity?.socials || []
-      };
+    if (!res.ok) {
+      const status = res.status;
+      if (status === 402) {
+        factors.push({ name: 'atv_quota_exceeded', impact: 0, detail: 'ATV free tier exhausted (100/day)' });
+      } else if (status === 429) {
+        factors.push({ name: 'atv_rate_limited', impact: 0, detail: 'ATV rate limited (10 req/min)' });
+      } else {
+        factors.push({ name: 'atv_error', impact: 0, detail: `ATV HTTP ${status}` });
+      }
+      return { found: false, verified: false };
     }
-    return { found: false, verified: false };
+
+    const data = await res.json();
+    const item = data?.addresses?.[0];
+
+    if (!item || !item.ens) {
+      factors.push({ name: 'atv_not_found', impact: -5, detail: 'No ENS identity for this address' });
+      return { found: false, verified: false, usage: data?.metadata?.usage };
+    }
+
+    const hasTwitter = !!item.social?.twitter;
+    const hasGithub = !!item.social?.github;
+    const hasSocialProof = hasTwitter || hasGithub;
+
+    if (hasSocialProof) {
+      const socialDetails = [];
+      if (hasTwitter) socialDetails.push(`Twitter: @${item.social.twitter}`);
+      if (hasGithub) socialDetails.push(`GitHub: ${item.social.github}`);
+      factors.push({ name: 'atv_verified', impact: 20, detail: `ENS: ${item.ens} | ${socialDetails.join(', ')}` });
+      console.log(`[${requestId}] [ATV] ✅ Verified: ${item.ens} (${socialDetails.join(', ')})`);
+    } else {
+      factors.push({ name: 'atv_found', impact: 10, detail: `ENS: ${item.ens} (no linked social accounts)` });
+      console.log(`[${requestId}] [ATV] 🏷️ ENS found: ${item.ens} (no socials)`);
+    }
+
+    return {
+      found: true, verified: hasSocialProof, name: item.ens, ens: item.ens,
+      twitter: item.social?.twitter || null, github: item.social?.github || null,
+      avatar: item.avatar || null,
+      socials: [
+        ...(hasTwitter ? [{ type: 'twitter', handle: item.social.twitter }] : []),
+        ...(hasGithub ? [{ type: 'github', handle: item.social.github }] : [])
+      ],
+      usage: data?.metadata?.usage
+    };
+
   } catch (err) {
     factors.push({ name: 'atv_error', impact: 0, detail: err.message });
+    console.log(`[${requestId}] [ATV] Error: ${err.message}`);
     return { found: false, verified: false };
   }
 }

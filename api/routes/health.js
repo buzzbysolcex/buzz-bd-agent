@@ -15,7 +15,7 @@ const http = require('http');
 const { getDB } = require('../db');
 
 const OPENCLAW_PORT = process.env.OPENCLAW_PORT || 18789;
-const BUZZ_VERSION = '6.1.1';
+const BUZZ_VERSION = '7.2.1';
 const API_VERSION = '1.0.0';
 
 // ─── GET /health ─────────────────────────────────────
