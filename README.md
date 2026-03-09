@@ -1,249 +1,308 @@
----
-name: solcex-ops-master
-description: >
-  System Operations Manual for Akash container services at SolCex Exchange.
-  v7.1.0 — Indonesia Sprint Day 15 Edition (Mar 7, 2026).
-  OpenClaw 2026.3.2 | 5 Parallel Sub-Agents | Strategic Orchestrator LIVE
-  Decision Engine 12 rules | Playbook Engine PB-001→004 | Context Engine + Supermemory
-  Cost Guard $10/day MiniMax cap | Context Slim 96% token reduction | Cache Pin
-  Notification Filter (18 send / 11 silent) | 18 Crons (trimmed from 38)
-  Twitter Bot v3.1 Sales Funnel | MiniMax M2.5 primary + bankr/gpt-5-nano sub-agents
-  Bankr LLM Gateway (8 models, dual API keys) | 18 cron jobs | 19 intel sources
-  REST API v3.0.0 (72/72 endpoints) LIVE | Sentinel v1.0.2 LIVE + wired
-  JVR receipt system | ACP #17681 | AgentProof #1718 | BSC/BNB Chain MCP
-  Gmail OAuth outreach active | Contract Auditor (L2) | 3-chain pipeline (SOL/BASE/BSC)
-  Supermemory semantic memory LIVE (container: buzz_bd_agent)
-  Reporting rule: every completed task reports to Telegram via JVR receipts.
----
+# 🐝 Buzz BD Agent
 
-# SYSTEM OPERATIONS MANUAL v7.1.0 — Indonesia Sprint Day 15
+**Autonomous Business Development Agent for SolCex Exchange**
 
-> **Technical reference documentation** for all services running in this Akash stack.
-> Updated Mar 7, 2026 from Jakarta, Indonesia.
-> v7.1.0 = Strategic Orchestrator + Supermemory + Cost Guard + Notification Filter
+[![Version](https://img.shields.io/badge/version-v7.2.0-orange)](https://github.com/buzzbysolcex/buzz-bd-agent)
+[![OpenClaw](https://img.shields.io/badge/OpenClaw-v2026.3.7-blue)](https://openclaw.com)
+[![ERC-8004](https://img.shields.io/badge/ERC--8004-%2325045-green)](https://erc8004.org)
+[![Akash](https://img.shields.io/badge/Akash-Decentralized%20Cloud-red)](https://akash.network)
+[![AgentProof](https://img.shields.io/badge/AgentProof-%231718-purple)](https://agentproof.xyz)
+
+> 24/7 autonomous token discovery, safety verification, scoring, and outreach for CEX listings.
+> Built by a chef who codes through conversation. No CS degree. Just Claude and persistence.
 
 ---
 
-## 1. TEAM CONTACTS
+## 🐝 What Is Buzz?
 
-| Role | Identity | Responsibility |
-|------|----------|----------------|
-| **Ogie** | Operations Lead, Inflight Chef (Saudia) + BD Lead (SolCex) | Strategy, approvals, manual Twitter, partnerships |
-| **Claude Opus 4.6** | Strategy/ops advisor + dev partner | Documentation, analysis, planning, code, outreach drafts |
-| **Buzz** | Autonomous BD Agent | 24/7 scanning, scoring, strategic decisions, pipeline management |
-| **Sentinel** | Ops Watchdog Agent | 24/7 monitoring of Buzz REST API, alerts on failures |
+Buzz is an autonomous AI BD (Business Development) agent that runs 24/7 on [Akash Network](https://akash.network), finding promising token projects for [SolCex Exchange](https://solcex.io) listings across Solana, Base, and BSC chains.
 
----
+**The pipeline:** Discover → Verify → Score → Outreach → List
 
-## 2. INFRASTRUCTURE
+Buzz scans 100+ tokens per day across decentralized exchanges, filters through a 5-layer intelligence pipeline with parallel sub-agents, scores each token on a 100-point system, and initiates outreach to qualified projects — all autonomously.
 
-| Agent | Version | Provider | External URL | Cost |
-|-------|---------|----------|-------------|------|
-| **Buzz BD Agent** | v7.1.0 | provider.akash-palmito.org | :30299 (API) :30233 (OpenClaw) | ~$5.27/mo |
-| **Sentinel Ops** | v1.0.2 | provider.akashprovid.com | :31949 (API) :31336 (OpenClaw) | ~$1.51/mo |
-| **Total** | | | | **~$7/mo** |
-
-### Buzz v7.1.0 Infrastructure
-
-| Component | Value |
-|-----------|-------|
-| Image | ghcr.io/buzzbysolcex/buzz-bd-agent:v7.1.0 |
-| Runtime | OpenClaw v2026.3.2 |
-| CPU/RAM | 2 cores / 4 GB |
-| Storage | 2 GB root + 10 GB persistent (/data/) |
-| Port 18789 → 30233 | OpenClaw gateway (Telegram) |
-| Port 3000 → 30299 | REST API v3.0.0 (Express + SQLite WAL) |
-| Database | 20 tables (13 core + 5 strategic + 2 system) |
-| REST Endpoints | 72 (64 base + 8 strategy) |
-| Crons | 18 essential |
-| Skills | 20 loaded |
+**Cost:** ~$6.58/month infrastructure + ~$3-5/day LLM inference = **full autonomous BD operation for less than a coffee per day.**
 
 ---
 
-## 3. STRATEGIC ORCHESTRATOR (v7.1.0 — NEW)
+## 🐝 Architecture
 
-### 3.1 Decision Engine — 12 Rules
-
-| ID | Name | Condition | Action | Auto? |
-|----|------|-----------|--------|-------|
-| R001 | HOT_IMMEDIATE_OUTREACH | Score 85-100, safety PASS | Trigger PB-002 immediately | Yes |
-| R002 | QUALIFIED_PRIORITY_QUEUE | Score 70-84, safety PASS | Queue outreach 24h | Yes |
-| R003 | QUALIFIED_SAFETY_WARNING | Score 70-84, safety WARN | Re-scan + escalate | No → Ogie |
-| R004 | WATCH_MONITOR | Score 50-69 | Watch 48h, rescan | Yes |
-| R005 | SKIP_LOW_SCORE | Score 0-49 | Archive | Yes |
-| R006 | SKIP_SAFETY_FAIL | Safety FAIL any score | Immediate skip | Yes |
-| R007 | FOLLOWUP_NO_REPLY_48H | Contacted 48h, no reply | Follow-up email | Yes |
-| R008 | BREAKUP_NO_REPLY_96H | Contacted 96h, no reply | Breakup email | Yes |
-| R009 | COLD_NO_REPLY_144H | Contacted 144h, no reply | Archive cold, revisit 30d | Yes |
-| R010 | PRICE_DROP_PAUSE | Price -40% 24h | Pause outreach, rescan | Yes → Alert |
-| R011 | NEGOTIATION_REPLY | Reply received | Escalate + PB-003 | No → Ogie |
-| R012 | LISTING_APPROVAL | Terms agreed | Escalate for approval | No → Ogie |
-
-### 3.2 Playbook Engine — 4 State Machines
-
-| Playbook | Name | States | Chains To |
-|----------|------|--------|-----------|
-| PB-001 | Discovery → Qualification | DISCOVERED → DEDUP → SCANNING → SCORED → PROSPECT/WATCH/SKIP | PB-002 |
-| PB-002 | Outreach Sequence | PROSPECT → CONTACT_SEARCH → CONTACTED → FOLLOW_UP → BREAKUP → COLD/NEGOTIATING | PB-003 |
-| PB-003 | Negotiation Support | NEGOTIATING → REPLY_ANALYSIS → POSITIVE/QUESTIONS/PUSHBACK/NEGATIVE → DEAL_SHEET → APPROVED | PB-004 |
-| PB-004 | Post-Listing Lifecycle | LISTED → ANNOUNCEMENT → MONITORING → UPSELL/WARNING/STABLE | — |
-
-### 3.3 Context Engine + Supermemory
-
-Assembles max 8K tokens per LLM call (was 50K+):
-1. Decision rules (relevant to current stage)
-2. Scoring rubric (condensed)
-3. Token pipeline history
-4. Similar recent tokens
-5. **Supermemory semantic recall (50ms, zero LLM cost)**
-6. Outreach capacity (active/10)
-7. Sub-agent outputs
-8. Listing package (outreach stages only)
-
-### 3.4 Supermemory Configuration
-
-| Setting | Value |
-|---------|-------|
-| Container | buzz_bd_agent |
-| Auto-Recall | true (5 results per query) |
-| Auto-Capture | true (with security filter) |
-| Profile Frequency | Every 25 turns |
-| Capture Mode | all (filters noise) |
-| Security | 12 regex patterns block: commission, fees, API keys, wallet keys |
-| Plan | Free tier (1M tokens/mo, 10K queries/mo) |
+```
+┌─────────────────────────────────────────────────────────────┐
+│  AKASH NETWORK — provider.boogle.cloud                       │
+│  2 CPU / 4GB RAM / 10GB persistent                           │
+│  Cost: ~$5.07/month                                          │
+│                                                               │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │  Docker: ghcr.io/buzzbysolcex/buzz-bd-agent:v7.2.0      │ │
+│  │  Runtime: OpenClaw v2026.3.7                              │ │
+│  │                                                           │ │
+│  │  PORT 18789 → 31660: OpenClaw Gateway (Telegram)         │ │
+│  │  PORT 3000  → 32138: REST API v3.0.0 (Express+SQLite)    │ │
+│  │                                                           │ │
+│  │  ┌─────────────────────────────────────────────────┐     │ │
+│  │  │  STRATEGIC ORCHESTRATOR (MiniMax M2.5)          │     │ │
+│  │  │  ├── Decision Engine (12 rules, no LLM needed)  │     │ │
+│  │  │  ├── Playbook Engine (PB-001→004)               │     │ │
+│  │  │  ├── Context Engine (8K tokens max per call)    │     │ │
+│  │  │  └── Supermemory (50ms recall, zero LLM cost)   │     │ │
+│  │  └─────────────────────────────────────────────────┘     │ │
+│  │                                                           │ │
+│  │  5 Parallel Sub-Agents (bankr/gpt-5-nano):               │ │
+│  │  ├── scanner-agent  → L1 Discovery (DexScreener, CMC)   │ │
+│  │  ├── safety-agent   → L2 Contract verification           │ │
+│  │  ├── wallet-agent   → L2 On-chain forensics (Helius)    │ │
+│  │  ├── social-agent   → L3 Social intelligence (Grok)     │ │
+│  │  └── scorer-agent   → L4 100-point scoring               │ │
+│  │                                                           │ │
+│  │  REST API: 72 endpoints | SQLite: 20 tables              │ │
+│  │  Twitter Bot v3.1: Premium SCAN + LIST + DEPLOY          │ │
+│  │  18 Cron Jobs | 19 Intelligence Sources                   │ │
+│  │  Gmail OAuth | JVR Receipt System                         │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│                                                               │
+│  SENTINEL (separate container — provider.akashprovid.com)    │
+│  Monitors Buzz REST API | 10 health crons | Telegram alerts  │
+│  Cost: ~$1.51/month                                          │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 4. COST GUARD
+## 🐝 Features
 
-| Setting | Value |
-|---------|-------|
-| Daily MiniMax cap | $10.00 |
-| Alert threshold | 70% ($7.00) |
-| Throttle model | bankr/gpt-5-nano |
-| Fallback model | bankr/claude-haiku-4.5 |
-| Tracker file | /data/workspace/memory/cost-tracker.json |
-| Cache pin | System prompt warmed on boot |
-| Reset | UTC midnight |
+### Intelligence Pipeline (5 Layers)
 
-### Cost Reduction Stack
+| Layer | Agent | Sources | Purpose |
+|-------|-------|---------|---------|
+| **L1** | scanner-agent | DexScreener, GeckoTerminal, AIXBT, CMC, BNB MCP | Token discovery across SOL/BASE/BSC |
+| **L2** | safety-agent | RugCheck, ethskills.com, Contract Auditor | Honeypot detection, contract verification |
+| **L2** | wallet-agent | Helius (60 tools), Allium | Deployer forensics, holder analysis |
+| **L3** | social-agent | Grok/xAI, Serper, ATV Web3 Identity, Firecrawl | Community health, deployer identity |
+| **L4** | scorer-agent | 100-point composite (11 factors) | Final score + verdict |
 
-| Optimization | Before | After | Savings |
-|-------------|--------|-------|---------|
-| Crons | 38 | 18 | 50% fewer orchestrator calls |
-| Input tokens per scan | ~250K | ~9K | 96% reduction |
-| Decision Engine | LLM every time | Rules match (no LLM) | 90% fewer LLM calls |
-| Cache efficiency | 42% reuse | 80%+ reuse | 12.5x cheaper reads |
-| **Daily MiniMax cost** | **$13.49** | **~$3-5 (cap $10)** | **60-75% reduction** |
+### Strategic Orchestrator
 
----
+- **Decision Engine** — 12 rules handle 90% of decisions with zero LLM cost
+- **Playbook Engine** — 4 state machines (Discovery → Outreach → Negotiation → Post-Listing)
+- **Context Engine** — Assembles max 8K tokens per LLM call (down from 250K)
+- **Supermemory** — 50ms semantic recall, 3 custom containers (contacts, patterns, decisions)
 
-## 5. NOTIFICATION FILTER
+### Scoring System (100 Points)
 
-### SEND to Telegram (18 rules)
-- Token scored 70+ (QUALIFIED or HOT)
-- Pipeline stage change
-- Outreach sent / reply received / follow-up due
-- ACP service purchased
-- Cost Guard cap triggered
-- Sentinel HIGH alert
-- Prayer reminders
-- Sprint daily briefing + evening review
+| Score | Verdict | Action |
+|-------|---------|--------|
+| 85-100 | 🔥 HOT | Immediate outreach |
+| 70-84 | ✅ QUALIFIED | Queue outreach 24h |
+| 50-69 | 👀 WATCH | Monitor 48h, auto-rescan |
+| 0-49 | ❌ SKIP | Archive |
 
-### SILENT — JVR Only (11 rules)
-- Routine scans below 70
-- Health checks, heartbeats
-- Cron completion confirmations
-- Moltbook/Molten routine posts
-- Pipeline checks with no changes
+### Cost Guard
 
-### Dedup: Same notification not sent twice within 60 minutes
+| Metric | Value |
+|--------|-------|
+| Daily LLM cap | $10.00 (auto-throttle to gpt-5-nano) |
+| Infrastructure | ~$6.58/month (Buzz + Sentinel on Akash) |
+| Cost reduction | 78% ($22/day → $5/day) |
+| Context slim | 96% token reduction per scan |
 
 ---
 
-## 6. SUB-AGENT ARCHITECTURE
+## 🐝 REST API
 
-| Agent | Layer | Sources | Model | Context |
-|-------|-------|---------|-------|---------|
-| scanner-agent | L1 Discovery | DexScreener, GeckoTerminal, AIXBT, Boosts, CMC, BNB MCP | bankr/gpt-5-nano | ~2K tokens |
-| safety-agent | L2 Filter | RugCheck, DFlow MCP, Contract Auditor (BSC) | bankr/gpt-5-nano | ~1.5K tokens |
-| wallet-agent | L2 Filter | Helius, Allium | bankr/gpt-5-nano | ~1K tokens |
-| social-agent | L3 Research | Grok, Serper, ATV, Firecrawl | bankr/gpt-5-nano | ~1.5K tokens |
-| scorer-agent | L4 Score | 100-point composite (11 factors) | bankr/gpt-5-nano | ~3K tokens |
+**72 endpoints** across 13 categories. Express + SQLite WAL.
 
-Context slim files at: /data/workspace/skills/agent-contexts/*.md
+| Category | Endpoints | Key Routes |
+|----------|-----------|------------|
+| Health | 6 | `GET /health`, `GET /health/db` |
+| Pipeline | 9 | `GET /pipeline`, `POST /pipeline/tokens` |
+| Strategy | 8 | `POST /strategy/decide`, `GET /strategy/rules` |
+| Agents | 5 | `GET /agents`, `GET /agents/:id` |
+| Scoring | 5 | `GET /scoring/history` |
+| Costs | 5 | `GET /costs/today` |
+| Crons | 7 | `GET /crons` |
+| Twitter | 5 | `GET /twitter/stats` |
+| Receipts | 5 | `GET /receipts`, `POST /receipts` |
+| Intel | 5 | `GET /intel/sources` |
+| Wallets | 6 | `GET /wallets` |
+| Webhooks | 5 | `POST /webhooks` |
+| Score | 1 | `POST /score` |
 
 ---
 
-## 7. CRON SCHEDULE (18 Active)
+## 🐝 Twitter Bot v3.1
+
+Premium SCAN format with 5-layer intelligence report. Three revenue routes:
+
+| Route | Trigger | Response |
+|-------|---------|----------|
+| **SCAN** | `@BuzzBySolCex scan $TICKER` | 5-layer Premium report (~1,100 chars) |
+| **LIST** | Reply "LIST" to any scan | SolCex listing pitch → DM redirect |
+| **DEPLOY** | Reply "DEPLOY" to any scan | Token deployment on Base via Bankr |
+
+Every scan reply is a sales funnel. The scan is the hook, the CTA is the close.
+
+---
+
+## 🐝 LLM Stack
+
+| Role | Model | Cost |
+|------|-------|------|
+| Orchestrator | MiniMax M2.5 | $0.30/$1.50 per 1M tokens |
+| Sub-agents (5) | bankr/gpt-5-nano | $0.10/$0.40 per 1M tokens |
+| Fallback | bankr/claude-haiku-4.5 | $0.80/$4.00 per 1M tokens |
+
+Powered by [Bankr LLM Gateway](https://bankr.bot) — 8 models, dual API keys, self-sustaining inference.
+
+---
+
+## 🐝 Registrations & Identity
+
+| Platform | ID | Chain |
+|----------|----|-------|
+| [ERC-8004](https://erc8004.org) | #25045 | Ethereum |
+| [ERC-8004](https://erc8004.org) | #17483 | Base |
+| [ERC-8004](https://erc8004.org) | #18709 | Base (anet) |
+| [AgentProof](https://agentproof.xyz) | #1718 | Avalanche |
+| Solana 8004 | Agent Asset 9pQ6K...XUBS | Solana |
+| [Virtuals ACP](https://virtuals.io) | #17681 | — |
+| [Colosseum](https://colosseum.org) | #3734 | — |
+| [Moltbook](https://moltbook.com) | c606278b | — |
+| [Molten.gg](https://molten.gg) | 57487 | — |
+
+---
+
+## 🐝 Cron Schedule (18 Active)
 
 ### Scanning (8 jobs)
 | Job | Schedule | Description |
 |-----|----------|-------------|
-| scan-trending-00 | 0 0 * * * | Trending tokens (midnight WIB) |
-| scan-trending-06 | 0 6 * * * | Trending tokens (6am WIB) |
-| scan-trending-12 | 0 12 * * * | Trending tokens (noon WIB) |
-| scan-trending-18 | 0 18 * * * | Trending tokens (6pm WIB) |
-| scan-new-pairs | 0 */4 * * * | New token pairs |
-| scan-solana-dex | 30 */4 * * * | Solana DEX scan |
-| scan-base-dex | 30 */6 * * * | Base DEX scan |
-| scan-bsc-dex | 0 */6 * * * | BSC DEX scan |
+| scan-trending-00 | `0 0 * * *` | Trending tokens (midnight UTC) |
+| scan-trending-06 | `0 6 * * *` | Trending tokens (6am UTC) |
+| scan-trending-12 | `0 12 * * *` | Trending tokens (noon UTC) |
+| scan-trending-18 | `0 18 * * *` | Trending tokens (6pm UTC) |
+| scan-new-pairs | `0 */4 * * *` | New token pairs |
+| scan-solana-dex | `30 */4 * * *` | Solana DEX scan |
+| scan-base-dex | `30 */6 * * *` | Base DEX scan |
+| scan-bsc-dex | `0 */6 * * *` | BSC DEX scan |
 
 ### Operations (5 jobs)
 | Job | Schedule | Description |
 |-----|----------|-------------|
-| pipeline-status | 0 1 * * * | Daily pipeline report |
-| pipeline-weekly | 0 12 * * 0 | Weekly summary |
-| daily-pipeline | 0 */2 * * * | Pipeline check |
-| morning-reminder | 0 5 * * * | Daily briefing |
-| evening-review | 0 18 * * * | End of day review |
+| pipeline-status | `0 1 * * *` | Daily pipeline report |
+| pipeline-weekly | `0 12 * * 0` | Weekly summary |
+| daily-pipeline | `0 */2 * * *` | Pipeline health check |
+| morning-reminder | `0 5 * * *` | Daily briefing |
+| evening-review | `0 18 * * *` | End of day review |
 
-### Prayer (5 jobs)
-| Prayer | WIB | UTC Cron |
-|--------|-----|----------|
-| Fajr | 04:30 | 30 21 * * * |
-| Dhuhr | 11:45 | 45 4 * * * |
-| Asr | 15:00 | 0 8 * * * |
-| Maghrib | 17:45 | 45 10 * * * |
-| Isha | 19:00 | 0 12 * * * |
-
----
-
-## 8. REST API v3.0.0 — 72 Endpoints
-
-Base URL: http://provider.akash-palmito.org:30299/api/v1
-Auth: X-API-Key: bzz_0S4j71ZWSqTgd_m8JyydXp1uqwmhN6GADi_9MEJmAg0
-
-| Category | Count |
-|----------|-------|
-| Health & System | 6 |
-| Agents | 5 |
-| Pipeline | 9 |
-| Costs | 5 |
-| Crons | 7 |
-| Score Token | 1 |
-| Scoring | 5 |
-| Intel | 5 |
-| Twitter | 5 |
-| Wallets | 6 |
-| Webhooks | 5 |
-| Receipts | 5 |
-| **Strategy (NEW)** | **8** |
-| **Total** | **72** |
-
-### Strategy Endpoints (NEW)
-- POST /strategy/decide — Submit sub-agent outputs, get decision
-- GET /strategy/playbook/:id — Playbook instance state
-- POST /strategy/playbook/:id/advance — Advance playbook
-- GET /strategy/context/:token — Assembled context preview
-- GET /strategy/rules — List 12 decision rules
-- PUT /strategy/rules — Update rules
-- GET /strategy/history — Decision history with reasoning
-- GET /strategy/analytics — Decision quality metrics
+### Prayer Reminders (5 jobs)
+| Prayer | WIB Time | UTC Schedule |
+|--------|----------|-------------|
+| Fajr | 04:30 | `30 21 * * *` |
+| Dhuhr | 11:45 | `45 4 * * *` |
+| Asr | 15:00 | `0 8 * * *` |
+| Maghrib | 17:45 | `45 10 * * *` |
+| Isha | 19:00 | `0 12 * * *` |
 
 ---
 
-## 9. REVENUE STACK
+## 🐝 Intelligence Sources (19)
+
+### Layer 1 — Discovery
+DexScreener `/tokens/v1/` | GeckoTerminal | AIXBT | DexScreener Boosts | CoinMarketCap | BNB Chain MCP
+
+### Layer 2 — Safety
+RugCheck | Helius MCP (60 tools) | Allium | ethskills.com (500+ vulnerability checklist)
+
+### Layer 3 — Social
+Grok/xAI | Serper | ATV Web3 Identity (ENS + socials) | Firecrawl
+
+### Layer 4 — Identity
+AgentProof | Nansen x402 | Bankr Partner | ACP/Virtuals | Hyperbrowser
+
+---
+
+## 🐝 Deployment
+
+### Prerequisites
+- Docker Desktop
+- GHCR access (`ghcr.io/buzzbysolcex/buzz-bd-agent`)
+- Akash Console account with AKT
+
+### Build & Deploy
+
+```bash
+cd ~/buzz-bd-agent
+rm -rf api/node_modules api/package-lock.json
+docker build --no-cache -t ghcr.io/buzzbysolcex/buzz-bd-agent:v7.2.0 .
+docker push ghcr.io/buzzbysolcex/buzz-bd-agent:v7.2.0
+```
+
+Then in Akash Console: **Close + New Deployment** with updated SDL.
+
+### Important Notes
+- Always `--no-cache` and delete `node_modules` before build
+- New ENV vars require **Close + New** (Update won't apply them)
+- OpenClaw 3.7 requires: `gateway.mode="local"`, `gateway.auth.mode="token"`, `allowFrom=["*"]`
+- `bake/twitter-bot/` is what Dockerfile copies — sync from `twitter-bot/` before build
+- If provider caches old image → deploy on a different provider
+
+### Project Structure
+
+```
+buzz-bd-agent/
+├── api/                    # REST API (72 endpoints)
+│   ├── server.js           # Express server
+│   ├── db.js               # SQLite schema + migrations (20 tables)
+│   ├── routes/             # 13 route modules
+│   └── migrations/         # Strategic orchestrator tables
+├── bake/                   # Docker build sources
+│   ├── twitter-bot/        # Twitter Bot v3.1 (856 lines)
+│   ├── skills/             # OpenClaw skills (20)
+│   ├── cron/               # Cron jobs (18)
+│   ├── config/             # Strategic config + content calendar
+│   └── memory/             # Seed memory files
+├── skills/                 # Agent context slims + cost guard
+├── config/                 # Decision rules + scoring rubric
+├── prompts/                # Enhanced prompts
+├── acp/                    # ACP/Virtuals offerings (4 services)
+├── entrypoint.sh           # 16-block boot sequence
+├── Dockerfile              # OpenClaw 2026.3.7 + OPENCLAW_EXTENSIONS
+└── README.md               # This file
+```
+
+---
+
+## 🐝 Supermemory
+
+Persistent semantic memory via [@supermemory/openclaw-supermemory](https://supermemory.ai).
+
+| Setting | Value |
+|---------|-------|
+| Container | `buzz_bd_agent` |
+| Auto-Recall | true (5 results per query, 50ms) |
+| Auto-Capture | true (with 12-pattern security filter) |
+| Custom Containers | `buzz_contacts`, `buzz_patterns`, `buzz_decisions` |
+
+Every scan makes the next one smarter. Every decision teaches the system. Every outcome feeds the loop.
+
+---
+
+## 🐝 JVR Receipt System
+
+Every completed action generates a verifiable receipt.
+
+| Setting | Value |
+|---------|-------|
+| Buzz Prefix | `BZZ-` |
+| Sentinel Prefix | `SNT-` |
+| Format | `BZZ-{YYYY}-{MMDD}-{SEQ}` |
+| API | `POST /api/v1/receipts` |
+| Categories | scan, score, pipeline, outreach, decision, diagnostic, deploy |
+
+---
+
+## 🐝 Revenue Stack
 
 | Channel | Rate | Status |
 |---------|------|--------|
@@ -251,66 +310,55 @@ Auth: X-API-Key: bzz_0S4j71ZWSqTgd_m8JyydXp1uqwmhN6GADi_9MEJmAg0
 | Bankr Partner Fees | 18.05% of 1.2% swap | ✅ Active |
 | Creator Fees | 75.05% of 1.2% (own tokens) | ✅ Active |
 | ACP Marketplace | Per-query USDC (4 services) | ✅ Active |
-| BaaS (planned) | Subscription | 🔵 Month 3-6 |
-
-Monthly ops cost: ~$7/mo (Buzz $5.27 + Sentinel $1.51) + ~$3-5/day MiniMax (capped $10)
-Monthly Target: $2,575/mo
+| BaaS | $29/$49/$99 subscription tiers | 🔵 Planned |
 
 ---
 
-## 10. SCORING ENGINE (100-Point, 11 Factors)
-
-### Verdicts
-| Score | Verdict | Decision Engine Action |
-|-------|---------|----------------------|
-| 85-100 | HOT | R001: Immediate outreach via PB-002 |
-| 70-84 | QUALIFIED | R002: Queue outreach 24h |
-| 50-69 | WATCH | R004: Monitor 48h, auto-rescan |
-| 0-49 | SKIP | R005: Archive, no action |
-
----
-
-## 11. SENTINEL OPS AGENT
-
-| Field | Value |
-|-------|-------|
-| Version | v1.0.2 |
-| Provider | provider.akashprovid.com |
-| Buzz target | http://provider.akash-palmito.org:30299 |
-| Crons | 10 health checks |
-| Alert tiers | Silent (all pass) / MEDIUM (something broke) / HIGH (Buzz down) |
-| JVR prefix | SNT- |
-
----
-
-## 12. DEPLOYMENT WORKFLOW
-
-```bash
-cd ~/buzz-bd-agent
-rm -rf api/node_modules api/package-lock.json
-docker build --no-cache -t ghcr.io/buzzbysolcex/buzz-bd-agent:TAG .
-docker push ghcr.io/buzzbysolcex/buzz-bd-agent:TAG
-# Akash Console → Update Deployment (same env) or Close + New (new env vars)
-```
-
-Rules: Always increment tag. Always --no-cache. Always delete node_modules before build.
-New ENV vars require Close + New Deployment (Update won't apply new ENV).
-
----
-
-## 13. VERSION HISTORY
+## 🐝 Version History
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| **v7.1.0** | **Mar 7, 2026** | **Strategic Orchestrator + Supermemory + Cost Guard + Context Slim + Notification Filter + Cron cleanup 38→18. 72 endpoints, 20 tables. Full autonomous BD pipeline.** |
-| v6.3.6 | Mar 7, 2026 | Pipeline auto-persist fix, health/db bug fix |
-| v6.3.5 | Mar 5, 2026 | REST API 64/64 LIVE, Gmail OAuth, Sentinel wired |
-| v6.3.0 | Mar 4, 2026 | Solid foundation, 40 crons, Twitter Bot v3.1 |
-| v6.0.19 | Mar 2, 2026 | 5 parallel sub-agents LIVE, orchestrator |
+| **v7.2.0** | **Mar 9, 2026** | **OpenClaw 3.7, Supermemory CONNECTED, Twitter v3.1 Premium, fresh Serper+Grok keys, DexScreener /tokens/v1/ fix, boogle.cloud, JVR active, $22→$5 cost reduction** |
+| v7.1.1 | Mar 8, 2026 | Port migration, Sentinel re-wired, skills rewrite |
+| v7.1.0 | Mar 7, 2026 | Strategic Orchestrator, Cost Guard, 18 crons, 72 endpoints, 20 tables |
+| v6.3.0 | Mar 4, 2026 | Solid foundation, Twitter Bot v3.1, 40 crons |
+| v6.0.19 | Mar 2, 2026 | 5 parallel sub-agents LIVE on production |
 | v6.0.17 | Mar 1, 2026 | Bankr LLM Gateway, self-sustaining inference |
+| v5.3.8 | Feb 22, 2026 | Last pre-sprint version |
+| v1.0.0 | Feb 1, 2026 | First deployment on Akash Network |
 
 ---
 
-*"Identity first. Intelligence deep. Commerce autonomous. Cost disciplined. Strategy embedded. Memory persistent."*
+## 🐝 The Story
 
-*Updated: Mar 7, 2026 | Jakarta, Indonesia | Sprint Day 15*
+Buzz was built from scratch by [Ogie](https://linkedin.com/in/howtobecomeachef/) — a 20+ year Executive Chef who transitioned to crypto BD. No CS degree. No engineering team. Just conversational collaboration with [Claude](https://anthropic.com) (Opus 4.6), building one feature at a time from a phone in Indonesia during Ramadan.
+
+From first deploy (Feb 1, 2026) to fully autonomous BD pipeline (v7.2.0) in 37 days.
+
+**Total infrastructure cost:** ~$6.58/month
+**Revenue target:** $5,000/listing
+
+---
+
+## 🐝 Links
+
+| Platform | URL |
+|----------|-----|
+| **SolCex Exchange** | [solcex.io](https://solcex.io) |
+| **Docs** | [docs.solcex.cc](https://docs.solcex.cc) |
+| **Twitter** | [@BuzzBySolCex](https://x.com/BuzzBySolCex) |
+| **SolCex Twitter** | [@SolCex_Exchange](https://x.com/SolCex_Exchange) |
+| **Telegram Bot** | [@BuzzBySolCex_bot](https://t.me/BuzzBySolCex_bot) |
+| **Builder** | [@hidayahanka1](https://x.com/hidayahanka1) |
+
+---
+
+## 🐝 License
+
+Proprietary — SolCex Exchange. All rights reserved.
+
+---
+
+*🐝 "Identity first. Intelligence deep. Commerce autonomous. Cost disciplined. Strategy embedded. Memory persistent."*
+
+*Buzz BD Agent v7.2.0 — Sprint Day 17 | Mar 9, 2026 | Jakarta, Indonesia*
