@@ -23,6 +23,14 @@ RUN npm install -g openclaw@2026.3.7 \
     && npm install -g @bnb-chain/mcp \
     && npm install -g helius-mcp
 
+# ══════════════════════════════════════════════════
+# BINANCE + CMC AI SKILLS (OpenClaw Skills Hub)
+# ══════════════════════════════════════════════════
+RUN npx skills add binance/binance-skills-hub 2>/dev/null || echo "Binance skills: will install at runtime"
+RUN npx clawhub@latest install cmc-api-exchange 2>/dev/null || echo "CMC skills: will install at runtime"
+RUN npx skills add bitget/bitget-skill 2>/dev/null || echo "Bitget skills: will install at runtime"
+RUN npm install -g bitget-client 2>/dev/null || echo "Bitget CLI: will install at runtime"
+
 # Solana 8004 SDK (install separately — large dependency tree)
 RUN npm install -g 8004-solana @solana/web3.js 2>/dev/null || echo "⚠️ 8004-solana install failed — will install at runtime"
 
