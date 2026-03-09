@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # ══════════════════════════════════════════════════
-# Buzz BD Agent v7.2.1 — Entrypoint
+# Buzz BD Agent v7.2.0 — Entrypoint
 # ══════════════════════════════════════════════════
 # PHILOSOPHY: Docker image = source of truth.
 #             Boot → 5 green layers → fully operational.
 #             Zero manual config. Zero Telegram directives.
 #             Zero hot-patches. No configuration needed.
 #
-# OpenClaw v2026.3.1 | REST API :3000 | ACP Marketplace
+# OpenClaw v2026.3.7 | REST API :3000 | ACP Marketplace
 # 5 Parallel Sub-Agents | 18 Intel Sources | Twitter Bot v3.1
 # Moltbook Autonomous | Scan directive baked (DSC + CMC)
 # SolCex Exchange | Indonesia Sprint | March 2026
@@ -23,9 +23,11 @@ export PATH="/data/.npm-global/bin:/usr/local/bin:$PATH"
 export LITE_AGENT_API_KEY="${ACP_API_KEY}"
 
 echo "════════════════════════════════════════════════"
-echo "  🐝 Buzz BD Agent v7.2.1"
-echo "  OpenClaw v2026.3.1 | REST API | ACP Marketplace"
-echo "  5 Sub-Agents | 20 Skills | 18 Crons | 18 Intel"
+echo "  🐝 Buzz BD Agent v7.2.0"
+echo "  OpenClaw v2026.3.7 | REST API | ACP | Supermemory"
+echo "  5 Sub-Agents | 20 Skills | 18 Crons | 19 Intel"
+echo "  Supermemory: buzz_bd_agent (3 custom containers)"
+echo "  Twitter Bot v3.1 Premium SCAN | Cost Guard \$10/day"
 echo "  Docker = source of truth. Zero config needed."
 echo "  State:     $OPENCLAW_STATE_DIR"
 echo "  Workspace: $OPENCLAW_WORKSPACE_DIR"
@@ -255,7 +257,7 @@ CONFIG="/data/.openclaw/openclaw.json"
 echo "[boot] Generating OpenClaw config..."
 cat > "$CONFIG" << JSONEOF
 {
-  "gateway": { "port": 18789, "mode": "local" },
+  "gateway": { "port": 18789, "mode": "local", "auth": { "mode": "token" } },
   "channels": {
     "telegram": {
       "enabled": true,
@@ -355,7 +357,7 @@ echo "[boot] ✅ Block 9: OpenClaw config generated (18 env keys, Bankr 8 models
 # This is the definitive health check on every boot.
 # ══════════════════════════════════════════════════
 echo ""
-echo "════════ 🐝 BUZZ v7.2.1 — 5-LAYER BOOT CHECK ════════"
+echo "════════ 🐝 BUZZ v7.2.0 — 5-LAYER BOOT CHECK ════════"
 
 # ── Layer 1: Scanner ──────────────────────────────────────────
 L1_CRON=$(grep -c 'BD SCAN\|DexScreener.*token-boosts' "$CRON_TARGET" 2>/dev/null || echo "0")
@@ -784,7 +786,7 @@ fi
 # ══════════════════════════════════════════════════
 echo ""
 echo "════════════════════════════════════════════════"
-echo "  🐝 Buzz BD Agent v7.2.1 — All services started"
+echo "  🐝 Buzz BD Agent v7.2.0 — All services started"
 echo "  REST API:      http://localhost:3000 (72 endpoints)"
 echo "  Strategic:     Decision + Playbook + Context engines"
 echo "  Cost Guard:    \$10/day cap, cache warm active"
@@ -798,8 +800,61 @@ echo "  $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 echo "  New deployment → boot → ✅✅✅✅✅ → operational"
 echo "════════════════════════════════════════════════"
 
-# Auto-fix OpenClaw config (allowFrom + doctor)
+# ══════════════════════════════════════════════════
+# BLOCK 16 — POST-GATEWAY CONFIG PATCH
+# OpenClaw doctor overwrites config on gateway start.
+# This runs AFTER gateway is up to fix:
+#   1. Telegram dmPolicy/groupPolicy/allowFrom
+#   2. Supermemory plugin full config (apiKey + containers)
+# ══════════════════════════════════════════════════
+cat > /data/fix-config.sh << 'FIXEOF'
+#!/bin/bash
+sleep 25
+node -e '
+const fs = require("fs");
+const f = "/data/.openclaw/openclaw.json";
+try {
+  const j = JSON.parse(fs.readFileSync(f, "utf8"));
+  
+  // Fix Telegram
+  if (!j.channels) j.channels = {};
+  if (!j.channels.telegram) j.channels.telegram = {};
+  j.channels.telegram.dmPolicy = "open";
+  j.channels.telegram.groupPolicy = "open";
+  j.channels.telegram.allowFrom = ["*"];
+  j.channels.telegram.groupAllowFrom = ["*"];
+  
+  // Fix Supermemory plugin config
+  if (!j.plugins) j.plugins = {};
+  j.plugins.allow = ["openclaw-supermemory", "telegram"];
+  // OC 3.7 rejects plugin config under plugins — SM reads SUPERMEMORY_OPENCLAW_API_KEY env var
+  delete j.plugins["openclaw-supermemory"];
+} catch (e) {
+  console.error("[fix-config] Error:", e.message);
+}
+'
+FIXEOF
+chmod +x /data/fix-config.sh
+
+# Pre-patch config before gateway starts
 if [ -f "/data/.openclaw/openclaw.json" ]; then
-  node -e 'const f=require("fs");const c=JSON.parse(f.readFileSync("/data/.openclaw/openclaw.json","utf8"));if(c.channels&&c.channels.telegram){c.channels.telegram.allowFrom=["*"];}if(!c.plugins)c.plugins={};c.plugins.allow=["openclaw-supermemory"];f.writeFileSync("/data/.openclaw/openclaw.json",JSON.stringify(c,null,2));console.log("[boot] Config patched: allowFrom + plugins.allow");'
+  node -e '
+const f=require("fs");
+const c=JSON.parse(f.readFileSync("/data/.openclaw/openclaw.json","utf8"));
+if(c.channels&&c.channels.telegram){
+  c.channels.telegram.dmPolicy="open";
+  c.channels.telegram.groupPolicy="open";
+  c.channels.telegram.allowFrom=["*"];
+  c.channels.telegram.groupAllowFrom=["*"];
+}
+if(!c.plugins)c.plugins={};
+c.plugins.allow=["openclaw-supermemory","telegram"];
+f.writeFileSync("/data/.openclaw/openclaw.json",JSON.stringify(c,null,2));
+console.log("[boot] Pre-patch: Telegram + plugins.allow");
+'
 fi
+
+# Start gateway, then apply full config patch after doctor runs
+echo "[boot] Starting gateway + scheduling config patch (25s delay)..."
+nohup /data/fix-config.sh >> /data/logs/fix-config.log 2>&1 &
 exec openclaw gateway --port 18789 --allow-unconfigured
