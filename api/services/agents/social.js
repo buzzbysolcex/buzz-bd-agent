@@ -81,7 +81,7 @@ async function runSocialAgent({ address, chain, requestId }) {
           factors.push({ name: 'low_engagement', impact: -5, detail: 'Suspiciously low engagement' });
         }
       } else {
-        factors.push({ name: 'no_twitter', impact: -10, detail: 'No Twitter/X account found' });
+        factors.push({ name: 'no_twitter', impact: -5, detail: 'No Twitter/X account found' });
       }
 
       // Telegram check
@@ -174,7 +174,7 @@ async function checkAtvIdentity(address, chain, factors, requestId) {
     const item = data?.addresses?.[0];
 
     if (!item || !item.ens) {
-      factors.push({ name: 'atv_not_found', impact: -5, detail: 'No ENS identity for this address' });
+      // REMOVED: duplicate atv_not_found (already handled in main orchestrator)
       return { found: false, verified: false, usage: data?.metadata?.usage };
     }
 

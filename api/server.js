@@ -37,6 +37,7 @@ const walletRoutes = require('./routes/wallets');
 const webhookRoutes = require('./routes/webhooks');
 const receiptRoutes = require('./routes/receipts');
 const strategyRoutes = require('./routes/strategy');
+const skillsRoutes = require('./routes/skills');
 
 // v7.0 Strategic Orchestrator engines
 const ContextEngine = require('./lib/context-engine');
@@ -118,6 +119,7 @@ app.use('/api/v1/twitter', apiKeyAuth, twitterRoutes);
 app.use('/api/v1/wallets', apiKeyAuth, walletRoutes);
 app.use('/api/v1/webhooks', apiKeyAuth, webhookRoutes);
 app.use('/api/v1/receipts', apiKeyAuth, receiptRoutes);
+app.use('/api/v1/skills', apiKeyAuth, skillsRoutes);
 
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 
