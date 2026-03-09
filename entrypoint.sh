@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ══════════════════════════════════════════════════
-# Buzz BD Agent v7.2.0 — Entrypoint
+# Buzz BD Agent v7.3.0 — Entrypoint
 # ══════════════════════════════════════════════════
 # PHILOSOPHY: Docker image = source of truth.
 #             Boot → 5 green layers → fully operational.
@@ -23,7 +23,7 @@ export PATH="/data/.npm-global/bin:/usr/local/bin:$PATH"
 export LITE_AGENT_API_KEY="${ACP_API_KEY}"
 
 echo "════════════════════════════════════════════════"
-echo "  🐝 Buzz BD Agent v7.2.0"
+echo "  🐝 Buzz BD Agent v7.3.0"
 echo "  OpenClaw v2026.3.7 | REST API | ACP | Supermemory"
 echo "  5 Sub-Agents | 20 Skills | 18 Crons | 19 Intel"
 echo "  Supermemory: buzz_bd_agent (3 custom containers)"
@@ -357,7 +357,7 @@ echo "[boot] ✅ Block 9: OpenClaw config generated (18 env keys, Bankr 8 models
 # This is the definitive health check on every boot.
 # ══════════════════════════════════════════════════
 echo ""
-echo "════════ 🐝 BUZZ v7.2.0 — 5-LAYER BOOT CHECK ════════"
+echo "════════ 🐝 BUZZ v7.3.0 — 5-LAYER BOOT CHECK ════════"
 
 # ── Layer 1: Scanner ──────────────────────────────────────────
 L1_CRON=$(grep -c 'BD SCAN\|DexScreener.*token-boosts' "$CRON_TARGET" 2>/dev/null || echo "0")
@@ -786,7 +786,7 @@ fi
 # ══════════════════════════════════════════════════
 echo ""
 echo "════════════════════════════════════════════════"
-echo "  🐝 Buzz BD Agent v7.2.0 — All services started"
+echo "  🐝 Buzz BD Agent v7.3.0 — All services started"
 echo "  REST API:      http://localhost:3000 (72 endpoints)"
 echo "  Strategic:     Decision + Playbook + Context engines"
 echo "  Cost Guard:    \$10/day cap, cache warm active"
