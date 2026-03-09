@@ -1,850 +1,856 @@
-#!/usr/bin/env node
-// =============================================================================
-// 🐝 BUZZ TWITTER BOT v3.0 — Sales Funnel + 4-Layer Intelligence Pipeline
-//
-// Standalone microservice running alongside OpenClaw on Akash.
-// No LLM dependency. Pure code. All 4 Buzz intelligence layers.
-//
-// L1 TokenAgent   → DexScreener (price, vol, liq, FDV, socials, holders)
-// L2 SafetyAgent  → RugCheck (Solana) / Contract checks (Base/ETH)
-// L3 IdentityAgent → Blockscout deployer + ATV Web3 Identity (ENS)
-// L4 ScoringAgent → 10-factor weighted scoring system (100 points) + Grade
-//
-// v2.2 Changes (Feb 28):
-//   - Fixed scoring flatness (everything was ~50/100)
-//   - Unknown/missing data now scores LOW (1-3) not MID (4-5)
-//   - Volume fallback: extrapolates from h6/h1 if h24 missing
-//   - Added letter grades (A/B/C/D/F)
-//   - More granular scoring tiers across all factors
-//   - Vol/Liq ratio bonus signal
-//
-// Architecture: twitter-bot.js (PID 2) ←→ Akash Container ←→ Twitter API
-// Dev workflow:  Mac → Docker → GHCR → Akash (never install on Akash)
-// =============================================================================
+// ══════════════════════════════════════════════════════════════════════════════
+// Buzz BD Agent — Twitter Bot v3.1-final
+// OpenClaw v2026.3.1 | SolCex Exchange | Indonesia Sprint
+// ──────────────────────────────────────────────────────────────────────────────
+// Routes:
+//   SCAN   → 5-Layer Premium report (4000 chars) + LIST/DEPLOY CTA footer
+//   LIST   → SolCex listing pitch + Telegram lead alert to Ogie
+//   DEPLOY → Autonomous Bankr token deploy (no Ogie approval needed)
+//   TOKEN DETAILS → Follow-up: execute bankr deploy after user provides name/symbol
+// ══════════════════════════════════════════════════════════════════════════════
 
-const https = require('https');
-const http  = require('http');
+'use strict';
+
+const https  = require('https');
+const http   = require('http');
+const fs     = require('fs');
+const path   = require('path');
 const crypto = require('crypto');
-const fs = require('fs');
 
-// ── Config ──────────────────────────────────────────────────────────────────
-const CHECK_INTERVAL_MS = 15 * 60 * 1000;   // 15 minutes
-const MAX_RESULTS       = 10;                // Twitter API minimum
-const MAX_REPLIES_DAY   = 12;                // Daily reply cap
-const REPLY_DELAY_MS    = 30000;             // 30s between replies
-const API_TIMEOUT_MS    = 15000;             // 15s per API call
-const DATA_DIR          = '/data/workspace';
-const REPLIED_FILE      = `${DATA_DIR}/twitter-replied.json`;
-const LOG_FILE          = `${DATA_DIR}/twitter-bot.log`;
-const DAILY_COUNT_FILE  = `${DATA_DIR}/twitter-daily-count.json`;
-const SCAN_HISTORY_FILE = `${DATA_DIR}/twitter-scan-history.json`;
+// ── Config ────────────────────────────────────────────────────────────────────
+const DATA_DIR            = process.env.TWITTER_DATA_DIR || '/data/workspace';
+const REPLIED_FILE        = path.join(DATA_DIR, 'twitter-replied.json');
+const DAILY_COUNT_FILE    = path.join(DATA_DIR, 'twitter-daily-count.json');
+const SCAN_HISTORY_FILE   = path.join(DATA_DIR, 'twitter-scan-history.json');
+const LEADS_FILE          = path.join(DATA_DIR, 'twitter-leads.json');
+const DEPLOYS_FILE        = path.join(DATA_DIR, 'twitter-deploys.json');
+const SCAN_TWEETS_FILE    = path.join(DATA_DIR, 'twitter-scan-tweets.json');
+const DEPLOY_DAILY_FILE   = path.join(DATA_DIR, 'twitter-deploy-daily.json');
+const LOG_FILE            = path.join(DATA_DIR, 'twitter-bot.log');
 
-// Telegram bridge — notify Buzz after each scan
-const TG_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TG_CHAT_ID   = process.env.TELEGRAM_CHAT_ID;
+const X_API_KEY           = process.env.X_API_KEY           || '';
+const X_API_SECRET        = process.env.X_API_SECRET        || '';
+const X_ACCESS_TOKEN      = process.env.X_ACCESS_TOKEN      || '';
+const X_ACCESS_TOKEN_SECRET = process.env.X_ACCESS_TOKEN_SECRET || '';
+const X_BEARER_TOKEN      = process.env.X_BEARER_TOKEN      || '';
+const BOT_USER_ID         = process.env.X_BOT_USER_ID       || '';
+const TELEGRAM_BOT_TOKEN  = process.env.TELEGRAM_BOT_TOKEN  || '';
+const TELEGRAM_CHAT_ID    = process.env.TELEGRAM_CHAT_ID    || '';
+const OPENCLAW_PORT       = parseInt(process.env.OPENCLAW_PORT || '18789');
+const MAX_REPLIES_DAY     = parseInt(process.env.MAX_REPLIES_DAY || '12');
+const MAX_DEPLOYS_DAY     = 3;
+const CHECK_INTERVAL_MS   = 15 * 60 * 1000; // 15 min
+const REPLY_DELAY_MS      = 30 * 1000;       // 30s between replies
 
-// ── Logging ─────────────────────────────────────────────────────────────────
+// Bankr Partner API
+const BANKR_PARTNER_KEY   = process.env.BANKR_PARTNER_KEY   || '';
+const BANKR_FEE_WALLET    = process.env.BANKR_FEE_WALLET    || '0x2Dc03124091104E7798C0273D96FC5ED65F05aA9';
+const BANKR_DEPLOY_WALLET = process.env.BANKR_DEPLOY_WALLET || '0xfa04c7d627ba707a1ad17e72e094b45150665593';
+const BANKR_BASE_URL      = 'https://api.bankr.bot';
+
+// ── Logger ────────────────────────────────────────────────────────────────────
 function log(msg) {
   const line = `[${new Date().toISOString()}] ${msg}`;
   console.log(line);
   try { fs.appendFileSync(LOG_FILE, line + '\n'); } catch {}
 }
 
-// ── Persistence ─────────────────────────────────────────────────────────────
-function loadJSON(file, fallback) {
-  try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
-  catch { return fallback; }
+// ── JSON Helpers ──────────────────────────────────────────────────────────────
+function loadJSON(file, def) {
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return def; }
 }
 function saveJSON(file, data) {
-  try { fs.writeFileSync(file, JSON.stringify(data, null, 2)); } catch {}
+  fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
-function loadReplied() { return loadJSON(REPLIED_FILE, []); }
-function saveReplied(ids) { saveJSON(REPLIED_FILE, ids.slice(-500)); }
-function getDailyCount() {
-  const d = loadJSON(DAILY_COUNT_FILE, { date: '', count: 0 });
+
+// ── Daily Count ───────────────────────────────────────────────────────────────
+function loadDailyCount() {
+  const data = loadJSON(DAILY_COUNT_FILE, { date: '', count: 0 });
   const today = new Date().toISOString().slice(0, 10);
-  return d.date === today ? d : { date: today, count: 0 };
+  if (data.date !== today) return { date: today, count: 0 };
+  return data;
 }
 function incrementDailyCount() {
-  const d = getDailyCount();
-  d.count++;
-  saveJSON(DAILY_COUNT_FILE, d);
-  return d.count;
-}
-function saveScanHistory(scan) {
-  const history = loadJSON(SCAN_HISTORY_FILE, []);
-  history.push({ ...scan, timestamp: new Date().toISOString() });
-  saveJSON(SCAN_HISTORY_FILE, history.slice(-200));
+  const today = new Date().toISOString().slice(0, 10);
+  const data = loadDailyCount();
+  data.date = today; data.count++;
+  saveJSON(DAILY_COUNT_FILE, data);
+  return data.count;
 }
 
-// ── Telegram: Notify Buzz ───────────────────────────────────────────────────
-// Sends full scan report to Buzz via Telegram so Buzz has context for
-// follow-up questions, memory, pipeline tracking, and learning.
-async function notifyBuzz(l1, l2, l3, scoring, tweetId) {
-  const chain = l1.chain === 'solana' ? 'SOL' : l1.chain === 'base' ? 'Base' : l1.chain.toUpperCase();
+// ── Replied Tracking ──────────────────────────────────────────────────────────
+function loadReplied() { return loadJSON(REPLIED_FILE, []); }
+function saveReplied(arr) { saveJSON(REPLIED_FILE, arr.slice(-2000)); }
 
-  // Build detailed report for Buzz (no 280 char limit)
-  let msg = `🐝 TWITTER SCAN COMPLETED\n\n`;
-  msg += `📋 Tweet: ${tweetId}\n`;
-  msg += `🔗 https://x.com/BuzzBySolCex/status/${tweetId}\n\n`;
+// ── Scan History ──────────────────────────────────────────────────────────────
+function loadScanHistory() { return loadJSON(SCAN_HISTORY_FILE, []); }
+function addScanHistory(ca) {
+  const h = loadScanHistory();
+  if (!h.includes(ca)) { h.push(ca); saveJSON(SCAN_HISTORY_FILE, h.slice(-500)); }
+}
 
-  msg += `━━ L1 TokenAgent ━━\n`;
-  msg += `Token: $${l1.symbol} (${l1.name})\n`;
-  msg += `Chain: ${chain} | DEX: ${l1.dex}\n`;
-  msg += `Price: ${fmtPrice(l1.price)} | FDV: $${fmtNum(l1.fdv)}\n`;
-  msg += `Vol 24h: $${fmtNum(l1.vol24h)} | Liq: $${fmtNum(l1.liq)}\n`;
-  msg += `Txns 24h: ${l1.txns24h} | Change: ${l1.priceChange24h > 0 ? '+' : ''}${l1.priceChange24h.toFixed(1)}%\n`;
-  msg += `Socials: ${l1.hasSocials ? 'YES' : 'NONE'}\n`;
-  msg += `CA: ${l1.ca}\n\n`;
+// ── Scan Tweet Mapping ────────────────────────────────────────────────────────
+function loadScanTweets() { return loadJSON(SCAN_TWEETS_FILE, {}); }
+function saveScanTweet(ourReplyId, scanData) {
+  const data = loadScanTweets();
+  data[ourReplyId] = {
+    symbol: scanData.l1.symbol, chain: scanData.l1.chain, ca: scanData.l1.ca,
+    score: scanData.scoring.score, grade: scanData.scoring.grade,
+    timestamp: new Date().toISOString()
+  };
+  const keys = Object.keys(data);
+  if (keys.length > 200) keys.slice(0, keys.length - 200).forEach(k => delete data[k]);
+  saveJSON(SCAN_TWEETS_FILE, data);
+}
 
-  msg += `━━ L2 SafetyAgent ━━\n`;
-  if (l1.chain === 'solana') {
-    msg += `RugCheck: ${l2.rugResult || 'N/A'} (score: ${l2.rugScore || 'N/A'})\n`;
-    msg += `Mint: ${l2.mintAuthority} | Freeze: ${l2.freezeAuthority}\n`;
-    msg += `LP: ${l2.lpLocked}\n`;
-    if (l2.risks.length > 0) {
-      msg += `Risks: ${l2.risks.map(r => `${r.name}(${r.level})`).join(', ')}\n`;
-    }
-  } else {
-    msg += `Contract verified: ${l2.isVerified ? 'YES ✅' : 'NO'}\n`;
+// ── Lead Tracking ─────────────────────────────────────────────────────────────
+function loadLeads() { return loadJSON(LEADS_FILE, []); }
+function saveLead(lead) {
+  const leads = loadLeads();
+  leads.push({ ...lead, timestamp: new Date().toISOString() });
+  saveJSON(LEADS_FILE, leads.slice(-500));
+}
+
+// ── Deploy Daily Count ────────────────────────────────────────────────────────
+function getDeployDailyCount() {
+  const data = loadJSON(DEPLOY_DAILY_FILE, { date: '', count: 0 });
+  const today = new Date().toISOString().slice(0, 10);
+  if (data.date !== today) return { date: today, count: 0 };
+  return data;
+}
+function incrementDeployDailyCount() {
+  const today = new Date().toISOString().slice(0, 10);
+  const data = getDeployDailyCount();
+  data.date = today; data.count++;
+  saveJSON(DEPLOY_DAILY_FILE, data);
+  return data.count;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PREMIUM SCAN REPLY FORMAT v3.1 — 5-Layer Intelligence (4000 chars)
+// ══════════════════════════════════════════════════════════════════════════════
+
+function progressBar(score, max) {
+  max = max || 10;
+  const filled = Math.round((score / max) * 5);
+  const empty = 5 - filled;
+  return '█'.repeat(Math.max(0, filled)) + '░'.repeat(Math.max(0, empty));
+}
+
+function trendArrow(pct) {
+  if (pct == null) return '— Unknown';
+  if (pct >= 50)  return '▲▲▲ Surging';
+  if (pct >= 20)  return '▲▲ Rising';
+  if (pct >= 5)   return '▲ Up';
+  if (pct >= -5)  return '→ Flat';
+  if (pct >= -20) return '▼ Declining';
+  return '▼▼ Dropping';
+}
+
+function safeIcon(v) {
+  if (v === true)  return '✅';
+  if (v === false) return '❌';
+  return '⚠️';
+}
+
+function tokenAge(ts) {
+  if (!ts) return 'Unknown';
+  const hours = Math.floor((Date.now() - ts) / 3600000);
+  const days  = Math.floor(hours / 24);
+  if (days > 365) return Math.floor(days / 365) + 'y ' + (days % 365) + 'd';
+  if (days > 0)   return days + 'd ' + (hours % 24) + 'h';
+  return hours + 'h';
+}
+
+function getVerdict(score) {
+  if (score >= 85) return { e: '🔥', l: 'HOT',       a: 'Strong listing prospect' };
+  if (score >= 70) return { e: '✅', l: 'QUALIFIED',  a: 'Worth monitoring' };
+  if (score >= 50) return { e: '👀', l: 'WATCHLIST',  a: 'Monitor 48h' };
+  if (score >= 30) return { e: '⚠️', l: 'HIGH RISK',  a: 'Caution' };
+  return               { e: '🔴', l: 'DANGER',     a: 'Avoid' };
+}
+
+function letterGrade(s) {
+  if (s >= 90) return 'A+'; if (s >= 85) return 'A';  if (s >= 80) return 'A-';
+  if (s >= 75) return 'B+'; if (s >= 70) return 'B';  if (s >= 65) return 'B-';
+  if (s >= 60) return 'C+'; if (s >= 55) return 'C';  if (s >= 50) return 'C-';
+  if (s >= 40) return 'D';  return 'F';
+}
+
+function fmtNum(n) {
+  if (n == null) return 'N/A';
+  if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+  return n.toFixed(2);
+}
+
+function fmtPrice(p) {
+  if (p == null) return 'N/A';
+  if (p < 0.000001) return '$' + p.toExponential(2);
+  if (p < 0.01)     return '$' + p.toFixed(6);
+  if (p < 1)        return '$' + p.toFixed(4);
+  return '$' + p.toFixed(2);
+}
+
+/**
+ * buildReply v3.1 — Premium 5-Layer SCAN reply
+ * Maps existing l1/l2/l3/scoring data to the full format
+ * @param {object} l1 - DexScreener pair data
+ * @param {object} l2 - Safety/RugCheck data
+ * @param {object} l3 - Social/Grok data
+ * @param {object} scoring - { score, grade, factors }
+ */
+function buildReply(l1, l2, l3, scoring) {
+  const chain  = l1.chain === 'solana' ? 'SOL'
+               : l1.chain === 'base'   ? 'Base'
+               : l1.chain === 'ethereum' ? 'ETH'
+               : (l1.chain || 'Unknown').toUpperCase();
+
+  const v      = getVerdict(scoring.score);
+  const grade  = letterGrade(scoring.score);
+  const age    = tokenAge(l1.pairCreatedAt);
+  const f      = scoring.factors || {};
+
+  // Price change
+  const pc1h  = l1.priceChange?.h1;
+  const pc24h = l1.priceChange?.h24;
+  const pc7d  = l1.priceChange?.d7;
+  const priceLine = pc24h != null
+    ? `${pc1h != null ? (pc1h >= 0 ? '+' : '') + pc1h.toFixed(1) + '% (1h) ' : ''}${(pc24h >= 0 ? '+' : '') + pc24h.toFixed(1)}% (24h)${pc7d != null ? ' / ' + (pc7d >= 0 ? '+' : '') + pc7d.toFixed(1) + '% (7d)' : ''}`
+    : 'N/A';
+
+  // Safety flags
+  const mintAuth   = l2?.mintAuthority   != null ? !l2.mintAuthority   : null;
+  const freezeAuth = l2?.freezeAuthority != null ? !l2.freezeAuthority : null;
+  const lpBurned   = l2?.lpBurned        != null ? l2.lpBurned         : null;
+  const rugScore   = l2?.rugScore        != null ? l2.rugScore         : null;
+  const topHolder  = l2?.topHolderPct    != null ? l2.topHolderPct     : null;
+
+  // Social signals
+  const sentiment  = l3?.sentiment  || null;
+  const twitterF   = l3?.followers  || null;
+  const mentions   = l3?.mentions   || null;
+  const devActivity = l3?.devActivity || null;
+
+  // Slippage estimate
+  const slip = l1.liq > 0
+    ? Math.min(99, Math.round((1000 / l1.liq) * 100) / 100).toFixed(1) + '%'
+    : 'N/A';
+
+  // Build the report
+  const lines = [];
+  lines.push(`🐝 BUZZ INTEL — $${l1.symbol} (${chain})`);
+  lines.push(`━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+
+  // Score header
+  lines.push(`${v.e} ${scoring.score}/100 (${grade}) — ${v.l}`);
+  lines.push(`Score ${progressBar(scoring.score, 100)} ${scoring.score}pts`);
+  lines.push('');
+
+  // Layer 1 — Market
+  lines.push(`📊 LAYER 1 — MARKET`);
+  lines.push(`Price:   ${fmtPrice(l1.priceUsd)}`);
+  lines.push(`FDV:     $${fmtNum(l1.fdv)}`);
+  lines.push(`Liq:     $${fmtNum(l1.liq)}`);
+  lines.push(`Vol 24h: $${fmtNum(l1.vol24h)}`);
+  lines.push(`Age:     ${age}`);
+  lines.push(`Trend:   ${trendArrow(pc24h)} ${priceLine}`);
+  if (l1.txns?.h24) {
+    lines.push(`Txns 24h: ${(l1.txns.h24.buy || 0) + (l1.txns.h24.sell || 0)} (${l1.txns.h24.buy || 0}B / ${l1.txns.h24.sell || 0}S)`);
   }
-  msg += `Top holders risk: ${l2.topHoldersRisk ? 'YES ⚠️' : 'NO'}\n\n`;
+  lines.push('');
 
-  msg += `━━ L3 IdentityAgent ━━\n`;
-  msg += `Deployer: ${l3.deployer || 'unknown'}\n`;
-  msg += `ENS: ${l3.ens || 'none'}\n`;
-  msg += `Twitter: ${l3.twitter || 'none'} | GitHub: ${l3.github || 'none'}\n`;
-  msg += `Label: ${l3.label}\n`;
-  msg += `Holders: ${l3.holders || 'unknown'}\n\n`;
+  // Layer 2 — Safety
+  lines.push(`🛡️ LAYER 2 — SAFETY`);
+  if (rugScore != null) lines.push(`RugScore: ${rugScore}/100 ${progressBar(100 - rugScore, 100)}`);
+  lines.push(`Mint Auth:   ${safeIcon(mintAuth)}${mintAuth == null ? ' Unknown' : ''}`);
+  lines.push(`Freeze Auth: ${safeIcon(freezeAuth)}${freezeAuth == null ? ' Unknown' : ''}`);
+  lines.push(`LP Burned:   ${safeIcon(lpBurned)}${lpBurned == null ? ' Unknown' : ''}`);
+  if (topHolder != null) lines.push(`Top Holder:  ${topHolder.toFixed(1)}% ${topHolder < 10 ? '✅' : topHolder < 20 ? '⚠️' : '❌'}`);
+  if (slip !== 'N/A') lines.push(`Slip Est:    ~${slip}`);
+  lines.push('');
 
-  msg += `━━ L4 ScoringAgent ━━\n`;
-  msg += `⭐ SCORE: ${scoring.score}/100 (${scoring.grade})\n`;
-  const f = scoring.factors;
-  msg += `Safety:${f.safety} Liq:${f.liquidity} Vol:${f.volume} MCap:${f.mcap} Social:${f.social}\n`;
-  msg += `Age:${f.age} Holders:${f.holders} Activity:${f.activity} LP:${f.lpLock} Identity:${f.identity}\n\n`;
+  // Layer 3 — Intelligence
+  lines.push(`🧠 LAYER 3 — INTELLIGENCE`);
+  if (f.marketScore    != null) lines.push(`Market:  ${f.marketScore}/25  ${progressBar(f.marketScore, 25)}`);
+  if (f.safetyScore    != null) lines.push(`Safety:  ${f.safetyScore}/30  ${progressBar(f.safetyScore, 30)}`);
+  if (f.socialScore    != null) lines.push(`Social:  ${f.socialScore}/25  ${progressBar(f.socialScore, 25)}`);
+  if (f.onchainScore   != null) lines.push(`OnChain: ${f.onchainScore}/20  ${progressBar(f.onchainScore, 20)}`);
+  lines.push('');
 
-  // Pipeline recommendation
+  // Layer 4 — Social
+  lines.push(`🌐 LAYER 4 — SOCIAL`);
+  if (sentiment)   lines.push(`Sentiment: ${sentiment}`);
+  if (twitterF)    lines.push(`Followers: ${fmtNum(twitterF)}`);
+  if (mentions)    lines.push(`Mentions:  ${fmtNum(mentions)} (24h)`);
+  if (devActivity) lines.push(`Dev Activity: ${devActivity}`);
+  if (!sentiment && !twitterF && !mentions) lines.push(`Social data: Limited`);
+  lines.push('');
+
+  // Layer 5 — Verdict
+  lines.push(`🎯 LAYER 5 — VERDICT`);
+  lines.push(`${v.e} ${v.l}: ${v.a}`);
   if (scoring.score >= 70) {
-    msg += `📌 RECOMMENDATION: HIGH PRIORITY — add to pipeline for outreach\n`;
+    lines.push(`CA: ${l1.ca}`);
+    lines.push(`Chain: ${chain} | DEX: ${l1.dex || 'N/A'}`);
+  }
+  lines.push('');
+
+  // Footer CTA
+  lines.push(`━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+  if (scoring.score >= 70) {
+    lines.push(`🏦 Want $${l1.symbol} listed on @SolCex_Exchange?`);
+    lines.push(`Reply LIST → get listing details`);
+    lines.push(`Reply DEPLOY → launch your own token via @bankrbot`);
   } else if (scoring.score >= 50) {
-    msg += `📌 RECOMMENDATION: MONITOR — decent project, needs more data\n`;
-  } else if (scoring.score >= 35) {
-    msg += `📌 RECOMMENDATION: LOW PRIORITY — weak metrics\n`;
+    lines.push(`👀 Monitoring $${l1.symbol}. Score needs 70+ for listing.`);
+    lines.push(`Reply DEPLOY → launch your own token via @bankrbot`);
   } else {
-    msg += `📌 RECOMMENDATION: SKIP — poor fundamentals\n`;
+    lines.push(`⚠️ $${l1.symbol} below threshold (70+ required for listing).`);
+    lines.push(`Reply DEPLOY → launch your own token via @bankrbot`);
   }
+  lines.push('');
+  lines.push(`Powered by @BuzzBySolCex | #SolCex #${chain}`);
 
-  // Send to Buzz via Telegram
-  try {
-    const body = JSON.stringify({
-      chat_id: TG_CHAT_ID,
-      text: msg,
-      parse_mode: 'HTML',
-      disable_web_page_preview: true
-    });
-
-    const res = await safeReq({
-      hostname: 'api.telegram.org',
-      path: `/bot${TG_BOT_TOKEN}/sendMessage`,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(body)
-      }
-    }, body);
-
-    if (res && res.status === 200) {
-      log('  📨 Buzz notified via Telegram');
-    } else {
-      log(`  ⚠ Telegram notify failed: ${res?.status || 'null'}`);
-    }
-  } catch (e) {
-    log(`  ⚠ Telegram notify error: ${e.message}`);
-  }
+  return lines.join('\n');
 }
 
-// ── HTTP Helper ─────────────────────────────────────────────────────────────
-function httpReq(options, body) {
+// ══════════════════════════════════════════════════════════════════════════════
+// LIST / DEPLOY REPLY FORMATTERS
+// ══════════════════════════════════════════════════════════════════════════════
+
+function formatListReply() {
+  return [
+    `🏦 SolCex Exchange — CEX Listing Inquiry`,
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+    ``,
+    `Thanks for your interest! Here's what we offer:`,
+    ``,
+    `✅ Solana-native CEX listing`,
+    `✅ Instant trading activation`,
+    `✅ Market maker partnership`,
+    `✅ Marketing collaboration`,
+    `✅ Community growth support`,
+    ``,
+    `📩 Next step: DM @SolCex_Exchange with:`,
+    `• Token name & CA`,
+    `• Current metrics`,
+    `• Team contact`,
+    ``,
+    `We review all inquiries within 24h.`,
+    ``,
+    `#SolCex #Solana #CEXListing`,
+  ].join('\n');
+}
+
+function formatDeployReply() {
+  return [
+    `🚀 Deploy Your Token via @bankrbot`,
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+    ``,
+    `Launch your token on Base chain in ~2 minutes:`,
+    ``,
+    `1️⃣ Reply with your token details:`,
+    `   Name: [Token Name]`,
+    `   Symbol: [TICKER]`,
+    `   Description: [optional]`,
+    ``,
+    `2️⃣ Buzz will deploy automatically via Bankr`,
+    ``,
+    `3️⃣ Your token goes LIVE on Base with:`,
+    `   • Auto LP seeded`,
+    `   • Trading enabled instantly`,
+    `   • 50% fee split to your wallet`,
+    ``,
+    `⚡ No wallet connection needed`,
+    `⚡ Fees split: 50% you / 50% platform`,
+    ``,
+    `Reply with Name + Symbol to start! 👇`,
+    ``,
+    `#Bankr #Base #TokenLaunch`,
+  ].join('\n');
+}
+
+function formatDeployConfirmation(name, symbol, contractAddress, txHash) {
+  return [
+    `🎉 Token Deployed Successfully!`,
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+    ``,
+    `✅ ${name} ($${symbol}) is LIVE on Base`,
+    ``,
+    `CA: ${contractAddress}`,
+    `TX: ${txHash ? txHash.slice(0, 20) + '...' : 'Confirmed'}`,
+    ``,
+    `🔗 Trade now on Bankr`,
+    `📊 50% of all trading fees go to your wallet`,
+    ``,
+    `Want $${symbol} listed on @SolCex_Exchange?`,
+    `DM us once you have volume! 🏦`,
+    ``,
+    `#${symbol} #Base #Bankr #SolCex`,
+  ].join('\n');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// COMMAND PARSERS
+// ══════════════════════════════════════════════════════════════════════════════
+
+function cleanText(text) {
+  return (text || '').replace(/@\w+/g, '').replace(/https?:\/\/\S+/g, '').trim();
+}
+
+/**
+ * parseCommand — detects LIST / DEPLOY / SCAN / TOKEN_DETAILS
+ * Returns { route, type?, value?, name?, symbol?, description? } or null
+ */
+function parseCommand(text) {
+  const cleaned = cleanText(text).toUpperCase();
+  const raw     = cleanText(text);
+
+  // LIST route
+  if (/^LIST[!.?]?$/.test(cleaned) || /\bLIST\b/.test(cleaned.slice(0, 20))) {
+    return { route: 'LIST' };
+  }
+
+  // DEPLOY route — bare "DEPLOY" triggers instructions
+  if (/^DEPLOY[!.?]?$/.test(cleaned)) {
+    return { route: 'DEPLOY' };
+  }
+
+  // TOKEN DETAILS — "Deploy Name: X Symbol: Y" or "Name: X\nSymbol: Y"
+  const nameMatch   = raw.match(/(?:name|token)[:\s]+([A-Za-z0-9 _-]{2,30})/i);
+  const symbolMatch = raw.match(/(?:symbol|ticker)[:\s]+\$?([A-Z]{2,10})/i);
+  if (nameMatch && symbolMatch) {
+    return {
+      route: 'TOKEN_DETAILS',
+      name:   nameMatch[1].trim(),
+      symbol: symbolMatch[1].trim().toUpperCase(),
+      description: raw.match(/(?:description|desc)[:\s]+(.{5,100})/i)?.[1]?.trim() || ''
+    };
+  }
+
+  // SCAN route — contract address or $SYMBOL
+  const caMatch = text.match(/\b([1-9A-HJ-NP-Za-km-z]{32,44})\b/);   // Solana CA
+  const evmMatch = text.match(/\b(0x[a-fA-F0-9]{40})\b/);              // EVM CA
+  const symMatch = text.match(/\$([A-Za-z]{2,10})\b/);
+
+  if (evmMatch) return { route: 'SCAN', type: 'ca', value: evmMatch[1] };
+  if (caMatch)  return { route: 'SCAN', type: 'ca', value: caMatch[1] };
+  if (symMatch) return { route: 'SCAN', type: 'symbol', value: symMatch[1].toUpperCase() };
+
+  return null;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SCAN PIPELINE (calls OpenClaw gateway)
+// ══════════════════════════════════════════════════════════════════════════════
+
+function callOpenClaw(message) {
   return new Promise((resolve, reject) => {
-    const lib = options.port === 80 ? http : https;
-    const req = lib.request(options, res => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
+    const payload = JSON.stringify({ content: message });
+    const options = {
+      hostname: 'localhost',
+      port: OPENCLAW_PORT,
+      path: '/v1/messages',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) }
+    };
+    const req = http.request(options, res => {
+      let body = '';
+      res.on('data', d => body += d);
       res.on('end', () => {
-        try { resolve({ status: res.statusCode, data: JSON.parse(data) }); }
-        catch { resolve({ status: res.statusCode, data }); }
+        try { resolve(JSON.parse(body)); }
+        catch { reject(new Error('OpenClaw parse error: ' + body.slice(0, 200))); }
       });
     });
     req.on('error', reject);
-    req.setTimeout(API_TIMEOUT_MS, () => { req.destroy(); reject(new Error('timeout')); });
-    if (body) req.write(body);
+    req.setTimeout(120000, () => { req.destroy(); reject(new Error('OpenClaw timeout (120s)')); });
+    req.write(payload);
     req.end();
   });
 }
 
-// Safe wrapper — returns null on any error
-async function safeReq(options, body) {
-  try { return await httpReq(options, body); }
-  catch (e) { log(`  ⚠ API error (${options.hostname}${options.path?.slice(0,40)}): ${e.message}`); return null; }
-}
+async function runScanPipeline(value) {
+  const directive = [
+    `TWITTER SCAN REQUEST`,
+    `Query: ${value}`,
+    ``,
+    `Run the full 5-layer scan pipeline (L1 market + L2 safety + L3 intelligence + L4 social + L5 scoring).`,
+    `Return structured JSON with:`,
+    `{ l1: { symbol, chain, ca, priceUsd, fdv, liq, vol24h, pairCreatedAt, priceChange, txns, dex },`,
+    `  l2: { rugScore, mintAuthority, freezeAuthority, lpBurned, topHolderPct },`,
+    `  l3: { sentiment, followers, mentions, devActivity },`,
+    `  scoring: { score, grade, factors: { marketScore, safetyScore, socialScore, onchainScore } } }`,
+  ].join('\n');
 
-// ── OAuth 1.0a Signature ────────────────────────────────────────────────────
-function oauthSign(method, url) {
-  const ck = process.env.X_API_KEY;
-  const cs = process.env.X_API_SECRET;
-  const tk = process.env.X_ACCESS_TOKEN;
-  const ts = process.env.X_ACCESS_TOKEN_SECRET;
-  const timestamp = Math.floor(Date.now() / 1000).toString();
-  const nonce = crypto.randomBytes(16).toString('hex');
-
-  const oauthParams = {
-    oauth_consumer_key: ck, oauth_nonce: nonce,
-    oauth_signature_method: 'HMAC-SHA1', oauth_timestamp: timestamp,
-    oauth_token: tk, oauth_version: '1.0'
-  };
-
-  const paramStr = Object.keys(oauthParams).sort()
-    .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(oauthParams[k])}`).join('&');
-  const baseStr = `${method}&${encodeURIComponent(url)}&${encodeURIComponent(paramStr)}`;
-  const sigKey = `${encodeURIComponent(cs)}&${encodeURIComponent(ts)}`;
-  const sig = crypto.createHmac('sha1', sigKey).update(baseStr).digest('base64');
-
-  return 'OAuth ' + Object.keys(oauthParams).sort()
-    .map(k => `${k}="${encodeURIComponent(oauthParams[k])}"`)
-    .join(', ') + `, oauth_signature="${encodeURIComponent(sig)}"`;
-}
-
-// =============================================================================
-// L1 — TOKEN AGENT (DexScreener)
-// =============================================================================
-async function l1_tokenAgent(query) {
-  log('  [L1 TokenAgent] DexScreener lookup...');
-  const res = await safeReq({
-    hostname: 'api.dexscreener.com',
-    path: `/latest/dex/search?q=${encodeURIComponent(query)}`,
-    method: 'GET',
-    headers: { 'Accept': 'application/json' }
-  });
-  if (!res || res.status !== 200 || !res.data.pairs?.length) {
-    log('  [L1] ❌ No pairs found');
+  try {
+    const raw = await callOpenClaw(directive);
+    const txt = raw?.content?.[0]?.text || raw?.text || '';
+    const jsonMatch = txt.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON in pipeline response');
+    const data = JSON.parse(jsonMatch[0]);
+    if (!data.l1 || !data.scoring) throw new Error('Incomplete pipeline data');
+    const reply = buildReply(data.l1, data.l2 || {}, data.l3 || {}, data.scoring);
+    return { ...data, reply };
+  } catch (err) {
+    log(`  ⚠️ Pipeline error: ${err.message}`);
     return null;
   }
-
-  // Sort by liquidity, pick top pair
-  const pair = res.data.pairs.sort((a, b) =>
-    (parseFloat(b.liquidity?.usd || 0)) - (parseFloat(a.liquidity?.usd || 0))
-  )[0];
-
-  // FIX v2.2: Volume fallback — extrapolate from h6/h1 if h24 is missing/zero
-  let vol24h = parseFloat(pair.volume?.h24 || 0);
-  if (vol24h === 0) {
-    const vol6h = parseFloat(pair.volume?.h6 || 0);
-    const vol1h = parseFloat(pair.volume?.h1 || 0);
-    if (vol6h > 0) vol24h = vol6h * 4;
-    else if (vol1h > 0) vol24h = vol1h * 24;
-  }
-
-  const result = {
-    symbol: pair.baseToken?.symbol || query,
-    name: pair.baseToken?.name || '',
-    chain: pair.chainId || 'unknown',
-    ca: pair.baseToken?.address || '',
-    pairAddress: pair.pairAddress || '',
-    dex: pair.dexId || '',
-    price: parseFloat(pair.priceUsd || 0),
-    fdv: parseFloat(pair.fdv || 0),
-    mcap: parseFloat(pair.marketCap || pair.fdv || 0),
-    liq: parseFloat(pair.liquidity?.usd || 0),
-    vol24h: vol24h,
-    priceChange24h: parseFloat(pair.priceChange?.h24 || 0),
-    txns24h: (pair.txns?.h24?.buys || 0) + (pair.txns?.h24?.sells || 0),
-    hasSocials: !!(pair.info?.websites?.length || pair.info?.socials?.length),
-    websites: pair.info?.websites?.map(w => w.url) || [],
-    socials: pair.info?.socials || [],
-    pairCreatedAt: pair.pairCreatedAt || null,
-  };
-
-  log(`  [L1] ✅ ${result.symbol} on ${result.chain} — $${fmtNum(result.liq)} liq, $${fmtNum(result.vol24h)} vol`);
-  return result;
 }
 
-// =============================================================================
-// L2 — SAFETY AGENT (RugCheck for Solana, Contract checks for Base/ETH)
-// =============================================================================
-async function l2_safetyAgent(l1) {
-  log('  [L2 SafetyAgent] Safety analysis...');
+// ══════════════════════════════════════════════════════════════════════════════
+// BANKR AUTONOMOUS DEPLOY
+// ══════════════════════════════════════════════════════════════════════════════
 
-  const safety = {
-    mintAuthority: 'unknown',
-    freezeAuthority: 'unknown',
-    rugScore: null,
-    rugResult: null,
-    risks: [],
-    lpLocked: 'unknown',
-    isVerified: false,
-    topHoldersRisk: false,
-  };
-
-  if (l1.chain === 'solana') {
-    // RugCheck API for Solana tokens
-    const res = await safeReq({
-      hostname: 'api.rugcheck.xyz',
-      path: `/v1/tokens/${l1.ca}/report`,
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
+async function executeBankrDeploy(name, symbol, description, creatorHandle) {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify({
+      name,
+      symbol,
+      description: description || `${name} — deployed via Buzz by SolCex`,
+      chain: 'base',
+      partnerFeeRecipient: BANKR_FEE_WALLET,
+      creatorXHandle: creatorHandle || '',
+      deployerWallet: BANKR_DEPLOY_WALLET,
     });
 
-    if (res && res.status === 200 && res.data) {
-      const d = res.data;
-      safety.rugScore = d.score || null;
-      safety.rugResult = d.result || null;
-      safety.mintAuthority = d.mintAuthority ? 'ENABLED ⚠️' : 'DISABLED ✅';
-      safety.freezeAuthority = d.freezeAuthority ? 'ENABLED ⚠️' : 'DISABLED ✅';
-
-      // Parse risks
-      if (d.risks && Array.isArray(d.risks)) {
-        safety.risks = d.risks.map(r => ({
-          name: r.name || r.description || 'Unknown',
-          level: r.level || 'info',
-          score: r.score || 0
-        }));
-        safety.topHoldersRisk = d.risks.some(r =>
-          r.name?.toLowerCase().includes('holder') && r.level === 'danger'
-        );
+    const options = {
+      hostname: 'api.bankr.bot',
+      port: 443,
+      path: '/token-launches/deploy',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload),
+        'X-Partner-Key': BANKR_PARTNER_KEY,
+        'X-Api-Version': '2025-01-01',
       }
+    };
 
-      // LP info
-      if (d.markets && Array.isArray(d.markets)) {
-        const totalLpLocked = d.markets.reduce((sum, m) => sum + (m.lp?.lpLockedPct || 0), 0);
-        safety.lpLocked = totalLpLocked > 0 ? `${(totalLpLocked * 100).toFixed(1)}%` : 'unknown';
-      }
-
-      // Lockers
-      if (d.lockers && d.lockers.length > 0) {
-        safety.lpLocked = 'LOCKED ✅';
-      }
-
-      log(`  [L2] ✅ RugCheck: score=${safety.rugScore} result=${safety.rugResult} mint=${safety.mintAuthority}`);
-    } else {
-      log('  [L2] ⚠ RugCheck unavailable, using defaults');
-      safety.mintAuthority = 'UNVERIFIED';
-      safety.freezeAuthority = 'UNVERIFIED';
-    }
-  } else {
-    // Base/ETH: Check via Blockscout contract verification
-    const host = l1.chain === 'base' ? 'base.blockscout.com' : 'eth.blockscout.com';
-    const res = await safeReq({
-      hostname: host,
-      path: `/api/v2/addresses/${l1.ca}`,
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
+    const req = https.request(options, res => {
+      let body = '';
+      res.on('data', d => body += d);
+      res.on('end', () => {
+        try {
+          const data = JSON.parse(body);
+          if (res.statusCode === 200 || res.statusCode === 201) resolve(data);
+          else reject(new Error(`Bankr ${res.statusCode}: ${body.slice(0, 200)}`));
+        } catch { reject(new Error('Bankr parse error: ' + body.slice(0, 200))); }
+      });
     });
-
-    if (res && res.status === 200 && res.data) {
-      safety.isVerified = res.data.is_verified || false;
-      safety.mintAuthority = 'N/A (ERC-20)';
-      safety.freezeAuthority = 'N/A (ERC-20)';
-
-      // Check token data for holder count
-      if (res.data.token) {
-        const holders = parseInt(res.data.token.holders_count || 0);
-        safety.topHoldersRisk = holders < 50;
-      }
-
-      log(`  [L2] ✅ Contract verified=${safety.isVerified}`);
-    } else {
-      log('  [L2] ⚠ Blockscout unavailable');
-    }
-  }
-
-  return safety;
+    req.on('error', reject);
+    req.setTimeout(60000, () => { req.destroy(); reject(new Error('Bankr deploy timeout')); });
+    req.write(payload);
+    req.end();
+  });
 }
 
-// =============================================================================
-// L3 — IDENTITY AGENT (Blockscout Deployer + ATV Web3 Identity)
-// =============================================================================
-async function l3_identityAgent(l1) {
-  log('  [L3 IdentityAgent] Deployer + identity analysis...');
+// ══════════════════════════════════════════════════════════════════════════════
+// TWITTER API
+// ══════════════════════════════════════════════════════════════════════════════
 
-  const identity = {
-    deployer: null,
-    ens: null,
-    twitter: null,
-    github: null,
-    label: 'UNKNOWN',
-    holders: null,
+function oauthSign(method, url, params, consumerKey, consumerSecret, tokenSecret) {
+  const allParams = { ...params, oauth_consumer_key: consumerKey, oauth_signature_method: 'HMAC-SHA1', oauth_version: '1.0' };
+  const base = method.toUpperCase() + '&' +
+    encodeURIComponent(url) + '&' +
+    encodeURIComponent(Object.keys(allParams).sort().map(k => k + '=' + encodeURIComponent(allParams[k])).join('&'));
+  const key = encodeURIComponent(consumerSecret) + '&' + encodeURIComponent(tokenSecret);
+  return crypto.createHmac('sha1', key).update(base).digest('base64');
+}
+
+function buildOAuthHeader(method, url, extraParams) {
+  const ts    = Math.floor(Date.now() / 1000).toString();
+  const nonce = crypto.randomBytes(16).toString('hex');
+  const oauthParams = {
+    oauth_consumer_key:     X_API_KEY,
+    oauth_nonce:            nonce,
+    oauth_signature_method: 'HMAC-SHA1',
+    oauth_timestamp:        ts,
+    oauth_token:            X_ACCESS_TOKEN,
+    oauth_version:          '1.0',
   };
+  const allParams = { ...oauthParams, ...(extraParams || {}) };
+  oauthParams.oauth_signature = oauthSign(method, url, allParams, X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN_SECRET);
+  const header = 'OAuth ' + Object.keys(oauthParams).sort()
+    .map(k => `${encodeURIComponent(k)}="${encodeURIComponent(oauthParams[k])}"`)
+    .join(', ');
+  return header;
+}
 
-  if (l1.chain === 'solana') {
-    // ATV cannot resolve Solana addresses
-    identity.label = 'UNVERIFIED (Solana)';
-    log('  [L3] ⚠ Solana — ATV cannot verify deployer');
-    return identity;
-  }
-
-  // Get deployer from Blockscout
-  const host = l1.chain === 'base' ? 'base.blockscout.com' : 'eth.blockscout.com';
-  const res = await safeReq({
-    hostname: host,
-    path: `/api/v2/addresses/${l1.ca}`,
-    method: 'GET',
-    headers: { 'Accept': 'application/json' }
+async function fetchMentions(sinceId) {
+  return new Promise((resolve, reject) => {
+    if (!BOT_USER_ID) { log('⚠️ X_BOT_USER_ID not set — skip fetch'); resolve([]); return; }
+    let url = `https://api.twitter.com/2/users/${BOT_USER_ID}/mentions?max_results=20&tweet.fields=author_id,conversation_id,text&expansions=referenced_tweets.id`;
+    if (sinceId) url += `&since_id=${sinceId}`;
+    const urlObj = new URL(url);
+    const options = {
+      hostname: urlObj.hostname,
+      path: urlObj.pathname + urlObj.search,
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${X_BEARER_TOKEN}` }
+    };
+    const req = https.request(options, res => {
+      let body = '';
+      res.on('data', d => body += d);
+      res.on('end', () => {
+        try {
+          const data = JSON.parse(body);
+          resolve(data.data || []);
+        } catch { reject(new Error('Mentions parse: ' + body.slice(0, 200))); }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(30000, () => { req.destroy(); reject(new Error('Mentions timeout')); });
+    req.end();
   });
+}
 
-  if (res && res.status === 200 && res.data) {
-    identity.deployer = res.data.creator_address_hash || null;
-    if (res.data.token) {
-      identity.holders = parseInt(res.data.token.holders_count || 0);
-    }
-  }
-
-  if (!identity.deployer) {
-    identity.label = 'DEPLOYER UNKNOWN';
-    log('  [L3] ⚠ Could not find deployer');
-    return identity;
-  }
-
-  log(`  [L3] Deployer: ${identity.deployer.slice(0, 12)}...`);
-
-  // ATV Web3 Identity resolve
-  const atv = await safeReq({
-    hostname: 'api.web3identity.com',
-    path: `/api/ens/batch-resolve?addresses=${identity.deployer}&include=name,twitter,github`,
-    method: 'GET',
-    headers: { 'Accept': 'application/json' }
+async function postReply(inReplyToId, text) {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify({ text, reply: { in_reply_to_tweet_id: inReplyToId } });
+    const url = 'https://api.twitter.com/2/tweets';
+    const header = buildOAuthHeader('POST', url, {});
+    const options = {
+      hostname: 'api.twitter.com',
+      path: '/2/tweets',
+      method: 'POST',
+      headers: { 'Authorization': header, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) }
+    };
+    const req = https.request(options, res => {
+      let body = '';
+      res.on('data', d => body += d);
+      res.on('end', () => {
+        try { resolve({ status: res.statusCode, data: JSON.parse(body) }); }
+        catch { resolve({ status: res.statusCode, data: {} }); }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(30000, () => { req.destroy(); reject(new Error('postReply timeout')); });
+    req.write(payload);
+    req.end();
   });
-
-  if (atv && atv.status === 200 && atv.data.addresses?.[0]) {
-    const a = atv.data.addresses[0];
-    identity.ens = a.ens || null;
-    identity.twitter = a.social?.twitter || null;
-    identity.github = a.social?.github || null;
-
-    if (identity.ens && identity.twitter) {
-      identity.label = `${identity.ens} ✅ (ENS+Twitter)`;
-    } else if (identity.ens && identity.github) {
-      identity.label = `${identity.ens} ✅ (ENS+GitHub)`;
-    } else if (identity.ens) {
-      identity.label = `${identity.ens} (ENS only)`;
-    } else {
-      identity.label = 'ANONYMOUS (ATV verified)';
-    }
-
-    log(`  [L3] ✅ ATV: ens=${identity.ens || 'none'} twitter=${identity.twitter || 'none'}`);
-  } else {
-    identity.label = 'ANONYMOUS (ATV verified)';
-    log('  [L3] ⚠ ATV: no identity found');
-  }
-
-  return identity;
 }
 
-// =============================================================================
-// L4 — SCORING AGENT v2.2 (10-Factor Weighted System, 100 Points + Grade)
-//
-// v2.2 FIX: Unknown/missing data now scores LOW (1-3) instead of MID (4-5).
-// This prevents the "everything is 50" problem where 5 unknown factors
-// each contributing 5 points = 25 free points pushing every token to ~50.
-// =============================================================================
-function l4_scoringAgent(l1, l2, l3) {
-  log('  [L4 ScoringAgent] Computing 10-factor score (v2.2)...');
+// ══════════════════════════════════════════════════════════════════════════════
+// TELEGRAM NOTIFICATIONS
+// ══════════════════════════════════════════════════════════════════════════════
 
-  const factors = {};
-
-  // Factor 1: Safety (0-10)
-  // Unknown/null rugResult = 3 (not 5). Missing data = risk.
-  if (l1.chain === 'solana') {
-    if (l2.rugResult === 'Good') factors.safety = 10;
-    else if (l2.rugResult === 'Warn') factors.safety = 5;
-    else if (l2.rugResult === 'Danger') factors.safety = 1;
-    else if (l2.mintAuthority?.includes('DISABLED') && l2.freezeAuthority?.includes('DISABLED')) factors.safety = 8;
-    else if (l2.mintAuthority?.includes('DISABLED')) factors.safety = 6;
-    else factors.safety = 3; // was 5
-  } else {
-    factors.safety = l2.isVerified ? 9 : 4; // was 8/5
-  }
-
-  // Factor 2: Liquidity (0-10)
-  if (l1.liq > 5000000) factors.liquidity = 10;
-  else if (l1.liq > 1000000) factors.liquidity = 9;
-  else if (l1.liq > 500000) factors.liquidity = 8;
-  else if (l1.liq > 200000) factors.liquidity = 7;
-  else if (l1.liq > 100000) factors.liquidity = 5;
-  else if (l1.liq > 50000) factors.liquidity = 4;
-  else if (l1.liq > 10000) factors.liquidity = 2;
-  else factors.liquidity = 1;
-
-  // Factor 3: Volume (0-10)
-  // Added: vol/liq ratio bonus for healthy trading
-  const volLiqRatio = l1.liq > 0 ? l1.vol24h / l1.liq : 0;
-  if (l1.vol24h > 5000000) factors.volume = 10;
-  else if (l1.vol24h > 1000000) factors.volume = 8;
-  else if (l1.vol24h > 500000) factors.volume = 7;
-  else if (l1.vol24h > 100000) factors.volume = 5;
-  else if (l1.vol24h > 10000) factors.volume = 3;
-  else if (l1.vol24h > 1000) factors.volume = 2;
-  else factors.volume = 0; // was 1 — zero volume = zero score
-
-  // Bonus: healthy vol/liq ratio (0.3x to 3x is good sign)
-  if (volLiqRatio > 0.3 && volLiqRatio < 3 && factors.volume > 0) {
-    factors.volume = Math.min(10, factors.volume + 1);
-  }
-
-  // Factor 4: Market Cap (0-10)
-  if (l1.fdv > 500000000) factors.mcap = 10;
-  else if (l1.fdv > 100000000) factors.mcap = 9;
-  else if (l1.fdv > 50000000) factors.mcap = 8;
-  else if (l1.fdv > 10000000) factors.mcap = 6;
-  else if (l1.fdv > 1000000) factors.mcap = 4;
-  else if (l1.fdv > 100000) factors.mcap = 2;
-  else factors.mcap = 1;
-
-  // Factor 5: Social Presence (0-10)
-  const socialCount = (l1.hasSocials ? 1 : 0)
-    + (l1.websites.length > 0 ? 1 : 0)
-    + Math.min(3, l1.socials.length); // cap at 3 to avoid gaming
-  if (socialCount >= 5) factors.social = 10;
-  else if (socialCount >= 4) factors.social = 8;
-  else if (socialCount >= 3) factors.social = 7;
-  else if (socialCount >= 2) factors.social = 5;
-  else if (socialCount >= 1) factors.social = 3;
-  else factors.social = 0; // was 1 — no socials = red flag
-
-  // Factor 6: Token Age (0-10)
-  // Unknown age = 2 (not 5). No data = risk signal.
-  if (l1.pairCreatedAt && l1.pairCreatedAt > 0) {
-    const ageMs = Date.now() - l1.pairCreatedAt;
-    const ageDays = ageMs / (1000 * 60 * 60 * 24);
-    if (ageDays > 365) factors.age = 10;
-    else if (ageDays > 180) factors.age = 9;
-    else if (ageDays > 90) factors.age = 7;
-    else if (ageDays > 30) factors.age = 5;
-    else if (ageDays > 7) factors.age = 3;
-    else if (ageDays > 1) factors.age = 2;
-    else factors.age = 1; // less than 1 day old
-  } else {
-    factors.age = 2; // was 5
-  }
-
-  // Factor 7: Holder Distribution (0-10)
-  // Unknown holders = 2 (not 5).
-  if (l3.holders && l3.holders > 0) {
-    if (l3.holders > 50000) factors.holders = 10;
-    else if (l3.holders > 10000) factors.holders = 9;
-    else if (l3.holders > 5000) factors.holders = 7;
-    else if (l3.holders > 1000) factors.holders = 5;
-    else if (l3.holders > 200) factors.holders = 3;
-    else if (l3.holders > 50) factors.holders = 2;
-    else factors.holders = 1;
-  } else {
-    factors.holders = 2; // was 5
-  }
-  if (l2.topHoldersRisk) factors.holders = Math.max(0, factors.holders - 3);
-
-  // Factor 8: Transaction Activity (0-10)
-  if (l1.txns24h > 10000) factors.activity = 10;
-  else if (l1.txns24h > 5000) factors.activity = 9;
-  else if (l1.txns24h > 1000) factors.activity = 7;
-  else if (l1.txns24h > 500) factors.activity = 5;
-  else if (l1.txns24h > 100) factors.activity = 3;
-  else if (l1.txns24h > 20) factors.activity = 2;
-  else factors.activity = 1;
-
-  // Factor 9: LP Lock Status (0-10)
-  // Unknown LP = 2 (not 4).
-  if (l2.lpLocked === 'LOCKED ✅') factors.lpLock = 10;
-  else if (typeof l2.lpLocked === 'string' && l2.lpLocked.includes('%')) {
-    const pct = parseFloat(l2.lpLocked);
-    if (pct > 95) factors.lpLock = 10;
-    else if (pct > 80) factors.lpLock = 8;
-    else if (pct > 50) factors.lpLock = 5;
-    else if (pct > 20) factors.lpLock = 3;
-    else factors.lpLock = 1;
-  } else {
-    factors.lpLock = 2; // was 4
-  }
-
-  // Factor 10: Deployer Identity (0-10)
-  if (l3.label.includes('ENS+Twitter') || l3.label.includes('ENS+GitHub')) {
-    factors.identity = 10;
-  } else if (l3.label.includes('ENS only')) {
-    factors.identity = 6; // was 7
-  } else if (l3.label.includes('ANONYMOUS')) {
-    factors.identity = 2;
-  } else if (l3.label.includes('UNVERIFIED')) {
-    factors.identity = 1; // was 2 — Solana unverified = worst case
-  } else {
-    factors.identity = 2;
-  }
-
-  // Weighted total (each factor is 0-10, total max = 100)
-  const total = Object.values(factors).reduce((s, v) => s + v, 0);
-  const capped = Math.min(100, Math.max(0, total));
-
-  // Letter grade
-  let grade;
-  if (capped >= 80) grade = 'A';
-  else if (capped >= 65) grade = 'B';
-  else if (capped >= 50) grade = 'C';
-  else if (capped >= 35) grade = 'D';
-  else grade = 'F';
-
-  log(`  [L4] ✅ Score: ${capped}/100 (${grade})`);
-  log(`  [L4]   Safety=${factors.safety} Liq=${factors.liquidity} Vol=${factors.volume} MCap=${factors.mcap}`);
-  log(`  [L4]   Social=${factors.social} Age=${factors.age} Holders=${factors.holders} Activity=${factors.activity}`);
-  log(`  [L4]   LP=${factors.lpLock} Identity=${factors.identity}`);
-
-  return { score: capped, factors, grade };
-}
-
-// ── Format Helpers ──────────────────────────────────────────────────────────
-function fmtNum(n) {
-  if (n >= 1000000000) return `${(n / 1000000000).toFixed(1)}B`;
-  if (n >= 1000000)    return `${(n / 1000000).toFixed(1)}M`;
-  if (n >= 1000)       return `${(n / 1000).toFixed(0)}K`;
-  return `${n.toFixed(0)}`;
-}
-function fmtPrice(n) {
-  if (n >= 100)   return `$${n.toFixed(0)}`;
-  if (n >= 1)     return `$${n.toFixed(2)}`;
-  if (n >= 0.01)  return `$${n.toFixed(4)}`;
-  if (n >= 0.0001) return `$${n.toFixed(6)}`;
-  return `$${n.toFixed(8)}`;
-}
-
-// ── Build Scan Reply (280 char Twitter limit) ───────────────────────────────
-function buildReply(l1, l2, l3, scoring) {
-  const chain = l1.chain === 'solana' ? 'SOL'
-    : l1.chain === 'base' ? 'Base'
-    : l1.chain === 'ethereum' ? 'ETH'
-    : l1.chain.toUpperCase();
-
-  // Safety line
-  let safetyLine;
-  if (l1.chain === 'solana' && l2.rugScore !== null) {
-    safetyLine = `🛡️ Rug:${l2.rugScore} | Mint ${l2.mintAuthority?.includes('DISABLED') ? '✅' : '⚠️'} Freeze ${l2.freezeAuthority?.includes('DISABLED') ? '✅' : '⚠️'}`;
-  } else if (l2.isVerified) {
-    safetyLine = `🛡️ Contract verified ✅`;
-  } else {
-    safetyLine = `🛡️ Safety: check`;
-  }
-
-  // Trim safety line if too long
-  if (safetyLine.length > 50) safetyLine = safetyLine.slice(0, 50);
-
-  let t = `🐝 BUZZ SCAN — $${l1.symbol} (${chain})\n`;
-  t += `━━━━━━━━━━━━━━\n`;
-  t += `💰 ${fmtPrice(l1.price)} | FDV $${fmtNum(l1.fdv)}\n`;
-  t += `📊 Vol $${fmtNum(l1.vol24h)} | Liq $${fmtNum(l1.liq)}\n`;
-  t += `${safetyLine}\n`;
-  t += `🪪 ${l3.label}\n`;
-  t += `⭐ ${scoring.score}/100 (${scoring.grade})\n\n`;
-  t += `CA: ${l1.ca.slice(0, 44)}\n\n`;
-  t += `Automated by @HidayahAnka1`;
-
-  if (t.length > 280) t = t.slice(0, 277) + '...';
-  return t;
-}
-
-// ── Twitter: Fetch Mentions ─────────────────────────────────────────────────
-async function fetchMentions() {
-  const res = await safeReq({
-    hostname: 'api.twitter.com',
-    path: `/2/tweets/search/recent?query=%40BuzzBySolCex&max_results=${MAX_RESULTS}`,
-    method: 'GET',
-    headers: { 'Authorization': `Bearer ${process.env.X_BEARER_TOKEN}` }
+async function sendTelegram(msg) {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
+  return new Promise(resolve => {
+    const payload = JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: msg, parse_mode: 'HTML' });
+    const options = {
+      hostname: 'api.telegram.org',
+      path: `/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) }
+    };
+    const req = https.request(options, res => {
+      res.on('data', () => {});
+      res.on('end', resolve);
+    });
+    req.on('error', resolve);
+    req.write(payload);
+    req.end();
   });
-  if (!res || res.status !== 200) {
-    log(`⚠ Mention fetch failed: ${res?.status || 'null'}`);
-    return [];
-  }
-  return res.data.data || [];
 }
 
-// ── Twitter: Post Reply ─────────────────────────────────────────────────────
-async function postReply(tweetId, text) {
-  const url  = 'https://api.twitter.com/2/tweets';
-  const body = JSON.stringify({ text, reply: { in_reply_to_tweet_id: tweetId } });
-  const auth = oauthSign('POST', url);
-  return await safeReq({
-    hostname: 'api.twitter.com',
-    path: '/2/tweets',
-    method: 'POST',
-    headers: {
-      'Authorization': auth,
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(body)
-    }
-  }, body);
+async function notifyListLead(tweetId, tweetText, authorHandle) {
+  const msg = [
+    `🐝 <b>LIST LEAD — @BuzzBySolCex</b>`,
+    ``,
+    `Tweet ID: ${tweetId}`,
+    `From: ${authorHandle || 'Unknown'}`,
+    `Text: ${tweetText?.slice(0, 200) || '—'}`,
+    ``,
+    `Action: DM the user to discuss SolCex listing`,
+    `Link: https://twitter.com/i/web/status/${tweetId}`,
+  ].join('\n');
+  await sendTelegram(msg);
+  saveLead({ tweetId, handle: authorHandle, text: tweetText?.slice(0, 200), type: 'LIST' });
 }
 
-// ── Parse Scan Command ──────────────────────────────────────────────────────
-function parseScan(text) {
-  const tickerMatch = text.match(/scan\s+\$?([A-Za-z]\w{1,15})/i);
-  if (tickerMatch) return { type: 'ticker', value: tickerMatch[1].toUpperCase() };
-  const addrMatch = text.match(/scan\s+(0x[a-fA-F0-9]{40})/i);
-  if (addrMatch) return { type: 'address', value: addrMatch[1] };
-  const solMatch = text.match(/scan\s+([1-9A-HJ-NP-Za-km-z]{32,44})/i);
-  if (solMatch) return { type: 'address', value: solMatch[1] };
-  return null;
+async function notifyDeployLead(tweetId, name, symbol, contractAddress, authorHandle) {
+  const msg = [
+    `🚀 <b>TOKEN DEPLOYED — @BuzzBySolCex</b>`,
+    ``,
+    `Token: ${name} ($${symbol})`,
+    `CA: ${contractAddress}`,
+    `From: ${authorHandle || 'Unknown'}`,
+    `Tweet: https://twitter.com/i/web/status/${tweetId}`,
+  ].join('\n');
+  await sendTelegram(msg);
+  saveLead({ tweetId, handle: authorHandle, name, symbol, contractAddress, type: 'DEPLOY' });
 }
 
-// ── Full 4-Layer Scan Pipeline ──────────────────────────────────────────────
-async function runScanPipeline(query) {
-  log(`\n  ╔══════════════════════════════════════╗`);
-  log(`  ║  🐝 BUZZ 4-LAYER SCAN: ${query.padEnd(14)} ║`);
-  log(`  ╚══════════════════════════════════════╝`);
-
-  // L1: Token data
-  const l1 = await l1_tokenAgent(query);
-  if (!l1) return null;
-
-  // L2: Safety
-  const l2 = await l2_safetyAgent(l1);
-
-  // L3: Identity
-  const l3 = await l3_identityAgent(l1);
-
-  // L4: Score
-  const scoring = l4_scoringAgent(l1, l2, l3);
-
-  // Build reply
-  const reply = buildReply(l1, l2, l3, scoring);
-
-  // Save to history
-  saveScanHistory({
-    symbol: l1.symbol, chain: l1.chain, ca: l1.ca,
-    score: scoring.score, grade: scoring.grade, identity: l3.label,
-    price: l1.price, fdv: l1.fdv, liq: l1.liq
-  });
-
-  return { l1, l2, l3, scoring, reply };
+async function notifyBuzz(l1, l2, l3, scoring, tweetId) {
+  const msg = [
+    `🐝 <b>SCAN COMPLETE — @BuzzBySolCex</b>`,
+    ``,
+    `$${l1?.symbol || '?'} (${l1?.chain || '?'})`,
+    `Score: ${scoring?.score || 0}/100 (${letterGrade(scoring?.score || 0)})`,
+    `Price: ${fmtPrice(l1?.priceUsd)} | FDV: $${fmtNum(l1?.fdv)}`,
+    `Liq: $${fmtNum(l1?.liq)} | Vol: $${fmtNum(l1?.vol24h)}`,
+    `Tweet: https://twitter.com/i/web/status/${tweetId}`,
+  ].join('\n');
+  await sendTelegram(msg);
 }
 
-// ── Credential Check ────────────────────────────────────────────────────────
-function checkCreds() {
-  const required = ['X_BEARER_TOKEN', 'X_API_KEY', 'X_API_SECRET', 'X_ACCESS_TOKEN', 'X_ACCESS_TOKEN_SECRET'];
-  const missing = required.filter(k => !process.env[k]);
-  if (missing.length) {
-    log(`❌ Missing env vars: ${missing.join(', ')}`);
-    process.exit(1);
-  }
-  log('✅ All Twitter credentials verified');
-}
+// ══════════════════════════════════════════════════════════════════════════════
+// MAIN LOOP
+// ══════════════════════════════════════════════════════════════════════════════
 
-// ── Main Loop ───────────────────────────────────────────────────────────────
-async function run() {
-  log('');
-  log('╔═══════════════════════════════════════════════════╗');
-  log('║  🐝 BUZZ TWITTER BOT v2.2 — 4-Layer + TG Bridge  ║');
-  log('║  L1: TokenAgent (DexScreener)                     ║');
-  log('║  L2: SafetyAgent (RugCheck/Contract)              ║');
-  log('║  L3: IdentityAgent (Blockscout + ATV)             ║');
-  log('║  L4: ScoringAgent v2.2 (10-factor + grade)        ║');
-  log('║  📨: Telegram bridge to Buzz (context + memory)   ║');
-  log(`║  Interval: ${CHECK_INTERVAL_MS / 60000}min | Max: ${MAX_REPLIES_DAY}/day               ║`);
-  log('╚═══════════════════════════════════════════════════╝');
+let lastMentionId = null;
 
-  checkCreds();
+async function runLoop() {
+  log(`\n${'─'.repeat(50)}`);
+  log(`── Mention check ──`);
 
-  // First-run safety: if no replied file exists, fetch current mentions
-  // and mark them as "seen" to avoid re-replying to old tweets
-  if (!fs.existsSync(REPLIED_FILE)) {
-    log('🆕 FIRST RUN — marking existing mentions as seen...');
-    try {
-      const existing = await fetchMentions();
-      if (existing.length > 0) {
-        const ids = existing.map(t => t.id);
-        saveReplied(ids);
-        log(`  ✅ Marked ${ids.length} existing mentions as seen. Will only reply to NEW mentions.`);
-      } else {
-        saveReplied([]);
-        log('  ✅ No existing mentions found. Ready for new ones.');
+  try {
+    const mentions = await fetchMentions(lastMentionId).catch(e => { log(`Fetch error: ${e.message}`); return []; });
+    if (!mentions.length) { log('No new mentions'); return; }
+
+    log(`Found ${mentions.length} mentions`);
+    const replied = loadReplied();
+    const daily   = loadDailyCount();
+    let processed = 0;
+
+    for (const tweet of mentions) {
+      if (replied.includes(tweet.id)) continue;
+      if (daily.count >= MAX_REPLIES_DAY) { log(`Daily limit ${MAX_REPLIES_DAY} reached`); break; }
+
+      lastMentionId = tweet.id;
+
+      const cmd = parseCommand(tweet.text);
+      if (!cmd) {
+        log(`Skip ${tweet.id}: no command in "${tweet.text.slice(0, 60)}"`);
+        replied.push(tweet.id);
+        saveReplied(replied);
+        continue;
       }
-    } catch (e) {
-      saveReplied([]);
-      log(`  ⚠ Could not fetch existing mentions: ${e.message}. Starting fresh.`);
-    }
-  } else {
-    log(`📋 Loaded ${loadReplied().length} previously replied tweet IDs`);
-  }
 
-  while (true) {
-    try {
-      log('\n── Mention check ──');
+      let replyText;
 
-      const daily = getDailyCount();
-      if (daily.count >= MAX_REPLIES_DAY) {
-        log(`⚠ Daily limit reached (${daily.count}/${MAX_REPLIES_DAY}). Skipping.`);
-      } else {
-        const mentions = await fetchMentions();
-        log(`Found ${mentions.length} mentions`);
+      // ── LIST ROUTE ───────────────────────────────────────────────────────
+      if (cmd.route === 'LIST') {
+        log(`\n📋 Tweet ${tweet.id}: LIST request`);
+        replyText = formatListReply();
+        await notifyListLead(tweet.id, tweet.text, tweet.author_id);
 
-        const replied = loadReplied();
-        let processed = 0;
+      // ── DEPLOY ROUTE (instructions) ──────────────────────────────────────
+      } else if (cmd.route === 'DEPLOY') {
+        log(`\n🚀 Tweet ${tweet.id}: DEPLOY request (instructions)`);
+        replyText = formatDeployReply();
 
-        for (const tweet of mentions) {
-          if (replied.includes(tweet.id)) continue;
-          if (tweet.text.startsWith('RT @')) {
-            replied.push(tweet.id);
-            saveReplied(replied);
-            continue;
-          }
-
-          const cmd = parseScan(tweet.text);
-          if (!cmd) {
-            log(`Skip ${tweet.id}: no scan cmd in "${tweet.text.slice(0, 60)}"`);
-            replied.push(tweet.id);
-            saveReplied(replied);
-            continue;
-          }
-
-          log(`\n🔍 Tweet ${tweet.id}: scan ${cmd.type}=${cmd.value}`);
-
-          // Run full 4-layer pipeline
-          const result = await runScanPipeline(cmd.value);
-          if (!result) {
-            log('  ❌ Pipeline returned no result');
-            replied.push(tweet.id);
-            saveReplied(replied);
-            continue;
-          }
-
-          log(`  📝 Reply (${result.reply.length} chars)`);
-
-          // Post reply
-          const postResult = await postReply(tweet.id, result.reply);
-          if (postResult && postResult.status === 201) {
-            const count = incrementDailyCount();
-            log(`  ✅ POSTED! Tweet replied. (${count}/${MAX_REPLIES_DAY} today)`);
-
-            // Notify Buzz via Telegram with full scan data
-            await notifyBuzz(result.l1, result.l2, result.l3, result.scoring, tweet.id);
-          } else {
-            log(`  ❌ Post failed: ${postResult?.status || 'null'} ${JSON.stringify(postResult?.data || '').slice(0, 200)}`);
-          }
-
-          replied.push(tweet.id);
-          saveReplied(replied);
-          processed++;
-
-          if (processed < mentions.length) {
-            log(`  ⏳ Rate limit delay ${REPLY_DELAY_MS / 1000}s...`);
-            await new Promise(r => setTimeout(r, REPLY_DELAY_MS));
+      // ── TOKEN DETAILS ROUTE (execute deploy) ─────────────────────────────
+      } else if (cmd.route === 'TOKEN_DETAILS') {
+        const deployDaily = getDeployDailyCount();
+        if (deployDaily.count >= MAX_DEPLOYS_DAY) {
+          log(`\n⚠️ Tweet ${tweet.id}: Deploy limit (${MAX_DEPLOYS_DAY}/day) reached`);
+          replyText = `⚠️ Daily deploy limit reached. Try again tomorrow!\n\nWant your token listed on @SolCex_Exchange instead? Reply LIST 🏦`;
+        } else {
+          log(`\n⚙️ Tweet ${tweet.id}: TOKEN DETAILS — deploying ${cmd.name} ($${cmd.symbol})`);
+          try {
+            const result = await executeBankrDeploy(cmd.name, cmd.symbol, cmd.description, tweet.author_id);
+            const ca  = result?.contractAddress || result?.token?.address || 'Pending';
+            const tx  = result?.transactionHash || result?.tx || '';
+            incrementDeployDailyCount();
+            replyText = formatDeployConfirmation(cmd.name, cmd.symbol, ca, tx);
+            await notifyDeployLead(tweet.id, cmd.name, cmd.symbol, ca, tweet.author_id);
+            log(`  ✅ Bankr deploy success: ${ca}`);
+          } catch (err) {
+            log(`  ❌ Bankr deploy failed: ${err.message}`);
+            replyText = `⚠️ Deploy encountered an issue. Please try again or contact @SolCex_Exchange for manual assistance.\n\nReply LIST to explore CEX listing instead 🏦`;
           }
         }
 
-        if (processed === 0) log('No new scan requests.');
-        else log(`✅ Processed ${processed} scan(s) this cycle.`);
+      // ── SCAN ROUTE ───────────────────────────────────────────────────────
+      } else {
+        log(`\n🔍 Tweet ${tweet.id}: SCAN ${cmd.type}=${cmd.value}`);
+        const history = loadScanHistory();
+        if (history.includes(cmd.value)) {
+          log(`  Skip: already scanned ${cmd.value}`);
+          replied.push(tweet.id);
+          saveReplied(replied);
+          continue;
+        }
+
+        const result = await runScanPipeline(cmd.value);
+        if (!result) {
+          log(`  ❌ Pipeline returned no result`);
+          replied.push(tweet.id);
+          saveReplied(replied);
+          continue;
+        }
+
+        replyText = result.reply;
+        addScanHistory(cmd.value);
+
+        log(`  📝 Reply (${replyText.length} chars)`);
+        const postResult = await postReply(tweet.id, replyText);
+        if (postResult && postResult.status === 201) {
+          const count = incrementDailyCount();
+          const replyId = postResult.data?.data?.id;
+          if (replyId) saveScanTweet(replyId, result);
+          log(`  ✅ POSTED! (${count}/${MAX_REPLIES_DAY} today)`);
+          await notifyBuzz(result.l1, result.l2, result.l3, result.scoring, tweet.id);
+        } else {
+          log(`  ❌ Post failed: ${postResult?.status || 'null'} ${JSON.stringify(postResult?.data || '').slice(0, 200)}`);
+        }
+        replied.push(tweet.id);
+        saveReplied(replied);
+        processed++;
+        if (processed < mentions.length) {
+          log(`  ⏳ Rate limit delay ${REPLY_DELAY_MS / 1000}s...`);
+          await new Promise(r => setTimeout(r, REPLY_DELAY_MS));
+        }
+        continue;  // Skip common post block below
       }
-    } catch (err) {
-      log(`❌ Loop error: ${err.message}`);
+
+      // ── Common post block for LIST / DEPLOY / TOKEN_DETAILS ──────────────
+      log(`  📝 Reply (${replyText.length} chars)`);
+      const pr = await postReply(tweet.id, replyText);
+      if (pr && pr.status === 201) {
+        const cnt = incrementDailyCount();
+        log(`  ✅ POSTED! (${cnt}/${MAX_REPLIES_DAY} today)`);
+      } else {
+        log(`  ❌ Post failed: ${pr?.status || 'null'} ${JSON.stringify(pr?.data || '').slice(0, 200)}`);
+      }
+      replied.push(tweet.id);
+      saveReplied(replied);
+      processed++;
+      if (processed < mentions.length) {
+        log(`  ⏳ Rate limit delay ${REPLY_DELAY_MS / 1000}s...`);
+        await new Promise(r => setTimeout(r, REPLY_DELAY_MS));
+      }
     }
 
-    log(`💤 Next check in ${CHECK_INTERVAL_MS / 60000} min`);
-    await new Promise(r => setTimeout(r, CHECK_INTERVAL_MS));
+    log(`✅ Processed ${processed} mention(s) this cycle.`);
+  } catch (err) {
+    log(`❌ Loop error: ${err.message}`);
   }
 }
 
-// ── Start ───────────────────────────────────────────────────────────────────
-run().catch(err => { log(`FATAL: ${err.message}`); process.exit(1); });
+// ══════════════════════════════════════════════════════════════════════════════
+// STARTUP
+// ══════════════════════════════════════════════════════════════════════════════
+
+log(`════════════════════════════════════════════════`);
+log(`  🐝 Twitter Bot v3.1-final`);
+log(`  Routes: SCAN (Premium 5-Layer) | LIST | DEPLOY | TOKEN_DETAILS`);
+log(`  Premium format: 4000 chars | Bankr autonomous deploy`);
+log(`  Interval: ${CHECK_INTERVAL_MS / 60000} min | Max: ${MAX_REPLIES_DAY}/day`);
+log(`════════════════════════════════════════════════`);
+
+// Validate env
+if (!X_BEARER_TOKEN) log('⚠️  X_BEARER_TOKEN not set');
+if (!X_API_KEY)      log('⚠️  X_API_KEY not set');
+if (!BOT_USER_ID)    log('⚠️  X_BOT_USER_ID not set — mentions fetch disabled');
+if (!BANKR_PARTNER_KEY) log('⚠️  BANKR_PARTNER_KEY not set — deploy will fail');
+
+// Initial run then loop
+(async () => {
+  await runLoop();
+  setInterval(runLoop, CHECK_INTERVAL_MS);
+})();
