@@ -344,7 +344,7 @@ cat > "$CONFIG" << JSONEOF
           "bankr/gpt-5-nano"
         ]
       },
-      "subagents": { "maxConcurrent": 8 }
+      "subagents": { "maxConcurrent": 8, "model": { "primary": "bankr/gpt-5-nano", "fallbacks": ["bankr/claude-haiku-4.5", "bankr/gemini-3-flash"] } }
     }
   }
 }
