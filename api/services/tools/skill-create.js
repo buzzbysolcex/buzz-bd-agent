@@ -17,7 +17,7 @@ function createSkill({ name, description, content, category = 'general', session
   }
   fs.mkdirSync(skillDir, { recursive: true });
   const now = new Date().toISOString();
-  const skillContent = `---\nname: ${safeName}\ndescription: "${description}"\nversion: 1.0.0\ncategory: ${category}\ncreated: ${now}\ncreated_by: buzz-learning-loop\nsession: ${session}\nauto_learned: true\n---\n\n# ${name}\n\n> Auto-learned by Buzz BD Agent on ${now.split('T')[0]}\n> Category: ${category} | Session: ${session}\n\n${content}\n\n---\n*Learned skill — Buzz Closed Learning Loop | Alpha Phase 0*\n`;
+  const skillContent = `---\nname: ${safeName}\ndescription: "${description}"\nversion: 1.0.0\ncategory: ${category}\ncreated: ${now}\ncreated_by: buzz-learning-loop\nsession: ${session}\nauto_learned: true\nagentskills_io:\n  agent: buzz-bd-agent\n  platform: solcex\n  runtime: openclaw\n  chains: [solana, base, bsc]\n---\n\n# ${name}\n\n> Auto-learned by Buzz BD Agent on ${now.split('T')[0]}\n> Category: ${category} | Session: ${session}\n\n${content}\n\n---\n*Learned skill — Buzz Closed Learning Loop | Alpha Phase 0*\n`;
   fs.writeFileSync(skillPath, skillContent, 'utf8');
   const receiptId = `BZZ-${now.split('T')[0].replace(/-/g, '')}-SKILL-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
   const patchLog = loadPatchLog();
