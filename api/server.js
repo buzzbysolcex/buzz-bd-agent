@@ -40,9 +40,11 @@ const strategyRoutes = require('./routes/strategy');
 const skillsRoutes = require('./routes/skills');
 const memoryRoutes = require('./routes/memory');
 const operatorRoutes = require('./routes/operator');
+const contactRoutes = require('./routes/contacts');
 
-// v7.3.1 Memory search engine
+// v7.3.1 Memory search engine + Contact intelligence
 const { initFTS } = require('./services/memory-search');
+const { initContacts } = require('./services/contact-intelligence');
 
 // v7.0 Strategic Orchestrator engines
 const ContextEngine = require('./lib/context-engine');
@@ -82,7 +84,7 @@ app.get('/api/v1/info', (req, res) => {
     intel_sources: '19/19 connected',
     cron_jobs: 42,
     endpoints: {
-      total: 85,
+      total: 91,
       categories: {
         health: 5,
         info: 1,
@@ -100,7 +102,8 @@ app.get('/api/v1/info', (req, res) => {
         strategy: 8,
         skills: 8,
         memory: 3,
-        operator: 2
+        operator: 2,
+        contacts: 6
       }
     },
     documentation: 'https://github.com/buzzbysolcex/buzz-bd-agent',
@@ -129,9 +132,10 @@ app.use('/api/v1/webhooks', apiKeyAuth, webhookRoutes);
 app.use('/api/v1/receipts', apiKeyAuth, receiptRoutes);
 app.use('/api/v1/skills', apiKeyAuth, skillsRoutes);
 
-// v7.3.1: Learning Loop + Memory + Operator
+// v7.3.1: Learning Loop + Memory + Operator + Contacts
 app.use('/api/v1/memory', apiKeyAuth, memoryRoutes);
 app.use('/api/v1/operator', apiKeyAuth, operatorRoutes);
+app.use('/api/v1/contacts', apiKeyAuth, contactRoutes);
 
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 
@@ -323,9 +327,10 @@ async function start() {
     const playbookEngine = new PlaybookEngine(db);
     console.log('[v7.0] ✓ Strategic Orchestrator engines initialized');
 
-    // v7.3.1: Initialize FTS5 memory search
+    // v7.3.1: Initialize FTS5 memory search + Contact intelligence
     initFTS(db);
-    console.log('[v7.3.1] ✓ Memory FTS5 search initialized');
+    initContacts(db);
+    console.log('[v7.3.1] ✓ Memory FTS5 search + Contact intelligence initialized');
 
     // v7.0: Strategy routes (8 endpoints)
     app.use('/api/v1/strategy', apiKeyAuth, strategyRoutes(db, { decisionEngine, playbookEngine, contextEngine }));
@@ -349,10 +354,10 @@ async function start() {
     });
 
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`[Buzz API] ✓ v3.1.0 — 85/85 endpoints on port ${PORT}`);
+      console.log(`[Buzz API] ✓ v3.1.0 — 91/91 endpoints on port ${PORT}`);
       console.log(`[Buzz API] ✓ Health: http://0.0.0.0:${PORT}/api/v1/health`);
       console.log(`[Buzz API] ✓ Info:   http://0.0.0.0:${PORT}/api/v1/info`);
-      console.log(`[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts, strategy, skills, memory, operator`);
+      console.log(`[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts, strategy, skills, memory, operator, contacts`);
     });
   } catch (err) {
     console.error('[Buzz API] ✗ Failed to start:', err.message);

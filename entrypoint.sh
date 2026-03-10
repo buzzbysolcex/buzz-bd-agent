@@ -801,8 +801,8 @@ fi
 CRON_COUNT=$(jq '.jobs | length' /data/.openclaw/cron/jobs.json 2>/dev/null || echo "42")
 echo ""
 echo "════════════════════════════════════════════════"
-echo "  🐝 Buzz BD Agent v7.3.1 — All services started"
-echo "  REST API:      http://localhost:3000 (85 endpoints)"
+echo "  🐝 Buzz BD Agent v7.3.1 — Alpha Buzz (Phase 0 Complete)"
+echo "  REST API:      http://localhost:3000 (91 endpoints)"
 echo "  Strategic:     Decision + Playbook + Context engines"
 echo "  Learning Loop: Reflect (12h) + Evolve + FTS5 memory"
 echo "  Cost Guard:    \$10/day cap, cache warm active"

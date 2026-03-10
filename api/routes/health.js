@@ -37,6 +37,9 @@ router.get('/', async (req, res) => {
       api: API_VERSION,
       openclaw: '2026.3.1'
     },
+    alpha: true,
+    phase0_features: ['learning-loop', 'skill-self-improvement', 'contact-intelligence'],
+    endpoints: 91,
     uptime_seconds: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
     response_ms: Date.now() - startTime,
