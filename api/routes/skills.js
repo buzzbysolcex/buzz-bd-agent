@@ -22,6 +22,34 @@ router.get('/', (req, res) => {
   } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });
 
+// ─── GET /skills/reflect/status ─────────────────────
+// Must be ABOVE /:name to avoid Express param catch-all
+router.get('/reflect/status', (req, res) => {
+  try {
+    const result = getReflectStatus();
+    res.json(result);
+  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+});
+
+// ─── POST /skills/reflect/trigger ───────────────────
+router.post('/reflect/trigger', (req, res) => {
+  try {
+    const { getDB } = require('../db');
+    const db = getDB();
+    const result = reflect(db);
+    res.json({ success: true, ...result });
+  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+});
+
+// ─── GET /skills/effectiveness ──────────────────────
+router.get('/effectiveness', (req, res) => {
+  try {
+    const { skill } = req.query;
+    const result = getEffectiveness(skill);
+    res.json(result);
+  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+});
+
 router.get('/:name', (req, res) => {
   try {
     const name = req.params.name;
@@ -51,33 +79,6 @@ router.patch('/:name', (req, res) => {
     const result = patchSkill({ name: req.params.name, oldString, newString, reason });
     if (result.success) res.json(result);
     else res.status(400).json(result);
-  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
-});
-
-// ─── GET /skills/reflect/status ─────────────────────
-router.get('/reflect/status', (req, res) => {
-  try {
-    const result = getReflectStatus();
-    res.json(result);
-  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
-});
-
-// ─── POST /skills/reflect/trigger ───────────────────
-router.post('/reflect/trigger', (req, res) => {
-  try {
-    const { getDB } = require('../db');
-    const db = getDB();
-    const result = reflect(db);
-    res.json({ success: true, ...result });
-  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
-});
-
-// ─── GET /skills/effectiveness ──────────────────────
-router.get('/effectiveness', (req, res) => {
-  try {
-    const { skill } = req.query;
-    const result = getEffectiveness(skill);
-    res.json(result);
   } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });
 

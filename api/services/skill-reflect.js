@@ -6,7 +6,7 @@
  * skills based on scoring, safety, outreach, tool failure,
  * and velocity patterns.
  *
- * Called by cron "skill-reflect" (0 */12 * * *)
+ * Called by cron "skill-reflect" (every 12 hours)
  */
 
 const fs = require('fs');
