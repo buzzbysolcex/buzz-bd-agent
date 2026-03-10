@@ -38,6 +38,11 @@ const webhookRoutes = require('./routes/webhooks');
 const receiptRoutes = require('./routes/receipts');
 const strategyRoutes = require('./routes/strategy');
 const skillsRoutes = require('./routes/skills');
+const memoryRoutes = require('./routes/memory');
+const operatorRoutes = require('./routes/operator');
+
+// v7.3.1 Memory search engine
+const { initFTS } = require('./services/memory-search');
 
 // v7.0 Strategic Orchestrator engines
 const ContextEngine = require('./lib/context-engine');
@@ -75,9 +80,9 @@ app.get('/api/v1/info', (req, res) => {
     sub_agent_model: 'bankr/gpt-5-nano',
     llm_gateway: 'Bankr LLM Gateway (8 models)',
     intel_sources: '19/19 connected',
-    cron_jobs: 40,
+    cron_jobs: 42,
     endpoints: {
-      total: 72,
+      total: 85,
       categories: {
         health: 5,
         info: 1,
@@ -92,7 +97,10 @@ app.get('/api/v1/info', (req, res) => {
         wallets: 6,
         webhooks: 5,
         receipts: 5,
-        strategy: 8
+        strategy: 8,
+        skills: 8,
+        memory: 3,
+        operator: 2
       }
     },
     documentation: 'https://github.com/buzzbysolcex/buzz-bd-agent',
@@ -120,6 +128,10 @@ app.use('/api/v1/wallets', apiKeyAuth, walletRoutes);
 app.use('/api/v1/webhooks', apiKeyAuth, webhookRoutes);
 app.use('/api/v1/receipts', apiKeyAuth, receiptRoutes);
 app.use('/api/v1/skills', apiKeyAuth, skillsRoutes);
+
+// v7.3.1: Learning Loop + Memory + Operator
+app.use('/api/v1/memory', apiKeyAuth, memoryRoutes);
+app.use('/api/v1/operator', apiKeyAuth, operatorRoutes);
 
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 
@@ -311,6 +323,10 @@ async function start() {
     const playbookEngine = new PlaybookEngine(db);
     console.log('[v7.0] ✓ Strategic Orchestrator engines initialized');
 
+    // v7.3.1: Initialize FTS5 memory search
+    initFTS(db);
+    console.log('[v7.3.1] ✓ Memory FTS5 search initialized');
+
     // v7.0: Strategy routes (8 endpoints)
     app.use('/api/v1/strategy', apiKeyAuth, strategyRoutes(db, { decisionEngine, playbookEngine, contextEngine }));
 
@@ -333,10 +349,10 @@ async function start() {
     });
 
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`[Buzz API] ✓ v3.0.0 — 72/72 endpoints on port ${PORT}`);
+      console.log(`[Buzz API] ✓ v3.1.0 — 85/85 endpoints on port ${PORT}`);
       console.log(`[Buzz API] ✓ Health: http://0.0.0.0:${PORT}/api/v1/health`);
       console.log(`[Buzz API] ✓ Info:   http://0.0.0.0:${PORT}/api/v1/info`);
-      console.log(`[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts, strategy`);
+      console.log(`[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts, strategy, skills, memory, operator`);
     });
   } catch (err) {
     console.error('[Buzz API] ✗ Failed to start:', err.message);

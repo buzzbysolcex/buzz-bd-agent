@@ -820,6 +820,26 @@
         "lastStatus": "pending",
         "consecutiveErrors": 0
       }
+    },
+    {
+      "id": "skill-reflect",
+      "name": "skill-reflect",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 */12 * * *"
+      },
+      "sessionTarget": "main",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "systemEvent",
+        "text": "SKILL REFLECTION — Learning Loop (every 12h):\n\nReview pipeline patterns and auto-create/patch skills.\n\nTrigger via API: POST /api/v1/skills/reflect/trigger\n\nThe reflection engine analyzes:\n1. Scoring drift — tokens consistently scoring higher/lower\n2. Safety failures — repeated safety check failures\n3. Outreach effectiveness — reply rates, bounce rates\n4. Tool failures — recurring API/tool errors\n5. Pipeline velocity — stage bottlenecks\n\nFor each detected pattern, creates or patches a learned skill in /data/workspace/skills/learned/.\nCheck status: GET /api/v1/skills/reflect/status\n\nSave JVR receipt category: learning-loop"
+      },
+      "state": {
+        "nextRunAtMs": 0,
+        "lastStatus": "pending",
+        "consecutiveErrors": 0
+      }
     }
   ]
 }

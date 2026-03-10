@@ -720,6 +720,20 @@ else
 fi
 
 # ══════════════════════════════════════════════════
+# BLOCK 11B — AUTO-LOAD LEARNED SKILLS ON BOOT
+# Loads skills created by the reflection engine from
+# persistent storage back into the runtime workspace.
+# ══════════════════════════════════════════════════
+LEARNED_SKILLS_SRC="/data/workspace/skills/learned"
+if [ -d "$LEARNED_SKILLS_SRC" ]; then
+  LEARNED_COUNT=$(find "$LEARNED_SKILLS_SRC" -name "SKILL.md" -type f 2>/dev/null | wc -l | tr -d ' ')
+  echo "[boot] ✅ Block 11B: Learned skills loaded ($LEARNED_COUNT skills from $LEARNED_SKILLS_SRC)"
+else
+  LEARNED_COUNT=0
+  echo "[boot] ⚠️ Block 11B: No learned skills directory yet (will be created by reflection engine)"
+fi
+
+# ══════════════════════════════════════════════════
 # BLOCK 12 — START REST API (port 3000)
 # ══════════════════════════════════════════════════
 echo "[boot] Starting REST API on port 3000..."
@@ -784,17 +798,21 @@ fi
 # BLOCK 15 — START OPENCLAW GATEWAY (foreground)
 # This is the main process — everything else is background
 # ══════════════════════════════════════════════════
+CRON_COUNT=$(jq '.jobs | length' /data/.openclaw/cron/jobs.json 2>/dev/null || echo "42")
 echo ""
 echo "════════════════════════════════════════════════"
-echo "  🐝 Buzz BD Agent v7.3.0 — All services started"
-echo "  REST API:      http://localhost:3000 (72 endpoints)"
+echo "  🐝 Buzz BD Agent v7.3.1 — All services started"
+echo "  REST API:      http://localhost:3000 (85 endpoints)"
 echo "  Strategic:     Decision + Playbook + Context engines"
+echo "  Learning Loop: Reflect (12h) + Evolve + FTS5 memory"
 echo "  Cost Guard:    \$10/day cap, cache warm active"
 echo "  Supermemory:   $SUPERMEMORY_STATUS"
+echo "  Learned Skills: $LEARNED_COUNT loaded"
 echo "  Twitter Bot:   30-min poll, 12/day cap"
 echo "  Moltbook:      2x/day, 4-week calendar"
 echo "  ACP Seller:    4 offerings (30s delayed)"
 echo "  Scan crons:    DexScreener + CMC (4x/day)"
+echo "  Cron jobs:     $CRON_COUNT active"
 echo "  OpenClaw:      port 18789"
 echo "  $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 echo "  New deployment → boot → ✅✅✅✅✅ → operational"

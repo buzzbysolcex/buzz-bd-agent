@@ -3,6 +3,8 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const { createSkill, patchSkill, listSkills } = require('../services/tools/skill-create');
+const { getReflectStatus, reflect } = require('../services/skill-reflect');
+const { getEffectiveness } = require('../services/skill-evolve');
 
 const STATIC_SKILLS_DIR = '/data/workspace/skills';
 const LEARNED_SKILLS_DIR = '/data/workspace/skills/learned';
@@ -49,6 +51,33 @@ router.patch('/:name', (req, res) => {
     const result = patchSkill({ name: req.params.name, oldString, newString, reason });
     if (result.success) res.json(result);
     else res.status(400).json(result);
+  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+});
+
+// ─── GET /skills/reflect/status ─────────────────────
+router.get('/reflect/status', (req, res) => {
+  try {
+    const result = getReflectStatus();
+    res.json(result);
+  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+});
+
+// ─── POST /skills/reflect/trigger ───────────────────
+router.post('/reflect/trigger', (req, res) => {
+  try {
+    const { getDB } = require('../db');
+    const db = getDB();
+    const result = reflect(db);
+    res.json({ success: true, ...result });
+  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
+});
+
+// ─── GET /skills/effectiveness ──────────────────────
+router.get('/effectiveness', (req, res) => {
+  try {
+    const { skill } = req.query;
+    const result = getEffectiveness(skill);
+    res.json(result);
   } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });
 
