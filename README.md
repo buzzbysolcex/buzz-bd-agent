@@ -1,11 +1,14 @@
-# 🐝 Buzz BD Agent — Alpha Buzz
-### Autonomous Business Development Agent for SolCex Exchange
+# 🐝 Buzz BD Agent — Alpha Buzz Mobile
 
-[![Version](https://img.shields.io/badge/version-v7.3.1a-blue)]() [![OpenClaw](https://img.shields.io/badge/OpenClaw-v2026.3.7-green)]() [![ERC-8004](https://img.shields.io/badge/ERC--8004-%2325045-purple)]() [![Akash](https://img.shields.io/badge/Akash-boogle.cloud-orange)]() [![AgentProof](https://img.shields.io/badge/AgentProof-%231718-red)]()
+**Autonomous Business Development Agent for SolCex Exchange**
 
-24/7 autonomous token discovery, safety verification, scoring, and outreach for CEX listings. Self-improving AI agent with closed learning loop, contact intelligence, and FTS5 memory search. Built by a chef who codes through conversation. No CS degree. Just Claude and persistence.
+| Version | OpenClaw | ERC-8004 | Akash | AgentProof | Mobile |
+|---------|----------|----------|-------|------------|--------|
+| v7.3.2a | v2026.3.7 | #25045 | ✅ | #1718 | ✅ Expo |
 
-**Alpha Buzz = Hermes Brain + Buzz Body.** Cherry-picked Nous Research's Hermes Agent intelligence concepts into Buzz's commercial architecture. Phase 0 Complete.
+24/7 autonomous token discovery, safety verification, scoring, and outreach for CEX listings. Self-improving AI agent with closed learning loop, contact intelligence, FTS5 memory search, and **native mobile app with direct chat to the agent brain**. Built by a chef who codes through conversation. No CS degree. Just Claude and persistence.
+
+Alpha Buzz = Hermes Brain + Buzz Body. Cherry-picked Nous Research's Hermes Agent intelligence concepts into Buzz's commercial architecture. Phase 0 Complete. **Mobile App LIVE.**
 
 ---
 
@@ -13,11 +16,13 @@
 
 Buzz is an autonomous AI BD (Business Development) agent that runs 24/7 on Akash Network, finding promising token projects for SolCex Exchange listings across Solana, Base, and BSC chains.
 
-**The pipeline:** Discover → Verify → Score → Outreach → **Learn** → List
+**The pipeline:** Discover → Verify → Score → Outreach → Learn → List
 
-Buzz scans 100+ tokens per day across decentralized exchanges, filters through a 5-layer intelligence pipeline with parallel sub-agents, scores each token on a 100-point system, initiates outreach to qualified projects, and **learns from every decision** — all autonomously.
+Buzz scans 100+ tokens per day across decentralized exchanges, filters through a 5-layer intelligence pipeline with parallel sub-agents, scores each token on a 100-point system, initiates outreach to qualified projects, and learns from every decision — all autonomously.
 
-**Cost:** ~$12.72/month infrastructure (Buzz + Sentinel) + ~$3-5/day LLM inference = full autonomous BD operation for less than a coffee per day.
+**NEW in v7.3.2a:** Talk to Buzz directly from your phone via the Buzz Alpha Mobile app. The chat connects to the real OpenClaw brain — same MiniMax M2.5, same memory, same skills. Not a wrapper. The actual agent.
+
+Cost: ~$12.71/month infrastructure (Buzz + Sentinel) + ~$3-5/day LLM inference = full autonomous BD operation for less than a coffee per day.
 
 ---
 
@@ -27,23 +32,26 @@ Buzz scans 100+ tokens per day across decentralized exchanges, filters through a
 ┌─────────────────────────────────────────────────────────────┐
 │  AKASH NETWORK — provider.boogle.cloud                       │
 │  4 CPU / 8GB RAM / 10GB persistent                           │
-│  Cost: ~$9.53/month                                          │
+│  Cost: ~$9.47/month                                          │
 │                                                               │
 │  ┌─────────────────────────────────────────────────────────┐ │
-│  │  Docker: ghcr.io/buzzbysolcex/buzz-bd-agent:v7.3.1a     │ │
+│  │  Docker: ghcr.io/buzzbysolcex/buzz-bd-agent:v7.3.2a     │ │
 │  │  Runtime: OpenClaw v2026.3.7                              │ │
 │  │                                                           │ │
-│  │  PORT 18789 → OpenClaw Gateway (Telegram)                │ │
+│  │  PORT 18789 → OpenClaw Gateway (Telegram + Chat API)     │ │
 │  │  PORT 3000  → REST API v3.1.0 (Express+SQLite)           │ │
+│  │               + /api/v1/chat proxy to OpenClaw            │ │
 │  │                                                           │ │
 │  │  ┌─────────────────────────────────────────────────┐     │ │
-│  │  │  LAYER 3: ALPHA INTELLIGENCE (Hermes Cherry-Pick)│    │ │
+│  │  │  LAYER 3: ALPHA INTELLIGENCE + MOBILE            │    │ │
 │  │  │  ├── Skill Reflection (12h learning loop)        │    │ │
 │  │  │  ├── Skill Evolution (+1/-1 effectiveness)       │    │ │
 │  │  │  ├── Contact Intelligence (Honcho-style BD)      │    │ │
 │  │  │  ├── FTS5 Memory Search (BM25 cross-session)     │    │ │
 │  │  │  ├── Operator Profile (preferences + prayer)     │    │ │
-│  │  │  └── Block 11B (auto-load learned skills)        │    │ │
+│  │  │  ├── Block 11B (auto-load learned skills)        │    │ │
+│  │  │  ├── chatCompletions (3-stage baked persistence) │    │ │
+│  │  │  └── /api/v1/chat proxy (mobile app direct)      │    │ │
 │  │  └─────────────────────────────────────────────────┘     │ │
 │  │                                                           │ │
 │  │  ┌─────────────────────────────────────────────────┐     │ │
@@ -63,34 +71,67 @@ Buzz scans 100+ tokens per day across decentralized exchanges, filters through a
 │  │  │  └── scorer-agent  → L4 100-point scoring        │    │ │
 │  │  └─────────────────────────────────────────────────┘     │ │
 │  │                                                           │ │
-│  │  REST API: 91 endpoints | SQLite: 28 tables              │ │
+│  │  REST API: 93 endpoints | SQLite: 30 tables              │ │
 │  │  Twitter Bot v3.1: Premium SCAN + LIST + DEPLOY          │ │
-│  │  42 Cron Jobs | 19+ Intelligence Sources                  │ │
+│  │  21 Cron Jobs | 20 Intelligence Sources | OKX CEX Data   │ │
 │  │  Gmail OAuth | JVR Receipt System                         │ │
 │  └─────────────────────────────────────────────────────────┘ │
 │                                                               │
 │  SENTINEL v1.1.0 (separate container)                        │
 │  provider.cpu.phl.aes.akash.pub                              │
-│  Monitors 91 endpoints | 3 health crons | Telegram alerts    │
+│  Monitors 93 endpoints | 3 health crons | Telegram alerts    │
 │  /alpha-status endpoint for Phase 0 monitoring               │
-│  Cost: ~$3.19/month                                          │
+│  Cost: ~$3.24/month                                          │
+│                                                               │
+│  BUZZ ALPHA MOBILE (Expo React Native)                       │
+│  5 tabs: Dashboard | Pipeline | Scan | Chat | Ops            │
+│  Direct chat to Buzz brain via /api/v1/chat                  │
+│  Dark cyberpunk theme | Offline-first | Prayer countdown     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
+## 🐝 Mobile App — Buzz Alpha
+
+**Talk to Buzz from your phone.** The Buzz Alpha mobile app connects directly to the OpenClaw agent brain through a REST API proxy — same MiniMax M2.5, same memory, same skills, same personality as Telegram.
+
+| Feature | Detail |
+|---------|--------|
+| Platform | React Native / Expo SDK 54 |
+| Tabs | Dashboard ⚡, Pipeline 🔬, Scan 🎯, Chat 💬, Ops 🛡️ |
+| Chat | Direct OpenClaw connection — real Buzz brain |
+| Theme | Dark cyberpunk (#0a0e17 bg, #00ff88 accent) |
+| Prayer | WIB countdown timer on Dashboard |
+| Offline | Cache-first, orange "CACHED" badge when offline |
+
+### Chat Architecture
+
+```
+Phone → POST /api/v1/chat (REST API port)
+  → chat.js proxy route (Express)
+  → localhost:18789/v1/chat/completions (OpenClaw)
+  → MiniMax M2.5 (same brain as Telegram)
+  → Full agent: memory, skills, pipeline DB, tools
+  → Response → phone
+```
+
+Session key `"user":"ogie-buzz-alpha-mobile"` maintains stable conversation. Buzz remembers.
+
+---
+
 ## 🐝 Alpha Intelligence (Phase 0 — Complete)
 
-The Alpha Model cherry-picks three breakthrough capabilities from [Hermes Agent](https://hermes-agent.nousresearch.com/) (Nous Research) into Buzz's commercial architecture.
+The Alpha Model cherry-picks three breakthrough capabilities from Hermes Agent (Nous Research) into Buzz's commercial architecture.
 
 | Feature | What It Does | Status |
 |---------|-------------|--------|
-| **Closed Learning Loop** | Reviews pipeline patterns every 12h, auto-creates skills from experience | ✅ Live |
-| **Skill Self-Improvement** | Tracks skill effectiveness (+1/-1), marks proven vs needs-review | ✅ Live |
-| **Contact Intelligence** | Builds deepening profiles of every token team contacted | ✅ Live |
-| **FTS5 Memory Search** | SQLite full-text search across all pipeline decisions (BM25 ranking) | ✅ Live |
-| **Operator Profile** | Models operator preferences, prayer times, approval patterns | ✅ Live |
-| **Block 11B** | Auto-loads learned skills on boot — survives redeploys | ✅ Live |
+| Closed Learning Loop | Reviews pipeline patterns every 12h, auto-creates skills from experience | ✅ Live |
+| Skill Self-Improvement | Tracks skill effectiveness (+1/-1), marks proven vs needs-review | ✅ Live |
+| Contact Intelligence | Builds deepening profiles of every token team contacted | ✅ Live |
+| FTS5 Memory Search | SQLite full-text search across all pipeline decisions (BM25 ranking) | ✅ Live |
+| Operator Profile | Models operator preferences, prayer times, approval patterns | ✅ Live |
+| Block 11B | Auto-loads learned skills on boot — survives redeploys | ✅ Live |
 
 ---
 
@@ -98,11 +139,11 @@ The Alpha Model cherry-picks three breakthrough capabilities from [Hermes Agent]
 
 | Layer | Agent | Sources | Purpose |
 |-------|-------|---------|---------|
-| L1 | scanner-agent | DexScreener, GeckoTerminal, AIXBT, CMC, BNB MCP, Bitget | Token discovery across SOL/BASE/BSC |
+| L1 | scanner-agent | DexScreener, GeckoTerminal, AIXBT, CMC, BNB MCP, Bitget, **OKX** | Token discovery across SOL/BASE/BSC |
 | L2 | safety-agent | RugCheck, ethskills.com, Contract Auditor | Honeypot detection, contract verification |
 | L2 | wallet-agent | Helius (60 tools), Allium | Deployer forensics, holder analysis |
 | L3 | social-agent | Grok/xAI, Serper, ATV Web3 Identity, Firecrawl | Community health, deployer identity |
-| L4 | scorer-agent | 100-point composite (11 factors) | Final score + verdict |
+| L4 | scorer-agent | 100-point composite (11 factors + OKX CEX signals) | Final score + verdict |
 
 ### Sub-Agent Real Code
 
@@ -117,9 +158,33 @@ The Alpha Model cherry-picks three breakthrough capabilities from [Hermes Agent]
 │   └── scorer.js            ← 100-point composite scoring
 ```
 
-**Weights:** safety(0.30) + wallet(0.30) + social(0.20) + scorer(0.20) = 1.0
+Weights: safety(0.30) + wallet(0.30) + social(0.20) + scorer(0.20) = 1.0
 
 Built with Claude Code + Superpowers (obra). 602 tests passing.
+
+---
+
+## 🐝 OKX Market Data (NEW in v7.3.2a)
+
+Free CEX market data from OKX — no API key required, zero cost.
+
+| Data | Endpoint | Purpose |
+|------|----------|---------|
+| Live Ticker | `GET /api/v5/market/ticker?instId={SYM}-USDT` | Price, volume, spread |
+| All Instruments | `GET /api/v5/public/instruments?instType=SPOT` | 1,010 spot pairs cached |
+| Order Book | `GET /api/v5/market/books?instId={SYM}-USDT&sz=20` | Depth analysis |
+| Candles | `GET /api/v5/market/candles?instId={SYM}-USDT&bar=1H` | Price history |
+| Funding Rate | `GET /api/v5/market/funding-rate?instId={SYM}-USDT-SWAP` | Sentiment |
+
+### CEX Scoring Signals
+
+| Signal | Condition | Impact |
+|--------|-----------|--------|
+| OKX_LISTED | Token has USDT pair on OKX | +10 |
+| OKX_HIGH_VOLUME | >$1M 24h volume | +5 |
+| OKX_TIGHT_SPREAD | <0.1% spread | +3 |
+| CEX_DEX_HEALTHY | Price within 1% of DEX | +5 |
+| CEX_DEX_MANIPULATION | Price >5% off DEX | -10 |
 
 ---
 
@@ -127,10 +192,10 @@ Built with Claude Code + Superpowers (obra). 602 tests passing.
 
 | Component | Function |
 |-----------|----------|
-| **Decision Engine** | 12 rules handle 90% of decisions with zero LLM cost |
-| **Playbook Engine** | 4 state machines (Discovery → Outreach → Negotiation → Post-Listing) |
-| **Context Engine** | Assembles max 8K tokens per LLM call (down from 250K) |
-| **Supermemory** | 50ms semantic recall, 3 custom containers |
+| Decision Engine | 12 rules handle 90% of decisions with zero LLM cost |
+| Playbook Engine | 4 state machines (Discovery → Outreach → Negotiation → Post-Listing) |
+| Context Engine | Assembles max 8K tokens per LLM call (down from 250K) |
+| Supermemory | 50ms semantic recall, 3 custom containers |
 
 ---
 
@@ -151,15 +216,16 @@ Built with Claude Code + Superpowers (obra). 602 tests passing.
 |--------|-------|
 | Daily LLM cap | $10.00 (auto-throttle) |
 | Orchestrator | MiniMax M2.5 (~$3-5/day) |
-| Sub-agents (5) | bankr/gpt-5-nano (**FREE**) |
-| Infrastructure | ~$12.72/month (Buzz + Sentinel) |
+| Sub-agents (5) | bankr/gpt-5-nano (FREE) |
+| Infrastructure | ~$12.71/month (Buzz + Sentinel) |
+| OKX Data | $0 (free public API) |
 | Cost reduction | 78% ($22/day → $5/day) |
 
 ---
 
 ## 🐝 REST API
 
-91 endpoints across 17 categories. Express + SQLite WAL.
+93 endpoints across 18 categories. Express + SQLite WAL.
 
 | Category | Endpoints | Key Routes |
 |----------|-----------|------------|
@@ -176,10 +242,11 @@ Built with Claude Code + Superpowers (obra). 602 tests passing.
 | Intel | 5 | `GET /intel/sources` |
 | Wallets | 6 | `GET /wallets` |
 | Webhooks | 5 | `POST /webhooks` |
-| **Skills** | **8** | `GET /skills`, `GET /skills/reflect/status`, `POST /skills/reflect/trigger`, `GET /skills/effectiveness` |
-| **Memory** | **3** | `GET /memory/search`, `POST /memory/index`, `GET /memory/stats` |
-| **Operator** | **2** | `GET /operator/profile`, `PATCH /operator/profile` |
-| **Contacts** | **6** | `GET /contacts`, `POST /contacts`, `POST /contacts/:project/interaction` |
+| Skills | 8 | `GET /skills`, `POST /skills/reflect/trigger`, `GET /skills/effectiveness` |
+| Memory | 3 | `GET /memory/search`, `GET /memory/stats` |
+| Operator | 2 | `GET /operator/profile`, `PATCH /operator/profile` |
+| Contacts | 6 | `GET /contacts`, `POST /contacts/:project/interaction` |
+| **Chat** | **2** | **`POST /chat`** (OpenClaw proxy), **`POST /chat/stream`** (SSE) |
 
 ---
 
@@ -223,69 +290,69 @@ Powered by Bankr LLM Gateway — 8 models, dual API keys, self-sustaining infere
 | Colosseum | #3734 | — |
 | Moltbook | c606278b | — |
 | Molten.gg | 57487 | — |
+| Expo Go | buzzbdagent | — |
 
 ---
 
-## 🐝 Cron Schedule (42 Active)
+## 🐝 Cron Schedule (21 Active)
 
-### Scanning (9 jobs)
+### Scanning (6 jobs)
 
 | Job | Schedule | Description |
 |-----|----------|-------------|
-| scan-trending-00 | `0 0 * * *` | Trending tokens (midnight UTC) |
-| scan-trending-06 | `0 6 * * *` | Trending tokens (6am UTC) |
-| scan-trending-12 | `0 12 * * *` | Trending tokens (noon UTC) |
-| scan-trending-18 | `0 18 * * *` | Trending tokens (6pm UTC) |
-| scan-new-pairs | `0 */4 * * *` | New token pairs |
-| scan-solana-dex | `30 */4 * * *` | Solana DEX scan |
-| scan-base-dex | `30 */6 * * *` | Base DEX scan |
-| scan-bsc-dex | `0 */6 * * *` | BSC DEX scan |
-| bitget-listings-intel | `0 */8 * * *` | Bitget CEX cross-reference |
+| scan-trending (4x) | 0 0,6,12,18 * * * | Trending tokens across SOL/BASE/BSC |
+| scan-new-pairs | 0 */4 * * * | New token pairs |
+| scan-solana-dex | 30 */4 * * * | Solana DEX scan |
+| scan-base-dex | 30 */6 * * * | Base DEX scan |
+| scan-bsc-dex | 0 */6 * * * | BSC DEX scan |
+| bitget-listings-intel | 0 */8 * * * | Bitget CEX cross-reference |
 
 ### Operations (5 jobs)
 
 | Job | Schedule | Description |
 |-----|----------|-------------|
-| pipeline-status | `0 1 * * *` | Daily pipeline report |
-| pipeline-weekly | `0 12 * * 0` | Weekly summary |
-| daily-pipeline | `0 */2 * * *` | Pipeline health check |
-| morning-reminder | `0 5 * * *` | Daily briefing |
-| evening-review | `0 18 * * *` | End of day review |
+| pipeline-status | 0 2 * * * | Pipeline status report |
+| pipeline-weekly | 0 3 * * 1 | Weekly pipeline summary |
+| daily-pipeline | 0 1 * * * | Daily pipeline digest |
+| morning-reminder | 0 23 * * * | Morning brief (06:00 WIB) |
+| evening-review | 0 13 * * * | Evening review (20:00 WIB) |
 
-### Learning Loop (1 job)
+### Learning (1 job)
 
 | Job | Schedule | Description |
 |-----|----------|-------------|
-| skill-reflect | `0 */12 * * *` | Review patterns, create/patch learned skills |
+| skill-reflect | 0 */12 * * * | Review patterns, create/patch learned skills |
 
 ### Prayer Reminders (5 jobs)
 
 | Prayer | WIB Time | UTC Schedule |
 |--------|----------|-------------|
-| Fajr | 04:30 | `30 21 * * *` |
-| Dhuhr | 11:45 | `45 4 * * *` |
-| Asr | 15:00 | `0 8 * * *` |
-| Maghrib | 17:45 | `45 10 * * *` |
-| Isha | 19:00 | `0 12 * * *` |
+| Fajr | 04:30 | 30 21 * * * |
+| Dhuhr | 11:45 | 45 4 * * * |
+| Asr | 15:00 | 0 8 * * * |
+| Maghrib | 17:45 | 45 10 * * * |
+| Isha | 19:00 | 0 12 * * * |
 
-### Additional (22+ jobs)
-Twitter polling, ACP heartbeat, Moltbook posting, AgentProof telemetry, cost tracking, strategic reviews, and more.
+### Additional (4 jobs)
+
+| Job | Schedule | Description |
+|-----|----------|-------------|
+| cost-tracker | 0 16 * * * | Daily cost summary |
+| moltbook-heartbeat | 0 */6 * * * | Moltbook engagement |
+| twitter-scan-premium | 0 */4 * * * | Twitter premium SCAN |
+| agentproof-heartbeat | 0 */8 * * * | AgentProof check |
 
 ---
 
-## 🐝 Intelligence Sources (19+)
+## 🐝 Intelligence Sources (20)
 
-**Layer 1 — Discovery:**
-DexScreener /tokens/v1/ | GeckoTerminal | AIXBT | DexScreener Boosts | CoinMarketCap | BNB Chain MCP | Bitget Listings API
+**Layer 1 — Discovery:** DexScreener /tokens/v1/ | GeckoTerminal | AIXBT | CoinMarketCap | BNB Chain MCP | Bitget Listings API | **OKX Market Data (1,010 instruments, FREE)**
 
-**Layer 2 — Safety:**
-RugCheck | Helius MCP (60 tools) | Allium | ethskills.com
+**Layer 2 — Safety:** RugCheck | Helius MCP (60 tools) | Allium | ethskills.com
 
-**Layer 3 — Social:**
-Grok/xAI | Serper | ATV Web3 Identity (ENS + socials) | Firecrawl
+**Layer 3 — Social:** Grok/xAI | Serper | ATV Web3 Identity (ENS + socials) | Firecrawl
 
-**Layer 4+ — Identity & Smart Money:**
-AgentProof | Nansen x402 | Bankr Partner | ACP/Virtuals | Hyperbrowser
+**Layer 4+ — Identity & Smart Money:** AgentProof | Nansen x402 | Bankr Partner | ACP/Virtuals
 
 ---
 
@@ -293,7 +360,7 @@ AgentProof | Nansen x402 | Bankr Partner | ACP/Virtuals | Hyperbrowser
 
 ### Prerequisites
 - Docker Desktop
-- GHCR access (`ghcr.io/buzzbysolcex/buzz-bd-agent`)
+- GHCR access (ghcr.io/buzzbysolcex/buzz-bd-agent)
 - Akash Console account with AKT
 
 ### Build & Deploy
@@ -301,20 +368,31 @@ AgentProof | Nansen x402 | Bankr Partner | ACP/Virtuals | Hyperbrowser
 ```bash
 cd ~/buzz-bd-agent
 cp cron/jobs.json bake/cron/jobs.json       # ALWAYS sync crons
-rm -rf api/node_modules api/package-lock.json
-docker build -t ghcr.io/buzzbysolcex/buzz-bd-agent:v7.3.1a .
-docker push ghcr.io/buzzbysolcex/buzz-bd-agent:v7.3.1a
+docker build -t ghcr.io/buzzbysolcex/buzz-bd-agent:v7.3.2a .
+docker push ghcr.io/buzzbysolcex/buzz-bd-agent:v7.3.2a
 ```
 
-Then in Akash Console: **Close + New Deployment** with updated SDL on **boogle.cloud**.
+Then in Akash Console: Close + New Deployment with updated SDL on boogle.cloud.
+
+### Post-Deploy Checklist
+
+```
+□ 1. Verify boot logs (5 green layers)
+□ 2. Pair Telegram (if new pairing code)
+□ 3. Run sessions_spawn patch in Akash shell
+□ 4. Create OKX tables + sync 1,010 instruments
+□ 5. Send activation directive to @BuzzBySolCex_bot
+□ 6. Retarget Sentinel to new ports
+□ 7. Test /api/v1/chat externally
+□ 8. Test mobile app connection
+□ 9. Note new ports in docs
+```
 
 ### Important Notes
-
 - **ALWAYS Close + New** — NEVER Update Deployment (Supermemory fails)
-- Use `--no-cache` ONLY for Dockerfile/npm changes (file-only = fast cached build)
+- Use **--no-cache** for new files, cached build for file-only edits
 - **boogle.cloud** is the stable provider
-- After deploy: patch `sessions_spawn` in Akash shell if sub-agents blocked
-- Send activation directive to @BuzzBySolCex_bot on Telegram
+- **Tag with 'a' suffix** if same version was already pushed (Akash caches tags)
 
 ---
 
@@ -322,10 +400,11 @@ Then in Akash Console: **Close + New Deployment** with updated SDL on **boogle.c
 
 ```
 buzz-bd-agent/
-├── api/                    # REST API (91 endpoints)
+├── api/                    # REST API (93 endpoints)
 │   ├── server.js           # Express server
-│   ├── db.js               # SQLite schema + migrations (28 tables)
-│   ├── routes/             # 17 route modules
+│   ├── db.js               # SQLite schema + migrations (30 tables)
+│   ├── routes/             # 18 route modules
+│   │   ├── chat.js         # NEW: OpenClaw chat proxy
 │   │   ├── health.js       # Health (alpha: true, phase0_features)
 │   │   ├── skills.js       # Skills + reflect + effectiveness
 │   │   ├── memory.js       # FTS5 search
@@ -335,28 +414,19 @@ buzz-bd-agent/
 │   ├── services/
 │   │   ├── orchestrator.js        # 242-line parallel dispatch
 │   │   ├── agents/                # 5 sub-agent implementations
-│   │   │   ├── scanner.js
-│   │   │   ├── safety.js
-│   │   │   ├── wallet.js
-│   │   │   ├── social.js
-│   │   │   └── scorer.js
 │   │   ├── skill-reflect.js       # Learning loop engine
 │   │   ├── skill-evolve.js        # Effectiveness tracking
 │   │   ├── contact-intelligence.js # BD contact modeling
 │   │   ├── memory-search.js       # FTS5 search
 │   │   └── operator-profile.js    # Operator preferences
-│   └── migrations/         # Strategic orchestrator tables
+│   └── migrations/         # Strategic orchestrator + OKX tables
 ├── bake/                   # Docker build sources
-│   ├── twitter-bot/        # Twitter Bot v3.1 (856 lines)
+│   ├── twitter-bot/        # Twitter Bot v3.1
 │   ├── skills/             # OpenClaw skills (20)
-│   ├── cron/               # Cron jobs (42)
+│   ├── cron/               # Cron jobs (21 active)
 │   ├── config/             # Strategic config + content calendar
 │   └── memory/             # Seed memory files
-├── skills/                 # Agent context slims + cost guard
-├── config/                 # Decision rules + scoring rubric
-├── prompts/                # Enhanced prompts
-├── acp/                    # ACP/Virtuals offerings (4 services)
-├── entrypoint.sh           # 16-block boot sequence + Block 11B
+├── entrypoint.sh           # 16-block boot sequence + chatCompletions
 ├── Dockerfile              # OpenClaw 2026.3.7 + all baked skills
 └── README.md               # This file
 ```
@@ -365,7 +435,7 @@ buzz-bd-agent/
 
 ## 🐝 Supermemory
 
-Persistent semantic memory via `@supermemory/openclaw-supermemory`.
+Persistent semantic memory via @supermemory/openclaw-supermemory.
 
 | Setting | Value |
 |---------|-------|
@@ -374,13 +444,9 @@ Persistent semantic memory via `@supermemory/openclaw-supermemory`.
 | Auto-Capture | true (with 12-pattern security filter) |
 | Custom Containers | buzz_contacts, buzz_patterns, buzz_decisions |
 
-Every scan makes the next one smarter. Every decision teaches the system. Every outcome feeds the loop.
-
 ---
 
 ## 🐝 JVR Receipt System
-
-Every completed action generates a verifiable receipt.
 
 | Setting | Value |
 |---------|-------|
@@ -394,16 +460,15 @@ Every completed action generates a verifiable receipt.
 
 ## 🐝 Sentinel (Ops Watchdog)
 
-Separate container monitoring Buzz 24/7.
-
 | Field | Value |
 |-------|-------|
-| Version | v1.1.0 (aligned with Alpha Buzz) |
-| Image | `ghcr.io/buzzbysolcex/buzz-sentinel:v1.1.0` |
+| Version | v1.1.0 |
+| Image | ghcr.io/buzzbysolcex/buzz-sentinel:v1.1.0 |
 | Provider | cpu.phl.aes.akash.pub |
-| Monitoring | 91 endpoints, 42 crons, 19+ intel sources |
-| New | `/alpha-status` — checks all Phase 0 features in one call |
-| Cost | ~$3.19/month |
+| Monitoring | 93 endpoints, 21 crons, 20 intel sources |
+| Health | `/health` endpoint |
+| Alpha | `/alpha-status` — checks Phase 0 features |
+| Cost | ~$3.24/month |
 
 Three-tier severity: 🟢 LOW (self-heal) | 🟡 MEDIUM (fix + notify) | 🔴 HIGH (SOS + fix steps)
 
@@ -425,15 +490,15 @@ Three-tier severity: 🟢 LOW (self-heal) | 🟡 MEDIUM (fix + notify) | 🔴 HI
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| **v7.3.1a** | **Mar 11, 2026** | **Alpha Buzz — Phase 0 Complete. Learning loop + skill-evolve + contact intelligence + FTS5 memory + operator profile. 91 endpoints, 42 crons, 28 tables. Sentinel v1.1.0 aligned.** |
-| v7.3.0 | Mar 10, 2026 | BSC DexScreener fix, Bitget intel cron, 4 CPU / 8 GB upgrade, boogle.cloud |
-| v7.2.5 | Mar 9, 2026 | Alpha Learning Loop (Feature 1), Binance+Bitget+CMC skills, social-agent fix |
+| **v7.3.2a** | **Mar 11, 2026** | **Alpha Buzz Mobile — chatCompletions BAKED (3-stage), /api/v1/chat proxy, Buzz Alpha Mobile app LIVE on Expo Go, OKX Market Data (1,010 instruments FREE), 30 tables, 93 endpoints, 21 crons (corrected), Sentinel retargeted** |
+| v7.3.1a | Mar 11, 2026 | Alpha Buzz — Phase 0 Complete. Learning loop + skill-evolve + contact intelligence + FTS5 memory + operator profile. 91 endpoints, 28 tables. |
+| v7.3.0 | Mar 10, 2026 | BSC DexScreener fix, Bitget intel cron, 4 CPU / 8 GB upgrade |
+| v7.2.5 | Mar 9, 2026 | Alpha Learning Loop (Feature 1), Binance+Bitget+CMC skills |
 | v7.2.0 | Mar 9, 2026 | OpenClaw 3.7, Supermemory CONNECTED, Twitter v3.1 Premium |
 | v7.1.0 | Mar 7, 2026 | Strategic Orchestrator, Cost Guard, 18 crons, 72 endpoints |
 | v6.3.0 | Mar 4, 2026 | Foundation, Twitter Bot v3.1, 40 crons |
 | v6.0.19 | Mar 2, 2026 | 5 parallel sub-agents LIVE on production |
 | v6.0.17 | Mar 1, 2026 | Bankr LLM Gateway, self-sustaining inference |
-| v5.3.8 | Feb 22, 2026 | Last pre-sprint version |
 | v1.0.0 | Feb 1, 2026 | First deployment on Akash Network |
 
 ---
@@ -442,11 +507,12 @@ Three-tier severity: 🟢 LOW (self-heal) | 🟡 MEDIUM (fix + notify) | 🔴 HI
 
 | Phase | Target | Status |
 |-------|--------|--------|
-| **Phase 0** | 3 Intelligence Features | ✅ **COMPLETE** |
-| **Phase 1** | Close First Deal ($5K) | 🔨 Active |
+| Phase 0 | 3 Intelligence Features | ✅ COMPLETE |
+| **Phase 0.5** | **Mobile App (Buzz Alpha)** | **✅ LIVE ON PHONE** |
+| Phase 1 | Close First Deal ($5K) | 🔨 Active |
 | Phase 2 | ARIA Multi-Chain Intel | 🔵 Mar 22-31 |
 | Phase 3 | BaaS x402 Subscriptions | 🔵 Month 2 |
-| Phase 4 | Mobile App (Rork Max) | 🔵 Month 3-6 |
+| Phase 4 | Mobile App (Public Release) | 🔵 Month 3-6 |
 | Phase 5 | $BUZZ Token + Bankr | 🔵 Month 4-6 |
 | Phase 6 | Autonomous Company | 🔵 Month 6-12 |
 
@@ -456,11 +522,11 @@ Three-tier severity: 🟢 LOW (self-heal) | 🟡 MEDIUM (fix + notify) | 🔴 HI
 
 Buzz was built from scratch by Ogie — a 20+ year Executive Chef who transitioned to crypto BD. No CS degree. No engineering team. Just conversational collaboration with Claude (Opus 4.6), building one feature at a time from a phone in Indonesia during Ramadan.
 
-From first deploy (Feb 1, 2026) to Alpha Buzz (v7.3.1a) in 39 days. Three-layer architecture: Foundation → Strategic Orchestrator → Alpha Intelligence. Self-improving agent that learns from every scan, every score, every outreach.
+From first deploy (Feb 1, 2026) to Alpha Buzz Mobile (v7.3.2a) in 39 days. Three-layer architecture: Foundation → Strategic Orchestrator → Alpha Intelligence + Mobile App. Self-improving agent that learns from every scan, every score, every outreach — now accessible from your pocket.
 
-**The formula:** Hermes Brain + Buzz Body = Alpha Model.
+The formula: **Hermes Brain + Buzz Body = Alpha Model. Now in your pocket.**
 
-Total infrastructure cost: ~$12.72/month. Revenue target: $5,000/listing.
+Total infrastructure cost: ~$12.71/month. Revenue target: $5,000/listing.
 
 ---
 
@@ -470,10 +536,10 @@ Total infrastructure cost: ~$12.72/month. Revenue target: $5,000/listing.
 |----------|-----|
 | SolCex Exchange | [solcex.io](https://solcex.io) |
 | Docs | [docs.solcex.cc](https://docs.solcex.cc) |
-| Twitter | [@BuzzBySolCex](https://twitter.com/BuzzBySolCex) |
-| SolCex Twitter | [@SolCex_Exchange](https://twitter.com/SolCex_Exchange) |
+| Twitter | [@BuzzBySolCex](https://x.com/BuzzBySolCex) |
+| SolCex Twitter | [@SolCex_Exchange](https://x.com/SolCex_Exchange) |
 | Telegram Bot | [@BuzzBySolCex_bot](https://t.me/BuzzBySolCex_bot) |
-| Builder | [@hidayahanka1](https://twitter.com/hidayahanka1) |
+| Builder | [@hidayahanka1](https://x.com/hidayahanka1) |
 | LinkedIn | [linkedin.com/in/howtobecomeachef](https://linkedin.com/in/howtobecomeachef) |
 
 ---
@@ -484,6 +550,6 @@ Proprietary — SolCex Exchange. All rights reserved.
 
 ---
 
-🐝 *"Identity first. Intelligence deep. Commerce autonomous. Cost disciplined. Strategy embedded. Memory persistent. Learning continuous."*
+*🐝 "Identity first. Intelligence deep. Commerce autonomous. Cost disciplined. Strategy embedded. Memory persistent. Learning continuous. Now mobile."*
 
-**Buzz BD Agent v7.3.1a — Alpha Buzz (Phase 0 Complete) | Sprint Day 21 | Mar 11, 2026 | Jakarta, Indonesia**
+*Buzz BD Agent v7.3.2a — Alpha Buzz Mobile | Sprint Day 22 | Mar 11, 2026 | Jakarta, Indonesia*
