@@ -756,7 +756,16 @@ function generateReplyQueue(tweets, scanId) {
  * Build contextual BD outreach reply based on token scan data
  */
 function buildOutreachReply(tweet) {
-  const d = tweet.scanData || {};
+  // Merge scanData + pipeline data from tweet fields
+  const d = {
+    ...tweet.scanData,
+    symbol: tweet.scanData?.symbol || tweet.symbol || null,
+    mcap: tweet.scanData?.mcap || (tweet.mcap ? formatUsd(tweet.mcap) : null),
+    liq: tweet.scanData?.liq || (tweet.liquidity ? formatUsd(tweet.liquidity) : null),
+    vol: tweet.scanData?.vol || (tweet.volume24h ? formatUsd(tweet.volume24h) : null),
+    price: tweet.scanData?.price || tweet.priceUsd || null,
+    holders: tweet.scanData?.holders || tweet.holders || null,
+  };
   const score = d.score || 0;
   const symbol = d.symbol || tweet.contractAddress?.slice(0, 8) || '???';
   const chain = (tweet.chain || 'unknown').charAt(0).toUpperCase() + (tweet.chain || 'unknown').slice(1);
@@ -773,6 +782,14 @@ function buildOutreachReply(tweet) {
 
   // Fallback for lower scores — short outreach
   return `🐝 BUZZ SCAN \u2014 ${symbol} (${chain})\nScore: ${score}/100\n\nInteresting project. We're reviewing for potential listing.\nDM @HidayahAnka1 to connect.${BUZZ_FOOTER}`;
+}
+
+function formatUsd(val) {
+  const n = parseFloat(val);
+  if (isNaN(n)) return null;
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
+  if (n >= 1e3) return `$${(n / 1e3).toFixed(1)}K`;
+  return `$${n.toFixed(2)}`;
 }
 
 /**
@@ -962,16 +979,13 @@ async function postReply(inReplyToId, text, scanId, username) {
     return { success: false, error: `TOS blocked: ${compliance.reason}` };
   }
 
-  // RULE 2: Append scanId + timestamp for uniqueness
-  const uniqueText = `${text}\n\n[${scanId || 'TB'}-${Date.now()}]`;
-
   const url = 'https://api.x.com/2/tweets';
   const body = JSON.stringify({
-    text: uniqueText,
+    text,
     reply: { in_reply_to_tweet_id: inReplyToId },
   });
 
-  console.log(`[${scanId}] 📤 postReply attempt — replying to tweet ${inReplyToId}, text: "${uniqueText.slice(0, 80)}..."`);
+  console.log(`[${scanId}] 📤 postReply attempt — replying to tweet ${inReplyToId}, text: "${text.slice(0, 80)}..."`);
 
   try {
     const authHeader = getOAuthHeader(url, 'POST');
@@ -993,7 +1007,7 @@ async function postReply(inReplyToId, text, scanId, username) {
 
     const data = await res.json();
     console.log(`[${scanId}] ✅ postReply SUCCESS — new tweet ID: ${data.data?.id}`);
-    recordPostedTweet(uniqueText, inReplyToId, username);
+    recordPostedTweet(text, inReplyToId, username);
     return {
       success: true,
       tweetId: data.data?.id,
@@ -1020,13 +1034,10 @@ async function postTweet(text, scanId) {
     return { success: false, error: `TOS blocked: ${compliance.reason}` };
   }
 
-  // RULE 2: Append scanId + timestamp for uniqueness
-  const uniqueText = `${text}\n\n[${scanId || 'TB'}-${Date.now()}]`;
-
   const url = 'https://api.x.com/2/tweets';
-  const body = JSON.stringify({ text: uniqueText });
+  const body = JSON.stringify({ text });
 
-  console.log(`[${scanId || 'TWEET'}] 📤 postTweet attempt — text: "${uniqueText.slice(0, 80)}..."`);
+  console.log(`[${scanId || 'TWEET'}] 📤 postTweet attempt — text: "${text.slice(0, 80)}..."`);
 
   try {
     const authHeader = getOAuthHeader(url, 'POST');
@@ -1048,7 +1059,7 @@ async function postTweet(text, scanId) {
 
     const data = await res.json();
     console.log(`[${scanId || 'TWEET'}] ✅ postTweet SUCCESS — new tweet ID: ${data.data?.id}`);
-    recordPostedTweet(uniqueText, null, null);
+    recordPostedTweet(text, null, null);
     return { success: true, tweetId: data.data?.id };
   } catch (err) {
     console.log(`[${scanId || 'TWEET'}] ❌ postTweet ERROR — ${err.message}`);
