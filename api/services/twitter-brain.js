@@ -1,20 +1,22 @@
 /**
- * Twitter Brain — Autonomous BD Scanning via Grok x_search + X API
+ * Twitter Brain — Autonomous BD Scanning via Serper Google Search + X API v2
  *
  * SCAN → LIST → DEPLOY funnel:
- *   Tier 1: Free scanning (Grok x_search + Serper) → keyword monitoring
- *   Tier 2: Targeted reads (X API pay-per-use) → read specific tweets
+ *   Tier 1: Free scanning (Serper site:x.com Google search) → keyword monitoring
+ *   Tier 2: X API v2 search fallback (pay-per-use) → when Serper returns nothing
  *   Tier 3: Writes (X API pay-per-use) → BD outreach replies
  *
  * Runs every 2 hours via twitter-brain-scan cron (12x/day).
  * Filters results (L1-L10 rules), extracts contracts, routes to pipeline.
  * Generates reply queue for autonomous outreach (12/day max).
  *
- * Buzz BD Agent v7.4.0 | Sprint Day 27
+ * Buzz BD Agent v7.4.1 | Sprint Day 26
  */
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
+const OAuth = require('/opt/buzz-api/node_modules/oauth-1.0a/oauth-1.0a.js');
 
 // ─── Config ─────────────────────────────────────────
 const TWITTER_BRAIN_ENABLED = process.env.TWITTER_BRAIN_ENABLED === 'true';
@@ -31,8 +33,25 @@ const X_API_SECRET = process.env.X_API_SECRET;
 const X_ACCESS_TOKEN = process.env.X_ACCESS_TOKEN;
 const X_ACCESS_SECRET = process.env.X_ACCESS_SECRET;
 
-// Grok / Serper
-const GROK_API_KEY = process.env.GROK_API_KEY || process.env.XAI_API_KEY;
+// OAuth 1.0a instance for X API v2 write endpoints
+const oauth = OAuth({
+  consumer: { key: X_API_KEY || '', secret: X_API_SECRET || '' },
+  signature_method: 'HMAC-SHA1',
+  hash_function(baseString, key) {
+    return crypto.createHmac('sha1', key).update(baseString).digest('base64');
+  },
+});
+const oauthToken = { key: X_ACCESS_TOKEN || '', secret: X_ACCESS_SECRET || '' };
+
+/**
+ * Generate OAuth 1.0a Authorization header for X API v2 write requests
+ */
+function getOAuthHeader(url, method) {
+  const authData = oauth.authorize({ url, method }, oauthToken);
+  return oauth.toHeader(authData);
+}
+
+// Serper (Tier 1 — FREE Google search)
 const SERPER_API_KEY = process.env.SERPER_API_KEY;
 
 // Data dirs
@@ -96,17 +115,12 @@ async function runTwitterBrainScan({ requestId, db } = {}) {
   };
 
   try {
-    // ─── Step 1: Grok x_search keyword scanning (FREE) ───
-    const rawTweets = await scanKeywordsViaGrok(scanId);
+    // ─── Step 1: Serper Google Search (FREE) + X API v2 fallback ───
+    const allTweets = await twitterBrainCombinedSearch(SCAN_KEYWORDS, scanId);
     results.keywordsScanned = SCAN_KEYWORDS.length;
-    results.rawResults = rawTweets.length;
-
-    // ─── Step 1b: Cross-reference with Serper (FREE) ───
-    const serperTweets = await scanKeywordsViaSerper(scanId);
-    const allTweets = deduplicateTweets([...rawTweets, ...serperTweets]);
     results.rawResults = allTweets.length;
 
-    console.log(`[${scanId}] 🧠 Raw tweets: ${allTweets.length} (Grok: ${rawTweets.length}, Serper: ${serperTweets.length})`);
+    console.log(`[${scanId}] 🧠 Raw tweets: ${allTweets.length} (Serper + X API fallback)`);
 
     // ─── Step 2: Filter (L1-L10 rules) ───
     const filtered = filterTweets(allTweets, scanId);
@@ -155,150 +169,168 @@ async function runTwitterBrainScan({ requestId, db } = {}) {
 }
 
 // ═════════════════════════════════════════════════════
-// TIER 1: FREE SCANNING
+// TIER 1: SERPER GOOGLE SEARCH (FREE)
 // ═════════════════════════════════════════════════════
 
 /**
- * Scan keywords via Grok x_search API (FREE — existing key)
+ * Serper Google Search for Twitter/X posts (FREE — existing key)
+ * Replaces non-working Grok x_search with real Google site:x.com queries
  */
-async function scanKeywordsViaGrok(scanId) {
-  if (!GROK_API_KEY) {
-    console.log(`[${scanId}] ⚠️ GROK_API_KEY not set — skipping Grok scan`);
+async function serperTwitterSearch(keyword, scanId) {
+  const response = await fetch('https://google.serper.dev/search', {
+    method: 'POST',
+    headers: {
+      'X-API-Key': SERPER_API_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      q: `site:x.com "${keyword}"`,
+      num: 10,
+      tbs: 'qdr:d' // last 24 hours
+    }),
+    signal: AbortSignal.timeout(15000),
+  });
+
+  if (!response.ok) {
+    console.log(`[${scanId}] ⚠️ Serper failed for "${keyword}": ${response.status}`);
     return [];
   }
 
-  const allResults = [];
+  const data = await response.json();
 
-  for (const keyword of SCAN_KEYWORDS) {
-    try {
-      const res = await fetch('https://api.x.ai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${GROK_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'grok-3',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a crypto BD research assistant. Search Twitter/X for the given keyword and return results as JSON array. Each result: { tweet_id, username, display_name, followers_count, text, created_at, url }. Return ONLY the JSON array, no other text. Max 10 results per query.'
-            },
-            {
-              role: 'user',
-              content: `Search Twitter/X for recent tweets matching: "${keyword}". Focus on crypto token projects looking for exchange listings or wanting to deploy tokens. Return results from the last 24 hours.`
-            }
-          ],
-          search_parameters: {
-            mode: 'on',
-            sources: [{ type: 'x_posts' }],
-            recency: 'day'
-          },
-          temperature: 0
-        }),
-        signal: AbortSignal.timeout(30000),
-      });
-
-      if (!res.ok) {
-        console.log(`[${scanId}] ⚠️ Grok x_search failed for "${keyword}": ${res.status}`);
-        continue;
-      }
-
-      const data = await res.json();
-      const content = data.choices?.[0]?.message?.content || '';
-
-      // Parse JSON results from Grok response
-      const tweets = parseGrokResults(content, keyword);
-      allResults.push(...tweets);
-
-    } catch (err) {
-      console.log(`[${scanId}] ⚠️ Grok scan error for "${keyword}": ${err.message}`);
-    }
-  }
-
-  return allResults;
+  // Parse Google results for Twitter/X posts
+  return (data.organic || []).map(result => {
+    const handle = extractHandleFromUrl(result.link);
+    const urlMatch = result.link?.match(/\/status\/(\d+)/);
+    return {
+      url: result.link,
+      title: result.title,
+      text: result.snippet || result.title || '',
+      tweet_id: urlMatch ? urlMatch[1] : null,
+      username: handle ? handle.replace('@', '') : null,
+      display_name: handle ? handle.replace('@', '') : null,
+      handle,
+      contracts: extractContractsFromText(result.snippet || ''),
+      source: 'serper',
+      keyword,
+    };
+  }).filter(r => r.handle); // Must have a handle
 }
 
+function extractHandleFromUrl(url) {
+  const match = url?.match(/x\.com\/([^\/]+)/);
+  return match ? `@${match[1]}` : null;
+}
+
+function extractTweetIdFromUrl(url) {
+  if (!url) return null;
+  const match = url.match(/\/status\/(\d+)/);
+  return match ? match[1] : null;
+}
+
+function extractContractsFromText(text) {
+  // Solana: base58, 32-44 chars
+  const solana = text.match(/[1-9A-HJ-NP-Za-km-z]{32,44}/g) || [];
+  // EVM: 0x + 40 hex chars
+  const evm = text.match(/0x[a-fA-F0-9]{40}/g) || [];
+  return [...solana, ...evm];
+}
+
+// ═════════════════════════════════════════════════════
+// TIER 2: X API v2 SEARCH (PAY-PER-USE FALLBACK)
+// ═════════════════════════════════════════════════════
+
 /**
- * Cross-reference scan via Serper API (FREE — existing key)
+ * X API v2 recent search — fallback when Serper returns nothing
  */
-async function scanKeywordsViaSerper(scanId) {
+async function xApiSearch(keyword, scanId) {
+  if (!X_API_BEARER) return [];
+
+  const query = encodeURIComponent(`"${keyword}" -is:retweet lang:en`);
+  const response = await fetch(
+    `https://api.x.com/2/tweets/search/recent?query=${query}&max_results=10&tweet.fields=author_id,created_at,public_metrics&expansions=author_id&user.fields=public_metrics,username`,
+    {
+      headers: {
+        'Authorization': `Bearer ${X_API_BEARER}`
+      },
+      signal: AbortSignal.timeout(15000),
+    }
+  );
+
+  if (!response.ok) {
+    console.log(`[${scanId}] ⚠️ X API search failed for "${keyword}": ${response.status}`);
+    return [];
+  }
+
+  const data = await response.json();
+
+  return (data.data || []).map(tweet => ({
+    url: `https://x.com/i/status/${tweet.id}`,
+    tweet_id: tweet.id,
+    text: tweet.text,
+    author_id: tweet.author_id,
+    username: findUsername(data.includes?.users, tweet.author_id),
+    display_name: findUsername(data.includes?.users, tweet.author_id),
+    handle: findHandle(data.includes?.users, tweet.author_id),
+    followers_count: findFollowers(data.includes?.users, tweet.author_id),
+    contracts: extractContractsFromText(tweet.text),
+    source: 'x_api',
+    keyword,
+  }));
+}
+
+function findUsername(users, authorId) {
+  if (!users || !authorId) return null;
+  const user = users.find(u => u.id === authorId);
+  return user?.username || null;
+}
+
+function findHandle(users, authorId) {
+  const username = findUsername(users, authorId);
+  return username ? `@${username}` : null;
+}
+
+function findFollowers(users, authorId) {
+  if (!users || !authorId) return null;
+  const user = users.find(u => u.id === authorId);
+  return user?.public_metrics?.followers_count || null;
+}
+
+// ═════════════════════════════════════════════════════
+// COMBINED SEARCH FLOW
+// ═════════════════════════════════════════════════════
+
+/**
+ * Combined search: Serper (Tier 1) → X API v2 fallback (Tier 2) per keyword
+ */
+async function twitterBrainCombinedSearch(keywords, scanId) {
   if (!SERPER_API_KEY) {
-    console.log(`[${scanId}] ⚠️ SERPER_API_KEY not set — skipping Serper scan`);
+    console.log(`[${scanId}] ⚠️ SERPER_API_KEY not set — Twitter Brain scan cannot run`);
     return [];
   }
 
   const allResults = [];
-  // Use subset of keywords for Serper (Twitter site search)
-  const serperKeywords = SCAN_KEYWORDS.slice(0, 5);
 
-  for (const keyword of serperKeywords) {
+  for (const keyword of keywords) {
     try {
-      const res = await fetch('https://google.serper.dev/search', {
-        method: 'POST',
-        headers: {
-          'X-API-KEY': SERPER_API_KEY,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          q: `site:twitter.com OR site:x.com "${keyword}" crypto token`,
-          num: 10,
-          tbs: 'qdr:d', // last 24 hours
-        }),
-        signal: AbortSignal.timeout(15000),
-      });
+      // Tier 1: Serper (FREE)
+      let results = await serperTwitterSearch(keyword, scanId);
 
-      if (!res.ok) continue;
-
-      const data = await res.json();
-      const organic = data.organic || [];
-
-      for (const result of organic) {
-        // Extract username from Twitter URL
-        const urlMatch = result.link?.match(/(?:twitter|x)\.com\/(\w+)\/status\/(\d+)/);
-        if (urlMatch) {
-          allResults.push({
-            tweet_id: urlMatch[2],
-            username: urlMatch[1],
-            display_name: urlMatch[1],
-            text: result.snippet || result.title || '',
-            url: result.link,
-            source: 'serper',
-            keyword,
-          });
-        }
+      // Tier 2: X API fallback if Serper returns nothing
+      if (results.length === 0 && X_API_BEARER) {
+        console.log(`[${scanId}] 🔄 Serper empty for "${keyword}" — trying X API v2`);
+        results = await xApiSearch(keyword, scanId);
       }
+
+      allResults.push(...results);
     } catch (err) {
-      console.log(`[${scanId}] ⚠️ Serper error for "${keyword}": ${err.message}`);
+      console.log(`[${scanId}] ⚠️ Search error for "${keyword}": ${err.message}`);
     }
   }
 
-  return allResults;
-}
-
-/**
- * Parse Grok x_search response content into tweet objects
- */
-function parseGrokResults(content, keyword) {
-  try {
-    // Try direct JSON parse
-    const parsed = JSON.parse(content);
-    if (Array.isArray(parsed)) {
-      return parsed.map(t => ({ ...t, source: 'grok', keyword }));
-    }
-  } catch {
-    // Try extracting JSON array from text
-    const jsonMatch = content.match(/\[[\s\S]*\]/);
-    if (jsonMatch) {
-      try {
-        const parsed = JSON.parse(jsonMatch[0]);
-        if (Array.isArray(parsed)) {
-          return parsed.map(t => ({ ...t, source: 'grok', keyword }));
-        }
-      } catch {}
-    }
-  }
-  return [];
+  // Dedup by URL
+  const unique = [...new Map(allResults.map(r => [r.url, r])).values()];
+  return unique;
 }
 
 // ═════════════════════════════════════════════════════
@@ -563,8 +595,11 @@ function generateReplyQueue(tweets, scanId) {
   for (const tweet of prioritized) {
     const reply = buildOutreachReply(tweet);
     if (reply) {
+      // Extract tweet ID from URL if not already set
+      const tweetId = tweet.tweet_id || extractTweetIdFromUrl(tweet.url);
       queue.push({
-        tweetId: tweet.tweet_id,
+        tweetId,
+        tweetUrl: tweet.url,
         username: tweet.username,
         replyText: reply,
         contractAddress: tweet.contractAddress,
@@ -615,8 +650,10 @@ function buildDeployReply(tweet) {
  * Rate limited: 30s between replies
  */
 async function executeReplyQueue(queue, scanId) {
-  if (!X_API_BEARER) {
-    console.log(`[${scanId}] ⚠️ X_API_BEARER_TOKEN not set — skipping reply execution`);
+  console.log(`[TB-REPLY] executeReplyQueue called — queue: ${queue.length}, TWEET_AUTO: ${TWEET_AUTO}, hasOAuth: ${!!(X_API_KEY && X_API_SECRET && X_ACCESS_TOKEN && X_ACCESS_SECRET)}`);
+
+  if (!X_API_KEY || !X_API_SECRET || !X_ACCESS_TOKEN || !X_ACCESS_SECRET) {
+    console.log(`[${scanId}] ⚠️ OAuth 1.0a credentials missing (X_API_KEY/X_API_SECRET/X_ACCESS_TOKEN/X_ACCESS_SECRET) — skipping reply execution`);
     return 0;
   }
 
@@ -624,18 +661,32 @@ async function executeReplyQueue(queue, scanId) {
 
   for (const item of queue) {
     try {
-      const result = await postReply(item.tweetId, item.replyText, scanId);
+      console.log(`[TB-REPLY] Attempting reply to @${item.username} — tweetId: ${item.tweetId || 'none'}, tweetUrl: ${item.tweetUrl || 'none'}`);
+      // Try to extract tweet ID from URL if not set
+      const tweetId = item.tweetId || extractTweetIdFromUrl(item.tweetUrl);
+      let result;
+
+      if (tweetId) {
+        // Have tweet ID — post as reply
+        result = await postReply(tweetId, item.replyText, scanId);
+      } else {
+        // No tweet ID — post as standalone tweet mentioning the handle
+        console.log(`[${scanId}] ⚠️ No tweet ID for @${item.username} — posting standalone mention`);
+        result = await postTweet(item.replyText, scanId);
+      }
+
       if (result.success) {
         item.status = 'sent';
         item.sentAt = new Date().toISOString();
         item.responseTweetId = result.tweetId;
+        item.method = tweetId ? 'reply' : 'standalone';
         sent++;
         incrementDailyReplyCount();
 
         // JVR receipt per reply
         saveReplyReceipt(item, scanId);
 
-        console.log(`[${scanId}] ✅ Reply sent to @${item.username} (tweet ${item.tweetId})`);
+        console.log(`[${scanId}] ✅ ${tweetId ? 'Reply' : 'Standalone'} sent to @${item.username} (${tweetId ? 'tweet ' + tweetId : 'mention'})`);
       } else {
         item.status = 'failed';
         item.error = result.error;
@@ -650,6 +701,7 @@ async function executeReplyQueue(queue, scanId) {
       item.status = 'error';
       item.error = err.message;
       console.log(`[${scanId}] ❌ Reply error for @${item.username}: ${err.message}`);
+      console.log(`[TB-REPLY] ❌ Reply failed for @${item.username}:`, err.message);
     }
   }
 
@@ -657,68 +709,84 @@ async function executeReplyQueue(queue, scanId) {
 }
 
 /**
- * Post a reply tweet via X API v2
+ * Post a reply tweet via X API v2 (OAuth 1.0a user authentication)
  */
 async function postReply(inReplyToId, text, scanId) {
+  const url = 'https://api.x.com/2/tweets';
+  const body = JSON.stringify({
+    text,
+    reply: { in_reply_to_tweet_id: inReplyToId },
+  });
+
+  console.log(`[${scanId}] 📤 postReply attempt — replying to tweet ${inReplyToId}, text: "${text.slice(0, 80)}..."`);
+
   try {
-    // X API v2 tweet creation with OAuth 1.0a
-    // In production, use oauth-1.0a library for proper signing
-    // For now, use Bearer token approach (requires elevated access)
-    const res = await fetch('https://api.x.com/2/tweets', {
+    const authHeader = getOAuthHeader(url, 'POST');
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${X_API_BEARER}`,
+        ...authHeader,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        text,
-        reply: { in_reply_to_tweet_id: inReplyToId },
-      }),
+      body,
       signal: AbortSignal.timeout(15000),
     });
 
     if (!res.ok) {
       const errBody = await res.text();
+      console.log(`[${scanId}] ❌ postReply FAILED — X API ${res.status}: ${errBody}`);
       return { success: false, error: `X API ${res.status}: ${errBody}` };
     }
 
     const data = await res.json();
+    console.log(`[${scanId}] ✅ postReply SUCCESS — new tweet ID: ${data.data?.id}`);
     return {
       success: true,
       tweetId: data.data?.id,
     };
   } catch (err) {
+    console.log(`[${scanId}] ❌ postReply ERROR — ${err.message}`);
     return { success: false, error: err.message };
   }
 }
 
 /**
- * Post a standalone tweet (scan summaries, pipeline updates)
+ * Post a standalone tweet via X API v2 (OAuth 1.0a user authentication)
  */
 async function postTweet(text, scanId) {
-  if (!X_API_BEARER) {
-    return { success: false, error: 'X_API_BEARER_TOKEN not set' };
+  if (!X_API_KEY || !X_API_SECRET || !X_ACCESS_TOKEN || !X_ACCESS_SECRET) {
+    console.log(`[${scanId || 'TWEET'}] ⚠️ postTweet SKIPPED — OAuth 1.0a credentials missing`);
+    return { success: false, error: 'OAuth 1.0a credentials not set (X_API_KEY/X_API_SECRET/X_ACCESS_TOKEN/X_ACCESS_SECRET)' };
   }
 
+  const url = 'https://api.x.com/2/tweets';
+  const body = JSON.stringify({ text });
+
+  console.log(`[${scanId || 'TWEET'}] 📤 postTweet attempt — text: "${text.slice(0, 80)}..."`);
+
   try {
-    const res = await fetch('https://api.x.com/2/tweets', {
+    const authHeader = getOAuthHeader(url, 'POST');
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${X_API_BEARER}`,
+        ...authHeader,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ text }),
+      body,
       signal: AbortSignal.timeout(15000),
     });
 
     if (!res.ok) {
       const errBody = await res.text();
+      console.log(`[${scanId || 'TWEET'}] ❌ postTweet FAILED — X API ${res.status}: ${errBody}`);
       return { success: false, error: `X API ${res.status}: ${errBody}` };
     }
 
     const data = await res.json();
+    console.log(`[${scanId || 'TWEET'}] ✅ postTweet SUCCESS — new tweet ID: ${data.data?.id}`);
     return { success: true, tweetId: data.data?.id };
   } catch (err) {
+    console.log(`[${scanId || 'TWEET'}] ❌ postTweet ERROR — ${err.message}`);
     return { success: false, error: err.message };
   }
 }
