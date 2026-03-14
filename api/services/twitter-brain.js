@@ -33,6 +33,14 @@ const X_API_SECRET = process.env.X_API_SECRET;
 const X_ACCESS_TOKEN = process.env.X_ACCESS_TOKEN;
 const X_ACCESS_SECRET = process.env.X_ACCESS_SECRET;
 
+// Bankr Partner Deploy API
+const BANKR_PARTNER_KEY = process.env.BANKR_PARTNER_KEY;
+const BANKR_DEPLOY_URL = 'https://api.bankr.bot/token-launches/deploy';
+
+// Telegram notification for deploys
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+
 // OAuth 1.0a instance for X API v2 write endpoints
 const oauth = OAuth({
   consumer: { key: X_API_KEY || '', secret: X_API_SECRET || '' },
@@ -58,6 +66,16 @@ const SERPER_API_KEY = process.env.SERPER_API_KEY;
 const TWITTER_DATA_DIR = process.env.TWITTER_DATA_DIR || '/data/workspace/twitter-bot';
 const PIPELINE_DIR = process.env.PIPELINE_DIR || '/data/workspace/memory/pipeline';
 const RECEIPTS_DIR = process.env.RECEIPTS_DIR || '/data/workspace/memory/receipts';
+
+// ─── Branded Footer ─────────────────────────────────
+const BUZZ_FOOTER = `\n\n🐝 Buzz BD Agent\nBuilt on OpenClaw · Hosted on Agentic.hosting\nLearning architecture inspired by @NousResearch Hermes\n@SolCex_Exchange`;
+
+// ─── R013 Safety Rules ──────────────────────────────
+// DEPLOY via Bankr Partner API: AUTONOMOUS (no Ogie approval needed)
+// transfer_tokens: REQUIRES Ogie Telegram approval
+// buy_token(execute=true): REQUIRES Ogie Telegram approval
+const R013_AUTONOMOUS_OPS = ['bankr_deploy'];
+const R013_APPROVAL_REQUIRED = ['transfer_tokens', 'buy_token_execute'];
 
 // ─── BD Keywords (Section 3 — SCAN layer) ───────────
 const SCAN_KEYWORDS = [
@@ -614,31 +632,139 @@ function generateReplyQueue(tweets, scanId) {
   return queue;
 }
 
+// ═════════════════════════════════════════════════════
+// REPLY TEMPLATES — Premium Branded
+// ═════════════════════════════════════════════════════
+
 /**
- * Build contextual BD outreach reply (Section 3, Layer 2 template)
+ * TEMPLATE 1 (HOT, score 85+) & TEMPLATE 2 (QUALIFIED, score 70-84)
+ * Build contextual BD outreach reply based on token scan data
  */
 function buildOutreachReply(tweet) {
-  const project = tweet.username;
-  const chain = tweet.chain || 'unknown';
-  const chainLabel = chain.charAt(0).toUpperCase() + chain.slice(1);
+  const d = tweet.scanData || {};
+  const score = d.score || 0;
+  const symbol = d.symbol || tweet.contractAddress?.slice(0, 8) || '???';
+  const chain = (tweet.chain || 'unknown').charAt(0).toUpperCase() + (tweet.chain || 'unknown').slice(1);
 
-  // Contextual template — varies per tweet (avoids spam flags, X TOS rule #2)
-  const templates = [
-    `Hey @${project} — Buzz here from @SolCex_Exchange. Your ${chainLabel} token caught our eye. We're actively listing quality projects. DM us or check solcex.io`,
-    `@${project} Spotted your project. SolCex is listing ${chainLabel} tokens — fast track, real exchange, real liquidity. Details at solcex.io`,
-    `@${project} We're @SolCex_Exchange — looking to list solid ${chainLabel} projects. Your token looks interesting. Let's talk — DM open or solcex.io`,
-  ];
+  // HOT — score 85+
+  if (score >= 85) {
+    return buildHotReply(d, symbol, chain);
+  }
 
-  // Select template based on tweet content hash for variety
-  const hash = simpleHash(tweet.tweet_id || tweet.text || '');
-  return templates[hash % templates.length];
+  // QUALIFIED — score 70-84
+  if (score >= 70) {
+    return buildQualifiedReply(d, symbol, chain);
+  }
+
+  // Fallback for lower scores — short outreach
+  return `🐝 BUZZ SCAN \u2014 ${symbol} (${chain})\nScore: ${score}/100\n\nInteresting project. We're reviewing for potential listing.\nDM @HidayahAnka1 to connect.${BUZZ_FOOTER}`;
 }
 
 /**
- * Build Bankr deploy offer reply (Section 3, Layer 3)
+ * TEMPLATE 1 — SCAN HOT (score 85+)
+ */
+function buildHotReply(d, symbol, chain) {
+  const s = (v) => v || 'N/A';
+  return `🐝 BUZZ DEEP SCAN \u2014 ${symbol} (${chain})
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
+🛡️ SAFETY FIRST
+Mint: ${s(d.mint)} | Freeze: ${s(d.freeze)}
+LP Lock: ${s(d.lp_lock)} | Contract: ${s(d.contract_status)}
+RugCheck: ${s(d.rugcheck)}/100 (${s(d.rugcheck_grade)})
+⚡ VERDICT: ${s(d.safety_verdict)}
+
+💰 SMART MONEY FLOW
+${s(d.whale_summary)}
+Top 10 holders: ${s(d.concentration)}% concentration
+⚡ VERDICT: ${s(d.money_verdict)}
+
+📊 MARKET STRUCTURE
+MCap: ${s(d.mcap)} | FDV: ${s(d.fdv)}
+24h Vol: ${s(d.vol)} | Vol/MCap: ${s(d.ratio)}%
+Liquidity: ${s(d.liq)} on ${s(d.dex)}
+Price: ${s(d.price)} | ATH: ${s(d.ath)}
+
+📈 MOMENTUM & TREND
+7d: ${s(d.d7)}% | 30d: ${s(d.d30)}%
+Holders: ${s(d.holders)} (+${s(d.new_holders)} in 7d)
+Buyers vs Sellers: ${s(d.bsr)} ratio
+
+🧠 PERSONA CONSENSUS (4 analysts)
+🎰 Degen: ${s(d.degen_signal)} (${s(d.degen_conf)})
+🐋 Whale: ${s(d.whale_signal)} (${s(d.whale_conf)})
+🏛️ Institutional: ${s(d.inst_signal)} (${s(d.inst_conf)})
+👥 Community: ${s(d.comm_signal)} (${s(d.comm_conf)})
+
+📋 FINAL VERDICT: ${s(d.score)}/100 \u2014 ${s(d.verdict)}
+${s(d.bullish)}/4 personas bullish | Safety ${s(d.grade)}
+
+💡 INTERESTED IN CEX LISTING?
+SolCex Exchange is actively listing quality ${chain} projects.
+Verified agent (ERC-8004 #25045 | AgentProof #1718)
+DM @HidayahAnka1${BUZZ_FOOTER}`;
+}
+
+/**
+ * TEMPLATE 2 — SCAN QUALIFIED (score 70-84)
+ */
+function buildQualifiedReply(d, symbol, chain) {
+  const s = (v) => v || 'N/A';
+  return `🐝 BUZZ SCAN \u2014 ${symbol} (${chain})
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
+Score: ${s(d.score)}/100 | ✅ QUALIFIED
+Safety: ${s(d.grade)} | Liq: ${s(d.liq)} | Vol: ${s(d.vol)}
+MCap: ${s(d.mcap)} | Holders: ${s(d.holders)}+
+
+🧠 ${s(d.bullish)}/4 personas flagged bullish
+
+Solid project. We're reviewing for listing.
+DM @HidayahAnka1 to fast-track.${BUZZ_FOOTER}`;
+}
+
+/**
+ * TEMPLATE 3 — LIST reply (when project engages back)
+ * NO listing fee mention ever
+ */
+function buildListReply(tweet) {
+  const d = tweet.scanData || {};
+  const s = (v) => v || 'N/A';
+  const handle = tweet.username || tweet.handle || '???';
+  const symbol = d.symbol || '???';
+  return `🐝 @${handle} \u2014 Thanks for connecting!
+
+SolCex Listing Process:
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
+✅ ${symbol} \u2014 Score: ${s(d.score)}/100 (verified by 9 AI agents)
+✅ Safety: ${s(d.grade)} \u2014 contract verified
+✅ Persona Consensus: ${s(d.bullish)}/4 bullish
+✅ Multi-chain support: SOL / Base / BSC
+
+Next step \u2192 DM @HidayahAnka1 for listing details
+Or email: buzzbysolcex@gmail.com
+
+Verified agent (ERC-8004 #25045 | AgentProof #1718)${BUZZ_FOOTER}`;
+}
+
+/**
+ * TEMPLATE 4 — DEPLOY offer reply (fully autonomous, cap 3/day)
  */
 function buildDeployReply(tweet) {
-  return `Want to launch your token on Base? We deploy via @bankrbot — verified contract, instant liquidity, 1.2% swap fee split. Reply with: TokenName TICKER 'description' or DM for details`;
+  const handle = tweet.username || tweet.handle || '???';
+  return `🐝 @${handle} \u2014 Launch your token on Base?
+
+Deploy via Buzz + @bankrbot:
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
+✅ Verified smart contract (Uniswap v4)
+✅ Instant liquidity pool
+✅ 57% of trading fees go to YOU
+✅ Zero upfront cost
+
+Reply with your token details:
+Name: [your token name]
+Ticker: [SYMBOL]
+Description: [what it does]
+
+Or DM @HidayahAnka1 for help.${BUZZ_FOOTER}`;
 }
 
 // ═════════════════════════════════════════════════════
@@ -661,7 +787,7 @@ async function executeReplyQueue(queue, scanId) {
 
   for (const item of queue) {
     try {
-      console.log(`[TB-REPLY] Attempting reply to @${item.username} — tweetId: ${item.tweetId || 'none'}, tweetUrl: ${item.tweetUrl || 'none'}`);
+      console.log(`[TB-REPLY] Attempting reply to @${item.username} — tweetId: ${item.tweetId || 'none'}, url: ${item.tweetUrl || 'none'}`);
       // Try to extract tweet ID from URL if not set
       const tweetId = item.tweetId || extractTweetIdFromUrl(item.tweetUrl);
       let result;
@@ -792,11 +918,11 @@ async function postTweet(text, scanId) {
 }
 
 // ═════════════════════════════════════════════════════
-// AUTONOMOUS CONTENT POSTING
+// AUTONOMOUS CONTENT POSTING — Branded Templates
 // ═════════════════════════════════════════════════════
 
 /**
- * Post scan result summary tweet (autonomous, 4x/day after each scan cycle)
+ * TEMPLATE 6 — Post scan result summary tweet (autonomous, 4x/day)
  */
 async function postScanSummary(results, scanId) {
   if (!TWEET_AUTO) return null;
@@ -804,20 +930,198 @@ async function postScanSummary(results, scanId) {
   const { tokensRouted, afterFilter, contractsFound } = results;
   if (tokensRouted === 0) return null; // Don't tweet empty scans
 
-  const text = `BUZZ SCAN — Found ${afterFilter} signals, ${contractsFound} contracts, ${tokensRouted} routed to pipeline. Scanning 24/7 for quality listings.\n\nsolcex.io`;
+  const time = new Date().toISOString().slice(11, 16);
+  const chains = 'SOL/Base/BSC';
+  const topSymbol = results.topSymbol || 'N/A';
+  const topScore = results.topScore || 'N/A';
+
+  const text = `🐝 BUZZ SCAN \u2014 ${time} UTC
+
+Scanned: ${afterFilter} tokens across ${chains}
+Filtered: ${afterFilter} passed L1-L5
+Contracts: ${contractsFound} verified
+New pipeline: ${tokensRouted} added
+
+Top find: ${topSymbol} \u2014 ${topScore}/100${BUZZ_FOOTER}`;
 
   return postTweet(text, scanId);
 }
 
 /**
- * Post daily pipeline status update (autonomous, 1x/day)
+ * TEMPLATE 5 — Post daily pipeline status update (autonomous, 1x/day)
  */
 async function postPipelineUpdate(stats, scanId) {
   if (!TWEET_AUTO) return null;
 
-  const text = `PIPELINE — ${stats.active || 0} active, ${stats.qualified || 0} qualified, ${stats.hot || 0} hot. Autonomous BD running 24/7.\n\nsolcex.io`;
+  const date = new Date().toISOString().slice(0, 10);
+  const total = (stats.hot || 0) + (stats.qualified || 0) + (stats.watch || 0);
+  const topSymbol = stats.topSymbol || 'N/A';
+  const topScore = stats.topScore || 'N/A';
+
+  const text = `🐝 BUZZ PIPELINE \u2014 ${date}
+
+📊 ${total} tokens tracked
+🔥 HOT: ${stats.hot || 0} | ✅ QUALIFIED: ${stats.qualified || 0}
+👀 WATCH: ${stats.watch || 0}
+
+Top signal: ${topSymbol} (${topScore}/100)
+9 agents \u00B7 53 crons \u00B7 Scanning 24/7${BUZZ_FOOTER}`;
 
   return postTweet(text, scanId);
+}
+
+// ═════════════════════════════════════════════════════
+// BANKR PARTNER DEPLOY API (R013 — AUTONOMOUS)
+// ═════════════════════════════════════════════════════
+
+/**
+ * Deploy a token via Bankr Partner API
+ * R013: AUTONOMOUS — no Ogie approval needed
+ * Cap: 3 deploys/day
+ */
+async function bankrDeploy({ tokenName, tokenSymbol, description, twitterHandle, scanId }) {
+  const id = scanId || `DEPLOY-${Date.now()}`;
+
+  // Check daily deploy cap
+  const deployCount = getDailyDeployCount();
+  if (deployCount >= DEPLOY_CAP_DAY) {
+    console.log(`[${id}] ⚠️ Deploy cap reached: ${deployCount}/${DEPLOY_CAP_DAY}`);
+    return { success: false, error: `Daily deploy cap reached (${DEPLOY_CAP_DAY}/day)` };
+  }
+
+  if (!BANKR_PARTNER_KEY) {
+    console.log(`[${id}] ⚠️ BANKR_PARTNER_KEY not set — cannot deploy`);
+    return { success: false, error: 'BANKR_PARTNER_KEY not configured' };
+  }
+
+  console.log(`[${id}] 🚀 Bankr deploy: ${tokenName} (${tokenSymbol}) for @${twitterHandle}`);
+
+  try {
+    const res = await fetch(BANKR_DEPLOY_URL, {
+      method: 'POST',
+      headers: {
+        'X-Partner-Key': BANKR_PARTNER_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        tokenName,
+        tokenSymbol,
+        description,
+        feeRecipient: {
+          type: 'x',
+          value: twitterHandle,
+        },
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+
+    if (!res.ok) {
+      const errBody = await res.text();
+      console.log(`[${id}] ❌ Bankr deploy FAILED — ${res.status}: ${errBody}`);
+      return { success: false, error: `Bankr API ${res.status}: ${errBody}` };
+    }
+
+    const data = await res.json();
+    console.log(`[${id}] ✅ Bankr deploy SUCCESS — token: ${data.tokenAddress}, pool: ${data.poolId}, tx: ${data.txHash}`);
+
+    // Increment deploy counter
+    incrementDailyDeployCount();
+
+    // Save JVR deploy receipt
+    const receipt = saveDeployReceipt({
+      tokenName,
+      tokenSymbol,
+      description,
+      twitterHandle,
+      tokenAddress: data.tokenAddress,
+      poolId: data.poolId,
+      txHash: data.txHash,
+      chain: data.chain || 'base',
+      feeDistribution: data.feeDistribution,
+    }, id);
+
+    // Notify Ogie via Telegram
+    await notifyDeployTelegram(receipt);
+
+    // Post deploy success reply on Twitter
+    const replyText = buildDeploySuccessReply({
+      handle: twitterHandle,
+      tokenName,
+      tokenSymbol,
+      tokenAddress: data.tokenAddress,
+    });
+
+    return {
+      success: true,
+      tokenAddress: data.tokenAddress,
+      poolId: data.poolId,
+      txHash: data.txHash,
+      chain: data.chain || 'base',
+      feeDistribution: data.feeDistribution,
+      replyText,
+      receiptId: receipt.id,
+    };
+  } catch (err) {
+    console.log(`[${id}] ❌ Bankr deploy ERROR — ${err.message}`);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Build deploy success reply tweet
+ */
+function buildDeploySuccessReply({ handle, tokenName, tokenSymbol, tokenAddress }) {
+  return `🐝 @${handle} \u2014 Token deployed! 🎉
+
+${tokenName} (${tokenSymbol}) is LIVE on Base
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
+📋 Contract: ${tokenAddress}
+🔗 BaseScan: https://basescan.org/token/${tokenAddress}
+💧 Pool: Uniswap v4
+💰 57% of trading fees \u2192 your wallet
+
+Trade now on Uniswap or any Base DEX.${BUZZ_FOOTER}`;
+}
+
+/**
+ * Notify Ogie via Telegram after each deploy
+ */
+async function notifyDeployTelegram(receipt) {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+    console.log(`[DEPLOY] ⚠️ Telegram not configured — skipping deploy notification`);
+    return;
+  }
+
+  const msg = `🚀 BUZZ DEPLOY — ${receipt.tokenSymbol}\n\nToken: ${receipt.tokenName} (${receipt.tokenSymbol})\nContract: ${receipt.tokenAddress}\nFor: @${receipt.twitterHandle}\nReceipt: ${receipt.id}\nTx: ${receipt.txHash}`;
+
+  try {
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: msg,
+        parse_mode: 'HTML',
+      }),
+      signal: AbortSignal.timeout(10000),
+    });
+    console.log(`[DEPLOY] ✅ Telegram notification sent for ${receipt.id}`);
+  } catch (err) {
+    console.log(`[DEPLOY] ⚠️ Telegram notification failed: ${err.message}`);
+  }
+}
+
+/**
+ * R013 safety check — is this operation autonomous or requires approval?
+ */
+function r013CheckAutonomy(operation) {
+  if (R013_AUTONOMOUS_OPS.includes(operation)) {
+    return { autonomous: true, requiresApproval: false };
+  }
+  if (R013_APPROVAL_REQUIRED.includes(operation)) {
+    return { autonomous: false, requiresApproval: true, channel: 'telegram' };
+  }
+  return { autonomous: false, requiresApproval: true, channel: 'telegram' };
 }
 
 // ═════════════════════════════════════════════════════
@@ -871,6 +1175,25 @@ function saveReplyReceipt(replyItem, scanId) {
     path.join(RECEIPTS_DIR, `${receiptId}.json`),
     JSON.stringify(receipt, null, 2)
   );
+}
+
+function saveDeployReceipt(deployData, scanId) {
+  ensureDir(RECEIPTS_DIR);
+  const date = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+  const n = getDailyDeployCount();
+  const receiptId = `BZZ-DEPLOY-${date}-${n.toString().padStart(3, '0')}`;
+  const receipt = {
+    id: receiptId,
+    type: 'bankr-deploy',
+    scanId,
+    ...deployData,
+    createdAt: new Date().toISOString(),
+  };
+  fs.writeFileSync(
+    path.join(RECEIPTS_DIR, `${receiptId}.json`),
+    JSON.stringify(receipt, null, 2)
+  );
+  return receipt;
 }
 
 function saveScanHistory(results) {
@@ -947,6 +1270,34 @@ function incrementDailyReplyCount() {
   fs.writeFileSync(countFile, JSON.stringify({ date: today, count }));
 }
 
+function getDailyDeployCount() {
+  ensureDir(TWITTER_DATA_DIR);
+  const countFile = path.join(TWITTER_DATA_DIR, 'daily-deploy-count.json');
+  try {
+    if (fs.existsSync(countFile)) {
+      const data = JSON.parse(fs.readFileSync(countFile, 'utf8'));
+      const today = new Date().toISOString().slice(0, 10);
+      if (data.date === today) return data.count;
+    }
+  } catch {}
+  return 0;
+}
+
+function incrementDailyDeployCount() {
+  ensureDir(TWITTER_DATA_DIR);
+  const countFile = path.join(TWITTER_DATA_DIR, 'daily-deploy-count.json');
+  const today = new Date().toISOString().slice(0, 10);
+  let count = 0;
+  try {
+    if (fs.existsSync(countFile)) {
+      const data = JSON.parse(fs.readFileSync(countFile, 'utf8'));
+      if (data.date === today) count = data.count;
+    }
+  } catch {}
+  count++;
+  fs.writeFileSync(countFile, JSON.stringify({ date: today, count }));
+}
+
 /**
  * Deduplicate tweets by tweet_id
  */
@@ -979,11 +1330,17 @@ module.exports = {
   postScanSummary,
   postPipelineUpdate,
   buildOutreachReply,
+  buildListReply,
   buildDeployReply,
+  buildDeploySuccessReply,
+  bankrDeploy,
+  r013CheckAutonomy,
   filterTweets,
   extractContracts,
   SCAN_KEYWORDS,
   TWITTER_BRAIN_ENABLED,
   MAX_REPLIES_DAY,
   TWEET_AUTO,
+  DEPLOY_CAP_DAY,
+  BUZZ_FOOTER,
 };
