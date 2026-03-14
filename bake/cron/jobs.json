@@ -13,7 +13,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "BD SCAN \u2014 Execute all steps in order:\n\nSTEP 1 \u2014 DEXSCREENER BOOSTED TOKENS:\nGET https://api.dexscreener.com/token-boosts/top/v1\nFilter: chainId=solana OR chainId=base ONLY. These are paid-promoted tokens = active projects with marketing budgets.\n\nSTEP 2 \u2014 DEXSCREENER PAIR DATA:\nFor each token contract address from Step 1, call:\nGET https://api.dexscreener.com/latest/dex/search?q={FULL_CONTRACT_ADDRESS}\n(Use /search NOT /pairs \u2014 /pairs returns 403 from this server)\nExtract: liquidity.usd, volume.h24, priceChange.h24, pairCreatedAt, baseToken.name, baseToken.symbol, baseToken.address (FULL \u2014 never truncate), info.socials\n\nSTEP 3 \u2014 CMC GAINERS (cross-reference):\nGET https://pro-api.coinmarketcap.com/v1/cryptocurrency/trending/gainers-losers?limit=20&time_period=24h\nHeader: X-CMC_PRO_API_KEY: {CMC_API_KEY}\nCross-reference symbols with DexScreener results. Flag matches as HIGH CONVICTION.\n\nSTEP 4 \u2014 FILTER:\nKeep ONLY tokens where liquidity.usd > 10000 AND volume.h24 > 5000.\nDiscard all pre-DEX tokens (no pairs = no data = no value for BD).\n\nSTEP 5 \u2014 SCORE:\nRun full 5-sub-agent scoring pipeline on each filtered token (0-100 points).\nHOT=85+, QUALIFIED=70-84, WATCH=50-69, SKIP<50\n\nSTEP 6 \u2014 PIPELINE:\nSave HOT and QUALIFIED tokens to /data/workspace/memory/pipeline/ with FULL contract address from DexScreener API. NEVER truncate addresses.\n\nSTEP 7 \u2014 JVR RECEIPT:\nSave scan receipt to /data/workspace/memory/receipts/ with: token count, qualified count, sources used, top score found.\n\nSTEP 8 \u2014 TELEGRAM ALERT:\nIf any HOT (85+) token found, send Telegram alert to Ogie immediately with token name, score, contract, liquidity, volume."
+        "text": "BD SCAN — Execute all steps in order:\n\nSTEP 1 — DEXSCREENER BOOSTED TOKENS:\nGET https://api.dexscreener.com/token-boosts/top/v1\nFilter: chainId=solana OR chainId=base ONLY. These are paid-promoted tokens = active projects with marketing budgets.\n\nSTEP 2 — DEXSCREENER PAIR DATA:\nFor each token contract address from Step 1, call:\nGET https://api.dexscreener.com/latest/dex/search?q={FULL_CONTRACT_ADDRESS}\n(Use /search NOT /pairs — /pairs returns 403 from this server)\nExtract: liquidity.usd, volume.h24, priceChange.h24, pairCreatedAt, baseToken.name, baseToken.symbol, baseToken.address (FULL — never truncate), info.socials\n\nSTEP 3 — CMC GAINERS (cross-reference):\nGET https://pro-api.coinmarketcap.com/v1/cryptocurrency/trending/gainers-losers?limit=20&time_period=24h\nHeader: X-CMC_PRO_API_KEY: {CMC_API_KEY}\nCross-reference symbols with DexScreener results. Flag matches as HIGH CONVICTION.\n\nSTEP 4 — FILTER:\nKeep ONLY tokens where liquidity.usd > 10000 AND volume.h24 > 5000.\nDiscard all pre-DEX tokens (no pairs = no data = no value for BD).\n\nSTEP 5 — SCORE:\nRun full 5-sub-agent scoring pipeline on each filtered token (0-100 points).\nHOT=85+, QUALIFIED=70-84, WATCH=50-69, SKIP<50\n\nSTEP 6 — PIPELINE:\nSave HOT and QUALIFIED tokens to /data/workspace/memory/pipeline/ with FULL contract address from DexScreener API. NEVER truncate addresses.\n\nSTEP 7 — JVR RECEIPT:\nSave scan receipt to /data/workspace/memory/receipts/ with: token count, qualified count, sources used, top score found.\n\nSTEP 8 — TELEGRAM ALERT:\nIf any HOT (85+) token found, send Telegram alert to Ogie immediately with token name, score, contract, liquidity, volume."
       },
       "state": {
         "nextRunAtMs": 0,
@@ -33,7 +33,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "BD SCAN \u2014 Execute all steps in order:\n\nSTEP 1 \u2014 DEXSCREENER BOOSTED TOKENS:\nGET https://api.dexscreener.com/token-boosts/top/v1\nFilter: chainId=solana OR chainId=base ONLY. These are paid-promoted tokens = active projects with marketing budgets.\n\nSTEP 2 \u2014 DEXSCREENER PAIR DATA:\nFor each token contract address from Step 1, call:\nGET https://api.dexscreener.com/latest/dex/search?q={FULL_CONTRACT_ADDRESS}\n(Use /search NOT /pairs \u2014 /pairs returns 403 from this server)\nExtract: liquidity.usd, volume.h24, priceChange.h24, pairCreatedAt, baseToken.name, baseToken.symbol, baseToken.address (FULL \u2014 never truncate), info.socials\n\nSTEP 3 \u2014 CMC GAINERS (cross-reference):\nGET https://pro-api.coinmarketcap.com/v1/cryptocurrency/trending/gainers-losers?limit=20&time_period=24h\nHeader: X-CMC_PRO_API_KEY: {CMC_API_KEY}\nCross-reference symbols with DexScreener results. Flag matches as HIGH CONVICTION.\n\nSTEP 4 \u2014 FILTER:\nKeep ONLY tokens where liquidity.usd > 10000 AND volume.h24 > 5000.\nDiscard all pre-DEX tokens (no pairs = no data = no value for BD).\n\nSTEP 5 \u2014 SCORE:\nRun full 5-sub-agent scoring pipeline on each filtered token (0-100 points).\nHOT=85+, QUALIFIED=70-84, WATCH=50-69, SKIP<50\n\nSTEP 6 \u2014 PIPELINE:\nSave HOT and QUALIFIED tokens to /data/workspace/memory/pipeline/ with FULL contract address from DexScreener API. NEVER truncate addresses.\n\nSTEP 7 \u2014 JVR RECEIPT:\nSave scan receipt to /data/workspace/memory/receipts/ with: token count, qualified count, sources used, top score found.\n\nSTEP 8 \u2014 TELEGRAM ALERT:\nIf any HOT (85+) token found, send Telegram alert to Ogie immediately with token name, score, contract, liquidity, volume."
+        "text": "BD SCAN — Execute all steps in order:\n\nSTEP 1 — DEXSCREENER BOOSTED TOKENS:\nGET https://api.dexscreener.com/token-boosts/top/v1\nFilter: chainId=solana OR chainId=base ONLY. These are paid-promoted tokens = active projects with marketing budgets.\n\nSTEP 2 — DEXSCREENER PAIR DATA:\nFor each token contract address from Step 1, call:\nGET https://api.dexscreener.com/latest/dex/search?q={FULL_CONTRACT_ADDRESS}\n(Use /search NOT /pairs — /pairs returns 403 from this server)\nExtract: liquidity.usd, volume.h24, priceChange.h24, pairCreatedAt, baseToken.name, baseToken.symbol, baseToken.address (FULL — never truncate), info.socials\n\nSTEP 3 — CMC GAINERS (cross-reference):\nGET https://pro-api.coinmarketcap.com/v1/cryptocurrency/trending/gainers-losers?limit=20&time_period=24h\nHeader: X-CMC_PRO_API_KEY: {CMC_API_KEY}\nCross-reference symbols with DexScreener results. Flag matches as HIGH CONVICTION.\n\nSTEP 4 — FILTER:\nKeep ONLY tokens where liquidity.usd > 10000 AND volume.h24 > 5000.\nDiscard all pre-DEX tokens (no pairs = no data = no value for BD).\n\nSTEP 5 — SCORE:\nRun full 5-sub-agent scoring pipeline on each filtered token (0-100 points).\nHOT=85+, QUALIFIED=70-84, WATCH=50-69, SKIP<50\n\nSTEP 6 — PIPELINE:\nSave HOT and QUALIFIED tokens to /data/workspace/memory/pipeline/ with FULL contract address from DexScreener API. NEVER truncate addresses.\n\nSTEP 7 — JVR RECEIPT:\nSave scan receipt to /data/workspace/memory/receipts/ with: token count, qualified count, sources used, top score found.\n\nSTEP 8 — TELEGRAM ALERT:\nIf any HOT (85+) token found, send Telegram alert to Ogie immediately with token name, score, contract, liquidity, volume."
       },
       "state": {
         "nextRunAtMs": 0,
@@ -53,7 +53,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "BD SCAN \u2014 Execute all steps in order:\n\nSTEP 1 \u2014 DEXSCREENER BOOSTED TOKENS:\nGET https://api.dexscreener.com/token-boosts/top/v1\nFilter: chainId=solana OR chainId=base ONLY. These are paid-promoted tokens = active projects with marketing budgets.\n\nSTEP 2 \u2014 DEXSCREENER PAIR DATA:\nFor each token contract address from Step 1, call:\nGET https://api.dexscreener.com/latest/dex/search?q={FULL_CONTRACT_ADDRESS}\n(Use /search NOT /pairs \u2014 /pairs returns 403 from this server)\nExtract: liquidity.usd, volume.h24, priceChange.h24, pairCreatedAt, baseToken.name, baseToken.symbol, baseToken.address (FULL \u2014 never truncate), info.socials\n\nSTEP 3 \u2014 CMC GAINERS (cross-reference):\nGET https://pro-api.coinmarketcap.com/v1/cryptocurrency/trending/gainers-losers?limit=20&time_period=24h\nHeader: X-CMC_PRO_API_KEY: {CMC_API_KEY}\nCross-reference symbols with DexScreener results. Flag matches as HIGH CONVICTION.\n\nSTEP 4 \u2014 FILTER:\nKeep ONLY tokens where liquidity.usd > 10000 AND volume.h24 > 5000.\nDiscard all pre-DEX tokens (no pairs = no data = no value for BD).\n\nSTEP 5 \u2014 SCORE:\nRun full 5-sub-agent scoring pipeline on each filtered token (0-100 points).\nHOT=85+, QUALIFIED=70-84, WATCH=50-69, SKIP<50\n\nSTEP 6 \u2014 PIPELINE:\nSave HOT and QUALIFIED tokens to /data/workspace/memory/pipeline/ with FULL contract address from DexScreener API. NEVER truncate addresses.\n\nSTEP 7 \u2014 JVR RECEIPT:\nSave scan receipt to /data/workspace/memory/receipts/ with: token count, qualified count, sources used, top score found.\n\nSTEP 8 \u2014 TELEGRAM ALERT:\nIf any HOT (85+) token found, send Telegram alert to Ogie immediately with token name, score, contract, liquidity, volume."
+        "text": "BD SCAN — Execute all steps in order:\n\nSTEP 1 — DEXSCREENER BOOSTED TOKENS:\nGET https://api.dexscreener.com/token-boosts/top/v1\nFilter: chainId=solana OR chainId=base ONLY. These are paid-promoted tokens = active projects with marketing budgets.\n\nSTEP 2 — DEXSCREENER PAIR DATA:\nFor each token contract address from Step 1, call:\nGET https://api.dexscreener.com/latest/dex/search?q={FULL_CONTRACT_ADDRESS}\n(Use /search NOT /pairs — /pairs returns 403 from this server)\nExtract: liquidity.usd, volume.h24, priceChange.h24, pairCreatedAt, baseToken.name, baseToken.symbol, baseToken.address (FULL — never truncate), info.socials\n\nSTEP 3 — CMC GAINERS (cross-reference):\nGET https://pro-api.coinmarketcap.com/v1/cryptocurrency/trending/gainers-losers?limit=20&time_period=24h\nHeader: X-CMC_PRO_API_KEY: {CMC_API_KEY}\nCross-reference symbols with DexScreener results. Flag matches as HIGH CONVICTION.\n\nSTEP 4 — FILTER:\nKeep ONLY tokens where liquidity.usd > 10000 AND volume.h24 > 5000.\nDiscard all pre-DEX tokens (no pairs = no data = no value for BD).\n\nSTEP 5 — SCORE:\nRun full 5-sub-agent scoring pipeline on each filtered token (0-100 points).\nHOT=85+, QUALIFIED=70-84, WATCH=50-69, SKIP<50\n\nSTEP 6 — PIPELINE:\nSave HOT and QUALIFIED tokens to /data/workspace/memory/pipeline/ with FULL contract address from DexScreener API. NEVER truncate addresses.\n\nSTEP 7 — JVR RECEIPT:\nSave scan receipt to /data/workspace/memory/receipts/ with: token count, qualified count, sources used, top score found.\n\nSTEP 8 — TELEGRAM ALERT:\nIf any HOT (85+) token found, send Telegram alert to Ogie immediately with token name, score, contract, liquidity, volume."
       },
       "state": {
         "nextRunAtMs": 0,
@@ -73,7 +73,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "BD SCAN \u2014 Execute all steps in order:\n\nSTEP 1 \u2014 DEXSCREENER BOOSTED TOKENS:\nGET https://api.dexscreener.com/token-boosts/top/v1\nFilter: chainId=solana OR chainId=base ONLY. These are paid-promoted tokens = active projects with marketing budgets.\n\nSTEP 2 \u2014 DEXSCREENER PAIR DATA:\nFor each token contract address from Step 1, call:\nGET https://api.dexscreener.com/latest/dex/search?q={FULL_CONTRACT_ADDRESS}\n(Use /search NOT /pairs \u2014 /pairs returns 403 from this server)\nExtract: liquidity.usd, volume.h24, priceChange.h24, pairCreatedAt, baseToken.name, baseToken.symbol, baseToken.address (FULL \u2014 never truncate), info.socials\n\nSTEP 3 \u2014 CMC GAINERS (cross-reference):\nGET https://pro-api.coinmarketcap.com/v1/cryptocurrency/trending/gainers-losers?limit=20&time_period=24h\nHeader: X-CMC_PRO_API_KEY: {CMC_API_KEY}\nCross-reference symbols with DexScreener results. Flag matches as HIGH CONVICTION.\n\nSTEP 4 \u2014 FILTER:\nKeep ONLY tokens where liquidity.usd > 10000 AND volume.h24 > 5000.\nDiscard all pre-DEX tokens (no pairs = no data = no value for BD).\n\nSTEP 5 \u2014 SCORE:\nRun full 5-sub-agent scoring pipeline on each filtered token (0-100 points).\nHOT=85+, QUALIFIED=70-84, WATCH=50-69, SKIP<50\n\nSTEP 6 \u2014 PIPELINE:\nSave HOT and QUALIFIED tokens to /data/workspace/memory/pipeline/ with FULL contract address from DexScreener API. NEVER truncate addresses.\n\nSTEP 7 \u2014 JVR RECEIPT:\nSave scan receipt to /data/workspace/memory/receipts/ with: token count, qualified count, sources used, top score found.\n\nSTEP 8 \u2014 TELEGRAM ALERT:\nIf any HOT (85+) token found, send Telegram alert to Ogie immediately with token name, score, contract, liquidity, volume."
+        "text": "BD SCAN — Execute all steps in order:\n\nSTEP 1 — DEXSCREENER BOOSTED TOKENS:\nGET https://api.dexscreener.com/token-boosts/top/v1\nFilter: chainId=solana OR chainId=base ONLY. These are paid-promoted tokens = active projects with marketing budgets.\n\nSTEP 2 — DEXSCREENER PAIR DATA:\nFor each token contract address from Step 1, call:\nGET https://api.dexscreener.com/latest/dex/search?q={FULL_CONTRACT_ADDRESS}\n(Use /search NOT /pairs — /pairs returns 403 from this server)\nExtract: liquidity.usd, volume.h24, priceChange.h24, pairCreatedAt, baseToken.name, baseToken.symbol, baseToken.address (FULL — never truncate), info.socials\n\nSTEP 3 — CMC GAINERS (cross-reference):\nGET https://pro-api.coinmarketcap.com/v1/cryptocurrency/trending/gainers-losers?limit=20&time_period=24h\nHeader: X-CMC_PRO_API_KEY: {CMC_API_KEY}\nCross-reference symbols with DexScreener results. Flag matches as HIGH CONVICTION.\n\nSTEP 4 — FILTER:\nKeep ONLY tokens where liquidity.usd > 10000 AND volume.h24 > 5000.\nDiscard all pre-DEX tokens (no pairs = no data = no value for BD).\n\nSTEP 5 — SCORE:\nRun full 5-sub-agent scoring pipeline on each filtered token (0-100 points).\nHOT=85+, QUALIFIED=70-84, WATCH=50-69, SKIP<50\n\nSTEP 6 — PIPELINE:\nSave HOT and QUALIFIED tokens to /data/workspace/memory/pipeline/ with FULL contract address from DexScreener API. NEVER truncate addresses.\n\nSTEP 7 — JVR RECEIPT:\nSave scan receipt to /data/workspace/memory/receipts/ with: token count, qualified count, sources used, top score found.\n\nSTEP 8 — TELEGRAM ALERT:\nIf any HOT (85+) token found, send Telegram alert to Ogie immediately with token name, score, contract, liquidity, volume."
       },
       "state": {
         "nextRunAtMs": 0,
@@ -93,7 +93,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "AIXBT MOMENTUM SCAN \u2014 Check AIXBT for high-momentum tokens.\n\nSTEP 1: Fetch AIXBT project list from https://aixbt.tech/projects\nSTEP 2: Identify tokens with momentum score > 70 or recent positive signal\nSTEP 3: For each AIXBT momentum token, cross-reference with DexScreener:\nGET https://api.dexscreener.com/latest/dex/search?q={TOKEN_SYMBOL_OR_CA}\nSTEP 4: Filter: liquidity.usd > 10000 AND volume.h24 > 5000\nSTEP 5: Score qualified tokens through full pipeline\nSTEP 6: Save any QUALIFIED (70+) or HOT (85+) results to /data/workspace/memory/pipeline/\nSTEP 7: Send Telegram alert to Ogie if HOT (85+) found\nSTEP 8: Save JVR receipt"
+        "text": "AIXBT MOMENTUM SCAN — Check AIXBT for high-momentum tokens.\n\nSTEP 1: Fetch AIXBT project list from https://aixbt.tech/projects\nSTEP 2: Identify tokens with momentum score > 70 or recent positive signal\nSTEP 3: For each AIXBT momentum token, cross-reference with DexScreener:\nGET https://api.dexscreener.com/latest/dex/search?q={TOKEN_SYMBOL_OR_CA}\nSTEP 4: Filter: liquidity.usd > 10000 AND volume.h24 > 5000\nSTEP 5: Score qualified tokens through full pipeline\nSTEP 6: Save any QUALIFIED (70+) or HOT (85+) results to /data/workspace/memory/pipeline/\nSTEP 7: Send Telegram alert to Ogie if HOT (85+) found\nSTEP 8: Save JVR receipt"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -113,7 +113,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "MOLTBOOK CONTENT CALENDAR HEARTBEAT \u2014 Execute all steps:\n\nCREDENTIALS: Load from /data/.openclaw/credentials/moltbook.json\nAPI BASE: https://www.moltbook.com (always www.)\nAUTH HEADER: Authorization: Bearer {apiKey from credentials file}\n\nSTEP 1 \u2014 STATUS CHECK:\nGET /api/v1/agents/status \u2014 verify agent is active\n\nSTEP 2 \u2014 READ FEED:\nGET /api/v1/posts?sort=hot&limit=10 \u2014 read current hot posts\n\nSTEP 3 \u2014 ENGAGE:\n- Upvote 2 relevant posts about crypto/agents/BD/listings\n- Comment on 1 post with genuine BD or crypto insight (max 200 chars)\n\nSTEP 4 \u2014 POST SCHEDULE CHECK:\nLoad content calendar from /data/workspace/memory/moltbook-content-calendar.json\nCheck today's UTC date against calendar entries.\nMorning post window: first heartbeat AFTER 05:00 UTC\nEvening post window: first heartbeat AFTER 14:00 UTC\nMax 2 posts per calendar day.\n\nSTEP 5 \u2014 POST (if in posting window and under daily limit):\n- Get today's submolt and topic from calendar\n- If submolt does not exist: POST /api/v1/submolts to create it first\n- POST /api/v1/posts with body: { submolt, title, content }\n- Title format: 'Buzz BD Agent \u2014 {topic from calendar}'\n- For scan-report type: include real data from latest scan results\n- For pipeline-digest type: include real pipeline counts and top prospect\n- For agent-showcase type: describe a Buzz capability with specifics\n- For educational type: write a concise, useful post on the topic\n- Always end every post with: 'Powered by Buzz BD Agent | @SolCex_Exchange | Akash Network'\n\nSTEP 6 \u2014 JVR RECEIPT:\nSave receipt to /data/workspace/memory/receipts/ for every action taken"
+        "text": "MOLTBOOK CONTENT CALENDAR HEARTBEAT — Execute all steps:\n\nCREDENTIALS: Load from /data/.openclaw/credentials/moltbook.json\nAPI BASE: https://www.moltbook.com (always www.)\nAUTH HEADER: Authorization: Bearer {apiKey from credentials file}\n\nSTEP 1 — STATUS CHECK:\nGET /api/v1/agents/status — verify agent is active\n\nSTEP 2 — READ FEED:\nGET /api/v1/posts?sort=hot&limit=10 — read current hot posts\n\nSTEP 3 — ENGAGE:\n- Upvote 2 relevant posts about crypto/agents/BD/listings\n- Comment on 1 post with genuine BD or crypto insight (max 200 chars)\n\nSTEP 4 — POST SCHEDULE CHECK:\nLoad content calendar from /data/workspace/memory/moltbook-content-calendar.json\nCheck today's UTC date against calendar entries.\nMorning post window: first heartbeat AFTER 05:00 UTC\nEvening post window: first heartbeat AFTER 14:00 UTC\nMax 2 posts per calendar day.\n\nSTEP 5 — POST (if in posting window and under daily limit):\n- Get today's submolt and topic from calendar\n- If submolt does not exist: POST /api/v1/submolts to create it first\n- POST /api/v1/posts with body: { submolt, title, content }\n- Title format: 'Buzz BD Agent — {topic from calendar}'\n- For scan-report type: include real data from latest scan results\n- For pipeline-digest type: include real pipeline counts and top prospect\n- For agent-showcase type: describe a Buzz capability with specifics\n- For educational type: write a concise, useful post on the topic\n- Always end every post with: 'Powered by Buzz BD Agent | @SolCex_Exchange | Akash Network'\n\nSTEP 6 — JVR RECEIPT:\nSave receipt to /data/workspace/memory/receipts/ for every action taken"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -133,7 +133,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "MOLTEN HEARTBEAT \u2014 Agent matchmaking on Molten.gg:\n\nCREDENTIALS: Load from /data/.openclaw/credentials/molten.json\nIf credentials file missing or key invalid, log warning and skip \u2014 do not error.\n\nSTEP 1: GET https://agentkey.molten.gg/api/agents/status with Authorization: Bearer {apiKey}\nIf 401/403: log 'Molten API key invalid \u2014 re-register at agentkey.molten.gg' and stop.\n\nSTEP 2: GET /api/matches \u2014 find new agent match opportunities\nSTEP 3: Review matches for BD/intelligence synergy (score > 50 = worth exploring)\nSTEP 4: Log match summary to Telegram if any score > 60 found\nSTEP 5: Save JVR receipt"
+        "text": "MOLTEN HEARTBEAT — Agent matchmaking on Molten.gg:\n\nCREDENTIALS: Load from /data/.openclaw/credentials/molten.json\nIf credentials file missing or key invalid, log warning and skip — do not error.\n\nSTEP 1: GET https://agentkey.molten.gg/api/agents/status with Authorization: Bearer {apiKey}\nIf 401/403: log 'Molten API key invalid — re-register at agentkey.molten.gg' and stop.\n\nSTEP 2: GET /api/matches — find new agent match opportunities\nSTEP 3: Review matches for BD/intelligence synergy (score > 50 = worth exploring)\nSTEP 4: Log match summary to Telegram if any score > 60 found\nSTEP 5: Save JVR receipt"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -153,7 +153,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "ACP MARKETPLACE MONITOR \u2014 Check for incoming job requests on Virtuals ACP:\n\nSTEP 1: Verify ACP seller runtime is running (check /data/logs/acp-serve.log last 10 lines)\nIf seller not running: restart with: cd /data/workspace/skills/virtuals-acp && LITE_AGENT_API_KEY={ACP_API_KEY} npx tsx src/seller/runtime/seller.ts &\n\nSTEP 2: Check for pending jobs via ACP API (Agent #17681)\nSTEP 3: Log status to Telegram \u2014 'ACP Seller: ACTIVE | {N} jobs processed today'\nSTEP 4: Save JVR receipt"
+        "text": "ACP MARKETPLACE MONITOR — Check for incoming job requests on Virtuals ACP:\n\nSTEP 1: Verify ACP seller runtime is running (check /data/logs/acp-serve.log last 10 lines)\nIf seller not running: restart with: cd /data/workspace/skills/virtuals-acp && LITE_AGENT_API_KEY={ACP_API_KEY} npx tsx src/seller/runtime/seller.ts &\n\nSTEP 2: Check for pending jobs via ACP API (Agent #17681)\nSTEP 3: Log status to Telegram — 'ACP Seller: ACTIVE | {N} jobs processed today'\nSTEP 4: Save JVR receipt"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -173,7 +173,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "Send Telegram prayer reminder to Ogie: '\ud83d\udd4c Fajr \u2014 04:25 WIB\\nSalat Subuh \u2014 time to pray.'"
+        "text": "Send Telegram prayer reminder to Ogie: '🕌 Fajr — 04:25 WIB\\nSalat Subuh — time to pray.'"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -193,7 +193,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "Send Telegram prayer reminder to Ogie: '\ud83d\udd4c Dhuhr \u2014 12:00 WIB\\nSalat Dzuhur \u2014 time to pray.'"
+        "text": "Send Telegram prayer reminder to Ogie: '🕌 Dhuhr — 12:00 WIB\\nSalat Dzuhur — time to pray.'"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -213,7 +213,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "Send Telegram prayer reminder to Ogie: '\ud83d\udd4c Asr \u2014 15:15 WIB\\nSalat Ashar \u2014 time to pray.'"
+        "text": "Send Telegram prayer reminder to Ogie: '🕌 Asr — 15:15 WIB\\nSalat Ashar — time to pray.'"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -233,7 +233,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "Send Telegram prayer reminder to Ogie: '\ud83d\udd4c Maghrib \u2014 18:00 WIB\\nSalat Maghrib \u2014 time to pray. Iftar time.'"
+        "text": "Send Telegram prayer reminder to Ogie: '🕌 Maghrib — 18:00 WIB\\nSalat Maghrib — time to pray. Iftar time.'"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -253,7 +253,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "Send Telegram prayer reminder to Ogie: '\ud83d\udd4c Isha \u2014 19:15 WIB\\nSalat Isya \u2014 time to pray.'"
+        "text": "Send Telegram prayer reminder to Ogie: '🕌 Isha — 19:15 WIB\\nSalat Isya — time to pray.'"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -273,7 +273,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "DAILY MORNING SUMMARY \u2014 Send to Ogie on Telegram:\n\nPrepare and send a structured daily summary:\n\ud83d\udc1d BUZZ DAILY SUMMARY \u2014 {today's date WIB}\n\nPIPELINE:\n- HOT prospects (85+): list with name, score, CA\n- QUALIFIED (70-84): count + top 3\n- New since yesterday: count\n\nSCAN STATS (last 24h):\n- Tokens scanned: total\n- Qualified: count\n- Sources active: list\n\nSYSTEM:\n- Twitter Bot: replies sent today\n- Moltbook: posts made today\n- ACP: jobs processed\n- API: status\n\nTOP PROSPECT:\nIf any 70+: full details (name, CA, score, liquidity, volume, socials)\n\nRead data from /data/workspace/memory/pipeline/ and /data/workspace/memory/receipts/ for today's date."
+        "text": "DAILY MORNING SUMMARY — Send to Ogie on Telegram:\n\nPrepare and send a structured daily summary:\n🐝 BUZZ DAILY SUMMARY — {today's date WIB}\n\nPIPELINE:\n- HOT prospects (85+): list with name, score, CA\n- QUALIFIED (70-84): count + top 3\n- New since yesterday: count\n\nSCAN STATS (last 24h):\n- Tokens scanned: total\n- Qualified: count\n- Sources active: list\n\nSYSTEM:\n- Twitter Bot: replies sent today\n- Moltbook: posts made today\n- ACP: jobs processed\n- API: status\n\nTOP PROSPECT:\nIf any 70+: full details (name, CA, score, liquidity, volume, socials)\n\nRead data from /data/workspace/memory/pipeline/ and /data/workspace/memory/receipts/ for today's date."
       },
       "state": {
         "nextRunAtMs": 0,
@@ -293,7 +293,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "END OF DAY REPORT \u2014 Send to Ogie on Telegram:\n\n\ud83c\udf19 BUZZ EOD REPORT \u2014 {today's date WIB}\n\nACTIONS TODAY:\n- BD scans completed: count\n- Tokens evaluated: total\n- New pipeline additions: count\n- Moltbook posts: count, engagements\n- Twitter replies: count\n- ACP jobs: count\n\nPIPELINE STATUS:\n- Awaiting Ogie approval: list any HOT tokens with name + CA\n- In progress: count\n\nTOMORROW:\n- First scan: 05:00 WIB\n- Moltbook topics: list tomorrow's calendar entries\n\nRead from /data/workspace/memory/receipts/ for today's date."
+        "text": "END OF DAY REPORT — Send to Ogie on Telegram:\n\n🌙 BUZZ EOD REPORT — {today's date WIB}\n\nACTIONS TODAY:\n- BD scans completed: count\n- Tokens evaluated: total\n- New pipeline additions: count\n- Moltbook posts: count, engagements\n- Twitter replies: count\n- ACP jobs: count\n\nPIPELINE STATUS:\n- Awaiting Ogie approval: list any HOT tokens with name + CA\n- In progress: count\n\nTOMORROW:\n- First scan: 05:00 WIB\n- Moltbook topics: list tomorrow's calendar entries\n\nRead from /data/workspace/memory/receipts/ for today's date."
       },
       "state": {
         "nextRunAtMs": 0,
@@ -313,7 +313,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "RESET DAILY COUNTERS \u2014 Reset all daily operation counters:\n\nReset these files to zero counts for today's date:\n- /data/workspace/twitter-daily-count.json \u2192 {date: today, count: 0}\n- /data/workspace/twitter-deploy-daily.json \u2192 {date: today, count: 0}\n\nLog: 'Daily counters reset for {date}'\nSave JVR receipt category: system"
+        "text": "RESET DAILY COUNTERS — Reset all daily operation counters:\n\nReset these files to zero counts for today's date:\n- /data/workspace/twitter-daily-count.json → {date: today, count: 0}\n- /data/workspace/twitter-deploy-daily.json → {date: today, count: 0}\n\nLog: 'Daily counters reset for {date}'\nSave JVR receipt category: system"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -333,7 +333,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "AGENTPROOF TELEMETRY \u2014 Submit agent activity proof to AgentProof #1718:\n\nSTEP 1: Count scans and qualified prospects from last 12h receipts in /data/workspace/memory/receipts/\nSTEP 2: POST https://api.agentproof.io/v1/telemetry\nHeaders: X-AgentProof-Key: {AGENTPROOF_API_KEY}\nBody: { agentId: '1718', chain: 'avalanche', action: 'bd_scan', scansCompleted: N, qualifiedProspects: N, timestamp: ISO }\nSTEP 3: Log response\nSTEP 4: Save JVR receipt"
+        "text": "AGENTPROOF TELEMETRY — Submit agent activity proof to AgentProof #1718:\n\nSTEP 1: Count scans and qualified prospects from last 12h receipts in /data/workspace/memory/receipts/\nSTEP 2: POST https://api.agentproof.io/v1/telemetry\nHeaders: X-AgentProof-Key: {AGENTPROOF_API_KEY}\nBody: { agentId: '1718', chain: 'avalanche', action: 'bd_scan', scansCompleted: N, qualifiedProspects: N, timestamp: ISO }\nSTEP 3: Log response\nSTEP 4: Save JVR receipt"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -353,7 +353,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "PIPELINE REVIEW \u2014 Re-score existing prospects:\n\nSTEP 1: Load all tokens from /data/workspace/memory/pipeline/ that are status=pending or status=qualified\nSTEP 2: For each token, fetch fresh data from DexScreener:\nGET https://api.dexscreener.com/latest/dex/search?q={FULL_CA}\nSTEP 3: Re-run scoring (check if score changed by >5 points)\nSTEP 4: Update pipeline file with new score and timestamp\nSTEP 5: If a token DROPS below 50 \u2192 mark status=dropped, alert Ogie\nSTEP 6: If a token RISES to 85+ \u2192 mark status=hot, alert Ogie immediately\nSTEP 7: Save JVR receipt"
+        "text": "PIPELINE REVIEW — Re-score existing prospects:\n\nSTEP 1: Load all tokens from /data/workspace/memory/pipeline/ that are status=pending or status=qualified\nSTEP 2: For each token, fetch fresh data from DexScreener:\nGET https://api.dexscreener.com/latest/dex/search?q={FULL_CA}\nSTEP 3: Re-run scoring (check if score changed by >5 points)\nSTEP 4: Update pipeline file with new score and timestamp\nSTEP 5: If a token DROPS below 50 → mark status=dropped, alert Ogie\nSTEP 6: If a token RISES to 85+ → mark status=hot, alert Ogie immediately\nSTEP 7: Save JVR receipt"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -373,7 +373,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "TWITTER BOT HEALTH CHECK \u2014 Verify twitter-bot.js is running:\n\nSTEP 1: Check /data/logs/twitter-bot.log last modified time \u2014 if older than 60 minutes, bot may be stuck\nSTEP 2: tail -5 /data/logs/twitter-bot.log \u2014 check for errors or crash signatures\nSTEP 3: If bot appears stuck or crashed:\n  - Kill existing process: pkill -f twitter-bot.js\n  - Restart: cd /opt/buzz-twitter-bot && nohup node twitter-bot.js >> /data/logs/twitter-bot.log 2>&1 &\n  - Alert Ogie: 'Twitter bot restarted'\nSTEP 4: Log health status\nSTEP 5: Save JVR receipt category: system"
+        "text": "TWITTER BOT HEALTH CHECK — Verify twitter-bot.js is running:\n\nSTEP 1: Check /data/logs/twitter-bot.log last modified time — if older than 60 minutes, bot may be stuck\nSTEP 2: tail -5 /data/logs/twitter-bot.log — check for errors or crash signatures\nSTEP 3: If bot appears stuck or crashed:\n  - Kill existing process: pkill -f twitter-bot.js\n  - Restart: cd /opt/buzz-twitter-bot && nohup node twitter-bot.js >> /data/logs/twitter-bot.log 2>&1 &\n  - Alert Ogie: 'Twitter bot restarted'\nSTEP 4: Log health status\nSTEP 5: Save JVR receipt category: system"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -393,7 +393,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "SCAN HISTORY CLEANUP \u2014 Trim old scan history files to prevent storage bloat:\n\nSTEP 1: Check /data/workspace/twitter-scan-history.json \u2014 if > 500 entries, keep only last 200\nSTEP 2: Check /data/workspace/twitter-replied.json \u2014 if > 1000 entries, keep only last 500\nSTEP 3: Check /data/workspace/memory/receipts/ \u2014 if total receipts > 200, archive oldest 100 to /data/workspace/memory/receipts/archive/\nSTEP 4: Log cleanup summary\nSTEP 5: Save JVR receipt category: system"
+        "text": "SCAN HISTORY CLEANUP — Trim old scan history files to prevent storage bloat:\n\nSTEP 1: Check /data/workspace/twitter-scan-history.json — if > 500 entries, keep only last 200\nSTEP 2: Check /data/workspace/twitter-replied.json — if > 1000 entries, keep only last 500\nSTEP 3: Check /data/workspace/memory/receipts/ — if total receipts > 200, archive oldest 100 to /data/workspace/memory/receipts/archive/\nSTEP 4: Log cleanup summary\nSTEP 5: Save JVR receipt category: system"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -413,7 +413,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "NANSEN SMART MONEY CHECK \u2014 Layer 5 intelligence on pipeline tokens:\n\nSTEP 1: Load HOT and QUALIFIED tokens from /data/workspace/memory/pipeline/\nSTEP 2: For each token CA, check Nansen smart money flow via x402 paid access\nUse: NANSEN_X402_WALLET_KEY env var for payment, NANSEN_SCORE_THRESHOLD=65, daily budget $0.50\nSTEP 3: Flag tokens with smart money inflow as SMART_MONEY_CONFIRMED\nSTEP 4: Update pipeline files with Nansen data\nSTEP 5: If smart money confirmed on a 70+ token: send Telegram alert to Ogie\nSTEP 6: Save JVR receipt"
+        "text": "NANSEN SMART MONEY CHECK — Layer 5 intelligence on pipeline tokens:\n\nSTEP 1: Load HOT and QUALIFIED tokens from /data/workspace/memory/pipeline/\nSTEP 2: For each token CA, check Nansen smart money flow via x402 paid access\nUse: NANSEN_X402_WALLET_KEY env var for payment, NANSEN_SCORE_THRESHOLD=65, daily budget $0.50\nSTEP 3: Flag tokens with smart money inflow as SMART_MONEY_CONFIRMED\nSTEP 4: Update pipeline files with Nansen data\nSTEP 5: If smart money confirmed on a 70+ token: send Telegram alert to Ogie\nSTEP 6: Save JVR receipt"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -433,7 +433,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "REST API HEALTH CHECK:\n\nSTEP 1: GET http://localhost:3000/api/v1/info\nIf response: log 'REST API \u2705 healthy'\nIf no response: log 'REST API \u274c down \u2014 watchdog should restart'\nSTEP 2: Check /data/logs/api-watchdog.log for recent restart events\nSTEP 3: Save brief JVR receipt (system category) only if API was down"
+        "text": "REST API HEALTH CHECK:\n\nSTEP 1: GET http://localhost:3000/api/v1/info\nIf response: log 'REST API ✅ healthy'\nIf no response: log 'REST API ❌ down — watchdog should restart'\nSTEP 2: Check /data/logs/api-watchdog.log for recent restart events\nSTEP 3: Save brief JVR receipt (system category) only if API was down"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -453,7 +453,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "WEEKLY PIPELINE DIGEST \u2014 Full BD report to Ogie on Telegram:\n\n\ud83d\udcca BUZZ WEEKLY DIGEST \u2014 Week of {date}\n\nPIPELINE SUMMARY:\n- Total tokens scanned this week: N\n- HOT (85+): list all with name, CA (full), score, liquidity, volume\n- QUALIFIED (70-84): count + top 5 details\n- Dropped from pipeline: count + reason\n\nOUTREACH STATUS:\n- Awaiting Ogie approval: list HOT tokens\n- Approved and contacted: any?\n\nMOLTBOOK PERFORMANCE:\n- Posts published: N\n- Total upvotes received: N\n- Comments received: N\n- Best performing post: title + engagement\n\nTWITTER PERFORMANCE:\n- SCAN replies sent: N\n- LIST leads captured: N\n- DEPLOY requests: N\n\nNEXT WEEK FOCUS:\n- Continue scanning + pipeline review\n- Moltbook Tier schedule\n\nRead from /data/workspace/memory/ receipts and pipeline files."
+        "text": "WEEKLY PIPELINE DIGEST — Full BD report to Ogie on Telegram:\n\n📊 BUZZ WEEKLY DIGEST — Week of {date}\n\nPIPELINE SUMMARY:\n- Total tokens scanned this week: N\n- HOT (85+): list all with name, CA (full), score, liquidity, volume\n- QUALIFIED (70-84): count + top 5 details\n- Dropped from pipeline: count + reason\n\nOUTREACH STATUS:\n- Awaiting Ogie approval: list HOT tokens\n- Approved and contacted: any?\n\nMOLTBOOK PERFORMANCE:\n- Posts published: N\n- Total upvotes received: N\n- Comments received: N\n- Best performing post: title + engagement\n\nTWITTER PERFORMANCE:\n- SCAN replies sent: N\n- LIST leads captured: N\n- DEPLOY requests: N\n\nNEXT WEEK FOCUS:\n- Continue scanning + pipeline review\n- Moltbook Tier schedule\n\nRead from /data/workspace/memory/ receipts and pipeline files."
       },
       "state": {
         "nextRunAtMs": 0,
@@ -473,7 +473,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "BSC/BNB CHAIN SCAN \u2014 DexScreener + GeckoTerminal + BNB MCP:\n\nSTEP 1 \u2014 DEXSCREENER BSC DISCOVERY:\nGET https://api.dexscreener.com/token-boosts/top/v1\nFilter: chainId=bsc ONLY. These are paid-promoted BSC tokens with marketing budgets.\n\nSTEP 1b \u2014 GECKOTERMINAL BSC TRENDING:\nGET https://api.geckoterminal.com/api/v2/networks/bsc/pools?sort=h24_volume_usd_liquidity_desc&page=1\nExtract top 10 BSC pools by volume. Combine with DexScreener results.\n\nSTEP 2 \u2014 PAIR DATA:\nFor each BSC token CA from Step 1+1b, call:\nGET https://api.dexscreener.com/latest/dex/search?q={FULL_CONTRACT_ADDRESS}\nFilter chainId=bsc\nExtract: liquidity.usd, volume.h24, priceChange.h24, baseToken.name, baseToken.symbol, baseToken.address (FULL), info.socials\n\nSTEP 2b \u2014 BNB MCP ENRICHMENT (optional):\nFor top 3 candidates, use BNB Chain MCP getTokenInfo for holder count and contract details.\n\nSTEP 3: Filter: liquidity.usd > 10000 AND volume.h24 > 5000\nSTEP 4: Run safety check (ethskills EVM audit + RugCheck) on each survivor\nSTEP 5: Run full scoring pipeline\nSTEP 6: Save QUALIFIED (70+) to /data/workspace/memory/pipeline/ with full CA\nSTEP 7: Save JVR receipt\nSTEP 8: Telegram alert if HOT (85+) found"
+        "text": "BSC/BNB CHAIN SCAN — DexScreener + GeckoTerminal + BNB MCP:\n\nSTEP 1 — DEXSCREENER BSC DISCOVERY:\nGET https://api.dexscreener.com/token-boosts/top/v1\nFilter: chainId=bsc ONLY. These are paid-promoted BSC tokens with marketing budgets.\n\nSTEP 1b — GECKOTERMINAL BSC TRENDING:\nGET https://api.geckoterminal.com/api/v2/networks/bsc/pools?sort=h24_volume_usd_liquidity_desc&page=1\nExtract top 10 BSC pools by volume. Combine with DexScreener results.\n\nSTEP 2 — PAIR DATA:\nFor each BSC token CA from Step 1+1b, call:\nGET https://api.dexscreener.com/latest/dex/search?q={FULL_CONTRACT_ADDRESS}\nFilter chainId=bsc\nExtract: liquidity.usd, volume.h24, priceChange.h24, baseToken.name, baseToken.symbol, baseToken.address (FULL), info.socials\n\nSTEP 2b — BNB MCP ENRICHMENT (optional):\nFor top 3 candidates, use BNB Chain MCP getTokenInfo for holder count and contract details.\n\nSTEP 3: Filter: liquidity.usd > 10000 AND volume.h24 > 5000\nSTEP 4: Run safety check (ethskills EVM audit + RugCheck) on each survivor\nSTEP 5: Run full scoring pipeline\nSTEP 6: Save QUALIFIED (70+) to /data/workspace/memory/pipeline/ with full CA\nSTEP 7: Save JVR receipt\nSTEP 8: Telegram alert if HOT (85+) found"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -493,7 +493,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "BSC/BNB CHAIN SCAN \u2014 DexScreener + GeckoTerminal + BNB MCP:\n\nSTEP 1 \u2014 DEXSCREENER BSC DISCOVERY:\nGET https://api.dexscreener.com/token-boosts/top/v1\nFilter: chainId=bsc ONLY. These are paid-promoted BSC tokens with marketing budgets.\n\nSTEP 1b \u2014 GECKOTERMINAL BSC TRENDING:\nGET https://api.geckoterminal.com/api/v2/networks/bsc/pools?sort=h24_volume_usd_liquidity_desc&page=1\nExtract top 10 BSC pools by volume. Combine with DexScreener results.\n\nSTEP 2 \u2014 PAIR DATA:\nFor each BSC token CA from Step 1+1b, call:\nGET https://api.dexscreener.com/latest/dex/search?q={FULL_CONTRACT_ADDRESS}\nFilter chainId=bsc\nExtract: liquidity.usd, volume.h24, priceChange.h24, baseToken.name, baseToken.symbol, baseToken.address (FULL), info.socials\n\nSTEP 2b \u2014 BNB MCP ENRICHMENT (optional):\nFor top 3 candidates, use BNB Chain MCP getTokenInfo for holder count and contract details.\n\nSTEP 3: Filter: liquidity.usd > 10000 AND volume.h24 > 5000\nSTEP 4: Run safety check (ethskills EVM audit + RugCheck) on each survivor\nSTEP 5: Run full scoring pipeline\nSTEP 6: Save QUALIFIED (70+) to /data/workspace/memory/pipeline/ with full CA\nSTEP 7: Save JVR receipt\nSTEP 8: Telegram alert if HOT (85+) found"
+        "text": "BSC/BNB CHAIN SCAN — DexScreener + GeckoTerminal + BNB MCP:\n\nSTEP 1 — DEXSCREENER BSC DISCOVERY:\nGET https://api.dexscreener.com/token-boosts/top/v1\nFilter: chainId=bsc ONLY. These are paid-promoted BSC tokens with marketing budgets.\n\nSTEP 1b — GECKOTERMINAL BSC TRENDING:\nGET https://api.geckoterminal.com/api/v2/networks/bsc/pools?sort=h24_volume_usd_liquidity_desc&page=1\nExtract top 10 BSC pools by volume. Combine with DexScreener results.\n\nSTEP 2 — PAIR DATA:\nFor each BSC token CA from Step 1+1b, call:\nGET https://api.dexscreener.com/latest/dex/search?q={FULL_CONTRACT_ADDRESS}\nFilter chainId=bsc\nExtract: liquidity.usd, volume.h24, priceChange.h24, baseToken.name, baseToken.symbol, baseToken.address (FULL), info.socials\n\nSTEP 2b — BNB MCP ENRICHMENT (optional):\nFor top 3 candidates, use BNB Chain MCP getTokenInfo for holder count and contract details.\n\nSTEP 3: Filter: liquidity.usd > 10000 AND volume.h24 > 5000\nSTEP 4: Run safety check (ethskills EVM audit + RugCheck) on each survivor\nSTEP 5: Run full scoring pipeline\nSTEP 6: Save QUALIFIED (70+) to /data/workspace/memory/pipeline/ with full CA\nSTEP 7: Save JVR receipt\nSTEP 8: Telegram alert if HOT (85+) found"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -613,7 +613,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "DEXSCREENER BOOST SCAN (supplemental):\n\nSTEP 1: GET https://api.dexscreener.com/token-boosts/latest/v1 \u2014 get latest boosted tokens (NOT top, latest = newly boosted = early signals)\nSTEP 2: GET https://api.dexscreener.com/token-boosts/top/v1 \u2014 compare with top for momentum direction\nSTEP 3: For tokens in latest-but-not-top: these are NEWLY boosted (early signal) \u2014 prioritize\nSTEP 4: For each new token CA: GET /latest/dex/search?q={CA}\nSTEP 5: Filter liquidity > 10000 AND volume > 5000\nSTEP 6: Quick score (scanner + safety only, skip full pipeline for speed)\nSTEP 7: If score > 60: add to WATCH list. If > 70: add to pipeline and alert Ogie.\nSTEP 8: Save JVR receipt"
+        "text": "DEXSCREENER BOOST SCAN (supplemental):\n\nSTEP 1: GET https://api.dexscreener.com/token-boosts/latest/v1 — get latest boosted tokens (NOT top, latest = newly boosted = early signals)\nSTEP 2: GET https://api.dexscreener.com/token-boosts/top/v1 — compare with top for momentum direction\nSTEP 3: For tokens in latest-but-not-top: these are NEWLY boosted (early signal) — prioritize\nSTEP 4: For each new token CA: GET /latest/dex/search?q={CA}\nSTEP 5: Filter liquidity > 10000 AND volume > 5000\nSTEP 6: Quick score (scanner + safety only, skip full pipeline for speed)\nSTEP 7: If score > 60: add to WATCH list. If > 70: add to pipeline and alert Ogie.\nSTEP 8: Save JVR receipt"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -633,7 +633,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "MORNING PIPELINE REVIEW (08:00 WIB):\n\nReview overnight scan results and pipeline status:\n1. Load all pipeline tokens added in last 8h\n2. Summarize to Ogie: HOT count, QUALIFIED count, top prospect details\n3. Flag any tokens needing Ogie approval for outreach\n4. Check if any WATCH tokens crossed 70+ threshold\n5. Highlight any that crossed 85+ overnight (HOT \u2014 urgent action)\nFormat: clean Telegram message, easy to read on mobile\nSave JVR receipt"
+        "text": "MORNING PIPELINE REVIEW (08:00 WIB):\n\nReview overnight scan results and pipeline status:\n1. Load all pipeline tokens added in last 8h\n2. Summarize to Ogie: HOT count, QUALIFIED count, top prospect details\n3. Flag any tokens needing Ogie approval for outreach\n4. Check if any WATCH tokens crossed 70+ threshold\n5. Highlight any that crossed 85+ overnight (HOT — urgent action)\nFormat: clean Telegram message, easy to read on mobile\nSave JVR receipt"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -693,7 +693,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "CRON HEALTH CHECK:\n\nVerify all critical systems are operational:\n1. Check /data/logs/api.log last modified \u2014 REST API alive?\n2. Check /data/logs/twitter-bot.log last modified \u2014 Twitter Bot alive?\n3. Check /data/logs/acp-serve.log last modified \u2014 ACP Seller alive?\n4. Check last receipt in /data/workspace/memory/receipts/ \u2014 scans running?\n5. Report status summary to Ogie via Telegram\nFormat: \ud83d\udc1d System Health | API: \u2705/\u274c | Twitter: \u2705/\u274c | ACP: \u2705/\u274c | Last Scan: {time}\nSave JVR receipt category: system"
+        "text": "CRON HEALTH CHECK:\n\nVerify all critical systems are operational:\n1. Check /data/logs/api.log last modified — REST API alive?\n2. Check /data/logs/twitter-bot.log last modified — Twitter Bot alive?\n3. Check /data/logs/acp-serve.log last modified — ACP Seller alive?\n4. Check last receipt in /data/workspace/memory/receipts/ — scans running?\n5. Report status summary to Ogie via Telegram\nFormat: 🐝 System Health | API: ✅/❌ | Twitter: ✅/❌ | ACP: ✅/❌ | Last Scan: {time}\nSave JVR receipt category: system"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -753,7 +753,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "GECKOTERMINAL SCAN (backup discovery source):\n\nSTEP 1: GET https://api.geckoterminal.com/api/v2/networks/trending_pools \u2014 get trending pools\nSTEP 2: GET https://api.geckoterminal.com/api/v2/networks/solana/pools?sort=h24_volume_usd_liquidity_desc&page=1 \u2014 top Solana by volume\nSTEP 3: GET https://api.geckoterminal.com/api/v2/networks/base/pools?sort=h24_volume_usd_liquidity_desc&page=1 \u2014 top Base by volume\nSTEP 4: GET https://api.geckoterminal.com/api/v2/networks/bsc/pools?sort=h24_volume_usd_liquidity_desc&page=1 \u2014 top BSC by volume\nSTEP 5: Cross-reference any new tokens not already in today's scan results\nSTEP 6: Run filter (liquidity > 10K, volume > 5K) + quick score on new candidates\nSTEP 7: Add any 70+ to pipeline, save JVR receipt"
+        "text": "GECKOTERMINAL SCAN (backup discovery source):\n\nSTEP 1: GET https://api.geckoterminal.com/api/v2/networks/trending_pools — get trending pools\nSTEP 2: GET https://api.geckoterminal.com/api/v2/networks/solana/pools?sort=h24_volume_usd_liquidity_desc&page=1 — top Solana by volume\nSTEP 3: GET https://api.geckoterminal.com/api/v2/networks/base/pools?sort=h24_volume_usd_liquidity_desc&page=1 — top Base by volume\nSTEP 4: GET https://api.geckoterminal.com/api/v2/networks/bsc/pools?sort=h24_volume_usd_liquidity_desc&page=1 — top BSC by volume\nSTEP 5: Cross-reference any new tokens not already in today's scan results\nSTEP 6: Run filter (liquidity > 10K, volume > 5K) + quick score on new candidates\nSTEP 7: Add any 70+ to pipeline, save JVR receipt"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -793,7 +793,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "BANKR LLM CREDIT CHECK (03:00 WIB daily):\n\nCheck Bankr LLM Gateway credit balance:\nGET https://llm.bankr.bot/v1/credits\nHeader: Authorization: Bearer {BANKR_LLM_KEY}\nIf balance < $5: alert Ogie 'Bankr LLM credits low \u2014 top up needed'\nIf balance < $1: alert URGENT\nAlso check BANKR_API_KEY (partner) balance\nReport: current balance, estimated days remaining at current burn rate\nSave JVR receipt category: system"
+        "text": "BANKR LLM CREDIT CHECK (03:00 WIB daily):\n\nCheck Bankr LLM Gateway credit balance:\nGET https://llm.bankr.bot/v1/credits\nHeader: Authorization: Bearer {BANKR_LLM_KEY}\nIf balance < $5: alert Ogie 'Bankr LLM credits low — top up needed'\nIf balance < $1: alert URGENT\nAlso check BANKR_API_KEY (partner) balance\nReport: current balance, estimated days remaining at current burn rate\nSave JVR receipt category: system"
       },
       "state": {
         "nextRunAtMs": 0,
@@ -813,7 +813,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "text": "BITGET LISTING INTEL \u2014 Competitive CEX intelligence:\n\nSTEP 1 \u2014 NEW LISTINGS:\nGET https://api.bitget.com/api/v2/public/annoucements?annType=coin_listings&language=en_US&limit=10\nNo auth needed. Extract: annTitle, annUrl, cTime for each listing announcement.\n\nSTEP 2 \u2014 DELISTINGS (avoid these):\nGET https://api.bitget.com/api/v2/public/annoucements?annType=symbol_delisting&language=en_US&limit=10\nIf any token in our pipeline matches a delisting: flag IMMEDIATELY, alert Ogie, pause outreach.\n\nSTEP 3 \u2014 CROSS-REFERENCE PIPELINE:\nFor each new Bitget listing token:\n- Check if already in SolCex pipeline: if yes, boost score +10 (CEX_VALIDATED)\n- Check if NOT in pipeline: potential BD lead (already CEX-approved, easier sell for SolCex)\n- For new leads: GET https://api.dexscreener.com/latest/dex/search?q={TOKEN_SYMBOL}\n- Filter for Solana/Base/BSC chains only\n- If liquidity > 10K and volume > 5K: add to pipeline as BITGET_CROSSLIST prospect\n\nSTEP 4 \u2014 TELEGRAM ALERT:\nSend summary to Ogie: new Bitget listings found, any pipeline matches, any new leads.\n\nSTEP 5 \u2014 JVR RECEIPT:\nSave receipt with: listings_found, delistings_found, pipeline_matches, new_leads_added."
+        "text": "BITGET LISTING INTEL — Competitive CEX intelligence:\n\nSTEP 1 — NEW LISTINGS:\nGET https://api.bitget.com/api/v2/public/annoucements?annType=coin_listings&language=en_US&limit=10\nNo auth needed. Extract: annTitle, annUrl, cTime for each listing announcement.\n\nSTEP 2 — DELISTINGS (avoid these):\nGET https://api.bitget.com/api/v2/public/annoucements?annType=symbol_delisting&language=en_US&limit=10\nIf any token in our pipeline matches a delisting: flag IMMEDIATELY, alert Ogie, pause outreach.\n\nSTEP 3 — CROSS-REFERENCE PIPELINE:\nFor each new Bitget listing token:\n- Check if already in SolCex pipeline: if yes, boost score +10 (CEX_VALIDATED)\n- Check if NOT in pipeline: potential BD lead (already CEX-approved, easier sell for SolCex)\n- For new leads: GET https://api.dexscreener.com/latest/dex/search?q={TOKEN_SYMBOL}\n- Filter for Solana/Base/BSC chains only\n- If liquidity > 10K and volume > 5K: add to pipeline as BITGET_CROSSLIST prospect\n\nSTEP 4 — TELEGRAM ALERT:\nSend summary to Ogie: new Bitget listings found, any pipeline matches, any new leads.\n\nSTEP 5 — JVR RECEIPT:\nSave receipt with: listings_found, delistings_found, pipeline_matches, new_leads_added."
       },
       "state": {
         "nextRunAtMs": 0,
@@ -834,6 +834,46 @@
       "payload": {
         "kind": "systemEvent",
         "text": "SKILL REFLECTION — Learning Loop (every 12h):\n\nReview pipeline patterns and auto-create/patch skills.\n\nTrigger via API: POST /api/v1/skills/reflect/trigger\n\nThe reflection engine analyzes:\n1. Scoring drift — tokens consistently scoring higher/lower\n2. Safety failures — repeated safety check failures\n3. Outreach effectiveness — reply rates, bounce rates\n4. Tool failures — recurring API/tool errors\n5. Pipeline velocity — stage bottlenecks\n\nFor each detected pattern, creates or patches a learned skill in /data/workspace/skills/learned/.\nCheck status: GET /api/v1/skills/reflect/status\n\nSave JVR receipt category: learning-loop"
+      },
+      "state": {
+        "nextRunAtMs": 0,
+        "lastStatus": "pending",
+        "consecutiveErrors": 0
+      }
+    },
+    {
+      "id": "backtest-weekly",
+      "name": "backtest-weekly",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 3 * * 0"
+      },
+      "sessionTarget": "main",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "systemEvent",
+        "text": "BACKTEST WEEKLY — Hedge Brain alpha validation (every Sunday 03:00 UTC):\n\nSTEP 1 — QUERY SCORED TOKENS:\nGet all tokens scored in the last 7 days (at least 3 days ago) from token_scores table.\n\nSTEP 2 — FETCH CURRENT PRICES:\nFor each token, GET https://api.dexscreener.com/latest/dex/tokens/{address}\nExtract current priceUsd from highest-liquidity pair.\n\nSTEP 3 — COMPUTE ACCURACY:\nFor each token: compare score signal (bullish if >=70, bearish if <50) with price movement.\nBullish + price up = TRUE POSITIVE. Bullish + price down = FALSE POSITIVE.\nBearish + price down = TRUE NEGATIVE. Bearish + price up = FALSE NEGATIVE.\n\nSTEP 4 — PER-AGENT ACCURACY:\nEvaluate each sub-agent and persona agent's individual signal correctness.\nFind best-performing agent and persona.\n\nSTEP 5 — AGGREGATE SUMMARY:\nCompute: accuracy_rate, precision_rate, avg_return_bullish, avg_return_bearish.\nStore results in backtest_results and backtest_summaries tables.\n\nSTEP 6 — JVR RECEIPT:\nSave receipt: BZZ-BACKTEST-{YYMMDD}-{N} with total tokens, accuracy rate, best agent.\n\nTrigger manually: POST /api/v1/backtest/run {days_back: 7, check_after_days: 3}\nCheck latest: GET /api/v1/backtest/latest"
+      },
+      "state": {
+        "nextRunAtMs": 0,
+        "lastStatus": "pending",
+        "consecutiveErrors": 0
+      }
+    },
+    {
+      "id": "twitter-brain-scan",
+      "name": "twitter-brain-scan",
+      "enabled": true,
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 */2 * * *"
+      },
+      "sessionTarget": "main",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "systemEvent",
+        "text": "TWITTER BRAIN SCAN — Autonomous BD via Twitter (every 2h):\n\nSTEP 1 — GROK X_SEARCH:\nScan keywords via Grok x_search API (FREE): 'CEX listing', 'exchange listing', 'listing partnership', 'token launch Base', 'deploy token', 'new token project team', '$5M mcap DEX only', 'just launched Solana/Base/BSC'.\n\nSTEP 2 — SERPER CROSS-REFERENCE:\nCross-reference top keywords via Serper API (FREE) for Twitter/X search results.\n\nSTEP 3 — FILTER (L1-L10):\nMust have contract address OR DexScreener/CoinGecko link. Must be 500+ followers. Must NOT be reply chain. Must NOT be already in pipeline. Must NOT be spam.\n\nSTEP 4 — CONTRACT EXTRACTION:\nExtract contract addresses (Solana base58 / EVM 0x). Verify via DexScreener. Filter: liquidity > $10K, volume > $5K.\n\nSTEP 5 — PIPELINE ROUTING:\nRoute verified tokens to existing 5 sub-agent scoring pipeline.\n\nSTEP 6 — REPLY QUEUE:\nGenerate contextual BD outreach replies (max 12/day). Rate limit: 30s between replies.\n\nSTEP 7 — AUTONOMOUS REPLIES (if TWEET_AUTO=true):\nPost replies via X API pay-per-use. Log every reply to JVR.\n\nSTEP 8 — SCAN SUMMARY TWEET:\nPost scan summary tweet if tokens were routed.\n\nTrigger manually: POST /api/v1/twitter/brain/scan\nCheck status: GET /api/v1/twitter/brain/status"
       },
       "state": {
         "nextRunAtMs": 0,
