@@ -77,6 +77,118 @@ const BUZZ_FOOTER = `\n\n🐝 Buzz BD Agent\nBuilt on OpenClaw · Hosted on Agen
 const R013_AUTONOMOUS_OPS = ['bankr_deploy'];
 const R013_APPROVAL_REQUIRED = ['transfer_tokens', 'buy_token_execute'];
 
+// ─── Twitter TOS Compliance ─────────────────────────
+const BANNED_FINANCIAL = ['guaranteed returns', 'moon', '100x', 'will pump', 'buy now', 'not financial advice', 'dyor'];
+const BANNED_ENGAGEMENT = ['retweet', 'like this', 'follow for follow', 'tag friends'];
+const DEPLOY_RISK_DISCLAIMER = 'This deploys a real smart contract on Base. Trading involves risk.';
+
+// Track posted texts for uniqueness (in-memory, reset on restart — file-based dedup via seen-tweets)
+const _postedTexts = new Set();
+
+/**
+ * Twitter TOS compliance validator — called BEFORE every postTweet/postReply
+ * Rules 1-11 per X TOS + BD agent safety
+ */
+function validateTweetCompliance(text, tweetId, username) {
+  // RULE 1: Never @mention more than 2 accounts per tweet
+  const mentions = (text.match(/@\w+/g) || []);
+  const uniqueMentions = new Set(mentions.map(m => m.toLowerCase()));
+  if (uniqueMentions.size > 2) {
+    return { valid: false, reason: `R1: Too many @mentions (${uniqueMentions.size} > 2)` };
+  }
+
+  // RULE 6: Banned financial language
+  const lower = text.toLowerCase();
+  for (const phrase of BANNED_FINANCIAL) {
+    if (lower.includes(phrase.toLowerCase())) {
+      return { valid: false, reason: `R6: Banned financial language: "${phrase}"` };
+    }
+  }
+
+  // RULE 9: No engagement farming language
+  for (const phrase of BANNED_ENGAGEMENT) {
+    if (lower.includes(phrase.toLowerCase())) {
+      return { valid: false, reason: `R9: Engagement farming language: "${phrase}"` };
+    }
+  }
+
+  // RULE 11: Scores presented as "AI analysis" never "investment advice"
+  if (lower.includes('investment advice')) {
+    return { valid: false, reason: 'R11: Contains "investment advice" — must use "AI analysis"' };
+  }
+
+  // RULE 2: Never post identical text — check in-memory set
+  const textHash = simpleHash(text);
+  if (_postedTexts.has(textHash)) {
+    return { valid: false, reason: 'R2: Duplicate text detected' };
+  }
+
+  // RULE 7: Never reply to same tweet ID twice
+  if (tweetId) {
+    const repliedFile = path.join(TWITTER_DATA_DIR, 'replied-tweets.json');
+    try {
+      if (fs.existsSync(repliedFile)) {
+        const replied = JSON.parse(fs.readFileSync(repliedFile, 'utf8'));
+        if (replied.includes(tweetId)) {
+          return { valid: false, reason: `R7: Already replied to tweet ${tweetId}` };
+        }
+      }
+    } catch {}
+  }
+
+  // RULE 8: Never reply to same username more than once per 24h
+  if (username) {
+    const userFile = path.join(TWITTER_DATA_DIR, 'replied-users-24h.json');
+    try {
+      if (fs.existsSync(userFile)) {
+        const data = JSON.parse(fs.readFileSync(userFile, 'utf8'));
+        const today = new Date().toISOString().slice(0, 10);
+        if (data.date === today && data.users && data.users.includes(username.toLowerCase())) {
+          return { valid: false, reason: `R8: Already replied to @${username} today` };
+        }
+      }
+    } catch {}
+  }
+
+  return { valid: true, reason: 'ok' };
+}
+
+/**
+ * Record a successful post for TOS tracking (dedup, replied tweets, replied users)
+ */
+function recordPostedTweet(text, tweetId, username) {
+  _postedTexts.add(simpleHash(text));
+
+  ensureDir(TWITTER_DATA_DIR);
+
+  // Track replied tweet IDs (Rule 7)
+  if (tweetId) {
+    const repliedFile = path.join(TWITTER_DATA_DIR, 'replied-tweets.json');
+    let replied = [];
+    try {
+      if (fs.existsSync(repliedFile)) replied = JSON.parse(fs.readFileSync(repliedFile, 'utf8'));
+    } catch {}
+    replied.push(tweetId);
+    if (replied.length > 5000) replied = replied.slice(-5000);
+    fs.writeFileSync(repliedFile, JSON.stringify(replied));
+  }
+
+  // Track replied usernames per day (Rule 8)
+  if (username) {
+    const userFile = path.join(TWITTER_DATA_DIR, 'replied-users-24h.json');
+    const today = new Date().toISOString().slice(0, 10);
+    let data = { date: today, users: [] };
+    try {
+      if (fs.existsSync(userFile)) {
+        data = JSON.parse(fs.readFileSync(userFile, 'utf8'));
+        if (data.date !== today) data = { date: today, users: [] };
+      }
+    } catch {}
+    data.users.push(username.toLowerCase());
+    fs.writeFileSync(userFile, JSON.stringify(data));
+  }
+}
+
 // ─── BD Keywords (Section 3 — SCAN layer) ───────────
 const SCAN_KEYWORDS = [
   'looking for CEX listing',
@@ -764,7 +876,9 @@ Name: [your token name]
 Ticker: [SYMBOL]
 Description: [what it does]
 
-Or DM @HidayahAnka1 for help.${BUZZ_FOOTER}`;
+Or DM @HidayahAnka1 for help.
+
+${DEPLOY_RISK_DISCLAIMER}${BUZZ_FOOTER}`;
 }
 
 // ═════════════════════════════════════════════════════
@@ -794,7 +908,7 @@ async function executeReplyQueue(queue, scanId) {
 
       if (tweetId) {
         // Have tweet ID — post as reply
-        result = await postReply(tweetId, item.replyText, scanId);
+        result = await postReply(tweetId, item.replyText, scanId, item.username);
       } else {
         // No tweet ID — post as standalone tweet mentioning the handle
         console.log(`[${scanId}] ⚠️ No tweet ID for @${item.username} — posting standalone mention`);
@@ -837,14 +951,24 @@ async function executeReplyQueue(queue, scanId) {
 /**
  * Post a reply tweet via X API v2 (OAuth 1.0a user authentication)
  */
-async function postReply(inReplyToId, text, scanId) {
+async function postReply(inReplyToId, text, scanId, username) {
+  // TOS compliance check before posting
+  const compliance = validateTweetCompliance(text, inReplyToId, username);
+  if (!compliance.valid) {
+    console.log(`[TB-TOS] ❌ Blocked: ${compliance.reason}`);
+    return { success: false, error: `TOS blocked: ${compliance.reason}` };
+  }
+
+  // RULE 2: Append scanId + timestamp for uniqueness
+  const uniqueText = `${text}\n\n[${scanId || 'TB'}-${Date.now()}]`;
+
   const url = 'https://api.x.com/2/tweets';
   const body = JSON.stringify({
-    text,
+    text: uniqueText,
     reply: { in_reply_to_tweet_id: inReplyToId },
   });
 
-  console.log(`[${scanId}] 📤 postReply attempt — replying to tweet ${inReplyToId}, text: "${text.slice(0, 80)}..."`);
+  console.log(`[${scanId}] 📤 postReply attempt — replying to tweet ${inReplyToId}, text: "${uniqueText.slice(0, 80)}..."`);
 
   try {
     const authHeader = getOAuthHeader(url, 'POST');
@@ -866,6 +990,7 @@ async function postReply(inReplyToId, text, scanId) {
 
     const data = await res.json();
     console.log(`[${scanId}] ✅ postReply SUCCESS — new tweet ID: ${data.data?.id}`);
+    recordPostedTweet(uniqueText, inReplyToId, username);
     return {
       success: true,
       tweetId: data.data?.id,
@@ -885,10 +1010,20 @@ async function postTweet(text, scanId) {
     return { success: false, error: 'OAuth 1.0a credentials not set (X_API_KEY/X_API_SECRET/X_ACCESS_TOKEN/X_ACCESS_SECRET)' };
   }
 
-  const url = 'https://api.x.com/2/tweets';
-  const body = JSON.stringify({ text });
+  // TOS compliance check before posting
+  const compliance = validateTweetCompliance(text, null, null);
+  if (!compliance.valid) {
+    console.log(`[TB-TOS] ❌ Blocked: ${compliance.reason}`);
+    return { success: false, error: `TOS blocked: ${compliance.reason}` };
+  }
 
-  console.log(`[${scanId || 'TWEET'}] 📤 postTweet attempt — text: "${text.slice(0, 80)}..."`);
+  // RULE 2: Append scanId + timestamp for uniqueness
+  const uniqueText = `${text}\n\n[${scanId || 'TB'}-${Date.now()}]`;
+
+  const url = 'https://api.x.com/2/tweets';
+  const body = JSON.stringify({ text: uniqueText });
+
+  console.log(`[${scanId || 'TWEET'}] 📤 postTweet attempt — text: "${uniqueText.slice(0, 80)}..."`);
 
   try {
     const authHeader = getOAuthHeader(url, 'POST');
@@ -910,6 +1045,7 @@ async function postTweet(text, scanId) {
 
     const data = await res.json();
     console.log(`[${scanId || 'TWEET'}] ✅ postTweet SUCCESS — new tweet ID: ${data.data?.id}`);
+    recordPostedTweet(uniqueText, null, null);
     return { success: true, tweetId: data.data?.id };
   } catch (err) {
     console.log(`[${scanId || 'TWEET'}] ❌ postTweet ERROR — ${err.message}`);
@@ -1080,7 +1216,9 @@ ${tokenName} (${tokenSymbol}) is LIVE on Base
 💧 Pool: Uniswap v4
 💰 57% of trading fees \u2192 your wallet
 
-Trade now on Uniswap or any Base DEX.${BUZZ_FOOTER}`;
+Trade now on Uniswap or any Base DEX.
+
+${DEPLOY_RISK_DISCLAIMER}${BUZZ_FOOTER}`;
 }
 
 /**
@@ -1335,6 +1473,7 @@ module.exports = {
   buildDeploySuccessReply,
   bankrDeploy,
   r013CheckAutonomy,
+  validateTweetCompliance,
   filterTweets,
   extractContracts,
   SCAN_KEYWORDS,
