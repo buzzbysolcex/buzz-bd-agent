@@ -220,6 +220,72 @@ function runMigrations() {
       `
     },
 
+    // ─── Migration 011: Hedge Brain — Persona Signals + Backtest (v7.4.0) ───
+    {
+      name: '011_hedge_brain',
+      sql: `
+        CREATE TABLE IF NOT EXISTS persona_signals (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          token_address TEXT NOT NULL,
+          chain TEXT NOT NULL,
+          symbol TEXT,
+          persona_name TEXT NOT NULL,
+          signal TEXT NOT NULL CHECK(signal IN ('bullish', 'bearish', 'neutral')),
+          confidence REAL NOT NULL CHECK(confidence >= 0.0 AND confidence <= 1.0),
+          reasoning TEXT,
+          bd_recommendation TEXT CHECK(bd_recommendation IN ('outreach_now', 'monitor', 'skip')),
+          raw_score INTEGER,
+          model_used TEXT,
+          scored_at TEXT DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_persona_token ON persona_signals(token_address, chain);
+        CREATE INDEX IF NOT EXISTS idx_persona_name ON persona_signals(persona_name);
+        CREATE INDEX IF NOT EXISTS idx_persona_signal ON persona_signals(signal);
+
+        CREATE TABLE IF NOT EXISTS backtest_results (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          run_id TEXT NOT NULL,
+          token_address TEXT NOT NULL,
+          chain TEXT NOT NULL,
+          symbol TEXT,
+          score_at_time INTEGER,
+          price_at_score REAL,
+          price_at_check REAL,
+          price_change_pct REAL,
+          days_elapsed INTEGER,
+          signal_correct INTEGER,
+          sub_agent_accuracy_json TEXT,
+          persona_accuracy_json TEXT,
+          scored_at TEXT,
+          checked_at TEXT DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_backtest_run ON backtest_results(run_id);
+        CREATE INDEX IF NOT EXISTS idx_backtest_token ON backtest_results(token_address);
+
+        CREATE TABLE IF NOT EXISTS backtest_summaries (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          run_id TEXT NOT NULL,
+          total_tokens INTEGER,
+          accuracy_rate REAL,
+          precision_rate REAL,
+          avg_return_bullish REAL,
+          avg_return_bearish REAL,
+          best_agent TEXT,
+          best_persona TEXT,
+          period_start TEXT,
+          period_end TEXT,
+          created_at TEXT DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_backtest_summary_run ON backtest_summaries(run_id);
+
+        INSERT OR IGNORE INTO agents (id, name, role, model, status) VALUES
+          ('degen-001', 'degen-agent', 'persona_momentum', 'bankr/gpt-5-nano', 'active'),
+          ('whale-001', 'whale-agent', 'persona_smart_money', 'bankr/gpt-5-nano', 'active'),
+          ('inst-001', 'institutional-agent', 'persona_compliance', 'bankr/claude-haiku-4.5', 'active'),
+          ('comm-001', 'community-agent', 'persona_social', 'bankr/gpt-5-nano', 'active');
+      `
+    },
+
     // ─── Migration 010: Strategic Orchestrator (v7.0) ───
     {
       name: '010_strategic',

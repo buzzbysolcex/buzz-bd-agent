@@ -51,6 +51,11 @@ const ContextEngine = require('./lib/context-engine');
 const DecisionEngine = require('./lib/decision-engine');
 const PlaybookEngine = require('./lib/playbook-engine');
 
+// v7.4.0 Hedge Brain routes
+const pipelineStreamRoutes = require('./routes/pipeline-stream');
+const createPersonaRoutes = require('./routes/personas');
+const createBacktestRoutes = require('./routes/backtest');
+
 const app = express();
 const PORT = process.env.BUZZ_API_PORT || 3000;
 
@@ -334,6 +339,12 @@ async function start() {
 
     // v7.0: Strategy routes (8 endpoints)
     app.use('/api/v1/strategy', apiKeyAuth, strategyRoutes(db, { decisionEngine, playbookEngine, contextEngine }));
+
+    // v7.4.0: Hedge Brain routes (SSE streaming, personas, backtest)
+    app.use('/api/v1/pipeline', pipelineStreamRoutes); // SSE stream (adds /stream under existing /pipeline)
+    app.use('/api/v1/personas', apiKeyAuth, createPersonaRoutes(db));
+    app.use('/api/v1/backtest', apiKeyAuth, createBacktestRoutes(db));
+    console.log('[v7.4.0] ✓ Hedge Brain routes: pipeline/stream, personas, backtest');
 
     // ─── 404 Handler (must be after all route registrations) ───
     app.use((req, res) => {

@@ -1,11 +1,14 @@
 /**
  * Buzz BD Agent — Twitter Bot Routes
- * 
+ *
  * GET  /api/v1/twitter/status           → Bot status + rate limits
  * GET  /api/v1/twitter/stats            → Reply count, engagement metrics
  * GET  /api/v1/twitter/replies          → Recent reply history
  * GET  /api/v1/twitter/leads            → Leads captured via Twitter
  * GET  /api/v1/twitter/routes           → Route breakdown (SCAN/LIST/DEPLOY/TOKEN)
+ * POST /api/v1/twitter/brain/scan       → Trigger Twitter Brain scan manually
+ * GET  /api/v1/twitter/brain/status     → Twitter Brain status + config
+ * GET  /api/v1/twitter/brain/history    → Twitter Brain scan history
  */
 
 const express = require('express');
@@ -107,6 +110,70 @@ router.get('/routes', (req, res) => {
         ? `${((routeCounts.DEPLOY / Math.max(1, routeCounts.SCAN)) * 100).toFixed(1)}%`
         : '0%'
     }
+  });
+});
+
+// ═════════════════════════════════════════════════════
+// TWITTER BRAIN — v7.4.0 Autonomous BD Scanning
+// ═════════════════════════════════════════════════════
+
+const { executeTwitterBrainScan } = require('../cron/twitter-brain-scan');
+const {
+  TWITTER_BRAIN_ENABLED,
+  MAX_REPLIES_DAY: TB_MAX_REPLIES,
+  TWEET_AUTO,
+  SCAN_KEYWORDS,
+} = require('../services/twitter-brain');
+
+// ─── POST /brain/scan — Trigger Twitter Brain scan manually ───
+router.post('/brain/scan', async (req, res) => {
+  try {
+    const requestId = `TB-API-${Date.now()}`;
+    const results = await executeTwitterBrainScan({ requestId });
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: 'twitter_brain_error', message: err.message });
+  }
+});
+
+// ─── GET /brain/status — Twitter Brain config + status ────────
+router.get('/brain/status', (req, res) => {
+  const dailyCount = readJSON(path.join(TWITTER_DATA_DIR, 'daily-count.json'), { date: null, count: 0 });
+  const today = new Date().toISOString().slice(0, 10);
+  const repliesSentToday = dailyCount.date === today ? dailyCount.count : 0;
+
+  const history = readJSON(path.join(TWITTER_DATA_DIR, 'scan-history.json'), []);
+  const lastScan = history.length > 0 ? history[history.length - 1] : null;
+
+  res.json({
+    enabled: TWITTER_BRAIN_ENABLED,
+    tweet_auto: TWEET_AUTO,
+    max_replies_day: TB_MAX_REPLIES,
+    replies_sent_today: repliesSentToday,
+    replies_remaining: Math.max(0, TB_MAX_REPLIES - repliesSentToday),
+    scan_interval: 'every 2 hours (0 */2 * * *)',
+    keywords: SCAN_KEYWORDS,
+    total_scans: history.length,
+    last_scan: lastScan,
+    api_keys_configured: {
+      grok: !!process.env.GROK_API_KEY || !!process.env.XAI_API_KEY,
+      serper: !!process.env.SERPER_API_KEY,
+      x_api_bearer: !!process.env.X_API_BEARER_TOKEN,
+      x_api_key: !!process.env.X_API_KEY,
+    },
+  });
+});
+
+// ─── GET /brain/history — Twitter Brain scan history ──────────
+router.get('/brain/history', (req, res) => {
+  const limit = parseInt(req.query.limit) || 50;
+  const history = readJSON(path.join(TWITTER_DATA_DIR, 'scan-history.json'), []);
+  const recent = history.slice(-limit).reverse();
+
+  res.json({
+    total: history.length,
+    returned: recent.length,
+    scans: recent,
   });
 });
 

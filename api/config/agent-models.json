@@ -1,0 +1,23 @@
+{
+  "default": {
+    "model": "bankr/gpt-5-nano",
+    "provider": "bankr"
+  },
+  "agents": {
+    "scanner-agent": { "model": "bankr/gpt-5-nano" },
+    "safety-agent": { "model": "bankr/gpt-5-nano" },
+    "wallet-agent": { "model": "bankr/gpt-5-nano" },
+    "social-agent": { "model": "bankr/gpt-5-nano" },
+    "scorer-agent": { "model": "bankr/gpt-5-nano" }
+  },
+  "personas": {
+    "degen-agent": { "model": "bankr/gpt-5-nano" },
+    "whale-agent": { "model": "bankr/gpt-5-nano" },
+    "institutional-agent": { "model": "bankr/claude-haiku-4.5" },
+    "community-agent": { "model": "bankr/gpt-5-nano" }
+  },
+  "orchestrator": {
+    "model": "minimax/MiniMax-M2.5",
+    "fallbacks": ["bankr/claude-haiku-4.5", "bankr/gemini-3-flash"]
+  }
+}
