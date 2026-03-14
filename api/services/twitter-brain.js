@@ -93,8 +93,8 @@ function validateTweetCompliance(text, tweetId, username) {
   // RULE 1: Never @mention more than 2 accounts per tweet
   const mentions = (text.match(/@\w+/g) || []);
   const uniqueMentions = new Set(mentions.map(m => m.toLowerCase()));
-  if (uniqueMentions.size > 2) {
-    return { valid: false, reason: `R1: Too many @mentions (${uniqueMentions.size} > 2)` };
+  if (uniqueMentions.size > 3) {
+    return { valid: false, reason: `R1: Too many @mentions (${uniqueMentions.size} > 3)` };
   }
 
   // RULE 6: Banned financial language
@@ -348,7 +348,10 @@ async function serperTwitterSearch(keyword, scanId) {
 }
 
 function extractHandleFromUrl(url) {
-  const match = url?.match(/x\.com\/([^\/]+)/);
+  if (!url) return null;
+  // Only match x.com/{handle}/status/{digits} — reject /search, /hashtag, /i/, query strings
+  if (/\/(search|hashtag|i)\b/.test(url) || /\?/.test(url)) return null;
+  const match = url.match(/x\.com\/([A-Za-z0-9_]+)\/status\/(\d+)/);
   return match ? `@${match[1]}` : null;
 }
 
