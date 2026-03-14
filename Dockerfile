@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ══════════════════════════════════════════════════
 # GLOBAL NPM PACKAGES
 # ══════════════════════════════════════════════════
-RUN npm install -g openclaw@2026.3.7 \
+RUN npm install -g openclaw@2026.3.13 \
     && npm install -g @bankr/cli \
     && npm install -g tsx \
     && npm install -g @bnb-chain/mcp \
