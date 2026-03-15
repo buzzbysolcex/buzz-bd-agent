@@ -61,27 +61,24 @@ jobs:
             set -e
             IMAGE="buzzbd/buzz-bd-agent:latest"
             SERVICE_ID="0780657e32638143a16250c4f12bf867"
-            TENANT_ID="6d51d59f165ed5757f85d2b4a6b1aa0d"
-            CONTAINER="ah-${TENANT_ID}-${SERVICE_ID}"
+            AH_TOKEN=$(cat /root/.ah_deploy_token)
+            AH_API="http://localhost:8080/v1/services/${SERVICE_ID}"
 
             echo ">>> Pulling ${IMAGE}"
             docker pull "${IMAGE}"
 
-            echo ">>> Updating ah database image ref"
+            echo ">>> Updating image in ah"
             sqlite3 /var/lib/ah/ah.db "UPDATE services SET image='${IMAGE}' WHERE id='${SERVICE_ID}';"
 
-            echo ">>> Stopping current container"
-            docker stop "${CONTAINER}" 2>/dev/null || true
-            docker rm "${CONTAINER}" 2>/dev/null || true
+            echo ">>> Restarting service via ah API"
+            curl -sf -X POST -H "Authorization: Bearer ${AH_TOKEN}" "${AH_API}/restart"
+            echo ""
 
-            echo ">>> Restarting ah to recreate container"
-            systemctl restart ah
+            echo ">>> Waiting 90s for boot (entrypoint installs npm packages + starts 9 agents)"
+            sleep 90
 
-            echo ">>> Waiting 60s for boot"
-            sleep 60
-
-            echo ">>> Health check (5 attempts, 15s apart)"
-            for i in 1 2 3 4 5; do
+            echo ">>> Health check (8 attempts, 15s apart)"
+            for i in 1 2 3 4 5 6 7 8; do
               HTTP_CODE=$(curl -s -o /tmp/health.json -w '%{http_code}' http://localhost:3000/api/v1/health)
               if [ "$HTTP_CODE" = "200" ]; then
                 echo "Health check PASSED on attempt $i"
@@ -91,7 +88,7 @@ jobs:
               echo "Attempt $i: HTTP $HTTP_CODE - retrying in 15s..."
               sleep 15
             done
-            echo "HEALTH CHECK FAILED after 5 attempts"
+            echo "HEALTH CHECK FAILED after 8 attempts"
             exit 1
 
       - name: Telegram notify — success
