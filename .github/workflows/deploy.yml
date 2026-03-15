@@ -1,0 +1,130 @@
+name: Build & Deploy to Hetzner
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - 'LICENSE'
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: buzzbd/buzz-bd-agent
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version from package.json
+        id: version
+        run: |
+          VERSION=$(jq -r .version package.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ env.IMAGE_NAME }}:v${{ steps.version.outputs.version }}
+            ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to Hetzner
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 204.168.137.253
+          username: root
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script_stop: true
+          command_timeout: 5m
+          script: |
+            set -e
+            IMAGE="buzzbd/buzz-bd-agent:latest"
+            SERVICE_ID="0780657e32638143a16250c4f12bf867"
+            TENANT_ID="6d51d59f165ed5757f85d2b4a6b1aa0d"
+            CONTAINER="ah-${TENANT_ID}-${SERVICE_ID}"
+
+            echo ">>> Pulling ${IMAGE}"
+            docker pull "${IMAGE}"
+
+            echo ">>> Updating ah database image ref"
+            sqlite3 /var/lib/ah/ah.db "UPDATE services SET image='${IMAGE}' WHERE id='${SERVICE_ID}';"
+
+            echo ">>> Stopping current container"
+            docker stop "${CONTAINER}" 2>/dev/null || true
+            docker rm "${CONTAINER}" 2>/dev/null || true
+
+            echo ">>> Restarting ah to recreate container"
+            systemctl restart ah
+
+            echo ">>> Waiting 60s for boot"
+            sleep 60
+
+            echo ">>> Health check (5 attempts, 15s apart)"
+            for i in 1 2 3 4 5; do
+              HTTP_CODE=$(curl -s -o /tmp/health.json -w '%{http_code}' http://localhost:3000/api/v1/health)
+              if [ "$HTTP_CODE" = "200" ]; then
+                echo "Health check PASSED on attempt $i"
+                cat /tmp/health.json
+                exit 0
+              fi
+              echo "Attempt $i: HTTP $HTTP_CODE - retrying in 15s..."
+              sleep 15
+            done
+            echo "HEALTH CHECK FAILED after 5 attempts"
+            exit 1
+
+      - name: Telegram notify — success
+        if: success()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: |
+          VERSION="v${{ steps.version.outputs.version }}"
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id=950395553 \
+            -d parse_mode=Markdown \
+            -d text="✅ *Buzz ${VERSION} deployed*
+
+          Image: \`buzzbd/buzz-bd-agent:${VERSION}\`
+          Server: 204.168.137.253
+          Health: PASSED
+          Commit: [\`${GITHUB_SHA::7}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+
+          _Auto-deployed via GitHub Actions_"
+
+      - name: Telegram notify — failure
+        if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: |
+          VERSION="v${{ steps.version.outputs.version }}"
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id=950395553 \
+            -d parse_mode=Markdown \
+            -d text="❌ *Buzz ${VERSION} deploy FAILED*
+
+          Server: 204.168.137.253
+          Commit: [\`${GITHUB_SHA::7}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+          Action: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          _Check GitHub Actions logs_"
