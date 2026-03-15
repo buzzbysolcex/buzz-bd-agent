@@ -286,6 +286,37 @@ function runMigrations() {
       `
     },
 
+    // ─── Migration 012: v7.5.0 Bags.fm-First (OKX instruments, listing simulations) ───
+    {
+      name: '012_bags_first',
+      sql: `
+        CREATE TABLE IF NOT EXISTS okx_instruments (
+          instrument_id TEXT PRIMARY KEY,
+          inst_type TEXT, base_ccy TEXT, quote_ccy TEXT,
+          settle_ccy TEXT, ct_val TEXT, ct_mult TEXT,
+          ct_val_ccy TEXT, list_time TEXT, exp_time TEXT,
+          tick_sz TEXT, lot_sz TEXT, min_sz TEXT,
+          ct_type TEXT, alias TEXT, state TEXT,
+          created_at TEXT DEFAULT (datetime('now'))
+        );
+
+        CREATE TABLE IF NOT EXISTS listing_simulations (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          token_address TEXT NOT NULL,
+          chain TEXT NOT NULL,
+          scenario TEXT NOT NULL,
+          persona_results TEXT NOT NULL,
+          consensus TEXT NOT NULL,
+          bullish_count INTEGER,
+          neutral_count INTEGER,
+          bearish_count INTEGER,
+          expected_impact TEXT,
+          created_at TEXT DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_sim_token ON listing_simulations(token_address);
+      `
+    },
+
     // ─── Migration 010: Strategic Orchestrator (v7.0) ───
     {
       name: '010_strategic',

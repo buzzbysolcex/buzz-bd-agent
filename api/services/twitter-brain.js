@@ -189,18 +189,23 @@ function recordPostedTweet(text, tweetId, username) {
   }
 }
 
-// ─── BD Keywords (Section 3 — SCAN layer) ───────────
+// ─── BD Keywords (Section 3 — SCAN layer, v7.5.0 site:x.com prefix) ───
 const SCAN_KEYWORDS = [
-  'looking for CEX listing',
-  'need exchange listing',
-  'listing partnership',
-  'token launch Base',
-  'deploy token',
-  'new token project team',
-  '$5M mcap DEX only',
-  'just launched Solana',
-  'just launched Base',
-  'just launched BSC',
+  // Bags.fm launches (highest BD value)
+  'site:x.com "just launched" contract solana',
+  'site:x.com "new token" launched bags.fm',
+  'site:x.com @BagsApp launched token',
+  'site:x.com "just graduated" bags token',
+  // General BD opportunities
+  'site:x.com "looking for exchange" listing crypto',
+  'site:x.com "CEX listing" token solana',
+  'site:x.com "token launch" solana 2026',
+  'site:x.com "need exchange listing" token',
+  'site:x.com "looking for CEX" crypto project',
+  'site:x.com "list our token" exchange',
+  // Multi-chain coverage
+  'site:x.com "new solana token" pump OR bags',
+  'site:x.com "launched on base" token contract',
 ];
 
 // ─── Contract Address Patterns ──────────────────────
@@ -314,7 +319,7 @@ async function serperTwitterSearch(keyword, scanId) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      q: `site:x.com "${keyword}"`,
+      q: keyword.startsWith('site:') ? keyword : `site:x.com "${keyword}"`,
       num: 10,
       tbs: 'qdr:d' // last 24 hours
     }),

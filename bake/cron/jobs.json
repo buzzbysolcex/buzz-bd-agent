@@ -107,7 +107,7 @@
       "enabled": true,
       "schedule": {
         "kind": "cron",
-        "expr": "0 */4 * * *"
+        "expr": "0 */6 * * *"
       },
       "sessionTarget": "main",
       "wakeMode": "now",
@@ -147,7 +147,7 @@
       "enabled": true,
       "schedule": {
         "kind": "cron",
-        "expr": "0 */4 * * *"
+        "expr": "0 */6 * * *"
       },
       "sessionTarget": "main",
       "wakeMode": "now",
@@ -367,7 +367,7 @@
       "enabled": true,
       "schedule": {
         "kind": "cron",
-        "expr": "0 */3 * * *"
+        "expr": "0 */6 * * *"
       },
       "sessionTarget": "main",
       "wakeMode": "now",
@@ -464,7 +464,7 @@
     {
       "id": "scan-bsc-morning",
       "name": "scan-bsc-morning",
-      "enabled": true,
+      "enabled": false,
       "schedule": {
         "kind": "cron",
         "expr": "30 22 * * *"
@@ -484,7 +484,7 @@
     {
       "id": "scan-bsc-evening",
       "name": "scan-bsc-evening",
-      "enabled": true,
+      "enabled": false,
       "schedule": {
         "kind": "cron",
         "expr": "30 11 * * *"
@@ -504,7 +504,7 @@
     {
       "id": "allium-scan-morning",
       "name": "allium-scan-morning",
-      "enabled": true,
+      "enabled": false,
       "schedule": {
         "kind": "cron",
         "expr": "5 22 * * *"
@@ -524,7 +524,7 @@
     {
       "id": "allium-scan-midday",
       "name": "allium-scan-midday",
-      "enabled": true,
+      "enabled": false,
       "schedule": {
         "kind": "cron",
         "expr": "5 5 * * *"
@@ -544,7 +544,7 @@
     {
       "id": "allium-scan-evening",
       "name": "allium-scan-evening",
-      "enabled": true,
+      "enabled": false,
       "schedule": {
         "kind": "cron",
         "expr": "35 11 * * *"
@@ -564,7 +564,7 @@
     {
       "id": "allium-scan-night",
       "name": "allium-scan-night",
-      "enabled": true,
+      "enabled": false,
       "schedule": {
         "kind": "cron",
         "expr": "5 14 * * *"
@@ -724,7 +724,7 @@
     {
       "id": "dflow-liquidity",
       "name": "dflow-liquidity",
-      "enabled": true,
+      "enabled": false,
       "schedule": {
         "kind": "cron",
         "expr": "0 */12 * * *"
@@ -764,7 +764,7 @@
     {
       "id": "firecrawl-research",
       "name": "firecrawl-research",
-      "enabled": true,
+      "enabled": false,
       "schedule": {
         "kind": "cron",
         "expr": "30 */12 * * *"
@@ -807,7 +807,7 @@
       "enabled": true,
       "schedule": {
         "kind": "cron",
-        "expr": "0 */8 * * *"
+        "expr": "0 8 * * *"
       },
       "sessionTarget": "main",
       "wakeMode": "now",
@@ -867,13 +867,31 @@
       "enabled": true,
       "schedule": {
         "kind": "cron",
-        "expr": "0 */2 * * *"
+        "expr": "0 */4 * * *"
       },
       "sessionTarget": "main",
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
         "text": "TWITTER BRAIN SCAN — Autonomous BD via Twitter (every 2h):\n\nSTEP 1 — GROK X_SEARCH:\nScan keywords via Grok x_search API (FREE): 'CEX listing', 'exchange listing', 'listing partnership', 'token launch Base', 'deploy token', 'new token project team', '$5M mcap DEX only', 'just launched Solana/Base/BSC'.\n\nSTEP 2 — SERPER CROSS-REFERENCE:\nCross-reference top keywords via Serper API (FREE) for Twitter/X search results.\n\nSTEP 3 — FILTER (L1-L10):\nMust have contract address OR DexScreener/CoinGecko link. Must be 500+ followers. Must NOT be reply chain. Must NOT be already in pipeline. Must NOT be spam.\n\nSTEP 4 — CONTRACT EXTRACTION:\nExtract contract addresses (Solana base58 / EVM 0x). Verify via DexScreener. Filter: liquidity > $10K, volume > $5K.\n\nSTEP 5 — PIPELINE ROUTING:\nRoute verified tokens to existing 5 sub-agent scoring pipeline.\n\nSTEP 6 — REPLY QUEUE:\nGenerate contextual BD outreach replies (max 12/day). Rate limit: 30s between replies.\n\nSTEP 7 — AUTONOMOUS REPLIES (if TWEET_AUTO=true):\nPost replies via X API pay-per-use. Log every reply to JVR.\n\nSTEP 8 — SCAN SUMMARY TWEET:\nPost scan summary tweet if tokens were routed.\n\nTrigger manually: POST /api/v1/twitter/brain/scan\nCheck status: GET /api/v1/twitter/brain/status"
+      },
+      "state": {
+        "nextRunAtMs": 0,
+        "lastStatus": "pending",
+        "consecutiveErrors": 0
+      }
+    },
+    {
+      "id": "scan-bags-tokens",
+      "name": "scan-bags-tokens",
+      "enabled": true,
+      "schedule": { "kind": "cron", "expr": "0 */3 * * *" },
+      "sessionTarget": "main",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "systemEvent",
+        "event": "cron_bags_scan",
+        "message": "Run Bags.fm token scan now. Execute: POST http://localhost:3000/api/v1/bags/scan with header X-API-Key: bzz_0S4j71ZWSqTgd_m8JyydXp1uqwmhN6GADi_9MEJmAg0. Report the results (total pools, tokens with metadata, tokens with twitter) to Telegram."
       },
       "state": {
         "nextRunAtMs": 0,

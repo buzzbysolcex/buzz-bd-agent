@@ -42,6 +42,10 @@ const memoryRoutes = require('./routes/memory');
 const operatorRoutes = require('./routes/operator');
 const contactRoutes = require('./routes/contacts');
 
+// v7.5.0: Bags.fm routes + Simulate Listing
+const bagsRoutes = require('./routes/bags');
+const simulateRoutes = require('./routes/simulate');
+
 // v7.3.1 Memory search engine + Contact intelligence
 const { initFTS } = require('./services/memory-search');
 const { initContacts } = require('./services/contact-intelligence');
@@ -141,6 +145,10 @@ app.use('/api/v1/skills', apiKeyAuth, skillsRoutes);
 app.use('/api/v1/memory', apiKeyAuth, memoryRoutes);
 app.use('/api/v1/operator', apiKeyAuth, operatorRoutes);
 app.use('/api/v1/contacts', apiKeyAuth, contactRoutes);
+
+// v7.5.0: Bags.fm + Simulate Listing
+app.use('/api/v1/bags', apiKeyAuth, bagsRoutes);
+app.use('/api/v1/simulate', apiKeyAuth, simulateRoutes);
 
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 

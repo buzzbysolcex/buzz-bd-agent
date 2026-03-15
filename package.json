@@ -1,6 +1,6 @@
 {
   "name": "buzz-bd-agent",
-  "version": "4.4.0",
+  "version": "7.5.0",
   "description": "Autonomous business development agent for SolCex Exchange",
   "main": "src/index.js",
   "scripts": {
