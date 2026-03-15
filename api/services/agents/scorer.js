@@ -307,11 +307,54 @@ async function runScorerAgent({
     }
 
     // ═══════════════════════════════════════════════
+    // BAGS.FM QUALITY SIGNALS (v7.5.0 — ADDITIVE)
+    // Cross-reference bags_tokens table by mint address
+    // ═══════════════════════════════════════════════
+    let bagsBonus = 0;
+    try {
+      const bagsDb = require('/opt/buzz-api/db').getDB();
+      const bagsRow = bagsDb.prepare('SELECT * FROM bags_tokens WHERE token_mint = ?').get(address);
+      if (bagsRow) {
+        bagsBonus += 5; // On Bags.fm platform (not Pump.fun)
+        factors.push({ name: 'bags_platform', score: 5, max: 5, category: 'quality',
+          detail: 'Listed on Bags.fm — creator earns 1% royalties (incentivized to grow)' });
+
+        if (bagsRow.lifetime_fees_sol > 50) {
+          bagsBonus += 12;
+          factors.push({ name: 'bags_fees_high', score: 12, max: 12, category: 'quality',
+            detail: `${bagsRow.lifetime_fees_sol} SOL lifetime fees — proven revenue generator` });
+        } else if (bagsRow.lifetime_fees_sol > 10) {
+          bagsBonus += 8;
+          factors.push({ name: 'bags_fees_moderate', score: 8, max: 12, category: 'quality',
+            detail: `${bagsRow.lifetime_fees_sol} SOL lifetime fees — active trading` });
+        }
+
+        if (bagsRow.twitter) {
+          bagsBonus += 3;
+          factors.push({ name: 'bags_twitter', score: 3, max: 3, category: 'social',
+            detail: 'Bags.fm token has linked Twitter' });
+        }
+        if (bagsRow.website) {
+          bagsBonus += 2;
+          factors.push({ name: 'bags_website', score: 2, max: 2, category: 'social',
+            detail: 'Bags.fm token has linked website' });
+        }
+        if (bagsRow.status === 'PRE_GRAD') {
+          bagsBonus += 2;
+          factors.push({ name: 'bags_pre_grad', score: 2, max: 2, category: 'quality',
+            detail: 'Pre-graduation on Bags.fm — early stage opportunity' });
+        }
+      }
+    } catch (e) {
+      // bags_tokens table may not exist yet — graceful fallback
+    }
+
+    // ═══════════════════════════════════════════════
     // COMPUTE TOTAL
     // ═══════════════════════════════════════════════
 
     const baseScore = Object.values(scores).reduce((sum, s) => sum + s, 0);
-    const totalScore = Math.min(100, baseScore + cmcBonus); // Cap at 100 even with bonus
+    const totalScore = Math.min(100, baseScore + cmcBonus + bagsBonus); // Cap at 100 even with bonus
     
     // Build factors array for response
     const factorsArray = Object.entries(scores).map(([name, score]) => ({
@@ -332,16 +375,38 @@ async function runScorerAgent({
 
     console.log(`[${requestId}] 📊 Scorer: ${totalScore}/${MAX_SCORE} | Market:${categories.market}/30 Safety:${categories.safety}/30 Social:${categories.social}/20 Quality:${categories.quality}/20`);
 
+    // ═══════════════════════════════════════════════
+    // MAJOR CEX EXCLUSION (v7.5.0)
+    // Tokens already on major CEXs with large mcap = not BD targets
+    // Still scored (for learning data) but flagged bd_target: false
+    // ═══════════════════════════════════════════════
+    let bdTarget = true;
+    try {
+      const cexDb = require('/opt/buzz-api/db').getDB();
+      const okxRow = cexDb.prepare('SELECT instrument_id FROM okx_instruments WHERE base_ccy = ? LIMIT 1').get(
+        (scannerData?.symbol || '').toUpperCase()
+      );
+      if (okxRow && mc > 100000000) {
+        bdTarget = false;
+        factors.push({ name: 'major_cex_listed', score: 0, max: 0, category: 'info',
+          detail: `Already on OKX (${okxRow.instrument_id}) with $${formatNumber(mc)} mcap — not a BD target` });
+      }
+    } catch (e) {
+      // okx_instruments table may not exist yet
+    }
+
     return {
       status: 'completed',
       score: totalScore,
+      bd_target: bdTarget,
       duration_ms: Date.now() - start,
       data: {
         total: totalScore,
         max: MAX_SCORE,
+        bd_target: bdTarget,
         categories,
-        factors: factorsArray,
-        factor_count: factorsArray.length
+        factors: [...factorsArray, ...factors],
+        factor_count: factorsArray.length + factors.length
       }
     };
 

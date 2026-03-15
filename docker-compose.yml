@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  buzz:
+    image: buzzbd/buzz-bd-agent:v7.5.0
+    container_name: buzz-production
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+      - "18789:18789"
+    volumes:
+      - buzz-data:/data
+    environment:
+      # ─── LLM API Keys ───
+      - MINIMAX_API_KEY=${MINIMAX_API_KEY}
+      - BANKR_API_KEY=${BANKR_API_KEY}
+      - BANKR_LLM_KEY=${BANKR_LLM_KEY}
+      - BANKR_PARTNER_KEY=${BANKR_PARTNER_KEY}
+      - BANKR_FEE_WALLET=${BANKR_FEE_WALLET}
+      - BANKR_DEPLOY_WALLET=${BANKR_DEPLOY_WALLET}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      # ─── Intel Source Keys ───
+      - HELIUS_API_KEY=${HELIUS_API_KEY}
+      - GROK_API_KEY=${GROK_API_KEY}
+      - SERPER_API_KEY=${SERPER_API_KEY}
+      - ALLIUM_API_KEY=${ALLIUM_API_KEY}
+      - FIRECRAWL_API_KEY=${FIRECRAWL_API_KEY}
+      - HYPERBROWSER_API_KEY=${HYPERBROWSER_API_KEY}
+      - CMC_API_KEY=${CMC_API_KEY}
+      - AGENTPROOF_API_KEY=${AGENTPROOF_API_KEY}
+      # ─── Bags.fm ───
+      - BAGS_API_KEY=bags_prod_QkBSFxvilRUpB0VKfv_9Ho4CEq_31zh6KzTT5alwnsI
+      - BAGS_AGENT_TOKEN=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImZiM2ZhMmJhMDkwOGQwOTlkOGY5ZGNhYzQ0ODYifQ.eyJzdWIiOiIyY2E2MTRjZC05YjJiLTQwMzUtOTgwMS05YWZmNTM2N2FhNDIiLCJhdWQiOlsiaHR0cHM6Ly9iYWdzLmZtIl0sImlzcyI6Imh0dHBzOi8vYXBpLmJhZ3MuZm0vYXBpL3YxL2F1dGgiLCJpYXQiOjE3NzM1MTQ4MjEsInNpZCI6IjI2Q1FLOE9SUVpsSWNsNEIzY2xfV2tmRXpMaFdRQWVuIiwiZXhwIjoxODA1MDUwODIxLCJzY29wZSI6InVzZXIifQ.Ds6JHbIJOnrxMmPOdUUdvD3KB7-zfyb47EySWHQ1V7JTgxIgFSM5sGL8-AVEMV-1gAEqdKtvjDcYX5qiy7LzmVLKELZdz81O-5IeSh9cdzqk7CEB9zlkT7mN11CZMgztDmUaHxuUogthWw0icykYU1u_SuevDr9xbF6l1JRK8RSAoCQwIkMtKxubRetMbV3CChGDq_nriN5B_Db4E8tYsKSR7xIgPEADmk2j6ESAZWRK6OJinPlQ82El152F0Ng3A2HbZvzMGr1Fkhq3IOB4sODXZMhF1k_sojLtEer6pZcKW4kxB1Qg2-K7v_kCnKqhW0FVXaG2Lb32PEwvglt2iQ
+      - BAGS_AGENT_WALLET=3o8eqzg2rruez1EQ1sGYmJgKcZSPq5uuwe6ApjX1s6YM
+      # ─── Twitter/X API ───
+      - X_API_KEY=${X_API_KEY}
+      - X_API_SECRET=${X_API_SECRET}
+      - X_BEARER_TOKEN=${X_BEARER_TOKEN}
+      - X_ACCESS_TOKEN=${X_ACCESS_TOKEN}
+      - X_ACCESS_TOKEN_SECRET=${X_ACCESS_TOKEN_SECRET}
+      - X_BOT_USER_ID=${X_BOT_USER_ID}
+      - MAX_REPLIES_DAY=${MAX_REPLIES_DAY:-30}
+      # ─── Telegram ───
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      # ─── ACP / Identity ───
+      - ACP_API_KEY=${ACP_API_KEY}
+      - ACP_AGENT_ID=${ACP_AGENT_ID:-17681}
+      - ACP_WALLET_ADDRESS=${ACP_WALLET_ADDRESS}
+      # ─── Moltbook / Molten ───
+      - MOLTBOOK_API_KEY=${MOLTBOOK_API_KEY}
+      - MOLTBOOK_AGENT_ID=${MOLTBOOK_AGENT_ID}
+      - MOLTEN_API_KEY=${MOLTEN_API_KEY}
+      # ─── Gmail OAuth ───
+      - GMAIL_CLIENT_ID=${GMAIL_CLIENT_ID}
+      - GMAIL_CLIENT_SECRET=${GMAIL_CLIENT_SECRET}
+      - GMAIL_REFRESH_TOKEN=${GMAIL_REFRESH_TOKEN}
+      - GMAIL_ADDRESS=${GMAIL_ADDRESS}
+      # ─── ATV / Web3 Identity ───
+      - ATV_API_URL=https://api.web3identity.com
+      - ATV_BATCH_ENDPOINT=/api/ens/batch-resolve
+      # ─── Nansen ───
+      - NANSEN_X402_ENABLED=${NANSEN_X402_ENABLED}
+      - NANSEN_X402_WALLET_KEY=${NANSEN_X402_WALLET_KEY}
+      # ─── BNB Chain ───
+      - BNB_PRIVATE_KEY=${BNB_PRIVATE_KEY}
+      # ─── Supermemory ───
+      - SUPERMEMORY_OPENCLAW_API_KEY=${SUPERMEMORY_OPENCLAW_API_KEY}
+      # ─── API ───
+      - BUZZ_API_ADMIN_KEY=${BUZZ_API_ADMIN_KEY}
+      - BUZZ_API_PORT=3000
+      - NODE_ENV=production
+
+volumes:
+  buzz-data:
+    driver: local

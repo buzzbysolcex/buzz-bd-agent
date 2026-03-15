@@ -23,10 +23,10 @@ export PATH="/data/.npm-global/bin:/usr/local/bin:$PATH"
 export LITE_AGENT_API_KEY="${ACP_API_KEY}"
 
 echo "════════════════════════════════════════════════"
-echo "  🐝 Buzz BD Agent v7.3.0"
+echo "  🐝 Buzz BD Agent v7.5.0 — Bags.fm-First"
 echo "  OpenClaw v2026.3.7 | REST API | ACP | Supermemory"
-echo "  5 Sub-Agents | 20 Skills | 18 Crons | 19 Intel"
-echo "  Supermemory: buzz_bd_agent (3 custom containers)"
+echo "  9 Agents (5 Sub + 4 Persona) | 20 Skills | 19 Intel"
+echo "  Bags.fm Scanner | /simulate-listing | Anthropic fallback"
 echo "  Twitter Bot v3.1 Premium SCAN | Cost Guard \$10/day"
 echo "  Docker = source of truth. Zero config needed."
 echo "  State:     $OPENCLAW_STATE_DIR"
@@ -268,6 +268,7 @@ cat > "$CONFIG" << JSONEOF
   },
   "env": {
     "MINIMAX_API_KEY": "$MINIMAX_API_KEY",
+    "ANTHROPIC_API_KEY": "$ANTHROPIC_API_KEY",
     "BANKR_API_KEY": "$BANKR_API_KEY",
     "BANKR_LLM_KEY": "$BANKR_LLM_KEY",
     "BANKR_PARTNER_KEY": "$BANKR_PARTNER_KEY",
@@ -325,6 +326,14 @@ cat > "$CONFIG" << JSONEOF
           { "id": "gemini-3-pro",     "name": "Gemini 3 Pro",    "contextWindow": 1000000, "maxTokens": 32768 },
           { "id": "claude-sonnet-4.6","name": "Sonnet 4.6",      "contextWindow": 200000, "maxTokens": 8192 }
         ]
+      },
+      "anthropic": {
+        "baseUrl": "https://api.anthropic.com",
+        "apiKey": "$ANTHROPIC_API_KEY",
+        "api": "anthropic-messages",
+        "models": [
+          { "id": "claude-haiku-4-5-20251001", "name": "Claude Haiku 4.5 Direct", "contextWindow": 200000, "maxTokens": 8192 }
+        ]
       }
     }
   },
@@ -341,7 +350,8 @@ cat > "$CONFIG" << JSONEOF
         "fallbacks": [
           "bankr/gemini-3-flash",
           "bankr/claude-haiku-4.5",
-          "bankr/gpt-5-nano"
+          "bankr/gpt-5-nano",
+          "anthropic/claude-haiku-4-5-20251001"
         ]
       },
       "subagents": { "maxConcurrent": 8, "model": { "primary": "bankr/gpt-5-nano", "fallbacks": ["bankr/claude-haiku-4.5", "bankr/gemini-3-flash"] } }
@@ -555,6 +565,33 @@ db.exec(\`
     expires_at TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_context_lookup ON context_cache(token_address, chain, expires_at);
+
+  -- v7.5.0: OKX instruments for CEX exclusion filter
+  CREATE TABLE IF NOT EXISTS okx_instruments (
+    instrument_id TEXT PRIMARY KEY,
+    inst_type TEXT, base_ccy TEXT, quote_ccy TEXT,
+    settle_ccy TEXT, ct_val TEXT, ct_mult TEXT,
+    ct_val_ccy TEXT, list_time TEXT, exp_time TEXT,
+    tick_sz TEXT, lot_sz TEXT, min_sz TEXT,
+    ct_type TEXT, alias TEXT, state TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+
+  -- v7.5.0: Listing simulation results
+  CREATE TABLE IF NOT EXISTS listing_simulations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_address TEXT NOT NULL,
+    chain TEXT NOT NULL,
+    scenario TEXT NOT NULL,
+    persona_results TEXT NOT NULL,
+    consensus TEXT NOT NULL,
+    bullish_count INTEGER,
+    neutral_count INTEGER,
+    bearish_count INTEGER,
+    expected_impact TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_sim_token ON listing_simulations(token_address);
 
   CREATE TABLE IF NOT EXISTS outreach_sequences (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -801,17 +838,18 @@ fi
 CRON_COUNT=$(jq '.jobs | length' /data/.openclaw/cron/jobs.json 2>/dev/null || echo "42")
 echo ""
 echo "════════════════════════════════════════════════"
-echo "  🐝 Buzz BD Agent v7.3.1 — Alpha Buzz (Phase 0 Complete)"
-echo "  REST API:      http://localhost:3000 (91 endpoints)"
+echo "  🐝 Buzz BD Agent v7.5.0 — Bags.fm-First Architecture"
+echo "  REST API:      http://localhost:3000 (95+ endpoints)"
 echo "  Strategic:     Decision + Playbook + Context engines"
-echo "  Learning Loop: Reflect (12h) + Evolve + FTS5 memory"
+echo "  Bags.fm:       Scanner + Scoring signals + /simulate-listing"
+echo "  LLM Fallback:  MiniMax → Bankr → Anthropic direct"
 echo "  Cost Guard:    \$10/day cap, cache warm active"
 echo "  Supermemory:   $SUPERMEMORY_STATUS"
 echo "  Learned Skills: $LEARNED_COUNT loaded"
-echo "  Twitter Bot:   30-min poll, 12/day cap"
+echo "  Twitter Bot:   30-min poll, 12/day cap, site:x.com keywords"
 echo "  Moltbook:      2x/day, 4-week calendar"
 echo "  ACP Seller:    4 offerings (30s delayed)"
-echo "  Scan crons:    DexScreener + CMC (4x/day)"
+echo "  Scan crons:    DexScreener + CMC + Bags.fm (optimized)"
 echo "  Cron jobs:     $CRON_COUNT active"
 echo "  OpenClaw:      port 18789"
 echo "  $(date -u '+%Y-%m-%d %H:%M:%S UTC')"

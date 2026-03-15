@@ -1,6 +1,6 @@
 {
   "name": "buzz-api",
-  "version": "3.0.0",
+  "version": "3.5.0",
   "description": "Buzz BD Agent REST API — Token intelligence and pipeline management",
   "main": "server.js",
   "scripts": {

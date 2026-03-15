@@ -2,7 +2,7 @@ FROM node:22-slim
 
 LABEL maintainer="Ogie @ SolCex Exchange"
 LABEL description="Buzz BD Agent — Autonomous AI Business Development on Akash Network"
-LABEL version="7.2.0"
+LABEL version="7.5.0"
 LABEL openclaw.version="2026.3.7"
 ENV OPENCLAW_EXTENSIONS="@supermemory/openclaw-supermemory"
 LABEL features="5-sub-agents, Strategic Orchestrator, 14-factor scoring, Helius MCP, REST API 72 endpoints, ACP marketplace"
