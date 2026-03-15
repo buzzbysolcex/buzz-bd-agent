@@ -25,6 +25,98 @@ const SPENDING_CAP = parseInt(process.env.TWITTER_BRAIN_SPENDING_CAP || '100', 1
 const TWEET_AUTO = process.env.TWEET_AUTO === 'true';
 const RATE_LIMIT_DELAY_MS = 30000; // 30s between replies
 const DEPLOY_CAP_DAY = 3;
+// ======================================================================
+// PREMIUM SCAN FORMAT v3.1 - 5-Layer Intelligence
+// ======================================================================
+const MIN_SCORE_TO_POST = 50;
+
+function progressBar(score, max) {
+  max = max || 10;
+  const filled = Math.round((score / max) * 5);
+  const empty = 5 - filled;
+  return '\u2588'.repeat(Math.max(0, filled)) + '\u2591'.repeat(Math.max(0, empty));
+}
+
+function getVerdict(score) {
+  if (score >= 85) return { e: '\ud83d\udd25', l: 'HOT', a: 'Strong listing prospect' };
+  if (score >= 70) return { e: '\u2705', l: 'QUALIFIED', a: 'Worth monitoring' };
+  if (score >= 50) return { e: '\ud83d\udc40', l: 'WATCHLIST', a: 'Monitor 48h' };
+  if (score >= 30) return { e: '\u26a0\ufe0f', l: 'HIGH RISK', a: 'Caution' };
+  return { e: '\ud83d\udd34', l: 'DANGER', a: 'Avoid' };
+}
+
+function letterGrade(s) {
+  if (s >= 90) return 'A+'; if (s >= 85) return 'A'; if (s >= 80) return 'A-';
+  if (s >= 75) return 'B+'; if (s >= 70) return 'B'; if (s >= 65) return 'B-';
+  if (s >= 60) return 'C+'; if (s >= 55) return 'C'; if (s >= 50) return 'C-';
+  if (s >= 40) return 'D'; return 'F';
+}
+
+function fmtNum(n) {
+  if (n == null) return 'N/A';
+  if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+  return String(n);
+}
+
+function formatScanResponse(d, symbol, chain, score) {
+  const v = getVerdict(score);
+  const grade = letterGrade(score);
+  const f = d.factors || {};
+  const s = (val) => val || 'N/A';
+  const lines = [];
+
+  lines.push('\ud83d\udc1d BUZZ INTEL \u2014 $' + symbol + ' (' + chain + ')');
+  lines.push('\u2501'.repeat(26));
+  lines.push(v.e + ' ' + score + '/100 (' + grade + ') \u2014 ' + v.l);
+  lines.push('Score ' + progressBar(score, 100) + ' ' + score + 'pts');
+  lines.push('');
+  lines.push('\ud83d\udcca LAYER 1 \u2014 MARKET');
+  lines.push('MCap: ' + s(d.mcap) + ' | FDV: ' + s(d.fdv));
+  lines.push('Liq: ' + s(d.liq) + ' | Vol 24h: ' + s(d.vol));
+  lines.push('Price: ' + s(d.price));
+  if (d.holders) lines.push('Holders: ' + s(d.holders));
+  lines.push('');
+  lines.push('\ud83d\udee1\ufe0f LAYER 2 \u2014 SAFETY');
+  lines.push('Mint: ' + s(d.mint) + ' | Freeze: ' + s(d.freeze));
+  lines.push('LP: ' + s(d.lp_lock) + ' | Contract: ' + s(d.contract_status));
+  if (d.rugcheck != null) lines.push('RugCheck: ' + d.rugcheck + '/100 ' + progressBar(100 - d.rugcheck, 100));
+  lines.push('Verdict: ' + s(d.safety_verdict));
+  lines.push('');
+  lines.push('\ud83e\udde0 LAYER 3 \u2014 INTELLIGENCE');
+  if (f.marketScore != null) lines.push('Market:  ' + f.marketScore + '/25 ' + progressBar(f.marketScore, 25));
+  if (f.safetyScore != null) lines.push('Safety:  ' + f.safetyScore + '/30 ' + progressBar(f.safetyScore, 30));
+  if (f.socialScore != null) lines.push('Social:  ' + f.socialScore + '/25 ' + progressBar(f.socialScore, 25));
+  if (f.onchainScore != null) lines.push('OnChain: ' + f.onchainScore + '/20 ' + progressBar(f.onchainScore, 20));
+  lines.push('');
+  lines.push('\ud83c\udf10 LAYER 4 \u2014 SOCIAL');
+  if (d.whale_summary) lines.push(d.whale_summary);
+  if (d.concentration) lines.push('Top 10: ' + d.concentration + '% concentration');
+  if (d.bsr) lines.push('Buy/Sell: ' + d.bsr);
+  lines.push('');
+  lines.push('\ud83c\udfaf LAYER 5 \u2014 VERDICT');
+  lines.push(v.e + ' ' + v.l + ': ' + v.a);
+  if (d.degen_signal) {
+    lines.push('\ud83c\udfb0 Degen: ' + s(d.degen_signal) + ' (' + s(d.degen_conf) + ')');
+    lines.push('\ud83d\udc33 Whale: ' + s(d.whale_signal) + ' (' + s(d.whale_conf) + ')');
+    lines.push('\ud83c\udfe6 Inst: ' + s(d.inst_signal) + ' (' + s(d.inst_conf) + ')');
+    lines.push('\ud83d\udc65 Community: ' + s(d.comm_signal) + ' (' + s(d.comm_conf) + ')');
+    lines.push(s(d.bullish) + '/4 personas bullish');
+  }
+  lines.push('');
+  lines.push('\u2501'.repeat(26));
+  if (score >= 70) {
+    lines.push('\ud83c\udfe6 Want $' + symbol + ' listed on @SolCex_Exchange?');
+    lines.push('DM @HidayahAnka1 to connect');
+  } else {
+    lines.push('\ud83d\udc40 Monitoring $' + symbol + '. Score needs 70+ for listing.');
+  }
+  lines.push('');
+  lines.push('Powered by @BuzzBySolCex | #SolCex #' + chain);
+  return lines.join('\n');
+}
+
 
 // X API credentials
 const X_API_BEARER = process.env.X_API_BEARER_TOKEN;
@@ -775,17 +867,14 @@ function buildOutreachReply(tweet) {
   const symbol = d.symbol || tweet.contractAddress?.slice(0, 8) || '???';
   const chain = (tweet.chain || 'unknown').charAt(0).toUpperCase() + (tweet.chain || 'unknown').slice(1);
 
-  // HOT — score 85+
-  if (score >= 85) {
-    return buildHotReply(d, symbol, chain);
+  // Use Premium 5-layer format for scores >= 50
+  if (score >= MIN_SCORE_TO_POST) {
+    return formatScanResponse(d, symbol, chain, score);
   }
 
-  // QUALIFIED — score 70-84
-  if (score >= 70) {
-    return buildQualifiedReply(d, symbol, chain);
-  }
 
-  // Fallback for lower scores — short outreach
+
+  // Below minimum score — short outreach
   return `🐝 BUZZ SCAN \u2014 ${symbol} (${chain})\nScore: ${score}/100\n\nInteresting project. We're reviewing for potential listing.\nDM @HidayahAnka1 to connect.${BUZZ_FOOTER}`;
 }
 
@@ -1090,14 +1179,31 @@ async function postScanSummary(results, scanId) {
   const topSymbol = results.topSymbol || 'N/A';
   const topScore = results.topScore || 'N/A';
 
-  const text = `🐝 BUZZ SCAN \u2014 ${time} UTC
+  const v = getVerdict(topScore || 0);
+  const grade = letterGrade(topScore || 0);
 
+  const text = `🐝 BUZZ SCAN \u2014 ${time} UTC
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
+
+📊 LAYER 1 \u2014 MARKET
 Scanned: ${afterFilter} tokens across ${chains}
-Filtered: ${afterFilter} passed L1-L5
 Contracts: ${contractsFound} verified
+
+🛡️ LAYER 2 \u2014 SAFETY
+Filtered: ${afterFilter} passed L1-L5
+
+🧠 LAYER 3 \u2014 INTELLIGENCE
+Score ${progressBar(topScore || 0, 100)} ${topScore || 0}pts
 New pipeline: ${tokensRouted} added
 
-Top find: ${topSymbol} \u2014 ${topScore}/100${BUZZ_FOOTER}`;
+🌐 LAYER 4 \u2014 SIGNALS
+Top find: ${topSymbol} \u2014 ${topScore}/100
+
+🎯 LAYER 5 \u2014 VERDICT
+${v.e} ${v.l}: ${v.a} (${grade})
+
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
+9 agents \u00b7 Scanning 24/7${BUZZ_FOOTER}`;
 
   return postTweet(text, scanId);
 }
