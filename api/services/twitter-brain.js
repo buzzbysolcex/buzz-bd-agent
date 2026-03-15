@@ -156,6 +156,45 @@ const SERPER_API_KEY = process.env.SERPER_API_KEY;
 
 // Data dirs
 const TWITTER_DATA_DIR = process.env.TWITTER_DATA_DIR || '/data/workspace/twitter-bot';
+
+// ─── Persistent replied-tweet dedup (survives restarts) ─────────────
+const REPLIED_FILE = '/data/workspace/twitter-replied.json';
+
+function loadRepliedSet() {
+  try {
+    if (fs.existsSync(REPLIED_FILE)) {
+      const arr = JSON.parse(fs.readFileSync(REPLIED_FILE, 'utf8'));
+      return new Set(Array.isArray(arr) ? arr : []);
+    }
+  } catch (e) {
+    console.error('[DEDUP] Error loading replied set:', e.message);
+  }
+  return new Set();
+}
+
+function saveRepliedSet(set) {
+  try {
+    ensureDir(path.dirname(REPLIED_FILE));
+    const arr = [...set].slice(-10000); // keep last 10k
+    fs.writeFileSync(REPLIED_FILE, JSON.stringify(arr));
+  } catch (e) {
+    console.error('[DEDUP] Error saving replied set:', e.message);
+  }
+}
+
+function markAsReplied(tweetId) {
+  if (!tweetId) return;
+  const set = loadRepliedSet();
+  set.add(String(tweetId));
+  saveRepliedSet(set);
+}
+
+function hasReplied(tweetId) {
+  if (!tweetId) return false;
+  const set = loadRepliedSet();
+  return set.has(String(tweetId));
+}
+
 const PIPELINE_DIR = process.env.PIPELINE_DIR || '/data/workspace/memory/pipeline';
 const RECEIPTS_DIR = process.env.RECEIPTS_DIR || '/data/workspace/memory/receipts';
 
@@ -818,7 +857,7 @@ function generateReplyQueue(tweets, scanId) {
 
   // Prioritize tweets with contracts and higher follower counts
   const prioritized = tweets
-    .filter(t => t.contractAddress && t.username)
+    .filter(t => t.contractAddress && t.username && !hasReplied(t.tweet_id || extractTweetIdFromUrl(t.url)))
     .sort((a, b) => (b.followers_count || 0) - (a.followers_count || 0))
     .slice(0, remaining);
 
@@ -1021,11 +1060,21 @@ async function executeReplyQueue(queue, scanId) {
       let result;
 
       if (tweetId) {
-        // Have tweet ID — post as reply
+        // Check dedup one more time right before posting
+        if (hasReplied(tweetId)) {
+          console.log(`[${scanId}] ⚠️ DEDUP: Already replied to tweet ${tweetId} — skipping`);
+          item.status = 'dedup_skipped';
+          continue;
+        }
+        // Record BEFORE posting to prevent race conditions
+        markAsReplied(tweetId);
+        // Post as reply
         result = await postReply(tweetId, item.replyText, scanId, item.username);
       } else {
         // No tweet ID — post as standalone tweet mentioning the handle
         console.log(`[${scanId}] ⚠️ No tweet ID for @${item.username} — posting standalone mention`);
+        // Mark username-based dedup for standalone mentions
+        markAsReplied('standalone_' + item.username);
         result = await postTweet(item.replyText, scanId);
       }
 
@@ -1044,6 +1093,12 @@ async function executeReplyQueue(queue, scanId) {
       } else {
         item.status = 'failed';
         item.error = result.error;
+        // On failure, remove from dedup so it can be retried next cycle
+        if (tweetId) {
+          const repliedSet = loadRepliedSet();
+          repliedSet.delete(String(tweetId));
+          saveRepliedSet(repliedSet);
+        }
         console.log(`[${scanId}] ❌ Reply failed for @${item.username}: ${result.error}`);
       }
 
