@@ -926,9 +926,18 @@ if [ -f /data/credential-gen.sh ]; then
 fi
 export BANKR_AGENT_API_KEY=${BANKR_PARTNER_KEY}
 WAIT=0
-while [ ! -f /data/.openclaw/credentials/.ready ] && [ $WAIT -lt 30 ]; do
+CREDS_READY=0
+while [ $WAIT -lt 30 ]; do
+  if [ -f /data/.openclaw/credentials/.ready ]; then
+    CREDS_READY=1
+    break
+  fi
   sleep 1
   WAIT=$((WAIT+1))
 done
-echo "[boot] Block 17: Credentials ready (${WAIT} seconds)"
+if [ $CREDS_READY -eq 1 ]; then
+  echo "[boot] Block 17: Credentials ready (${WAIT}s)"
+else
+  echo "[boot] Block 17: Timeout waiting for credentials (30s)"
+fi
 exec openclaw gateway --port 18789 --allow-unconfigured
