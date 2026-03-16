@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// Buzz BD Agent — Twitter Bot v3.2-premium-longform
+// Buzz BD Agent — Twitter Bot v3.3-premium-7section
 // OpenClaw v2026.3.1 | SolCex Exchange | Indonesia Sprint
 // ──────────────────────────────────────────────────────────────────────────────
 // Routes:
@@ -194,14 +194,19 @@ function fmtPrice(p) {
 }
 
 /**
- * buildReply v3.1 — Premium 5-Layer SCAN reply
- * Maps existing l1/l2/l3/scoring data to the full format
+ * buildReply v3.3 — Premium 7-Section SCAN reply
+ * Sections: Safety, Smart Money, Market Structure, Momentum,
+ *           Persona Consensus, Final Verdict, CEX Listing CTA
  * @param {object} l1 - DexScreener pair data
  * @param {object} l2 - Safety/RugCheck data
  * @param {object} l3 - Social/Grok data
  * @param {object} scoring - { score, grade, factors }
+ * @returns {string|null} formatted reply or null if score < 50
  */
 function buildReply(l1, l2, l3, scoring) {
+  // Score 50+ minimum — don't generate reply for low-scoring tokens
+  if (scoring.score < 50) return null;
+
   const chain  = l1.chain === 'solana' ? 'SOL'
                : l1.chain === 'base'   ? 'Base'
                : l1.chain === 'ethereum' ? 'ETH'
@@ -238,31 +243,16 @@ function buildReply(l1, l2, l3, scoring) {
     ? Math.min(99, Math.round((1000 / l1.liq) * 100) / 100).toFixed(1) + '%'
     : 'N/A';
 
-  // Build the report
+  // Build the 7-section report
   const lines = [];
-  lines.push(`🐝 BUZZ INTEL — $${l1.symbol} (${chain})`);
-  lines.push(`━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-
-  // Score header
-  lines.push(`${v.e} ${scoring.score}/100 (${grade}) — ${v.l}`);
+  lines.push(`🐝 BUZZ INTEL --- $${l1.symbol} (${chain})`);
+  lines.push(`---`);
+  lines.push(`${v.e} ${scoring.score}/100 (${grade}) --- ${v.l}`);
   lines.push(`Score ${progressBar(scoring.score, 100)} ${scoring.score}pts`);
   lines.push('');
 
-  // Layer 1 — Market
-  lines.push(`📊 LAYER 1 — MARKET`);
-  lines.push(`Price:   ${fmtPrice(l1.priceUsd)}`);
-  lines.push(`FDV:     $${fmtNum(l1.fdv)}`);
-  lines.push(`Liq:     $${fmtNum(l1.liq)}`);
-  lines.push(`Vol 24h: $${fmtNum(l1.vol24h)}`);
-  lines.push(`Age:     ${age}`);
-  lines.push(`Trend:   ${trendArrow(pc24h)} ${priceLine}`);
-  if (l1.txns?.h24) {
-    lines.push(`Txns 24h: ${(l1.txns.h24.buy || 0) + (l1.txns.h24.sell || 0)} (${l1.txns.h24.buy || 0}B / ${l1.txns.h24.sell || 0}S)`);
-  }
-  lines.push('');
-
-  // Layer 2 — Safety
-  lines.push(`🛡️ LAYER 2 — SAFETY`);
+  // Section 1 --- Safety
+  lines.push(`🛡️ SAFETY`);
   if (rugScore != null) lines.push(`RugScore: ${rugScore}/100 ${progressBar(100 - rugScore, 100)}`);
   lines.push(`Mint Auth:   ${safeIcon(mintAuth)}${mintAuth == null ? ' Unknown' : ''}`);
   lines.push(`Freeze Auth: ${safeIcon(freezeAuth)}${freezeAuth == null ? ' Unknown' : ''}`);
@@ -271,25 +261,43 @@ function buildReply(l1, l2, l3, scoring) {
   if (slip !== 'N/A') lines.push(`Slip Est:    ~${slip}`);
   lines.push('');
 
-  // Layer 3 — Intelligence
-  lines.push(`🧠 LAYER 3 — INTELLIGENCE`);
-  if (f.marketScore    != null) lines.push(`Market:  ${f.marketScore}/25  ${progressBar(f.marketScore, 25)}`);
-  if (f.safetyScore    != null) lines.push(`Safety:  ${f.safetyScore}/30  ${progressBar(f.safetyScore, 30)}`);
-  if (f.socialScore    != null) lines.push(`Social:  ${f.socialScore}/25  ${progressBar(f.socialScore, 25)}`);
-  if (f.onchainScore   != null) lines.push(`OnChain: ${f.onchainScore}/20  ${progressBar(f.onchainScore, 20)}`);
+  // Section 2 --- Smart Money
+  lines.push(`💰 SMART MONEY`);
+  if (f.onchainScore != null) lines.push(`OnChain Score: ${f.onchainScore}/20 ${progressBar(f.onchainScore, 20)}`);
+  if (l1.txns?.h24) {
+    const totalTxns = (l1.txns.h24.buy || 0) + (l1.txns.h24.sell || 0);
+    const buyRatio = totalTxns > 0 ? Math.round(((l1.txns.h24.buy || 0) / totalTxns) * 100) : 0;
+    lines.push(`Txns 24h: ${totalTxns} (${l1.txns.h24.buy || 0}B / ${l1.txns.h24.sell || 0}S)`);
+    lines.push(`Buy Pressure: ${buyRatio}% ${buyRatio >= 60 ? '🟢' : buyRatio >= 40 ? '🟡' : '🔴'}`);
+  }
   lines.push('');
 
-  // Layer 4 — Social
-  lines.push(`🌐 LAYER 4 — SOCIAL`);
-  if (sentiment)   lines.push(`Sentiment: ${sentiment}`);
-  if (twitterF)    lines.push(`Followers: ${fmtNum(twitterF)}`);
-  if (mentions)    lines.push(`Mentions:  ${fmtNum(mentions)} (24h)`);
+  // Section 3 --- Market Structure
+  lines.push(`📊 MARKET STRUCTURE`);
+  lines.push(`Price:   ${fmtPrice(l1.priceUsd)}`);
+  lines.push(`FDV:     $${fmtNum(l1.fdv)}`);
+  lines.push(`Liq:     $${fmtNum(l1.liq)}`);
+  lines.push(`Vol 24h: $${fmtNum(l1.vol24h)}`);
+  lines.push(`Age:     ${age}`);
+  lines.push('');
+
+  // Section 4 --- Momentum
+  lines.push(`⚡ MOMENTUM`);
+  lines.push(`Trend: ${trendArrow(pc24h)} ${priceLine}`);
+  if (f.marketScore != null) lines.push(`Market Score: ${f.marketScore}/25 ${progressBar(f.marketScore, 25)}`);
+  lines.push('');
+
+  // Section 5 --- Persona Consensus
+  lines.push(`🧠 PERSONA CONSENSUS`);
+  if (f.safetyScore != null) lines.push(`Safety:  ${f.safetyScore}/30  ${progressBar(f.safetyScore, 30)}`);
+  if (f.socialScore != null) lines.push(`Social:  ${f.socialScore}/25  ${progressBar(f.socialScore, 25)}`);
+  if (sentiment) lines.push(`Sentiment: ${sentiment}`);
   if (devActivity) lines.push(`Dev Activity: ${devActivity}`);
-  if (!sentiment && !twitterF && !mentions) lines.push(`Social data: Limited`);
+  if (!sentiment && !devActivity) lines.push(`Social data: Limited`);
   lines.push('');
 
-  // Layer 5 — Verdict
-  lines.push(`🎯 LAYER 5 — VERDICT`);
+  // Section 6 --- Final Verdict
+  lines.push(`🎯 FINAL VERDICT`);
   lines.push(`${v.e} ${v.l}: ${v.a}`);
   if (scoring.score >= 70) {
     lines.push(`CA: ${l1.ca}`);
@@ -297,21 +305,18 @@ function buildReply(l1, l2, l3, scoring) {
   }
   lines.push('');
 
-  // Footer CTA
-  lines.push(`━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+  // Section 7 --- CEX Listing CTA
+  lines.push(`---`);
   if (scoring.score >= 70) {
     lines.push(`🏦 Want $${l1.symbol} listed on @SolCex_Exchange?`);
-    lines.push(`Reply LIST → get listing details`);
-    lines.push(`Reply DEPLOY → launch your own token via @bankrbot`);
-  } else if (scoring.score >= 50) {
-    lines.push(`👀 Monitoring $${l1.symbol}. Score needs 70+ for listing.`);
-    lines.push(`Reply DEPLOY → launch your own token via @bankrbot`);
+    lines.push(`Reply LIST -- get listing details`);
+    lines.push(`Reply DEPLOY -- launch your own token via @bankrbot`);
   } else {
-    lines.push(`⚠️ $${l1.symbol} below threshold (70+ required for listing).`);
-    lines.push(`Reply DEPLOY → launch your own token via @bankrbot`);
+    lines.push(`👀 Monitoring $${l1.symbol}. Score needs 70+ for listing.`);
+    lines.push(`Reply DEPLOY -- launch your own token via @bankrbot`);
   }
   lines.push('');
-  lines.push(`Powered by @BuzzBySolCex | #SolCex #${chain}`);
+  lines.push(`🐝 Buzz BD Agent | Built on OpenClaw · Agentic.hosting | @SolCex_Exchange`);
 
   return lines.join('\n');
 }
@@ -323,7 +328,7 @@ function buildReply(l1, l2, l3, scoring) {
 function formatListReply() {
   return [
     `🏦 SolCex Exchange — CEX Listing Inquiry`,
-    `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+    `---`,
     ``,
     `Thanks for your interest! Here's what we offer:`,
     ``,
@@ -347,7 +352,7 @@ function formatListReply() {
 function formatDeployReply() {
   return [
     `🚀 Deploy Your Token via @bankrbot`,
-    `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+    `---`,
     ``,
     `Launch your token on Base chain in ~2 minutes:`,
     ``,
@@ -375,7 +380,7 @@ function formatDeployReply() {
 function formatDeployConfirmation(name, symbol, contractAddress, txHash) {
   return [
     `🎉 Token Deployed Successfully!`,
-    `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+    `---`,
     ``,
     `✅ ${name} ($${symbol}) is LIVE on Base`,
     ``,
@@ -833,6 +838,14 @@ async function runLoop() {
           continue;
         }
 
+        // Score 50+ minimum — skip posting for low-scoring tokens
+        if (!result.reply) {
+          log(`  ⛔ Score ${result.scoring?.score || 0}/100 below 50 minimum — not posting`);
+          replied.push(tweet.id);
+          saveReplied(replied);
+          continue;
+        }
+
         replyText = result.reply;
         addScanHistory(cmd.value);
 
@@ -1233,8 +1246,8 @@ async function postBuildUpdate() {
 // ══════════════════════════════════════════════════════════════════════════════
 
 log(`════════════════════════════════════════════════`);
-log(`  🐝 Twitter Bot v3.2-premium-longform`);
-log(`  Routes: SCAN (Premium 5-Layer) | LIST | DEPLOY | TOKEN_DETAILS`);
+log(`  🐝 Twitter Bot v3.3-premium-7section`);
+log(`  Routes: SCAN (Premium 7-Section) | LIST | DEPLOY | TOKEN_DETAILS`);
 log(`  Premium long-form tweets: 1000-2000 chars | Bankr autonomous deploy`);
 log(`  Interval: ${CHECK_INTERVAL_MS / 60000} min | Max: ${MAX_REPLIES_DAY}/day`);
 log(`════════════════════════════════════════════════`);
