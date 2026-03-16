@@ -893,8 +893,7 @@
       "wakeMode": "now",
       "payload": {
         "kind": "systemEvent",
-        "event": "cron_bags_scan",
-        "message": "Run Bags.fm token scan now. Execute: POST http://localhost:3000/api/v1/bags/scan with header X-API-Key: bzz_0S4j71ZWSqTgd_m8JyydXp1uqwmhN6GADi_9MEJmAg0. Report the results (total pools, tokens with metadata, tokens with twitter) to Telegram."
+        "text": "Run Bags.fm token scan now. Execute: POST http://localhost:3000/api/v1/bags/scan with header X-API-Key: bzz_0S4j71ZWSqTgd_m8JyydXp1uqwmhN6GADi_9MEJmAg0. Report the results (total pools, tokens with metadata, tokens with twitter) to Telegram."
       },
       "state": {
         "nextRunAtMs": 0,
