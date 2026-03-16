@@ -451,6 +451,40 @@ function parseCommand(text) {
 // SCAN PIPELINE (calls OpenClaw gateway)
 // ══════════════════════════════════════════════════════════════════════════════
 
+
+// ── Ticker-to-Address Resolution via DexScreener ──
+const CHAIN_PRIORITY = ['solana', 'base', 'ethereum', 'bsc', 'tron'];
+
+function resolveTickerToAddress(symbol) {
+  return new Promise(function(resolve) {
+    var url = 'https://api.dexscreener.com/latest/dex/search?q=' + encodeURIComponent(symbol);
+    https.get(url, function(res) {
+      var body = '';
+      res.on('data', function(c) { body += c; });
+      res.on('end', function() {
+        try {
+          var data = JSON.parse(body);
+          var pairs = data.pairs || [];
+          if (!pairs.length) { resolve(null); return; }
+          pairs.sort(function(a, b) {
+            var aPri = CHAIN_PRIORITY.indexOf(a.chainId);
+            var bPri = CHAIN_PRIORITY.indexOf(b.chainId);
+            if (aPri === -1) aPri = 99;
+            if (bPri === -1) bPri = 99;
+            if (aPri !== bPri) return aPri - bPri;
+            return ((b.volume && b.volume.h24) || 0) - ((a.volume && a.volume.h24) || 0);
+          });
+          var best = pairs[0];
+          var addr = best.baseToken && best.baseToken.address || null;
+          var chain = best.chainId || 'solana';
+          log('  DexScreener resolved ' + symbol + ' -> ' + (addr ? addr.slice(0,12) + '...' : 'null') + ' on ' + chain);
+          resolve({ address: addr, chain: chain, name: best.baseToken && best.baseToken.name || symbol, symbol: best.baseToken && best.baseToken.symbol || symbol });
+        } catch(e) { resolve(null); }
+      });
+    }).on('error', function() { resolve(null); });
+  });
+}
+
 function callBuzzAPI(address) {
   return new Promise((resolve, reject) => {
     const payload = JSON.stringify({ address });
@@ -821,7 +855,25 @@ async function runLoop() {
 
       // ── SCAN ROUTE ───────────────────────────────────────────────────────
       } else {
-        log(`\n🔍 Tweet ${tweet.id}: SCAN ${cmd.type}=${cmd.value}`);
+        log(`\n\ud83d\udd0d Tweet ${tweet.id}: SCAN ${cmd.type}=${cmd.value}`);
+        // Resolve ticker to contract address via DexScreener
+        if (cmd.type === 'symbol') {
+          const resolved = await resolveTickerToAddress(cmd.value);
+          if (!resolved || !resolved.address) {
+            log('  \u274c Could not resolve ticker ' + cmd.value);
+            const noFind = 'Could not find token $' + cmd.value + ' on DexScreener. Try the full contract address instead.\n\nTag @BuzzBySolCex scan <contract_address>';
+            await postReply(tweet.id, noFind);
+            incrementDailyCount();
+            replied.push(tweet.id);
+            saveReplied(replied);
+            processed++;
+            if (processed < mentions.length) await new Promise(r => setTimeout(r, REPLY_DELAY_MS));
+            continue;
+          }
+          log('  \u2705 Resolved $' + cmd.value + ' -> ' + resolved.address.slice(0,12) + '... on ' + resolved.chain);
+          cmd.value = resolved.address;
+          cmd.type = 'ca';
+        }
         const history = loadScanHistory();
         if (history.includes(cmd.value)) {
           log(`  Skip: already scanned ${cmd.value}`);
