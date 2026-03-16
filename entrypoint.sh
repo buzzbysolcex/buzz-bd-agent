@@ -19,6 +19,7 @@ set -e
 export OPENCLAW_STATE_DIR=/data/.openclaw
 export OPENCLAW_WORKSPACE_DIR=/data/workspace
 export NPM_CONFIG_PREFIX=/data/.npm-global
+export BANKR_AGENT_API_KEY=${BANKR_PARTNER_KEY}
 export PATH="/data/.npm-global/bin:/usr/local/bin:$PATH"
 export LITE_AGENT_API_KEY="${ACP_API_KEY}"
 
@@ -913,4 +914,21 @@ fi
 # Start gateway, then apply full config patch after doctor runs
 echo "[boot] Starting gateway + scheduling config patch (25s delay)..."
 nohup /data/fix-config.sh >> /data/logs/fix-config.log 2>&1 &
+
+# ══════════════════════════════════════════════════
+# BLOCK 17 — PRE-GATEWAY CREDENTIAL VERIFICATION (v7.5.1)
+# Run credential-gen.sh and verify all 9 files exist
+# BEFORE the gateway starts, so crons never see missing creds
+# ══════════════════════════════════════════════════
+echo "[boot] Block 17: Pre-gateway credential generation"
+if [ -f /data/credential-gen.sh ]; then
+  bash /data/credential-gen.sh
+fi
+export BANKR_AGENT_API_KEY=${BANKR_PARTNER_KEY}
+WAIT=0
+while [ ! -f /data/.openclaw/credentials/.ready ] && [ $WAIT -lt 30 ]; do
+  sleep 1
+  WAIT=$((WAIT+1))
+done
+echo "[boot] Block 17: Credentials ready (${WAIT} seconds)"
 exec openclaw gateway --port 18789 --allow-unconfigured

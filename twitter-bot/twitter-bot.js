@@ -702,8 +702,12 @@ async function notifyBuzz(l1, l2, l3, scoring, tweetId) {
 // ══════════════════════════════════════════════════════════════════════════════
 
 let lastMentionId = null;
+let isRunning = false;  // Concurrency guard — prevents overlapping scans
 
 async function runLoop() {
+  if (isRunning) { log('Previous scan still running, skip'); return; }
+  isRunning = true;
+  try {
   log(`\n${'─'.repeat(50)}`);
   log(`── Mention check ──`);
 
@@ -830,6 +834,7 @@ async function runLoop() {
   } catch (err) {
     log(`❌ Loop error: ${err.message}`);
   }
+  } finally { isRunning = false; }
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
