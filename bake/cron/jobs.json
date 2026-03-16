@@ -107,7 +107,7 @@
       "enabled": true,
       "schedule": {
         "kind": "cron",
-        "expr": "0 */6 * * *"
+        "expr": "0 */12 * * *"
       },
       "sessionTarget": "main",
       "wakeMode": "now",
@@ -502,86 +502,6 @@
       }
     },
     {
-      "id": "allium-scan-morning",
-      "name": "allium-scan-morning",
-      "enabled": false,
-      "schedule": {
-        "kind": "cron",
-        "expr": "5 22 * * *"
-      },
-      "sessionTarget": "main",
-      "wakeMode": "now",
-      "payload": {
-        "kind": "systemEvent",
-        "text": "ALLIUM ENRICHMENT (post-morning-scan):\n\nLoad top 5 highest-scored 70+ prospects from /data/workspace/memory/pipeline/ that have not been Allium-checked in last 24h.\nFor each: use Allium API (ALLIUM_API_KEY) to fetch smart wallet PnL data across 16 EVM chains.\nUpdate pipeline files with Allium data: smartWalletHolders, avgPnL, whaleCount.\nIf whaleCount > 10 on a 70+ token: boost score by +5 and send Telegram alert.\nSave JVR receipt."
-      },
-      "state": {
-        "nextRunAtMs": 0,
-        "lastStatus": "pending",
-        "consecutiveErrors": 0
-      }
-    },
-    {
-      "id": "allium-scan-midday",
-      "name": "allium-scan-midday",
-      "enabled": false,
-      "schedule": {
-        "kind": "cron",
-        "expr": "5 5 * * *"
-      },
-      "sessionTarget": "main",
-      "wakeMode": "now",
-      "payload": {
-        "kind": "systemEvent",
-        "text": "ALLIUM ENRICHMENT (post-midday-scan):\n\nLoad top 5 highest-scored 70+ prospects from /data/workspace/memory/pipeline/ that have not been Allium-checked in last 24h.\nFor each: use Allium API (ALLIUM_API_KEY) to fetch smart wallet PnL across 16 EVM chains.\nUpdate pipeline files with Allium data. If whaleCount > 10: boost +5, alert Ogie.\nSave JVR receipt."
-      },
-      "state": {
-        "nextRunAtMs": 0,
-        "lastStatus": "pending",
-        "consecutiveErrors": 0
-      }
-    },
-    {
-      "id": "allium-scan-evening",
-      "name": "allium-scan-evening",
-      "enabled": false,
-      "schedule": {
-        "kind": "cron",
-        "expr": "35 11 * * *"
-      },
-      "sessionTarget": "main",
-      "wakeMode": "now",
-      "payload": {
-        "kind": "systemEvent",
-        "text": "ALLIUM ENRICHMENT (post-evening-scan):\n\nLoad top 5 highest-scored 70+ prospects from /data/workspace/memory/pipeline/ that have not been Allium-checked in last 24h.\nFor each: use Allium API (ALLIUM_API_KEY) to fetch smart wallet PnL across 16 EVM chains.\nUpdate pipeline files with Allium data. If whaleCount > 10: boost +5, alert Ogie.\nSave JVR receipt."
-      },
-      "state": {
-        "nextRunAtMs": 0,
-        "lastStatus": "pending",
-        "consecutiveErrors": 0
-      }
-    },
-    {
-      "id": "allium-scan-night",
-      "name": "allium-scan-night",
-      "enabled": false,
-      "schedule": {
-        "kind": "cron",
-        "expr": "5 14 * * *"
-      },
-      "sessionTarget": "main",
-      "wakeMode": "now",
-      "payload": {
-        "kind": "systemEvent",
-        "text": "ALLIUM ENRICHMENT (post-night-scan):\n\nLoad top 5 highest-scored 70+ prospects from /data/workspace/memory/pipeline/ that have not been Allium-checked in last 24h.\nFor each: use Allium API (ALLIUM_API_KEY) to fetch smart wallet PnL across 16 EVM chains.\nUpdate pipeline files with Allium data. If whaleCount > 10: boost +5, alert Ogie.\nSave JVR receipt."
-      },
-      "state": {
-        "nextRunAtMs": 0,
-        "lastStatus": "pending",
-        "consecutiveErrors": 0
-      }
-    },
-    {
       "id": "atv-identity",
       "name": "atv-identity",
       "enabled": true,
@@ -694,26 +614,6 @@
       "payload": {
         "kind": "systemEvent",
         "text": "CRON HEALTH CHECK:\n\nVerify all critical systems are operational:\n1. Check /data/logs/api.log last modified \u2014 REST API alive?\n2. Check /data/logs/twitter-bot.log last modified \u2014 Twitter Bot alive?\n3. Check /data/logs/acp-serve.log last modified \u2014 ACP Seller alive?\n4. Check last receipt in /data/workspace/memory/receipts/ \u2014 scans running?\n5. Report status summary to Ogie via Telegram\nFormat: \ud83d\udc1d System Health | API: \u2705/\u274c | Twitter: \u2705/\u274c | ACP: \u2705/\u274c | Last Scan: {time}\nSave JVR receipt category: system"
-      },
-      "state": {
-        "nextRunAtMs": 0,
-        "lastStatus": "pending",
-        "consecutiveErrors": 0
-      }
-    },
-    {
-      "id": "colosseum-check",
-      "name": "colosseum-check",
-      "enabled": true,
-      "schedule": {
-        "kind": "cron",
-        "expr": "0 4 * * *"
-      },
-      "sessionTarget": "main",
-      "wakeMode": "now",
-      "payload": {
-        "kind": "systemEvent",
-        "text": "COLOSSEUM HACKATHON CHECK:\n\nBuzz is entered in the Colosseum Agent Hackathon (Agent ID: 3734, Claim Code: bc3e2dab-bf2c-42ac-b0f3-a4e223df3728).\nCheck for any updates, leaderboard changes, or result announcements.\nConfig file: /data/workspace/.config/buzz/colosseum.json\nReport any changes to Ogie via Telegram.\nSave JVR receipt category: identity"
       },
       "state": {
         "nextRunAtMs": 0,
