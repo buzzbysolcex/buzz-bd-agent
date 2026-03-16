@@ -882,6 +882,252 @@ async function runLoop() {
   } finally { isRunning = false; }
 }
 
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PROACTIVE TWEET SCHEDULE v1.0
+// Alpha Alerts | Pipeline Reports | Intelligence Threads | Build Updates
+// ══════════════════════════════════════════════════════════════════════════════
+
+const SCHEDULE_STATE_FILE = path.join(DATA_DIR, 'tweet-schedule-state.json');
+const ROTATION_FILE = path.join(DATA_DIR, 'tweet-rotation.json');
+
+// ── Buzz API helper ─────────────────────────────────────────────────────────
+
+function buzzApiGet(apiPath) {
+  return new Promise((resolve) => {
+    const opts = {
+      hostname: 'localhost', port: 3000, path: apiPath, method: 'GET',
+      headers: { 'X-API-Key': 'bzz_0S4j71ZWSqTgd_m8JyydXp1uqwmhN6GADi_9MEJmAg0' }
+    };
+    const req = http.request(opts, (res) => {
+      let body = '';
+      res.on('data', c => body += c);
+      res.on('end', () => { try { resolve(JSON.parse(body)); } catch { resolve(null); } });
+    });
+    req.on('error', () => resolve(null));
+    req.setTimeout(15000, () => { req.destroy(); resolve(null); });
+    req.end();
+  });
+}
+
+// ── Schedule state (dedup) ──────────────────────────────────────────────────
+
+function loadScheduleState() {
+  try { return JSON.parse(fs.readFileSync(SCHEDULE_STATE_FILE, 'utf8')); }
+  catch { return {}; }
+}
+
+function saveScheduleState(state) {
+  fs.writeFileSync(SCHEDULE_STATE_FILE, JSON.stringify(state, null, 2));
+}
+
+function canPost(type, minIntervalHours) {
+  const state = loadScheduleState();
+  const last = state[type];
+  if (!last) return true;
+  const elapsed = (Date.now() - new Date(last).getTime()) / (1000 * 60 * 60);
+  return elapsed >= minIntervalHours;
+}
+
+function markPosted(type) {
+  const state = loadScheduleState();
+  state[type] = new Date().toISOString();
+  saveScheduleState(state);
+}
+
+// ── Post original tweet (not a reply) ───────────────────────────────────────
+
+async function postOriginalTweet(text) {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify({ text });
+    const url = 'https://api.twitter.com/2/tweets';
+    const header = buildOAuthHeader('POST', url, {});
+    const options = {
+      hostname: 'api.twitter.com',
+      path: '/2/tweets',
+      method: 'POST',
+      headers: {
+        'Authorization': header,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload)
+      }
+    };
+    const req = https.request(options, res => {
+      let body = '';
+      res.on('data', d => body += d);
+      res.on('end', () => {
+        try { resolve({ status: res.statusCode, data: JSON.parse(body) }); }
+        catch { resolve({ status: res.statusCode, data: {} }); }
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(30000, () => { req.destroy(); reject(new Error('postOriginalTweet timeout')); });
+    req.write(payload);
+    req.end();
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 1. ALPHA ALERT — every 6h
+// ══════════════════════════════════════════════════════════════════════════════
+
+async function postAlphaAlert() {
+  if (!canPost('alpha', 5)) { log('Alpha alert: too soon, skip'); return; }
+
+  try {
+    const pipeline = await buzzApiGet('/api/v1/pipeline?limit=1&sort=score_desc');
+    const okx = await buzzApiGet('/api/v1/ws/okx/status');
+    const btcPrice = okx?.mostRecent?.last_price || 0;
+
+    let tweet;
+
+    if (pipeline?.tokens?.length > 0 && pipeline.tokens[0].score && pipeline.tokens[0].score >= 70) {
+      const t = pipeline.tokens[0];
+      tweet = `\u{1F41D} BUZZ ALPHA: $${t.ticker || 'TOKEN'} scored ${t.score}/100\n\n` +
+        `Stage: ${t.stage || '?'}\n` +
+        `Chain: ${t.chain}\n\n` +
+        `Tag @BuzzBySolCex scan ${t.ticker || t.address?.slice(0,8)} for the full report.\n\n` +
+        `\u{1F48E} CEX listing: DM @HidayahAnka1\n` +
+        `#AIAgent #SolCex #BuzzAgent #CryptoAlpha`;
+    } else {
+      // Market snapshot fallback
+      const stats = await buzzApiGet('/api/v1/pipeline/stats') || {};
+      tweet = `\u{1F41D} BUZZ MARKET PULSE\n\n` +
+        `BTC: $${btcPrice ? Math.round(btcPrice).toLocaleString() : '?'}\n` +
+        `Tokens in pipeline: ${stats.total || '?'}\n\n` +
+        `Scanning 24/7 with 10 AI agents.\n` +
+        `Tag @BuzzBySolCex scan $TICKER for instant analysis.\n\n` +
+        `#AIAgent #CryptoAlpha #BuzzAgent #SolCex`;
+    }
+
+    const result = await postOriginalTweet(tweet);
+    if (result && result.status === 201) {
+      markPosted('alpha');
+      log('\u2705 Alpha alert posted');
+    } else {
+      log('\u274C Alpha alert failed: ' + JSON.stringify(result?.data || '').slice(0, 200));
+    }
+  } catch (err) {
+    log('\u274C Alpha alert error: ' + err.message);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 2. PIPELINE REPORT — daily at 12:00 UTC
+// ══════════════════════════════════════════════════════════════════════════════
+
+async function postPipelineReport() {
+  if (!canPost('pipeline', 22)) { log('Pipeline report: too soon, skip'); return; }
+
+  try {
+    const stats = await buzzApiGet('/api/v1/pipeline/stats') || {};
+    const okx = await buzzApiGet('/api/v1/ws/okx/status');
+    const btcPrice = okx?.mostRecent?.last_price || 0;
+
+    // Count by score tiers from by_stage data
+    const byStage = stats.by_stage || {};
+    const scored = byStage.scored || {};
+    const discovered = byStage.discovered || {};
+
+    const tweet = `\u{1F41D} PIPELINE REPORT\n\n` +
+      `\u{1F525} Total tokens: ${stats.total || 0}\n` +
+      `\u2705 Added (24h): ${stats.added_24h || 0}\n` +
+      `\u{1F440} Chains: ${(stats.by_chain || []).map(c => c.chain).join(', ') || '?'}\n\n` +
+      `BTC: $${btcPrice ? Math.round(btcPrice).toLocaleString() : '?'}\n` +
+      `10 AI agents scanning 24/7.\n` +
+      `Infra: $4.09/mo\n\n` +
+      `#BuildInPublic #AIAgent #SolCex #BuzzAgent`;
+
+    const result = await postOriginalTweet(tweet);
+    if (result && result.status === 201) {
+      markPosted('pipeline');
+      log('\u2705 Pipeline report posted');
+    } else {
+      log('\u274C Pipeline report failed: ' + JSON.stringify(result?.data || '').slice(0, 200));
+    }
+  } catch (err) {
+    log('\u274C Pipeline report error: ' + err.message);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 3. INTELLIGENCE THREAD — Tue & Fri 14:00 UTC
+// ══════════════════════════════════════════════════════════════════════════════
+
+async function postIntelligenceThread() {
+  if (!canPost('intelligence', 60)) { log('Intelligence: too soon, skip'); return; }
+
+  const topics = [
+    `\u{1F41D} HOW BUZZ SCORES TOKENS:\n\n10 AI agents run in parallel.\nL1: Scanner finds token\nL2: Safety + Wallet verify\nL3: Social checks community\nL4: Scorer computes 100-pt score\nL5: 4 Hedge Brain personas debate\n\nResult in 10 seconds.\nTag @BuzzBySolCex scan any token.\n\n#AIAgent #CryptoAlpha #SolCex`,
+    `\u{1F41D} WHY 10 AGENTS > 1 MODEL:\n\nMost bots use 1 LLM call.\nBuzz uses 10 specialized agents:\n\n\u{1F50D} Scanner - finds pairs\n\u{1F6E1}\uFE0F Safety - rug detection\n\u{1F4B0} Wallet - holder analysis\n\u{1F310} Social - community check\n\u{1F3AF} Scorer - 100pt composite\n\u{1F9E0} 4x Hedge Brain - debate\n\nMore agents = fewer blind spots.\n\n#AIAgent #SolCex`,
+    `\u{1F41D} BUZZ INFRA BREAKDOWN:\n\nHetzner CX23: $4.09/mo\nDocker container: 1 vCPU / 4GB RAM\n91 API endpoints\n43 database tables\nOKX WebSocket: live BTC feed\n\nRunning an AI agent doesn't need GPUs.\nSmart architecture > brute force.\n\n#BuildInPublic #AIAgent #SolCex`,
+    `\u{1F41D} WHAT IS HEDGE BRAIN?\n\n4 AI personas debate every token:\n\n\u{1F4C8} Bull - finds upside\n\u{1F4C9} Bear - spots risk\n\u{1F50D} Analyst - checks data\n\u26A0\uFE0F Skeptic - challenges all\n\nThey vote independently.\nConsensus = high confidence.\nSplit = uncertainty flag.\n\nTag @BuzzBySolCex scan to see it work.\n\n#AIAgent #SolCex`,
+    `\u{1F41D} SOLCEX EXCHANGE VISION:\n\nSolana-native CEX for vetted tokens only.\n\nEvery token must pass Buzz's 10-agent scan.\nNo pay-to-list. Merit only.\n\nPipeline: Discovered > Scanned > Scored > Listed\n\nDM @HidayahAnka1 for listing inquiries.\n\n#SolCex #Solana #CEX`,
+    `\u{1F41D} AUTONOMOUS DEPLOY:\n\nSay "deploy" to @BuzzBySolCex.\nProvide name + symbol.\nBuzz deploys via @bankrbot on Base.\n\n\u26A1 No wallet connection needed\n\u26A1 Auto LP seeded\n\u26A1 50/50 fee split\n\u26A1 Live in ~2 minutes\n\nThe bot handles everything.\n\n#Bankr #Base #TokenLaunch`,
+    `\u{1F41D} SAFETY SCORING EXPLAINED:\n\nBuzz checks these red flags:\n\n\u274C Mint authority still active\n\u274C Freeze authority enabled\n\u274C LP not burned\n\u274C Top holder > 20%\n\u274C Honeypot detection\n\u274C Rugcheck score\n\nAll automated. No human bias.\nTag @BuzzBySolCex scan any CA.\n\n#CryptoSafety #AIAgent #SolCex`,
+    `\u{1F41D} BUZZ vs TRADITIONAL SCANNERS:\n\nTraditional: 1 check, pass/fail\nBuzz: 10 agents, 100-point score\n\nTraditional: static rules\nBuzz: AI reasoning + debate\n\nTraditional: minutes\nBuzz: 10 seconds\n\nTraditional: paid API\nBuzz: free via Twitter mention\n\n#AIAgent #CryptoAlpha #SolCex`,
+    `\u{1F41D} THE $4.09 CHALLENGE:\n\nCan you run a production AI agent for less than a coffee?\n\nBuzz proves yes:\n- Hetzner CX23 ARM: $4.09/mo\n- Docker + SQLite: $0\n- Claude API: pay per call\n- No GPU needed\n\n10 agents. 91 endpoints. 43 tables.\nAll on one tiny VPS.\n\n#BuildInPublic #Frugal #AIAgent`,
+    `\u{1F41D} WHAT'S NEXT FOR BUZZ:\n\n\u2705 Phase 0: Core pipeline (DONE)\n\u{1F6E0}\uFE0F Phase 1: Learning loop\n\u{1F4CA} Phase 2: Skill self-improvement\n\u{1F4DE} Phase 3: Contact intelligence\n\u{1F680} Phase 4: SolCex launch\n\nBuilding in public with @AnthropicAI Claude.\nFollow @BuzzBySolCex for updates.\n\n#Roadmap #AIAgent #SolCex`
+  ];
+
+  try {
+    // Load rotation index
+    let rotation;
+    try { rotation = JSON.parse(fs.readFileSync(ROTATION_FILE, 'utf8')); }
+    catch { rotation = { index: 0 }; }
+
+    const topic = topics[rotation.index % topics.length];
+    const result = await postOriginalTweet(topic);
+
+    if (result && result.status === 201) {
+      rotation.index = (rotation.index + 1) % topics.length;
+      fs.writeFileSync(ROTATION_FILE, JSON.stringify(rotation));
+      markPosted('intelligence');
+      log(`\u2705 Intelligence thread posted (topic ${rotation.index}/${topics.length})`);
+    } else {
+      log('\u274C Intelligence thread failed: ' + JSON.stringify(result?.data || '').slice(0, 200));
+    }
+  } catch (err) {
+    log('\u274C Intelligence thread error: ' + err.message);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 4. BUILD UPDATE — Wed & Sat 15:00 UTC
+// ══════════════════════════════════════════════════════════════════════════════
+
+async function postBuildUpdate() {
+  if (!canPost('build', 60)) { log('Build update: too soon, skip'); return; }
+
+  try {
+    const health = await buzzApiGet('/api/v1/health') || {};
+    const okx = await buzzApiGet('/api/v1/ws/okx/status') || {};
+
+    // Calculate sprint day (started March 1, 2026)
+    const sprintDay = Math.floor((Date.now() - new Date('2026-03-01').getTime()) / 86400000);
+
+    const tweet = `\u{1F41D} SPRINT DAY ${sprintDay}:\n\n` +
+      `System: ${health.endpoints || '?'} endpoints | ${health.checks?.database?.tables || '?'} tables\n` +
+      `WebSocket: ${(okx.messageCount || 0).toLocaleString()} OKX updates\n` +
+      `Agents: 10 online\n` +
+      `Infra: $4.09/mo Hetzner CX23\n\n` +
+      `Built by @hidayahanka1 with @AnthropicAI Claude.\n\n` +
+      `#BuildInPublic #AIAgent #ChefWhoCodes #SolCex`;
+
+    const result = await postOriginalTweet(tweet);
+    if (result && result.status === 201) {
+      markPosted('build');
+      log(`\u2705 Build update posted (day ${sprintDay})`);
+    } else {
+      log('\u274C Build update failed: ' + JSON.stringify(result?.data || '').slice(0, 200));
+    }
+  } catch (err) {
+    log('\u274C Build update error: ' + err.message);
+  }
+}
+
+
+
 // ══════════════════════════════════════════════════════════════════════════════
 // STARTUP
 // ══════════════════════════════════════════════════════════════════════════════
@@ -903,4 +1149,34 @@ if (!BANKR_PARTNER_KEY) log('⚠️  BANKR_PARTNER_KEY not set — deploy will f
 (async () => {
   await runLoop();
   setInterval(runLoop, CHECK_INTERVAL_MS);
+
+// ── Proactive Tweet Schedule ────────────────────────────────────────────────
+const ONE_HOUR = 60 * 60 * 1000;
+
+// Alpha alert: every 6h (at :05 past to avoid exact hour collisions)
+setInterval(() => {
+  const h = new Date().getUTCHours();
+  if ([0, 6, 12, 18].includes(h)) postAlphaAlert();
+}, ONE_HOUR);
+
+// Pipeline report: daily at 12:00 UTC
+setInterval(() => {
+  const h = new Date().getUTCHours();
+  if (h === 12) postPipelineReport();
+}, ONE_HOUR);
+
+// Intelligence thread: Tue (2) & Fri (5) at 14:00 UTC
+setInterval(() => {
+  const d = new Date();
+  if ([2, 5].includes(d.getUTCDay()) && d.getUTCHours() === 14) postIntelligenceThread();
+}, ONE_HOUR);
+
+// Build update: Wed (3) & Sat (6) at 15:00 UTC
+setInterval(() => {
+  const d = new Date();
+  if ([3, 6].includes(d.getUTCDay()) && d.getUTCHours() === 15) postBuildUpdate();
+}, ONE_HOUR);
+
+log('\u{1F4E2} Proactive tweet schedule active (alpha/pipeline/intelligence/build)');
+
 })();
