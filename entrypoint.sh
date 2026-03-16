@@ -88,7 +88,7 @@ echo "[boot] ✅ Block 2: Skills synced (20 skills, critical force-synced)"
 # ══════════════════════════════════════════════════
 CRON_TARGET="/data/.openclaw/cron/jobs.json"
 if [ -f "/opt/buzz-cron/jobs.json" ]; then
-  cp /opt/buzz-cron/jobs.json "$CRON_TARGET"
+  python3 /data/fix-cron-restore.py
   CRON_COUNT=$(grep -c '"id"' "$CRON_TARGET" 2>/dev/null || echo "0")
   echo "[boot] ✅ Block 3: $CRON_COUNT cron jobs restored (correct scan directive baked)"
 else
