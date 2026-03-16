@@ -1,13 +1,13 @@
-// ══════════════════════════════════════════════════════════════════════════════
-// Buzz BD Agent — Twitter Bot v3.3-premium-7section
+// ==============================================================================
+// Buzz BD Agent -- Twitter Bot v3.3-premium-7section
 // OpenClaw v2026.3.1 | SolCex Exchange | Indonesia Sprint
-// ──────────────────────────────────────────────────────────────────────────────
+// ------------------------------------------------------------------------------
 // Routes:
-//   SCAN   → 5-Layer Premium report (4000 chars) + LIST/DEPLOY CTA footer
-//   LIST   → SolCex listing pitch + Telegram lead alert to Ogie
-//   DEPLOY → Autonomous Bankr token deploy (no Ogie approval needed)
-//   TOKEN DETAILS → Follow-up: execute bankr deploy after user provides name/symbol
-// ══════════════════════════════════════════════════════════════════════════════
+//   SCAN   -> 5-Layer Premium report (4000 chars) + LIST/DEPLOY CTA footer
+//   LIST   -> SolCex listing pitch + Telegram lead alert to Ogie
+//   DEPLOY -> Autonomous Bankr token deploy (no Ogie approval needed)
+//   TOKEN DETAILS -> Follow-up: execute bankr deploy after user provides name/symbol
+// ==============================================================================
 
 'use strict';
 
@@ -17,7 +17,7 @@ const fs     = require('fs');
 const path   = require('path');
 const crypto = require('crypto');
 
-// ── Config ────────────────────────────────────────────────────────────────────
+// -- Config --------------------------------------------------------------------
 const DATA_DIR            = process.env.TWITTER_DATA_DIR || '/data/workspace';
 const REPLIED_FILE        = path.join(DATA_DIR, 'twitter-replied.json');
 const DAILY_COUNT_FILE    = path.join(DATA_DIR, 'twitter-daily-count.json');
@@ -48,14 +48,14 @@ const BANKR_FEE_WALLET    = process.env.BANKR_FEE_WALLET    || '0x2Dc03124091104
 const BANKR_DEPLOY_WALLET = process.env.BANKR_DEPLOY_WALLET || '0xfa04c7d627ba707a1ad17e72e094b45150665593';
 const BANKR_BASE_URL      = 'https://api.bankr.bot';
 
-// ── Logger ────────────────────────────────────────────────────────────────────
+// -- Logger --------------------------------------------------------------------
 function log(msg) {
   const line = `[${new Date().toISOString()}] ${msg}`;
   console.log(line);
   try { fs.appendFileSync(LOG_FILE, line + '\n'); } catch {}
 }
 
-// ── JSON Helpers ──────────────────────────────────────────────────────────────
+// -- JSON Helpers --------------------------------------------------------------
 function loadJSON(file, def) {
   try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return def; }
 }
@@ -63,7 +63,7 @@ function saveJSON(file, data) {
   fs.writeFileSync(file, JSON.stringify(data, null, 2));
 }
 
-// ── Daily Count ───────────────────────────────────────────────────────────────
+// -- Daily Count ---------------------------------------------------------------
 function loadDailyCount() {
   const data = loadJSON(DAILY_COUNT_FILE, { date: '', count: 0 });
   const today = new Date().toISOString().slice(0, 10);
@@ -78,18 +78,18 @@ function incrementDailyCount() {
   return data.count;
 }
 
-// ── Replied Tracking ──────────────────────────────────────────────────────────
+// -- Replied Tracking ----------------------------------------------------------
 function loadReplied() { return loadJSON(REPLIED_FILE, []); }
 function saveReplied(arr) { saveJSON(REPLIED_FILE, arr.slice(-2000)); }
 
-// ── Scan History ──────────────────────────────────────────────────────────────
+// -- Scan History --------------------------------------------------------------
 function loadScanHistory() { return loadJSON(SCAN_HISTORY_FILE, []); }
 function addScanHistory(ca) {
   const h = loadScanHistory();
   if (!h.includes(ca)) { h.push(ca); saveJSON(SCAN_HISTORY_FILE, h.slice(-500)); }
 }
 
-// ── Scan Tweet Mapping ────────────────────────────────────────────────────────
+// -- Scan Tweet Mapping --------------------------------------------------------
 function loadScanTweets() { return loadJSON(SCAN_TWEETS_FILE, {}); }
 function saveScanTweet(ourReplyId, scanData) {
   const data = loadScanTweets();
@@ -103,7 +103,7 @@ function saveScanTweet(ourReplyId, scanData) {
   saveJSON(SCAN_TWEETS_FILE, data);
 }
 
-// ── Lead Tracking ─────────────────────────────────────────────────────────────
+// -- Lead Tracking -------------------------------------------------------------
 function loadLeads() { return loadJSON(LEADS_FILE, []); }
 function saveLead(lead) {
   const leads = loadLeads();
@@ -111,7 +111,7 @@ function saveLead(lead) {
   saveJSON(LEADS_FILE, leads.slice(-500));
 }
 
-// ── Deploy Daily Count ────────────────────────────────────────────────────────
+// -- Deploy Daily Count --------------------------------------------------------
 function getDeployDailyCount() {
   const data = loadJSON(DEPLOY_DAILY_FILE, { date: '', count: 0 });
   const today = new Date().toISOString().slice(0, 10);
@@ -126,25 +126,25 @@ function incrementDeployDailyCount() {
   return data.count;
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// PREMIUM SCAN REPLY FORMAT v3.1 — 5-Layer Intelligence (4000 chars)
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
+// PREMIUM SCAN REPLY FORMAT v3.1 -- 5-Layer Intelligence (4000 chars)
+// ==============================================================================
 
 function progressBar(score, max) {
   max = max || 10;
   const filled = Math.round((score / max) * 5);
   const empty = 5 - filled;
-  return '█'.repeat(Math.max(0, filled)) + '░'.repeat(Math.max(0, empty));
+  return '#'.repeat(Math.max(0, filled)) + '-'.repeat(Math.max(0, empty));
 }
 
 function trendArrow(pct) {
-  if (pct == null) return '— Unknown';
-  if (pct >= 50)  return '▲▲▲ Surging';
-  if (pct >= 20)  return '▲▲ Rising';
-  if (pct >= 5)   return '▲ Up';
-  if (pct >= -5)  return '→ Flat';
-  if (pct >= -20) return '▼ Declining';
-  return '▼▼ Dropping';
+  if (pct == null) return '-- Unknown';
+  if (pct >= 50)  return '^^^ Surging';
+  if (pct >= 20)  return '^^ Rising';
+  if (pct >= 5)   return '^ Up';
+  if (pct >= -5)  return '-> Flat';
+  if (pct >= -20) return 'v Declining';
+  return 'vv Dropping';
 }
 
 function safeIcon(v) {
@@ -194,7 +194,7 @@ function fmtPrice(p) {
 }
 
 /**
- * buildReply v3.3 — Premium 7-Section SCAN reply
+ * buildReply v3.3 -- Premium 7-Section SCAN reply
  * Sections: Safety, Smart Money, Market Structure, Momentum,
  *           Persona Consensus, Final Verdict, CEX Listing CTA
  * @param {object} l1 - DexScreener pair data
@@ -204,7 +204,7 @@ function fmtPrice(p) {
  * @returns {string|null} formatted reply or null if score < 50
  */
 function buildReply(l1, l2, l3, scoring) {
-  // Score 50+ minimum — don't generate reply for low-scoring tokens
+  // Score 50+ minimum -- don't generate reply for low-scoring tokens
   if (scoring.score < 50) return null;
 
   const chain  = l1.chain === 'solana' ? 'SOL'
@@ -316,18 +316,18 @@ function buildReply(l1, l2, l3, scoring) {
     lines.push(`Reply DEPLOY -- launch your own token via @bankrbot`);
   }
   lines.push('');
-  lines.push(`🐝 Buzz BD Agent | Built on OpenClaw · Agentic.hosting | @SolCex_Exchange`);
+  lines.push(`🐝 Buzz BD Agent | Built on OpenClaw . Agentic.hosting | @SolCex_Exchange`);
 
   return lines.join('\n');
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 // LIST / DEPLOY REPLY FORMATTERS
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 
 function formatListReply() {
   return [
-    `🏦 SolCex Exchange — CEX Listing Inquiry`,
+    `🏦 SolCex Exchange -- CEX Listing Inquiry`,
     `---`,
     ``,
     `Thanks for your interest! Here's what we offer:`,
@@ -339,9 +339,9 @@ function formatListReply() {
     `✅ Community growth support`,
     ``,
     `📩 Next step: DM @SolCex_Exchange with:`,
-    `• Token name & CA`,
-    `• Current metrics`,
-    `• Team contact`,
+    `* Token name & CA`,
+    `* Current metrics`,
+    `* Team contact`,
     ``,
     `We review all inquiries within 24h.`,
     ``,
@@ -356,17 +356,17 @@ function formatDeployReply() {
     ``,
     `Launch your token on Base chain in ~2 minutes:`,
     ``,
-    `1️⃣ Reply with your token details:`,
+    `1️ Reply with your token details:`,
     `   Name: [Token Name]`,
     `   Symbol: [TICKER]`,
     `   Description: [optional]`,
     ``,
-    `2️⃣ Buzz will deploy automatically via Bankr`,
+    `2️ Buzz will deploy automatically via Bankr`,
     ``,
-    `3️⃣ Your token goes LIVE on Base with:`,
-    `   • Auto LP seeded`,
-    `   • Trading enabled instantly`,
-    `   • 50% fee split to your wallet`,
+    `3️ Your token goes LIVE on Base with:`,
+    `   * Auto LP seeded`,
+    `   * Trading enabled instantly`,
+    `   * 50% fee split to your wallet`,
     ``,
     `⚡ No wallet connection needed`,
     `⚡ Fees split: 50% you / 50% platform`,
@@ -397,16 +397,16 @@ function formatDeployConfirmation(name, symbol, contractAddress, txHash) {
   ].join('\n');
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 // COMMAND PARSERS
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 
 function cleanText(text) {
   return (text || '').replace(/@\w+/g, '').replace(/https?:\/\/\S+/g, '').trim();
 }
 
 /**
- * parseCommand — detects LIST / DEPLOY / SCAN / TOKEN_DETAILS
+ * parseCommand -- detects LIST / DEPLOY / SCAN / TOKEN_DETAILS
  * Returns { route, type?, value?, name?, symbol?, description? } or null
  */
 function parseCommand(text) {
@@ -418,12 +418,12 @@ function parseCommand(text) {
     return { route: 'LIST' };
   }
 
-  // DEPLOY route — bare "DEPLOY" triggers instructions
+  // DEPLOY route -- bare "DEPLOY" triggers instructions
   if (/^DEPLOY[!.?]?$/.test(cleaned)) {
     return { route: 'DEPLOY' };
   }
 
-  // TOKEN DETAILS — "Deploy Name: X Symbol: Y" or "Name: X\nSymbol: Y"
+  // TOKEN DETAILS -- "Deploy Name: X Symbol: Y" or "Name: X\nSymbol: Y"
   const nameMatch   = raw.match(/(?:name|token)[:\s]+([A-Za-z0-9 _-]{2,30})/i);
   const symbolMatch = raw.match(/(?:symbol|ticker)[:\s]+\$?([A-Z]{2,10})/i);
   if (nameMatch && symbolMatch) {
@@ -435,7 +435,7 @@ function parseCommand(text) {
     };
   }
 
-  // SCAN route — contract address or $SYMBOL
+  // SCAN route -- contract address or $SYMBOL
   const caMatch = text.match(/\b([1-9A-HJ-NP-Za-km-z]{32,44})\b/);   // Solana CA
   const evmMatch = text.match(/\b(0x[a-fA-F0-9]{40})\b/);              // EVM CA
   const symMatch = text.match(/\$([A-Za-z]{2,10})\b/);
@@ -447,12 +447,12 @@ function parseCommand(text) {
   return null;
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 // SCAN PIPELINE (calls OpenClaw gateway)
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 
 
-// ── Ticker-to-Address Resolution via DexScreener ──
+// -- Ticker-to-Address Resolution via DexScreener --
 const CHAIN_PRIORITY = ['solana', 'base', 'ethereum', 'bsc', 'tron'];
 
 function resolveTickerToAddress(symbol) {
@@ -581,16 +581,16 @@ async function runScanPipeline(value) {
 }
 
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 // BANKR AUTONOMOUS DEPLOY
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 
 async function executeBankrDeploy(name, symbol, description, creatorHandle) {
   return new Promise((resolve, reject) => {
     const payload = JSON.stringify({
       name,
       symbol,
-      description: description || `${name} — deployed via Buzz by SolCex`,
+      description: description || `${name} -- deployed via Buzz by SolCex`,
       chain: 'base',
       partnerFeeRecipient: BANKR_FEE_WALLET,
       creatorXHandle: creatorHandle || '',
@@ -628,9 +628,9 @@ async function executeBankrDeploy(name, symbol, description, creatorHandle) {
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 // TWITTER API
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 
 function oauthSign(method, url, params, consumerKey, consumerSecret, tokenSecret) {
   const allParams = { ...params, oauth_consumer_key: consumerKey, oauth_signature_method: 'HMAC-SHA1', oauth_version: '1.0' };
@@ -662,7 +662,7 @@ function buildOAuthHeader(method, url, extraParams) {
 
 async function fetchMentions(sinceId) {
   return new Promise((resolve, reject) => {
-    if (!BOT_USER_ID) { log('⚠️ X_BOT_USER_ID not set — skip fetch'); resolve([]); return; }
+    if (!BOT_USER_ID) { log('⚠️ X_BOT_USER_ID not set -- skip fetch'); resolve([]); return; }
     let url = `https://api.twitter.com/2/users/${BOT_USER_ID}/mentions?max_results=20&tweet.fields=author_id,conversation_id,text&expansions=referenced_tweets.id`;
     if (sinceId) url += `&since_id=${sinceId}`;
     const urlObj = new URL(url);
@@ -714,9 +714,9 @@ async function postReply(inReplyToId, text) {
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 // TELEGRAM NOTIFICATIONS
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 
 async function sendTelegram(msg) {
   if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
@@ -740,11 +740,11 @@ async function sendTelegram(msg) {
 
 async function notifyListLead(tweetId, tweetText, authorHandle) {
   const msg = [
-    `🐝 <b>LIST LEAD — @BuzzBySolCex</b>`,
+    `🐝 <b>LIST LEAD -- @BuzzBySolCex</b>`,
     ``,
     `Tweet ID: ${tweetId}`,
     `From: ${authorHandle || 'Unknown'}`,
-    `Text: ${tweetText?.slice(0, 200) || '—'}`,
+    `Text: ${tweetText?.slice(0, 200) || '--'}`,
     ``,
     `Action: DM the user to discuss SolCex listing`,
     `Link: https://twitter.com/i/web/status/${tweetId}`,
@@ -755,7 +755,7 @@ async function notifyListLead(tweetId, tweetText, authorHandle) {
 
 async function notifyDeployLead(tweetId, name, symbol, contractAddress, authorHandle) {
   const msg = [
-    `🚀 <b>TOKEN DEPLOYED — @BuzzBySolCex</b>`,
+    `🚀 <b>TOKEN DEPLOYED -- @BuzzBySolCex</b>`,
     ``,
     `Token: ${name} ($${symbol})`,
     `CA: ${contractAddress}`,
@@ -768,7 +768,7 @@ async function notifyDeployLead(tweetId, name, symbol, contractAddress, authorHa
 
 async function notifyBuzz(l1, l2, l3, scoring, tweetId) {
   const msg = [
-    `🐝 <b>SCAN COMPLETE — @BuzzBySolCex</b>`,
+    `🐝 <b>SCAN COMPLETE -- @BuzzBySolCex</b>`,
     ``,
     `$${l1?.symbol || '?'} (${l1?.chain || '?'})`,
     `Score: ${scoring?.score || 0}/100 (${letterGrade(scoring?.score || 0)})`,
@@ -779,19 +779,19 @@ async function notifyBuzz(l1, l2, l3, scoring, tweetId) {
   await sendTelegram(msg);
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 // MAIN LOOP
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 
 let lastMentionId = null;
-let isRunning = false;  // Concurrency guard — prevents overlapping scans
+let isRunning = false;  // Concurrency guard -- prevents overlapping scans
 
 async function runLoop() {
   if (isRunning) { log('Previous scan still running, skip'); return; }
   isRunning = true;
   try {
-  log(`\n${'─'.repeat(50)}`);
-  log(`── Mention check ── (since_id: ${lastMentionId || "none"})`);
+  log(`\n${'-'.repeat(50)}`);
+  log(`-- Mention check -- (since_id: ${lastMentionId || "none"})`);
 
   try {
     const mentions = await fetchMentions(lastMentionId).catch(e => { log(`Fetch error: ${e.message}`); return []; });
@@ -820,25 +820,25 @@ async function runLoop() {
 
       let replyText;
 
-      // ── LIST ROUTE ───────────────────────────────────────────────────────
+      // -- LIST ROUTE -------------------------------------------------------
       if (cmd.route === 'LIST') {
         log(`\n📋 Tweet ${tweet.id}: LIST request`);
         replyText = formatListReply();
         await notifyListLead(tweet.id, tweet.text, tweet.author_id);
 
-      // ── DEPLOY ROUTE (instructions) ──────────────────────────────────────
+      // -- DEPLOY ROUTE (instructions) --------------------------------------
       } else if (cmd.route === 'DEPLOY') {
         log(`\n🚀 Tweet ${tweet.id}: DEPLOY request (instructions)`);
         replyText = formatDeployReply();
 
-      // ── TOKEN DETAILS ROUTE (execute deploy) ─────────────────────────────
+      // -- TOKEN DETAILS ROUTE (execute deploy) -----------------------------
       } else if (cmd.route === 'TOKEN_DETAILS') {
         const deployDaily = getDeployDailyCount();
         if (deployDaily.count >= MAX_DEPLOYS_DAY) {
           log(`\n⚠️ Tweet ${tweet.id}: Deploy limit (${MAX_DEPLOYS_DAY}/day) reached`);
           replyText = `⚠️ Daily deploy limit reached. Try again tomorrow!\n\nWant your token listed on @SolCex_Exchange instead? Reply LIST 🏦`;
         } else {
-          log(`\n⚙️ Tweet ${tweet.id}: TOKEN DETAILS — deploying ${cmd.name} ($${cmd.symbol})`);
+          log(`\n⚙️ Tweet ${tweet.id}: TOKEN DETAILS -- deploying ${cmd.name} ($${cmd.symbol})`);
           try {
             const result = await executeBankrDeploy(cmd.name, cmd.symbol, cmd.description, tweet.author_id);
             const ca  = result?.contractAddress || result?.token?.address || 'Pending';
@@ -853,7 +853,7 @@ async function runLoop() {
           }
         }
 
-      // ── SCAN ROUTE ───────────────────────────────────────────────────────
+      // -- SCAN ROUTE -------------------------------------------------------
       } else {
         log(`\n\ud83d\udd0d Tweet ${tweet.id}: SCAN ${cmd.type}=${cmd.value}`);
         // Resolve ticker to contract address via DexScreener
@@ -890,9 +890,9 @@ async function runLoop() {
           continue;
         }
 
-        // Score 50+ minimum — skip posting for low-scoring tokens
+        // Score 50+ minimum -- skip posting for low-scoring tokens
         if (!result.reply) {
-          log(`  ⛔ Score ${result.scoring?.score || 0}/100 below 50 minimum — not posting`);
+          log(`  ⛔ Score ${result.scoring?.score || 0}/100 below 50 minimum -- not posting`);
           replied.push(tweet.id);
           saveReplied(replied);
           continue;
@@ -922,7 +922,7 @@ async function runLoop() {
         continue;  // Skip common post block below
       }
 
-      // ── Common post block for LIST / DEPLOY / TOKEN_DETAILS ──────────────
+      // -- Common post block for LIST / DEPLOY / TOKEN_DETAILS --------------
       log(`  📝 Reply (${replyText.length} chars)`);
       const pr = await postReply(tweet.id, replyText);
       if (pr && pr.status === 201) {
@@ -948,15 +948,15 @@ async function runLoop() {
 }
 
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 // PROACTIVE TWEET SCHEDULE v1.0
 // Alpha Alerts | Pipeline Reports | Intelligence Threads | Build Updates
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 
 const SCHEDULE_STATE_FILE = path.join(DATA_DIR, 'tweet-schedule-state.json');
 const ROTATION_FILE = path.join(DATA_DIR, 'tweet-rotation.json');
 
-// ── Buzz API helper ─────────────────────────────────────────────────────────
+// -- Buzz API helper ---------------------------------------------------------
 
 function buzzApiGet(apiPath) {
   return new Promise((resolve) => {
@@ -975,7 +975,7 @@ function buzzApiGet(apiPath) {
   });
 }
 
-// ── Schedule state (dedup) ──────────────────────────────────────────────────
+// -- Schedule state (dedup) --------------------------------------------------
 
 function loadScheduleState() {
   try { return JSON.parse(fs.readFileSync(SCHEDULE_STATE_FILE, 'utf8')); }
@@ -1000,7 +1000,7 @@ function markPosted(type) {
   saveScheduleState(state);
 }
 
-// ── Post original tweet (not a reply) ───────────────────────────────────────
+// -- Post original tweet (not a reply) ---------------------------------------
 
 async function postOriginalTweet(text) {
   return new Promise((resolve, reject) => {
@@ -1032,9 +1032,9 @@ async function postOriginalTweet(text) {
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// 1. ALPHA ALERT — every 6h
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
+// 1. ALPHA ALERT -- every 6h
+// ==============================================================================
 
 async function postAlphaAlert() {
   if (!canPost('alpha', 5)) { log('Alpha alert: too soon, skip'); return; }
@@ -1119,9 +1119,9 @@ async function postAlphaAlert() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// 2. PIPELINE REPORT — daily at 12:00 UTC
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
+// 2. PIPELINE REPORT -- daily at 12:00 UTC
+// ==============================================================================
 
 async function postPipelineReport() {
   if (!canPost('pipeline', 22)) { log('Pipeline report: too soon, skip'); return; }
@@ -1180,9 +1180,9 @@ async function postPipelineReport() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// 3. INTELLIGENCE THREAD — Tue & Fri 14:00 UTC
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
+// 3. INTELLIGENCE THREAD -- Tue & Fri 14:00 UTC
+// ==============================================================================
 
 async function postIntelligenceThread() {
   if (!canPost('intelligence', 60)) { log('Intelligence: too soon, skip'); return; }
@@ -1228,9 +1228,9 @@ async function postIntelligenceThread() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// 4. BUILD UPDATE — Wed & Sat 15:00 UTC
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
+// 4. BUILD UPDATE -- Wed & Sat 15:00 UTC
+// ==============================================================================
 
 async function postBuildUpdate() {
   if (!canPost('build', 60)) { log('Build update: too soon, skip'); return; }
@@ -1293,29 +1293,29 @@ async function postBuildUpdate() {
 
 
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 // STARTUP
-// ══════════════════════════════════════════════════════════════════════════════
+// ==============================================================================
 
-log(`════════════════════════════════════════════════`);
+log(`================================================`);
 log(`  🐝 Twitter Bot v3.3-premium-7section`);
 log(`  Routes: SCAN (Premium 7-Section) | LIST | DEPLOY | TOKEN_DETAILS`);
 log(`  Premium long-form tweets: 1000-2000 chars | Bankr autonomous deploy`);
 log(`  Interval: ${CHECK_INTERVAL_MS / 60000} min | Max: ${MAX_REPLIES_DAY}/day`);
-log(`════════════════════════════════════════════════`);
+log(`================================================`);
 
 // Validate env
 if (!X_BEARER_TOKEN) log('⚠️  X_BEARER_TOKEN not set');
 if (!X_API_KEY)      log('⚠️  X_API_KEY not set');
-if (!BOT_USER_ID)    log('⚠️  X_BOT_USER_ID not set — mentions fetch disabled');
-if (!BANKR_PARTNER_KEY) log('⚠️  BANKR_PARTNER_KEY not set — deploy will fail');
+if (!BOT_USER_ID)    log('⚠️  X_BOT_USER_ID not set -- mentions fetch disabled');
+if (!BANKR_PARTNER_KEY) log('⚠️  BANKR_PARTNER_KEY not set -- deploy will fail');
 
 // Initial run then loop
 (async () => {
   await runLoop();
   setInterval(runLoop, CHECK_INTERVAL_MS);
 
-// ── Proactive Tweet Schedule ────────────────────────────────────────────────
+// -- Proactive Tweet Schedule ------------------------------------------------
 const ONE_HOUR = 60 * 60 * 1000;
 
 // Alpha alert: every 6h (at :05 past to avoid exact hour collisions)
