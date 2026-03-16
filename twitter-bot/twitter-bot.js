@@ -446,58 +446,101 @@ function parseCommand(text) {
 // SCAN PIPELINE (calls OpenClaw gateway)
 // ══════════════════════════════════════════════════════════════════════════════
 
-function callOpenClaw(message) {
+function callBuzzAPI(address) {
   return new Promise((resolve, reject) => {
-    const payload = JSON.stringify({ content: message });
+    const payload = JSON.stringify({ address });
     const options = {
-      hostname: 'localhost',
-      port: OPENCLAW_PORT,
-      path: '/v1/messages',
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) }
+      hostname: "localhost",
+      port: 3000,
+      path: "/api/v1/score-token",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(payload),
+        "X-API-Key": process.env.BUZZ_API_ADMIN_KEY || ""
+      }
     };
     const req = http.request(options, res => {
-      let body = '';
-      res.on('data', d => body += d);
-      res.on('end', () => {
+      let body = "";
+      res.on("data", d => body += d);
+      res.on("end", () => {
         try { resolve(JSON.parse(body)); }
-        catch { reject(new Error('OpenClaw parse error: ' + body.slice(0, 200))); }
+        catch { reject(new Error("BuzzAPI parse error: " + body.slice(0, 200))); }
       });
     });
-    req.on('error', reject);
-    req.setTimeout(120000, () => { req.destroy(); reject(new Error('OpenClaw timeout (120s)')); });
+    req.on("error", reject);
+    req.setTimeout(120000, () => { req.destroy(); reject(new Error("BuzzAPI timeout (120s)")); });
     req.write(payload);
     req.end();
   });
 }
 
 async function runScanPipeline(value) {
-  const directive = [
-    `TWITTER SCAN REQUEST`,
-    `Query: ${value}`,
-    ``,
-    `Run the full 5-layer scan pipeline (L1 market + L2 safety + L3 intelligence + L4 social + L5 scoring).`,
-    `Return structured JSON with:`,
-    `{ l1: { symbol, chain, ca, priceUsd, fdv, liq, vol24h, pairCreatedAt, priceChange, txns, dex },`,
-    `  l2: { rugScore, mintAuthority, freezeAuthority, lpBurned, topHolderPct },`,
-    `  l3: { sentiment, followers, mentions, devActivity },`,
-    `  scoring: { score, grade, factors: { marketScore, safetyScore, socialScore, onchainScore } } }`,
-  ].join('\n');
-
   try {
-    const raw = await callOpenClaw(directive);
-    const txt = raw?.content?.[0]?.text || raw?.text || '';
-    const jsonMatch = txt.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('No JSON in pipeline response');
-    const data = JSON.parse(jsonMatch[0]);
-    if (!data.l1 || !data.scoring) throw new Error('Incomplete pipeline data');
-    const reply = buildReply(data.l1, data.l2 || {}, data.l3 || {}, data.scoring);
-    return { ...data, reply };
+    const raw = await callBuzzAPI(value);
+    if (!raw.success) throw new Error(raw.error || "API returned unsuccessful");
+
+    const t   = raw.token || {};
+    const sc  = raw.score || {};
+    const sub = raw.sub_agents || {};
+    const scanner = sub.scanner && sub.scanner.data || {};
+
+    const l1 = {
+      symbol:        t.symbol || scanner.symbol || "?",
+      chain:         t.chain || scanner.chain || "solana",
+      ca:            t.address || value,
+      priceUsd:      t.price_usd || scanner.price_usd,
+      fdv:           scanner.fdv || scanner.market_cap,
+      liq:           t.liquidity || scanner.liquidity_usd || 0,
+      vol24h:        scanner.volume_24h || 0,
+      pairCreatedAt: scanner.pair_created_at || null,
+      priceChange:   {
+        h1:  scanner.price_change_1h,
+        h24: scanner.price_change_24h,
+        d7:  null
+      },
+      txns: scanner.txns_24h_buys ? {
+        h24: { buy: scanner.txns_24h_buys, sell: scanner.txns_24h_sells }
+      } : null,
+      dex: scanner.dex || "N/A"
+    };
+
+    const safetyData = sub.safety && sub.safety.data || {};
+    const l2 = {
+      rugScore:        safetyData.rugcheck_score != null ? safetyData.rugcheck_score : null,
+      mintAuthority:   safetyData.factors && safetyData.factors.some(f => f.name === "mint_revoked") ? false : null,
+      freezeAuthority: null,
+      lpBurned:        null,
+      topHolderPct:    null
+    };
+
+    const socialData = sub.social && sub.social.data || {};
+    const l3 = {
+      sentiment: socialData.verdict || null,
+      followers: null,
+      mentions:  null,
+      devActivity: null
+    };
+
+    const scoring = {
+      score: Math.round(sc.total || 0),
+      grade: sc.verdict || "?",
+      factors: {
+        marketScore: sc.breakdown && sc.breakdown.scorer && sc.breakdown.scorer.data && sc.breakdown.scorer.data.categories && sc.breakdown.scorer.data.categories.market || null,
+        safetyScore: Math.round((sub.safety && sub.safety.weighted_score || 0)),
+        socialScore: Math.round((sub.social && sub.social.weighted_score || 0)),
+        onchainScore: Math.round((sub.wallet && sub.wallet.weighted_score || 0))
+      }
+    };
+
+    const reply = buildReply(l1, l2, l3, scoring);
+    return { l1, l2, l3, scoring, reply };
   } catch (err) {
-    log(`  ⚠️ Pipeline error: ${err.message}`);
+    log("  ⚠️ Pipeline error: " + err.message);
     return null;
   }
 }
+
 
 // ══════════════════════════════════════════════════════════════════════════════
 // BANKR AUTONOMOUS DEPLOY
@@ -709,7 +752,7 @@ async function runLoop() {
   isRunning = true;
   try {
   log(`\n${'─'.repeat(50)}`);
-  log(`── Mention check ──`);
+  log(`── Mention check ── (since_id: ${lastMentionId || "none"})`);
 
   try {
     const mentions = await fetchMentions(lastMentionId).catch(e => { log(`Fetch error: ${e.message}`); return []; });
@@ -720,11 +763,13 @@ async function runLoop() {
     const daily   = loadDailyCount();
     let processed = 0;
 
+    // Advance watermark to newest mention so since_id skips already-seen tweets
+    if (mentions.length) lastMentionId = mentions[0].id;
     for (const tweet of mentions) {
       if (replied.includes(tweet.id)) continue;
       if (daily.count >= MAX_REPLIES_DAY) { log(`Daily limit ${MAX_REPLIES_DAY} reached`); break; }
 
-      lastMentionId = tweet.id;
+
 
       const cmd = parseCommand(tweet.text);
       if (!cmd) {
