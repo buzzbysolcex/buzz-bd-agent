@@ -66,3 +66,7 @@ deploy*.yaml
 *.db
 *.db-shm
 *.db-wal
+
+# API keys
+*.env
+.env.*

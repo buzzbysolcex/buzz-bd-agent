@@ -962,7 +962,7 @@ function buzzApiGet(apiPath) {
   return new Promise((resolve) => {
     const opts = {
       hostname: 'localhost', port: 3000, path: apiPath, method: 'GET',
-      headers: { 'X-API-Key': 'bzz_0S4j71ZWSqTgd_m8JyydXp1uqwmhN6GADi_9MEJmAg0' }
+      headers: { 'X-API-Key': process.env.BUZZ_API_ADMIN_KEY || '' }
     };
     const req = http.request(opts, (res) => {
       let body = '';
