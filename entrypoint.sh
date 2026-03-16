@@ -922,7 +922,7 @@ nohup /data/fix-config.sh >> /data/logs/fix-config.log 2>&1 &
 # ══════════════════════════════════════════════════
 echo "[boot] Block 17: Pre-gateway credential generation"
 if [ -f /data/credential-gen.sh ]; then
-  bash /data/credential-gen.sh
+  bash /data/credential-gen.sh || true
 fi
 export BANKR_AGENT_API_KEY=${BANKR_PARTNER_KEY}
 WAIT=0
