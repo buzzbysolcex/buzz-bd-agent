@@ -1,0 +1,8 @@
+title = "Buzz BD Agent Gitleaks Config"
+
+[allowlist]
+description = "Internal API key patterns (localhost-only)"
+paths = [
+  "cron/jobs.json",
+  "bake/cron/jobs.json"
+]
