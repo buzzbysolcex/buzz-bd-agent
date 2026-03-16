@@ -23,17 +23,22 @@ function getDb() {
 
 function ensureTable() {
   const db = getDb();
+  // Match existing schema: snake_case columns from prior deployment
   db.exec(`
     CREATE TABLE IF NOT EXISTS okx_live_tickers (
-      instId TEXT PRIMARY KEY,
-      last REAL,
-      bid REAL,
-      ask REAL,
-      vol24h REAL,
-      high24h REAL,
-      low24h REAL,
-      ts TEXT,
-      updated_at DATETIME DEFAULT (datetime('now'))
+      inst_id TEXT PRIMARY KEY,
+      last_price REAL,
+      bid_px REAL,
+      ask_px REAL,
+      bid_sz REAL,
+      ask_sz REAL,
+      vol_24h REAL,
+      vol_ccy_24h REAL,
+      high_24h REAL,
+      low_24h REAL,
+      open_24h REAL,
+      ts INTEGER,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
 }
@@ -69,12 +74,14 @@ function connect() {
       if (msg.data && msg.arg && msg.arg.channel === 'tickers') {
         const db = getDb();
         const upsert = db.prepare(`
-          INSERT INTO okx_live_tickers (instId, last, bid, ask, vol24h, high24h, low24h, ts, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
-          ON CONFLICT(instId) DO UPDATE SET
-            last=excluded.last, bid=excluded.bid, ask=excluded.ask,
-            vol24h=excluded.vol24h, high24h=excluded.high24h, low24h=excluded.low24h,
-            ts=excluded.ts, updated_at=datetime('now')
+          INSERT INTO okx_live_tickers (inst_id, last_price, bid_px, ask_px, bid_sz, ask_sz, vol_24h, vol_ccy_24h, high_24h, low_24h, open_24h, ts, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+          ON CONFLICT(inst_id) DO UPDATE SET
+            last_price=excluded.last_price, bid_px=excluded.bid_px, ask_px=excluded.ask_px,
+            bid_sz=excluded.bid_sz, ask_sz=excluded.ask_sz,
+            vol_24h=excluded.vol_24h, vol_ccy_24h=excluded.vol_ccy_24h,
+            high_24h=excluded.high_24h, low_24h=excluded.low_24h, open_24h=excluded.open_24h,
+            ts=excluded.ts, updated_at=CURRENT_TIMESTAMP
         `);
 
         for (const d of msg.data) {
@@ -83,10 +90,14 @@ function connect() {
             parseFloat(d.last) || 0,
             parseFloat(d.bidPx) || 0,
             parseFloat(d.askPx) || 0,
+            parseFloat(d.bidSz) || 0,
+            parseFloat(d.askSz) || 0,
             parseFloat(d.vol24h) || 0,
+            parseFloat(d.volCcy24h) || 0,
             parseFloat(d.high24h) || 0,
             parseFloat(d.low24h) || 0,
-            d.ts || ''
+            parseFloat(d.open24h) || 0,
+            parseInt(d.ts) || 0
           );
           status.messageCount++;
           status.lastMessage = new Date().toISOString();

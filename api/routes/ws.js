@@ -13,7 +13,7 @@ router.get('/okx/status', (req, res) => {
     const { getDB } = require('../db');
     const db = getDB();
     const tickerCount = db.prepare('SELECT COUNT(*) as count FROM okx_live_tickers').get();
-    const recentTicker = db.prepare('SELECT instId, last, updated_at FROM okx_live_tickers ORDER BY updated_at DESC LIMIT 1').get();
+    const recentTicker = db.prepare('SELECT inst_id, last_price, updated_at FROM okx_live_tickers ORDER BY updated_at DESC LIMIT 1').get();
     res.json({ ...status, tickersInDb: tickerCount?.count || 0, mostRecent: recentTicker || null });
   } catch (err) {
     res.json({ connected: false, error: err.message });
