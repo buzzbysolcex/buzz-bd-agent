@@ -35,19 +35,38 @@ function readCostTracker() {
 
 // ─── GET /summary ───────────────────────────────
 router.get('/summary', (req, res) => {
-  const tracker = readCostTracker();
+  const db = getDB();
   const dailyCap = 10.00;
-  const dailyTotal = tracker.daily_total || 0;
-
+  const today = new Date().toISOString().slice(0, 10);
+  let dailyTotal = 0, callsMinimax = 0, callsBankr = 0;
+  try {
+    const row = db.prepare("SELECT COALESCE(SUM(cost_usd), 0) as daily_total, COALESCE(SUM(CASE WHEN model LIKE '%inimax%' THEN 1 ELSE 0 END), 0) as calls_minimax, COALESCE(SUM(CASE WHEN model LIKE '%bankr%' OR model LIKE '%gpt-5%' THEN 1 ELSE 0 END), 0) as calls_bankr FROM cost_logs WHERE date(created_at) = date('now')").get();
+    dailyTotal = row.daily_total || 0;
+    callsMinimax = row.calls_minimax || 0;
+    callsBankr = row.calls_bankr || 0;
+  } catch (err) {
+    console.error("[costs] DB read error:", err.message);
+    const tracker = readCostTracker();
+    dailyTotal = tracker.daily_total || 0;
+  }
+  try {
+    const trackerPath = require("path").join(process.env.BUZZ_DATA_DIR || "/data", "workspace/memory/cost-tracker.json");
+    const t = readCostTracker();
+    t.date = today; t.daily_total = Math.round(dailyTotal * 10000) / 10000;
+    t.calls_minimax = callsMinimax; t.calls_bankr_fallback = callsBankr;
+    t.alert_70pct_sent = dailyTotal >= dailyCap * 0.7;
+    t.alert_cap_sent = dailyTotal >= dailyCap;
+    require("fs").writeFileSync(trackerPath, JSON.stringify(t, null, 2));
+  } catch (e) {}
   res.json({
-    date: tracker.date,
-    daily_total: dailyTotal,
+    date: today,
+    daily_total: Math.round(dailyTotal * 10000) / 10000,
     daily_cap: dailyCap,
-    remaining: Math.max(0, dailyCap - dailyTotal),
+    remaining: Math.max(0, Math.round((dailyCap - dailyTotal) * 10000) / 10000),
     pct_used: dailyCap > 0 ? Math.round((dailyTotal / dailyCap) * 10000) / 100 : 0,
-    throttled: tracker.alert_cap_sent || dailyTotal >= dailyCap,
-    calls_minimax: tracker.calls_minimax || 0,
-    calls_bankr: tracker.calls_bankr_fallback || 0
+    throttled: dailyTotal >= dailyCap,
+    calls_minimax: callsMinimax,
+    calls_bankr: callsBankr
   });
 });
 
