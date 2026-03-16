@@ -52,4 +52,4 @@ else:
     # No existing target, just copy source
     import shutil
     shutil.copy2(source, target)
-    print(f"[cron-merge] First boot: copied {len(src_data.get(\"jobs\", []))} jobs from source")
+    count = len(src_data.get("jobs", [])); print(f"[cron-merge] First boot: copied {count} jobs from source")
