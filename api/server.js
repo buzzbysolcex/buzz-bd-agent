@@ -150,6 +150,9 @@ app.use('/api/v1/contacts', apiKeyAuth, contactRoutes);
 app.use('/api/v1/bags', apiKeyAuth, bagsRoutes);
 app.use('/api/v1/simulate', apiKeyAuth, simulateRoutes);
 
+// v7.6.0: WebSocket status routes (OKX + Helius)
+app.use('/api/v1/ws', apiKeyAuth, require('./routes/ws'));
+
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 
 // ═════════════════════════════════════════════════════
@@ -373,10 +376,16 @@ async function start() {
     });
 
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`[Buzz API] ✓ v3.1.0 — 91/91 endpoints on port ${PORT}`);
+      console.log(`[Buzz API] ✓ v3.2.0 — 93/93 endpoints on port ${PORT}`);
       console.log(`[Buzz API] ✓ Health: http://0.0.0.0:${PORT}/api/v1/health`);
       console.log(`[Buzz API] ✓ Info:   http://0.0.0.0:${PORT}/api/v1/info`);
-      console.log(`[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts, strategy, skills, memory, operator, contacts`);
+      console.log(`[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts, strategy, skills, memory, operator, contacts, ws`);
+
+      // v7.6.0: Start WebSocket services (non-blocking, with delay for DB init)
+      setTimeout(() => {
+        try { require('./services/okx-websocket').init(); } catch (e) { console.error('[okx-ws] Init failed:', e.message); }
+        try { require('./services/helius-websocket').init(); } catch (e) { console.error('[helius-ws] Init failed:', e.message); }
+      }, 5000);
     });
   } catch (err) {
     console.error('[Buzz API] ✗ Failed to start:', err.message);
