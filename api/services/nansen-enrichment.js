@@ -50,7 +50,7 @@ async function enrichToken(address, chain = "solana") {
   const db = getDB();
   
   const existing = db.prepare(
-    "SELECT * FROM nansen_enrichments WHERE token_address = ? AND chain = ? AND enriched_at > datetime(\'now\', \'-2 hours\')"
+    "SELECT * FROM nansen_enrichments WHERE token_address = ? AND chain = ? AND enriched_at > datetime('now', '-2 hours')"
   ).get(address, chain);
   if (existing) return { cached: true, data: existing };
   

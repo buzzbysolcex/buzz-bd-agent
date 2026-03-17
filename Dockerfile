@@ -67,6 +67,9 @@ COPY bake/skills/ /opt/buzz-workspace-skills/
 # BAKE: Cron schedule (38+ jobs), memory, pipeline data
 # ══════════════════════════════════════════════════
 COPY bake/memory/ /opt/buzz-memory/
+
+# Persistent directive (repo-managed)
+COPY memory/ /opt/buzz-memory-repo/
 COPY bake/cron/ /opt/buzz-cron/
 
 # ══════════════════════════════════════════════════
