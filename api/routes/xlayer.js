@@ -45,7 +45,7 @@ router.get("/stats", (req, res) => {
   const db = getDB();
   const stats = db.prepare(`
     SELECT COUNT(*) as total_tx, 
-      SUM(CASE WHEN status=completed THEN 1 ELSE 0 END) as completed,
+      SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) as completed,
       SUM(amount_usdc) as total_revenue,
       MAX(created_at) as last_tx
     FROM xlayer_transactions

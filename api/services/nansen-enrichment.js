@@ -50,7 +50,7 @@ async function enrichToken(address, chain = "solana") {
   const db = getDB();
   
   const existing = db.prepare(
-    "SELECT * FROM nansen_enrichments WHERE token_address = ? AND chain = ? AND enriched_at > datetime(now, -2 hours)"
+    "SELECT * FROM nansen_enrichments WHERE token_address = ? AND chain = ? AND enriched_at > datetime(\'now\', \'-2 hours\')"
   ).get(address, chain);
   if (existing) return { cached: true, data: existing };
   
@@ -86,7 +86,7 @@ async function enrichToken(address, chain = "solana") {
       top10_concentration=excluded.top10_concentration,
       nansen_labels=excluded.nansen_labels,
       raw_json=excluded.raw_json,
-      enriched_at=datetime(now)
+      enriched_at=datetime('now')
   `).run(
     enrichment.token_address, enrichment.chain,
     enrichment.smart_money_netflow, enrichment.smart_money_count,
