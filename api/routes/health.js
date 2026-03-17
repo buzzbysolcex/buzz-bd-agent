@@ -39,7 +39,7 @@ router.get('/', async (req, res) => {
     },
     alpha: true,
     phase0_features: ['learning-loop', 'skill-self-improvement', 'contact-intelligence'],
-    endpoints: 91,
+    endpoints: 123,
     uptime_seconds: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
     response_ms: Date.now() - startTime,
