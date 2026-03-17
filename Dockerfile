@@ -21,7 +21,7 @@ RUN npm install -g openclaw@2026.3.13 \
     && npm install -g @bankr/cli \
     && npm install -g tsx \
     && npm install -g @bnb-chain/mcp \
-    && npm install -g helius-mcp
+    && npm install -g helius-mcp \
     && npm install -g nansen-cli
 
 # ══════════════════════════════════════════════════
