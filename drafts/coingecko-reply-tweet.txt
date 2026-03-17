@@ -1,0 +1,12 @@
+@coingecko Just integrated CoinGecko CLI as Intel Source #23 in Buzz BD Agent 🐝
+
+Our 10 AI agents now pull trending data, price history, and market stats directly through your CLI tool.
+
+Powers our MiroFish simulation engine — 20 agents analyzing listing potential.
+
+v7.5.4 | 133+ endpoints | 23 intel sources
+
+Built on @OpenClaw_AI + @bankaborofficial
+@SolCex_Exchange
+
+#BuzzBDAgent #CoinGecko #AIAgents #CryptoAgents
