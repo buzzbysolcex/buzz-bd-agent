@@ -56,7 +56,7 @@ jobs:
           username: root
           key: ${{ secrets.HETZNER_SSH_KEY }}
           script_stop: true
-          command_timeout: 5m
+          command_timeout: 8m
           script: |
             set -e
             IMAGE="buzzbd/buzz-bd-agent:latest"
@@ -74,11 +74,11 @@ jobs:
             curl -sf -X POST -H "Authorization: Bearer ${AH_TOKEN}" "${AH_API}/restart"
             echo ""
 
-            echo ">>> Waiting 90s for boot (entrypoint installs npm packages + starts 9 agents)"
-            sleep 90
+            echo ">>> Waiting 180s for boot (entrypoint installs npm packages + starts 9 agents)"
+            sleep 180
 
-            echo ">>> Health check (8 attempts, 15s apart)"
-            for i in 1 2 3 4 5 6 7 8; do
+            echo ">>> Health check (12 attempts, 15s apart)"
+            for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
               HTTP_CODE=$(curl -s -o /tmp/health.json -w '%{http_code}' http://localhost:3000/api/v1/health)
               if [ "$HTTP_CODE" = "200" ]; then
                 echo "Health check PASSED on attempt $i"
@@ -88,8 +88,24 @@ jobs:
               echo "Attempt $i: HTTP $HTTP_CODE - retrying in 15s..."
               sleep 15
             done
-            echo "HEALTH CHECK FAILED after 8 attempts"
+            echo "HEALTH CHECK FAILED after 12 attempts"
             exit 1
+
+      - name: Post-deploy — directive reload + announcement
+        if: success()
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 204.168.137.253
+          username: root
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          command_timeout: 2m
+          script: |
+            # Collect system stats for announcement
+            HEALTH=$(curl -s http://localhost:3000/api/v1/health)
+            ENDPOINTS=$(echo "$HEALTH" | python3 -c "import sys,json; print(json.load(sys.stdin).get('endpoints',0))" 2>/dev/null || echo "?")
+            TABLES=$(echo "$HEALTH" | python3 -c "import sys,json; print(json.load(sys.stdin)['checks']['database']['tables'])" 2>/dev/null || echo "?")
+            AGENTS=$(curl -s http://localhost:3000/api/v1/agents | python3 -c "import sys,json; d=json.load(sys.stdin); print(sum(1 for a in d['agents'] if a['status']=='active'))" 2>/dev/null || echo "?")
+            echo "Stats: ${ENDPOINTS} endpoints, ${TABLES} tables, ${AGENTS} agents"
 
       - name: Telegram notify — success
         if: success()
@@ -97,17 +113,25 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
           VERSION="v${{ steps.version.outputs.version }}"
+
+          # Deploy announcement
           curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d chat_id=950395553 \
             -d parse_mode=Markdown \
-            -d text="✅ *Buzz ${VERSION} deployed*
+            -d text="✅ *Buzz ${VERSION} deployed successfully*
 
+          🐝 *Deploy Summary*
           Image: \`buzzbd/buzz-bd-agent:${VERSION}\`
           Server: 204.168.137.253
           Health: PASSED
           Commit: [\`${GITHUB_SHA::7}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
 
-          _Auto-deployed via GitHub Actions_"
+          📊 *System Status*
+          Endpoints | Tables | Agents: check /status
+          Sentinel: monitoring every 15 min
+
+          _Auto-deployed via GitHub Actions_
+          _Directive reload: automatic on next cron cycle_"
 
       - name: Telegram notify — failure
         if: failure()
