@@ -116,7 +116,12 @@ app.get('/api/v1/info', (req, res) => {
         skills: 8,
         memory: 3,
         operator: 2,
-        contacts: 6
+        contacts: 6,
+        bags: 4,
+        simulate: 2,
+        ws: 2,
+        nansen: 2,
+        xlayer: 2
       }
     },
     documentation: 'https://github.com/buzzbysolcex/buzz-bd-agent',
@@ -387,7 +392,7 @@ async function start() {
       console.log(`[Buzz API] ✓ v3.5.2 — 103/103 endpoints on port ${PORT}`);
       console.log(`[Buzz API] ✓ Health: http://0.0.0.0:${PORT}/api/v1/health`);
       console.log(`[Buzz API] ✓ Info:   http://0.0.0.0:${PORT}/api/v1/info`);
-      console.log(`[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts, strategy, skills, memory, operator, contacts, bags, simulate, ws, nansen, xlayer`);
+      console.log(`[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts, strategy, skills, memory, operator, contacts, bags, simulate, ws, nansen, xlayer, personas, backtest`);
 
       // v7.6.0: Start WebSocket services (non-blocking, with delay for DB init)
       setTimeout(() => {
