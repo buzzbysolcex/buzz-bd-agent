@@ -1331,32 +1331,43 @@ if (!BANKR_PARTNER_KEY) log('⚠️  BANKR_PARTNER_KEY not set -- deploy will fa
   setInterval(runLoop, CHECK_INTERVAL_MS);
 
 // -- Proactive Tweet Schedule ------------------------------------------------
-const ONE_HOUR = 60 * 60 * 1000;
+// Runs on startup AND every 15 min so restarts do not skip scheduled tweets.
+// The canPost() dedup prevents double-posting within the minimum interval.
 
-// Alpha alert: every 6h (at :05 past to avoid exact hour collisions)
-setInterval(() => {
-  const h = new Date().getUTCHours();
-  if ([0, 6, 12, 18].includes(h)) postAlphaAlert();
-}, ONE_HOUR);
-
-// Pipeline report: daily at 12:00 UTC
-setInterval(() => {
-  const h = new Date().getUTCHours();
-  if (h === 12) postPipelineReport();
-}, ONE_HOUR);
-
-// Intelligence thread: Tue (2) & Fri (5) at 14:00 UTC
-setInterval(() => {
+async function checkScheduledTweets() {
   const d = new Date();
-  if ([2, 5].includes(d.getUTCDay()) && d.getUTCHours() === 14) postIntelligenceThread();
-}, ONE_HOUR);
+  const h = d.getUTCHours();
+  const day = d.getUTCDay();
 
-// Build update: Wed (3) & Sat (6) at 15:00 UTC
-setInterval(() => {
-  const d = new Date();
-  if ([3, 6].includes(d.getUTCDay()) && d.getUTCHours() === 15) postBuildUpdate();
-}, ONE_HOUR);
+  // Alpha alert: every 6h (0, 6, 12, 18 UTC)
+  if ([0, 6, 12, 18].includes(h)) {
+    log("Schedule check: Alpha alert hour (" + h + " UTC), attempting...");
+    await postAlphaAlert();
+  }
 
-log('\u{1F4E2} Proactive tweet schedule active (alpha/pipeline/intelligence/build)');
+  // Pipeline report: daily at 12:00 UTC
+  if (h === 12) {
+    log("Schedule check: Pipeline report hour (12 UTC), attempting...");
+    await postPipelineReport();
+  }
+
+  // Intelligence thread: Tue (2) & Fri (5) at 14:00 UTC
+  if ([2, 5].includes(day) && h === 14) {
+    log("Schedule check: Intelligence thread (day=" + day + " hour=14), attempting...");
+    await postIntelligenceThread();
+  }
+
+  // Build update: Wed (3) & Sat (6) at 15:00 UTC
+  if ([3, 6].includes(day) && h === 15) {
+    log("Schedule check: Build update (day=" + day + " hour=15), attempting...");
+    await postBuildUpdate();
+  }
+}
+
+// Run immediately on startup, then every 15 minutes
+checkScheduledTweets();
+setInterval(checkScheduledTweets, CHECK_INTERVAL_MS);
+
+log("Proactive tweet schedule active (alpha/pipeline/intelligence/build) [15-min check]");
 
 })();
