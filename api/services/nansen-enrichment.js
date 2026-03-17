@@ -15,7 +15,7 @@ function nansenCmd(args) {
   if (!NANSEN_KEY()) return { error: "NANSEN_API_KEY not set" };
   
   try {
-    const cmd = `nansen ${args} --api-key ${NANSEN_KEY()} --output json`;
+    const cmd = `nansen ${args} --output json`;
     const result = execSync(cmd, { timeout: 30000, encoding: "utf8" });
     return JSON.parse(result);
   } catch (err) {
@@ -35,15 +35,15 @@ function nansenCmd(args) {
 }
 
 async function getSmartMoney(chain = "solana") {
-  return nansenCmd(`smart-money --chain ${chain} --fields address,label,netflow_7d,token_count`);
+  return nansenCmd(`research smart-money --chain ${chain} --fields address,label,netflow_7d,token_count`);
 }
 
 async function getTokenHolders(address, chain = "solana") {
-  return nansenCmd(`token holders ${address} --chain ${chain} --fields address,label,balance,pct`);
+  return nansenCmd(`research token holders ${address} --chain ${chain} --fields address,label,balance,pct`);
 }
 
 async function getWalletProfile(address, chain = "solana") {
-  return nansenCmd(`wallet profile ${address} --chain ${chain} --fields label,pnl_30d,tokens_held,first_seen`);
+  return nansenCmd(`research profiler labels ${address} --chain ${chain} --fields label,pnl_30d,tokens_held,first_seen`);
 }
 
 async function enrichToken(address, chain = "solana") {
