@@ -414,6 +414,56 @@ function runMigrations() {
         CREATE INDEX IF NOT EXISTS idx_outreach_active ON outreach_sequences(is_active, next_action_at);
         CREATE INDEX IF NOT EXISTS idx_outreach_token ON outreach_sequences(token_address, chain);
       `
+    },
+
+    // ─── Migration 015: MiroFish EV — Add EV columns to listing_simulations ───
+    {
+      name: '015_mirofish_ev',
+      sql: 'SELECT 1', // Placeholder — actual ALTERs run in postRun due to SQLite limitations
+      postRun: (db) => {
+        const columns = [
+          'ALTER TABLE listing_simulations ADD COLUMN ticker TEXT',
+          'ALTER TABLE listing_simulations ADD COLUMN score INTEGER',
+          'ALTER TABLE listing_simulations ADD COLUMN agents_count INTEGER DEFAULT 20',
+          'ALTER TABLE listing_simulations ADD COLUMN probability REAL',
+          'ALTER TABLE listing_simulations ADD COLUMN confidence REAL',
+          'ALTER TABLE listing_simulations ADD COLUMN ev REAL',
+          'ALTER TABLE listing_simulations ADD COLUMN recommendation TEXT',
+          'ALTER TABLE listing_simulations ADD COLUMN cluster_degen TEXT',
+          'ALTER TABLE listing_simulations ADD COLUMN cluster_whale TEXT',
+          'ALTER TABLE listing_simulations ADD COLUMN cluster_institutional TEXT',
+          'ALTER TABLE listing_simulations ADD COLUMN cluster_community TEXT',
+          'ALTER TABLE listing_simulations ADD COLUMN key_risk TEXT',
+          'ALTER TABLE listing_simulations ADD COLUMN key_signal TEXT',
+          'ALTER TABLE listing_simulations ADD COLUMN raw_verdicts TEXT',
+          'ALTER TABLE listing_simulations ADD COLUMN simulated_at TEXT DEFAULT CURRENT_TIMESTAMP',
+        ];
+        for (const sql of columns) {
+          try { db.exec(sql); } catch (e) { /* duplicate column — OK */ }
+        }
+        try {
+          db.exec('CREATE INDEX IF NOT EXISTS idx_sim_ticker ON listing_simulations(ticker)');
+        } catch (e) { /* index may exist */ }
+      }
+    },
+
+    // ─── Migration 016: Listing Proposals (MiroFish Stage 1) ───
+    {
+      name: '016_listing_proposals',
+      sql: `
+        CREATE TABLE IF NOT EXISTS listing_proposals (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          token_address TEXT,
+          ticker TEXT,
+          chain TEXT,
+          score INTEGER,
+          ev REAL,
+          recommendation TEXT,
+          html_content TEXT,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE INDEX IF NOT EXISTS idx_proposal_ticker ON listing_proposals(ticker);
+      `
     }
     ,
     // Migration 013: Nansen Enrichments (v7.5.2)
@@ -465,6 +515,7 @@ function runMigrations() {
     if (!applied.has(m.name)) {
       console.log(`[Buzz DB] Running migration: ${m.name}`);
       db.exec(m.sql);
+      if (m.postRun) m.postRun(db);
       insert.run(m.name);
     }
   }

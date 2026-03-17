@@ -50,6 +50,15 @@ const simulateRoutes = require('./routes/simulate');
 const nansenRoutes = require('./routes/nansen');
 const xlayerRoutes = require('./routes/xlayer');
 
+// MiroFish Stage 1: Listing Proposal generator
+const listingProposalRoutes = require('./routes/listing-proposal');
+
+// MiroFish Stage 1: Listing Report (unified token report)
+const listingReportRoutes = require('./routes/listing-report');
+
+// v7.5.4: CoinGecko CLI — Intel Source #23
+const coingeckoRoutes = require('./routes/coingecko');
+
 // v7.3.1 Memory search engine + Contact intelligence
 const { initFTS } = require('./services/memory-search');
 const { initContacts } = require('./services/contact-intelligence');
@@ -165,6 +174,13 @@ app.use('/api/v1/xlayer', apiKeyAuth, xlayerRoutes);
 
 // v7.6.0: WebSocket status routes (OKX + Helius)
 app.use('/api/v1/ws', apiKeyAuth, require('./routes/ws'));
+
+// MiroFish Stage 1: Listing Proposal + Listing Report
+app.use('/api/v1/listing-proposal', apiKeyAuth, listingProposalRoutes);
+app.use('/api/v1', apiKeyAuth, listingReportRoutes);
+
+// v7.5.4: CoinGecko CLI — Intel Source #23
+app.use('/api/v1/coingecko', apiKeyAuth, coingeckoRoutes);
 
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 
