@@ -225,8 +225,8 @@ router.post('/simulate-listing', async (req, res) => {
          bullish_count, neutral_count, bearish_count, expected_impact,
          ticker, score, agents_count, probability, confidence, ev, recommendation,
          cluster_degen, cluster_whale, cluster_institutional, cluster_community,
-         key_risk, key_signal, raw_verdicts, simulated_at, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         key_risk, key_signal, raw_verdicts, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         tokenAddr, tokenChain, scenario,
         JSON.stringify(verdicts.map(v => ({ persona: v.persona, signal: v.signal, confidence: v.confidence, score: v.score, weight: v.weight }))),
@@ -234,7 +234,7 @@ router.post('/simulate-listing', async (req, res) => {
         bullish, neutral, bearish,
         consensus.expected_impact,
         tokenTicker,
-        token?.score || scores?.total_score || null,
+        token?.score || scores?.score_total || null,
         verdicts.length,
         probability,
         confidence,
@@ -247,7 +247,6 @@ router.post('/simulate-listing', async (req, res) => {
         key_risk,
         key_signal,
         JSON.stringify(verdicts),
-        now,
         now
       );
     } catch (e) {
