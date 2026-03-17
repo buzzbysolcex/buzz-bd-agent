@@ -46,6 +46,10 @@ const contactRoutes = require('./routes/contacts');
 const bagsRoutes = require('./routes/bags');
 const simulateRoutes = require('./routes/simulate');
 
+// v7.5.2: Nansen CLI + X Layer x402
+const nansenRoutes = require('./routes/nansen');
+const xlayerRoutes = require('./routes/xlayer');
+
 // v7.3.1 Memory search engine + Contact intelligence
 const { initFTS } = require('./services/memory-search');
 const { initContacts } = require('./services/contact-intelligence');
@@ -83,17 +87,17 @@ app.use('/api/v1/health', healthRoutes);
 app.get('/api/v1/info', (req, res) => {
   res.json({
     name: 'Buzz BD Agent API',
-    version: '3.0.0',
+    version: '3.5.2',
     agent: 'Buzz by SolCex',
     architecture: '5 parallel sub-agents + orchestrator',
     sub_agents: ['scanner-agent', 'safety-agent', 'wallet-agent', 'social-agent', 'scorer-agent'],
     orchestrator_model: 'MiniMax M2.5',
     sub_agent_model: 'bankr/gpt-5-nano',
     llm_gateway: 'Bankr LLM Gateway (8 models)',
-    intel_sources: '19/19 connected',
+    intel_sources: '22/22 connected',
     cron_jobs: 42,
     endpoints: {
-      total: 91,
+      total: 103,
       categories: {
         health: 5,
         info: 1,
@@ -149,6 +153,10 @@ app.use('/api/v1/contacts', apiKeyAuth, contactRoutes);
 // v7.5.0: Bags.fm + Simulate Listing
 app.use('/api/v1/bags', apiKeyAuth, bagsRoutes);
 app.use('/api/v1/simulate', apiKeyAuth, simulateRoutes);
+
+// v7.5.2: Nansen CLI (#17 activated) + X Layer x402 (BaaS payment layer)
+app.use('/api/v1/nansen', apiKeyAuth, nansenRoutes);
+app.use('/api/v1/xlayer', apiKeyAuth, xlayerRoutes);
 
 // v7.6.0: WebSocket status routes (OKX + Helius)
 app.use('/api/v1/ws', apiKeyAuth, require('./routes/ws'));
@@ -376,10 +384,10 @@ async function start() {
     });
 
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`[Buzz API] ✓ v3.2.0 — 93/93 endpoints on port ${PORT}`);
+      console.log(`[Buzz API] ✓ v3.5.2 — 103/103 endpoints on port ${PORT}`);
       console.log(`[Buzz API] ✓ Health: http://0.0.0.0:${PORT}/api/v1/health`);
       console.log(`[Buzz API] ✓ Info:   http://0.0.0.0:${PORT}/api/v1/info`);
-      console.log(`[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts, strategy, skills, memory, operator, contacts, ws`);
+      console.log(`[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts, strategy, skills, memory, operator, contacts, bags, simulate, ws, nansen, xlayer`);
 
       // v7.6.0: Start WebSocket services (non-blocking, with delay for DB init)
       setTimeout(() => {
