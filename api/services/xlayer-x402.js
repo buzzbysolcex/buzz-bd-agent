@@ -89,7 +89,7 @@ async function runPaidScore(address, txHash) {
   
   db.prepare(`
     INSERT OR IGNORE INTO xlayer_transactions (tx_hash, from_address, to_address, amount_usdc, service, token_scored, status)
-    VALUES (?, , ?, ?, score-token, ?, pending)
+    VALUES (?, '', ?, ?, 'score-token', ?, 'pending')
   `).run(txHash, BUZZ_WALLET, SCORE_PRICE_USDC, address);
   
   return new Promise((resolve) => {
@@ -107,7 +107,7 @@ async function runPaidScore(address, txHash) {
       res.on("end", () => {
         try {
           const result = JSON.parse(body);
-          db.prepare("UPDATE xlayer_transactions SET score_result = ?, status = completed WHERE tx_hash = ?")
+          db.prepare("UPDATE xlayer_transactions SET score_result = ?, status = 'completed' WHERE tx_hash = ?")
             .run(result.score?.total || 0, txHash);
           resolve(result);
         } catch (e) { resolve({ error: "score_failed" }); }
