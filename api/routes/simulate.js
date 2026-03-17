@@ -66,24 +66,53 @@ function lookupToken(db, tokenAddress, ticker, chain) {
 }
 
 /**
- * Build context for persona agents (same pattern as existing simulate.js)
+ * Build context for persona agents from pipeline_tokens + token_scores
+ * token_scores stores rich data as JSON strings in scanner_data, safety_data, etc.
  */
 function buildContext(token, scores, scenario) {
+  // Parse JSON fields from token_scores
+  let scannerData = {};
+  let safetyData = {};
+  let walletData = {};
+  let socialData = {};
+  let safetyScore = 50;
+  let walletScore = 50;
+  let socialScore = 50;
+
+  if (scores) {
+    try {
+      const sd = JSON.parse(scores.scanner_data || '{}');
+      scannerData = sd.data || sd;
+      // Merge top-level scanner fields
+      if (sd.tokenName) scannerData.name = sd.tokenName;
+      if (sd.tokenSymbol) scannerData.symbol = sd.tokenSymbol;
+      if (sd.marketCap) scannerData.market_cap = sd.marketCap;
+      if (sd.liquidity) scannerData.liquidity_usd = sd.liquidity;
+      if (sd.priceUsd) scannerData.price_usd = sd.priceUsd;
+    } catch {}
+    try { const s = JSON.parse(scores.safety_data || '{}'); safetyData = s.data || s; safetyScore = s.score || 50; } catch {}
+    try { const w = JSON.parse(scores.wallet_data || '{}'); walletData = w.data || w; walletScore = w.score || 50; } catch {}
+    try { const so = JSON.parse(scores.social_data || '{}'); socialData = so.data || so; socialScore = so.score || 50; } catch {}
+  }
+
+  // Fallback: use pipeline_tokens data if no token_scores
+  if (!scannerData.name && token) {
+    scannerData.name = token.name || token.ticker || token.address;
+    scannerData.symbol = token.ticker;
+  }
+
+  // Use pipeline score if available and higher fidelity
+  const pipelineScore = token?.score || 0;
+
   return {
-    scannerData: token ? {
-      name: token.name || token.ticker || token.address,
-      symbol: token.ticker,
-      market_cap: scores?.market_cap,
-      liquidity_usd: scores?.liquidity_usd,
-      volume_24h: scores?.volume_24h,
-      price_change_24h: scores?.price_change_24h,
-    } : {},
-    safetyData: {},
-    walletData: {},
-    socialData: {},
-    safetyScore: scores?.safety_score || 50,
-    walletScore: scores?.wallet_score || 50,
-    socialScore: scores?.social_score || 50,
+    scannerData,
+    safetyData,
+    walletData,
+    socialData,
+    safetyScore,
+    walletScore,
+    socialScore,
+    pipelineScore,
     scenario: scenario || 'listing_evaluation',
     timestamp: new Date().toISOString()
   };
