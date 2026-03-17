@@ -1,130 +1,272 @@
 /**
- * Simulate Listing — 6-Persona Market Impact Simulation
+ * Simulate Listing — MiroFish Stage 1 (20-Agent EV Simulation)
  * POST /api/v1/simulate/simulate-listing
+ * GET  /api/v1/simulate/history
+ * GET  /api/v1/simulate/simulations
  *
- * Dispatches all 6 persona agents (4 original + 2 new) against a listing scenario
- * to predict market reaction and consensus BD recommendation.
+ * Dispatches 4 persona types x 5 weight variations = 20 agent verdicts.
+ * Calculates probability, confidence, EV, clusters, and recommendation.
  *
- * Buzz BD Agent v7.5.0 | Bags.fm-First
+ * Buzz BD Agent | MiroFish MVP
  */
 
 const express = require('express');
 const router = express.Router();
+const path = require('path');
 const { getDB } = require('../db');
+const {
+  calculateEV,
+  calculateConfidence,
+  calculateProbability,
+  buildClusterBreakdown,
+  identifySignals
+} = require('../services/ev-calculator');
+
+// Persona agent paths — use relative require so it works both locally and in Docker
+const PERSONA_DIR = path.resolve(__dirname, '../services/agents/personas');
+
+const PERSONA_CONFIGS = [
+  { name: 'degen-agent', file: 'degen-agent', baseWeight: 0.15 },
+  { name: 'whale-agent', file: 'whale-agent', baseWeight: 0.25 },
+  { name: 'institutional-agent', file: 'institutional-agent', baseWeight: 0.35 },
+  { name: 'community-agent', file: 'community-agent', baseWeight: 0.25 },
+];
+
+// 5 weight offsets per persona to create 20 distinct evaluations
+const WEIGHT_OFFSETS = [-0.04, -0.02, 0, 0.02, 0.04];
+
+/**
+ * Look up token by address OR ticker from pipeline_tokens + token_scores
+ */
+function lookupToken(db, tokenAddress, ticker, chain) {
+  let token = null;
+
+  if (tokenAddress) {
+    try {
+      token = db.prepare('SELECT * FROM pipeline_tokens WHERE address = ?').get(tokenAddress);
+    } catch (e) { /* table may not exist */ }
+  }
+
+  if (!token && ticker) {
+    try {
+      token = db.prepare('SELECT * FROM pipeline_tokens WHERE UPPER(ticker) = UPPER(?)').get(ticker);
+    } catch (e) { /* table may not exist */ }
+  }
+
+  // Also pull token_scores if available
+  let scores = null;
+  const addr = token?.address || tokenAddress;
+  if (addr) {
+    try {
+      scores = db.prepare('SELECT * FROM token_scores WHERE address = ?').get(addr);
+    } catch (e) { /* table may not exist */ }
+  }
+
+  return { token, scores };
+}
+
+/**
+ * Build context for persona agents (same pattern as existing simulate.js)
+ */
+function buildContext(token, scores, scenario) {
+  return {
+    scannerData: token ? {
+      name: token.name || token.ticker || token.address,
+      symbol: token.ticker,
+      market_cap: scores?.market_cap,
+      liquidity_usd: scores?.liquidity_usd,
+      volume_24h: scores?.volume_24h,
+      price_change_24h: scores?.price_change_24h,
+    } : {},
+    safetyData: {},
+    walletData: {},
+    socialData: {},
+    safetyScore: scores?.safety_score || 50,
+    walletScore: scores?.wallet_score || 50,
+    socialScore: scores?.social_score || 50,
+    scenario: scenario || 'listing_evaluation',
+    timestamp: new Date().toISOString()
+  };
+}
 
 // POST /api/v1/simulate/simulate-listing
 router.post('/simulate-listing', async (req, res) => {
   try {
-    const { address, chain, scenario } = req.body;
-    if (!address || !chain || !scenario) {
-      return res.json({ success: false, error: 'address, chain, scenario required' });
+    const { tokenAddress, address, ticker, chain, depth } = req.body;
+    const resolvedAddress = tokenAddress || address;
+
+    if (!resolvedAddress && !ticker) {
+      return res.json({ success: false, error: 'tokenAddress or ticker required' });
     }
 
     const db = getDB();
 
-    // 1. Pull existing scan data
-    let tokenData = null;
-    try {
-      tokenData = db.prepare('SELECT * FROM token_scores WHERE address = ?').get(address);
-    } catch (e) { /* table may not exist */ }
+    // 1. Look up token
+    const { token, scores } = lookupToken(db, resolvedAddress, ticker, chain || 'solana');
 
-    let bagsData = null;
-    try {
-      bagsData = db.prepare('SELECT * FROM bags_tokens WHERE token_mint = ?').get(address);
-    } catch (e) { /* table may not exist */ }
+    if (!token && !resolvedAddress) {
+      return res.json({
+        success: false,
+        error: 'Token not found in pipeline — scan first'
+      });
+    }
 
-    // 2. Build context for personas
-    const context = {
-      scannerData: tokenData ? {
-        name: tokenData.name || address,
-        symbol: tokenData.symbol,
-        market_cap: tokenData.market_cap,
-        liquidity_usd: tokenData.liquidity_usd,
-        volume_24h: tokenData.volume_24h,
-        price_change_24h: tokenData.price_change_24h,
-      } : { name: address, address },
-      safetyData: {},
-      walletData: {},
-      socialData: {},
-      safetyScore: tokenData?.safety_score || 50,
-      walletScore: tokenData?.wallet_score || 50,
-      socialScore: tokenData?.social_score || 50,
-      bags: bagsData,
-      scenario,
-      timestamp: new Date().toISOString()
-    };
+    const tokenAddr = token?.address || resolvedAddress;
+    const tokenTicker = token?.ticker || ticker || null;
+    const tokenChain = token?.chain || chain || 'solana';
+    const scenario = req.body.scenario || 'listing_evaluation';
 
-    // 3. Import all 6 personas
-    const degenAgent = require('/opt/buzz-api/services/agents/personas/degen-agent');
-    const whaleAgent = require('/opt/buzz-api/services/agents/personas/whale-agent');
-    const institutionalAgent = require('/opt/buzz-api/services/agents/personas/institutional-agent');
-    const communityAgent = require('/opt/buzz-api/services/agents/personas/community-agent');
-    const competitorAgent = require('/opt/buzz-api/services/agents/personas/competitor-exchange-agent');
-    const narrativeAgent = require('/opt/buzz-api/services/agents/personas/narrative-trader-agent');
+    // 2. Build context
+    const context = buildContext(token, scores, scenario);
 
-    // 4. Dispatch all 6 in parallel (same pattern as orchestrator.js)
-    const results = await Promise.allSettled([
-      degenAgent.analyzeToken(context, null),
-      whaleAgent.analyzeToken(context, null),
-      institutionalAgent.analyzeToken(context, null),
-      communityAgent.analyzeToken(context, null),
-      competitorAgent.analyzeToken(context, null),
-      narrativeAgent.analyzeToken(context, null),
-    ]);
+    // 3. Load persona agents and dispatch 20 evaluations (4 personas x 5 weight variations)
+    const agentPromises = [];
 
-    // 5. Aggregate consensus
-    const fulfilled = results
-      .filter(r => r.status === 'fulfilled')
+    for (const persona of PERSONA_CONFIGS) {
+      let agentModule;
+      try {
+        agentModule = require(path.join(PERSONA_DIR, persona.file));
+      } catch (e) {
+        // Try Docker path as fallback
+        try {
+          agentModule = require(`/opt/buzz-api/services/agents/personas/${persona.file}`);
+        } catch (e2) {
+          console.error(`[simulate] Cannot load ${persona.name}: ${e.message}`);
+          continue;
+        }
+      }
+
+      for (const offset of WEIGHT_OFFSETS) {
+        const adjustedWeight = Math.max(0.05, Math.min(0.50, persona.baseWeight + offset));
+        agentPromises.push(
+          agentModule.analyzeToken(context, null).then(result => ({
+            ...result,
+            persona: persona.name,
+            weight: adjustedWeight,
+            variation: offset
+          }))
+        );
+      }
+    }
+
+    const results = await Promise.allSettled(agentPromises);
+
+    // 4. Collect valid verdicts
+    const verdicts = results
+      .filter(r => r.status === 'fulfilled' && r.value)
       .map(r => r.value);
 
-    const bullish = fulfilled.filter(r => r.signal === 'bullish').length;
-    const neutral = fulfilled.filter(r => r.signal === 'neutral').length;
-    const bearish = fulfilled.filter(r => r.signal === 'bearish').length;
+    if (verdicts.length < 10) {
+      return res.json({
+        success: false,
+        error: `Only ${verdicts.length} valid verdicts — need at least 10. Check persona agents.`
+      });
+    }
+
+    const partialNote = verdicts.length < 15
+      ? `Partial simulation: ${verdicts.length}/20 agents responded`
+      : null;
+
+    // 5. Calculate EV metrics
+    const probability = calculateProbability(verdicts);
+    const confidence = calculateConfidence(verdicts);
+    const evResult = calculateEV(probability);
+    const clusters = buildClusterBreakdown(verdicts);
+    const { key_risk, key_signal } = identifySignals(clusters);
+
+    // 6. Aggregate counts
+    const bullish = verdicts.filter(v => v.signal === 'bullish').length;
+    const neutral = verdicts.filter(v => v.signal === 'neutral').length;
+    const bearish = verdicts.filter(v => v.signal === 'bearish').length;
 
     const consensus = {
       overall: bullish > bearish + neutral ? 'bullish' : bearish > bullish ? 'bearish' : 'mixed',
       bullish_count: bullish,
       neutral_count: neutral,
       bearish_count: bearish,
-      total_personas: fulfilled.length,
-      expected_impact: bullish >= 4 ? '+15-25% in 24h' : bullish >= 2 ? '+5-15% in 24h' : 'minimal',
+      total_agents: verdicts.length,
+      expected_impact: bullish >= 14 ? '+15-25% in 24h' : bullish >= 8 ? '+5-15% in 24h' : 'minimal',
     };
 
-    // 6. Store in listing_simulations table
+    // 7. Store in DB
+    const now = new Date().toISOString();
     try {
       db.prepare(`INSERT INTO listing_simulations
-        (token_address, chain, scenario, persona_results, consensus, bullish_count, neutral_count, bearish_count, expected_impact, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (token_address, chain, scenario, persona_results, consensus,
+         bullish_count, neutral_count, bearish_count, expected_impact,
+         ticker, score, agents_count, probability, confidence, ev, recommendation,
+         cluster_degen, cluster_whale, cluster_institutional, cluster_community,
+         key_risk, key_signal, raw_verdicts, simulated_at, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
-        address, chain, scenario,
-        JSON.stringify(fulfilled),
+        tokenAddr, tokenChain, scenario,
+        JSON.stringify(verdicts.map(v => ({ persona: v.persona, signal: v.signal, confidence: v.confidence, score: v.score, weight: v.weight }))),
         JSON.stringify(consensus),
         bullish, neutral, bearish,
         consensus.expected_impact,
-        new Date().toISOString()
+        tokenTicker,
+        token?.score || scores?.total_score || null,
+        verdicts.length,
+        probability,
+        confidence,
+        evResult.ev,
+        evResult.decision,
+        JSON.stringify(clusters.degen || null),
+        JSON.stringify(clusters.whale || null),
+        JSON.stringify(clusters.institutional || null),
+        JSON.stringify(clusters.community || null),
+        key_risk,
+        key_signal,
+        JSON.stringify(verdicts),
+        now,
+        now
       );
     } catch (e) {
       console.error('[simulate] DB insert error:', e.message);
     }
 
-    // 7. Return
+    // 8. Return response
     res.json({
       success: true,
       simulation: {
-        token: address,
-        chain,
+        token: tokenAddr,
+        ticker: tokenTicker,
+        chain: tokenChain,
+        agents_count: verdicts.length,
         scenario,
-        persona_results: fulfilled,
-        consensus
+        probability,
+        confidence,
+        ev: evResult,
+        recommendation: evResult.decision,
+        consensus,
+        clusters,
+        key_risk,
+        key_signal,
+        partial_note: partialNote,
+        persona_results: verdicts,
+        simulated_at: now
       }
     });
   } catch (err) {
+    console.error('[simulate] Error:', err.message);
     res.json({ success: false, error: err.message });
   }
 });
 
 // GET /api/v1/simulate/history — recent simulations
 router.get('/history', (req, res) => {
+  try {
+    const db = getDB();
+    const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+    const rows = db.prepare('SELECT * FROM listing_simulations ORDER BY id DESC LIMIT ?').all(limit);
+    res.json({ success: true, count: rows.length, simulations: rows });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/v1/simulate/simulations — alias for history
+router.get('/simulations', (req, res) => {
   try {
     const db = getDB();
     const limit = Math.min(parseInt(req.query.limit) || 20, 100);
