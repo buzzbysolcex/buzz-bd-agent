@@ -27,6 +27,20 @@ const DEPLOYS_FILE        = path.join(DATA_DIR, 'twitter-deploys.json');
 const SCAN_TWEETS_FILE    = path.join(DATA_DIR, 'twitter-scan-tweets.json');
 const DEPLOY_DAILY_FILE   = path.join(DATA_DIR, 'twitter-deploy-daily.json');
 const LOG_FILE            = path.join(DATA_DIR, 'twitter-bot.log');
+const WATERMARK_FILE     = path.join(DATA_DIR, 'twitter-bot-state.json');
+
+// sinceId watermark persistence — survives container restarts
+function loadWatermark() {
+  try {
+    const data = JSON.parse(fs.readFileSync(WATERMARK_FILE, "utf8"));
+    return data.lastMentionId || null;
+  } catch { return null; }
+}
+function saveWatermark(id) {
+  try {
+    fs.writeFileSync(WATERMARK_FILE, JSON.stringify({ lastMentionId: id, updatedAt: new Date().toISOString() }));
+  } catch (e) { console.error("[watermark] Save failed:", e.message); }
+}
 
 const X_API_KEY           = process.env.X_API_KEY           || '';
 const X_API_SECRET        = process.env.X_API_SECRET        || '';
@@ -485,9 +499,9 @@ function resolveTickerToAddress(symbol) {
   });
 }
 
-function callBuzzAPI(address) {
+function callBuzzAPI(address, chain) {
   return new Promise((resolve, reject) => {
-    const payload = JSON.stringify({ address });
+    const payload = JSON.stringify({ address, chain: chain || "solana" });
     const options = {
       hostname: "localhost",
       port: 3000,
@@ -514,9 +528,9 @@ function callBuzzAPI(address) {
   });
 }
 
-async function runScanPipeline(value) {
+async function runScanPipeline(value, chain) {
   try {
-    const raw = await callBuzzAPI(value);
+    const raw = await callBuzzAPI(value, chain);
     if (!raw.success) throw new Error(raw.error || "API returned unsuccessful");
 
     const t   = raw.token || {};
@@ -783,7 +797,7 @@ async function notifyBuzz(l1, l2, l3, scoring, tweetId) {
 // MAIN LOOP
 // ==============================================================================
 
-let lastMentionId = null;
+let lastMentionId = loadWatermark();
 let isRunning = false;  // Concurrency guard -- prevents overlapping scans
 
 async function runLoop() {
@@ -803,7 +817,7 @@ async function runLoop() {
     let processed = 0;
 
     // Advance watermark to newest mention so since_id skips already-seen tweets
-    if (mentions.length) lastMentionId = mentions[0].id;
+    if (mentions.length) { lastMentionId = mentions[0].id; saveWatermark(lastMentionId); }
     for (const tweet of mentions) {
       if (replied.includes(tweet.id)) continue;
       if (daily.count >= MAX_REPLIES_DAY) { log(`Daily limit ${MAX_REPLIES_DAY} reached`); break; }
@@ -873,6 +887,7 @@ async function runLoop() {
           log('  \u2705 Resolved $' + cmd.value + ' -> ' + resolved.address.slice(0,12) + '... on ' + resolved.chain);
           cmd.value = resolved.address;
           cmd.type = 'ca';
+          cmd.chain = resolved.chain || 'solana';
         }
         const history = loadScanHistory();
         if (history.includes(cmd.value)) {
@@ -882,7 +897,7 @@ async function runLoop() {
           continue;
         }
 
-        const result = await runScanPipeline(cmd.value);
+        const result = await runScanPipeline(cmd.value, cmd.chain || "solana");
         if (!result) {
           log(`  ❌ Pipeline returned no result`);
           replied.push(tweet.id);

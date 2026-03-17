@@ -772,6 +772,22 @@ else
 fi
 
 # ══════════════════════════════════════════════════
+# ══════════════════════════════════════════════════
+# BLOCK 11C — BAKE: PERSISTENT MEMORY (copy-if-not-exists)
+# ══════════════════════════════════════════════════
+PERSISTENT_MEM_SRC="/opt/buzz-memory-repo/buzz-persistent-memory.md"
+PERSISTENT_MEM_DST="/data/workspace/memory/buzz-persistent-memory.md"
+if [ -f "$PERSISTENT_MEM_SRC" ]; then
+  if [ ! -f "$PERSISTENT_MEM_DST" ] || [ "$(wc -l < "$PERSISTENT_MEM_DST" 2>/dev/null || echo 0)" -lt 50 ]; then
+    cp "$PERSISTENT_MEM_SRC" "$PERSISTENT_MEM_DST"
+    echo "[boot] ✅ Block 11C: Persistent memory installed ($(wc -l < "$PERSISTENT_MEM_DST") lines)"
+  else
+    echo "[boot] ✅ Block 11C: Persistent memory already exists ($(wc -l < "$PERSISTENT_MEM_DST") lines) — not overwriting"
+  fi
+else
+  echo "[boot] ⚠️ Block 11C: No persistent memory source at $PERSISTENT_MEM_SRC"
+fi
+
 # BLOCK 12 — START REST API (port 3000)
 # ══════════════════════════════════════════════════
 echo "[boot] Starting REST API on port 3000..."
