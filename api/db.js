@@ -415,6 +415,48 @@ function runMigrations() {
         CREATE INDEX IF NOT EXISTS idx_outreach_token ON outreach_sequences(token_address, chain);
       `
     }
+    ,
+    // Migration 013: Nansen Enrichments (v7.5.2)
+    {
+      name: '013_nansen',
+      sql: `
+        CREATE TABLE IF NOT EXISTS nansen_enrichments (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          token_address TEXT,
+          chain TEXT,
+          smart_money_netflow REAL,
+          smart_money_count INTEGER,
+          whale_holders INTEGER,
+          top10_concentration REAL,
+          nansen_labels TEXT,
+          raw_json TEXT,
+          enriched_at TEXT DEFAULT (datetime('now')),
+          UNIQUE(token_address, chain)
+        );
+        CREATE INDEX IF NOT EXISTS idx_nansen_token ON nansen_enrichments(token_address, chain);
+      `
+    },
+
+    // Migration 014: X Layer Transactions (v7.5.2)
+    {
+      name: '014_xlayer',
+      sql: `
+        CREATE TABLE IF NOT EXISTS xlayer_transactions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          tx_hash TEXT UNIQUE,
+          from_address TEXT,
+          to_address TEXT,
+          amount_usdc REAL,
+          chain_id INTEGER DEFAULT 196,
+          service TEXT,
+          token_scored TEXT,
+          score_result INTEGER,
+          status TEXT DEFAULT 'pending',
+          created_at TEXT DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_xlayer_tx ON xlayer_transactions(tx_hash);
+      `
+    }
   ];
 
   const insert = db.prepare('INSERT INTO _migrations (name) VALUES (?)');

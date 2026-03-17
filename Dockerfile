@@ -2,10 +2,10 @@ FROM node:22-slim
 
 LABEL maintainer="Ogie @ SolCex Exchange"
 LABEL description="Buzz BD Agent — Autonomous AI Business Development on Akash Network"
-LABEL version="7.5.0"
+LABEL version="7.5.2"
 LABEL openclaw.version="2026.3.7"
 ENV OPENCLAW_EXTENSIONS="@supermemory/openclaw-supermemory"
-LABEL features="5-sub-agents, Strategic Orchestrator, 14-factor scoring, Helius MCP, REST API 72 endpoints, ACP marketplace"
+LABEL features="5-sub-agents, Strategic Orchestrator, 14-factor scoring, Helius MCP, Nansen CLI, X Layer x402, REST API 103 endpoints, ACP marketplace"
 
 # ══════════════════════════════════════════════════
 # SYSTEM DEPENDENCIES
@@ -22,6 +22,7 @@ RUN npm install -g openclaw@2026.3.13 \
     && npm install -g tsx \
     && npm install -g @bnb-chain/mcp \
     && npm install -g helius-mcp
+    && npm install -g nansen-cli
 
 # ══════════════════════════════════════════════════
 # BINANCE + CMC AI SKILLS (OpenClaw Skills Hub)
