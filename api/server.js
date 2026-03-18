@@ -62,6 +62,14 @@ const simulationReportRoutes = require('./routes/simulation-report');
 // v7.5.4: CoinGecko CLI — Intel Source #23
 const coingeckoRoutes = require('./routes/coingecko');
 
+// Day 32 Revenue Sprint
+const revenueRoutes = require('./routes/revenue');
+const attributionRoutes = require('./routes/attribution');
+const loopRoutes = require('./routes/loops');
+const dashboardRoutes = require('./routes/dashboard');
+const alertRoutes = require('./routes/alerts');
+const reportRoutes = require('./routes/reports');
+
 // v7.5.5: LLM Cost Proxy
 const llmProxyRoutes = require('./routes/llm-proxy');
 
@@ -192,6 +200,14 @@ app.use('/api/v1', apiKeyAuth, listingReportRoutes);
 
 // v7.5.4: CoinGecko CLI — Intel Source #23
 app.use('/api/v1/coingecko', apiKeyAuth, coingeckoRoutes);
+
+// Day 32 Revenue Sprint (25 endpoints)
+app.use('/api/v1/revenue', apiKeyAuth, revenueRoutes);
+app.use('/api/v1/attribution', apiKeyAuth, attributionRoutes);
+app.use('/api/v1/loops', apiKeyAuth, loopRoutes);
+app.use('/api/v1/dashboard', apiKeyAuth, dashboardRoutes);
+app.use('/api/v1/alerts', apiKeyAuth, alertRoutes);
+app.use('/api/v1/reports', apiKeyAuth, reportRoutes);
 
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 
