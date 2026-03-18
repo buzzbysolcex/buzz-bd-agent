@@ -61,6 +61,26 @@ module.exports = function (db) {
     }
   });
 
+  // ─── POST /anthropic/* — Transparent Anthropic-format Proxy ──
+  // OpenClaw sends Anthropic-format requests here (e.g. /anthropic/v1/messages)
+  // Forwards to api.minimax.io/anthropic/*, logs cost
+  router.post('/anthropic/*', async (req, res) => {
+    try {
+      const caller = req.headers['x-buzz-caller'] || 'openclaw-gateway';
+      // Extract sub-path: /anthropic/v1/messages → /v1/messages
+      const subPath = req.path.replace(/^\/anthropic/, '') || '/v1/messages';
+
+      const result = await proxy.proxyAnthropicRequest(subPath, req.body, caller);
+
+      res.set('X-Buzz-Cost-USD', String(result._meta.cost_usd));
+      res.set('X-Buzz-Latency-MS', String(result._meta.latency_ms));
+      res.status(result.statusCode).json(result.body);
+    } catch (err) {
+      console.error('[LLM Proxy] Anthropic proxy error:', err.message);
+      res.status(502).json({ error: 'proxy_error', message: err.message });
+    }
+  });
+
   // ─── GET /costs/today — Today's Breakdown ──────────
   router.get('/costs/today', (req, res) => {
     try {

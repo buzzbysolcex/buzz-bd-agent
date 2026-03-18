@@ -12,6 +12,7 @@ const https = require('https');
 const { URL } = require('url');
 
 const MINIMAX_ENDPOINT = 'https://api.minimax.io/v1/chat/completions';
+const MINIMAX_ANTHROPIC_BASE = 'https://api.minimax.io/anthropic';
 
 const PRICING = {
   'MiniMax-Text-02': { input: 0.55, output: 2.19 },
@@ -201,6 +202,105 @@ class LLMProxy {
           status: 'error',
           error_message: err.message,
         });
+        reject(err);
+      });
+
+      req.write(bodyStr);
+      req.end();
+    });
+  }
+
+  /**
+   * Transparent Anthropic-format proxy for OpenClaw gateway.
+   * Forwards to api.minimax.io/anthropic{subPath}, logs cost from response.
+   * Accepts any sub-path (e.g. /v1/messages).
+   */
+  proxyAnthropicRequest(subPath, requestBody, caller) {
+    return new Promise((resolve, reject) => {
+      const startTime = Date.now();
+      const apiKey = process.env.MINIMAX_API_KEY;
+
+      if (!apiKey) {
+        return reject(new Error('MINIMAX_API_KEY not configured'));
+      }
+
+      const model = requestBody.model || 'MiniMax-M2.5';
+      const bodyStr = JSON.stringify(requestBody);
+      const targetPath = `/anthropic${subPath}`;
+
+      const options = {
+        hostname: 'api.minimax.io',
+        port: 443,
+        path: targetPath,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'Content-Length': Buffer.byteLength(bodyStr),
+        },
+        timeout: 120000,
+      };
+
+      const req = https.request(options, (res) => {
+        const chunks = [];
+        res.on('data', (chunk) => chunks.push(chunk));
+        res.on('end', () => {
+          const latencyMs = Date.now() - startTime;
+          const raw = Buffer.concat(chunks).toString('utf8');
+
+          let parsed;
+          try {
+            parsed = JSON.parse(raw);
+          } catch (e) {
+            this.logCost({ model, caller, latency_ms: latencyMs, status: 'error', error_message: `Parse error: ${e.message}`, endpoint: targetPath });
+            return reject(new Error(`Anthropic proxy parse error: ${e.message}`));
+          }
+
+          // Anthropic format: usage.input_tokens, usage.output_tokens
+          const usage = parsed.usage || {};
+          const promptTokens = usage.input_tokens || usage.prompt_tokens || 0;
+          const completionTokens = usage.output_tokens || usage.completion_tokens || 0;
+          const totalTokens = promptTokens + completionTokens;
+          const cachedTokens = usage.cache_read_input_tokens || usage.cache_creation_input_tokens || 0;
+
+          const costUsd = this.calculateCost(model, promptTokens, completionTokens, cachedTokens);
+
+          this.logCost({
+            model,
+            caller,
+            prompt_tokens: promptTokens,
+            completion_tokens: completionTokens,
+            total_tokens: totalTokens,
+            cost_usd: costUsd,
+            latency_ms: latencyMs,
+            status: res.statusCode >= 400 ? 'error' : 'success',
+            error_message: res.statusCode >= 400 ? (parsed.error?.message || raw.slice(0, 500)) : null,
+            endpoint: targetPath,
+            cached_tokens: cachedTokens,
+          });
+
+          resolve({
+            statusCode: res.statusCode,
+            headers: res.headers,
+            body: parsed,
+            _meta: {
+              latency_ms: latencyMs,
+              cost_usd: Math.round(costUsd * 1_000_000) / 1_000_000,
+              tokens: { prompt: promptTokens, completion: completionTokens, total: totalTokens, cached: cachedTokens },
+            },
+          });
+        });
+      });
+
+      req.on('timeout', () => {
+        req.destroy();
+        this.logCost({ model, caller, latency_ms: Date.now() - startTime, status: 'error', error_message: 'Anthropic proxy timeout (120s)', endpoint: targetPath });
+        reject(new Error('Anthropic proxy timeout (120s)'));
+      });
+
+      req.on('error', (err) => {
+        this.logCost({ model, caller, latency_ms: Date.now() - startTime, status: 'error', error_message: err.message, endpoint: targetPath });
         reject(err);
       });
 
