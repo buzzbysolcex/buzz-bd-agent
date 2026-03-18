@@ -100,17 +100,17 @@ app.use('/api/v1/simulation-report', simulationReportRoutes);
 app.get('/api/v1/info', (req, res) => {
   res.json({
     name: 'Buzz BD Agent API',
-    version: '3.5.2',
+    version: '3.6.0',
     agent: 'Buzz by SolCex',
     architecture: '5 parallel sub-agents + orchestrator',
     sub_agents: ['scanner-agent', 'safety-agent', 'wallet-agent', 'social-agent', 'scorer-agent'],
     orchestrator_model: 'MiniMax M2.5',
     sub_agent_model: 'bankr/gpt-5-nano',
     llm_gateway: 'Bankr LLM Gateway (8 models)',
-    intel_sources: '22/22 connected',
+    intel_sources: '23/23 connected',
     cron_jobs: 42,
     endpoints: {
-      total: 103,
+      total: 113,
       categories: {
         health: 5,
         info: 1,
@@ -134,7 +134,11 @@ app.get('/api/v1/info', (req, res) => {
         simulate: 2,
         ws: 2,
         nansen: 2,
-        xlayer: 2
+        xlayer: 2,
+        listing_report: 1,
+        listing_proposal: 2,
+        coingecko: 6,
+        simulation_report: 1
       }
     },
     documentation: 'https://github.com/buzzbysolcex/buzz-bd-agent',
@@ -409,10 +413,10 @@ async function start() {
     });
 
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`[Buzz API] ✓ v3.5.2 — 103/103 endpoints on port ${PORT}`);
+      console.log(`[Buzz API] ✓ v3.6.0 — 113/113 endpoints on port ${PORT}`);
       console.log(`[Buzz API] ✓ Health: http://0.0.0.0:${PORT}/api/v1/health`);
       console.log(`[Buzz API] ✓ Info:   http://0.0.0.0:${PORT}/api/v1/info`);
-      console.log(`[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts, strategy, skills, memory, operator, contacts, bags, simulate, ws, nansen, xlayer, personas, backtest`);
+      console.log(`[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts, strategy, skills, memory, operator, contacts, bags, simulate, ws, nansen, xlayer, personas, backtest, listing-report, listing-proposal, coingecko, simulation-report`);
 
       // v7.6.0: Start WebSocket services (non-blocking, with delay for DB init)
       setTimeout(() => {
