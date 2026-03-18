@@ -397,6 +397,15 @@ async function start() {
     console.log('[Boot Sync] Starting data sync from persistent storage...');
     const pipelineSynced = syncPipelineOnBoot();
     const cronsSynced = syncCronsOnBoot();
+
+    // Day 32B: Sync scanner MD files → pipeline_tokens
+    try {
+      const { syncPipelineFiles } = require('./lib/pipeline-persist');
+      const mdSync = syncPipelineFiles();
+      console.log(`[Boot Sync] ✓ Pipeline MD files: ${mdSync.synced} synced, ${mdSync.total} total in DB`);
+    } catch (e) {
+      console.log(`[Boot Sync] ⚠️ Pipeline MD sync failed: ${e.message}`);
+    }
     console.log(`[Boot Sync] ✓ Complete — ${pipelineSynced} pipeline tokens, ${cronsSynced} cron jobs`);
 
     // v7.0: Initialize Strategic Orchestrator engines

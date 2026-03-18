@@ -95,28 +95,35 @@ router.post('/tokens', (req, res) => {
     return res.status(400).json({ error: 'missing_field', message: 'address is required' });
   }
 
+  // Score cap: NEVER exceed 100
+  const cappedScore = score != null ? Math.min(Math.max(0, score), 100) : null;
+
   const db = getDB();
 
   try {
     const result = db.prepare(`
       INSERT INTO pipeline_tokens (address, chain, ticker, name, source, score, score_breakdown)
       VALUES (?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(address, chain) DO UPDATE SET
+        ticker = COALESCE(excluded.ticker, pipeline_tokens.ticker),
+        name = COALESCE(excluded.name, pipeline_tokens.name),
+        score = CASE WHEN excluded.score > COALESCE(pipeline_tokens.score, 0) THEN excluded.score ELSE pipeline_tokens.score END,
+        source = COALESCE(excluded.source, pipeline_tokens.source),
+        score_breakdown = COALESCE(excluded.score_breakdown, pipeline_tokens.score_breakdown),
+        updated_at = datetime('now')
     `).run(
       address,
       chain || 'solana',
       ticker || null,
       name || null,
       source || 'manual',
-      score || null,
+      cappedScore,
       score_breakdown ? JSON.stringify(score_breakdown) : null
     );
 
-    const token = db.prepare('SELECT * FROM pipeline_tokens WHERE id = ?').get(result.lastInsertRowid);
+    const token = db.prepare('SELECT * FROM pipeline_tokens WHERE id = ? OR (address = ? AND chain = ?)').get(result.lastInsertRowid, address, chain || 'solana');
     res.status(201).json({ message: 'Token added to pipeline', token });
   } catch (err) {
-    if (err.message.includes('UNIQUE constraint')) {
-      return res.status(409).json({ error: 'duplicate', message: `Token ${address} on ${chain || 'solana'} already exists` });
-    }
     throw err;
   }
 });
@@ -230,6 +237,17 @@ router.post('/tokens/:address/reject', (req, res) => {
   }
 
   res.json({ message: 'Token rejected', reason });
+});
+
+// ─── POST /sync — Sync scanner MD files to pipeline_tokens ──
+router.post('/sync', (req, res) => {
+  try {
+    const { syncPipelineFiles } = require('../lib/pipeline-persist');
+    const result = syncPipelineFiles();
+    res.json({ message: 'Pipeline sync complete', ...result });
+  } catch (err) {
+    res.status(500).json({ error: 'sync_failed', message: err.message });
+  }
 });
 
 module.exports = router;
