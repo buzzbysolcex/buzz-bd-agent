@@ -196,5 +196,42 @@ module.exports = function (db) {
     }
   });
 
+  // ─── GET /stats — Provider Usage Stats (Day 32B) ───
+  router.get('/stats', (req, res) => {
+    try {
+      const { getCascadeStatus } = require('../lib/llm-cascade');
+      const cascadeStatus = getCascadeStatus();
+
+      // Provider usage from llm_provider_log
+      let providerStats = [];
+      try {
+        providerStats = db.prepare(`
+          SELECT provider, model, agent,
+            COUNT(*) as calls,
+            SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as successes,
+            SUM(CASE WHEN success = 0 THEN 1 ELSE 0 END) as failures,
+            SUM(tokens_in) as total_tokens_in,
+            SUM(tokens_out) as total_tokens_out,
+            ROUND(AVG(latency_ms), 0) as avg_latency_ms
+          FROM llm_provider_log
+          WHERE created_at >= datetime('now', '-24 hours')
+          GROUP BY provider, model, agent
+          ORDER BY calls DESC
+        `).all();
+      } catch { /* table may not exist yet */ }
+
+      // Also pull from existing llm_costs table
+      const costStats = proxy.getCostsToday();
+
+      res.json({
+        cascade: cascadeStatus,
+        provider_usage_24h: providerStats,
+        cost_today: costStats,
+      });
+    } catch (err) {
+      res.status(500).json({ error: 'query_error', message: err.message });
+    }
+  });
+
   return router;
 };
