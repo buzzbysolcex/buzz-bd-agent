@@ -1057,7 +1057,7 @@ async function postAlphaAlert() {
   try {
     const pipeline = await buzzApiGet('/api/v1/pipeline?limit=5&sort=score_desc');
     const okx = await buzzApiGet('/api/v1/ws/okx/status');
-    const btcPrice = okx?.mostRecent?.last_price || 0;
+    const btcPrice = okx?.btcPrice || okx?.mostRecent?.last_price || 0;
     const btcStr = btcPrice ? '\u0024' + Math.round(btcPrice).toLocaleString() : '?';
 
     let tweet;
@@ -1112,7 +1112,7 @@ async function postAlphaAlert() {
         `\u2705 10/10 AI agents online\n` +
         `\u2705 OKX WebSocket: live\n` +
         `\u2705 Helius WebSocket: live\n` +
-        `\u2705 21 intel sources active\n` +
+        `\u2705 23 intel sources active\n` +
         `\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n\n` +
         `No 70+ signals right now \u2014 but Buzz never sleeps.\n` +
         `10 agents scanning 7 sources 24/7.\n\n` +
@@ -1144,7 +1144,7 @@ async function postPipelineReport() {
   try {
     const stats = await buzzApiGet('/api/v1/pipeline/stats') || {};
     const okx = await buzzApiGet('/api/v1/ws/okx/status');
-    const btcPrice = okx?.mostRecent?.last_price || 0;
+    const btcPrice = okx?.btcPrice || okx?.mostRecent?.last_price || 0;
     const btcStr = btcPrice ? '\u0024' + Math.round(btcPrice).toLocaleString() : '?';
 
     // Top tokens leaderboard
@@ -1173,7 +1173,7 @@ async function postPipelineReport() {
       `\u26D3\uFE0F CHAIN DISTRIBUTION:\n` +
       `${byChain}\n\n` +
       `\u{1F916} SYSTEM PERFORMANCE:\n` +
-      `\u2022 10 AI agents \u2022 21 intel sources\n` +
+      `\u2022 10 AI agents \u2022 23 intel sources\n` +
       `\u2022 OKX WS: ${((okx?.messageCount || 0) > 0 ? (okx.messageCount).toLocaleString() + ' msgs' : 'active')}\n` +
       `\u2022 Scan time: ~10 seconds per token\n` +
       `\u2022 Infra: \u00244.09/mo Hetzner CX23\n` +
@@ -1281,7 +1281,7 @@ async function postBuildUpdate() {
       `\u{1F4E1} LIVE FEEDS:\n` +
       `\u2022 OKX WebSocket: ${okxMsgs} messages received\n` +
       `\u2022 Helius WebSocket: monitoring Solana\n` +
-      `\u2022 21 intel sources active\n\n` +
+      `\u2022 23 intel sources active\n\n` +
       `\u{1F916} AGENTS: 10/10 online\n` +
       `\u2022 Scanner \u2022 Safety \u2022 Wallet \u2022 Social \u2022 Scorer\n` +
       `\u2022 Degen \u2022 Whale \u2022 Institutional \u2022 Community\n` +
