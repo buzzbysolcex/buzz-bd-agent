@@ -113,7 +113,7 @@ async function verifyViaDexScreener(contractAddress, chain) {
 }
 
 // ═══════ CHECK 2: CoinGecko cross-reference ═══════
-async function verifyViaCoinGecko(contractAddress, chain) {
+async function verifyViaCoinGecko(contractAddress, chain, dexData) {
   const result = { pass: false, data: null, warnings: [] };
 
   const platformMap = { solana: 'solana', base: 'base', bsc: 'binance-smart-chain', ethereum: 'ethereum' };
@@ -123,13 +123,52 @@ async function verifyViaCoinGecko(contractAddress, chain) {
     return result;
   }
 
-  const data = await fetchJSON(
+  // Try 1: Exact contract address lookup
+  let data = await fetchJSON(
     `https://api.coingecko.com/api/v3/coins/${platform}/contract/${contractAddress}`
   );
 
+  // Try 2: If contract lookup fails, search by symbol/name (flexible matching)
+  if ((!data || data.error) && dexData?.data?.symbol) {
+    const symbol = (dexData.data.symbol || '').toLowerCase();
+    const searchData = await fetchJSON(
+      `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(symbol)}`
+    );
+
+    if (searchData?.coins?.length > 0) {
+      // Find matching coin by symbol, preferring exact symbol match
+      const match = searchData.coins.find(c =>
+        c.symbol?.toLowerCase() === symbol
+      );
+
+      if (match) {
+        // Fetch full coin data to get mcap for comparison
+        const coinData = await fetchJSON(
+          `https://api.coingecko.com/api/v3/coins/${match.id}?localization=false&tickers=false&community_data=false&developer_data=false`
+        );
+
+        if (coinData && !coinData.error) {
+          const cgMcap = coinData.market_data?.market_cap?.usd || 0;
+          const dexMcap = dexData?.data?.mcap || 0;
+
+          // Verify mcap within 30% tolerance (wider for symbol-based match)
+          const mcapMatch = dexMcap > 0 && cgMcap > 0
+            ? Math.abs(cgMcap - dexMcap) / Math.max(cgMcap, dexMcap) < 0.30
+            : false;
+
+          if (mcapMatch) {
+            data = coinData;
+            result.warnings.push('VERIFIED_BY_SYMBOL_MATCH');
+          } else if (cgMcap > 0) {
+            result.warnings.push(`SYMBOL_MATCH_MCAP_MISMATCH: cg=$${Math.round(cgMcap)} dex=$${Math.round(dexMcap)}`);
+          }
+        }
+      }
+    }
+  }
+
   if (!data || data.error) {
     result.warnings.push('NOT_ON_COINGECKO');
-    // Not on CoinGecko = UNVERIFIED, not auto-pass
     return result;
   }
 
@@ -240,8 +279,8 @@ async function verifyToken(contractAddress, chain) {
   results.check1_dexscreener = await verifyViaDexScreener(contractAddress, chain);
   results.evidence.dexscreener = results.check1_dexscreener.data;
 
-  // CHECK 2: CoinGecko
-  results.check2_crossref = await verifyViaCoinGecko(contractAddress, chain);
+  // CHECK 2: CoinGecko (pass dexData for symbol-based fallback)
+  results.check2_crossref = await verifyViaCoinGecko(contractAddress, chain, results.check1_dexscreener);
   results.evidence.coingecko = results.check2_crossref.data;
 
   // CHECK 3: Internal consistency (needs check1 + check2 data)
