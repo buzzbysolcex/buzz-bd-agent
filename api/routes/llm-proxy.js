@@ -37,10 +37,54 @@ module.exports = function (db) {
 
   router.use(authMiddleware);
 
+  // ─── Caller Inference from Message Content ─────────
+  // When OpenClaw routes through the proxy, it doesn't send x-buzz-caller.
+  // We infer the caller from system prompt keywords in the request body.
+  function inferCaller(body) {
+    const systemText = extractSystemText(body);
+    if (!systemText) return 'openclaw-gateway';
+
+    const lower = systemText.toLowerCase();
+    // Match against known agent/cron patterns
+    if (lower.includes('twitter') || lower.includes('tweet') || lower.includes('mention'))
+      return 'twitter-bot';
+    if (lower.includes('alpha alert') || lower.includes('alpha_alert'))
+      return 'cron-alpha';
+    if (lower.includes('pipeline report') || lower.includes('pipeline_report'))
+      return 'cron-pipeline';
+    if (lower.includes('intelligence') || lower.includes('intel report'))
+      return 'cron-intel';
+    if (lower.includes('build update') || lower.includes('build_update'))
+      return 'cron-build';
+    if (lower.includes('simulat') || lower.includes('mirofish') || lower.includes('microbuzz'))
+      return 'simulation';
+    if (lower.includes('scan') || lower.includes('score-token') || lower.includes('scanner'))
+      return 'scan';
+    if (lower.includes('orchestrat'))
+      return 'orchestrator';
+    if (lower.includes('prayer') || lower.includes('salat'))
+      return 'cron-prayer';
+    if (lower.includes('daily') || lower.includes('digest') || lower.includes('summary'))
+      return 'cron-daily';
+    return 'openclaw-gateway';
+  }
+
+  function extractSystemText(body) {
+    // Anthropic format: body.system (string) or body.messages[0].role === 'system'
+    if (typeof body.system === 'string') return body.system;
+    // OpenAI format: body.messages array
+    const msgs = body.messages;
+    if (Array.isArray(msgs)) {
+      const sys = msgs.find(m => m.role === 'system');
+      if (sys) return typeof sys.content === 'string' ? sys.content : JSON.stringify(sys.content);
+    }
+    return null;
+  }
+
   // ─── POST /completions — Transparent Proxy ─────────
   router.post('/completions', async (req, res) => {
     try {
-      const caller = req.headers['x-buzz-caller'] || req.body._caller || 'unknown';
+      const caller = req.headers['x-buzz-caller'] || req.body._caller || inferCaller(req.body);
 
       // Remove _caller before forwarding
       const body = { ...req.body };
@@ -66,7 +110,8 @@ module.exports = function (db) {
   // Forwards to api.minimax.io/anthropic/*, logs cost
   router.post('/anthropic/*', async (req, res) => {
     try {
-      const caller = req.headers['x-buzz-caller'] || 'openclaw-gateway';
+      // Auto-detect caller from request context
+      let caller = req.headers['x-buzz-caller'] || inferCaller(req.body);
       // Extract sub-path: /anthropic/v1/messages → /v1/messages
       const subPath = req.path.replace(/^\/anthropic/, '') || '/v1/messages';
 
