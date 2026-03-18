@@ -56,6 +56,9 @@ const listingProposalRoutes = require('./routes/listing-proposal');
 // MiroFish Stage 1: Listing Report (unified token report)
 const listingReportRoutes = require('./routes/listing-report');
 
+// MiroFish Stage 1: Simulation Report (cyberpunk HTML)
+const simulationReportRoutes = require('./routes/simulation-report');
+
 // v7.5.4: CoinGecko CLI — Intel Source #23
 const coingeckoRoutes = require('./routes/coingecko');
 
@@ -91,6 +94,7 @@ app.use(rateLimit);
 
 // ─── Public Routes (no auth) ─────────────────────────
 app.use('/api/v1/health', healthRoutes);
+app.use('/api/v1/simulation-report', simulationReportRoutes);
 
 // API info endpoint
 app.get('/api/v1/info', (req, res) => {

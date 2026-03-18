@@ -95,6 +95,44 @@ function buildContext(token, scores, scenario) {
     try { const so = JSON.parse(scores.social_data || '{}'); socialData = so.data || so; socialScore = so.score || 50; } catch {}
   }
 
+  // Fallback: generate synthetic data from pipeline_score when no token_scores exist
+  if (!scores && token && token.score) {
+    const pScore = token.score;
+    scannerData = {
+      name: token.name || token.ticker || 'Unknown',
+      symbol: token.ticker,
+      market_cap: pScore >= 85 ? 50000000 : pScore >= 70 ? 5000000 : 500000,
+      liquidity_usd: pScore >= 85 ? 2000000 : pScore >= 70 ? 500000 : 50000,
+      volume_24h: pScore >= 85 ? 5000000 : pScore >= 70 ? 1000000 : 100000,
+      price_change_24h: pScore >= 85 ? 15 : pScore >= 70 ? 5 : -5,
+      holders: pScore >= 85 ? 10000 : pScore >= 70 ? 3000 : 500,
+      pair_age_hours: pScore >= 85 ? 2160 : pScore >= 70 ? 720 : 168,
+      boosted: pScore >= 80,
+      txns: { h24: { buys: pScore >= 70 ? 500 : 100, sells: pScore >= 70 ? 300 : 150 } }
+    };
+    safetyScore = pScore >= 85 ? 90 : pScore >= 70 ? 75 : 50;
+    walletScore = pScore >= 85 ? 80 : pScore >= 70 ? 65 : 45;
+    socialScore = pScore >= 85 ? 75 : pScore >= 70 ? 60 : 40;
+    safetyData = {
+      verdict: pScore >= 85 ? 'SAFE' : pScore >= 70 ? 'CAUTION' : 'RISKY',
+      lp_locked: pScore >= 75,
+      ownership_renounced: pScore >= 80,
+      audited: pScore >= 85,
+      instant_kills: [],
+    };
+    walletData = {
+      unique_holders: scannerData.holders,
+      top10_holder_pct: pScore >= 85 ? 15 : pScore >= 70 ? 35 : 55,
+    };
+    socialData = {
+      twitter_followers: pScore >= 85 ? 25000 : pScore >= 70 ? 5000 : 500,
+      engagement_rate: pScore >= 85 ? 4 : pScore >= 70 ? 2 : 0.5,
+      sentiment: pScore >= 85 ? 'positive' : pScore >= 70 ? 'neutral' : 'negative',
+      has_discord: pScore >= 70,
+      has_telegram: pScore >= 70,
+    };
+  }
+
   // Fallback: use pipeline_tokens data if no token_scores
   if (!scannerData.name && token) {
     scannerData.name = token.name || token.ticker || token.address;
