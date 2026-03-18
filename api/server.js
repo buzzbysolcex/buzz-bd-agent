@@ -70,6 +70,10 @@ const dashboardRoutes = require('./routes/dashboard');
 const alertRoutes = require('./routes/alerts');
 const reportRoutes = require('./routes/reports');
 
+// Day 32B Data Hardening — Triple Verification Layer
+const verifyRoutes = require('./routes/verify');
+const { requireVerifiedAutoCheck } = require('./middleware/verification-gate');
+
 // v7.5.5: LLM Cost Proxy
 const llmProxyRoutes = require('./routes/llm-proxy');
 
@@ -183,9 +187,9 @@ app.use('/api/v1/memory', apiKeyAuth, memoryRoutes);
 app.use('/api/v1/operator', apiKeyAuth, operatorRoutes);
 app.use('/api/v1/contacts', apiKeyAuth, contactRoutes);
 
-// v7.5.0: Bags.fm + Simulate Listing
+// v7.5.0: Bags.fm + Simulate Listing (simulation GATED by verification)
 app.use('/api/v1/bags', apiKeyAuth, bagsRoutes);
-app.use('/api/v1/simulate', apiKeyAuth, simulateRoutes);
+app.use('/api/v1/simulate', apiKeyAuth, requireVerifiedAutoCheck, simulateRoutes);
 
 // v7.5.2: Nansen CLI (#17 activated) + X Layer x402 (BaaS payment layer)
 app.use('/api/v1/nansen', apiKeyAuth, nansenRoutes);
@@ -208,6 +212,9 @@ app.use('/api/v1/loops', apiKeyAuth, loopRoutes);
 app.use('/api/v1/dashboard', apiKeyAuth, dashboardRoutes);
 app.use('/api/v1/alerts', apiKeyAuth, alertRoutes);
 app.use('/api/v1/reports', apiKeyAuth, reportRoutes);
+
+// Day 32B Data Hardening — Triple Verification (6 endpoints)
+app.use('/api/v1/verify', apiKeyAuth, verifyRoutes);
 
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 
