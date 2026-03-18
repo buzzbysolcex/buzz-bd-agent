@@ -2,13 +2,13 @@
 
 **Autonomous Business Development Agent for SolCex Exchange**
 
-| Version | OpenClaw | ERC-8004 | Server | AgentProof | Mobile | CI/CD |
-|---------|----------|----------|--------|------------|--------|-------|
-| v7.5.1 | v2026.3.13 | #25045 | Hetzner CX23 via Agentic.hosting | #1718 | ✅ Expo | ✅ GitHub Actions |
+| Version | OpenClaw | ERC-8004 | Server | AgentProof | MicroBuzz | CI/CD |
+|---------|----------|----------|--------|------------|-----------|-------|
+| v7.5.5+ | v2026.3.13 | #25045 | Hetzner CX23 via Agentic.hosting | #1718 | microbuzz.vercel.app | ✅ GitHub Actions |
 
-24/7 autonomous token discovery, safety verification, 9-agent parallel scoring, Premium Twitter BD outreach with 4-route funnel, and backtested alpha for CEX listings. Self-improving AI agent with dual memory (Honcho + Supermemory), closed learning loop, CI/CD self-deploy pipeline, and **native mobile app with direct chat to the agent brain**. Built by a chef who codes through conversation. No CS degree. Just Claude and persistence.
+24/7 autonomous token discovery, **triple-verified** safety scoring, 10-agent parallel analysis, Premium Twitter BD outreach with 4-route funnel, MicroBuzz simulation engine, revenue infrastructure with autonomous loop crons, and 3-tier LLM cascade for CEX listings. Self-improving AI agent with dual memory (Honcho + Supermemory), closed learning loop, CI/CD self-deploy pipeline, and hybrid development swarm (Agent Teams + ClawTeam). Built by a chef who codes through conversation. No CS degree. Just Claude and persistence.
 
-**AIXBT finds alpha. Bankr deploys tokens. Buzz closes deals. And proves it with backtested data.**
+**AIXBT finds alpha. Bankr deploys tokens. Buzz closes deals. And proves it with triple-verified simulation data.**
 
 ---
 
@@ -16,24 +16,27 @@
 
 Buzz is an autonomous AI BD (Business Development) agent that runs 24/7 on Hetzner CX23 (Helsinki), finding promising token projects for SolCex Exchange listings across **Solana, Ethereum, Base, BSC, and Tron** chains.
 
-**The pipeline:** Discover → Verify → Score (9 agents) → Outreach → Deploy → Learn → List
+**The pipeline:** Discover → **Triple Verify** → Score (10 agents) → **Simulate** → Outreach → Deploy → Learn → List
 
-Buzz scans 100+ tokens per day across decentralized exchanges, filters through a 5-layer intelligence pipeline with **9 parallel agents** (5 sub-agents + 4 persona agents), scores each token on a 100-point composite system with multi-perspective consensus, initiates autonomous outreach via Twitter with Premium deep scan format, offers Bankr token deployment, and learns from every decision — all autonomously.
+Buzz scans 100+ tokens per day across decentralized exchanges, filters through a 5-layer intelligence pipeline with **10 parallel agents** (5 sub-agents + 4 persona agents + 1 orchestrator), scores each token on a 100-point composite system with multi-perspective consensus, **runs MicroBuzz listing simulations with EV calculation**, initiates autonomous outreach via Twitter with Premium deep scan format, offers Bankr token deployment, and learns from every decision — all autonomously.
 
-**What's NEW in v7.5.1:**
-- **CI/CD Pipeline** — Push to main → GitHub Actions builds → Docker Hub → auto-deploys to Hetzner → Telegram notification. No manual deploys.
-- **Dual Memory** — Honcho v3.0.3 (self-hosted, dialectic reasoning + dream consolidation) + Supermemory (4 custom containers: bd-scans, token-patterns, bags-intelligence, operator)
-- **Twitter Funnel** — 4 autonomous routes: SCAN (Premium deep scan, 7 sections) → LIST (SolCex benefits, lead capture) → DEPLOY (Bankr token launch) → ENGAGEMENT
-- **Twitter Brain 5x** — Serper URL parsing fix: 6 → 30 raw results per scan. Persistent dedup (no duplicate replies). Min score 50 to post.
-- **Deployer Verification** — ATV (free ENS resolution) + ETH Skills (Austin Griffith builder reputation)
-- **Agentic.hosting** — Docker Compose retired. ah manages container lifecycle with patched Go source.
-- **Credential Boot** — 9 credential JSON files auto-generated from env vars on every boot
+**No data surfaces without triple verification. Our credibility is our product.**
+
+**What's NEW in v7.5.5+:**
+- **Triple Verification Layer** — NO data surfaces without 3 independent checks: DexScreener API (contract address) + CoinGecko cross-reference (name + mcap within 20%) + Internal consistency (DB + chain + format). All outputs gated: simulation, tweets, reports, MicroBuzz.
+- **3-Tier LLM Cascade** — MiniMax M2.5 PRIMARY → Bankr gemini-3-flash FALLBACK 1 → Anthropic claude-haiku-4.5 FALLBACK 2. Auto-skip after 3 failures in 5min. Provider usage logging.
+- **MicroBuzz Simulation Engine** — AI-powered listing simulation at microbuzz.vercel.app. 10 agents vote BUY/HOLD/SELL. EV calculation (EV = p × W − (1−p) × L). Public simulation reports. Inspired by MiroFish architecture.
+- **Revenue Infrastructure** — 7 new tables, ~31 endpoints. Revenue tracking, pipeline attribution, agent authority matrix. 3 autonomous loop crons: Morning Brief (07:00 WIB), Discovery Alert (every 4h), Evening Recap (21:00 WIB).
+- **Hybrid Development Swarm** — Agent Teams (fast, in-process, 5 teammates) + ClawTeam (structured, TOML templates, task chains). 16 files built in 11 minutes on Day 32.
+- **Synthesis Hackathon** — REGISTERED + PUBLISHED across 5 tracks ($51K addressable). On-chain TX on Base.
 
 **Previous milestones:**
+- **v7.5.3** — Agent Teams first deployment, endpoint count corrected (91→123), scheduled tweet fix (startup+15min pattern), buzz-x402 public repo, Nansen CLI syntax fix
+- **v7.5.1** — CI/CD pipeline (GitHub Actions), Dual memory (Honcho v3.0.3 + Supermemory), Twitter Brain 5x, Premium deep scan, 4-route Twitter funnel, ATV + ETH Skills deployer verification
 - **v7.5.0** — Bags.fm pipeline (168K tokens), /simulate-listing, Anthropic fallback, agentic.hosting migration
 - **v7.4.x** — Twitter Brain + Hedge Brain, 9 parallel agents, Hetzner migration, OAuth 1.0a posting
 
-Cost: ~$6.42/month infrastructure (Buzz $4.09 + Sentinel $2.33) + ~$2-4/day LLM inference = full autonomous BD operation for less than a coffee per day.
+Cost: ~$4.09/month infrastructure + ~$0-4/day LLM inference (Bankr FREE for sub-agents) = full autonomous BD operation for less than a coffee per day.
 
 ---
 
@@ -46,45 +49,67 @@ Cost: ~$6.42/month infrastructure (Buzz $4.09 + Sentinel $2.33) + ~$2-4/day LLM 
 │  Managed by: Agentic.hosting (ah) — systemd, port 8080           │
 │                                                                    │
 │  ┌──────────────────────────────────────────────────────────────┐ │
-│  │  Docker: buzzbd/buzz-bd-agent:v7.5.1                          │ │
+│  │  Docker: buzzbd/buzz-bd-agent:latest                          │ │
 │  │  Runtime: OpenClaw v2026.3.13                                  │ │
 │  │                                                                │ │
 │  │  PORT 18789 → OpenClaw Gateway (Telegram + Chat API)          │ │
-│  │  PORT 3000  → REST API (Express + SQLite WAL, 42 tables)     │ │
+│  │  PORT 3000  → REST API (Express + SQLite WAL, 57 tables)     │ │
 │  │  PORT 8000  → Honcho v3.0.3 (Dialectic Memory, 36 endpoints) │ │
 │  │  PORT 5432  → PostgreSQL + pgvector (Honcho embeddings)       │ │
+│  │  PORT 3001  → Sentinel v2.0 (Watchdog)                        │ │
 │  │                                                                │ │
 │  │  ┌────────────────────────────────────────────────────┐       │ │
-│  │  │  BRAIN 2 — HEDGE BRAIN (4 Persona Agents)          │       │ │
+│  │  │  TRIPLE VERIFICATION LAYER (Day 32B)                │       │ │
+│  │  │  ├── Check 1: DexScreener (contract address key)   │       │ │
+│  │  │  ├── Check 2: CoinGecko (cross-reference)          │       │ │
+│  │  │  ├── Check 3: Internal (DB consistency)             │       │ │
+│  │  │  ├── VERIFIED = data surfaces                       │       │ │
+│  │  │  └── QUARANTINED = data blocked                     │       │ │
+│  │  └────────────────────────────────────────────────────┘       │ │
+│  │                                                                │ │
+│  │  ┌────────────────────────────────────────────────────┐       │ │
+│  │  │  3-TIER LLM CASCADE                                 │       │ │
+│  │  │  ├── PRIMARY: MiniMax M2.5 ($126 balance)          │       │ │
+│  │  │  ├── FALLBACK 1: Bankr gemini-3-flash ($11)        │       │ │
+│  │  │  └── FALLBACK 2: Anthropic claude-haiku-4.5 ($129) │       │ │
+│  │  └────────────────────────────────────────────────────┘       │ │
+│  │                                                                │ │
+│  │  ┌────────────────────────────────────────────────────┐       │ │
+│  │  │  MICROBUZZ SIMULATION ENGINE                        │       │ │
+│  │  │  ├── 10 agents vote BUY/HOLD/SELL                  │       │ │
+│  │  │  ├── EV = p × W − (1−p) × L                       │       │ │
+│  │  │  ├── Requires VERIFIED status to run               │       │ │
+│  │  │  └── Public reports: microbuzz.vercel.app           │       │ │
+│  │  └────────────────────────────────────────────────────┘       │ │
+│  │                                                                │ │
+│  │  ┌────────────────────────────────────────────────────┐       │ │
+│  │  │  HEDGE BRAIN (4 Persona Agents)                     │       │ │
 │  │  │  ├── degen-agent (momentum, 0.15)                   │       │ │
 │  │  │  ├── whale-agent (smart money, 0.25)                │       │ │
 │  │  │  ├── institutional-agent (compliance, 0.35)         │       │ │
 │  │  │  └── community-agent (sentiment, 0.25)              │       │ │
-│  │  │  Backtester | SSE streaming | Weekly digest          │       │ │
 │  │  └────────────────────────────────────────────────────┘       │ │
 │  │                                                                │ │
 │  │  ┌────────────────────────────────────────────────────┐       │ │
-│  │  │  BRAIN 1 — TWITTER BRAIN (v7.5.1)                   │       │ │
-│  │  │  ├── Serper search (30 raw results per scan)        │       │ │
-│  │  │  ├── OAuth 1.0a auto-posting (confirmed LIVE)       │       │ │
-│  │  │  ├── Premium deep scan format (7 sections)          │       │ │
+│  │  │  TWITTER BRAIN (v7.5.5)                              │       │ │
 │  │  │  ├── 4-route funnel: SCAN→LIST→DEPLOY→ENGAGEMENT   │       │ │
-│  │  │  ├── Persistent dedup (/data/twitter-replied.json)  │       │ │
-│  │  │  └── Min score 50 to post | 12 replies/day cap      │       │ │
+│  │  │  ├── Premium deep scan format (7 sections)          │       │ │
+│  │  │  ├── All outputs gated by Triple Verification       │       │ │
+│  │  │  └── Min score 50 | 12 replies/day cap              │       │ │
+│  │  └────────────────────────────────────────────────────┘       │ │
+│  │                                                                │ │
+│  │  ┌────────────────────────────────────────────────────┐       │ │
+│  │  │  REVENUE INFRASTRUCTURE (Day 32)                    │       │ │
+│  │  │  ├── 7 tables (revenue, attribution, authority)     │       │ │
+│  │  │  ├── ~31 endpoints (revenue, dashboard, alerts)     │       │ │
+│  │  │  ├── 3 autonomous crons (brief, alert, recap)       │       │ │
+│  │  │  └── Agent Authority Matrix (16 permissions)        │       │ │
 │  │  └────────────────────────────────────────────────────┘       │ │
 │  │                                                                │ │
 │  │  ┌────────────────────────────────────────────────────┐       │ │
 │  │  │  DUAL MEMORY                                        │       │ │
 │  │  │  ├── Honcho v3.0.3 (primary — dialectic + dreams)  │       │ │
-│  │  │  └── Supermemory (4 containers: bd-scans,           │       │ │
-│  │  │      token-patterns, bags-intelligence, operator)   │       │ │
-│  │  └────────────────────────────────────────────────────┘       │ │
-│  │                                                                │ │
-│  │  ┌────────────────────────────────────────────────────┐       │ │
-│  │  │  STRATEGIC ORCHESTRATOR (MiniMax M2.5)              │       │ │
-│  │  │  ├── Decision Engine (12 rules)                     │       │ │
-│  │  │  ├── Playbook Engine (PB-001→004)                   │       │ │
-│  │  │  └── Cost Guard ($10/day cap)                       │       │ │
+│  │  │  └── Supermemory (4 containers)                     │       │ │
 │  │  └────────────────────────────────────────────────────┘       │ │
 │  │                                                                │ │
 │  │  ┌────────────────────────────────────────────────────┐       │ │
@@ -96,25 +121,82 @@ Cost: ~$6.42/month infrastructure (Buzz $4.09 + Sentinel $2.33) + ~$2-4/day LLM 
 │  │  │  └── scorer-agent  → L4 100-point scoring          │       │ │
 │  │  └────────────────────────────────────────────────────┘       │ │
 │  │                                                                │ │
-│  │  REST API: 91+ endpoints | SQLite: 42 tables | 27 crons      │ │
-│  │  21 intel sources | OKX 1,111 instruments | Bags.fm 168K     │ │
+│  │  ~166 endpoints | 57 tables | 31 crons | 23 intel sources    │ │
+│  │  2 WebSocket feeds | 59 tests | Triple Verification LIVE      │ │
 │  │  CI/CD: GitHub Actions → Docker Hub → ah API restart          │ │
-│  │  9 credential files auto-generated on boot                     │ │
 │  └──────────────────────────────────────────────────────────────┘ │
 │                                                                    │
-│  SENTINEL v1.1.0 (Akash Network — $2.33/month)                    │
-│  Monitors 204.168.137.253:3000 every 15 min | Telegram alerts    │
+│  SENTINEL v2.0 (Same Hetzner server, port 3001)                   │
+│  15min sweeps | Auto-repair | Telegram alerts | Daily digest      │
 │                                                                    │
-│  BUZZ ALPHA MOBILE (Expo React Native)                             │
-│  5 tabs: Dashboard | Pipeline | Scan | Chat | Ops                 │
-│  Direct chat to Buzz brain | SSE pipeline streaming               │
+│  MICROBUZZ (microbuzz.vercel.app — Vercel free tier)              │
+│  Simulation reports | Live CoinGecko prices | Request form         │
+│                                                                    │
+│  HYBRID SWARM (Development)                                        │
+│  Agent Teams: 5 teammates, fast, in-process                        │
+│  ClawTeam: 3 TOML templates, structured orchestration              │
 └──────────────────────────────────────────────────────────────────┘
-
-CI/CD PIPELINE (GitHub Actions)
-  Push to main → Docker build (linux/amd64) → Docker Hub
-  → SSH to Hetzner → ah API restart → Health check → Telegram notify
-  Deploy time: ~4 minutes | 3 consecutive green builds proven
 ```
+
+---
+
+## 🐝 Triple Verification Layer
+
+**NO DATA SURFACES WITHOUT TRIPLE VERIFICATION.**
+
+| Check | Source | Verifies |
+|-------|--------|----------|
+| Check 1 | DexScreener API | Contract address → name, symbol, chain, mcap, liquidity |
+| Check 2 | CoinGecko API | Cross-reference: name match, mcap within 20% |
+| Check 3 | Internal DB | Consistency, chain format, freshness (<1 hour) |
+
+| Status | Meaning | Action |
+|--------|---------|--------|
+| ✅ VERIFIED | All 3 pass | Data can surface |
+| 🚫 QUARANTINED | 1+ failed | Data BLOCKED |
+| ⚠️ UNVERIFIED | Insufficient data | Data BLOCKED |
+| ⏰ STALE | >1 hour old | Must re-verify |
+
+**Gated outputs:** Simulation engine, Twitter brain, autonomous loop crons, MicroBuzz reports, DM templates.
+
+**Hard rules:** Contract address as primary key (never name/symbol). Base58 = Solana, 0x = EVM. Address ending 'pump' = auto-flag. Name mismatch = QUARANTINE. Chain mismatch = instant QUARANTINE.
+
+---
+
+## 🐝 MicroBuzz Simulation Engine
+
+AI-powered listing simulation engine. Public reports at **microbuzz.vercel.app**.
+
+| Field | Value |
+|-------|-------|
+| URL | [microbuzz.vercel.app](https://microbuzz.vercel.app) |
+| Repo | [github.com/buzzbysolcex/mirofish-web](https://github.com/buzzbysolcex/mirofish-web) |
+| Agents | 10 (4 personas × weight variations + consensus) |
+| EV Formula | EV = p × W − (1−p) × L |
+| Gate | Requires VERIFIED status (Triple Verification) |
+| Credit | Inspired by MiroFish architecture · Powered by OASIS concepts |
+
+**How it works:**
+1. Token enters pipeline with score ≥ 70
+2. Triple Verification runs (3 independent checks)
+3. If VERIFIED → 10 simulation agents vote BUY/HOLD/SELL
+4. Consensus probability calculated
+5. Expected Value computed: EV = probability × win − (1-probability) × loss
+6. Public report generated at microbuzz.vercel.app/report/{token}
+
+---
+
+## 🐝 3-Tier LLM Cascade
+
+| Tier | Provider | Model | Role | Balance |
+|------|----------|-------|------|---------|
+| PRIMARY | MiniMax | M2.5 | Orchestrator | $126 |
+| FALLBACK 1 | Bankr | gemini-3-flash | Orchestrator fallback | $11 credits |
+| FALLBACK 2 | Anthropic | claude-haiku-4.5 | Emergency | $129 |
+| FREE | Bankr | gpt-5-nano | All 5 sub-agents + 4 Hedge Brain | $0 |
+
+Auto-skip: 3 failures in 5min → switch to next tier for 30min cooldown.
+All provider usage logged. Stats at GET /api/v1/llm/stats.
 
 ---
 
@@ -124,7 +206,7 @@ Autonomous Twitter BD pipeline — scan, score, outreach, deploy, all while Ogie
 
 ### Route 1 — SCAN (Premium Deep Scan)
 
-Someone tweets `@BuzzBySolCex scan $TICKER` → 9 agents analyze → Premium reply with 7 sections:
+Someone tweets `@BuzzBySolCex scan $TICKER` → 10 agents analyze → **Triple Verification** → Premium reply with 7 sections:
 
 1. 🛡️ **Safety First** — Mint/Freeze status, LP Lock %, RugCheck grade, verdict
 2. 💰 **Smart Money Flow** — Whale wallets, accumulation, top 10 concentration
@@ -134,68 +216,54 @@ Someone tweets `@BuzzBySolCex scan $TICKER` → 9 agents analyze → Premium rep
 6. 🎯 **Final Verdict** — Score/100, grade (HOT/QUALIFIED), Safety grade
 7. 💎 **CEX Listing CTA** — SolCex listing across Solana | Ethereum | Base | BSC | Tron
 
-### Route 2 — LIST
+**All scan outputs gated by Triple Verification. No unverified data ever reaches Twitter.**
 
-Reply `LIST` to any scan → SolCex listing benefits (market making, whale airdrop, fast-track) → Lead saved → Ogie alerted via Telegram. **No pricing publicly. Ever.**
+### Route 2 — LIST
+Reply `LIST` to any scan → SolCex listing benefits → Lead saved → Ogie alerted.
 
 ### Route 3 — DEPLOY
-
-Reply `DEPLOY` to any scan → Bankr token deploy on Base. Zero gas, instant liquidity, 1.2% fee split. Simulate → confirm → deploy → live on BaseScan.
+Reply `DEPLOY` to any scan → Bankr token deploy on Base. Zero gas, instant liquidity.
 
 ### Route 4 — ENGAGEMENT
-
 Tag `@BuzzBySolCex` without command → Friendly ack + suggest scan.
 
-| Setting | Value |
-|---------|-------|
-| Serper Results | 30 raw per scan (5x improvement) |
-| OAuth 1.0a | Confirmed LIVE |
-| Dedup | Persistent — no duplicate replies ever |
-| Min Score | 50/100 to post publicly |
-| Reply Cap | 12/day |
-| Deploy Cap | 3/day (autonomous) |
+---
+
+## 🐝 Revenue Infrastructure
+
+| Component | Details |
+|-----------|---------|
+| Tables | 7 new (revenue_events, listing_fees, monthly_revenue_summary, pipeline_revenue_attribution, loop_cron_runs, loop_cron_outputs, agent_authority_matrix) |
+| Endpoints | ~31 new across revenue, attribution, loops, dashboard, alerts, reports |
+| Autonomous Crons | Morning Brief (07:00 WIB), Discovery Alert (every 4h), Evening Recap (21:00 WIB) |
+| Authority Matrix | 16 permissions, daily limits per agent, full audit logging |
 
 ---
 
 ## 🐝 Hedge Brain
 
-4 persona agents scoring tokens from different strategic perspectives.
-
 | Agent | Philosophy | Weight | Model |
 |-------|-----------|--------|-------|
 | 🎰 degen-agent | "Ape early, exit fast" | 0.15 | bankr/gpt-5-nano (FREE) |
 | 🐋 whale-agent | "Follow smart money" | 0.25 | bankr/gpt-5-nano (FREE) |
-| 🏛️ institutional-agent | "Due diligence first" | 0.35 | bankr/claude-haiku-4.5 |
+| 🏛️ institutional-agent | "Due diligence first" | 0.35 | bankr/gpt-5-nano (FREE) |
 | 👥 community-agent | "Community is the moat" | 0.25 | bankr/gpt-5-nano (FREE) |
 
 **Composite:** 70% sub-agent score + 30% persona consensus
 
 ---
 
-## 🐝 Deployer Verification (ATV + ETH Skills)
-
-| Identity Found | Points | Tag |
-|---------------|--------|-----|
-| ENS + Twitter + GitHub + ETH Skills badges | +10 | VERIFIED BUILDER |
-| ENS only | +5 | IDENTIFIED |
-| Anonymous / no identity | -10 | UNVERIFIED-IDENTITY |
-
-- **ETH/Base:** ATV batch-resolve (free, no API key) → cross-check ETH Skills
-- **Solana:** ATV can't resolve → Helius forensics (wallet age, history)
-
----
-
-## 🐝 Intelligence Sources (21)
+## 🐝 Intelligence Sources (23)
 
 | # | Source | Layer | Purpose |
 |---|--------|-------|---------|
-| 1 | DexScreener | L1 | Token discovery |
+| 1 | DexScreener | L1 | Token discovery + Triple Verification Check 1 |
 | 2 | GeckoTerminal | L1 | Pool data |
 | 3 | AIXBT | L1 | Momentum signals |
 | 4 | CoinMarketCap | L1 | Market data |
 | 5 | BNB Chain MCP | L1 | BSC tokens |
 | 6 | Bitget API | L1 | Exchange data |
-| 7 | OKX Market Data | L1 | 1,111 instruments (FREE) |
+| 7 | OKX Market Data | L1 | 1,010 instruments (FREE) |
 | 8 | Bags.fm | L1 | 168K tokens indexed |
 | 9 | RugCheck | L2 | Rug pull detection |
 | 10 | Helius API + MCP | L2 | Solana forensics (60 tools) |
@@ -205,11 +273,13 @@ Tag `@BuzzBySolCex` without command → Friendly ack + suggest scan.
 | 14 | Serper | L3 | Google search (30 results) |
 | 15 | ATV Web3 Identity | L3 | ENS + socials (FREE) |
 | 16 | Firecrawl | L3 | Web scraping |
-| 17 | Nansen x402 | L5 | Smart money (planned) |
+| 17 | Nansen CLI | L5 | Smart money (~117 credits) |
 | 18 | X API v2 | Amplify | OAuth 1.0a posting |
 | 19 | Bankr | Deploy | Partner token launch |
 | 20 | Moltbook | Social | Forum presence |
 | 21 | AgentProof | Identity | #1718 Avalanche |
+| 22 | CoinGecko REST | L1/Verify | Triple Verification Check 2 + prices |
+| 23 | OKX WebSocket | L1 | Real-time BTC/ETH/SOL prices |
 
 ---
 
@@ -217,20 +287,23 @@ Tag `@BuzzBySolCex` without command → Friendly ack + suggest scan.
 
 | Score | Verdict | Action |
 |-------|---------|--------|
-| 85-100 | 🔥 HOT | Immediate outreach + Premium tweet + Telegram alert |
-| 70-84 | ✅ QUALIFIED | Queue outreach + Premium tweet |
-| 50-69 | 👀 WATCH | Monitor 48h, daily summary only |
+| 85-100 | 🔥 HOT | Immediate outreach + tweet + simulation (VERIFIED only) |
+| 70-84 | ✅ QUALIFIED | Queue outreach + tweet + simulation (VERIFIED only) |
+| 50-69 | 👀 WATCH | Monitor 48h, summary only |
 | 0-49 | ❌ SKIP | Archive — NEVER tweet |
 
 ---
 
-## 🐝 Dual Memory
+## 🐝 Hybrid Development Swarm
 
-| System | Type | Purpose |
-|--------|------|---------|
-| Honcho v3.0.3 | Self-hosted (port 8000) | Primary. Dialectic reasoning — Buzz can ASK its own memory. Dream consolidation. Peer modeling. |
-| Supermemory | Cloud | Auto-recall + auto-capture. 4 custom containers for smart routing. |
-| PostgreSQL + pgvector | Self-hosted (port 5432) | Vector store for Honcho embeddings |
+| Tool | Use Case | Speed |
+|------|----------|-------|
+| Agent Teams | Bug fixes, features, daily work | 5 teammates, zero setup, ~10 min |
+| ClawTeam | Complex orchestration, deployments | TOML templates, task chains, Web UI |
+
+**ClawTeam TOML Templates:** buzz-bd-scan (10 agents), buzz-deploy (6 agents), buzz-mirofish (21 agents)
+
+**Day 32 record:** 16 files, 7 tables, ~31 endpoints, 44 tests — built in 11 minutes with hybrid swarm.
 
 ---
 
@@ -239,16 +312,16 @@ Tag `@BuzzBySolCex` without command → Friendly ack + suggest scan.
 ```
 Push to main
   → GitHub Actions builds Docker image (linux/amd64)
-  → Push to Docker Hub (buzzbd/buzz-bd-agent:vX.Y.Z + :latest)
+  → Push to Docker Hub (buzzbd/buzz-bd-agent:latest)
   → SSH to Hetzner
-  → docker pull → ah API restart (preserves 88 env vars + /data volume)
-  → 90s boot wait + 8 health retries
+  → docker pull → ah API restart (preserves env vars + /data volume)
+  → 180s boot wait + 12 health retries
   → Telegram notification to Ogie
+  → Auto directive reload
+  → Sentinel verify
 ```
 
-Deploy time: ~4 minutes. 3 consecutive green builds proven.
-
-**Docker Compose is RETIRED.** All deploys via CI/CD or ah API.
+Deploy time: ~7 minutes. Docker Compose RETIRED. Hot-patch RETIRED.
 
 ---
 
@@ -256,14 +329,13 @@ Deploy time: ~4 minutes. 3 consecutive green builds proven.
 
 | Component | Cost |
 |-----------|------|
-| Hetzner CX23 (Buzz + Honcho + PostgreSQL) | $4.09/month |
-| Akash (Sentinel) | $2.33/month |
-| Agentic.hosting (ah) | $0 (self-hosted, MIT) |
-| MiniMax M2.5 (orchestrator) | ~$2-4/day |
-| bankr/gpt-5-nano (8 agents) | FREE |
+| Hetzner CX23 (Buzz + Honcho + PostgreSQL + Sentinel) | $4.09/month |
+| MicroBuzz (Vercel free tier) | $0 |
+| MiniMax M2.5 (orchestrator PRIMARY) | ~$2-4/day |
+| bankr/gpt-5-nano (9 agents) | FREE |
 | Anthropic fallback | $129 balance |
-| OKX data | FREE |
-| **Total infrastructure** | **$6.42/month** |
+| OKX data + WebSocket | FREE |
+| **Total infrastructure** | **$4.09/month** |
 
 Full autonomous BD operation for less than a coffee per day.
 
@@ -281,7 +353,7 @@ Full autonomous BD operation for less than a coffee per day.
 | Virtuals ACP | #17681 | — |
 | Colosseum | #3734 | — |
 | Moltbook | c606278b | — |
-| Bags.fm | Verified agent | wallet 3o8eq...s6YM |
+| Synthesis | e61039b7 | Base (TX 0x2e3ea1f) |
 
 ---
 
@@ -289,36 +361,15 @@ Full autonomous BD operation for less than a coffee per day.
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| **v7.5.1** | **Mar 15, 2026** | **CI/CD pipeline (GitHub Actions). Dual memory (Honcho v3.0.3 + Supermemory). Twitter Brain 5x (30 results). Premium deep scan format (7 sections). 4-route Twitter funnel proven. Persistent dedup. Credential auto-gen on boot. Cron stabilization. Backtester schema fix. ATV + ETH Skills deployer verification. 12 deliverables in one day.** |
-| v7.5.0 | Mar 15, 2026 | Bags.fm pipeline (168K tokens), /simulate-listing, Anthropic fallback, agentic.hosting migration |
-| v7.4.1 | Mar 14, 2026 | Serper real search, OAuth 1.0a confirmed, TOS compliance, branded footer |
-| v7.4.0 | Mar 14, 2026 | Twitter Brain + Hedge Brain. 9 parallel agents. Hetzner migration. |
-| v7.3.2a | Mar 11, 2026 | Mobile app LIVE, chatCompletions BAKED, OKX data |
-| v7.3.1a | Mar 11, 2026 | Learning loop + contact intelligence |
+| **v7.5.5+** | **Mar 19, 2026** | **Triple Verification Layer (3 independent checks, all outputs gated). 3-Tier LLM Cascade (MiniMax → Bankr → Anthropic). MicroBuzz simulation engine LIVE. Revenue infrastructure (7 tables, ~31 endpoints, 3 autonomous crons). Hybrid swarm (Agent Teams + ClawTeam). Synthesis hackathon PUBLISHED ($51K). 59 tests. ~166 endpoints.** |
+| v7.5.3 | Mar 18, 2026 | Agent Teams, endpoint count corrected (123), scheduled tweet fix, buzz-x402 repo |
+| v7.5.1 | Mar 15, 2026 | CI/CD pipeline, Dual memory, Twitter Brain 5x, Premium deep scan, 4-route funnel |
+| v7.5.0 | Mar 15, 2026 | Bags.fm pipeline, /simulate-listing, Anthropic fallback, agentic.hosting |
+| v7.4.x | Mar 14, 2026 | Twitter Brain + Hedge Brain, 9 parallel agents, Hetzner migration |
+| v7.3.2a | Mar 11, 2026 | Mobile app LIVE, chatCompletions, OKX data |
 | v7.1.0 | Mar 7, 2026 | Strategic Orchestrator, Cost Guard |
-| v6.3.0 | Mar 4, 2026 | Twitter Bot v3.1, Foundation |
 | v6.0.19 | Mar 2, 2026 | 5 parallel sub-agents LIVE |
 | v1.0.0 | Feb 1, 2026 | First deployment on Akash Network |
-
----
-
-## 🐝 Roadmap
-
-| Phase | Target | Status |
-|-------|--------|--------|
-| Phase 0 | 3 Intelligence Features | ✅ COMPLETE |
-| Phase 0.5 | Mobile App (Buzz Alpha) | ✅ LIVE |
-| Phase 0.7 | Dual Memory (Honcho + Supermemory) | ✅ DEPLOYED |
-| Phase D | Twitter Brain + Hedge Brain | ✅ v7.4.0-v7.5.1 LIVE |
-| Phase D.1 | Bags.fm Integration | ✅ Layer 1+2 COMPLETE |
-| Phase E | CI/CD Self-Deploy Pipeline | ✅ LIVE (GitHub Actions) |
-| Phase E.1 | Twitter Funnel (4 routes) | ✅ PROVEN |
-| **Phase 1** | **Close First Deal ($5K)** | **🔨 ACTIVE** |
-| Phase 2 | ARIA Multi-Chain Intel | 🔵 Next |
-| Phase 3 | BaaS x402 Subscriptions | 🔵 Month 2 |
-| Phase 4 | Mobile App (Public Release) | 🔵 Month 3-6 |
-| Phase 5 | $BUZZ Token + Bankr | 🔵 Month 4-6 |
-| Phase 6 | Autonomous Company | 🔵 Month 6-12 |
 
 ---
 
@@ -326,11 +377,26 @@ Full autonomous BD operation for less than a coffee per day.
 
 | Hackathon | Prize | Deadline | Status |
 |-----------|-------|----------|--------|
-| Bags.fm | $4M ($1M + $3M fund) | Rolling Q1 | ✅ IN REVIEW |
-| X Layer | $200K | Mar 26 | Battle plan ready |
-| Solana Agent Talent Show | TBD | Mar 27 | ✅ Article published |
-| Binance 48.6 BNB | 48.6 BNB | Mar 18 | ✅ Submitted |
-| Colosseum | $100K | Closed | ⏳ Awaiting results (#3734) |
+| Synthesis | $51K (5 tracks) | Mar 25 | ✅ REGISTERED + PUBLISHED |
+| X Layer | $200K | Mar 26 | Testnet TX needed |
+| Solana Agent Economy | $30K | Mar 27 | Submission plan ready |
+
+---
+
+## 🐝 Roadmap
+
+| Phase | Target | Status |
+|-------|--------|--------|
+| Phase 0-E | Foundation → CI/CD → Twitter | ✅ COMPLETE |
+| Phase SIM | MicroBuzz Simulation Engine | ✅ LIVE |
+| Phase VER | Triple Verification Layer | ✅ LIVE |
+| Phase REV | Revenue Infrastructure | ✅ LIVE |
+| **Phase 1** | **Close First Deal ($5K)** | **🔨 ACTIVE** |
+| Phase 2 | ARIA Multi-Chain Intel | 🔵 Next |
+| Phase 3 | BaaS x402 Subscriptions | 🔵 Month 2 |
+| Phase 4 | Mobile App (Public Release) | 🔵 Month 3-6 |
+| Phase 5 | $BUZZ Token + Bankr | 🔵 Month 4-6 |
+| Phase 6 | Zero-Human Exchange Listing Company | 🔵 Month 6-12 |
 
 ---
 
@@ -338,9 +404,9 @@ Full autonomous BD operation for less than a coffee per day.
 
 **AIXBT is the intelligence agent of crypto — it finds alpha and tells you about it.**
 **Bankr is the infrastructure agent of crypto — it deploys tokens and provides rails.**
-**Buzz is the deal-making agent of crypto — it finds tokens, scores them, reaches out, lists them, and deploys them. And proves it with backtested data.**
+**Buzz is the deal-making agent of crypto — it finds tokens, triple-verifies them, simulates the listing, reaches out, and closes deals.**
 
-The flywheel: **Scan → Score → List OR Deploy → Fees → Fund Compute → More BD → More Revenue → REPEAT**
+The flywheel: **Scan → Triple Verify → Score → Simulate → List OR Deploy → Fees → Fund Compute → More BD → More Revenue → REPEAT**
 
 No other agent occupies this lane.
 
@@ -350,11 +416,9 @@ No other agent occupies this lane.
 
 Buzz was built from scratch by Ogie — a 20+ year Executive Chef who transitioned to crypto BD. No CS degree. No engineering team. Just conversational collaboration with Claude (Opus 4.6), building one feature at a time from Jakarta, Indonesia during Ramadan.
 
-From first deploy (Feb 1, 2026) to v7.5.1 CI/CD + dual memory + Twitter funnel (Mar 15) in 43 days. Nine parallel agents. Autonomous Twitter with Premium deep scan. Self-deploying CI/CD pipeline. Dual memory that dreams. The deal-making agent of crypto.
+From first deploy (Feb 1, 2026) to v7.5.5+ triple-verified simulation engine (Mar 19) in 47 days. Ten parallel agents. Triple verification on every output. MicroBuzz simulation engine. Revenue infrastructure with autonomous loop crons. Hybrid development swarm. The deal-making agent of crypto.
 
-Total infrastructure cost: ~$6.42/month. Revenue target: $13,000+/month.
-
-**The formula: Hermes Brain + Buzz Body = Alpha Model.**
+Total infrastructure cost: $4.09/month. Revenue target: $13,000+/month.
 
 ---
 
@@ -363,12 +427,11 @@ Total infrastructure cost: ~$6.42/month. Revenue target: $13,000+/month.
 | Platform | URL |
 |----------|-----|
 | SolCex Exchange | [solcex.io](https://solcex.io) |
+| MicroBuzz | [microbuzz.vercel.app](https://microbuzz.vercel.app) |
 | Twitter | [@BuzzBySolCex](https://x.com/BuzzBySolCex) |
 | SolCex Twitter | [@SolCex_Exchange](https://x.com/SolCex_Exchange) |
 | Telegram Bot | [@BuzzBySolCex_bot](https://t.me/BuzzBySolCex_bot) |
 | Builder | [@HidayahAnka1](https://x.com/HidayahAnka1) |
-| Bags.fm App | [bags.fm/apps/1df0bf1a-960d-4d78-b3d3-011126ffdd48](https://bags.fm/apps/1df0bf1a-960d-4d78-b3d3-011126ffdd48) |
-| Talent Show Article | [X Article](https://x.com/HidayahAnka1/status/2032917413369622728) |
 
 ---
 
@@ -380,8 +443,8 @@ Proprietary — SolCex Exchange. All rights reserved.
 
 *🐝 "AIXBT finds alpha. Bankr deploys tokens. Buzz closes deals."*
 
-*Buzz BD Agent v7.5.1 — Sprint Day 26 | Mar 15, 2026 | Jakarta, Indonesia*
-*91+ endpoints | 27 crons | 42 tables | 21 intel | 9 agents | $6.42/mo*
-*Hetzner CX23 via Agentic.hosting | CI/CD: GitHub Actions → auto-deploy*
-*Dual Memory: Honcho v3.0.3 + Supermemory | Twitter Funnel: 4 routes proven*
+*Buzz BD Agent v7.5.5+ — Sprint Day 32 | Mar 19, 2026 | Jakarta, Indonesia*
+*~166 endpoints | 31 crons | 57 tables | 23 intel | 10 agents | $4.09/mo*
+*Triple Verification LIVE | MicroBuzz LIVE | Revenue Infrastructure LIVE*
+*3-Tier LLM: MiniMax → Bankr → Anthropic | Hybrid Swarm: Agent Teams + ClawTeam*
 *Built by a chef who codes through conversation. No CS degree. Just Claude and persistence.*
