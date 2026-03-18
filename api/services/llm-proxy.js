@@ -11,7 +11,7 @@
 const https = require('https');
 const { URL } = require('url');
 
-const MINIMAX_ENDPOINT = 'https://api.minimax.chat/v1/chat/completions';
+const MINIMAX_ENDPOINT = 'https://api.minimax.io/v1/chat/completions';
 
 const PRICING = {
   'MiniMax-Text-02': { input: 0.55, output: 2.19 },
