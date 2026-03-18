@@ -506,6 +506,31 @@ function runMigrations() {
         );
         CREATE INDEX IF NOT EXISTS idx_xlayer_tx ON xlayer_transactions(tx_hash);
       `
+    },
+
+    // Migration 017: LLM Cost Proxy (v7.5.5)
+    {
+      name: '017_llm_costs',
+      sql: `
+        CREATE TABLE IF NOT EXISTS llm_costs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          timestamp TEXT DEFAULT (datetime('now')),
+          model TEXT NOT NULL,
+          caller TEXT DEFAULT 'unknown',
+          prompt_tokens INTEGER DEFAULT 0,
+          completion_tokens INTEGER DEFAULT 0,
+          total_tokens INTEGER DEFAULT 0,
+          cost_usd REAL DEFAULT 0.0,
+          latency_ms INTEGER DEFAULT 0,
+          status TEXT DEFAULT 'success',
+          error_message TEXT,
+          endpoint TEXT DEFAULT '/v1/chat/completions',
+          cached_tokens INTEGER DEFAULT 0
+        );
+        CREATE INDEX IF NOT EXISTS idx_llm_costs_timestamp ON llm_costs(timestamp);
+        CREATE INDEX IF NOT EXISTS idx_llm_costs_model ON llm_costs(model);
+        CREATE INDEX IF NOT EXISTS idx_llm_costs_caller ON llm_costs(caller);
+      `
     }
   ];
 
