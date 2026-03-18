@@ -49,6 +49,13 @@ router.get('/summary', (req, res) => {
     const tracker = readCostTracker();
     dailyTotal = tracker.daily_total || 0;
   }
+  // Include LLM proxy costs
+  let llmCostToday = 0;
+  try {
+    const llmRow = db.prepare("SELECT COALESCE(SUM(cost_usd), 0) as llm_total FROM llm_costs WHERE date(timestamp) = date('now')").get();
+    llmCostToday = llmRow?.llm_total || 0;
+  } catch (e) { /* llm_costs table may not exist yet */ }
+
   try {
     const trackerPath = require("path").join(process.env.BUZZ_DATA_DIR || "/data", "workspace/memory/cost-tracker.json");
     const t = readCostTracker();
@@ -66,7 +73,9 @@ router.get('/summary', (req, res) => {
     pct_used: dailyCap > 0 ? Math.round((dailyTotal / dailyCap) * 10000) / 100 : 0,
     throttled: dailyTotal >= dailyCap,
     calls_minimax: callsMinimax,
-    calls_bankr: callsBankr
+    calls_bankr: callsBankr,
+    llm_cost_today: Math.round(llmCostToday * 10000) / 10000,
+    combined_total: Math.round((dailyTotal + llmCostToday) * 10000) / 10000,
   });
 });
 

@@ -62,6 +62,9 @@ const simulationReportRoutes = require('./routes/simulation-report');
 // v7.5.4: CoinGecko CLI — Intel Source #23
 const coingeckoRoutes = require('./routes/coingecko');
 
+// v7.5.5: LLM Cost Proxy
+const llmProxyRoutes = require('./routes/llm-proxy');
+
 // v7.3.1 Memory search engine + Contact intelligence
 const { initFTS } = require('./services/memory-search');
 const { initContacts } = require('./services/contact-intelligence');
@@ -387,6 +390,9 @@ async function start() {
 
     // v7.0: Strategy routes (8 endpoints)
     app.use('/api/v1/strategy', apiKeyAuth, strategyRoutes(db, { decisionEngine, playbookEngine, contextEngine }));
+
+    // v7.5.5: LLM Cost Proxy (6 endpoints)
+    app.use('/api/v1/llm', llmProxyRoutes(db));
 
     // v7.4.0: Hedge Brain routes (SSE streaming, personas, backtest)
     app.use('/api/v1/pipeline', pipelineStreamRoutes); // SSE stream (adds /stream under existing /pipeline)

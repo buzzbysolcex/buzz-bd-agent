@@ -1,0 +1,135 @@
+/**
+ * Buzz BD Agent — LLM Cost Proxy Routes
+ * v7.5.5 | 6 endpoints under /api/v1/llm
+ *
+ * POST /completions         — Transparent proxy to MiniMax
+ * GET  /costs/today         — Today's breakdown with alert status
+ * GET  /costs/summary       — Daily totals (default 7 days)
+ * GET  /costs/callers       — By caller identity
+ * GET  /costs/hourly        — Hourly breakdown for a date
+ * GET  /costs/runway        — Runway estimate from balance
+ */
+
+const express = require('express');
+const LLMProxy = require('../services/llm-proxy');
+
+module.exports = function (db) {
+  const router = express.Router();
+  const proxy = new LLMProxy(db);
+
+  // ─── Auth Middleware ────────────────────────────────
+  function authMiddleware(req, res, next) {
+    const adminKey = process.env.BUZZ_API_ADMIN_KEY;
+    if (!adminKey) {
+      return res.status(500).json({ error: 'server_config', message: 'BUZZ_API_ADMIN_KEY not configured' });
+    }
+
+    const bearer = req.headers.authorization?.replace(/^Bearer\s+/i, '');
+    const xApiKey = req.headers['x-api-key'];
+    const provided = bearer || xApiKey;
+
+    if (!provided || provided !== adminKey) {
+      return res.status(401).json({ error: 'unauthorized', message: 'Invalid or missing API key' });
+    }
+
+    next();
+  }
+
+  router.use(authMiddleware);
+
+  // ─── POST /completions — Transparent Proxy ─────────
+  router.post('/completions', async (req, res) => {
+    try {
+      const caller = req.headers['x-buzz-caller'] || req.body._caller || 'unknown';
+
+      // Remove _caller before forwarding
+      const body = { ...req.body };
+      delete body._caller;
+
+      const result = await proxy.proxyRequest(body, caller);
+
+      // Return the MiniMax response transparently, with cost metadata header
+      res.set('X-Buzz-Cost-USD', String(result._meta.cost_usd));
+      res.set('X-Buzz-Latency-MS', String(result._meta.latency_ms));
+      res.status(result.statusCode).json(result.body);
+    } catch (err) {
+      console.error('[LLM Proxy] Proxy error:', err.message);
+      res.status(502).json({
+        error: 'proxy_error',
+        message: err.message,
+      });
+    }
+  });
+
+  // ─── GET /costs/today — Today's Breakdown ──────────
+  router.get('/costs/today', (req, res) => {
+    try {
+      const data = proxy.getCostsToday();
+
+      // R007 alert thresholds
+      let alert_status = 'OK';
+      if (data.total_cost_usd >= 8) {
+        alert_status = 'ALERT';
+      } else if (data.total_cost_usd >= 5) {
+        alert_status = 'WARNING';
+      }
+
+      res.json({
+        ...data,
+        alert_status,
+        thresholds: { warning: 5, alert: 8 },
+      });
+    } catch (err) {
+      res.status(500).json({ error: 'query_error', message: err.message });
+    }
+  });
+
+  // ─── GET /costs/summary — Daily Totals ─────────────
+  router.get('/costs/summary', (req, res) => {
+    try {
+      const days = parseInt(req.query.days) || 7;
+      const data = proxy.getCostsSummary(days);
+      res.json({ days, daily_totals: data });
+    } catch (err) {
+      res.status(500).json({ error: 'query_error', message: err.message });
+    }
+  });
+
+  // ─── GET /costs/callers — By Caller Identity ───────
+  router.get('/costs/callers', (req, res) => {
+    try {
+      const days = parseInt(req.query.days) || 7;
+      const data = proxy.getCostsByCaller(days);
+      res.json({ days, callers: data });
+    } catch (err) {
+      res.status(500).json({ error: 'query_error', message: err.message });
+    }
+  });
+
+  // ─── GET /costs/hourly — Hourly Breakdown ──────────
+  router.get('/costs/hourly', (req, res) => {
+    try {
+      const date = req.query.date || new Date().toISOString().slice(0, 10);
+      const data = proxy.getHourlyCosts(date);
+      res.json({ date, hours: data });
+    } catch (err) {
+      res.status(500).json({ error: 'query_error', message: err.message });
+    }
+  });
+
+  // ─── GET /costs/runway — Runway Estimate ───────────
+  router.get('/costs/runway', (req, res) => {
+    try {
+      const balance = parseFloat(req.query.balance);
+      if (isNaN(balance) || balance < 0) {
+        return res.status(400).json({ error: 'invalid_balance', message: 'Provide ?balance=<number>' });
+      }
+      const data = proxy.getRunwayEstimate(balance);
+      res.json(data);
+    } catch (err) {
+      res.status(500).json({ error: 'query_error', message: err.message });
+    }
+  });
+
+  return router;
+};
