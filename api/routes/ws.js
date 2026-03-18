@@ -14,7 +14,10 @@ router.get('/okx/status', (req, res) => {
     const db = getDB();
     const tickerCount = db.prepare('SELECT COUNT(*) as count FROM okx_live_tickers').get();
     const recentTicker = db.prepare('SELECT inst_id, last_price, updated_at FROM okx_live_tickers ORDER BY updated_at DESC LIMIT 1').get();
-    res.json({ ...status, tickersInDb: tickerCount?.count || 0, mostRecent: recentTicker || null });
+    const btcTicker = db.prepare("SELECT last_price, high_24h, low_24h, open_24h, vol_24h, updated_at FROM okx_live_tickers WHERE inst_id = 'BTC-USDT'").get();
+    const ethTicker = db.prepare("SELECT last_price FROM okx_live_tickers WHERE inst_id = 'ETH-USDT'").get();
+    const solTicker = db.prepare("SELECT last_price FROM okx_live_tickers WHERE inst_id = 'SOL-USDT'").get();
+    res.json({ ...status, tickersInDb: tickerCount?.count || 0, mostRecent: recentTicker || null, btcPrice: btcTicker?.last_price || 0, ethPrice: ethTicker?.last_price || 0, solPrice: solTicker?.last_price || 0, btcTicker: btcTicker || null });
   } catch (err) {
     res.json({ connected: false, error: err.message });
   }
