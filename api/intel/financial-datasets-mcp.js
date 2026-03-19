@@ -103,7 +103,7 @@ async function getAvailableCryptoTickers() {
     return tickerCache.data;
   }
   try {
-    const data = await apiGet('/crypto/tickers/');
+    const data = await apiGet('/crypto/tickers');
     tickerCache = { data, expiresAt: now + 24 * 60 * 60 * 1000 };
     return data;
   } catch (err) {
@@ -129,8 +129,8 @@ async function getCompanyNews(ticker, limit = 10) {
  */
 async function healthCheck() {
   try {
-    const result = await apiGet('/crypto/tickers/');
-    return { status: 'ok', configured: true, tickers: Array.isArray(result) ? result.length : 0 };
+    const result = await apiGet('/crypto/prices/snapshot/?ticker=BTC-USD');
+    return { status: 'ok', configured: true, btcPrice: result?.snapshot?.price || null };
   } catch (err) {
     return { status: 'error', configured: !!process.env.FINANCIAL_DATASETS_API_KEY, error: err.message };
   }
