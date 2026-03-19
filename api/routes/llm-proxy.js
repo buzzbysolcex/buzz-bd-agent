@@ -98,13 +98,20 @@ module.exports = function (db) {
   }
 
   function extractSystemText(body) {
-    // Anthropic format: body.system (string) or body.messages[0].role === 'system'
-    if (typeof body.system === 'string') return body.system;
-    // OpenAI format: body.messages array
+    // Anthropic format: body.system (string)
+    if (typeof body.system === 'string' && body.system.length > 0) return body.system;
+    // OpenAI format: body.messages array — check system message
     const msgs = body.messages;
     if (Array.isArray(msgs)) {
       const sys = msgs.find(m => m.role === 'system');
       if (sys) return typeof sys.content === 'string' ? sys.content : JSON.stringify(sys.content);
+      // OpenClaw puts cron task text in user messages — check those too
+      // Concatenate all user message content for fingerprinting
+      const userTexts = msgs
+        .filter(m => m.role === 'user')
+        .map(m => typeof m.content === 'string' ? m.content : JSON.stringify(m.content))
+        .join(' ');
+      if (userTexts.length > 0) return userTexts;
     }
     return null;
   }
