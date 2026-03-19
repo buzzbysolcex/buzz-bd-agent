@@ -303,10 +303,9 @@ cat > "$CONFIG" << JSONEOF
   "models": {
     "providers": {
       "minimax": {
-        "baseUrl": "https://api.minimax.io/anthropic",
-        "apiKey": "$MINIMAX_API_KEY",
+        "baseUrl": "http://localhost:3000/api/v1/llm/anthropic",
+        "apiKey": "$BUZZ_API_ADMIN_KEY",
         "api": "anthropic-messages",
-        "authHeader": true,
         "models": [{
           "id": "MiniMax-M2.5",
           "name": "MiniMax M2.5",

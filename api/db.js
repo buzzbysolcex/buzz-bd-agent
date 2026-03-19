@@ -531,6 +531,27 @@ function runMigrations() {
         CREATE INDEX IF NOT EXISTS idx_llm_costs_model ON llm_costs(model);
         CREATE INDEX IF NOT EXISTS idx_llm_costs_caller ON llm_costs(caller);
       `
+    },
+    // ─── Migration 015: LLM Provider Cascade Logging ───
+    {
+      name: '015_llm_provider_log',
+      sql: `
+        CREATE TABLE IF NOT EXISTS llm_provider_log (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          provider TEXT NOT NULL,
+          model TEXT NOT NULL,
+          agent TEXT NOT NULL,
+          tokens_in INTEGER DEFAULT 0,
+          tokens_out INTEGER DEFAULT 0,
+          latency_ms INTEGER DEFAULT 0,
+          success INTEGER NOT NULL,
+          error_message TEXT,
+          created_at TEXT DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_provider_log_provider ON llm_provider_log(provider, created_at);
+        CREATE INDEX IF NOT EXISTS idx_provider_log_agent ON llm_provider_log(agent);
+        CREATE INDEX IF NOT EXISTS idx_provider_log_date ON llm_provider_log(created_at);
+      `
     }
   ];
 
