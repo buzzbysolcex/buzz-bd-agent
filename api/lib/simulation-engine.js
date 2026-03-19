@@ -303,6 +303,17 @@ async function runSimulation(tokenAddress, chain, options = {}) {
   // 5. Calculate consensus
   const consensus = calculateConsensus(verdicts);
 
+  // 5b. Adversarial bull/bear debate (B5)
+  let debate = null;
+  const completed = verdicts.filter(v => v.status === 'COMPLETED');
+  if (completed.length >= 6) {
+    try {
+      debate = await runDebate(completed, symbol, chain);
+    } catch (e) {
+      console.error('[SimEngine] Debate failed:', e.message);
+    }
+  }
+
   // 6. Build metrics
   const durationMs = Date.now() - startTime;
   const metrics = {
@@ -316,6 +327,7 @@ async function runSimulation(tokenAddress, chain, options = {}) {
     tokenFound: !!token,
     scoresFound: !!scores,
     financialDataEnriched: !!financialData,
+    hasDebate: !!debate,
   };
 
   return {
@@ -332,10 +344,74 @@ async function runSimulation(tokenAddress, chain, options = {}) {
     recommendation: consensus.recommendation,
     weightedAvg: consensus.weightedAvg,
     verdicts,
+    debate,
     metrics,
     durationMs,
     createdAt: new Date().toISOString(),
   };
 }
 
-module.exports = { runSimulation, PERSONAS, VERDICT_MAP, calculateConsensus };
+// ─── Adversarial Bull/Bear Debate ────────────────────────
+
+async function runDebate(completedVerdicts, symbol, chain) {
+  const sorted = [...completedVerdicts].sort((a, b) => {
+    const va = VERDICT_MAP[a.verdict] || 0;
+    const vb = VERDICT_MAP[b.verdict] || 0;
+    return vb - va;
+  });
+
+  const bulls = sorted.slice(0, 3);
+  const bears = sorted.slice(-3).reverse();
+
+  const bullCase = bulls.map(v =>
+    `${v.persona} (w=${v.weight}): ${v.verdict} — ${v.reasoning}`
+  ).join('\n');
+
+  const bearCase = bears.map(v =>
+    `${v.persona} (w=${v.weight}): ${v.verdict} — ${v.reasoning}`
+  ).join('\n');
+
+  const debatePrompt = `You are a senior crypto analyst reviewing a listing simulation for ${symbol} (${chain}) on SolCex Exchange.
+
+BULL CASE (top 3 most bullish agents):
+${bullCase}
+
+BEAR CASE (top 3 most bearish/cautious agents):
+${bearCase}
+
+Synthesize both cases in 3-4 sentences. Who has the stronger argument? What is the key risk? What is the key signal? End with a one-word refined consensus: BULLISH, BEARISH, or NEUTRAL.
+
+Respond ONLY with valid JSON:
+{"synthesis":"3-4 sentences","refined_consensus":"BULLISH|BEARISH|NEUTRAL","key_risk":"one sentence","key_signal":"one sentence"}`;
+
+  const result = await cascadeCall({
+    messages: [
+      { role: 'system', content: 'You are a senior analyst. Respond only with valid JSON.' },
+      { role: 'user', content: debatePrompt }
+    ],
+    max_tokens: 400,
+    temperature: 0.3,
+  }, { agent: 'debate-analyst' });
+
+  let text = typeof result === 'string' ? result : result?.content || result?.text || '';
+  text = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) return { transcript: text, refined_consensus: null };
+
+  try {
+    const parsed = JSON.parse(jsonMatch[0]);
+    return {
+      synthesis: parsed.synthesis || '',
+      refined_consensus: parsed.refined_consensus || null,
+      key_risk: parsed.key_risk || '',
+      key_signal: parsed.key_signal || '',
+      bull_arguments: bulls.map(v => ({ persona: v.persona, verdict: v.verdict, reasoning: v.reasoning })),
+      bear_arguments: bears.map(v => ({ persona: v.persona, verdict: v.verdict, reasoning: v.reasoning })),
+    };
+  } catch {
+    return { transcript: text, refined_consensus: null };
+  }
+}
+
+module.exports = { runSimulation, PERSONAS, VERDICT_MAP, calculateConsensus, runDebate };

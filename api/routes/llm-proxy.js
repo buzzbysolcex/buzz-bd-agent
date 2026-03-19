@@ -231,6 +231,26 @@ module.exports = function (db) {
     }
   });
 
+  // ─── GET /costs-by-agent — Per-Agent Cost Tracking ───
+  router.get('/costs-by-agent', (req, res) => {
+    try {
+      const agents = db.prepare(`
+        SELECT agent,
+          SUM(CASE WHEN success THEN 1 ELSE 0 END) as ok_calls,
+          COUNT(*) as total_calls,
+          provider,
+          model
+        FROM llm_provider_log
+        GROUP BY agent, provider, model
+        ORDER BY total_calls DESC
+      `).all();
+
+      res.json({ success: true, agents });
+    } catch (err) {
+      res.status(500).json({ error: 'query_error', message: err.message });
+    }
+  });
+
   // ─── GET /stats — Provider Usage Stats (Day 32B) ───
   router.get('/stats', (req, res) => {
     try {

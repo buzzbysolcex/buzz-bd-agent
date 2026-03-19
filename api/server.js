@@ -65,6 +65,9 @@ const simulateListingRoutes = require('./routes/simulate-listing');
 // v7.6.0: Financial Datasets MCP — Intel Source #24
 const financialDatasetsRoutes = require('./routes/financial-datasets');
 
+// v7.7.0: Technical Analyst
+const technicalRoutes = require('./routes/technical');
+
 // v7.5.4: CoinGecko CLI — Intel Source #23
 const coingeckoRoutes = require('./routes/coingecko');
 
@@ -121,11 +124,11 @@ app.use('/api/v1/simulation-report', simulationReportRoutes);
 app.get('/api/v1/info', (req, res) => {
   res.json({
     name: 'Buzz BD Agent API',
-    version: '3.7.0',
+    version: '3.8.0',
     agent: 'Buzz by SolCex',
     architecture: '5 parallel sub-agents + orchestrator + MiroFish simulation engine',
     sub_agents: ['scanner-agent', 'safety-agent', 'wallet-agent', 'social-agent', 'scorer-agent'],
-    orchestrator_model: 'MiniMax M2.5',
+    orchestrator_model: 'MiniMax M2.7',
     sub_agent_model: 'bankr/gpt-5-nano',
     llm_gateway: 'Bankr LLM Gateway (8 models)',
     intel_sources: '24/24 connected',
@@ -215,6 +218,9 @@ app.use('/api/v1', apiKeyAuth, listingReportRoutes);
 
 // v7.6.0: Financial Datasets MCP — Intel Source #24
 app.use('/api/v1/intel/financial-datasets', apiKeyAuth, financialDatasetsRoutes);
+
+// v7.7.0: Technical Analyst
+app.use('/api/v1/technical', apiKeyAuth, technicalRoutes);
 
 // v7.5.4: CoinGecko CLI — Intel Source #23
 app.use('/api/v1/coingecko', apiKeyAuth, coingeckoRoutes);
