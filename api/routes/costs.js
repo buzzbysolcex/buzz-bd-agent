@@ -60,6 +60,17 @@ router.get('/summary', (req, res) => {
     console.error("[costs] llm_costs read error:", err.message);
   }
 
+  // Per-agent breakdown for Sentinel/Telegram
+  let byAgent = {};
+  try {
+    const agents = db.prepare(`
+      SELECT caller, COUNT(*) as calls, COALESCE(SUM(cost_usd), 0) as cost
+      FROM llm_costs WHERE date(timestamp) = date('now')
+      GROUP BY caller ORDER BY cost DESC
+    `).all();
+    for (const a of agents) byAgent[a.caller] = { calls: a.calls, cost: Math.round(a.cost * 1_000_000) / 1_000_000 };
+  } catch (e) {}
+
   // Write to cost-tracker.json for Sentinel compatibility
   try {
     const trackerPath = path.join(process.env.BUZZ_DATA_DIR || "/data", "workspace/memory/cost-tracker.json");
@@ -70,6 +81,7 @@ router.get('/summary', (req, res) => {
     t.calls_bankr_fallback = callsBankr;
     t.alert_70pct_sent = dailyTotal >= dailyCap * 0.7;
     t.alert_cap_sent = dailyTotal >= dailyCap;
+    t.by_agent = byAgent;
     fs.writeFileSync(trackerPath, JSON.stringify(t, null, 2));
   } catch (e) {}
 
@@ -84,6 +96,56 @@ router.get('/summary', (req, res) => {
     calls_bankr: callsBankr,
     total_calls: totalCalls,
   });
+});
+
+// ─── GET /by-agent — Per-agent cost breakdown ────────
+router.get('/by-agent', (req, res) => {
+  const db = getDB();
+  const today = new Date().toISOString().slice(0, 10);
+  const period = req.query.period || 'today';
+  const dateFilter = period === 'today' ? "date(timestamp) = date('now')" :
+                     period === '7d' ? "timestamp >= datetime('now', '-7 days')" :
+                     "timestamp >= datetime('now', '-30 days')";
+
+  try {
+    const agents = db.prepare(`
+      SELECT
+        caller as agent,
+        COUNT(*) as total_calls,
+        COALESCE(SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END), 0) as success_calls,
+        COALESCE(SUM(prompt_tokens), 0) as total_tokens_in,
+        COALESCE(SUM(completion_tokens), 0) as total_tokens_out,
+        COALESCE(SUM(cost_usd), 0) as total_cost,
+        ROUND(COALESCE(SUM(cost_usd), 0) / MAX(COUNT(*), 1), 8) as avg_cost_per_call
+      FROM llm_costs
+      WHERE ${dateFilter}
+      GROUP BY caller
+      ORDER BY total_cost DESC
+    `).all();
+
+    const totals = db.prepare(`
+      SELECT COALESCE(SUM(cost_usd), 0) as cost, COUNT(*) as calls
+      FROM llm_costs WHERE ${dateFilter}
+    `).get();
+
+    res.json({
+      date: today,
+      period,
+      total_cost: Math.round((totals.cost || 0) * 1_000_000) / 1_000_000,
+      total_calls: totals.calls || 0,
+      agents: agents.map(a => ({
+        agent: a.agent,
+        calls: a.total_calls,
+        success: a.success_calls,
+        cost: Math.round(a.total_cost * 1_000_000) / 1_000_000,
+        avg: Math.round(a.avg_cost_per_call * 1_000_000) / 1_000_000,
+        tokens_in: a.total_tokens_in,
+        tokens_out: a.total_tokens_out,
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'query_error', message: err.message });
+  }
 });
 
 // ─── GET / ───────────────────────────────────────────

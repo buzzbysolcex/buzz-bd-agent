@@ -44,34 +44,56 @@ module.exports = function (db) {
   router.use(authMiddleware);
 
   // ─── Caller Inference from Message Content ─────────
-  // When OpenClaw routes through the proxy, it doesn't send x-buzz-caller.
-  // We infer the caller from system prompt keywords in the request body.
+  // Infer caller from system prompt keywords. Searches ENTIRE text
+  // (credential guards push keywords further into the prompt).
+  // Order matters: more specific patterns first.
+  const CALLER_PATTERNS = [
+    // Specific crons (check before generic patterns)
+    [['bd scan'], 'bd-scan'],
+    [['twitter brain', 'twitter brain scan'], 'twitter-brain'],
+    [['nansen', 'smart money check', 'smart money scan'], 'nansen'],
+    [['atv', 'identity batch', 'web3 identity'], 'atv'],
+    [['daily morning summary'], 'daily-summary'],
+    [['end of day', 'eod report', 'buzz eod'], 'eod-report'],
+    [['morning pipeline review', 'morning review'], 'morning-review'],
+    [['evening pipeline review', 'evening review'], 'evening-review'],
+    [['pipeline review', 're-score existing'], 'pipeline-review'],
+    [['weekly pipeline digest'], 'weekly-digest'],
+    [['moltbook', 'content calendar heartbeat'], 'moltbook'],
+    [['molten heartbeat', 'molten.gg'], 'molten'],
+    [['geckoterminal'], 'gecko-scan'],
+    [['dexscreener boost', 'boost scan'], 'dex-boost'],
+    [['prayer', 'salat', 'sholat', 'fajr', 'dhuhr', 'maghrib', 'isha'], 'prayer'],
+    [['simulat', 'mirofish', 'microbuzz'], 'simulation'],
+    [['bankr', 'deploy stats', 'credit check'], 'bankr'],
+    [['bitget', 'listing intel'], 'bitget-intel'],
+    [['firecrawl', 'deep research'], 'firecrawl'],
+    [['acp marketplace', 'acp monitor'], 'acp'],
+    [['agentproof', 'telemetry'], 'agentproof'],
+    [['skill reflect', 'learning loop'], 'skill-reflect'],
+    [['backtest', 'hedge brain'], 'backtest'],
+    [['health check', 'system health', 'cron health', 'api health'], 'health-check'],
+    [['alpha alert'], 'alpha-alert'],
+    [['build update'], 'build-update'],
+    [['intelligence', 'intel report'], 'intel-report'],
+    [['orchestrat'], 'orchestrator'],
+    [['bsc scan', 'bnb chain scan'], 'bsc-scan'],
+    [['bags.fm', 'bags scan', 'scan bags'], 'bags-scan'],
+    // Generic fallbacks (after specific)
+    [['twitter', 'tweet'], 'twitter'],
+    [['scan', 'scanner', 'score-token'], 'scan'],
+    [['pipeline'], 'pipeline'],
+    [['summary', 'digest', 'report'], 'report'],
+  ];
+
   function inferCaller(body) {
     const systemText = extractSystemText(body);
     if (!systemText) return 'openclaw-gateway';
 
     const lower = systemText.toLowerCase();
-    // Match against known agent/cron patterns
-    if (lower.includes('twitter') || lower.includes('tweet') || lower.includes('mention'))
-      return 'twitter-bot';
-    if (lower.includes('alpha alert') || lower.includes('alpha_alert'))
-      return 'cron-alpha';
-    if (lower.includes('pipeline report') || lower.includes('pipeline_report'))
-      return 'cron-pipeline';
-    if (lower.includes('intelligence') || lower.includes('intel report'))
-      return 'cron-intel';
-    if (lower.includes('build update') || lower.includes('build_update'))
-      return 'cron-build';
-    if (lower.includes('simulat') || lower.includes('mirofish') || lower.includes('microbuzz'))
-      return 'simulation';
-    if (lower.includes('scan') || lower.includes('score-token') || lower.includes('scanner'))
-      return 'scan';
-    if (lower.includes('orchestrat'))
-      return 'orchestrator';
-    if (lower.includes('prayer') || lower.includes('salat'))
-      return 'cron-prayer';
-    if (lower.includes('daily') || lower.includes('digest') || lower.includes('summary'))
-      return 'cron-daily';
+    for (const [keywords, caller] of CALLER_PATTERNS) {
+      if (keywords.some(kw => lower.includes(kw))) return caller;
+    }
     return 'openclaw-gateway';
   }
 
