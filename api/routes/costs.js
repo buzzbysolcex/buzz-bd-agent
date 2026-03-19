@@ -38,44 +38,51 @@ router.get('/summary', (req, res) => {
   const db = getDB();
   const dailyCap = 10.00;
   const today = new Date().toISOString().slice(0, 10);
-  let dailyTotal = 0, callsMinimax = 0, callsBankr = 0;
+  let dailyTotal = 0, callsMinimax = 0, callsBankr = 0, totalCalls = 0;
+
+  // Primary source: llm_costs table (populated by LLM proxy on every call)
   try {
-    const row = db.prepare("SELECT COALESCE(SUM(cost_usd), 0) as daily_total, COALESCE(SUM(CASE WHEN model LIKE '%inimax%' THEN 1 ELSE 0 END), 0) as calls_minimax, COALESCE(SUM(CASE WHEN model LIKE '%bankr%' OR model LIKE '%gpt-5%' THEN 1 ELSE 0 END), 0) as calls_bankr FROM cost_logs WHERE date(created_at) = date('now')").get();
+    const row = db.prepare(`
+      SELECT
+        COALESCE(SUM(cost_usd), 0) as daily_total,
+        COUNT(*) as total_calls,
+        COALESCE(SUM(CASE WHEN model LIKE '%MiniMax%' OR model LIKE '%minimax%' THEN 1 ELSE 0 END), 0) as calls_minimax,
+        COALESCE(SUM(CASE WHEN model LIKE '%bankr%' OR model LIKE '%gpt-5%' OR model LIKE '%gemini%' THEN 1 ELSE 0 END), 0) as calls_bankr,
+        COALESCE(SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END), 0) as success_calls,
+        COALESCE(SUM(CASE WHEN status = 'error' THEN 1 ELSE 0 END), 0) as error_calls
+      FROM llm_costs WHERE date(timestamp) = date('now')
+    `).get();
     dailyTotal = row.daily_total || 0;
     callsMinimax = row.calls_minimax || 0;
     callsBankr = row.calls_bankr || 0;
+    totalCalls = row.total_calls || 0;
   } catch (err) {
-    console.error("[costs] DB read error:", err.message);
-    const tracker = readCostTracker();
-    dailyTotal = tracker.daily_total || 0;
+    console.error("[costs] llm_costs read error:", err.message);
   }
-  // Include LLM proxy costs
-  let llmCostToday = 0;
-  try {
-    const llmRow = db.prepare("SELECT COALESCE(SUM(cost_usd), 0) as llm_total FROM llm_costs WHERE date(timestamp) = date('now')").get();
-    llmCostToday = llmRow?.llm_total || 0;
-  } catch (e) { /* llm_costs table may not exist yet */ }
 
+  // Write to cost-tracker.json for Sentinel compatibility
   try {
-    const trackerPath = require("path").join(process.env.BUZZ_DATA_DIR || "/data", "workspace/memory/cost-tracker.json");
+    const trackerPath = path.join(process.env.BUZZ_DATA_DIR || "/data", "workspace/memory/cost-tracker.json");
     const t = readCostTracker();
-    t.date = today; t.daily_total = Math.round(dailyTotal * 10000) / 10000;
-    t.calls_minimax = callsMinimax; t.calls_bankr_fallback = callsBankr;
+    t.date = today;
+    t.daily_total = Math.round(dailyTotal * 1_000_000) / 1_000_000;
+    t.calls_minimax = callsMinimax;
+    t.calls_bankr_fallback = callsBankr;
     t.alert_70pct_sent = dailyTotal >= dailyCap * 0.7;
     t.alert_cap_sent = dailyTotal >= dailyCap;
-    require("fs").writeFileSync(trackerPath, JSON.stringify(t, null, 2));
+    fs.writeFileSync(trackerPath, JSON.stringify(t, null, 2));
   } catch (e) {}
+
   res.json({
     date: today,
-    daily_total: Math.round(dailyTotal * 10000) / 10000,
+    daily_total: Math.round(dailyTotal * 1_000_000) / 1_000_000,
     daily_cap: dailyCap,
-    remaining: Math.max(0, Math.round((dailyCap - dailyTotal) * 10000) / 10000),
+    remaining: Math.max(0, Math.round((dailyCap - dailyTotal) * 1_000_000) / 1_000_000),
     pct_used: dailyCap > 0 ? Math.round((dailyTotal / dailyCap) * 10000) / 100 : 0,
     throttled: dailyTotal >= dailyCap,
     calls_minimax: callsMinimax,
     calls_bankr: callsBankr,
-    llm_cost_today: Math.round(llmCostToday * 10000) / 10000,
-    combined_total: Math.round((dailyTotal + llmCostToday) * 10000) / 10000,
+    total_calls: totalCalls,
   });
 });
 
