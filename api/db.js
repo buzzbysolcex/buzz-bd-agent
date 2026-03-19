@@ -570,6 +570,30 @@ function runMigrations() {
   // Run score-table migrations
   const {migrations: scoreMigrations} = require('./migrations/score-tables');
   for (const m of scoreMigrations) { try { db.exec(m.sql); } catch(e) {} }
+
+  // Run financial-datasets migration (P1-A)
+  const {migrations: finDataMigrations} = require('./migrations/016-financial-datasets');
+  for (const m of finDataMigrations) {
+    if (!applied.has(m.name)) {
+      try {
+        console.log(`[Buzz DB] Running migration: ${m.name}`);
+        db.exec(m.sql);
+        insert.run(m.name);
+      } catch(e) { console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message); }
+    }
+  }
+
+  // Run simulation-results migration (P1-B)
+  const {migrations: simResultMigrations} = require('./migrations/017-simulation-results');
+  for (const m of simResultMigrations) {
+    if (!applied.has(m.name)) {
+      try {
+        console.log(`[Buzz DB] Running migration: ${m.name}`);
+        db.exec(m.sql);
+        insert.run(m.name);
+      } catch(e) { console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message); }
+    }
+  }
 }
 
 module.exports = { initDB, getDB };

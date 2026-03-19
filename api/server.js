@@ -59,6 +59,12 @@ const listingReportRoutes = require('./routes/listing-report');
 // MiroFish Stage 1: Simulation Report (cyberpunk HTML)
 const simulationReportRoutes = require('./routes/simulation-report');
 
+// MiroFish P1-B: Enhanced Simulation Engine
+const simulateListingRoutes = require('./routes/simulate-listing');
+
+// v7.6.0: Financial Datasets MCP — Intel Source #24
+const financialDatasetsRoutes = require('./routes/financial-datasets');
+
 // v7.5.4: CoinGecko CLI — Intel Source #23
 const coingeckoRoutes = require('./routes/coingecko');
 
@@ -115,17 +121,17 @@ app.use('/api/v1/simulation-report', simulationReportRoutes);
 app.get('/api/v1/info', (req, res) => {
   res.json({
     name: 'Buzz BD Agent API',
-    version: '3.6.0',
+    version: '3.7.0',
     agent: 'Buzz by SolCex',
-    architecture: '5 parallel sub-agents + orchestrator',
+    architecture: '5 parallel sub-agents + orchestrator + MiroFish simulation engine',
     sub_agents: ['scanner-agent', 'safety-agent', 'wallet-agent', 'social-agent', 'scorer-agent'],
     orchestrator_model: 'MiniMax M2.5',
     sub_agent_model: 'bankr/gpt-5-nano',
     llm_gateway: 'Bankr LLM Gateway (8 models)',
-    intel_sources: '23/23 connected',
+    intel_sources: '24/24 connected',
     cron_jobs: 42,
     endpoints: {
-      total: 113,
+      total: 120,
       categories: {
         health: 5,
         info: 1,
@@ -147,6 +153,8 @@ app.get('/api/v1/info', (req, res) => {
         contacts: 6,
         bags: 4,
         simulate: 2,
+        simulate_listing: 1,
+        financial_datasets: 5,
         ws: 2,
         nansen: 2,
         xlayer: 2,
@@ -191,6 +199,9 @@ app.use('/api/v1/contacts', apiKeyAuth, contactRoutes);
 app.use('/api/v1/bags', apiKeyAuth, bagsRoutes);
 app.use('/api/v1/simulate', apiKeyAuth, requireVerifiedAutoCheck, simulateRoutes);
 
+// MiroFish P1-B: Enhanced Simulation Engine (separate from /simulate/* routes)
+app.use('/api/v1', apiKeyAuth, simulateListingRoutes);
+
 // v7.5.2: Nansen CLI (#17 activated) + X Layer x402 (BaaS payment layer)
 app.use('/api/v1/nansen', apiKeyAuth, nansenRoutes);
 app.use('/api/v1/xlayer', apiKeyAuth, xlayerRoutes);
@@ -201,6 +212,9 @@ app.use('/api/v1/ws', apiKeyAuth, require('./routes/ws'));
 // MiroFish Stage 1: Listing Proposal + Listing Report
 app.use('/api/v1/listing-proposal', apiKeyAuth, listingProposalRoutes);
 app.use('/api/v1', apiKeyAuth, listingReportRoutes);
+
+// v7.6.0: Financial Datasets MCP — Intel Source #24
+app.use('/api/v1/intel/financial-datasets', apiKeyAuth, financialDatasetsRoutes);
 
 // v7.5.4: CoinGecko CLI — Intel Source #23
 app.use('/api/v1/coingecko', apiKeyAuth, coingeckoRoutes);
