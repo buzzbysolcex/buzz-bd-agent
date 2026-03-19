@@ -594,6 +594,31 @@ function runMigrations() {
       } catch(e) { console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message); }
     }
   }
+
+  // Run technical-analysis migration (B4)
+  const {migrations: techMigrations} = require('./migrations/021-technical-analysis');
+  for (const m of techMigrations) {
+    if (!applied.has(m.name)) {
+      try {
+        console.log(`[Buzz DB] Running migration: ${m.name}`);
+        db.exec(m.sql);
+        insert.run(m.name);
+      } catch(e) { console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message); }
+    }
+  }
+
+  // Run agent-cost-tracking migration (B3)
+  const {migrations: agentCostMigrations} = require('./migrations/020-agent-cost-tracking');
+  for (const m of agentCostMigrations) {
+    if (!applied.has(m.name)) {
+      try {
+        console.log(`[Buzz DB] Running migration: ${m.name}`);
+        db.exec(m.sql);
+        if (m.postRun) m.postRun(db);
+        insert.run(m.name);
+      } catch(e) { console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message); }
+    }
+  }
 }
 
 module.exports = { initDB, getDB };

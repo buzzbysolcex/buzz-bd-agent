@@ -2,7 +2,7 @@
  * 3-Tier LLM Cascade — MiniMax → Bankr → Anthropic
  * Day 32B — LLM Provider Resilience
  *
- * PRIMARY:   MiniMax M2.5 (orchestrator)
+ * PRIMARY:   MiniMax M2.7 (orchestrator)
  * FALLBACK1: Bankr gemini-3-flash (orchestrator) / gpt-5-nano (sub-agents)
  * FALLBACK2: Anthropic claude-haiku-4.5 (emergency only)
  *
@@ -10,11 +10,12 @@
  */
 
 const https = require('https');
+const { getDB } = require('../db');
 
 const PROVIDERS = {
   minimax: {
     name: 'minimax',
-    model: 'MiniMax-M2.5',
+    model: 'MiniMax-M2.7',
     endpoint: 'https://api.minimax.io/v1/chat/completions',
     keyEnv: 'MINIMAX_API_KEY',
     headerKey: 'Authorization',
@@ -167,11 +168,43 @@ async function callProvider(provider, body, timeout = 120000) {
 }
 
 /**
+ * Log a provider call attempt to llm_provider_log table.
+ * Wrapped in try/catch so logging failures never break LLM calls.
+ */
+function logProviderCall({ provider, model, agent, tokens_in, tokens_out, latency_ms, success, error_message }) {
+  try {
+    const db = getDB();
+    db.prepare(`
+      INSERT INTO llm_provider_log (provider, model, agent, tokens_in, tokens_out, latency_ms, success, error_message)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      provider,
+      model,
+      agent || 'orchestrator',
+      tokens_in || 0,
+      tokens_out || 0,
+      latency_ms || 0,
+      success ? 1 : 0,
+      error_message || null
+    );
+  } catch (e) {
+    // Never let logging break the LLM call
+    console.warn(`[LLM Cascade] Provider log write failed: ${e.message}`);
+  }
+}
+
+/**
  * Main cascade function — tries each provider in order
  */
 async function cascadeCall(body, options = {}) {
   const { agent = 'orchestrator', logFn = null } = options;
   const providers = getProviderCascade(agent);
+
+  // Verbosity guard: M2.7 uses <thinking> blocks that burn tokens.
+  // Default max_tokens to 2000 unless caller explicitly sets it.
+  if (!body.max_tokens) {
+    body = { ...body, max_tokens: 2000 };
+  }
 
   if (providers.length === 0) {
     throw new Error('All LLM providers in cooldown');
@@ -183,6 +216,18 @@ async function cascadeCall(body, options = {}) {
       const result = await callProvider(provider, body);
       result.latency_ms = Date.now() - startTime;
 
+      // Built-in logging to llm_provider_log
+      logProviderCall({
+        provider: provider.name,
+        model: provider.model,
+        agent,
+        tokens_in: result.usage?.prompt_tokens || 0,
+        tokens_out: result.usage?.completion_tokens || 0,
+        latency_ms: result.latency_ms,
+        success: true,
+      });
+
+      // Legacy callback support
       if (logFn) {
         logFn({
           provider: provider.name,
@@ -197,15 +242,27 @@ async function cascadeCall(body, options = {}) {
 
       return result;
     } catch (err) {
+      const latency = Date.now() - startTime;
       console.warn(`[LLM Cascade] ${provider.name}/${provider.model} failed: ${err.message}`);
       trackFailure(provider.name);
 
+      // Built-in logging to llm_provider_log
+      logProviderCall({
+        provider: provider.name,
+        model: provider.model,
+        agent,
+        latency_ms: latency,
+        success: false,
+        error_message: err.message,
+      });
+
+      // Legacy callback support
       if (logFn) {
         logFn({
           provider: provider.name,
           model: provider.model,
           agent,
-          latency_ms: Date.now() - startTime,
+          latency_ms: latency,
           success: false,
           error_message: err.message,
         });
