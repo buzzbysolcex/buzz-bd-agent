@@ -225,7 +225,8 @@ class LLMProxy {
       }
 
       const model = requestBody.model || 'MiniMax-M2.5';
-      const bodyStr = JSON.stringify(requestBody);
+      // Force non-streaming — MiniMax Anthropic endpoint defaults to SSE
+      const bodyStr = JSON.stringify({ ...requestBody, stream: false });
       const targetPath = `/anthropic${subPath}`;
 
       const options = {
