@@ -25,6 +25,14 @@ function hashKey(key) {
  * Checks X-API-Key header or Authorization: Bearer <key>
  */
 function apiKeyAuth(req, res, next) {
+  // Skip auth for internal requests (OpenClaw, Sentinel, crons on localhost)
+  const clientIp = req.ip || req.connection?.remoteAddress || '';
+  const isLocalhost = clientIp === '127.0.0.1' || clientIp === '::1' || clientIp === '::ffff:127.0.0.1';
+  if (isLocalhost) {
+    req.auth = { role: 'internal', label: 'localhost', keyId: 0 };
+    return next();
+  }
+
   const key = req.headers['x-api-key'] || extractBearer(req.headers.authorization);
 
   if (!key) {

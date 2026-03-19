@@ -15,7 +15,7 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
 
     steps:
       - name: Checkout
@@ -56,25 +56,22 @@ jobs:
           username: root
           key: ${{ secrets.HETZNER_SSH_KEY }}
           script_stop: true
-          command_timeout: 8m
+          command_timeout: 10m
           script: |
             set -e
             IMAGE="buzzbd/buzz-bd-agent:latest"
-            SERVICE_ID="0780657e32638143a16250c4f12bf867"
-            AH_TOKEN=$(cat /root/.ah_deploy_token)
-            AH_API="http://localhost:8080/v1/services/${SERVICE_ID}"
 
             echo ">>> Pulling ${IMAGE}"
             docker pull "${IMAGE}"
 
-            echo ">>> Updating image in ah"
-            sqlite3 /var/lib/ah/ah.db "UPDATE services SET image='${IMAGE}' WHERE id='${SERVICE_ID}';"
+            echo ">>> Stopping old container"
+            cd /data/buzz
+            docker compose down --timeout 30 || true
 
-            echo ">>> Restarting service via ah API"
-            curl -sf -X POST -H "Authorization: Bearer ${AH_TOKEN}" "${AH_API}/restart"
-            echo ""
+            echo ">>> Starting new container"
+            docker compose up -d
 
-            echo ">>> Waiting 180s for boot (entrypoint installs npm packages + starts 9 agents)"
+            echo ">>> Waiting 180s for boot"
             sleep 180
 
             echo ">>> Health check (12 attempts, 15s apart)"
