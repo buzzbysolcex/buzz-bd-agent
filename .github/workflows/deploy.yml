@@ -46,8 +46,7 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:v${{ steps.version.outputs.version }}
             ${{ env.IMAGE_NAME }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          no-cache: true
 
       - name: Deploy to Hetzner
         uses: appleboy/ssh-action@v1
