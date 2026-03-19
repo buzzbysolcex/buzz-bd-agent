@@ -59,16 +59,26 @@ router.get('/listing-report/:addressOrTicker', (req, res) => {
       `).all(token.address);
     } catch (e) { /* table may not exist */ }
 
-    // 4. Query listing_simulations (latest)
+    // 4. Query simulation_results (new engine) then fall back to listing_simulations
     let simulation = null;
     try {
       simulation = db.prepare(`
-        SELECT * FROM listing_simulations
+        SELECT * FROM simulation_results
         WHERE token_address = ?
-        ORDER BY id DESC
+        ORDER BY created_at DESC
         LIMIT 1
       `).get(token.address);
     } catch (e) { /* table may not exist */ }
+    if (!simulation) {
+      try {
+        simulation = db.prepare(`
+          SELECT * FROM listing_simulations
+          WHERE token_address = ?
+          ORDER BY id DESC
+          LIMIT 1
+        `).get(token.address);
+      } catch (e) { /* table may not exist */ }
+    }
 
     // 5. Build unified report
     const report = {
@@ -103,23 +113,29 @@ router.get('/listing-report/:addressOrTicker', (req, res) => {
         scored_at: ps.scored_at
       })) : null,
       simulation: simulation ? {
-        id: simulation.id,
-        agents_count: simulation.agents_count || 6,
+        id: simulation.simulation_id || simulation.id,
+        agents_count: simulation.agents_count || 20,
+        score: simulation.score,
         probability: simulation.probability,
         confidence: simulation.confidence,
+        confidence_interval: simulation.confidence_low ? { low: simulation.confidence_low, high: simulation.confidence_high } : null,
         ev: simulation.ev,
         recommendation: simulation.recommendation,
         consensus: safeJSONParse(simulation.consensus),
+        verdicts: safeJSONParse(simulation.verdicts_json || simulation.raw_verdicts),
+        metrics: safeJSONParse(simulation.metrics_json),
         bullish_count: simulation.bullish_count,
         neutral_count: simulation.neutral_count,
         bearish_count: simulation.bearish_count,
         key_risk: simulation.key_risk,
         key_signal: simulation.key_signal,
         expected_impact: simulation.expected_impact,
+        duration_ms: simulation.duration_ms,
+        report_url: simulation.report_url,
         simulated_at: simulation.simulated_at || simulation.created_at
       } : {
         message: 'No simulation found — run one first',
-        hint: 'POST /api/v1/simulate/simulate-listing with { tokenAddress: "' + token.address + '" }'
+        hint: 'POST /api/v1/simulate-listing with { tokenAddress: "' + token.address + '", chain: "' + token.chain + '" }'
       }
     };
 

@@ -129,7 +129,7 @@ function generateProposal(reportData) {
 <body>
 <div class="container">
   <div class="header">
-    <div style="color:#555;font-size:12px;">BUZZ BD AGENT v7.5.4 | MiroFish Stage 1</div>
+    <div style="color:#555;font-size:12px;">BUZZ BD AGENT v7.6.0 | MiroFish Stage 1</div>
     <h1>LISTING PROPOSAL<span class="cursor">_</span></h1>
     <div class="ticker">$${escapeHtml(ticker)}</div>
     <div style="color:#888;margin-top:5px;">Chain: ${escapeHtml(chain.toUpperCase())} | Generated: ${new Date().toISOString().split('T')[0]}</div>
@@ -185,7 +185,7 @@ function generateProposal(reportData) {
   </div>
 
   <div class="footer">
-    Powered by Buzz BD Agent | 23 Intel Sources | MiroFish Simulation Engine<br>
+    Powered by Buzz BD Agent | 24 Intel Sources | MiroFish Simulation Engine | Financial Datasets MCP<br>
     SolCex Exchange | ${new Date().toISOString()}
   </div>
 </div>
