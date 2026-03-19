@@ -63,8 +63,11 @@ jobs:
             echo ">>> Pulling ${IMAGE}"
             docker pull "${IMAGE}"
 
-            echo ">>> Stopping old container"
+            echo ">>> Update docker-compose to use latest tag"
             cd /data/buzz
+            sed -i 's|buzzbd/buzz-bd-agent:v[0-9.]*|buzzbd/buzz-bd-agent:latest|g' docker-compose.yml
+
+            echo ">>> Stopping old container"
             docker compose down --timeout 30 || true
 
             echo ">>> Starting new container"
