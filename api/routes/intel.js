@@ -35,6 +35,7 @@ const INTEL_SOURCES = [
   { id: 'moltbook', name: 'Moltbook', layer: 'Social', endpoint: 'moltbook.com', env_key: 'MOLTBOOK_API_KEY' },
   { id: 'bnbchain', name: 'BNB Chain MCP', layer: 'L1', type: 'MCP', endpoint: 'OpenClaw MCP', env_key: 'BNB_PRIVATE_KEY' },
   { id: 'helius-mcp', name: 'Helius MCP', layer: 'L2', type: 'MCP', endpoint: 'mainnet.helius-rpc.com', env_key: 'HELIUS_API_KEY', tools: 60 },
+  { id: 'financial-datasets', name: 'Financial Datasets MCP', layer: 'L1', type: 'MCP', endpoint: 'api.financialdatasets.ai', env_key: 'FINANCIAL_DATASETS_API_KEY' },
 ];
 
 // ─── GET /sources ────────────────────────────────────
