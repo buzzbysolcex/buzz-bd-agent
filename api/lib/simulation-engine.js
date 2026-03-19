@@ -132,18 +132,35 @@ async function callAgent(persona, weight, focus, symbol, chain, ctx) {
       { role: 'system', content: `You are a ${persona} persona agent for SolCex listing simulations. Return ONLY valid JSON.` },
       { role: 'user', content: prompt },
     ],
-    max_tokens: 300,
+    max_tokens: 600,
     temperature: 0.4,
   }, { agent: `sim-${persona}` });
 
   const raw = await Promise.race([llmPromise, timeoutPromise]);
-  const text = typeof raw === 'string' ? raw : raw?.content || raw?.text || JSON.stringify(raw);
+  let text = typeof raw === 'string' ? raw : raw?.content || raw?.text || JSON.stringify(raw);
 
-  // Extract JSON from response
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('No JSON in response');
+  // Strip <think>...</think> blocks (Bankr/gemini-3-flash includes reasoning tags)
+  text = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
-  const parsed = JSON.parse(jsonMatch[0]);
+  // Extract JSON from response — find the last complete JSON object (most likely the answer)
+  const jsonMatches = text.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g);
+  if (!jsonMatches || jsonMatches.length === 0) throw new Error('No JSON in response');
+
+  // Try each match until one parses with a valid verdict
+  let parsed = null;
+  for (const match of jsonMatches) {
+    try {
+      const candidate = JSON.parse(match);
+      if (candidate.verdict) { parsed = candidate; break; }
+    } catch {}
+  }
+  if (!parsed) {
+    // Fallback: try the first parseable match
+    for (const match of jsonMatches) {
+      try { parsed = JSON.parse(match); break; } catch {}
+    }
+  }
+  if (!parsed) throw new Error('No parseable JSON in response');
 
   // Validate required fields
   if (!VERDICT_MAP.hasOwnProperty(parsed.verdict)) {
