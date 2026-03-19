@@ -19,6 +19,12 @@ module.exports = function (db) {
 
   // ─── Auth Middleware ────────────────────────────────
   function authMiddleware(req, res, next) {
+    // Skip auth for localhost (OpenClaw, crons, internal services)
+    const clientIp = req.ip || req.connection?.remoteAddress || '';
+    if (clientIp === '127.0.0.1' || clientIp === '::1' || clientIp === '::ffff:127.0.0.1') {
+      return next();
+    }
+
     const adminKey = process.env.BUZZ_API_ADMIN_KEY;
     if (!adminKey) {
       return res.status(500).json({ error: 'server_config', message: 'BUZZ_API_ADMIN_KEY not configured' });
