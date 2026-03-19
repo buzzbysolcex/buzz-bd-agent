@@ -72,21 +72,29 @@ class LLMProxy {
    */
   logCost(data) {
     try {
+      const promptTok = Number(data.prompt_tokens) || 0;
+      const completionTok = Number(data.completion_tokens) || 0;
+      const cachedTok = Number(data.cached_tokens) || 0;
+      // Recalculate cost to guarantee accuracy — don't trust caller's value alone
+      let costValue = Number(data.cost_usd) || 0;
+      if (costValue === 0 && promptTok + completionTok > 0) {
+        costValue = this.calculateCost(data.model || 'unknown', promptTok, completionTok, cachedTok);
+      }
       this.db.prepare(`
         INSERT INTO llm_costs (model, caller, prompt_tokens, completion_tokens, total_tokens, cost_usd, latency_ms, status, error_message, endpoint, cached_tokens)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         data.model || 'unknown',
         data.caller || 'unknown',
-        data.prompt_tokens || 0,
-        data.completion_tokens || 0,
-        data.total_tokens || 0,
-        data.cost_usd || 0,
-        data.latency_ms || 0,
+        promptTok,
+        completionTok,
+        Number(data.total_tokens) || 0,
+        costValue,
+        Number(data.latency_ms) || 0,
         data.status || 'success',
         data.error_message || null,
         data.endpoint || '/v1/chat/completions',
-        data.cached_tokens || 0
+        cachedTok
       );
     } catch (e) {
       console.error('[LLM Proxy] DB log error:', e.message);
