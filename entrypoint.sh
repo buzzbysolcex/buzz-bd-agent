@@ -311,12 +311,12 @@ cat > "$CONFIG" << JSONEOF
   "models": {
     "providers": {
       "minimax": {
-        "baseUrl": "http://localhost:3000/api/v1/llm/anthropic",
-        "apiKey": "$BUZZ_API_ADMIN_KEY",
+        "baseUrl": "https://api.minimax.io/anthropic",
+        "apiKey": "$MINIMAX_API_KEY",
         "api": "anthropic-messages",
         "models": [{
-          "id": "MiniMax-M2.5",
-          "name": "MiniMax M2.5",
+          "id": "MiniMax-M2.7",
+          "name": "MiniMax M2.7",
           "contextWindow": 200000,
           "maxTokens": 8192
         }]
@@ -349,13 +349,13 @@ cat > "$CONFIG" << JSONEOF
   "agents": {
     "defaults": {
       "models": {
-        "minimax/MiniMax-M2.5":       { "alias": "MiniMax" },
+        "minimax/MiniMax-M2.7":       { "alias": "MiniMax" },
         "bankr/gpt-5-nano":           { "alias": "GPT5Nano" },
         "bankr/gemini-3-flash":       { "alias": "Gemini3Flash" },
         "bankr/claude-haiku-4.5":     { "alias": "Haiku45" }
       },
       "model": {
-        "primary": "minimax/MiniMax-M2.5",
+        "primary": "minimax/MiniMax-M2.7",
         "fallbacks": [
           "bankr/gemini-3-flash",
           "bankr/claude-haiku-4.5",
@@ -427,7 +427,7 @@ SKILLS_COUNT=$(ls /data/workspace/skills/ 2>/dev/null | wc -l | tr -d ' ')
 echo "  Layer 5 — INFRASTRUCTURE"
 echo "    REST API:            $API_FILE (port 3000, SQLite WAL)"
 echo "    Twitter Bot:         $TWITTER_FILE (5-layer SCAN + LIST + DEPLOY)"
-echo "    OpenClaw:            ✅ (port 18789, MiniMax M2.5 primary)"
+echo "    OpenClaw:            ✅ (port 18789, MiniMax M2.7 primary)"
 echo "    Cron jobs:           $(grep -c '"id"' "$CRON_TARGET" 2>/dev/null || echo '0') jobs active"
 echo "    Skills:              $SKILLS_COUNT skills loaded"
 echo "    Telegram:            $([ -n "$TELEGRAM_BOT_TOKEN" ] && echo '✅' || echo '❌')"
@@ -725,7 +725,7 @@ if [ -n "$MINIMAX_API_KEY" ]; then
     -H "Content-Type: application/json" \
     -H "x-api-key: $MINIMAX_API_KEY" \
     -d "{
-      \"model\": \"MiniMax-M2.5\",
+      \"model\": \"MiniMax-M2.7\",
       \"max_tokens\": 10,
       \"system\": $(jq -Rs '.' < "$CACHE_WARM_PROMPT"),
       \"messages\": [{\"role\": \"user\", \"content\": \"System prompt cached. Respond OK.\"}]
