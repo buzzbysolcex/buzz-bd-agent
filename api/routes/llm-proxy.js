@@ -288,5 +288,32 @@ module.exports = function (db) {
     }
   });
 
+  // ─── GET /timeout-stats — Timeout frequency per provider ───
+  router.get('/timeout-stats', (req, res) => {
+    try {
+      const { getTimeoutStats } = require('../lib/llm-cascade');
+      const stats = getTimeoutStats();
+
+      // Also query DB for timeout history
+      let dbTimeouts = [];
+      try {
+        dbTimeouts = db.prepare(`
+          SELECT provider, model,
+            strftime('%Y-%m-%dT%H', created_at) as hour,
+            COUNT(*) as timeout_count
+          FROM llm_provider_log
+          WHERE success = 0 AND error_message LIKE '%timeout%'
+          GROUP BY provider, model, hour
+          ORDER BY hour DESC
+          LIMIT 24
+        `).all();
+      } catch {}
+
+      res.json({ success: true, ...stats, db_timeouts: dbTimeouts });
+    } catch (err) {
+      res.status(500).json({ error: 'query_error', message: err.message });
+    }
+  });
+
   return router;
 };

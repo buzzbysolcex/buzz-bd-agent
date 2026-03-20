@@ -49,6 +49,17 @@ const FAILURE_WINDOW_MS = 5 * 60 * 1000;
 const FAILURE_THRESHOLD = 3;
 const COOLDOWN_MS = 30 * 60 * 1000;
 
+// Adaptive cascade: track timeouts per provider per hour
+const timeoutTracker = {}; // { provider: { hour: count } }
+const TIMEOUT_THRESHOLD_PCT = 30; // if >30% of calls timeout, auto-switch
+const ADAPTIVE_COOLDOWN_MS = 2 * 60 * 60 * 1000; // 2 hours
+let adaptiveOverride = null; // { provider: 'bankr', until: timestamp }
+
+// Timeout settings (Fix 1)
+const ORCHESTRATOR_TIMEOUT_MS = 15000; // 15s for first attempt
+const RETRY_TIMEOUT_MS = 10000;        // 10s for retry attempt
+const FALLBACK_TIMEOUT_MS = 30000;     // 30s for fallback providers
+
 function trackFailure(providerName) {
   const now = Date.now();
   if (!failureTracker[providerName]) {
@@ -72,6 +83,39 @@ function isInCooldown(providerName) {
   return false;
 }
 
+function trackTimeout(providerName) {
+  const hour = new Date().toISOString().slice(0, 13); // "2026-03-20T01"
+  if (!timeoutTracker[providerName]) timeoutTracker[providerName] = {};
+  timeoutTracker[providerName][hour] = (timeoutTracker[providerName][hour] || 0) + 1;
+
+  // Clean old hours
+  const keys = Object.keys(timeoutTracker[providerName]);
+  if (keys.length > 6) {
+    keys.slice(0, keys.length - 6).forEach(k => delete timeoutTracker[providerName][k]);
+  }
+}
+
+function getTimeoutStats() {
+  const stats = {};
+  for (const [provider, hours] of Object.entries(timeoutTracker)) {
+    stats[provider] = { ...hours };
+  }
+  return { timeouts: stats, adaptiveOverride };
+}
+
+function checkAdaptiveCascade(providerName) {
+  // Check if provider's timeout rate exceeds threshold this hour
+  const hour = new Date().toISOString().slice(0, 13);
+  const timeouts = timeoutTracker[providerName]?.[hour] || 0;
+  const tracker = failureTracker[providerName];
+  const totalAttempts = (tracker?.failures?.length || 0) + timeouts + 5; // +5 baseline to avoid div/0 on few calls
+
+  if (timeouts > 3 && (timeouts / totalAttempts) * 100 > TIMEOUT_THRESHOLD_PCT) {
+    adaptiveOverride = { provider: 'bankr', until: Date.now() + ADAPTIVE_COOLDOWN_MS };
+    console.warn(`[LLM Cascade] ADAPTIVE: ${providerName} timeout rate ${Math.round(timeouts/totalAttempts*100)}% > ${TIMEOUT_THRESHOLD_PCT}% — switching to Bankr for 2h`);
+  }
+}
+
 function getProviderCascade(agentName) {
   // Sub-agents always use Bankr (FREE)
   const subAgents = ['scanner-agent', 'safety-agent', 'wallet-agent', 'social-agent', 'scorer-agent'];
@@ -79,7 +123,18 @@ function getProviderCascade(agentName) {
     return [{ ...PROVIDERS.bankr, model: 'gpt-5-nano' }];
   }
 
-  // Orchestrator uses full cascade
+  // Check adaptive override: if M2.7 is timing out too much, lead with Bankr
+  if (adaptiveOverride && Date.now() < adaptiveOverride.until) {
+    console.log(`[LLM Cascade] Adaptive override active — Bankr primary until ${new Date(adaptiveOverride.until).toISOString()}`);
+    return [PROVIDERS.bankr, PROVIDERS.minimax, PROVIDERS.anthropic]
+      .filter(p => !isInCooldown(p.name));
+  }
+  if (adaptiveOverride && Date.now() >= adaptiveOverride.until) {
+    console.log('[LLM Cascade] Adaptive override expired — M2.7 primary restored');
+    adaptiveOverride = null;
+  }
+
+  // Normal cascade
   return [PROVIDERS.minimax, PROVIDERS.bankr, PROVIDERS.anthropic]
     .filter(p => !isInCooldown(p.name));
 }
@@ -210,63 +265,81 @@ async function cascadeCall(body, options = {}) {
     throw new Error('All LLM providers in cooldown');
   }
 
-  for (const provider of providers) {
+  for (let i = 0; i < providers.length; i++) {
+    const provider = providers[i];
+    const isPrimary = i === 0 && provider.name === 'minimax';
+
+    // Fix 1: Use shorter timeouts — 15s for M2.7 primary, 30s for fallbacks
+    const timeout = isPrimary ? ORCHESTRATOR_TIMEOUT_MS : FALLBACK_TIMEOUT_MS;
+
     const startTime = Date.now();
     try {
-      const result = await callProvider(provider, body);
+      const result = await callProvider(provider, body, timeout);
       result.latency_ms = Date.now() - startTime;
 
-      // Built-in logging to llm_provider_log
       logProviderCall({
-        provider: provider.name,
-        model: provider.model,
-        agent,
+        provider: provider.name, model: provider.model, agent,
         tokens_in: result.usage?.prompt_tokens || 0,
         tokens_out: result.usage?.completion_tokens || 0,
-        latency_ms: result.latency_ms,
-        success: true,
+        latency_ms: result.latency_ms, success: true,
       });
-
-      // Legacy callback support
-      if (logFn) {
-        logFn({
-          provider: provider.name,
-          model: provider.model,
-          agent,
-          prompt_tokens: result.usage?.prompt_tokens || 0,
-          completion_tokens: result.usage?.completion_tokens || 0,
-          latency_ms: result.latency_ms,
-          success: true,
-        });
-      }
+      if (logFn) logFn({ provider: provider.name, model: provider.model, agent, prompt_tokens: result.usage?.prompt_tokens || 0, completion_tokens: result.usage?.completion_tokens || 0, latency_ms: result.latency_ms, success: true });
 
       return result;
     } catch (err) {
       const latency = Date.now() - startTime;
+      const isTimeout = err.message?.includes('Timeout') || err.message?.includes('timeout');
+
+      // Fix 2: If M2.7 timed out, retry ONCE with shorter timeout before falling to Bankr
+      if (isPrimary && isTimeout) {
+        console.warn(`[LLM Cascade] ${provider.name} timeout (${latency}ms) — retrying with ${RETRY_TIMEOUT_MS}ms...`);
+        trackTimeout(provider.name);
+
+        logProviderCall({
+          provider: provider.name, model: provider.model, agent,
+          latency_ms: latency, success: false, error_message: `timeout_attempt_1 (${latency}ms)`,
+        });
+
+        const retryStart = Date.now();
+        try {
+          const retryResult = await callProvider(provider, body, RETRY_TIMEOUT_MS);
+          retryResult.latency_ms = Date.now() - retryStart;
+
+          logProviderCall({
+            provider: provider.name, model: provider.model, agent,
+            tokens_in: retryResult.usage?.prompt_tokens || 0,
+            tokens_out: retryResult.usage?.completion_tokens || 0,
+            latency_ms: retryResult.latency_ms, success: true,
+          });
+          console.log(`[LLM Cascade] ${provider.name} retry succeeded (${retryResult.latency_ms}ms)`);
+          return retryResult;
+        } catch (retryErr) {
+          const retryLatency = Date.now() - retryStart;
+          console.warn(`[LLM Cascade] ${provider.name} retry also failed (${retryLatency}ms) — falling to next provider`);
+          trackTimeout(provider.name);
+          trackFailure(provider.name);
+
+          logProviderCall({
+            provider: provider.name, model: provider.model, agent,
+            latency_ms: retryLatency, success: false, error_message: `timeout_attempt_2 (${retryLatency}ms)`,
+          });
+
+          // Fix 3: Check if we should adaptively switch
+          checkAdaptiveCascade(provider.name);
+          continue;
+        }
+      }
+
+      // Non-timeout failure or non-primary — standard cascade
       console.warn(`[LLM Cascade] ${provider.name}/${provider.model} failed: ${err.message}`);
       trackFailure(provider.name);
+      if (isTimeout) trackTimeout(provider.name);
 
-      // Built-in logging to llm_provider_log
       logProviderCall({
-        provider: provider.name,
-        model: provider.model,
-        agent,
-        latency_ms: latency,
-        success: false,
-        error_message: err.message,
+        provider: provider.name, model: provider.model, agent,
+        latency_ms: latency, success: false, error_message: err.message,
       });
-
-      // Legacy callback support
-      if (logFn) {
-        logFn({
-          provider: provider.name,
-          model: provider.model,
-          agent,
-          latency_ms: latency,
-          success: false,
-          error_message: err.message,
-        });
-      }
+      if (logFn) logFn({ provider: provider.name, model: provider.model, agent, latency_ms: latency, success: false, error_message: err.message });
       continue;
     }
   }
@@ -291,4 +364,4 @@ function getCascadeStatus() {
   return status;
 }
 
-module.exports = { cascadeCall, getCascadeStatus, getProviderCascade, PROVIDERS, trackFailure, isInCooldown };
+module.exports = { cascadeCall, getCascadeStatus, getProviderCascade, getTimeoutStats, PROVIDERS, trackFailure, isInCooldown };
