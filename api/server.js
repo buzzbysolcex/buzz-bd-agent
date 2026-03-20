@@ -90,6 +90,9 @@ const llmProxyRoutes = require('./routes/llm-proxy');
 const listingReadinessRoutes = require('./routes/listing-readiness');
 const activityRoutes = require('./routes/activity');
 
+// Whale Signal Intelligence (Nansen Hyperliquid)
+const whaleSignalRoutes = require('./routes/whale-signal');
+
 // x402 Premium endpoints (paywalled)
 const premiumRoutes = require('./routes/premium');
 
@@ -249,6 +252,9 @@ app.use('/api/v1/verify', apiKeyAuth, verifyRoutes);
 // Listing Readiness + Activity
 app.use('/api/v1/listing-readiness', apiKeyAuth, listingReadinessRoutes);
 app.use('/api/v1/activity', apiKeyAuth, activityRoutes);
+
+// Whale Signal Intelligence (Nansen Hyperliquid)
+app.use('/api/v1/whale-signal', apiKeyAuth, whaleSignalRoutes);
 
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 
