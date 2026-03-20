@@ -87,6 +87,44 @@ cp /opt/BUZZ_RULES.md /data/BUZZ_RULES.md 2>/dev/null || true
 echo "[boot] ✅ Block 2: Skills synced (20 skills, critical force-synced)"
 
 # ══════════════════════════════════════════════════
+# CREDENTIAL CHECK — Verify all required env vars on every boot
+# ══════════════════════════════════════════════════
+echo ""
+echo "🔑 Credential Check:"
+CRED_MISSING=0
+CRED_OK=0
+for VAR in BUZZ_API_ADMIN_KEY MINIMAX_API_KEY ANTHROPIC_API_KEY BANKR_API_KEY TELEGRAM_BOT_TOKEN TELEGRAM_CHAT_ID HELIUS_API_KEY NANSEN_API_KEY FINANCIAL_DATASETS_API_KEY FIRECRAWL_API_KEY CMC_API_KEY SERPER_API_KEY GROK_API_KEY ALLIUM_API_KEY; do
+  VAL=$(eval echo \$$VAR)
+  if [ -n "$VAL" ]; then
+    echo "  ✅ $VAR: configured"
+    CRED_OK=$((CRED_OK + 1))
+  else
+    echo "  ❌ $VAR: MISSING"
+    CRED_MISSING=$((CRED_MISSING + 1))
+  fi
+done
+for VAR in X_API_KEY X_BEARER_TOKEN GMAIL_CLIENT_ID MOLTBOOK_API_KEY SUPERMEMORY_OPENCLAW_API_KEY WAR_ROOM_CHAT_ID DEXSCREENER_BASE_URL ATV_API_URL BNB_PRIVATE_KEY DEFAULT_MODEL; do
+  VAL=$(eval echo \$$VAR)
+  if [ -n "$VAL" ]; then
+    CRED_OK=$((CRED_OK + 1))
+  else
+    echo "  ⚠️ $VAR: not configured (optional)"
+  fi
+done
+echo "  📊 $CRED_OK configured | $CRED_MISSING missing"
+if [ $CRED_MISSING -gt 0 ]; then
+  echo "  🚨 WARNING: $CRED_MISSING required credentials missing!"
+  # Send Telegram alert if bot token available
+  if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+    curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+      -d "chat_id=${TELEGRAM_CHAT_ID}" \
+      -d "text=🚨 CREDENTIAL CHECK FAILED: $CRED_MISSING required env vars missing on boot!" \
+      -d "parse_mode=Markdown" > /dev/null 2>&1
+  fi
+fi
+echo ""
+
+# ══════════════════════════════════════════════════
 # BLOCK 3 — RESTORE CRON JOBS
 # Crons are pre-baked with correct directives.
 # jobs.json in /opt/ already has:
