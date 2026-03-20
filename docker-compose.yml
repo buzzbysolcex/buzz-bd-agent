@@ -43,6 +43,7 @@ services:
       # ─── Telegram ───
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - WAR_ROOM_CHAT_ID=-1003701758077
       # ─── ACP / Identity ───
       - ACP_API_KEY=${ACP_API_KEY}
       - ACP_AGENT_ID=${ACP_AGENT_ID:-17681}
