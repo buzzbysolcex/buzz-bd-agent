@@ -15,8 +15,8 @@ const http = require('http');
 const { getDB } = require('../db');
 
 const OPENCLAW_PORT = process.env.OPENCLAW_PORT || 18789;
-const BUZZ_VERSION = '7.5.5';
-const API_VERSION = '3.6.0';
+const BUZZ_VERSION = '7.7.0';
+const API_VERSION = '3.8.0';
 
 // ─── GET /health ─────────────────────────────────────
 router.get('/', async (req, res) => {
@@ -39,7 +39,7 @@ router.get('/', async (req, res) => {
     },
     alpha: true,
     phase0_features: ['learning-loop', 'skill-self-improvement', 'contact-intelligence'],
-    endpoints: 113,
+    endpoints: 122,
     uptime_seconds: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
     response_ms: Date.now() - startTime,
