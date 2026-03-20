@@ -16,10 +16,10 @@ const crypto = require('crypto');
 const { getDB } = require('../db');
 const { runSimulation } = require('../lib/simulation-engine');
 
-// ─── In-Route Rate Limiter (5/hour per IP) ──────────────
+// ─── In-Route Rate Limiter (20/hour per IP) ─────────────
 
 const rateLimitMap = new Map();
-const RATE_LIMIT = 5;
+const RATE_LIMIT = 20;
 const RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 
 function checkRateLimit(key) {
