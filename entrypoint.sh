@@ -77,12 +77,13 @@ if [ -f "/data/workspace/skills/orchestrator/orchestrate.js.md" ]; then
      /root/.openclaw/workspace/skills/orchestrator/orchestrate.js.md
 fi
 # Inject BUZZ_RULES.md into OpenClaw workspace (prompt hardening)
-if [ -f "/data/BUZZ_RULES.md" ]; then
-  cp /data/BUZZ_RULES.md /root/.openclaw/workspace/BUZZ_RULES.md
-  echo "[boot] ✅ BUZZ_RULES.md injected into workspace"
-else
-  echo "[boot] ⚠️ /data/BUZZ_RULES.md not found — prompt hardening disabled"
-fi
+# Baked into image at /opt/BUZZ_RULES.md — always available
+mkdir -p /root/.openclaw/workspace
+cp /opt/BUZZ_RULES.md /root/.openclaw/workspace/BUZZ_RULES.md 2>/dev/null && \
+  echo "[boot] ✅ BUZZ_RULES.md injected into workspace (prompt hardening active)" || \
+  echo "[boot] ⚠️ BUZZ_RULES.md copy failed"
+# Also persist to data volume for Sentinel checks
+cp /opt/BUZZ_RULES.md /data/BUZZ_RULES.md 2>/dev/null || true
 echo "[boot] ✅ Block 2: Skills synced (20 skills, critical force-synced)"
 
 # ══════════════════════════════════════════════════
