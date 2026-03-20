@@ -86,6 +86,10 @@ const { requireVerifiedAutoCheck } = require('./middleware/verification-gate');
 // v7.5.5: LLM Cost Proxy
 const llmProxyRoutes = require('./routes/llm-proxy');
 
+// Listing Readiness + Activity routes
+const listingReadinessRoutes = require('./routes/listing-readiness');
+const activityRoutes = require('./routes/activity');
+
 // v7.3.1 Memory search engine + Contact intelligence
 const { initFTS } = require('./services/memory-search');
 const { initContacts } = require('./services/contact-intelligence');
@@ -235,6 +239,10 @@ app.use('/api/v1/reports', apiKeyAuth, reportRoutes);
 
 // Day 32B Data Hardening — Triple Verification (6 endpoints)
 app.use('/api/v1/verify', apiKeyAuth, verifyRoutes);
+
+// Listing Readiness + Activity
+app.use('/api/v1/listing-readiness', apiKeyAuth, listingReadinessRoutes);
+app.use('/api/v1/activity', apiKeyAuth, activityRoutes);
 
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 
