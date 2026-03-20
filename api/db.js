@@ -619,6 +619,18 @@ function runMigrations() {
       } catch(e) { console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message); }
     }
   }
+
+  // Run whale-signal-cache migration
+  const {migrations: whaleSignalMigrations} = require('./migrations/022-whale-signal-cache');
+  for (const m of whaleSignalMigrations) {
+    if (!applied.has(m.name)) {
+      try {
+        console.log(`[Buzz DB] Running migration: ${m.name}`);
+        db.exec(m.sql);
+        insert.run(m.name);
+      } catch(e) { console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message); }
+    }
+  }
 }
 
 module.exports = { initDB, getDB };

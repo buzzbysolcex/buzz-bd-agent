@@ -47,3 +47,11 @@
 - Rate limit: 20/hour
 - Confidence > 0.7 = PROCEED
 - Always include technical analysis (RSI/MACD) in reports
+
+## WHALE SIGNAL RULES
+- Whale signal data is READ-ONLY intelligence. Buzz NEVER trades.
+- Whale signal score is a POST-COMPOSITE MODIFIER (+/-10 max). Does NOT replace 5 scoring dimensions.
+- If bearish_flag = true, ALWAYS surface in simulation prompts, listing reports, and War Room alerts.
+- No Hyperliquid perp data = neutral score (50). NEVER penalize tokens for not having perps.
+- All Nansen API calls logged with costs. Monitor via /costs command.
+- Whale signal data expires after 1 hour. Stale data must be re-fetched.
