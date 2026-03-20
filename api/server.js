@@ -90,6 +90,9 @@ const llmProxyRoutes = require('./routes/llm-proxy');
 const listingReadinessRoutes = require('./routes/listing-readiness');
 const activityRoutes = require('./routes/activity');
 
+// x402 Premium endpoints (paywalled)
+const premiumRoutes = require('./routes/premium');
+
 // v7.3.1 Memory search engine + Contact intelligence
 const { initFTS } = require('./services/memory-search');
 const { initContacts } = require('./services/contact-intelligence');
@@ -123,6 +126,9 @@ app.use(rateLimit);
 // ─── Public Routes (no auth) ─────────────────────────
 app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/simulation-report', simulationReportRoutes);
+
+// x402 Premium (paywall handles auth — admin key bypasses, x402 payment required for others)
+app.use('/api/v1/premium', premiumRoutes);
 
 // API info endpoint
 app.get('/api/v1/info', (req, res) => {
