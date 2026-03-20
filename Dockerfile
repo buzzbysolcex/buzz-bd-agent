@@ -122,6 +122,7 @@ RUN chmod +x /opt/buzz-acp/start-acp.sh
 # ENTRYPOINT
 # ══════════════════════════════════════════════════
 COPY entrypoint.sh /entrypoint.sh
+COPY BUZZ_RULES.md /opt/BUZZ_RULES.md
 RUN chmod +x /entrypoint.sh
 
 # ══════════════════════════════════════════════════
