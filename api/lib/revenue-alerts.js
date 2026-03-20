@@ -3,6 +3,7 @@
  */
 
 const { getDB } = require('../db');
+const { sendTelegram } = require('./telegram-notify');
 
 const DEFAULT_MILESTONES = [1000, 5000, 10000, 50000, 100000];
 const DEFAULT_DAILY_TARGET = 500;
@@ -44,21 +45,15 @@ function formatAlertMessage(alertType, data) {
   return `${emoji[alertType] || '\u{1F4CA}'} *Buzz Revenue Alert*\n\n${data.message}\n\n_${new Date().toISOString()}_`;
 }
 
-async function sendTelegramAlert(message) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId) return { sent: false, reason: 'missing_telegram_config' };
-  try {
-    const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'Markdown' })
-    });
-    const result = await response.json();
-    return { sent: result.ok, message_id: result.result?.message_id };
-  } catch (e) {
-    return { sent: false, error: e.message };
-  }
+async function sendTelegramAlert(message, options = {}) {
+  // Revenue alerts are non-sensitive (pipeline reports, milestones) → send to both DM + War Room
+  // Unless caller explicitly marks as sensitive (e.g., commission data)
+  const result = await sendTelegram(message, {
+    sensitive: options.sensitive || false,
+    parseMode: 'Markdown',
+  });
+  // Return backward-compatible shape
+  return { sent: result.dm.sent, message_id: result.dm.message_id, warRoom: result.warRoom };
 }
 
 function runAlertCheck() {

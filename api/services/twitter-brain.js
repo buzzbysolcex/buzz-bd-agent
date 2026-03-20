@@ -132,6 +132,7 @@ const BANKR_DEPLOY_URL = 'https://api.bankr.bot/token-launches/deploy';
 // Telegram notification for deploys
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+const { sendTelegram } = require('../lib/telegram-notify');
 
 // OAuth 1.0a instance for X API v2 write endpoints
 const oauth = OAuth({
@@ -1405,7 +1406,7 @@ ${DEPLOY_RISK_DISCLAIMER}${BUZZ_FOOTER}`;
  * Notify Ogie via Telegram after each deploy
  */
 async function notifyDeployTelegram(receipt) {
-  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+  if (!TELEGRAM_BOT_TOKEN) {
     console.log(`[DEPLOY] ⚠️ Telegram not configured — skipping deploy notification`);
     return;
   }
@@ -1413,17 +1414,13 @@ async function notifyDeployTelegram(receipt) {
   const msg = `🚀 BUZZ DEPLOY — ${receipt.tokenSymbol}\n\nToken: ${receipt.tokenName} (${receipt.tokenSymbol})\nContract: ${receipt.tokenAddress}\nFor: @${receipt.twitterHandle}\nReceipt: ${receipt.id}\nTx: ${receipt.txHash}`;
 
   try {
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: msg,
-        parse_mode: 'HTML',
-      }),
-      signal: AbortSignal.timeout(10000),
-    });
-    console.log(`[DEPLOY] ✅ Telegram notification sent for ${receipt.id}`);
+    // Deploy notifications are SENSITIVE (transfer/buy approvals) → Ogie DM only
+    const result = await sendTelegram(msg, { sensitive: true, parseMode: 'HTML' });
+    if (result.dm.sent) {
+      console.log(`[DEPLOY] ✅ Telegram notification sent for ${receipt.id}`);
+    } else {
+      console.log(`[DEPLOY] ⚠️ Telegram DM failed: ${result.dm.error || result.dm.reason}`);
+    }
   } catch (err) {
     console.log(`[DEPLOY] ⚠️ Telegram notification failed: ${err.message}`);
   }

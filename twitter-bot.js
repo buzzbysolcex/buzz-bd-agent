@@ -58,6 +58,24 @@ const BANKR_ENABLED     = process.env.BANKR_SIGNALS_ENABLED === 'true';
 // Telegram bridge — notify Buzz after each scan
 const TG_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TG_CHAT_ID   = process.env.TELEGRAM_CHAT_ID;
+const TG_WAR_ROOM  = process.env.WAR_ROOM_CHAT_ID || '-1003701758077';
+
+// War Room: also send non-sensitive messages to the War Room group.
+// Failures here are non-fatal — never break the primary DM notification.
+async function sendToWarRoom(msg, parseMode) {
+  if (!TG_BOT_TOKEN || !TG_WAR_ROOM) return;
+  try {
+    const payload = { chat_id: TG_WAR_ROOM, text: msg, disable_web_page_preview: true };
+    if (parseMode) payload.parse_mode = parseMode;
+    const body = JSON.stringify(payload);
+    await safeReq({
+      hostname: 'api.telegram.org',
+      path: `/bot${TG_BOT_TOKEN}/sendMessage`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
+    }, body);
+  } catch (e) { log(`  ⚠ War Room notify error (non-fatal): ${e.message}`); }
+}
 
 // ── Logging ─────────────────────────────────────────────────────────────────
 function log(msg) {
@@ -222,6 +240,8 @@ async function notifyLead(type, handle, tokenInfo, tweetId) {
       headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
     }, body);
     log(`  📨 ${label} notified to Telegram`);
+    // Also send to War Room (lead notifications are non-sensitive)
+    await sendToWarRoom(msg);
   } catch (e) { log(`  ⚠ Lead notify error: ${e.message}`); }
 }
 
@@ -433,6 +453,8 @@ async function notifyBuzz(l1, l2, l3, scoring, tweetId) {
 
     if (res && res.status === 200) {
       log('  📨 Buzz notified via Telegram');
+      // Also send scan results to War Room (token discovery = non-sensitive)
+      await sendToWarRoom(msg, 'HTML');
     } else {
       log(`  ⚠ Telegram notify failed: ${res?.status || 'null'}`);
     }
