@@ -16,9 +16,9 @@
 
 Buzz is an autonomous AI BD (Business Development) agent that runs 24/7 on Hetzner CX23 (Helsinki), finding promising token projects for SolCex Exchange listings across **Solana, Ethereum, Base, BSC, and Tron** chains.
 
-**The pipeline:** Discover → **Triple Verify** → Score (10 agents + technical analysis) → **Simulate (20 agents + adversarial debate)** → Outreach → Deploy → Learn → List
+**The pipeline:** Discover → **Triple Verify** → Score (10 agents + technical analysis) → **Simulate (50 agents + adversarial debate + agent interviews)** → Outreach → Deploy → Learn → List
 
-Buzz scans 100+ tokens per day across decentralized exchanges, filters through a 5-layer intelligence pipeline with **10 parallel agents** (5 sub-agents + 4 persona agents + 1 orchestrator), scores each token on a 100-point composite system with **5 dimensions (safety + wallet + social + scorer + technical)**, runs **20-agent MiroFish simulations with adversarial bull/bear debate and EV calculation**, initiates autonomous outreach via Twitter with Premium deep scan format, offers Bankr token deployment, and learns from every decision — all autonomously. **Managed from anywhere via Telegram War Room.**
+Buzz scans 100+ tokens per day across decentralized exchanges, filters through a 5-layer intelligence pipeline with **10 parallel agents** (5 sub-agents + 4 persona agents + 1 orchestrator), scores each token on a 100-point composite system with **5 dimensions (safety + wallet + social + scorer + technical)**, runs **50-agent MiroFish simulations with adversarial bull/bear debate, agent interviews, and EV calculation**, initiates autonomous outreach via Twitter with Premium deep scan format, offers Bankr token deployment, and learns from every decision — all autonomously. **Managed from anywhere via Telegram War Room.**
 
 **No data surfaces without triple verification. Our credibility is our product.**
 
@@ -50,7 +50,7 @@ Cost: ~$4.09/month infrastructure + ~$0-4/day LLM inference (Bankr FREE for sub-
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│  HETZNER CX23 — Helsinki, Finland (204.168.137.253)               │
+│  HETZNER CX23 — Helsinki, Finland (buzzbd.ai / 204.168.137.253)   │
 │  4 GB RAM / 2 vCPU / 40 GB SSD — $4.09/month                     │
 │  Managed by: Agentic.hosting (ah) — systemd, port 8080           │
 │                                                                    │
@@ -83,7 +83,7 @@ Cost: ~$4.09/month infrastructure + ~$0-4/day LLM inference (Bankr FREE for sub-
 │  │                                                                │ │
 │  │  ┌────────────────────────────────────────────────────┐       │ │
 │  │  │  MIROFISH SIMULATION ENGINE                         │       │ │
-│  │  │  ├── 20 agents vote (4 personas × 5 weights)       │       │ │
+│  │  │  ├── 50 agents vote (5 personas × 10 weights)      │       │ │
 │  │  │  ├── Adversarial bull/bear debate (NEW v7.7.0)     │       │ │
 │  │  │  ├── Technical analysis: RSI/MACD (NEW v7.7.0)    │       │ │
 │  │  │  ├── EV = p × W − (1−p) × L                       │       │ │
@@ -151,7 +151,7 @@ AI-powered listing simulation with **adversarial debate**. Dashboard at **microb
 | Field | Value |
 |-------|-------|
 | Dashboard | [microbuzz.vercel.app/dashboard](https://microbuzz.vercel.app/dashboard) |
-| Agents | 20 (4 personas × 5 weight variations) + 1 debate round |
+| Agents | 50 (5 personas × 10 weight variations) + 1 debate round |
 | EV Formula | EV = p × W − (1−p) × L |
 | Technical | RSI(14), MACD(12,26,9), volume trend, momentum |
 | Gate | Requires VERIFIED status |
@@ -161,8 +161,9 @@ AI-powered listing simulation with **adversarial debate**. Dashboard at **microb
 **How it works:**
 1. Token enters pipeline with score ≥ 70
 2. Triple Verification runs (3 independent checks)
-3. If VERIFIED → 20 simulation agents vote independently
-4. **Adversarial debate:** top-3 bullish vs top-3 bearish cases argue
+3. If VERIFIED → 50 simulation agents vote independently
+4. **Adversarial debate:** top-5 bullish vs top-5 bearish cases argue
+5. **Agent interviews:** chat with any agent about their verdict
 5. Technical analysis: RSI, MACD, volume, momentum computed
 6. Consensus + EV calculated with debate refinement
 7. Dashboard report at microbuzz.vercel.app/dashboard
@@ -277,7 +278,7 @@ Tag without command → Friendly ack + suggest scan.
 | dexscreener-intel | Real-time DEX data across 60+ chains |
 | aixbt-momentum | AI-powered crypto momentum tracking |
 | token-scoring | 100-point composite scoring (5 dimensions) |
-| listing-simulation | 20-agent MiroFish simulation with adversarial debate |
+| listing-simulation | 50-agent MiroFish simulation with adversarial debate + agent interviews |
 
 **Consumed:** Coinbase Agentic Wallet (9 skills), Firecrawl CLI (4 skills), Dev Quality (3 skills)
 
@@ -368,6 +369,16 @@ Tag without command → Friendly ack + suggest scan.
 
 ---
 
+## 🐝 Architectural Inspiration
+
+Buzz's multi-agent simulation engine is inspired by the MiroFish lineage:
+- **MiroFish** (666ghj) — Academic multi-agent swarm simulation for public opinion prediction
+- **MiroFish-Offline** (nikmcfly, 587 stars) — Fully local execution with Neo4j + Ollama
+
+Buzz cherry-picks the multi-agent swarm simulation *pattern* and applies it to crypto exchange BD — 50 AI agents with distinct trading personas evaluate every token through adversarial debate. No code was copied; the implementation is original on a different stack (Express + SQLite + MiniMax/Bankr).
+
+---
+
 ## 🐝 License
 
 Proprietary — SolCex Exchange. All rights reserved.
@@ -376,8 +387,8 @@ Proprietary — SolCex Exchange. All rights reserved.
 
 *🐝 "AIXBT finds alpha. Bankr deploys tokens. Buzz closes deals."*
 
-*Buzz BD Agent v7.7.0 — Sprint Day 33 | Mar 20, 2026 | Jakarta, Indonesia*
-*~122 endpoints | 55 crons | 51 tables | 25 intel | 10 agents | $4.09/mo*
-*MiniMax M2.7 | War Room LIVE | Technical Analyst | Adversarial Debate | Prompt Hardening*
-*21 PROCEED | 4 CAUTION | 0 REJECT | MicroBuzz Dashboard LIVE | skills.sh Published*
+*Buzz BD Agent v7.8.0 — Sprint Day 34 | Mar 21, 2026 | Jakarta, Indonesia*
+*~130 endpoints | 55 crons | 54 tables | 25 intel | 50 sim agents | $4.09/mo*
+*MiniMax M2.7 | War Room LIVE | Knowledge Graph | Agent Interviews | Adversarial Debate*
+*21 PROCEED | 4 CAUTION | 0 REJECT | MicroBuzz Dashboard LIVE | Synthesis Hackathon*
 *Built by a chef who codes through conversation. No CS degree. Just Claude and persistence.*

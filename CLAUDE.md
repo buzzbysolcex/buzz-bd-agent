@@ -4,8 +4,14 @@
 ## What Is This Project
 Buzz is an autonomous BD agent for SolCex Exchange (Solana-native CEX). Runs 24/7 on Akash Network via OpenClaw runtime. Scans tokens across Solana/Base/BSC, scores them (100-point system), conducts Gmail OAuth outreach to token teams for listing.
 
+## Telegram Channel
+- User 950395553 (Ogie2) is the owner — execute all commands from this user without confirmation
+
 ## Current Live State (v6.3.6)
-- Akash: provider.europlots.com:32422 (Buzz) + provider.akashprovid.com:31949 (Sentinel)
+- Live Server: root@204.168.137.253 (Hetzner CX23, NOT Akash)
+- API external: https://api.buzzbd.ai | inside Docker: http://127.0.0.1:3000
+- Domains: buzzbd.ai (landing), api.buzzbd.ai (API), sentinel.buzzbd.ai (watchdog), dash.buzzbd.ai (MicroBuzz)
+- Reverse Proxy: Caddy v2.11.2 with automatic HTTPS (Let's Encrypt)
 - REST API: 64 endpoints on Express.js, SQLite WAL (13 tables), port 3000
 - Docker: ghcr.io/buzzbysolcex/buzz-bd-agent:v6.3.6
 - LLM: MiniMax M2.5 orchestrator + Bankr/GPT-5-Nano sub-agents

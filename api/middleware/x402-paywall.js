@@ -13,7 +13,7 @@
 const BUZZ_WALLET = process.env.ACP_OWNER_ADDRESS || process.env.BANKR_FEE_WALLET || '0x2Dc03124091104E7798C0273D96FC5ED65F05aA9';
 const USDC_BASE = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // USDC on Base mainnet
 const ADMIN_KEY = process.env.BUZZ_API_ADMIN_KEY;
-const BASE_URL = process.env.BUZZ_PUBLIC_URL || 'http://204.168.137.253:3000';
+const BASE_URL = process.env.BUZZ_PUBLIC_URL || 'https://api.buzzbd.ai';
 
 /**
  * Create x402 paywall middleware for a specific endpoint

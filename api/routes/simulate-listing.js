@@ -70,8 +70,37 @@ router.post('/simulate-listing', async (req, res) => {
       includeReport: includeReport || false,
     });
 
-    // simulation-engine.js already persists to simulation_results + listing_simulations
     const simulationId = result.simulationId || `sim_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`;
+
+    // Persist to simulation_results for interview system + reporting
+    try {
+      const db = getDB();
+      db.pragma('foreign_keys = OFF');
+      db.prepare(`INSERT OR REPLACE INTO simulation_results (
+        simulation_id, token_address, chain, depth, score, confidence,
+        confidence_low, confidence_high, consensus, recommendation,
+        verdicts_json, metrics_json, duration_ms, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+        simulationId,
+        tokenAddress,
+        resolvedChain,
+        resolvedDepth,
+        result.score,
+        result.confidence,
+        result.confidenceLow,
+        result.confidenceHigh,
+        result.consensus,
+        result.recommendation,
+        JSON.stringify(result.verdicts),
+        JSON.stringify({ ...result.metrics, debate: result.debate || null }),
+        result.durationMs,
+        result.createdAt
+      );
+      db.pragma('foreign_keys = ON');
+    } catch (persistErr) {
+      console.error('[SimulateListing] Persist failed (non-fatal):', persistErr.message);
+      try { getDB().pragma('foreign_keys = ON'); } catch {}
+    }
 
     return res.json({
       simulationId,

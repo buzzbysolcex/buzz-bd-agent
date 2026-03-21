@@ -68,6 +68,12 @@ const financialDatasetsRoutes = require('./routes/financial-datasets');
 // v7.7.0: Technical Analyst
 const technicalRoutes = require('./routes/technical');
 
+// v7.8.0: Agent Interview System (MiroFish Cherry-Pick)
+const interviewRoutes = require('./routes/interview');
+
+// v7.8.0: Knowledge Graph Layer (SQLite Adjacency)
+const kgRoutes = require('./routes/kg');
+
 // v7.5.4: CoinGecko CLI — Intel Source #23
 const coingeckoRoutes = require('./routes/coingecko');
 
@@ -95,6 +101,43 @@ const whaleSignalRoutes = require('./routes/whale-signal');
 
 // x402 Premium endpoints (paywalled)
 const premiumRoutes = require('./routes/premium');
+
+// x402 Discovery — .well-known/x402.json for Bazaar auto-indexing
+const BUZZ_WALLET = process.env.ACP_OWNER_ADDRESS || '0x2Dc03124091104E7798C0273D96FC5ED65F05aA9';
+const X402_DISCOVERY = {
+  provider: 'Buzz BD Agent by SolCex Exchange',
+  homepage: 'https://buzzbd.ai',
+  contact: 'buzzbysolcex@gmail.com',
+  endpoints: [
+    {
+      url: 'https://api.buzzbd.ai/api/v1/premium/pipeline',
+      method: 'GET',
+      description: 'Real-time hot token pipeline with 100-point composite scoring across safety, wallet, social, scorer, and technical dimensions.',
+      price: '0.01',
+      asset: 'USDC',
+      network: 'base',
+      payTo: BUZZ_WALLET,
+    },
+    {
+      url: 'https://api.buzzbd.ai/api/v1/premium/score/:address',
+      method: 'GET',
+      description: 'Per-token intelligence score with multi-dimensional breakdown across 5 scoring dimensions.',
+      price: '0.005',
+      asset: 'USDC',
+      network: 'base',
+      payTo: BUZZ_WALLET,
+    },
+    {
+      url: 'https://api.buzzbd.ai/api/v1/premium/sim/:address',
+      method: 'GET',
+      description: '20-agent MiroFish listing simulation with adversarial bull/bear debate. LIST or REJECT verdict.',
+      price: '0.02',
+      asset: 'USDC',
+      network: 'base',
+      payTo: BUZZ_WALLET,
+    },
+  ],
+};
 
 // v7.3.1 Memory search engine + Contact intelligence
 const { initFTS } = require('./services/memory-search');
@@ -127,17 +170,24 @@ app.use(express.json({ limit: '1mb' }));
 app.use(rateLimit);
 
 // ─── Public Routes (no auth) ─────────────────────────
+app.get('/.well-known/x402.json', (req, res) => res.json(X402_DISCOVERY));
 app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/simulation-report', simulationReportRoutes);
 
 // x402 Premium (paywall handles auth — admin key bypasses, x402 payment required for others)
 app.use('/api/v1/premium', premiumRoutes);
 
+// v7.8.0: Agent Interview (public — simulation interview system)
+app.use('/api/v1/interview', interviewRoutes);
+
+// v7.8.0: Knowledge Graph (public read — entity/relationship explorer)
+app.use('/api/v1/kg', kgRoutes);
+
 // API info endpoint
 app.get('/api/v1/info', (req, res) => {
   res.json({
     name: 'Buzz BD Agent API',
-    version: '3.8.0',
+    version: '3.9.0',
     agent: 'Buzz by SolCex',
     architecture: '5 parallel sub-agents + orchestrator + MiroFish simulation engine',
     sub_agents: ['scanner-agent', 'safety-agent', 'wallet-agent', 'social-agent', 'scorer-agent'],
@@ -234,6 +284,9 @@ app.use('/api/v1/intel/financial-datasets', apiKeyAuth, financialDatasetsRoutes)
 
 // v7.7.0: Technical Analyst
 app.use('/api/v1/technical', apiKeyAuth, technicalRoutes);
+
+// v7.8.0: Agent Interview System (MiroFish Cherry-Pick)
+app.use('/api/v1/interview', apiKeyAuth, interviewRoutes);
 
 // v7.5.4: CoinGecko CLI — Intel Source #23
 app.use('/api/v1/coingecko', apiKeyAuth, coingeckoRoutes);
