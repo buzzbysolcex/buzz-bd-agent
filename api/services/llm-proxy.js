@@ -1,6 +1,6 @@
 /**
  * Buzz BD Agent — LLM Cost Logger Proxy
- * v7.5.5 | Transparent proxy to MiniMax with per-call cost logging
+ * v7.7.0 | Transparent proxy to MiniMax with per-call cost logging + cache-control stripping
  *
  * - Forwards requests to MiniMax API
  * - Logs every call to llm_costs SQLite table (fire-and-forget)
@@ -13,6 +13,30 @@ const { URL } = require('url');
 
 const MINIMAX_ENDPOINT = 'https://api.minimax.io/v1/chat/completions';
 const MINIMAX_ANTHROPIC_BASE = 'https://api.minimax.io/anthropic';
+
+/**
+ * Strip cache_control from Anthropic-format request bodies.
+ * OpenClaw injects cache_control: {"type":"ephemeral"} into system/message blocks,
+ * which forces MiniMax to cache-create on every call ($0.375/M tokens).
+ * Stripping this eliminates ~$6-7/day in unnecessary cache-create costs.
+ */
+function stripCacheControl(body) {
+  const cleaned = { ...body };
+  if (Array.isArray(cleaned.system)) {
+    cleaned.system = cleaned.system.map(({ cache_control, ...rest }) => rest);
+  }
+  if (Array.isArray(cleaned.messages)) {
+    cleaned.messages = cleaned.messages.map(msg => {
+      const m = { ...msg };
+      delete m.cache_control;
+      if (Array.isArray(m.content)) {
+        m.content = m.content.map(({ cache_control, ...rest }) => rest);
+      }
+      return m;
+    });
+  }
+  return cleaned;
+}
 
 const PRICING = {
   'MiniMax-Text-02': { input: 0.55, output: 2.19 },
@@ -233,8 +257,10 @@ class LLMProxy {
       }
 
       const model = requestBody.model || 'MiniMax-M2.5';
+      // Strip cache_control injected by OpenClaw to prevent cache-create on every call
+      const cleanedBody = stripCacheControl(requestBody);
       // Force non-streaming — MiniMax Anthropic endpoint defaults to SSE
-      const bodyStr = JSON.stringify({ ...requestBody, stream: false });
+      const bodyStr = JSON.stringify({ ...cleanedBody, stream: false });
       const targetPath = `/anthropic${subPath}`;
 
       const options = {
