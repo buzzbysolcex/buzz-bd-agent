@@ -60,6 +60,41 @@ router.get('/summary', (req, res) => {
     console.error("[costs] llm_costs read error:", err.message);
   }
 
+  // Fallback: if llm_costs is empty, use llm_provider_log (populated by cascade logger)
+  if (totalCalls === 0) {
+    try {
+      const row = db.prepare(`
+        SELECT
+          COUNT(*) as total_calls,
+          COALESCE(SUM(CASE WHEN provider = 'minimax' THEN 1 ELSE 0 END), 0) as calls_minimax,
+          COALESCE(SUM(CASE WHEN provider = 'bankr' THEN 1 ELSE 0 END), 0) as calls_bankr,
+          COALESCE(SUM(CASE WHEN provider = 'anthropic' THEN 1 ELSE 0 END), 0) as calls_anthropic,
+          COALESCE(SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END), 0) as success_calls,
+          COALESCE(SUM(tokens_in), 0) as total_tokens_in,
+          COALESCE(SUM(tokens_out), 0) as total_tokens_out
+        FROM llm_provider_log WHERE date(created_at) = date('now')
+      `).get();
+      totalCalls = row.total_calls || 0;
+      callsMinimax = row.calls_minimax || 0;
+      callsBankr = row.calls_bankr || 0;
+
+      // Estimate cost from token counts (MiniMax pricing)
+      // MiniMax: input $0.30/M, output $1.50/M, cache-read $0.03/M
+      // Anthropic haiku: input $0.80/M, output $4.00/M
+      // Bankr: $0 (free)
+      const mmIn = row.total_tokens_in || 0;
+      const mmOut = row.total_tokens_out || 0;
+      const anthCalls = row.calls_anthropic || 0;
+      dailyTotal = (callsMinimax * mmIn / totalCalls * 0.30 / 1_000_000) +
+                   (callsMinimax * mmOut / totalCalls * 1.50 / 1_000_000) +
+                   (anthCalls * mmIn / totalCalls * 0.80 / 1_000_000) +
+                   (anthCalls * mmOut / totalCalls * 4.00 / 1_000_000);
+      if (!isFinite(dailyTotal)) dailyTotal = 0;
+    } catch (err) {
+      console.error("[costs] llm_provider_log fallback error:", err.message);
+    }
+  }
+
   // Per-agent breakdown for Sentinel/Telegram
   let byAgent = {};
   try {
@@ -70,6 +105,19 @@ router.get('/summary', (req, res) => {
     `).all();
     for (const a of agents) byAgent[a.caller] = { calls: a.calls, cost: Math.round(a.cost * 1_000_000) / 1_000_000 };
   } catch (e) {}
+
+  // Fallback: if byAgent is empty, use llm_provider_log
+  if (Object.keys(byAgent).length === 0) {
+    try {
+      const agents = db.prepare(`
+        SELECT agent, provider, COUNT(*) as calls,
+          COALESCE(SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END), 0) as ok_calls
+        FROM llm_provider_log WHERE date(created_at) = date('now')
+        GROUP BY agent ORDER BY calls DESC
+      `).all();
+      for (const a of agents) byAgent[a.agent] = { calls: a.calls, ok: a.ok_calls, provider: a.provider };
+    } catch (e) {}
+  }
 
   // Write to cost-tracker.json for Sentinel compatibility
   try {
