@@ -25,8 +25,9 @@ const PROVIDERS = {
   bankr: {
     name: 'bankr',
     model: 'gemini-3-flash',
-    endpoint: 'https://api.bankr.chat/v1/chat/completions',
-    keyEnv: 'BANKR_API_KEY',
+    endpoint: 'https://llm.bankr.bot/v1/chat/completions',
+    keyEnv: 'BANKR_LLM_KEY',
+    keyEnvFallback: 'BANKR_API_KEY',
     headerKey: 'Authorization',
     headerPrefix: 'Bearer ',
     priority: 2,
@@ -56,8 +57,8 @@ const ADAPTIVE_COOLDOWN_MS = 2 * 60 * 60 * 1000; // 2 hours
 let adaptiveOverride = null; // { provider: 'bankr', until: timestamp }
 
 // Timeout settings (Fix 1)
-const ORCHESTRATOR_TIMEOUT_MS = 15000; // 15s for first attempt
-const RETRY_TIMEOUT_MS = 10000;        // 10s for retry attempt
+const ORCHESTRATOR_TIMEOUT_MS = 30000; // 30s for first attempt (M2.7 avg 12.9s)
+const RETRY_TIMEOUT_MS = 20000;        // 20s for retry attempt
 const FALLBACK_TIMEOUT_MS = 30000;     // 30s for fallback providers
 
 function trackFailure(providerName) {
@@ -117,9 +118,9 @@ function checkAdaptiveCascade(providerName) {
 }
 
 function getProviderCascade(agentName) {
-  // Sub-agents always use Bankr (FREE)
+  // Sub-agents and sim agents always use Bankr (FREE) — NEVER cascade to paid
   const subAgents = ['scanner-agent', 'safety-agent', 'wallet-agent', 'social-agent', 'scorer-agent'];
-  if (subAgents.includes(agentName)) {
+  if (subAgents.includes(agentName) || agentName?.startsWith('sim-') || agentName?.startsWith('interview-') || agentName === 'debate-analyst') {
     return [{ ...PROVIDERS.bankr, model: 'gpt-5-nano' }];
   }
 
@@ -140,7 +141,7 @@ function getProviderCascade(agentName) {
 }
 
 async function callProvider(provider, body, timeout = 120000) {
-  const apiKey = process.env[provider.keyEnv];
+  const apiKey = process.env[provider.keyEnv] || (provider.keyEnvFallback && process.env[provider.keyEnvFallback]);
   if (!apiKey) throw new Error(`${provider.keyEnv} not configured`);
 
   const { URL } = require('url');
