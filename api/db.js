@@ -631,6 +631,18 @@ function runMigrations() {
       } catch(e) { console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message); }
     }
   }
+
+  // Run knowledge-graph migration (v7.8.0)
+  const {migrations: kgMigrations} = require('./migrations/023-knowledge-graph');
+  for (const m of kgMigrations) {
+    if (!applied.has(m.name)) {
+      try {
+        console.log(`[Buzz DB] Running migration: ${m.name}`);
+        db.exec(m.sql);
+        insert.run(m.name);
+      } catch(e) { console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message); }
+    }
+  }
 }
 
 module.exports = { initDB, getDB };

@@ -1,6 +1,6 @@
 /**
- * Enhanced Simulation Engine — MiroFish P1-B
- * 4 Personas x 5 Weight Variations = 20 Agent Verdicts
+ * Enhanced Simulation Engine — MiroFish P1-B (v7.8.0)
+ * 5 Personas x 10 Weight Variations = 50 Agent Verdicts
  *
  * Integrates with:
  *   - llm-cascade.js (cascadeCall for sub-agent LLM calls)
@@ -18,13 +18,31 @@ const { cascadeCall } = require('./llm-cascade');
 let financialDatasets;
 try { financialDatasets = require('../intel/financial-datasets-mcp'); } catch {}
 
-// ─── Persona Definitions ────────────────────────────────
+// ─── Persona Definitions (5 personas × 10 variations = 50 agents) ─────
 const PERSONAS = {
-  degen:         { baseWeight: 0.15, variations: [0.05, 0.10, 0.15, 0.20, 0.25], focus: 'momentum, narrative, hype' },
-  whale:         { baseWeight: 0.25, variations: [0.15, 0.20, 0.25, 0.30, 0.35], focus: 'smart money, accumulation, liquidity' },
-  institutional: { baseWeight: 0.35, variations: [0.25, 0.30, 0.35, 0.40, 0.45], focus: 'audit, KYC, compliance, risk' },
-  community:     { baseWeight: 0.25, variations: [0.15, 0.20, 0.25, 0.30, 0.35], focus: 'organic growth, dev activity, holder loyalty' },
+  degen:            { baseWeight: 0.15, focus: 'momentum, narrative, hype' },
+  whale:            { baseWeight: 0.25, focus: 'smart money, accumulation, liquidity' },
+  institutional:    { baseWeight: 0.35, focus: 'audit, KYC, compliance, risk' },
+  community:        { baseWeight: 0.25, focus: 'organic growth, dev activity, holder loyalty' },
+  technical_trader: { baseWeight: 0.20, focus: 'RSI, MACD, volume trends, price momentum, chart patterns, support/resistance' },
 };
+
+// 10 variation axes per persona
+const VARIATIONS = [
+  { risk_tolerance: 'ultra_conservative', time_horizon: 'long_term',   experience: 'veteran' },
+  { risk_tolerance: 'conservative',       time_horizon: 'long_term',   experience: 'veteran' },
+  { risk_tolerance: 'moderate',           time_horizon: 'medium_term', experience: 'veteran' },
+  { risk_tolerance: 'aggressive',         time_horizon: 'medium_term', experience: 'veteran' },
+  { risk_tolerance: 'ultra_aggressive',   time_horizon: 'short_term',  experience: 'veteran' },
+  { risk_tolerance: 'ultra_conservative', time_horizon: 'long_term',   experience: 'newcomer' },
+  { risk_tolerance: 'conservative',       time_horizon: 'medium_term', experience: 'newcomer' },
+  { risk_tolerance: 'moderate',           time_horizon: 'short_term',  experience: 'newcomer' },
+  { risk_tolerance: 'aggressive',         time_horizon: 'short_term',  experience: 'newcomer' },
+  { risk_tolerance: 'ultra_aggressive',   time_horizon: 'short_term',  experience: 'newcomer' },
+];
+
+// Weight spread per variation index (centered on baseWeight)
+const WEIGHT_OFFSETS = [-0.10, -0.08, -0.05, -0.02, 0, 0, 0.02, 0.05, 0.08, 0.10];
 
 // Verdict numeric mapping
 const VERDICT_MAP = {
@@ -98,9 +116,13 @@ function buildTokenContext(token, scores) {
 
 // ─── Build LLM Prompt ────────────────────────────────────
 
-function buildPrompt(persona, weight, focus, symbol, chain, ctx) {
+function buildPrompt(persona, weight, focus, symbol, chain, ctx, variation) {
+  const variationCtx = variation
+    ? `\nYour risk tolerance is ${variation.risk_tolerance}. Your time horizon is ${variation.time_horizon}. You are a ${variation.experience} trader.`
+    : '';
+
   return `You are a ${persona} analyst evaluating token ${symbol} (${chain}) for exchange listing on SolCex.
-Your influence weight in this simulation is ${weight}.
+Your influence weight in this simulation is ${weight}.${variationCtx}
 
 TOKEN DATA:
 - Composite Score: ${ctx.compositeScore}/100
@@ -120,8 +142,8 @@ Respond ONLY with valid JSON:
 
 // ─── Single Agent Call ───────────────────────────────────
 
-async function callAgent(persona, weight, focus, symbol, chain, ctx) {
-  const prompt = buildPrompt(persona, weight, focus, symbol, chain, ctx);
+async function callAgent(persona, weight, focus, symbol, chain, ctx, variation) {
+  const prompt = buildPrompt(persona, weight, focus, symbol, chain, ctx, variation);
 
   const timeoutPromise = new Promise((_, reject) =>
     setTimeout(() => reject(new Error('TIMEOUT')), CALL_TIMEOUT_MS)
@@ -170,6 +192,7 @@ async function callAgent(persona, weight, focus, symbol, chain, ctx) {
   return {
     persona,
     weight,
+    variation,
     verdict: parsed.verdict,
     confidence: Math.min(1, Math.max(0, parseFloat(parsed.confidence) || 0.5)),
     reasoning: parsed.reasoning || '',
@@ -267,46 +290,71 @@ async function runSimulation(tokenAddress, chain, options = {}) {
     } catch {}
   }
 
-  // 3. Build 20 agent calls (4 personas x 5 variations)
+  // 3. Build 50 agent calls (5 personas x 10 variations)
   const agentCalls = [];
   for (const [persona, config] of Object.entries(PERSONAS)) {
-    for (const weight of config.variations) {
-      agentCalls.push(
-        callAgent(persona, weight, config.focus, symbol, chain, ctx)
-          .catch(err => ({
-            persona,
-            weight,
-            verdict: 'NEUTRAL',
-            confidence: 0,
-            reasoning: `Agent call failed: ${err.message}`,
-            priceTarget30d: 'STABLE',
-            riskLevel: 'MEDIUM',
-            status: 'ABSTAIN',
-          }))
-      );
+    for (let i = 0; i < VARIATIONS.length; i++) {
+      const variation = VARIATIONS[i];
+      const weight = Math.max(0.05, config.baseWeight + WEIGHT_OFFSETS[i]);
+      agentCalls.push({
+        persona,
+        weight,
+        focus: config.focus,
+        variation,
+        variationIndex: i,
+      });
     }
   }
 
-  // 4. Execute all 20 calls in parallel
-  const results = await Promise.allSettled(agentCalls);
-  const verdicts = results.map(r => r.status === 'fulfilled' ? r.value : {
-    persona: 'unknown',
-    weight: 0,
-    verdict: 'NEUTRAL',
-    confidence: 0,
-    reasoning: 'Promise rejected',
-    priceTarget30d: 'STABLE',
-    riskLevel: 'MEDIUM',
-    status: 'ABSTAIN',
-  });
+  // 4. Execute in batches of 10 with 500ms delay between batches
+  const BATCH_SIZE = 10;
+  const BATCH_DELAY_MS = 500;
+  const verdicts = [];
+
+  for (let b = 0; b < agentCalls.length; b += BATCH_SIZE) {
+    const batch = agentCalls.slice(b, b + BATCH_SIZE);
+    const batchPromises = batch.map(a =>
+      callAgent(a.persona, a.weight, a.focus, symbol, chain, ctx, a.variation)
+        .catch(err => ({
+          persona: a.persona,
+          weight: a.weight,
+          variation: a.variation,
+          verdict: 'NEUTRAL',
+          confidence: 0,
+          reasoning: `Agent call failed: ${err.message}`,
+          priceTarget30d: 'STABLE',
+          riskLevel: 'MEDIUM',
+          status: 'ABSTAIN',
+        }))
+    );
+
+    const results = await Promise.allSettled(batchPromises);
+    for (const r of results) {
+      verdicts.push(r.status === 'fulfilled' ? r.value : {
+        persona: 'unknown',
+        weight: 0,
+        verdict: 'NEUTRAL',
+        confidence: 0,
+        reasoning: 'Promise rejected',
+        priceTarget30d: 'STABLE',
+        riskLevel: 'MEDIUM',
+        status: 'ABSTAIN',
+      });
+    }
+
+    // Delay between batches (skip after last batch)
+    if (b + BATCH_SIZE < agentCalls.length) {
+      await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS));
+    }
+  }
 
   // 5. Calculate consensus
   const consensus = calculateConsensus(verdicts);
 
-  // 5b. Adversarial bull/bear debate (B5)
+  // 5b. Adversarial bull/bear debate (top-5 vs top-5)
   let debate = null;
   const completed = verdicts.filter(v => v.status === 'COMPLETED');
-  if (completed.length >= 6) {
+  if (completed.length >= 10) {
     try {
       debate = await runDebate(completed, symbol, chain);
     } catch (e) {
@@ -317,7 +365,9 @@ async function runSimulation(tokenAddress, chain, options = {}) {
   // 6. Build metrics
   const durationMs = Date.now() - startTime;
   const metrics = {
-    totalAgents: 20,
+    totalAgents: 50,
+    persona_count: 5,
+    variation_count: 10,
     completed: consensus.completedCount,
     abstained: consensus.abstainCount,
     durationMs,
@@ -360,8 +410,8 @@ async function runDebate(completedVerdicts, symbol, chain) {
     return vb - va;
   });
 
-  const bulls = sorted.slice(0, 3);
-  const bears = sorted.slice(-3).reverse();
+  const bulls = sorted.slice(0, 5);
+  const bears = sorted.slice(-5).reverse();
 
   const bullCase = bulls.map(v =>
     `${v.persona} (w=${v.weight}): ${v.verdict} — ${v.reasoning}`
@@ -373,10 +423,10 @@ async function runDebate(completedVerdicts, symbol, chain) {
 
   const debatePrompt = `You are a senior crypto analyst reviewing a listing simulation for ${symbol} (${chain}) on SolCex Exchange.
 
-BULL CASE (top 3 most bullish agents):
+BULL CASE (top 5 most bullish agents):
 ${bullCase}
 
-BEAR CASE (top 3 most bearish/cautious agents):
+BEAR CASE (top 5 most bearish/cautious agents):
 ${bearCase}
 
 Synthesize both cases in 3-4 sentences. Who has the stronger argument? What is the key risk? What is the key signal? End with a one-word refined consensus: BULLISH, BEARISH, or NEUTRAL.
@@ -414,4 +464,4 @@ Respond ONLY with valid JSON:
   }
 }
 
-module.exports = { runSimulation, PERSONAS, VERDICT_MAP, calculateConsensus, runDebate };
+module.exports = { runSimulation, PERSONAS, VARIATIONS, WEIGHT_OFFSETS, VERDICT_MAP, calculateConsensus, runDebate };
