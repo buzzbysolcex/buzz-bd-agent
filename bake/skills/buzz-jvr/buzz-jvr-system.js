@@ -136,8 +136,9 @@ class ReceiptManager {
     // Update index
     this._addToIndex(receipt);
 
-    // Telegram notification
-    if (notify && this.telegramBotToken && category !== 'api') {
+    // Telegram notification — only for high-value events (skip routine cron/scan/system noise)
+    const SILENT_CATEGORIES = ['api', 'cron', 'scan', 'system', 'score', 'safety', 'wallet', 'social', 'reputation'];
+    if (notify && this.telegramBotToken && !SILENT_CATEGORIES.includes(category)) {
       await this._notifyTelegram(receipt);
     }
 
