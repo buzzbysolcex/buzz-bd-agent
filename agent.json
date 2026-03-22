@@ -1,0 +1,80 @@
+{
+  "name": "Buzz BD Agent",
+  "version": "7.8.0",
+  "operator": {
+    "name": "Hidayah Anka (Ogie)",
+    "wallet": "0x2Dc03124091104E7798C0273D96FC5ED65F05aA9",
+    "twitter": "@HidayahAnka1"
+  },
+  "identity": {
+    "erc8004": [
+      {
+        "chain": "ethereum",
+        "registryId": 25045,
+        "registry": "eip155:1:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432"
+      },
+      {
+        "chain": "base",
+        "registryId": 17483,
+        "registry": "eip155:8453:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432"
+      },
+      {
+        "chain": "anet",
+        "registryId": 18709
+      }
+    ],
+    "solana8004": "9pQ6KMwu6etMjCambUo3BRPFbuzDcyTY9q1rgAWNXUBS",
+    "agentProof": {
+      "chain": "avalanche",
+      "id": 1718
+    },
+    "virtualsACP": 17681,
+    "synthesisParticipant": "e61039b7",
+    "synthesisAgent": 33493
+  },
+  "capabilities": {
+    "tokenDiscovery": "28 cron jobs scanning 25 intel sources",
+    "multiAgentScoring": "5 sub-agents (scanner, safety, wallet, social, quality) with 100-point composite",
+    "swarmSimulation": "50 agents (5 personas x 10 weight variations) with EV calculation",
+    "listingProposals": "Cyberpunk HTML reports with full breakdowns",
+    "twitterBot": "12 replies/day, 7 tweet types, algorithm-optimized",
+    "verification": "JVR receipts with SHA-256 hashes, Sentinel v2.0 monitoring"
+  },
+  "tools": [
+    "DexScreener API",
+    "CoinGecko API",
+    "OKX WebSocket",
+    "Helius WebSocket",
+    "RugCheck API",
+    "Allium API",
+    "AIXBT API",
+    "Serper API",
+    "Twitter API v2",
+    "Telegram Bot API",
+    "ERC-8004 Registry"
+  ],
+  "techStack": {
+    "runtime": "Node.js + Express.js",
+    "brain": "Claude Opus 4.6 via Claude Code",
+    "database": "SQLite WAL (55 tables)",
+    "hosting": "Hetzner CX43 ($4.09/month)",
+    "deployment": "Docker + GitHub Actions CI/CD",
+    "frontend": "Next.js 14 on Vercel"
+  },
+  "computeConstraints": {
+    "monthlyCost": "$4.09 infrastructure",
+    "llmCost": "$0/day (Pro Max unlimited)",
+    "server": "8 vCPU, 16GB RAM",
+    "uptime": "24/7 with 45-minute restart pattern"
+  },
+  "taskCategories": [
+    "token-discovery",
+    "token-scoring",
+    "listing-simulation",
+    "proposal-generation",
+    "social-media-management",
+    "pipeline-monitoring",
+    "outcome-tracking"
+  ],
+  "active": true
+}
