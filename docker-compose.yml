@@ -58,16 +58,20 @@ services:
       - GMAIL_REFRESH_TOKEN=${GMAIL_REFRESH_TOKEN}
       - GMAIL_ADDRESS=${GMAIL_ADDRESS}
       # ─── ATV / Web3 Identity ───
+      - ATV_ENABLED=false
       - ATV_API_URL=https://api.web3identity.com
       - ATV_BATCH_ENDPOINT=/api/ens/batch-resolve
       # ─── Nansen ───
       - NANSEN_API_KEY=${NANSEN_API_KEY}
-      - NANSEN_X402_ENABLED=${NANSEN_X402_ENABLED}
+      - NANSEN_X402_ENABLED=false
       - NANSEN_X402_WALLET_KEY=${NANSEN_X402_WALLET_KEY}
       # ─── BNB Chain ───
       - BNB_PRIVATE_KEY=${BNB_PRIVATE_KEY}
       # ─── Supermemory ───
       - SUPERMEMORY_OPENCLAW_API_KEY=${SUPERMEMORY_OPENCLAW_API_KEY}
+      # ─── Feature Flags (disabled — dead services) ───
+      - BANKR_SIGNALS_ENABLED=false
+      - COST_PARSER_ENABLED=false
       # ─── API ───
       - BUZZ_API_ADMIN_KEY=${BUZZ_API_ADMIN_KEY}
       - BUZZ_API_PORT=3000

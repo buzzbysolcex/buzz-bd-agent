@@ -407,7 +407,7 @@
     {
       "id": "agentproof-telemetry",
       "name": "agentproof-telemetry",
-      "enabled": true,
+      "enabled": false,
       "schedule": {
         "kind": "cron",
         "expr": "0 */12 * * *",
@@ -726,7 +726,7 @@
     {
       "id": "deploy-stats-daily",
       "name": "deploy-stats-daily",
-      "enabled": true,
+      "enabled": false,
       "schedule": {
         "kind": "cron",
         "expr": "0 22 * * *"
@@ -993,7 +993,7 @@
     {
       "id": "nansen-smart-money-scan",
       "name": "nansen-smart-money-scan",
-      "enabled": true,
+      "enabled": false,
       "schedule": {
         "kind": "cron",
         "expr": "0 */4 * * *",
