@@ -10,7 +10,6 @@
  * Buzz BD Agent | SolCex
  */
 
-const { cascadeCall } = require('../lib/llm-cascade');
 const { getDB } = require('../db');
 const { PERSONAS, VARIATIONS, VERDICT_MAP } = require('../lib/simulation-engine');
 
@@ -174,7 +173,7 @@ function listInterviewableAgents(simulationId) {
 
 /**
  * Reconstruct an agent persona from the stored verdict and conduct an
- * in-character LLM interview via cascadeCall (bankr/gpt-5-nano).
+ * rule-based interview response (Project Opus Brain — Claude Code handles deep analysis).
  *
  * @param {string} simulationId
  * @param {number} agentIndex — 0-based index into the verdicts array
@@ -223,27 +222,12 @@ Reference specific data from your evaluation.
 
 ${BUZZ_RULES}`;
 
-  // Build messages array with conversation history
-  const messages = [
-    { role: 'system', content: systemPrompt },
-  ];
-
-  for (const turn of conversationHistory) {
-    if (turn.question) messages.push({ role: 'user', content: turn.question });
-    if (turn.response) messages.push({ role: 'assistant', content: turn.response });
-  }
-
-  messages.push({ role: 'user', content: userQuestion });
-
-  const result = await cascadeCall({
-    messages,
-    max_tokens: 800,
-    temperature: 0.5,
-  }, { agent: `interview-${agent.persona}` });
-
-  let text = typeof result === 'string' ? result : result?.content || result?.text || '';
-  // Strip <think>...</think> blocks (Bankr/gemini includes reasoning tags)
-  text = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+  // Project Opus Brain: Return agent data for Claude Code to analyze.
+  // Claude Code handles the conversational interview directly.
+  const response = `[${agent.persona}/${variation.risk_tolerance || 'moderate'}/${variation.experience || 'veteran'}] ` +
+    `Verdict: ${agent.verdict} (${((agent.confidence || 0) * 100).toFixed(0)}% confidence). ` +
+    `${agent.reasoning || 'No reasoning recorded.'} ` +
+    `Risk: ${agent.riskLevel || 'MEDIUM'}. 30d target: ${agent.priceTarget30d || 'STABLE'}.`;
 
   return {
     agent: {
@@ -257,9 +241,9 @@ ${BUZZ_RULES}`;
       riskLevel: agent.riskLevel || 'MEDIUM',
       priceTarget30d: agent.priceTarget30d || 'STABLE',
     },
-    response: text,
-    model: result?.model || 'bankr/gpt-5-nano',
-    cost: 0, // bankr/gpt-5-nano is FREE
+    response,
+    model: 'rule-based',
+    cost: 0,
   };
 }
 

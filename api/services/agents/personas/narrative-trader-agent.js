@@ -11,7 +11,7 @@
 
 const WEIGHT = 0.15;
 
-async function analyzeToken(tokenData, llmCall) {
+async function analyzeToken(tokenData) {
   const start = Date.now();
 
   try {
@@ -20,15 +20,7 @@ async function analyzeToken(tokenData, llmCall) {
     const signal = score >= 65 ? 'bullish' : score >= 40 ? 'neutral' : 'bearish';
     const confidence = Math.min(1.0, Math.max(0.1, score / 100));
 
-    let reasoning = generateReasoning(factors, score);
-    if (llmCall) {
-      try {
-        const llmReasoning = await getLLMAnalysis(tokenData, factors, llmCall);
-        if (llmReasoning) reasoning = llmReasoning;
-      } catch {
-        // Fall back to rule-based reasoning
-      }
-    }
+    const reasoning = generateReasoning(factors, score);
 
     const recommendation = deriveRecommendation(signal, confidence, score);
 
@@ -42,7 +34,7 @@ async function analyzeToken(tokenData, llmCall) {
       reasoning,
       bd_recommendation: recommendation,
       factors,
-      model_used: llmCall ? 'bankr/gpt-5-nano' : 'rule-based',
+      model_used: 'rule-based',
       duration_ms: Date.now() - start,
     };
   } catch (err) {
@@ -149,17 +141,6 @@ function generateReasoning(factors, score) {
   return `Narrative trader analysis (${signal}, ${score}/100): ${topDetails || 'No tradeable narrative found.'}`;
 }
 
-async function getLLMAnalysis(tokenData, factors, llmCall) {
-  const prompt = `As a crypto narrative trader on CT, briefly analyze this listing event (2-3 sentences):
-Token: ${tokenData.scannerData?.name || 'Unknown'}
-Narrative: ${factors.find(f => f.name === 'viral_narrative')?.detail || 'N/A'}
-Listing alpha: ${factors.find(f => f.name === 'listing_alpha')?.detail || 'N/A'}
-Momentum: ${factors.find(f => f.name === 'momentum_play')?.detail || 'N/A'}
-Would this listing create a tradeable narrative? Long, short, or skip?`;
-
-  const result = await llmCall(prompt);
-  return result?.content || result?.text || null;
-}
 
 function deriveRecommendation(signal, confidence, score) {
   if (signal === 'bullish' && confidence >= 0.7) return 'outreach_now';

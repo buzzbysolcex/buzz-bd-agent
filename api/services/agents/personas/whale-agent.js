@@ -14,7 +14,7 @@ const WEIGHT = 0.25;
 /**
  * Analyze token from whale/smart money perspective
  */
-async function analyzeToken(tokenData, llmCall) {
+async function analyzeToken(tokenData) {
   const start = Date.now();
 
   try {
@@ -23,13 +23,7 @@ async function analyzeToken(tokenData, llmCall) {
     const signal = score >= 65 ? 'bullish' : score >= 40 ? 'neutral' : 'bearish';
     const confidence = Math.min(1.0, Math.max(0.1, score / 100));
 
-    let reasoning = generateWhaleReasoning(factors, score);
-    if (llmCall) {
-      try {
-        const llmReasoning = await getWhaleLLMAnalysis(tokenData, factors, llmCall);
-        if (llmReasoning) reasoning = llmReasoning;
-      } catch {}
-    }
+    const reasoning = generateWhaleReasoning(factors, score);
 
     const recommendation = deriveRecommendation(signal, confidence, score);
 
@@ -43,7 +37,7 @@ async function analyzeToken(tokenData, llmCall) {
       reasoning,
       bd_recommendation: recommendation,
       factors,
-      model_used: llmCall ? 'bankr/gpt-5-nano' : 'rule-based',
+      model_used: 'rule-based',
       duration_ms: Date.now() - start,
     };
   } catch (err) {
@@ -148,17 +142,6 @@ function generateWhaleReasoning(factors, score) {
   return `Whale analysis (${signal}, ${score}/100): ${top.map(f => f.detail).join('. ') || 'Insufficient data.'}`;
 }
 
-async function getWhaleLLMAnalysis(tokenData, factors, llmCall) {
-  const prompt = `As a crypto whale managing $10M+, analyze this token briefly (2-3 sentences):
-Token: ${tokenData.scannerData?.name || 'Unknown'}
-Liquidity: ${factors.find(f => f.name === 'liquidity_depth')?.detail || 'N/A'}
-Holders: ${factors.find(f => f.name === 'holder_count')?.detail || 'N/A'}
-Distribution: ${factors.find(f => f.name === 'holder_distribution')?.detail || 'N/A'}
-Would you take a position? Why or why not?`;
-
-  const result = await llmCall(prompt);
-  return result?.content || result?.text || null;
-}
 
 function deriveRecommendation(signal, confidence, score) {
   if (signal === 'bullish' && confidence >= 0.7) return 'outreach_now';

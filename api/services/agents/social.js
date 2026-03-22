@@ -268,13 +268,11 @@ async function checkWebPresence(address, chain, factors, requestId) {
 }
 
 /**
- * Social sentiment check via Grok x_search (or fallback)
- * Note: Grok can be slow (30-60s) — this is the bottleneck agent
+ * Social sentiment check — data-only (no LLM)
+ * Project Opus Brain: Claude Code analyzes raw social data directly.
+ * This function returns raw social signals for Claude Code to interpret.
  */
 async function checkSocialSentiment(address, chain, factors, requestId) {
-  const GROK_KEY = process.env.GROK_API_KEY || process.env.XAI_API_KEY;
-  
-  // Default neutral response
   const defaultResult = {
     hasTwitter: false,
     hasTelegram: false,
@@ -283,57 +281,64 @@ async function checkSocialSentiment(address, chain, factors, requestId) {
     sentimentScore: 0.5
   };
 
-  if (!GROK_KEY) {
-    factors.push({ name: 'grok_unavailable', impact: 0, detail: 'Grok/xAI API key not configured' });
+  // Use Serper to check for Twitter/X presence (already have the key for web search)
+  const SERPER_KEY = process.env.SERPER_API_KEY;
+  if (!SERPER_KEY) {
+    factors.push({ name: 'social_sentiment_skipped', impact: 0, detail: 'No Serper key for Twitter search' });
     return defaultResult;
   }
 
   try {
-    // Use Grok's x_search for Twitter/X sentiment
-    const res = await fetch('https://api.x.ai/v1/chat/completions', {
+    const res = await fetch('https://google.serper.dev/search', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GROK_KEY}`,
+        'X-API-KEY': SERPER_KEY,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        model: 'grok-3-mini',
-        messages: [{
-          role: 'user',
-          content: `Analyze the Twitter/X social presence and sentiment for the crypto token with contract address ${address} on ${chain}. Return ONLY a JSON object with these fields: hasTwitter (bool), hasTelegram (bool), followerCount (number), engagementRate (decimal 0-1), sentimentScore (decimal 0-1 where 1=very positive), summary (brief text). If you can't find info, use reasonable defaults.`
-        }],
-        temperature: 0.1,
-        max_tokens: 500
-      }),
-      signal: AbortSignal.timeout(60000) // 60s timeout for Grok
+      body: JSON.stringify({ q: `site:x.com OR site:twitter.com ${address} token`, num: 10 }),
+      signal: AbortSignal.timeout(15000)
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      const content = data.choices?.[0]?.message?.content || '';
-      
-      // Try to parse JSON from response
-      try {
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          return {
-            hasTwitter: parsed.hasTwitter || false,
-            hasTelegram: parsed.hasTelegram || false,
-            followerCount: parsed.followerCount || 0,
-            engagementRate: parsed.engagementRate || 0,
-            sentimentScore: parsed.sentimentScore || 0.5,
-            summary: parsed.summary || null
-          };
-        }
-      } catch {
-        // JSON parse failed, use defaults
-      }
-    }
+    if (!res.ok) return defaultResult;
 
-    return defaultResult;
+    const data = await res.json();
+    const organic = data.organic || [];
+
+    const hasTwitter = organic.length > 0;
+    const hasTelegram = organic.some(r =>
+      `${r.title} ${r.snippet}`.toLowerCase().includes('telegram')
+    );
+
+    // Estimate engagement from result quality
+    const mentionCount = organic.length;
+    const engagementRate = Math.min(1, mentionCount / 10);
+
+    // Basic sentiment from snippet analysis (no LLM — just keyword counting)
+    let positiveSignals = 0;
+    let negativeSignals = 0;
+    for (const r of organic) {
+      const text = `${r.title} ${r.snippet}`.toLowerCase();
+      if (text.match(/bullish|moon|gem|based|legit|safu|growing|partnership/)) positiveSignals++;
+      if (text.match(/scam|rug|honeypot|fake|dead|dump|avoid|warning/)) negativeSignals++;
+    }
+    const total = positiveSignals + negativeSignals;
+    const sentimentScore = total > 0 ? positiveSignals / total : 0.5;
+
+    return {
+      hasTwitter,
+      hasTelegram,
+      followerCount: 0, // Not available from search — Claude Code can enrich
+      engagementRate,
+      sentimentScore,
+      mentionCount,
+      rawResults: organic.slice(0, 5).map(r => ({
+        title: r.title,
+        url: r.link,
+        snippet: r.snippet?.slice(0, 150)
+      }))
+    };
   } catch (err) {
-    factors.push({ name: 'grok_error', impact: 0, detail: err.message });
+    factors.push({ name: 'social_sentiment_error', impact: 0, detail: err.message });
     return defaultResult;
   }
 }

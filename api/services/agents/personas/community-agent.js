@@ -14,7 +14,7 @@ const WEIGHT = 0.25;
 /**
  * Analyze token from community/social perspective
  */
-async function analyzeToken(tokenData, llmCall) {
+async function analyzeToken(tokenData) {
   const start = Date.now();
 
   try {
@@ -23,13 +23,7 @@ async function analyzeToken(tokenData, llmCall) {
     const signal = score >= 65 ? 'bullish' : score >= 40 ? 'neutral' : 'bearish';
     const confidence = Math.min(1.0, Math.max(0.1, score / 100));
 
-    let reasoning = generateCommunityReasoning(factors, score);
-    if (llmCall) {
-      try {
-        const llmReasoning = await getCommunityLLMAnalysis(tokenData, factors, llmCall);
-        if (llmReasoning) reasoning = llmReasoning;
-      } catch {}
-    }
+    const reasoning = generateCommunityReasoning(factors, score);
 
     const recommendation = deriveRecommendation(signal, confidence, score);
 
@@ -43,7 +37,7 @@ async function analyzeToken(tokenData, llmCall) {
       reasoning,
       bd_recommendation: recommendation,
       factors,
-      model_used: llmCall ? 'bankr/gpt-5-nano' : 'rule-based',
+      model_used: 'rule-based',
       duration_ms: Date.now() - start,
     };
   } catch (err) {
@@ -176,17 +170,6 @@ function generateCommunityReasoning(factors, score) {
   return `Community analysis (${signal}, ${score}/100): ${top.map(f => f.detail).join('. ') || 'Insufficient social data.'}`;
 }
 
-async function getCommunityLLMAnalysis(tokenData, factors, llmCall) {
-  const prompt = `As a crypto community analyst, evaluate this token's community strength (2-3 sentences):
-Token: ${tokenData.scannerData?.name || 'Unknown'}
-Twitter: ${factors.find(f => f.name === 'twitter_size')?.detail || 'N/A'}
-Engagement: ${factors.find(f => f.name === 'twitter_engagement')?.detail || 'N/A'}
-Community: ${factors.find(f => f.name === 'community_channels')?.detail || 'N/A'}
-Is the community organic and sustainable? Would it support a CEX listing?`;
-
-  const result = await llmCall(prompt);
-  return result?.content || result?.text || null;
-}
 
 function deriveRecommendation(signal, confidence, score) {
   if (signal === 'bullish' && confidence >= 0.7) return 'outreach_now';
