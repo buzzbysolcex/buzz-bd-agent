@@ -38,8 +38,8 @@ function x402Paywall(options = {}) {
     const clientIp = req.ip || req.connection?.remoteAddress || '';
     if (clientIp === '127.0.0.1' || clientIp === '::1' || clientIp === '::ffff:127.0.0.1') return next();
 
-    // Bypass 3: Valid x402 payment proof
-    const paymentHeader = req.headers['x-402-payment'] || req.headers['x-payment'];
+    // Bypass 3: Valid x402 payment proof (payment-signature is x402 v2 standard)
+    const paymentHeader = req.headers['payment-signature'] || req.headers['x-payment'] || req.headers['x-402-payment'];
     if (paymentHeader) {
       // For now, accept any non-empty payment proof
       // TODO: Verify payment proof via Coinbase CDP facilitator
@@ -48,37 +48,36 @@ function x402Paywall(options = {}) {
       return next();
     }
 
-    // No payment — return 402 with payment requirements
+    // No payment — return 402 with x402 spec-compliant payment requirements
     const paymentRequired = {
+      x402Version: 2,
       accepts: [{
         scheme: 'exact',
         network: 'base',
-        maxAmountRequired: price,
-        resource: `${BASE_URL}${resource}`,
-        description,
-        mimeType: 'application/json',
+        amount: price,
         payTo: BUZZ_WALLET,
-        maxTimeoutSeconds: 60,
         asset: USDC_BASE,
+        maxTimeoutSeconds: 60,
         extra: {
-          provider: 'SolCex Exchange',
-          agent: 'Buzz BD Agent',
-          version: '7.7.0',
+          name: description,
+          provider: 'SolCex Exchange / Buzz BD Agent',
         },
       }],
+      resource: {
+        url: `${BASE_URL}${resource}`,
+        method: 'GET',
+        contentType: 'application/json',
+        description,
+      },
+      error: 'X-PAYMENT header is required',
     };
 
     const encoded = Buffer.from(JSON.stringify(paymentRequired)).toString('base64');
 
     res.status(402)
-      .set('X-Payment-Required', encoded)
-      .set('Access-Control-Expose-Headers', 'X-Payment-Required')
-      .json({
-        error: 'payment_required',
-        message: `This endpoint requires x402 micropayment. Price: $${(parseInt(price) / 1000000).toFixed(4)} USDC on Base.`,
-        payment_info: paymentRequired,
-        docs: 'https://x402.org',
-      });
+      .set('PAYMENT-REQUIRED', encoded)
+      .set('Access-Control-Expose-Headers', 'PAYMENT-REQUIRED')
+      .json(paymentRequired);
   };
 }
 
