@@ -89,8 +89,8 @@ const reportRoutes = require('./routes/reports');
 const verifyRoutes = require('./routes/verify');
 const { requireVerifiedAutoCheck } = require('./middleware/verification-gate');
 
-// v7.5.5: LLM Cost Proxy
-const llmProxyRoutes = require('./routes/llm-proxy');
+// v7.5.5: LLM Cost Proxy — KILLED by Project Opus Brain (Claude Code is the brain now)
+// const llmProxyRoutes = require('./routes/llm-proxy');
 
 // Listing Readiness + Activity routes
 const listingReadinessRoutes = require('./routes/listing-readiness');
@@ -98,6 +98,9 @@ const activityRoutes = require('./routes/activity');
 
 // Whale Signal Intelligence (Nansen Hyperliquid)
 const whaleSignalRoutes = require('./routes/whale-signal');
+
+// Project Opus Brain — Raw Data Endpoints for Claude Code
+const rawDataRoutes = require('./routes/raw-data');
 
 // x402 Premium endpoints (paywalled)
 const premiumRoutes = require('./routes/premium');
@@ -309,6 +312,9 @@ app.use('/api/v1/activity', apiKeyAuth, activityRoutes);
 // Whale Signal Intelligence (Nansen Hyperliquid)
 app.use('/api/v1/whale-signal', apiKeyAuth, whaleSignalRoutes);
 
+// Project Opus Brain — Raw data endpoints for Claude Code
+app.use('/api/v1', apiKeyAuth, rawDataRoutes);
+
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 
 // ═════════════════════════════════════════════════════
@@ -516,8 +522,8 @@ async function start() {
     // v7.0: Strategy routes (8 endpoints)
     app.use('/api/v1/strategy', apiKeyAuth, strategyRoutes(db, { decisionEngine, playbookEngine, contextEngine }));
 
-    // v7.5.5: LLM Cost Proxy (6 endpoints)
-    app.use('/api/v1/llm', llmProxyRoutes(db));
+    // v7.5.5: LLM Cost Proxy — KILLED by Project Opus Brain
+    // app.use('/api/v1/llm', llmProxyRoutes(db));
 
     // v7.4.0: Hedge Brain routes (SSE streaming, personas, backtest)
     app.use('/api/v1/pipeline', pipelineStreamRoutes); // SSE stream (adds /stream under existing /pipeline)

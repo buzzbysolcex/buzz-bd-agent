@@ -11,7 +11,7 @@
 
 const WEIGHT = 0.15;
 
-async function analyzeToken(tokenData, llmCall) {
+async function analyzeToken(tokenData) {
   const start = Date.now();
 
   try {
@@ -20,15 +20,7 @@ async function analyzeToken(tokenData, llmCall) {
     const signal = score >= 65 ? 'bullish' : score >= 40 ? 'neutral' : 'bearish';
     const confidence = Math.min(1.0, Math.max(0.1, score / 100));
 
-    let reasoning = generateReasoning(factors, score);
-    if (llmCall) {
-      try {
-        const llmReasoning = await getLLMAnalysis(tokenData, factors, llmCall);
-        if (llmReasoning) reasoning = llmReasoning;
-      } catch {
-        // Fall back to rule-based reasoning
-      }
-    }
+    const reasoning = generateReasoning(factors, score);
 
     const recommendation = deriveRecommendation(signal, confidence, score);
 
@@ -42,7 +34,7 @@ async function analyzeToken(tokenData, llmCall) {
       reasoning,
       bd_recommendation: recommendation,
       factors,
-      model_used: llmCall ? 'bankr/gpt-5-nano' : 'rule-based',
+      model_used: 'rule-based',
       duration_ms: Date.now() - start,
     };
   } catch (err) {
@@ -137,17 +129,6 @@ function generateReasoning(factors, score) {
   return `Competitor exchange analysis (${signal}, ${score}/100): ${topDetails || 'No strong competitive signals.'}`;
 }
 
-async function getLLMAnalysis(tokenData, factors, llmCall) {
-  const prompt = `As a BD analyst at a competing CEX (Bitget/MEXC), briefly analyze this listing opportunity (2-3 sentences):
-Token: ${tokenData.scannerData?.name || 'Unknown'}
-Volume: ${factors.find(f => f.name === 'volume_growth')?.detail || 'N/A'}
-Safety: ${factors.find(f => f.name === 'cex_safety')?.detail || 'N/A'}
-First-mover: ${factors.find(f => f.name === 'first_mover')?.detail || 'N/A'}
-Would your exchange list this? Would SolCex gain first-mover advantage?`;
-
-  const result = await llmCall(prompt);
-  return result?.content || result?.text || null;
-}
 
 function deriveRecommendation(signal, confidence, score) {
   if (signal === 'bullish' && confidence >= 0.7) return 'outreach_now';

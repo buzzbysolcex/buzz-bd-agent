@@ -14,7 +14,7 @@ const WEIGHT = 0.35;
 /**
  * Analyze token from institutional/compliance perspective
  */
-async function analyzeToken(tokenData, llmCall) {
+async function analyzeToken(tokenData) {
   const start = Date.now();
 
   try {
@@ -23,13 +23,7 @@ async function analyzeToken(tokenData, llmCall) {
     const signal = score >= 65 ? 'bullish' : score >= 40 ? 'neutral' : 'bearish';
     const confidence = Math.min(1.0, Math.max(0.1, score / 100));
 
-    let reasoning = generateInstitutionalReasoning(factors, score);
-    if (llmCall) {
-      try {
-        const llmReasoning = await getInstitutionalLLMAnalysis(tokenData, factors, llmCall);
-        if (llmReasoning) reasoning = llmReasoning;
-      } catch {}
-    }
+    const reasoning = generateInstitutionalReasoning(factors, score);
 
     const recommendation = deriveRecommendation(signal, confidence, score);
 
@@ -43,7 +37,7 @@ async function analyzeToken(tokenData, llmCall) {
       reasoning,
       bd_recommendation: recommendation,
       factors,
-      model_used: llmCall ? 'bankr/claude-haiku-4.5' : 'rule-based',
+      model_used: 'rule-based',
       duration_ms: Date.now() - start,
     };
   } catch (err) {
@@ -159,18 +153,6 @@ function generateInstitutionalReasoning(factors, score) {
   return reasoning;
 }
 
-async function getInstitutionalLLMAnalysis(tokenData, factors, llmCall) {
-  const prompt = `As an institutional compliance analyst, evaluate this token for CEX listing (2-3 sentences):
-Token: ${tokenData.scannerData?.name || 'Unknown'}
-Safety: ${factors.find(f => f.name === 'contract_safety')?.detail || 'N/A'}
-Audit: ${factors.find(f => f.name === 'audit_status')?.detail || 'N/A'}
-Team: ${factors.find(f => f.name === 'team_credibility')?.detail || 'N/A'}
-LP Lock: ${factors.find(f => f.name === 'liquidity_lock')?.detail || 'N/A'}
-Would this pass institutional due diligence for a CEX listing? Key risks?`;
-
-  const result = await llmCall(prompt);
-  return result?.content || result?.text || null;
-}
 
 function deriveRecommendation(signal, confidence, score) {
   if (signal === 'bullish' && confidence >= 0.7) return 'outreach_now';

@@ -14,10 +14,10 @@ const WEIGHT = 0.15;
 /**
  * Analyze token from degen perspective
  * @param {object} tokenData - Scanner + safety + wallet + social data
- * @param {function} llmCall - LLM function (bankr/gpt-5-nano)
+ * @param {object} tokenData - Scanner + safety + wallet + social data
  * @returns {object} { signal, confidence, reasoning, score, recommendation }
  */
-async function analyzeToken(tokenData, llmCall) {
+async function analyzeToken(tokenData) {
   const start = Date.now();
 
   try {
@@ -26,16 +26,7 @@ async function analyzeToken(tokenData, llmCall) {
     const signal = score >= 65 ? 'bullish' : score >= 40 ? 'neutral' : 'bearish';
     const confidence = Math.min(1.0, Math.max(0.1, score / 100));
 
-    // LLM enrichment for reasoning (if available)
-    let reasoning = generateDegenReasoning(factors, score);
-    if (llmCall) {
-      try {
-        const llmReasoning = await getDegenLLMAnalysis(tokenData, factors, llmCall);
-        if (llmReasoning) reasoning = llmReasoning;
-      } catch {
-        // Fall back to rule-based reasoning
-      }
-    }
+    const reasoning = generateDegenReasoning(factors, score);
 
     const recommendation = deriveRecommendation(signal, confidence, score);
 
@@ -49,7 +40,7 @@ async function analyzeToken(tokenData, llmCall) {
       reasoning,
       bd_recommendation: recommendation,
       factors,
-      model_used: llmCall ? 'bankr/gpt-5-nano' : 'rule-based',
+      model_used: 'rule-based',
       duration_ms: Date.now() - start,
     };
   } catch (err) {
@@ -163,17 +154,6 @@ function generateDegenReasoning(factors, score) {
   return `Degen analysis (${signal}, ${score}/100): ${topDetails || 'No strong signals found.'}`;
 }
 
-async function getDegenLLMAnalysis(tokenData, factors, llmCall) {
-  const prompt = `As a degen crypto trader, analyze this token briefly (2-3 sentences max):
-Token: ${tokenData.scannerData?.name || tokenData.scanner?.data?.name || 'Unknown'}
-Volume/Liq ratio: ${factors.find(f => f.name === 'volume_surge')?.detail || 'N/A'}
-Price 24h: ${factors.find(f => f.name === 'price_momentum')?.detail || 'N/A'}
-Market cap: ${factors.find(f => f.name === 'early_stage')?.detail || 'N/A'}
-Give your degen take: ape or pass? Why?`;
-
-  const result = await llmCall(prompt);
-  return result?.content || result?.text || null;
-}
 
 function deriveRecommendation(signal, confidence, score) {
   if (signal === 'bullish' && confidence >= 0.7) return 'outreach_now';

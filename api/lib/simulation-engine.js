@@ -3,7 +3,7 @@
  * 5 Personas x 10 Weight Variations = 50 Agent Verdicts
  *
  * Integrates with:
- *   - llm-cascade.js (cascadeCall for sub-agent LLM calls)
+ *   - Rule-based verdicts (Project Opus Brain — no external LLM calls)
  *   - pipeline_tokens + token_scores (DB)
  *   - persona agents at api/services/agents/personas/
  *   - financial-datasets MCP (optional)
@@ -12,7 +12,6 @@
  */
 
 const { getDB } = require('../db');
-const { cascadeCall } = require('./llm-cascade');
 
 // Optional: Financial Datasets MCP integration
 let financialDatasets;
@@ -114,92 +113,67 @@ function buildTokenContext(token, scores) {
   return { compositeScore, safetyScore, walletScore, socialScore, mcap, volume24h, holders };
 }
 
-// ─── Build LLM Prompt ────────────────────────────────────
+// buildPrompt removed — Project Opus Brain: Claude Code handles qualitative analysis
 
-function buildPrompt(persona, weight, focus, symbol, chain, ctx, variation) {
-  const variationCtx = variation
-    ? `\nYour risk tolerance is ${variation.risk_tolerance}. Your time horizon is ${variation.time_horizon}. You are a ${variation.experience} trader.`
-    : '';
+// ─── Single Agent Call (Rule-Based — No LLM) ────────────
+// Project Opus Brain: Simulation verdicts are now computed by rules.
+// Claude Code performs the deep qualitative analysis externally.
 
-  return `You are a ${persona} analyst evaluating token ${symbol} (${chain}) for exchange listing on SolCex.
-Your influence weight in this simulation is ${weight}.${variationCtx}
+function callAgent(persona, weight, focus, symbol, chain, ctx, variation) {
+  const score = ctx.compositeScore || 0;
+  const safety = ctx.safetyScore || 0;
+  const wallet = ctx.walletScore || 0;
+  const social = ctx.socialScore || 0;
 
-TOKEN DATA:
-- Composite Score: ${ctx.compositeScore}/100
-- Safety Score: ${ctx.safetyScore}/30
-- Wallet Score: ${ctx.walletScore}/30
-- Social Score: ${ctx.socialScore}/20
-- Market Cap: $${ctx.mcap.toLocaleString()}
-- 24h Volume: $${ctx.volume24h.toLocaleString()}
-- Holders: ${ctx.holders}
-- Chain: ${chain}
+  // Risk tolerance modifier
+  const riskMod = {
+    ultra_conservative: -15,
+    conservative: -8,
+    moderate: 0,
+    aggressive: 8,
+    ultra_aggressive: 15,
+  }[variation?.risk_tolerance] || 0;
 
-As a ${persona} with weight ${weight}, your focus is: ${focus}
+  // Persona-specific scoring bias
+  const personaBias = {
+    degen: (ctx.volume24h > 100000 ? 10 : 0) + (ctx.mcap < 2000000 ? 10 : 0),
+    whale: (wallet >= 20 ? 10 : -5) + (ctx.mcap > 1000000 ? 5 : -5),
+    institutional: (safety >= 20 ? 15 : -10) + (ctx.holders > 1000 ? 5 : -5),
+    community: (social >= 12 ? 10 : -5) + (ctx.holders > 500 ? 5 : 0),
+    technical_trader: (score >= 60 ? 10 : -5),
+  }[persona] || 0;
 
-Respond ONLY with valid JSON:
-{"verdict":"STRONG_BUY|BUY|NEUTRAL|SELL|STRONG_SELL","confidence":0.0-1.0,"reasoning":"2-3 sentences","priceTarget30d":"UP_50|UP_20|STABLE|DOWN_20|DOWN_50","riskLevel":"LOW|MEDIUM|HIGH|EXTREME"}`;
-}
+  const adjustedScore = Math.max(0, Math.min(100, score + riskMod + personaBias));
 
-// ─── Single Agent Call ───────────────────────────────────
-
-async function callAgent(persona, weight, focus, symbol, chain, ctx, variation) {
-  const prompt = buildPrompt(persona, weight, focus, symbol, chain, ctx, variation);
-
-  const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('TIMEOUT')), CALL_TIMEOUT_MS)
-  );
-
-  const llmPromise = cascadeCall({
-    messages: [
-      { role: 'system', content: `You are a ${persona} persona agent for SolCex listing simulations. Return ONLY valid JSON.` },
-      { role: 'user', content: prompt },
-    ],
-    max_tokens: 600,
-    temperature: 0.4,
-  }, { agent: `sim-${persona}` });
-
-  const raw = await Promise.race([llmPromise, timeoutPromise]);
-  let text = typeof raw === 'string' ? raw : raw?.content || raw?.text || JSON.stringify(raw);
-
-  // Strip <think>...</think> blocks (Bankr/gemini-3-flash includes reasoning tags)
-  text = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-  // Extract JSON from response — find the last complete JSON object (most likely the answer)
-  const jsonMatches = text.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g);
-  if (!jsonMatches || jsonMatches.length === 0) throw new Error('No JSON in response');
-
-  // Try each match until one parses with a valid verdict
-  let parsed = null;
-  for (const match of jsonMatches) {
-    try {
-      const candidate = JSON.parse(match);
-      if (candidate.verdict) { parsed = candidate; break; }
-    } catch {}
-  }
-  if (!parsed) {
-    // Fallback: try the first parseable match
-    for (const match of jsonMatches) {
-      try { parsed = JSON.parse(match); break; } catch {}
-    }
-  }
-  if (!parsed) throw new Error('No parseable JSON in response');
-
-  // Validate required fields
-  if (!VERDICT_MAP.hasOwnProperty(parsed.verdict)) {
-    throw new Error(`Invalid verdict: ${parsed.verdict}`);
+  // Map to verdict
+  let verdict, confidence, priceTarget, riskLevel;
+  if (adjustedScore >= 85) {
+    verdict = 'STRONG_BUY'; confidence = 0.9; priceTarget = 'UP_50'; riskLevel = 'LOW';
+  } else if (adjustedScore >= 70) {
+    verdict = 'BUY'; confidence = 0.75; priceTarget = 'UP_20'; riskLevel = 'MEDIUM';
+  } else if (adjustedScore >= 50) {
+    verdict = 'NEUTRAL'; confidence = 0.5; priceTarget = 'STABLE'; riskLevel = 'MEDIUM';
+  } else if (adjustedScore >= 30) {
+    verdict = 'SELL'; confidence = 0.6; priceTarget = 'DOWN_20'; riskLevel = 'HIGH';
+  } else {
+    verdict = 'STRONG_SELL'; confidence = 0.8; priceTarget = 'DOWN_50'; riskLevel = 'EXTREME';
   }
 
-  return {
+  const reasoning = `${persona} (${variation?.risk_tolerance || 'moderate'}, ${variation?.experience || 'veteran'}): ` +
+    `Score ${adjustedScore} (base ${score} + risk ${riskMod} + persona ${personaBias}). ` +
+    `Safety=${safety}/30, Wallet=${wallet}/30, Social=${social}/20, MCap=$${ctx.mcap.toLocaleString()}`;
+
+  return Promise.resolve({
     persona,
     weight,
     variation,
-    verdict: parsed.verdict,
-    confidence: Math.min(1, Math.max(0, parseFloat(parsed.confidence) || 0.5)),
-    reasoning: parsed.reasoning || '',
-    priceTarget30d: parsed.priceTarget30d || 'STABLE',
-    riskLevel: parsed.riskLevel || 'MEDIUM',
+    verdict,
+    confidence,
+    reasoning,
+    priceTarget30d: priceTarget,
+    riskLevel,
     status: 'COMPLETED',
-  };
+  });
 }
 
 // ─── Consensus Calculation ───────────────────────────────
@@ -401,9 +375,11 @@ async function runSimulation(tokenAddress, chain, options = {}) {
   };
 }
 
-// ─── Adversarial Bull/Bear Debate ────────────────────────
+// ─── Adversarial Bull/Bear Debate (Rule-Based — No LLM) ─
+// Project Opus Brain: Claude Code performs the deep debate analysis externally.
+// This function provides structured bull/bear data for Claude Code to analyze.
 
-async function runDebate(completedVerdicts, symbol, chain) {
+function runDebate(completedVerdicts, symbol, chain) {
   const sorted = [...completedVerdicts].sort((a, b) => {
     const va = VERDICT_MAP[a.verdict] || 0;
     const vb = VERDICT_MAP[b.verdict] || 0;
@@ -413,55 +389,27 @@ async function runDebate(completedVerdicts, symbol, chain) {
   const bulls = sorted.slice(0, 5);
   const bears = sorted.slice(-5).reverse();
 
-  const bullCase = bulls.map(v =>
-    `${v.persona} (w=${v.weight}): ${v.verdict} — ${v.reasoning}`
-  ).join('\n');
+  const bullScore = bulls.reduce((s, v) => s + (VERDICT_MAP[v.verdict] || 0), 0);
+  const bearScore = bears.reduce((s, v) => s + (VERDICT_MAP[v.verdict] || 0), 0);
+  const netScore = bullScore + bearScore;
 
-  const bearCase = bears.map(v =>
-    `${v.persona} (w=${v.weight}): ${v.verdict} — ${v.reasoning}`
-  ).join('\n');
+  let refined_consensus;
+  if (netScore > 2) refined_consensus = 'BULLISH';
+  else if (netScore < -2) refined_consensus = 'BEARISH';
+  else refined_consensus = 'NEUTRAL';
 
-  const debatePrompt = `You are a senior crypto analyst reviewing a listing simulation for ${symbol} (${chain}) on SolCex Exchange.
+  const bullReasons = bulls.map(v => v.reasoning).join(' ');
+  const bearReasons = bears.map(v => v.reasoning).join(' ');
 
-BULL CASE (top 5 most bullish agents):
-${bullCase}
-
-BEAR CASE (top 5 most bearish/cautious agents):
-${bearCase}
-
-Synthesize both cases in 3-4 sentences. Who has the stronger argument? What is the key risk? What is the key signal? End with a one-word refined consensus: BULLISH, BEARISH, or NEUTRAL.
-
-Respond ONLY with valid JSON:
-{"synthesis":"3-4 sentences","refined_consensus":"BULLISH|BEARISH|NEUTRAL","key_risk":"one sentence","key_signal":"one sentence"}`;
-
-  const result = await cascadeCall({
-    messages: [
-      { role: 'system', content: 'You are a senior analyst. Respond only with valid JSON.' },
-      { role: 'user', content: debatePrompt }
-    ],
-    max_tokens: 400,
-    temperature: 0.3,
-  }, { agent: 'debate-analyst' });
-
-  let text = typeof result === 'string' ? result : result?.content || result?.text || '';
-  text = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) return { transcript: text, refined_consensus: null };
-
-  try {
-    const parsed = JSON.parse(jsonMatch[0]);
-    return {
-      synthesis: parsed.synthesis || '',
-      refined_consensus: parsed.refined_consensus || null,
-      key_risk: parsed.key_risk || '',
-      key_signal: parsed.key_signal || '',
-      bull_arguments: bulls.map(v => ({ persona: v.persona, verdict: v.verdict, reasoning: v.reasoning })),
-      bear_arguments: bears.map(v => ({ persona: v.persona, verdict: v.verdict, reasoning: v.reasoning })),
-    };
-  } catch {
-    return { transcript: text, refined_consensus: null };
-  }
+  return Promise.resolve({
+    synthesis: `Bull camp (${bulls.length} agents, net +${bullScore}) vs Bear camp (${bears.length} agents, net ${bearScore}). ` +
+      `Net debate score: ${netScore}. Consensus: ${refined_consensus}.`,
+    refined_consensus,
+    key_risk: bearReasons.slice(0, 200),
+    key_signal: bullReasons.slice(0, 200),
+    bull_arguments: bulls.map(v => ({ persona: v.persona, verdict: v.verdict, reasoning: v.reasoning })),
+    bear_arguments: bears.map(v => ({ persona: v.persona, verdict: v.verdict, reasoning: v.reasoning })),
+  });
 }
 
 module.exports = { runSimulation, PERSONAS, VARIATIONS, WEIGHT_OFFSETS, VERDICT_MAP, calculateConsensus, runDebate };
