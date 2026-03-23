@@ -72,6 +72,11 @@ router.post('/simulate-listing', async (req, res) => {
 
     const simulationId = result.simulationId || `sim_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`;
 
+    // Map simulation-engine recommendation (PROCEED/CAUTION/REJECT) to
+    // listing vocabulary (LIST/MONITOR/REJECT) used by proposal + report consumers
+    const recommendationMap = { PROCEED: 'LIST', CAUTION: 'MONITOR', REJECT: 'REJECT' };
+    const mappedRecommendation = recommendationMap[result.recommendation] || result.recommendation || 'MONITOR';
+
     // Persist to simulation_results for interview system + reporting
     try {
       const db = getDB();
@@ -90,7 +95,7 @@ router.post('/simulate-listing', async (req, res) => {
         result.confidenceLow,
         result.confidenceHigh,
         result.consensus,
-        result.recommendation,
+        mappedRecommendation,
         JSON.stringify(result.verdicts),
         JSON.stringify({ ...result.metrics, debate: result.debate || null }),
         result.durationMs,
@@ -115,7 +120,7 @@ router.post('/simulate-listing', async (req, res) => {
         high: result.confidenceHigh,
       },
       consensus: result.consensus,
-      recommendation: result.recommendation,
+      recommendation: mappedRecommendation,
       weightedAvg: result.weightedAvg,
       verdicts: result.verdicts,
       metrics: result.metrics,
