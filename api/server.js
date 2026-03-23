@@ -507,6 +507,18 @@ async function start() {
     }
     console.log(`[Boot Sync] ✓ Complete — ${pipelineSynced} pipeline tokens, ${cronsSynced} cron jobs`);
 
+    // Score Calibration — apply mcap/liquidity penalties after pipeline sync
+    try {
+      const { calibrateScores } = require('./lib/score-calibrator');
+      calibrateScores().then(result => {
+        console.log(`[Boot Sync] ✓ Score calibration: ${result.adjusted} adjusted, ${result.unchanged} unchanged, ${result.errors} errors`);
+      }).catch(e => {
+        console.log(`[Boot Sync] ⚠️ Score calibration failed: ${e.message}`);
+      });
+    } catch (e) {
+      console.log(`[Boot Sync] ⚠️ Score calibrator load failed: ${e.message}`);
+    }
+
     // v7.0: Initialize Strategic Orchestrator engines
     const db = getDB();
     const contextEngine = new ContextEngine(db);

@@ -317,6 +317,19 @@ router.post('/outcomes/:address', (req, res) => {
 });
 
 // ============================================================
+// Score Calibration — MCap/Liquidity penalty pass
+// ============================================================
+router.post('/calibrate', async (req, res) => {
+  try {
+    const { calibrateScores } = require('../lib/score-calibrator');
+    const result = await calibrateScores();
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(500).json({ error: err.message, code: 'CALIBRATE_ERROR' });
+  }
+});
+
+// ============================================================
 // Phase 10: Calibration
 // ============================================================
 router.post('/calibration/run', async (req, res) => {
