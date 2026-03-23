@@ -63,9 +63,13 @@ jobs:
             echo ">>> Pulling ${IMAGE}"
             docker pull "${IMAGE}"
 
-            echo ">>> Update docker-compose to use latest tag"
+            echo ">>> Update docker-compose to use latest tag + fix ENV flags"
             cd /data/buzz
             sed -i 's|buzzbd/buzz-bd-agent:v[0-9.]*|buzzbd/buzz-bd-agent:latest|g' docker-compose.yml
+            sed -i 's|ATV_ENABLED=true|ATV_ENABLED=false|g' docker-compose.yml
+            sed -i 's|BANKR_SIGNALS_ENABLED=true|BANKR_SIGNALS_ENABLED=false|g' docker-compose.yml
+            sed -i 's|COST_PARSER_ENABLED=true|COST_PARSER_ENABLED=false|g' docker-compose.yml
+            sed -i 's|NANSEN_X402_ENABLED=true|NANSEN_X402_ENABLED=false|g' docker-compose.yml
 
             echo ">>> Stopping old container"
             docker compose down --timeout 30 || true
