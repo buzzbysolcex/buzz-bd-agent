@@ -281,16 +281,12 @@ WRAPPER
 chmod +x /usr/local/bin/acp
 
 # ══════════════════════════════════════════════════
-# BLOCK 8 — SYNC TWITTER BOT v3.1
-# Source of truth = /opt/buzz-twitter-bot/ (Docker image)
-# Synced to /data/workspace/twitter-bot/ for runtime
-# Twitter bot runs from /opt/ directly (not /data/)
-# to avoid version drift on redeploy.
+# BLOCK 8 — TWITTER BOT (DISABLED — Opus Brain handles all tweets)
+# Old autonomous twitter-bot.js killed permanently.
+# All tweets: Opus Brain drafts -> War Room -> Ogie approves -> Opus posts via API.
 # ══════════════════════════════════════════════════
-if [ -f "/opt/buzz-twitter-bot/twitter-bot.js" ]; then
-  cp /opt/buzz-twitter-bot/twitter-bot.js /data/workspace/twitter-bot/twitter-bot.js
-  echo "[boot] ✅ Block 8: Twitter Bot v3.1 synced (5-layer Premium SCAN + LIST + DEPLOY)"
-fi
+echo "[boot] Block 8: Twitter Bot DISABLED (Opus Brain handles all tweets via War Room approval)"
+rm -f /opt/buzz-twitter-bot/twitter-bot.js /data/workspace/twitter-bot/twitter-bot.js 2>/dev/null
 
 # ══════════════════════════════════════════════════
 # BLOCK 9 — GENERATE OPENCLAW CONFIG
@@ -837,19 +833,13 @@ echo "[boot] ✅ Block 12: REST API started (PID: $API_PID) + watchdog"
 cd /
 
 # ══════════════════════════════════════════════════
-# BLOCK 13 — START TWITTER BOT v3.1 (single instance)
-# Runs from /opt/ (Docker image = source of truth)
-# Single spawn only — no duplicate log issue
+# BLOCK 13 — TWITTER BOT (DISABLED — Opus Brain handles all tweets)
+# Old autonomous twitter-bot.js killed permanently. DO NOT re-enable.
+# Was posting with stale data (OpenClaw branding, broken leaderboard, 5 hashtags).
+# All tweets now: Opus Brain -> War Room -> Ogie approves -> API post.
 # ══════════════════════════════════════════════════
-if [ -n "$X_API_KEY" ] && [ -f "/opt/buzz-twitter-bot/twitter-bot.js" ]; then
-  echo "[boot] Starting Twitter Bot v3.1 (SCAN/LIST/DEPLOY routes)..."
-  cd /opt/buzz-twitter-bot && node twitter-bot.js >> /data/logs/twitter-bot.log 2>&1 &
-  TWITTER_PID=$!
-  echo "[boot] ✅ Block 13: Twitter Bot v3.1 started (PID: $TWITTER_PID)"
-  cd /
-else
-  echo "[boot] ⚠️ Block 13: Twitter Bot skipped (missing X_API_KEY or bot file)"
-fi
+echo "[boot] Block 13: Twitter Bot DISABLED (Opus Brain handles all tweets)"
+rm -f /opt/buzz-twitter-bot/twitter-bot.js /data/workspace/twitter-bot/twitter-bot.js 2>/dev/null
 
 # ══════════════════════════════════════════════════
 # BLOCK 14 — START ACP SELLER (direct seller.ts)
