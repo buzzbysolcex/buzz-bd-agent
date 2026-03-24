@@ -133,13 +133,10 @@ echo ""
 #   No patching required.
 # ══════════════════════════════════════════════════
 CRON_TARGET="/data/.openclaw/cron/jobs.json"
-if [ -f "/opt/buzz-cron/jobs.json" ]; then
-  python3 /data/fix-cron-restore.py
-  CRON_COUNT=$(grep -c '"id"' "$CRON_TARGET" 2>/dev/null || echo "0")
-  echo "[boot] ✅ Block 3: $CRON_COUNT cron jobs restored (correct scan directive baked)"
-else
-  echo "[boot] ⚠️ Block 3: No cron jobs found in Docker image"
-fi
+# DISABLED — Project Opus Brain. All LLM crons killed. Claude Code (Buzz Brain) handles all scanning/scoring.
+# OpenClaw cron scheduler was the source of $9/day MiniMax bleed (27 active jobs, 4 heavy BD scans/day).
+echo '{"version":1,"jobs":[]}' > "$CRON_TARGET"
+echo "[boot] Block 3: OpenClaw crons DISABLED (Opus Brain — zero external LLM calls)"
 
 # ══════════════════════════════════════════════════
 # BLOCK 4 — WRITE CREDENTIALS (from env vars, every boot)
@@ -314,15 +311,15 @@ cat > "$CONFIG" << JSONEOF
     }
   },
   "env": {
-    "MINIMAX_API_KEY": "$MINIMAX_API_KEY",
-    "ANTHROPIC_API_KEY": "$ANTHROPIC_API_KEY",
+    "MINIMAX_API_KEY": "DISABLED",
+    "ANTHROPIC_API_KEY": "DISABLED",
     "BANKR_API_KEY": "$BANKR_API_KEY",
-    "BANKR_LLM_KEY": "$BANKR_LLM_KEY",
+    "BANKR_LLM_KEY": "DISABLED",
     "BANKR_PARTNER_KEY": "$BANKR_PARTNER_KEY",
     "BANKR_FEE_WALLET": "$BANKR_FEE_WALLET",
     "BANKR_DEPLOY_WALLET": "$BANKR_DEPLOY_WALLET",
     "HELIUS_API_KEY": "$HELIUS_API_KEY",
-    "GROK_API_KEY": "$GROK_API_KEY",
+    "GROK_API_KEY": "DISABLED",
     "SERPER_API_KEY": "$SERPER_API_KEY",
     "ALLIUM_API_KEY": "$ALLIUM_API_KEY",
     "FIRECRAWL_API_KEY": "$FIRECRAWL_API_KEY",
@@ -350,7 +347,7 @@ cat > "$CONFIG" << JSONEOF
     "providers": {
       "minimax": {
         "baseUrl": "https://api.minimax.io/anthropic",
-        "apiKey": "$MINIMAX_API_KEY",
+        "apiKey": "DISABLED",
         "api": "anthropic-messages",
         "models": [{
           "id": "MiniMax-M2.7",
@@ -361,7 +358,7 @@ cat > "$CONFIG" << JSONEOF
       },
       "bankr": {
         "baseUrl": "https://llm.bankr.bot/v1",
-        "apiKey": "$BANKR_LLM_KEY",
+        "apiKey": "DISABLED",
         "api": "openai-completions",
         "models": [
           { "id": "gpt-5-nano",       "name": "GPT-5 Nano",      "contextWindow": 400000, "maxTokens": 16384 },
@@ -376,7 +373,7 @@ cat > "$CONFIG" << JSONEOF
       },
       "anthropic": {
         "baseUrl": "https://api.anthropic.com",
-        "apiKey": "$ANTHROPIC_API_KEY",
+        "apiKey": "DISABLED",
         "api": "anthropic-messages",
         "models": [
           { "id": "claude-haiku-4-5-20251001", "name": "Claude Haiku 4.5 Direct", "contextWindow": 200000, "maxTokens": 8192 }
@@ -756,27 +753,8 @@ You operate via OpenClaw with 5 parallel sub-agents dispatched through
 sessions_spawn. Sub-agents have their own slim context files.
 CACHE_EOF
 
-if [ -n "$MINIMAX_API_KEY" ]; then
-  echo "[boot] Block 11d: Warming MiniMax cache..."
-  WARM_RESPONSE=$(curl -s -w "%{http_code}" -o /dev/null \
-    https://api.minimax.io/anthropic/v1/messages \
-    -H "Content-Type: application/json" \
-    -H "x-api-key: $MINIMAX_API_KEY" \
-    -d "{
-      \"model\": \"MiniMax-M2.7\",
-      \"max_tokens\": 10,
-      \"system\": $(jq -Rs '.' < "$CACHE_WARM_PROMPT"),
-      \"messages\": [{\"role\": \"user\", \"content\": \"System prompt cached. Respond OK.\"}]
-    }" 2>/dev/null)
-
-  if [ "$WARM_RESPONSE" = "200" ]; then
-    echo "[boot] ✅ Block 11d: MiniMax cache warmed successfully"
-  else
-    echo "[boot] ⚠️ Block 11d: Cache warm returned HTTP $WARM_RESPONSE (non-critical)"
-  fi
-else
-  echo "[boot] ⚠️ Block 11d: MINIMAX_API_KEY not set — cache warm skipped"
-fi
+# BLOCK 11d — MINIMAX CACHE WARM (DISABLED — Opus Brain replaces all external LLMs)
+echo "[boot] Block 11d: MiniMax cache warm SKIPPED (Project Opus Brain — all external LLMs disabled)"
 
 # ══════════════════════════════════════════════════
 # BLOCK 11e — SUPERMEMORY SEMANTIC MEMORY LAYER

@@ -1,5 +1,53 @@
 {
+  "permissions": {
+    "allow": [
+      "npm run lint",
+      "npm test",
+      "npm run build",
+      "curl localhost:*",
+      "curl http://localhost:*",
+      "git status",
+      "git diff",
+      "git log",
+      "git add",
+      "git commit",
+      "git push",
+      "cat *",
+      "ls *",
+      "head *",
+      "tail *",
+      "wc *",
+      "grep *",
+      "find *",
+      "docker logs*",
+      "docker ps*",
+      "ah *"
+    ],
+    "deny": [
+      "rm -rf /",
+      "rm -rf /*",
+      "docker stop",
+      "docker rm",
+      "docker kill",
+      "ufw disable",
+      "iptables -F",
+      "systemctl stop",
+      "shutdown",
+      "reboot"
+    ]
+  },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/claude-code/buzz-workspace/scripts/check-safety.sh \"$CLAUDE_BASH_COMMAND\""
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Bash",
@@ -9,7 +57,30 @@
             "command": "python3 .claude/hooks/prompt-injection-defender/post-tool-defender.py"
           }
         ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PreCommit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /home/claude-code/buzz-workspace && grep -rn 'BUZZ_API_ADMIN_KEY\\|FIRECRAWL_API\\|PRIVATE_KEY\\|fc-c1fe0fd8' --include='*.js' --include='*.ts' --include='*.json' --include='*.env' . 2>/dev/null && echo 'SECRET DETECTED — COMMIT BLOCKED' && exit 1 || exit 0"
+          }
+        ]
       }
     ]
+  },
+  "env": {
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "50"
   }
 }

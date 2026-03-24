@@ -11,17 +11,17 @@ services:
     volumes:
       - buzz-data:/data
     environment:
-      # ─── LLM API Keys ───
-      - MINIMAX_API_KEY=${MINIMAX_API_KEY}
+      # ─── LLM API Keys (DISABLED — Opus Brain replaces all external LLMs) ───
+      - MINIMAX_API_KEY=DISABLED
       - BANKR_API_KEY=${BANKR_API_KEY}
-      - BANKR_LLM_KEY=${BANKR_LLM_KEY}
+      - BANKR_LLM_KEY=DISABLED
       - BANKR_PARTNER_KEY=${BANKR_PARTNER_KEY}
       - BANKR_FEE_WALLET=${BANKR_FEE_WALLET}
       - BANKR_DEPLOY_WALLET=${BANKR_DEPLOY_WALLET}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - ANTHROPIC_API_KEY=DISABLED
       # ─── Intel Source Keys ───
       - HELIUS_API_KEY=${HELIUS_API_KEY}
-      - GROK_API_KEY=${GROK_API_KEY}
+      - GROK_API_KEY=DISABLED
       - SERPER_API_KEY=${SERPER_API_KEY}
       - ALLIUM_API_KEY=${ALLIUM_API_KEY}
       - FIRECRAWL_API_KEY=${FIRECRAWL_API_KEY}
@@ -69,9 +69,12 @@ services:
       - BNB_PRIVATE_KEY=${BNB_PRIVATE_KEY}
       # ─── Supermemory ───
       - SUPERMEMORY_OPENCLAW_API_KEY=${SUPERMEMORY_OPENCLAW_API_KEY}
-      # ─── Feature Flags (disabled — dead services) ───
+      # ─── Feature Flags (disabled — dead services / Opus Brain replaces) ───
       - BANKR_SIGNALS_ENABLED=false
       - COST_PARSER_ENABLED=false
+      - DEFAULT_MODEL=DISABLED
+      - TWITTER_BRAIN_ENABLED=false
+      - TWEET_AUTO=false
       # ─── API ───
       - BUZZ_API_ADMIN_KEY=${BUZZ_API_ADMIN_KEY}
       - BUZZ_API_PORT=3000
