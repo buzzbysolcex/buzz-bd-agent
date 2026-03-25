@@ -970,4 +970,19 @@ if [ $CREDS_READY -eq 1 ]; then
 else
   echo "[boot] Block 17: Timeout waiting for credentials (30s)"
 fi
-exec openclaw gateway --port 18789 --allow-unconfigured
+# v8.1.0: OpenClaw gateway REMOVED. Express API + Cron Executor is the main process.
+# API server started by keep-api-alive.sh watchdog (line 831).
+# This process stays alive as PID 1 to keep the container running.
+echo "[boot] v8.1.0: OpenClaw gateway REMOVED. Express API + Cron Executor running."
+echo "[boot] All 39+ crons managed by Express cron-executor.js"
+echo "[boot] Buzz Brain online. Bismillah."
+
+# Keep container alive — wait for API watchdog child processes
+while true; do
+  sleep 300
+  # Health check — restart API if down
+  if ! curl -s http://localhost:3000/api/v1/health > /dev/null 2>&1; then
+    echo "[watchdog] $(date -u) API down — restarting..."
+    cd /opt/buzz-api && node server.js >> /data/logs/api.log 2>&1 &
+  fi
+done

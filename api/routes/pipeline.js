@@ -15,6 +15,7 @@
 const express = require('express');
 const router = express.Router();
 const { getDB } = require('../db');
+const { classifyAndGate } = require('../lib/pipeline-classifier');
 
 const STAGES = [
   'discovered', 'scanned', 'scored', 'prospect', 'contacted',
@@ -158,7 +159,14 @@ router.patch('/tokens/:address', (req, res) => {
     }
     updates.push('stage = ?'); params.push(stage);
   }
-  if (score !== undefined) { updates.push('score = ?'); params.push(score); }
+  if (score !== undefined) {
+    updates.push('score = ?'); params.push(score);
+    // v8.1.0: Auto-classify based on score + dual-gate
+    if (!stage) {
+      const classification = classifyAndGate(score, score_breakdown);
+      updates.push('stage = ?'); params.push(classification.effective_stage);
+    }
+  }
   if (score_breakdown) { updates.push('score_breakdown = ?'); params.push(JSON.stringify(score_breakdown)); }
   if (ticker) { updates.push('ticker = ?'); params.push(ticker); }
   if (name) { updates.push('name = ?'); params.push(name); }

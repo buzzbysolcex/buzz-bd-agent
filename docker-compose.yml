@@ -2,12 +2,11 @@ version: '3.8'
 
 services:
   buzz:
-    image: buzzbd/buzz-bd-agent:v7.5.0
+    image: buzzbd/buzz-bd-agent:v8.1.0
     container_name: buzz-production
     restart: unless-stopped
     ports:
       - "3000:3000"
-      - "18789:18789"
     volumes:
       - buzz-data:/data
     environment:
@@ -69,6 +68,9 @@ services:
       - BNB_PRIVATE_KEY=${BNB_PRIVATE_KEY}
       # ─── Supermemory ───
       - SUPERMEMORY_OPENCLAW_API_KEY=${SUPERMEMORY_OPENCLAW_API_KEY}
+      # ─── Moltbook ───
+      - MOLTBOOK_API_KEY=${MOLTBOOK_API_KEY}
+      - MOLTBOOK_AGENT_ID=c606278b-365f-473e-9203-3a517042a641
       # ─── Feature Flags (disabled — dead services / Opus Brain replaces) ───
       - BANKR_SIGNALS_ENABLED=false
       - COST_PARSER_ENABLED=false
