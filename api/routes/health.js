@@ -14,9 +14,8 @@ const router = express.Router();
 const http = require('http');
 const { getDB } = require('../db');
 
-const OPENCLAW_PORT = process.env.OPENCLAW_PORT || 18789;
-const BUZZ_VERSION = '7.7.0';
-const API_VERSION = '3.8.0';
+const BUZZ_VERSION = '8.1.0';
+const API_VERSION = '3.9.0';
 
 // ─── GET /health ─────────────────────────────────────
 router.get('/', async (req, res) => {
@@ -25,7 +24,7 @@ router.get('/', async (req, res) => {
   const checks = {
     api: { status: 'ok' },
     database: checkDatabase(),
-    openclaw: await checkOpenClaw(),
+    // OpenClaw REMOVED in v8.1.0 — no longer checked
   };
 
   const allOk = Object.values(checks).every(c => c.status === 'ok');
@@ -34,12 +33,10 @@ router.get('/', async (req, res) => {
     status: allOk ? 'healthy' : 'degraded',
     version: {
       buzz: BUZZ_VERSION,
-      api: API_VERSION,
-      openclaw: '2026.3.1'
+      api: API_VERSION
     },
-    alpha: true,
-    phase0_features: ['learning-loop', 'skill-self-improvement', 'contact-intelligence'],
-    endpoints: 122,
+    phase0_features: ['learning-loop', 'skill-self-improvement', 'contact-intelligence', 'dual-gate-scoring', 'express-cron-executor'],
+    endpoints: 135,
     uptime_seconds: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
     response_ms: Date.now() - startTime,
