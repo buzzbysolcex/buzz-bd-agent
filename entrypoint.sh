@@ -758,10 +758,7 @@ echo "[boot] Block 11d: MiniMax cache warm SKIPPED (Project Opus Brain — all e
 # semantic recall + capture across agent sessions.
 # ══════════════════════════════════════════════════
 if [ -n "$SUPERMEMORY_OPENCLAW_API_KEY" ]; then
-  echo "[boot] Block 11e: Installing Supermemory plugin..."
-  openclaw plugins install @supermemory/openclaw-supermemory >> /data/logs/supermemory-install.log 2>&1 && \
-    echo "[boot] ✅ Block 11e: Supermemory plugin installed" || \
-    echo "[boot] ⚠️ Block 11e: Supermemory plugin install failed (non-critical)"
+  echo "[boot] Block 11e: Supermemory SKIPPED (OpenClaw removed in v8.1.0)"
 
   # Set Supermemory environment variables
   export SUPERMEMORY_CONTAINER_TAG=buzz_bd_agent
@@ -866,25 +863,17 @@ fi
 # BLOCK 15 — START OPENCLAW GATEWAY (foreground)
 # This is the main process — everything else is background
 # ══════════════════════════════════════════════════
-CRON_COUNT=$(jq '.jobs | length' /data/.openclaw/cron/jobs.json 2>/dev/null || echo "42")
 echo ""
 echo "════════════════════════════════════════════════"
-echo "  🐝 Buzz BD Agent v7.5.0 — Bags.fm-First Architecture"
-echo "  REST API:      http://localhost:3000 (95+ endpoints)"
-echo "  Strategic:     Decision + Playbook + Context engines"
-echo "  Bags.fm:       Scanner + Scoring signals + /simulate-listing"
-echo "  LLM Fallback:  MiniMax → Bankr → Anthropic direct"
-echo "  Cost Guard:    \$10/day cap, cache warm active"
-echo "  Supermemory:   $SUPERMEMORY_STATUS"
-echo "  Learned Skills: $LEARNED_COUNT loaded"
-echo "  Twitter Bot:   30-min poll, 12/day cap, site:x.com keywords"
-echo "  Moltbook:      2x/day, 4-week calendar"
-echo "  ACP Seller:    4 offerings (30s delayed)"
-echo "  Scan crons:    DexScreener + CMC + Bags.fm (optimized)"
-echo "  Cron jobs:     $CRON_COUNT active"
-echo "  OpenClaw:      port 18789"
+echo "  Buzz BD Agent v8.1.0 — Opus Brain Architecture"
+echo "  REST API:      http://localhost:3000 (135 endpoints)"
+echo "  Brain:         Claude Opus 4.6 (Pro Max unlimited)"
+echo "  Cron Executor: 39+ jobs in Express (node-cron)"
+echo "  Scoring:       5-layer + dual-gate + auto-classify"
+echo "  LLM Cost:      \$0/day (all external LLMs DISABLED)"
+echo "  Platforms:     AIBTC + Moltbook + Twitter"
+echo "  OpenClaw:      REMOVED (v8.1.0)"
 echo "  $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-echo "  New deployment → boot → ✅✅✅✅✅ → operational"
 echo "════════════════════════════════════════════════"
 
 # ══════════════════════════════════════════════════
