@@ -140,22 +140,40 @@ router.post('/:id/trigger', (req, res) => {
     return res.status(404).json({ error: 'not_found' });
   }
 
-  // Log the manual trigger as a run
-  db.prepare(`
-    INSERT INTO cron_runs (cron_id, status, output) VALUES (?, 'ok', 'Manual trigger')
-  `).run(req.params.id);
+  // v8.1.0: Actually trigger via cron-executor
+  try {
+    const cronExecutor = require('../services/cron-executor');
+    const result = cronExecutor.triggerJob(req.params.id);
+    res.json({
+      message: `Cron '${cron.name}' triggered`,
+      cron_id: req.params.id,
+      triggered_at: new Date().toISOString(),
+      result
+    });
+  } catch (e) {
+    res.json({
+      message: `Cron '${cron.name}' trigger attempted`,
+      cron_id: req.params.id,
+      triggered_at: new Date().toISOString(),
+      error: e.message
+    });
+  }
+});
 
-  db.prepare(`
-    UPDATE cron_jobs SET run_count = run_count + 1, last_run = datetime('now') WHERE id = ?
-  `).run(req.params.id);
-
-  // TODO: Actually trigger the cron via OpenClaw gateway
-  // For now, log and return success
-  res.json({
-    message: `Cron '${cron.name}' triggered manually`,
-    cron_id: req.params.id,
-    triggered_at: new Date().toISOString()
-  });
+// ─── GET /executor/status ────────────────────────────
+// v8.1.0: Live status from cron-executor (not just DB)
+router.get('/executor/status', (req, res) => {
+  try {
+    const cronExecutor = require('../services/cron-executor');
+    const status = cronExecutor.getStatus();
+    res.json({
+      executor: 'running',
+      jobs: status.length,
+      details: status
+    });
+  } catch (e) {
+    res.json({ executor: 'not started', error: e.message });
+  }
 });
 
 module.exports = router;

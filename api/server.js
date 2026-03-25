@@ -572,6 +572,14 @@ async function start() {
         try { require('./services/okx-websocket').init(); } catch (e) { console.error('[okx-ws] Init failed:', e.message); }
         try { require('./services/helius-websocket').init(); } catch (e) { console.error('[helius-ws] Init failed:', e.message); }
       }, 5000);
+
+      // v8.1.0: Start Cron Executor (replaces host crontab + dead OpenClaw scheduler)
+      setTimeout(() => {
+        try {
+          const cronExecutor = require('./services/cron-executor');
+          cronExecutor.start();
+        } catch (e) { console.error('[cron-executor] Init failed:', e.message); }
+      }, 10000);
     });
   } catch (err) {
     console.error('[Buzz API] ✗ Failed to start:', err.message);

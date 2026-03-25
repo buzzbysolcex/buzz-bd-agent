@@ -2,10 +2,8 @@ FROM node:22-slim
 
 LABEL maintainer="Ogie @ SolCex Exchange"
 LABEL description="Buzz BD Agent — Autonomous AI Business Development on Akash Network"
-LABEL version="7.5.2"
-LABEL openclaw.version="2026.3.7"
-ENV OPENCLAW_EXTENSIONS="@supermemory/openclaw-supermemory"
-LABEL features="5-sub-agents, Strategic Orchestrator, 14-factor scoring, Helius MCP, Nansen CLI, X Layer x402, REST API 103 endpoints, ACP marketplace"
+LABEL version="8.1.0"
+LABEL features="Opus Brain, Express Cron Executor, 39+ crons, dual-gate scoring, 135 endpoints, AIBTC + Moltbook presence"
 
 # ══════════════════════════════════════════════════
 # SYSTEM DEPENDENCIES
@@ -17,8 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ══════════════════════════════════════════════════
 # GLOBAL NPM PACKAGES
 # ══════════════════════════════════════════════════
-RUN npm install -g openclaw@2026.3.13 \
-    && npm install -g @bankr/cli \
+# OpenClaw REMOVED (v8.1.0 — Opus Brain replaces all LLM orchestration)
+RUN npm install -g @bankr/cli \
     && npm install -g tsx \
     && npm install -g @bnb-chain/mcp \
     && npm install -g helius-mcp \
@@ -77,9 +75,7 @@ COPY bake/cron/ /opt/buzz-cron/
 # ══════════════════════════════════════════════════
 COPY bake/twitter-bot/ /opt/buzz-twitter-bot/
 
-# ══════════════════════════════════════════════════
-# BAKE: OpenClaw config reference (character, agent config)
-# ══════════════════════════════════════════════════
+# Config reference
 COPY bake/config/ /opt/buzz-config/
 
 # ══════════════════════════════════════════════════
@@ -128,8 +124,7 @@ RUN chmod +x /entrypoint.sh
 # ══════════════════════════════════════════════════
 # PORTS
 # ══════════════════════════════════════════════════
-# 18789 = OpenClaw gateway
-# 3000  = REST API
-EXPOSE 18789 3000
+# 3000 = REST API (OpenClaw 18789 REMOVED in v8.1.0)
+EXPOSE 3000
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/entrypoint.sh"]
