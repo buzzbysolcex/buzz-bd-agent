@@ -23,12 +23,11 @@ RUN npm install -g @bankr/cli \
     && npm install -g nansen-cli
 
 # ══════════════════════════════════════════════════
-# BINANCE + CMC AI SKILLS (OpenClaw Skills Hub)
+# EXCHANGE SKILLS (v8.1.0 — clawhub/openclaw removed, npx skills kept)
 # ══════════════════════════════════════════════════
-RUN npx skills add binance/binance-skills-hub 2>/dev/null || echo "Binance skills: will install at runtime"
-RUN npx clawhub@latest install cmc-api-exchange 2>/dev/null || echo "CMC skills: will install at runtime"
-RUN npx skills add bitget/bitget-skill 2>/dev/null || echo "Bitget skills: will install at runtime"
-RUN npm install -g bitget-client 2>/dev/null || echo "Bitget CLI: will install at runtime"
+RUN npx skills add binance/binance-skills-hub 2>/dev/null || true
+RUN npx skills add bitget/bitget-skill 2>/dev/null || true
+RUN npm install -g bitget-client 2>/dev/null || true
 
 # Solana 8004 SDK (install separately — large dependency tree)
 RUN npm install -g 8004-solana @solana/web3.js 2>/dev/null || echo "⚠️ 8004-solana install failed — will install at runtime"

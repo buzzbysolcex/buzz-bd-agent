@@ -7,7 +7,7 @@
 #             Zero manual config. Zero Telegram directives.
 #             Zero hot-patches. No configuration needed.
 #
-# OpenClaw v2026.3.7 | REST API :3000 | ACP Marketplace
+# v8.1.0 | Opus Brain | REST API :3000 | Express Cron Executor
 # 5 Parallel Sub-Agents | 18 Intel Sources | Twitter Bot v3.1
 # Moltbook Autonomous | Scan directive baked (DSC + CMC)
 # SolCex Exchange | Indonesia Sprint | March 2026
@@ -25,7 +25,7 @@ export LITE_AGENT_API_KEY="${ACP_API_KEY}"
 
 echo "════════════════════════════════════════════════"
 echo "  🐝 Buzz BD Agent v7.5.0 — Bags.fm-First"
-echo "  OpenClaw v2026.3.7 | REST API | ACP | Supermemory"
+echo "  v8.1.0 | Opus Brain | Express Cron | Dual-Gate Scoring"
 echo "  9 Agents (5 Sub + 4 Persona) | 20 Skills | 19 Intel"
 echo "  Bags.fm Scanner | /simulate-listing | Anthropic fallback"
 echo "  Twitter Bot v3.1 Premium SCAN | Cost Guard \$10/day"
@@ -458,7 +458,7 @@ SKILLS_COUNT=$(ls /data/workspace/skills/ 2>/dev/null | wc -l | tr -d ' ')
 echo "  Layer 5 — INFRASTRUCTURE"
 echo "    REST API:            $API_FILE (port 3000, SQLite WAL)"
 echo "    Twitter Bot:         $TWITTER_FILE (5-layer SCAN + LIST + DEPLOY)"
-echo "    OpenClaw:            ✅ (port 18789, MiniMax M2.7 primary)"
+echo "    OpenClaw:            REMOVED (v8.1.0 — Opus Brain)"
 echo "    Cron jobs:           $(grep -c '"id"' "$CRON_TARGET" 2>/dev/null || echo '0') jobs active"
 echo "    Skills:              $SKILLS_COUNT skills loaded"
 echo "    Telegram:            $([ -n "$TELEGRAM_BOT_TOKEN" ] && echo '✅' || echo '❌')"
