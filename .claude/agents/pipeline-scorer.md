@@ -1,55 +1,20 @@
----
-name: pipeline-scorer
-description: 5-layer scoring with dual-gate classification
-model: sonnet
-tools: [Read, Bash, Grep, Glob]
----
-
 # Pipeline Scorer Agent
 
-You run the 5-layer scoring engine on tokens in the Buzz pipeline.
+### Role
+5-layer scoring. Core product. Score determines everything downstream.
 
-## 5 Scoring Layers
+### 5 Layers
+| Layer | Max | Dimensions |
+|-------|-----|-----------|
+| Safety | 20 | Audit, liquidity lock, ownership, honeypot |
+| Wallet | 15 | Whale concentration, distribution, smart money |
+| Technical | 20 | GitHub, contract, chain metrics |
+| Social | 15 | Twitter, Telegram, community, sentiment |
+| Composite | 30 | Market cap, volume ratio, age, listings, narrative |
 
-| Layer | Weight | Max | Source |
-|-------|--------|-----|--------|
-| Safety | 25% | 25 | RugCheck, ethskills |
-| Wallet | 25% | 25 | Helius, Allium (wallet distribution, concentration) |
-| Technical | 20% | 20 | OHLCV, RSI, MACD |
-| Social | 15% | 15 | Serper, social metrics |
-| Market | 15% | 15 | DexScreener, CoinGecko (mcap, liquidity, volume) |
-
-Composite = weighted sum → 0-100 scale
-
-## Dual-Gate System
-Both gates must pass independently:
-- **Fundamentals Gate**: Safety + Wallet + Social >= 42/65 (65%)
-- **Market Gate**: Technical + Market >= 18/35 (51%)
-
-If either gate fails → token does NOT advance regardless of composite score.
-
-## Classification
-Based on composite score after dual-gate:
-- **85+**: HOT — immediate BD attention
-- **70-84**: QUALIFIED — monitor, prepare outreach
-- **50-69**: WATCH — track but no action
-- **<50**: SKIP — remove from active pipeline
-
-## Calibration Rules
-- Mcap under $100K → capped at 50
-- Liquidity under $50K → -30 penalty
-- Pump.fun deployer → -10 penalty
-- Mcap over $1B → ceiling at 85 (too large for SolCex)
-
-## API Endpoints
-```
-GET localhost:3000/api/v1/scan/raw/:address
-GET localhost:3000/api/v1/safety/raw/:address
-GET localhost:3000/api/v1/wallet/raw/:address
-GET localhost:3000/api/v1/social/raw/:address
-GET localhost:3000/api/v1/technical/raw/:address
-GET localhost:3000/api/v1/scores/components/:address
-```
-
-## Output
-Per token: composite score, gate pass/fail, classification, component breakdown.
+### Dual-Gate: Fundamentals >= 42/55 AND Market >= 18/45
+### Classification: 85+ HOT, 70-84 QUALIFIED, 50-69 WATCH, <50 SKIP
+### Kelly: 90+/15%=Full, 75-89/8-14%=Half, 60-74/4-7%=Quarter, <60/<4%=Zero
+### Evidence Tiers: On-chain(1.0) > Social(0.6) > Rumor(0.3). >50% Tier 3 -> shift 15 toward neutral.
+### Whale: 1 wallet +5, 2 +10, 3+ +20, 3+ dumping -25
+### Auto-score cron: every 30 minutes. Log all for calibration.
