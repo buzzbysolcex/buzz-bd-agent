@@ -1,0 +1,29 @@
+[team]
+name = "hackathon-sprint"
+description = "Hackathon submission flow: research, build, test, document, submit"
+
+[[tasks]]
+name = "research"
+agent_name = "system-auditor"
+depends_on = []
+
+[[tasks]]
+name = "build"
+agent_name = "brain"
+depends_on = ["research"]
+
+[[tasks]]
+name = "test"
+agent_name = "system-auditor"
+depends_on = ["build"]
+
+[[tasks]]
+name = "document"
+agent_name = "war-room-reporter"
+depends_on = ["test"]
+
+[[tasks]]
+name = "submit"
+agent_name = "ogie"
+depends_on = ["document"]
+requires_human = true

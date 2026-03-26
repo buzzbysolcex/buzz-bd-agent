@@ -1,0 +1,29 @@
+[team]
+name = "twitter-campaign"
+description = "Content pipeline: research, draft, review, post, engage"
+
+[[tasks]]
+name = "research"
+agent_name = "twitter-drafter"
+depends_on = []
+
+[[tasks]]
+name = "draft"
+agent_name = "twitter-drafter"
+depends_on = ["research"]
+
+[[tasks]]
+name = "war_room_review"
+agent_name = "ogie"
+depends_on = ["draft"]
+requires_human = true
+
+[[tasks]]
+name = "post"
+agent_name = "twitter-drafter"
+depends_on = ["war_room_review"]
+
+[[tasks]]
+name = "self_reply"
+agent_name = "twitter-drafter"
+depends_on = ["post"]

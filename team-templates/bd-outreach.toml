@@ -1,0 +1,24 @@
+[team]
+name = "bd-outreach"
+description = "Outreach pipeline for qualified tokens"
+
+[[tasks]]
+name = "proposal_draft"
+agent_name = "bd-proposer"
+depends_on = []
+
+[[tasks]]
+name = "tweet_draft"
+agent_name = "twitter-drafter"
+depends_on = ["proposal_draft"]
+
+[[tasks]]
+name = "dm_draft"
+agent_name = "bd-follower"
+depends_on = ["proposal_draft"]
+
+[[tasks]]
+name = "war_room_approval"
+agent_name = "ogie"
+depends_on = ["tweet_draft", "dm_draft"]
+requires_human = true
