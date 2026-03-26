@@ -86,6 +86,9 @@ COPY skills/cost-guard/ /opt/buzz-workspace-skills/cost-guard/
 COPY skills/agent-contexts/ /opt/buzz-workspace-skills/agent-contexts/
 COPY skills/notification-filter/ /opt/buzz-workspace-skills/notification-filter/
 
+# v8.2.0: ClawTeam TOML templates for 12 persistent agents
+COPY team-templates/ /opt/team-templates/
+
 # ══════════════════════════════════════════════════
 # REST API — Express + SQLite (baked into image)
 # ══════════════════════════════════════════════════
