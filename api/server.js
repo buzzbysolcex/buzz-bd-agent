@@ -174,6 +174,38 @@ app.use(rateLimit);
 
 // ─── Public Routes (no auth) ─────────────────────────
 app.get('/.well-known/x402.json', (req, res) => res.json(X402_DISCOVERY));
+
+// v8.2.0: Machine-readable agent identity (P0 for ZHC readiness)
+app.get('/agent', (req, res) => {
+  let pipelineSize = 0, hotTokens = 0;
+  try {
+    const db = getDB();
+    const total = db.prepare('SELECT COUNT(*) as c FROM pipeline_tokens').get();
+    const hot = db.prepare('SELECT COUNT(*) as c FROM pipeline_tokens WHERE score >= 85').get();
+    pipelineSize = total.c;
+    hotTokens = hot.c;
+  } catch (e) {}
+  res.json({
+    name: 'Buzz BD Agent',
+    version: '8.2.0',
+    dna: '3.0',
+    type: 'autonomous-bd-agent',
+    specialization: 'exchange-listing-intelligence',
+    capabilities: ['token-scoring', 'triple-verification', 'adversarial-debate', 'listing-simulation', 'signal-generation', 'deal-proposal'],
+    scoring: { dimensions: 5, max_score: 100, pipeline_size: pipelineSize, hot_tokens: hotTokens },
+    agents: 12,
+    intel_sources: 25,
+    identity: { erc8004_base: '#17483', erc8004_eth: '#25045', virtuals_acp: '#17681', moltbook: 'c606278b', agent_tld: ['buzz.agent', 'buzzbd.agent'] },
+    contact: { twitter: '@BuzzBySolCex', telegram: '@Ogie2', api: 'https://api.buzzbd.ai' },
+    services: [
+      { name: 'token-scoring', protocol: 'REST', pricing: 'x402 micropayment' },
+      { name: 'listing-proposal', protocol: 'REST', pricing: 'per-deal commission' },
+      { name: 'safety-check', protocol: 'ACP', pricing: '$0.10/check' },
+      { name: 'trending-intelligence', protocol: 'ACP', pricing: '$0.25/query' }
+    ]
+  });
+});
+
 app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/simulation-report', simulationReportRoutes);
 
