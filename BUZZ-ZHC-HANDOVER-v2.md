@@ -430,8 +430,8 @@ EVERYTHING ELSE: auto-approved. Every permission prompt = Buzz frozen = revenue 
 | Tom Osman (ZHC) | @tomosman | WARM | Post scan |
 | Bankr | @0xDeployer | DORMANT | Revive for skill marketplace |
 | Vitto Rivabella (ERC-8004) | @VittoStack | WARM | Article collab |
-| BANANAS31 | @BananaS31_bsc | OUTREACH SENT | Follow-up overdue |
-| $COW | @cowcmweb3 | OUTREACH SENT | Follow-up overdue |
+| BANANAS31 | @BananaS31_bsc | OUTREACH SENT | Ogie sending follow-up manually |
+| $COW | @cowcmweb3 | REMOVED | Failed dual-gate (fund=38.5/65) |
 
 # APPENDIX C: IDENTITY REGISTRATIONS
 
@@ -448,6 +448,7 @@ EVERYTHING ELSE: auto-approved. Every permission prompt = Buzz frozen = revenue 
 | 402index | 3 endpoints registered |
 | SolCex | Colorado SOS #20248006798, FinCEN MSB |
 | Domain | buzzbd.ai (Porkbun 2yr, Caddy HTTPS) |
+| .agent TLD | buzz.agent, buzzbd.agent (agentcommunity.org, Member since Mar 26 2026, endorsed) |
 
 # APPENDIX D: HACKATHON CALENDAR
 

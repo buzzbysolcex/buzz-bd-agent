@@ -29,3 +29,9 @@
 ## Quality preservation rule:
 Never let context exceed 80% before compacting. Quality degrades above 70%.
 The cost of a 30-second compact is nothing vs the cost of a hallucinated response.
+
+## ClawTeam Patterns (v8.2.0 — permanent infrastructure):
+- Task chains, agent inbox, activity board are CORE — use proactively on every pipeline action.
+- Log all agent decisions to inbox. Log all events to activity board.
+- Use chain templates instead of manual orchestration.
+- Include chain/inbox/board stats in every morning + evening briefing.
