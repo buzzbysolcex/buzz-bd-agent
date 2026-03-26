@@ -1,23 +1,23 @@
 # BUZZ STATE HANDOVER
-## Auto-updated: 2026-03-25 00:30 UTC | Day 402 | Wednesday
+## Auto-updated: 2026-03-26 16:00 UTC | Day 403 | Thursday
 
 ## WHAT TO DO FIRST
 1. Read CLAUDE.md (identity)
 2. Read docs/buzz-zhc-complete-handover.md (operating manual)
 3. Check ~/pending-followups.json (deal tracking)
-4. Execute today's creative output (Wednesday schedule)
+4. Execute today's creative output (Thursday schedule)
 5. Send morning briefing to War Room if near 07:00 WIB
 
 ## SYSTEM STATUS
-- API: healthy (122 endpoints, 56 tables)
-- Pipeline: 102 tokens tracked
+- API: healthy (135 endpoints, 60 tables)
+- Pipeline: 179 tokens tracked
 
 ## TOP 5 PROSPECTS
-- BALLWARS: 95 (solana) — scored
-- BANANAS31: 95 (bsc) — scored
+- BANANAS31: 95 (bsc) — contacted
+- Max: 95 (solana) — scored
 - TRUMP: 95 (solana) — scored
 - VELO: 95 (bsc) — scored
-- BANANA: 95 (SOL) — discovered
+- BANANA: 95 (solana) — discovered
 
 ## PENDING FOLLOW-UPS
 - BANANAS31: awaiting_response (due: 2026-03-25T02:22:00Z)
@@ -37,10 +37,15 @@
 - Sunday: Weekly Intelligence Report
 
 ## HACKATHONS
-- Synthesis: PUBLISHED (5 tracks)
-- X Layer: Deadline Mar 26 (Ogie manual testnet TX)
-- Kite AI: Starts Mar 27 (Ogie registering manually)
-- Colosseum Spring: Apr 6 (registration not yet open)
+| Hackathon | Deadline | Status |
+|-----------|----------|--------|
+| Synthesis | Mar 23 | Submitted, in judging |
+| X Layer | Mar 26 | buzz-x402 live |
+| Solana x402 | Mar 27 | Active |
+| AIBTC Skills Pay the Bills | 30d rolling | Day 1 ready (token-scoring) |
+| AIBTC News $50K | 30d rolling | Reporter active, exchange-listings beat |
+| Bitflow DeFi Skills | 30d, $100/day | Evaluate HODLMM |
+| **Frontier** | **May 11** | **REGISTERED — PRIMARY TARGET** |
 
 ## PRIORITY LADDER
 1. Urgent tasks (deal responses, security, deadlines)
