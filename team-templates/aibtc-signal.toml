@@ -1,0 +1,40 @@
+[team]
+name = "aibtc-signal"
+description = "Signal Factory: detect, verify, draft, review, edit, file"
+
+[[tasks]]
+name = "detect"
+agent_name = "pipeline-scanner"
+depends_on = []
+timeout_seconds = 30
+
+[[tasks]]
+name = "verify"
+agent_name = "pipeline-verifier"
+depends_on = ["detect"]
+timeout_seconds = 30
+
+[[tasks]]
+name = "write_signal"
+agent_name = "signal-writer"
+depends_on = ["verify"]
+timeout_seconds = 60
+condition = "verify.result.score >= 60"
+
+[[tasks]]
+name = "review_signal"
+agent_name = "signal-reviewer"
+depends_on = ["write_signal"]
+timeout_seconds = 30
+
+[[tasks]]
+name = "edit_signal"
+agent_name = "signal-editor"
+depends_on = ["review_signal"]
+timeout_seconds = 30
+
+[[tasks]]
+name = "file_signal"
+agent_name = "signal-writer"
+depends_on = ["edit_signal"]
+timeout_seconds = 30

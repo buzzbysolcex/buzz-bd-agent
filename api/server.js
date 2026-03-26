@@ -543,6 +543,24 @@ async function start() {
     app.use('/api/v1/backtest', apiKeyAuth, createBacktestRoutes(db));
     console.log('[v7.4.0] ✓ Hedge Brain routes: pipeline/stream, personas, backtest');
 
+    // v8.2.0: ClawTeam Patterns for DNA v2.0 — 12 agents chained
+    const ActivityBoard = require('./lib/activity-board');
+    const AgentInbox = require('./lib/agent-inbox');
+    const TaskChainExecutor = require('./lib/task-chains');
+    const { sendTelegram } = require('./lib/telegram-notify');
+
+    const activityBoard = new ActivityBoard(db);
+    const agentInbox = new AgentInbox(db, activityBoard, (msg) => {
+      try { sendTelegram(msg); } catch (e) { console.error('[v8.2.0] Telegram notify failed:', e.message); }
+    });
+    const taskChainExecutor = new TaskChainExecutor(db, activityBoard, agentInbox);
+    global.buzzModules = { activityBoard, agentInbox, taskChainExecutor };
+
+    app.use('/api/v1/chains', apiKeyAuth, require('./routes/chains')(db, taskChainExecutor));
+    app.use('/api/v1/inbox', apiKeyAuth, require('./routes/inbox')(db, agentInbox));
+    app.use('/api/v1/board', apiKeyAuth, require('./routes/board')(db, activityBoard, taskChainExecutor));
+    console.log('[v8.2.0] ✓ ClawTeam patterns: chains(4) + inbox(4) + board(3) = 11 endpoints');
+
     // ─── 404 Handler (must be after all route registrations) ───
     app.use((req, res) => {
       res.status(404).json({

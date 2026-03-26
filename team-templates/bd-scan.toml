@@ -1,0 +1,39 @@
+[team]
+name = "bd-scan"
+description = "Full BD pipeline: discover, verify, score, simulate, propose"
+
+[[tasks]]
+name = "scanner"
+agent_name = "pipeline-scanner"
+endpoint = "/api/v1/scan/raw/:address"
+depends_on = []
+timeout_seconds = 30
+
+[[tasks]]
+name = "safety"
+agent_name = "pipeline-verifier"
+endpoint = "/api/v1/safety/raw/:address"
+depends_on = ["scanner"]
+timeout_seconds = 30
+
+[[tasks]]
+name = "scorer"
+agent_name = "pipeline-scorer"
+endpoint = "/api/v1/scores/components/:address"
+depends_on = ["scanner", "safety"]
+timeout_seconds = 15
+
+[[tasks]]
+name = "simulator"
+agent_name = "pipeline-scorer"
+endpoint = "/api/v1/simulate/data/:address"
+depends_on = ["scorer"]
+timeout_seconds = 60
+condition = "scorer.result.score >= 70"
+
+[[tasks]]
+name = "proposer"
+agent_name = "bd-proposer"
+endpoint = "opus-brain"
+depends_on = ["simulator"]
+condition = "simulator.result.decision == 'PROCEED'"
