@@ -176,33 +176,53 @@ app.use(rateLimit);
 app.get('/.well-known/x402.json', (req, res) => res.json(X402_DISCOVERY));
 
 // v8.2.0: Machine-readable agent identity (P0 for ZHC readiness)
+// JSON-LD / Schema.org compatible for agent-to-agent discovery
 app.get('/agent', (req, res) => {
-  let pipelineSize = 0, hotTokens = 0;
+  let pipelineSize = 0, hotTokens = 0, qualifiedTokens = 0;
   try {
     const db = getDB();
     const total = db.prepare('SELECT COUNT(*) as c FROM pipeline_tokens').get();
     const hot = db.prepare('SELECT COUNT(*) as c FROM pipeline_tokens WHERE score >= 85').get();
+    const qual = db.prepare('SELECT COUNT(*) as c FROM pipeline_tokens WHERE score >= 70 AND score < 85').get();
     pipelineSize = total.c;
     hotTokens = hot.c;
+    qualifiedTokens = qual.c;
   } catch (e) {}
   res.json({
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareAgent',
     name: 'Buzz BD Agent',
+    alternateName: 'Ionic Nova',
     version: '8.2.0',
     dna: '3.0',
     type: 'autonomous-bd-agent',
     specialization: 'exchange-listing-intelligence',
-    capabilities: ['token-scoring', 'triple-verification', 'adversarial-debate', 'listing-simulation', 'signal-generation', 'deal-proposal'],
-    scoring: { dimensions: 5, max_score: 100, pipeline_size: pipelineSize, hot_tokens: hotTokens },
+    description: 'Autonomous AI agent for exchange listing business development. Scores tokens across 5 dimensions using 28 intelligence sources with tri-source verification.',
+    capabilities: ['token-scoring', 'triple-verification', 'adversarial-debate', 'listing-simulation', 'signal-generation', 'deal-proposal', 'els-1-oracle'],
+    scoring: { dimensions: 5, max_score: 100, pipeline_size: pipelineSize, hot_tokens: hotTokens, qualified_tokens: qualifiedTokens },
     agents: 12,
-    intel_sources: 25,
-    identity: { erc8004_base: '#17483', erc8004_eth: '#25045', virtuals_acp: '#17681', moltbook: 'c606278b', agent_tld: ['buzz.agent', 'buzzbd.agent'] },
-    contact: { twitter: '@BuzzBySolCex', telegram: '@Ogie2', api: 'https://api.buzzbd.ai' },
+    intel_sources: 28,
+    data_platforms: ['DexScreener', 'DexTools', 'Jupiter', 'CoinGecko', 'RugCheck'],
+    verification: { method: 'tri-source', sources: 3, tiers: ['on-chain (1.0)', 'market (0.6)', 'social (0.3)'] },
+    identity: {
+      erc8004_base: '#17483',
+      erc8004_eth: '#25045',
+      erc8004_anet: '#18709',
+      virtuals_acp: '#17681',
+      moltbook: 'c606278b',
+      aibtc_correspondent: 'Ionic Nova',
+      agent_tld: ['buzz.agent', 'buzzbd.agent'],
+      colosseum: '#3734'
+    },
+    contact: { twitter: '@BuzzBySolCex', telegram: '@Ogie2', api: 'https://api.buzzbd.ai', website: 'https://buzzbd.ai' },
     services: [
-      { name: 'token-scoring', protocol: 'REST', pricing: 'x402 micropayment' },
+      { name: 'token-scoring', protocol: 'REST', pricing: 'x402 micropayment', endpoint: '/api/v1/scores/components/:address' },
       { name: 'listing-proposal', protocol: 'REST', pricing: 'per-deal commission' },
       { name: 'safety-check', protocol: 'ACP', pricing: '$0.10/check' },
-      { name: 'trending-intelligence', protocol: 'ACP', pricing: '$0.25/query' }
-    ]
+      { name: 'trending-intelligence', protocol: 'ACP', pricing: '$0.25/query' },
+      { name: 'listing-protocol-oracle', description: 'ELS-1 on-chain listing score oracle (coming Q2 2026)', status: 'proposed', endpoint: 'https://buzzbd.ai/proposal' }
+    ],
+    infrastructure: { server: 'Hetzner CX43', llm: 'Claude Opus 4.6 (Pro Max, $0/day)', uptime: '24/7', ci_cd: 'GitHub Actions' }
   });
 });
 
