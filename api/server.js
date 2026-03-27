@@ -212,7 +212,8 @@ app.get('/agent', (req, res) => {
       moltbook: 'c606278b',
       aibtc_correspondent: 'Ionic Nova',
       agent_tld: ['buzz.agent', 'buzzbd.agent'],
-      colosseum: '#3734'
+      colosseum: '#3734',
+      izhc: { name: 'IZHC', description: 'Institute for Zero-Human Companies member', url: 'https://zhcinstitute.com', status: 'active', joined: '2026-03-27' }
     },
     contact: { twitter: '@BuzzBySolCex', telegram: '@Ogie2', api: 'https://api.buzzbd.ai', website: 'https://buzzbd.ai' },
     services: [
