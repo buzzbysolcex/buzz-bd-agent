@@ -28,6 +28,16 @@ Discovers tokens from 25 intel sources. First in critical path.
 - Ghost tokens (<10 holders, $0 volume) -> auto-exclude
 - Phantom tokens (no valid pair URL on any source) -> auto-exclude
 
+### Colosseum Copilot Enrichment (Intel #18 — after discovery, before scoring)
+- Call enrichTokenWithHackathonData(tokenName, tokenDescription)
+- Scoring bonuses (highest applicable, do NOT stack):
+  - Found in Colosseum submissions: +5 composite
+  - Prize winner: +10 composite
+  - Accelerator backed: +15 composite
+- Apply AFTER base scoring, BEFORE Opus qualitative override
+- Store enrichment data in pipeline notes: "Colosseum Copilot (Intel #18)"
+- If API fails or rate-limited: skip gracefully, no pipeline block
+
 ### Rules
 - Contract addresses ALWAYS full. NEVER truncated.
 - Explicit chain tag (SOL/BASE/BSC/ETH). Never assume from ticker.

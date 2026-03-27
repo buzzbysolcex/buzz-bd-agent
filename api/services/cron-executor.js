@@ -247,6 +247,21 @@ function registerAllJobs() {
     return 'triggered';
   });
 
+  // v8.2.1: Colosseum Copilot weekly trends (Sunday 16:00 UTC — before report compilation)
+  register('copilot-weekly-trends', '0 16 * * 0', async () => {
+    try {
+      const copilot = require('../lib/colosseum-copilot');
+      const trends = await copilot.getWeeklyTrends();
+      if (trends) {
+        global.buzzModules?.activityBoard?.log('copilot_trends', 'pipeline-scanner', null, null, null, JSON.stringify(trends));
+        return `trends fetched: ${JSON.stringify(trends).length} bytes`;
+      }
+      return 'trends: no data';
+    } catch (e) {
+      return `copilot trends error: ${e.message}`;
+    }
+  });
+
   register('moltbook-engage', '0 5,11,17,23 * * *', async () => {
     await triggerBrain('Buzz: MOLTBOOK ENGAGEMENT — Read feed, upvote 2 relevant posts, draft 1 quality comment for War Room approval. If in posting window and past spam cooldown, draft post for approval. Check notifications for replies.');
     return 'triggered';
@@ -378,51 +393,11 @@ function registerAllJobs() {
     return `memory: ${usedGB}GB`;
   });
 
-  register('db-backup', '0 3 * * *', async () => {
-    return new Promise((resolve, reject) => {
-      execFile('/home/claude-code/backup-db.sh', (err, stdout) => {
-        if (err) reject(err);
-        else resolve('backup complete');
-      });
-    });
-  });
-
-  register('handover-update', '*/15 * * * *', async () => {
-    return new Promise((resolve, reject) => {
-      execFile('/home/claude-code/update-handover.sh', (err) => {
-        if (err) reject(err);
-        else resolve('handover updated');
-      });
-    });
-  });
+  // ─── HOST-ONLY CRONS (removed — these run via host crontab, not inside Docker) ───
+  // db-backup, handover-update, aibtc-heartbeat, aibtc-inbox-poll, aibtc-network-scout
+  // All handled by /home/claude-code/*.sh scripts in host crontab
 
   // ─── PLATFORM: AIBTC ───
-  register('aibtc-heartbeat', '*/5 * * * *', async () => {
-    return new Promise((resolve, reject) => {
-      execFile('/home/claude-code/aibtc-heartbeat.sh', (err) => {
-        if (err) reject(err);
-        else resolve('heartbeat sent');
-      });
-    });
-  });
-
-  register('aibtc-inbox-poll', '*/5 * * * *', async () => {
-    return new Promise((resolve, reject) => {
-      execFile('/home/claude-code/aibtc-inbox-poll.sh', (err) => {
-        if (err) reject(err);
-        else resolve('inbox checked');
-      });
-    });
-  });
-
-  register('aibtc-network-scout', '0 */4 * * *', async () => {
-    return new Promise((resolve, reject) => {
-      execFile('/home/claude-code/aibtc-network-scout.sh', (err) => {
-        if (err) reject(err);
-        else resolve('scout complete');
-      });
-    });
-  });
 
   register('aibtc-news-signal', '0 */8 * * *', async () => {
     await triggerBrain('Buzz: AIBTC DAILY SIGNAL — DRAFT to War Room for Ogie approval. Pull fresh pipeline data, generate news-format headline + body. DO NOT auto-file.');
@@ -438,14 +413,7 @@ function registerAllJobs() {
   // moltbook-engage already registered above in DATA COLLECTION
 
   // ─── PLATFORM: TWITTER ───
-  register('twitter-mention-monitor', '*/15 * * * *', async () => {
-    return new Promise((resolve, reject) => {
-      execFile('/home/claude-code/twitter-mention-check.sh', (err) => {
-        if (err) reject(err);
-        else resolve('mentions checked');
-      });
-    });
-  });
+  // twitter-mention-monitor removed — runs via host crontab
 
   // ─── PRAYER REMINDERS (SACRED) ───
   register('prayer-fajr', '25 21 * * *', async () => {
