@@ -16,6 +16,8 @@
 set -e
 
 # ─── Environment ───
+# v8.2.1: Source persistent env overrides (Copilot PAT, etc.)
+[ -f /data/.env.copilot ] && export $(grep -v '^#' /data/.env.copilot | xargs) && echo "[boot] ✓ Copilot env loaded"
 export OPENCLAW_STATE_DIR=/data/.openclaw
 export OPENCLAW_WORKSPACE_DIR=/data/workspace
 export NPM_CONFIG_PREFIX=/data/.npm-global
