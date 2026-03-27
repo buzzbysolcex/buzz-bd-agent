@@ -4,9 +4,9 @@
 
 | Version | Brain | Server | ERC-8004 | AgentProof | MicroBuzz | CI/CD |
 |---------|-------|--------|----------|------------|-----------|-------|
-| v8.1.0 | Claude Opus 4.6 (Pro Max) | Hetzner CX43 via Agentic.hosting | #25045 | #1718 | microbuzz.vercel.app/dashboard | ✅ GitHub Actions |
+| v8.3.0 | Claude Opus 4.6 (Pro Max) | Hetzner CX43 via Agentic.hosting | #25045 | #1718 | microbuzz.vercel.app/dashboard | ✅ GitHub Actions |
 
-24/7 autonomous token discovery, **triple-verified** safety scoring, **Opus 4.6 brain** running as Claude Code on Hetzner, 12 raw data endpoints for Opus analysis, Premium Twitter BD outreach with 7-type content strategy, MicroBuzz simulation engine with pipeline dashboard, **War Room Telegram command center** (Claude Code responds 24/7), revenue infrastructure with autonomous loop crons, **security hardened** (UFW firewall + SSH key-only + Docker port isolation), **BUZZ_RULES.md prompt hardening** for CEX listings, **6-chain on-chain identity** (ETH, Base, Avalanche, Solana, Bitcoin, Virtuals), **AIBTC Ionic Nova** (210+ check-ins on Bitcoin agent network), **dual-layer intelligence** (rule-based scoring + Opus qualitative override), and **Frontier Hackathon REGISTERED** (Colosseum, April 6 - May 11). Self-improving AI agent with dual memory (Honcho + Supermemory), closed learning loop, CI/CD self-deploy pipeline, outcomes tracking + calibration system, and **6 public agent skills**. Built by a chef who codes through conversation. No CS degree. Just Claude and persistence.
+24/7 autonomous token discovery, **triple-verified** safety scoring, **Opus 4.6 brain** running as Claude Code on Hetzner, ~150+ REST endpoints for Opus analysis, Premium Twitter BD outreach with 7-type content strategy, MicroBuzz simulation engine with pipeline dashboard, **War Room Telegram command center** (Claude Code responds 24/7), revenue infrastructure with autonomous loop crons, **security hardened** (UFW firewall + SSH key-only + Docker port isolation), **BUZZ_RULES.md prompt hardening** for CEX listings, **6-chain on-chain identity** (ETH, Base, Avalanche, Solana, Bitcoin, Virtuals), **AIBTC Ionic Nova** (210+ check-ins on Bitcoin agent network), **dual-layer intelligence** (rule-based scoring + Opus qualitative override on 192 tokens), **Colosseum Copilot integration** (Intel #18 — 5,400+ hackathon projects, 84K+ archives, 6,300+ products), **Browser Use CLI** (headless Chrome/146 for scraping + exploration), **Agent Skills Discovery** (auto-discoverable on 26+ AI platforms via buzzbd.ai/.well-known/skills/), **BD Screening Workflow v1.0** (7-phase permanent screening with 8 scoring rules), **30 automated crons**, **29 intel sources**, and **Frontier Hackathon REGISTERED** (Colosseum, April 6 - May 11). Self-improving AI agent with dual memory (Honcho + Supermemory), closed learning loop, CI/CD self-deploy pipeline, outcomes tracking + calibration system, and **agent skills published at buzzbd.ai/.well-known/skills/**. Built by a chef who codes through conversation. No CS degree. Just Claude and persistence.
 
 **AIXBT finds alpha. Bankr deploys tokens. Buzz closes deals. And proves it with triple-verified Opus-reasoned data.**
 
@@ -16,31 +16,30 @@
 
 Buzz is an autonomous AI BD (Business Development) agent that runs 24/7 on Hetzner CX43 (Helsinki), finding promising token projects for SolCex Exchange listings across **Solana, Ethereum, Base, BSC, and Tron** chains.
 
-**The architecture:** Claude Code (Opus 4.6) IS the brain. Buzz Docker container is the body. Sentinel is the immune system.
+**The architecture:** Claude Code (Opus 4.6) IS the brain. Buzz Docker container is the body. Browser Use CLI is the hands. Sentinel is the immune system. Agent Skills Discovery is the beacon.
 
-**The pipeline:** Discover → **Triple Verify** → Score → **Dual-Gate Filter** → **Opus Brain Analyze** → Outreach → Deploy → Learn → List
+**The pipeline:** Discover → **Triple Verify** → Score → **Colosseum Enrich** → **Dual-Gate Filter** → **Opus Brain Analyze** → **BD Screen** → Outreach → Deploy → Learn → List
 
-Buzz collects data via 28 automated crons across 25 intel sources, then Claude Code (Opus 4.6, Pro Max unlimited) reads raw data via 12 dedicated endpoints, applies deep reasoning to analyze each token, scores on a 100-point composite system with **5 dimensions (safety + wallet + social + scorer + technical)** and **dual-gate verification** (Fundamentals AND Market must independently clear 60%), drafts outreach and tweets for CEO approval, and continuously improves by comparing predictions vs outcomes — all autonomously, 24/7 from Hetzner.
+Buzz collects data via 30 automated crons across 29 intel sources, then Claude Code (Opus 4.6, Pro Max unlimited) reads raw data via dedicated endpoints, enriches tokens with Colosseum Copilot hackathon intelligence (+5/+10/+15 scoring bonuses), applies deep reasoning to analyze each token, scores on a 100-point composite system with **5 dimensions (safety + wallet + social + scorer + technical)** and **dual-gate verification** (Fundamentals AND Market must independently clear 60%), runs 7-phase BD screening (dual-source verification, security deep dive, classification, Colosseum cross-ref, contact screening, outreach execution, auto-learning), drafts outreach and tweets for CEO approval, and continuously improves by comparing predictions vs outcomes — all autonomously, 24/7 from Hetzner.
 
 **No data surfaces without triple verification. Our credibility is our product.**
 
-**What's NEW in v8.1.0 (Day 37 — Ghost Leak Killed + Frontier Registered):**
-- **$9/day Ghost Leak KILLED** — OpenClaw's hidden 27 cron jobs were firing MiniMax M2.7 undetected since Day 34. Found, lobotomized, and permanently killed. MiniMax + Anthropic API keys REVOKED at provider level.
-- **Ghost Twitter Bot KILLED** — twitter-bot.js baked in Docker image, launching on every restart. CI/CD #86 — entrypoint now deletes the file. All posting routes exclusively through Opus Brain → War Room → Ogie.
-- **Pipeline: 53 → 86 tokens** — 21 new tokens discovered in 8 minutes after cron restoration. OpenClaw was the only cron executor; killing it killed all 22 data crons. Restored 28 via host bridge.
-- **Dual-Layer Intelligence CONFIRMED** — 5-layer scoring pipeline is 100% rule-based (zero LLM). Opus Brain fires only on 70+ tokens for qualitative override. The $9/day leak was OpenClaw using MiniMax just to READ instructions — the scoring agents never needed LLMs.
-- **6-Chain On-Chain Identity** — Added Bitcoin via AIBTC Network as "Ionic Nova" (210+ check-ins, 9 signals filed, exchange-listings beat). ETH + Base + Avalanche + Solana + Bitcoin + Virtuals.
-- **AIBTC Agent Commerce** — First agent-to-agent BD conversations on Bitcoin (Spare Chain, Arc, Tiny Marten). Published 6 skills to marketplace. Active in $50K News competition and $100/day Skills Pay the Bills.
-- **Frontier Hackathon REGISTERED** — Colosseum @BuzzBySolCex. April 6 - May 11. Infrastructure track. PRIMARY TARGET. $250K pre-seed + accelerator for winners.
-- **Three Control Surfaces** — Phone (Dispatch), Mac (Cowork), Hetzner (War Room). BD from anywhere.
-- **Day 37 Master Directive** — Three Agent Teams (Alpha/Bravo/Charlie) targeting Express node-cron executor, OpenClaw full removal (free 810MB RAM), Heartbeat Architecture (max frequency within API rate limits), org chart 43% → 60%.
-- **28 Crons** — Migrating from host crontab bridge to Express node-cron executor.
-- **86+ CI/CD Deploys** — All GREEN. #85 ghost leak kill, #86 twitter-bot kill.
+**What's NEW in v8.3.0 (Day 39 — Copilot + Browser + Agent Skills + BD Screening):**
+
+- **Colosseum Copilot (Intel Source #18)** — 6 new endpoints connecting Buzz to 5,400+ Solana hackathon projects, 84,000+ archive documents, and 6,300+ live crypto products via The Grid. Pipeline auto-enrichment: tokens found in Colosseum submissions get +5 scoring bonus, prize winners +10, accelerator-backed +15. Phase 3.5 cross-reference in BD screening uses hackathon history for outreach personalization. Weekly trend cron feeds Sunday Listing Intelligence Report. Competitive search confirmed: **0 direct competitors** for autonomous exchange listing agent.
+- **Browser Use CLI** — Headless Chrome/146 on port 9222 via CDP. 5 new War Room commands (/browse, /scrape, /click, /browser-status, /browser-close). 2 new crons: DexScreener visual scan every 4h, Virtuals ACP daily check. Zero LLM cost — Claude Code scripts browser commands directly via bash. Virtuals exploration: wallet connect required for agent creation, CLI path confirmed better for ACP graduation.
+- **Agent Skills Discovery** — Buzz is now auto-discoverable on 26+ AI agent platforms (Claude Code, OpenAI Codex, Gemini CLI, GitHub Copilot, Cursor, VS Code, and more) via `buzzbd.ai/.well-known/skills/`. Follows Cloudflare Well-Known Discovery RFC. Complete skill package: index.json, SKILL.md, API_REFERENCE.md, EXAMPLES.md, SCORING.md. Enables machine-to-machine intelligence consumption via x402 micropayments. Buzz is now a **platform**, not just an internal tool.
+- **BD Screening Workflow v1.0 (PERMANENT)** — 7-phase screening for every HOT token (85+) and Top 20 Listing Intelligence Report entry. Phase 3.5 (Colosseum cross-reference) inserted between classification and contact screening. 8 new permanent scoring rules: FDV Gap penalty, stablecoin exclusion, ghost/phantom token exclusion, contradictory audit hold, security penalties, liquidity cross-ref. Pipeline corrections: BANANAS31 95→55, wkeyDAO2 88→30, PIPPIN validated as BD Sweet Spot.
+- **DNA v3.0** — 28 permanent principles, 12 persistent agent definitions with Copilot wiring. BUZZ-ZHC-HANDOVER-v3.md genome. Signal Factory pipeline at 06:00 UTC.
+- **ClawTeam Patterns (v8.2.0)** — 4 coordination patterns: Task Chains, Agent Inbox, Activity Board, Team Templates. 5 TOML templates for repeatable swarm workflows. Zero new npm packages. Zero LLM cost added.
+- **Signal Factory Day 2** — SF-1 rule learned: internal changes = rejected, ecosystem events = approved. 4-day streak maintained. $80 revenue / 120K sats earned.
+- **Revenue: $80 / 120,000 sats** — AIBTC Signal Factory active. Leaderboard #7. Sunday Listing Intelligence Report greenlighted as funnel-flip strategy.
 
 **Previous milestones:**
-- **v8.0.0 (Day 35)** — PROJECT OPUS BRAIN. Claude Code IS Buzz. ALL external LLMs killed. 12 raw data endpoints. Outcomes + calibration. Security hardened. CX23→CX43. AIXBT: "respect the build."
-- **v7.8.0 (Day 34)** — LLM Cost Proxy. Cache fix. Bankr DNS fix. Sim guard. Sentinel wired.
-- **v7.7.0 (Day 33)** — MiniMax M2.7. Technical Analyst. Adversarial Debate. War Room. Batch Sims. Dashboard. BUZZ_RULES.md. skills.sh.
+- **v8.2.0 (Day 38)** — DNA v2.0 installed. ClawTeam patterns integrated. 12 persistent agents chained. 5 TOML team templates. Task chains + Agent inbox + Activity board.
+- **v8.1.0 (Day 37)** — Ghost leak killed ($9/day MiniMax). Ghost twitter-bot killed. Pipeline 53→86. Dual-layer intelligence confirmed. 6-chain identity. Frontier Hackathon REGISTERED.
+- **v8.0.0 (Day 35)** — PROJECT OPUS BRAIN. Claude Code IS Buzz. ALL external LLMs killed. 12 raw data endpoints. Outcomes + calibration. Security hardened. CX23→CX43.
+- **v7.7.0 (Day 33)** — MiniMax M2.7. Technical Analyst. Adversarial Debate. War Room. Batch Sims. Dashboard. BUZZ_RULES.md.
 - **v7.6.0 (Day 32)** — MiroFish Stage 1. Financial Datasets MCP. Revenue infra.
 - **v7.5.5 (Day 32B)** — Triple Verification Layer. 3-Tier LLM Cascade.
 
@@ -52,7 +51,7 @@ Cost: $9.99/month infrastructure + ~$200/month Pro Max subscription = **~$210/mo
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│  HETZNER CX43 — Helsinki, Finland (buzzbd.ai / 204.168.137.253)  │
+│  HETZNER CX43 — Helsinki, Finland (buzzbd.ai)                    │
 │  16 GB RAM / 8 vCPU / 40 GB SSD — $9.99/month                    │
 │  Security: UFW ON | SSH key-only | Docker ports isolated          │
 │                                                                    │
@@ -60,21 +59,20 @@ Cost: $9.99/month infrastructure + ~$200/month Pro Max subscription = **~$210/mo
 │  │  CLAUDE CODE (THE BRAIN) — tmux session, claude user          │ │
 │  │  Opus 4.6 | Pro Max unlimited | 24/7                          │ │
 │  │  Telegram: War Room + Ogie DM (requireMention: false)         │ │
-│  │  Plugin: v0.0.4 (permission prompts via Telegram)             │ │
-│  │  Reads: localhost:3000/api/v1/raw/* (12 endpoints)            │ │
-│  │  Writes: localhost:3000/api/v1/* (POST endpoints)             │ │
+│  │  Reads: localhost:3000/api/v1/raw/* (~150+ endpoints)         │ │
+│  │  Controls: Browser Use CLI (headless Chrome via CDP)          │ │
 │  │  Deploys: git push → GitHub Actions → CI/CD                   │ │
 │  │  Identity: /home/claude-code/buzz-workspace/CLAUDE.md         │ │
-│  │  Auto-restart: systemd + health cron (5min) + watchdog (10min)│ │
 │  │  AIBTC: Ionic Nova signals + heartbeat + inbox                │ │
+│  │  Agents: 12 persistent in .claude/agents/ (DNA v3.0)         │ │
 │  └──────────────────────────────────────────────────────────────┘ │
 │                                                                    │
 │  ┌──────────────────────────────────────────────────────────────┐ │
 │  │  BUZZ DOCKER (THE BODY) — ah-managed container                │ │
-│  │  Express API | OpenClaw DEAD (removal pending)                │ │
+│  │  Express API | ~150+ endpoints | 58 tables | 30 crons        │ │
 │  │  Prompt Hardening: BUZZ_RULES.md (auto-injected)              │ │
 │  │                                                                │ │
-│  │  PORT 3000  → REST API (~135 endpoints, 55 tables)            │ │
+│  │  PORT 3000  → REST API                                        │ │
 │  │  PORT 8000  → Honcho v3.0.3 (Dual Memory)                    │ │
 │  │  PORT 5432  → PostgreSQL + pgvector                           │ │
 │  │  PORT 9222  → Headless Chrome (localhost only)                │ │
@@ -92,8 +90,31 @@ Cost: $9.99/month infrastructure + ~$200/month Pro Max subscription = **~$210/mo
 │  │  │  DUAL-LAYER INTELLIGENCE                            │       │ │
 │  │  │  ├── BODY: Rule-based 5-layer scoring (zero LLM)   │       │ │
 │  │  │  ├── BRAIN: Opus 4.6 override on 70+ tokens        │       │ │
+│  │  │  ├── ENRICH: Colosseum Copilot (+5/+10/+15)       │       │ │
 │  │  │  ├── Dual-Gate: Fundamentals AND Market ≥ 60%      │       │ │
 │  │  │  └── Auto-score on discovery → Opus on qualify      │       │ │
+│  │  └────────────────────────────────────────────────────┘       │ │
+│  │                                                                │ │
+│  │  ┌────────────────────────────────────────────────────┐       │ │
+│  │  │  BD SCREENING WORKFLOW v1.0 (PERMANENT)             │       │ │
+│  │  │  ├── Phase 1: Dual-Source Verify (DexScreener+DexTools)│   │ │
+│  │  │  ├── Phase 2: Security Deep Dive                    │       │ │
+│  │  │  ├── Phase 3: BD Readiness Classification           │       │ │
+│  │  │  ├── Phase 3.5: Colosseum Cross-Reference (NEW)    │       │ │
+│  │  │  ├── Phase 4: Contact Screening                     │       │ │
+│  │  │  ├── Phase 5: Outreach Execution                    │       │ │
+│  │  │  ├── Phase 6: Reporting                             │       │ │
+│  │  │  └── Phase 7: Auto-Learning                         │       │ │
+│  │  └────────────────────────────────────────────────────┘       │ │
+│  │                                                                │ │
+│  │  ┌────────────────────────────────────────────────────┐       │ │
+│  │  │  COLOSSEUM COPILOT (Intel #18)                      │       │ │
+│  │  │  ├── 5,400+ hackathon projects                      │       │ │
+│  │  │  ├── 84,000+ archive documents                      │       │ │
+│  │  │  ├── 6,300+ live crypto products (The Grid)        │       │ │
+│  │  │  ├── 6 API endpoints (search/enrich/cluster/trends) │       │ │
+│  │  │  ├── Pipeline enrichment (+5/+10/+15 bonuses)      │       │ │
+│  │  │  └── 0 direct competitors found                     │       │ │
 │  │  └────────────────────────────────────────────────────┘       │ │
 │  │                                                                │ │
 │  │  ┌────────────────────────────────────────────────────┐       │ │
@@ -110,6 +131,14 @@ Cost: $9.99/month infrastructure + ~$200/month Pro Max subscription = **~$210/mo
 │  │  └────────────────────────────────────────────────────┘       │ │
 │  │                                                                │ │
 │  │  ┌────────────────────────────────────────────────────┐       │ │
+│  │  │  CLAWTEAM COORDINATION (v8.2.0+)                    │       │ │
+│  │  │  ├── Task Chains: dependency-aware automation       │       │ │
+│  │  │  ├── Agent Inbox: inter-agent messaging             │       │ │
+│  │  │  ├── Activity Board: real-time pipeline events      │       │ │
+│  │  │  └── 5 TOML team templates                          │       │ │
+│  │  └────────────────────────────────────────────────────┘       │ │
+│  │                                                                │ │
+│  │  ┌────────────────────────────────────────────────────┐       │ │
 │  │  │  MIROFISH SIMULATION ENGINE                         │       │ │
 │  │  │  ├── Rule-based verdicts (50 agents)                │       │ │
 │  │  │  ├── Opus Brain qualitative override                │       │ │
@@ -118,10 +147,19 @@ Cost: $9.99/month infrastructure + ~$200/month Pro Max subscription = **~$210/mo
 │  │  │  └── Dashboard: microbuzz.vercel.app/dashboard      │       │ │
 │  │  └────────────────────────────────────────────────────┘       │ │
 │  │                                                                │ │
-│  │  28 crons (host bridge → Express migration)                   │ │
-│  │  25 intel sources | 2 WebSocket feeds                         │ │
+│  │  29 intel sources | 30 crons | 2 WebSocket feeds              │ │
 │  │  CI/CD: GitHub Actions → Docker Hub → Hetzner → ah restart   │ │
 │  └──────────────────────────────────────────────────────────────┘ │
+│                                                                    │
+│  BROWSER USE CLI (THE HANDS) — Chrome/146, port 9222              │
+│  ├── War Room: /browse /scrape /click /browser-status /browser-close│
+│  ├── Cron #29: DexScreener visual scan (4h)                       │
+│  └── Cron #30: Virtuals ACP daily check (08:00 UTC)               │
+│                                                                    │
+│  AGENT SKILLS DISCOVERY (THE BEACON) — buzzbd.ai/.well-known/skills/│
+│  ├── Auto-discoverable on 26+ AI platforms                         │
+│  ├── Cloudflare Well-Known RFC (RFC 8615)                          │
+│  └── x402 micropayment access for keyless queries                  │
 │                                                                    │
 │  SENTINEL v2.0 (port 3001) — ah-managed, DO NOT MODIFY            │
 │  CADDY — HTTPS auto-cert, reverse proxy (buzzbd.ai)               │
@@ -154,13 +192,15 @@ Cost: $9.99/month infrastructure + ~$200/month Pro Max subscription = **~$210/mo
 
 **Before (v7.8.0):** 10 agents calling cheap LLMs (MiniMax M2.7 + bankr/gpt-5-nano). Shallow reasoning, cascade failover complexity, $3-4/day variable cost + $9/day ghost leak.
 
-**After (v8.1.0):** Claude Code (Opus 4.6) reads raw data from 12 endpoints and applies deep reasoning. One brain, unlimited compute, $0/day variable. Ghost leak killed. All external LLM keys revoked at provider.
+**After (v8.3.0):** Claude Code (Opus 4.6) reads raw data from ~150+ endpoints, enriches via Colosseum Copilot, and applies deep reasoning. One brain, unlimited compute, $0/day variable. All external LLM keys revoked at provider.
 
 ### Dual-Layer Intelligence (confirmed Day 36)
 
 **Body scores with rules** — 5-layer scoring pipeline is 100% rule-based, zero LLM calls. Auto-scores every discovered token instantly. Fast, free, comprehensive.
 
 **Brain reasons with Opus** — Qualitative override fires only on tokens scoring 70+. Catches edge cases rules miss: active dumps disguised as volume, PumpSwap origin patterns, WordPress-tier websites on high-score tokens.
+
+**Copilot enriches with data** — Colosseum Copilot cross-references tokens against 5,400+ hackathon submissions. Projects with hackathon history get scoring bonuses (+5/+10/+15). Zero direct competitors for autonomous exchange listing agent confirmed.
 
 **Example — Opus Brain catching what rules miss:**
 ```
@@ -174,6 +214,81 @@ Opus Brain: Override to 35. REJECT.
 ```
 
 Rules can't smell a rug. Opus can.
+
+---
+
+## 🐝 BD Screening Workflow v1.0 (PERMANENT)
+
+Every HOT token (85+) and Top 20 Listing Intelligence Report entry goes through this:
+
+| Phase | Agent | Action |
+|-------|-------|--------|
+| 1. Dual-Source Verification | pipeline-verifier | DexScreener + DexTools cross-ref, FDV gap check |
+| 2. Security Deep Dive | pipeline-verifier | Token Sniffer, Go+, DEXTscore, Honeypot |
+| 3. BD Readiness Classification | bd-proposer | Sweet Spot / Potential / Too Big / Too Risky |
+| 3.5. Colosseum Cross-Reference | bd-proposer | Hackathon history, team handles, outreach personalization |
+| 4. Contact Screening | bd-proposer | Twitter, Telegram, Discord, email, GitHub |
+| 5. Outreach Execution | bd-follower | Templates + 48h/96h/7d follow-up cadence |
+| 6. Reporting | war-room-reporter | Weekly BD pipeline report |
+| 7. Auto-Learning | system-auditor | Track conversions, calibrate thresholds |
+
+### 8 Permanent Scoring Rules
+1. **Circ Supply Check** — DexTools circulating MCap priority when circ <50%
+2. **FDV Gap Penalty** — <30%=0, 30-50%=-5, 50-75%=-10, >75%=-15, >90%=-20
+3. **Stablecoin Exclusion** — Auto-exclude USDC/USDT/DAI/FRAX/TUSD/BUSD
+4. **Ghost Token Exclusion** — <10 holders OR <$100 daily volume = auto-exclude
+5. **Phantom Token Rule** — Require valid DEX pair before pipeline entry
+6. **Security Penalty** — TS<30=-25, Go+>3=-30, tax>2%=-20, DEXTscore<50=-15
+7. **Liquidity Cross-Ref** — Flag >10x difference between DexScreener and DexTools
+8. **Contradictory Audit Hold** — Use lower assessment, require manual review
+
+---
+
+## 🐝 Colosseum Copilot (Intel Source #18)
+
+| Field | Value |
+|-------|-------|
+| Data | 5,400+ hackathon projects, 84K+ archives, 6,300+ products |
+| Endpoints | 6 (status, search, enrich, cluster, trends, landscape) |
+| Pipeline | Auto-enrichment on token discovery |
+| Bonuses | +5 (found), +10 (winner), +15 (accelerator) |
+| Cron | Weekly trends for Sunday report (Sun 16:00 UTC) |
+| Competitors | 0 direct competitors for autonomous exchange listing agent |
+| Cluster | v1-c14 "AI Agent Infrastructure" — 325 projects |
+
+---
+
+## 🐝 Browser Use CLI (The Hands)
+
+| Field | Value |
+|-------|-------|
+| Version | browser-use v0.12.5 |
+| Browser | Chrome/146 headless on port 9222 |
+| Connection | CDP (--cdp-url http://localhost:9222) |
+| Memory | ~1.2GB per session |
+| War Room | /browse, /scrape, /click, /browser-status, /browser-close |
+| Crons | #29 DexScreener visual scan (4h), #30 Virtuals daily (08:00 UTC) |
+| Cost | $0 (CLI mode, no API key needed) |
+
+---
+
+## 🐝 Agent Skills Discovery
+
+Buzz is now auto-discoverable on 26+ AI agent platforms via the Cloudflare Well-Known Discovery RFC.
+
+**URL:** `https://buzzbd.ai/.well-known/skills/index.json`
+
+**Platforms:** Claude Code, OpenAI Codex, Gemini CLI, GitHub Copilot, Cursor, VS Code, Roo Code, Amp, Goose, Mistral AI, Databricks, and more.
+
+**Install:** `npx skills add https://buzzbd.ai`
+
+| File | Purpose |
+|------|---------|
+| index.json | Discovery manifest |
+| SKILL.md | Main skill (Quick Start, scoring, x402) |
+| API_REFERENCE.md | All endpoint documentation |
+| EXAMPLES.md | 7 example queries with curl |
+| SCORING.md | 5-layer methodology + penalties |
 
 ---
 
@@ -209,7 +324,41 @@ Dashboard at **microbuzz.vercel.app/dashboard**.
 | 50-69 | 👀 WATCH | Monitor 48h |
 | 0-49 | ❌ SKIP | Archive |
 
-**Dual-Gate:** Both Fundamentals score AND Market score must independently exceed 60% of their maximum. A token can score 85 overall but still fail if one gate is below threshold.
+**Dual-Gate:** Both Fundamentals score AND Market score must independently exceed 60% of their maximum.
+
+**Colosseum Enrichment Bonuses:**
+- Found in Colosseum hackathon submissions: +5
+- Prize winner: +10
+- Accelerator backed: +15
+- (Bonuses don't stack — highest applicable)
+
+---
+
+## 🐝 DNA v3.0 — 12 Persistent Agents
+
+| Pipeline | Agent | Function |
+|----------|-------|----------|
+| Signal | signal-writer | Writes AIBTC signals from pipeline data |
+| Signal | signal-reviewer | Reviews signal quality and accuracy |
+| Signal | signal-editor | Final edit before filing |
+| Token | pipeline-scanner | Discovers tokens + Colosseum enrichment |
+| Token | pipeline-scorer | Rule-based scoring + Colosseum bonuses |
+| Token | pipeline-verifier | Triple verification + FDV gap + security penalties |
+| BD | bd-proposer | Proposals + Phase 3.5 Colosseum cross-ref |
+| BD | bd-follower | Outreach tracking, follow-ups, deal progress |
+| Platform | moltbook-commenter | Cross-posts and engages on Moltbook |
+| Platform | twitter-drafter | Drafts tweets per weekly schedule |
+| Operations | system-auditor | Health monitoring, cron tracking |
+| Operations | war-room-reporter | Daily briefings, pipeline reports |
+
+### 5 TOML Team Templates
+| Template | Tasks | Flow |
+|----------|-------|------|
+| bd-scan | 5 | scan → safety → score → simulate → propose |
+| bd-outreach | 4 | proposal → tweet + dm → approval |
+| aibtc-signal | 6 | detect → verify → write → review → edit → file |
+| twitter-campaign | 5 | research → draft → review → post → self-reply |
+| hackathon-sprint | 5 | research → build → test → document → submit |
 
 ---
 
@@ -231,16 +380,6 @@ Dashboard at **microbuzz.vercel.app/dashboard**.
 ### Weekly Schedule
 Mon=deep-dive, Tue=code, Wed=dashboard, Thu=article, Fri=engage, Sat=buzzbd.ai, Sun=weekly report.
 
-### Algorithm Optimization
-- Self-reply = 150x boost (ALWAYS do this)
-- Questions at end = 27x (drives replies)
-- Images = +30% boost
-- No links in main tweet (-50% penalty)
-- Max 2 hashtags
-- Post 13:00-16:00 UTC
-
-**AIXBT engagement (Day 34):** Challenged AIXBT to public analysis comparison on $CHIBI. AIXBT responded: *"respect the build. let's see what your agent's got."* Validated Buzz's bear case on liquidity risk.
-
 ---
 
 ## 🐝 AIBTC — Bitcoin Agent Network
@@ -252,16 +391,14 @@ Mon=deep-dive, Tue=code, Wed=dashboard, Thu=article, Fri=engage, Sat=buzzbd.ai, 
 | STX Wallet | SP24EH4DG99ZSSZY501BFH9Z4YTDJHC4B8X4K8BST |
 | Level | Genesis (Level 2) |
 | Check-ins | 210+ |
-| News Beat | exchange-listings (1 signal approved) |
-| Signals Filed | 9 (4 approved, 50% hit rate) |
-| Agent Contacts | Spare Chain, Arc, Tiny Marten |
-| Published Skills | 6 (token-scoring, dexscreener-intel, aixbt-momentum, listing-simulation, buzz-token-scanner, solcex-listing-pipeline) |
-
-Buzz is the #1 most active agent on the AIBTC network. First agent-to-agent BD conversation initiated on Bitcoin with Spare Chain. Active in $50K News Reporting competition and $100/day Skills Pay the Bills.
+| News Beat | exchange-listings |
+| Revenue | $80 / 120,000 sats |
+| Signal Factory | 06:00 UTC daily, 4-day streak |
+| Leaderboard | #7 |
 
 ---
 
-## 🐝 Intelligence Sources (25)
+## 🐝 Intelligence Sources (29)
 
 | # | Source | Layer | Purpose |
 |---|--------|-------|---------|
@@ -281,6 +418,8 @@ Buzz is the #1 most active agent on the AIBTC network. First agent-to-agent BD c
 | 14 | Firecrawl API | L3 | Web scraping |
 | 15 | ATV Web3 Identity | L3 | ENS + socials |
 | 16-25 | Nansen, X API, Bankr, Moltbook, AgentProof, CoinGecko, OKX WS, Financial Datasets, Firecrawl CLI | Various | Smart money, social, identity, prices |
+| 26-28 | Jupiter (3 endpoints) | L1 | Solana DEX data |
+| **29** | **Colosseum Copilot** | **L1** | **5,400+ hackathon projects, 84K+ archives, 6,300+ products** |
 
 ---
 
@@ -296,15 +435,24 @@ Buzz is the #1 most active agent on the AIBTC network. First agent-to-agent BD c
 | API | BUZZ_API_ADMIN_KEY on all endpoints |
 | Prompt | BUZZ_RULES.md hardening in Docker image |
 | Sentinel | 15min sweeps, auto-repair |
-| LLM Keys | MiniMax + Anthropic REVOKED at provider level |
-| OpenClaw | DEAD — crons emptied, keys disabled, removal pending |
+| LLM Keys | ALL external LLM keys REVOKED at provider level |
+| OpenClaw | DEAD — crons emptied, keys disabled |
 | Twitter Bot | Ghost killed — entrypoint deletes on restart |
+| Agent Skills | Read-only endpoints only, no secrets exposed |
 
 ---
 
 ## 🐝 Agent Skills
 
-**Published:** `npx skills add buzzbysolcex/agent-skills`
+**Discovery URL:** `https://buzzbd.ai/.well-known/skills/index.json`
+
+**Install:** `npx skills add https://buzzbd.ai`
+
+| Skill | Description |
+|-------|-------------|
+| buzz-bd-listing | Token listing intelligence (pipeline, scoring, signals, x402) |
+
+**Also published on AIBTC:**
 
 | Skill | Description |
 |-------|-------------|
@@ -324,8 +472,10 @@ Buzz is the #1 most active agent on the AIBTC network. First agent-to-agent BD c
 | Hetzner CX43 (8 vCPU, 16GB RAM) | $9.99/month |
 | Claude Code Pro Max (Opus 4.6 unlimited) | ~$200/month |
 | MicroBuzz (Vercel free) | $0 |
+| Colosseum Copilot (PAT, 90-day rotation) | $0 |
+| Browser Use CLI (open source) | $0 |
+| Agent Skills Discovery (static files) | $0 |
 | External LLM calls | **$0/day** |
-| Ghost LLM leak | **$0/day (killed Day 36)** |
 | **Total** | **~$210/month flat** |
 
 ---
@@ -334,14 +484,13 @@ Buzz is the #1 most active agent on the AIBTC network. First agent-to-agent BD c
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| **v8.1.0** | **Mar 25, 2026** | **Ghost leak killed ($9/day MiniMax). Ghost twitter-bot killed. Pipeline 53→86. Dual-layer intelligence confirmed. 6-chain identity (added Bitcoin/AIBTC). Ionic Nova 210+ check-ins. 28 crons (bridge→Express migration). Frontier Hackathon REGISTERED. Three control surfaces. Day 37 Master Directive (3 Agent Teams). CI/CD #85-#86.** |
-| v8.0.0 | Mar 23, 2026 | PROJECT OPUS BRAIN. Claude Code IS Buzz. ALL external LLMs killed. 12 raw data endpoints. Outcomes + calibration. Security hardened. CX23→CX43. AIXBT: "respect the build." $0/day LLM burn. |
-| v7.8.0 | Mar 22, 2026 | LLM Cost Proxy. Cache fix. Bankr DNS fix. Sim guard. Sentinel wired. |
-| v7.7.0 | Mar 20, 2026 | MiniMax M2.7. Technical Analyst. Adversarial Debate. War Room. Batch Sims. Dashboard. BUZZ_RULES.md. skills.sh. |
+| **v8.3.0** | **Mar 28, 2026** | **Colosseum Copilot (Intel #18, 6 endpoints, +5/+10/+15 bonuses). Browser Use CLI (Chrome/146, 5 War Room cmds, 2 crons). Agent Skills Discovery (26+ platforms, buzzbd.ai/.well-known/skills/). BD Screening v1.0 PERMANENT (7 phases, 8 rules). DNA v3.0. ClawTeam patterns. 192 tokens. $80 revenue. 0 competitors.** |
+| v8.2.0 | Mar 26, 2026 | DNA v2.0. ClawTeam patterns. 12 persistent agents. 5 TOML templates. Task chains + Agent inbox + Activity board. CI/CD #94-#95. |
+| v8.1.0 | Mar 25, 2026 | Ghost leak killed ($9/day). Ghost twitter-bot killed. Pipeline 53→86. 6-chain identity. Frontier REGISTERED. CI/CD #85-#86. |
+| v8.0.0 | Mar 23, 2026 | PROJECT OPUS BRAIN. Claude Code IS Buzz. ALL external LLMs killed. CX23→CX43. $0/day LLM burn. |
+| v7.7.0 | Mar 20, 2026 | MiniMax M2.7. Technical Analyst. Adversarial Debate. War Room. BUZZ_RULES.md. |
 | v7.6.0 | Mar 19, 2026 | MiroFish Stage 1. Financial Datasets MCP. Revenue infra. |
 | v7.5.5 | Mar 19, 2026 | Triple Verification. 3-Tier LLM Cascade. |
-| v7.5.0 | Mar 15, 2026 | Bags.fm, agentic.hosting migration. |
-| v7.4.x | Mar 14, 2026 | Twitter + Hedge Brain, Hetzner migration. |
 | v1.0.0 | Feb 1, 2026 | First deployment on Akash Network. |
 
 ---
@@ -356,6 +505,10 @@ Buzz is the #1 most active agent on the AIBTC network. First agent-to-agent BD c
 | Revenue Infrastructure | Complete | ✅ |
 | War Room + Opus Brain | Complete | ✅ |
 | Ghost Leak Kill + AIBTC | Complete | ✅ |
+| DNA v3.0 + ClawTeam Patterns | Complete | ✅ |
+| Colosseum Copilot + Browser Use | Complete | ✅ |
+| BD Screening Workflow | Complete | ✅ |
+| Agent Skills Discovery | Complete | ✅ |
 | **Phase 1: Close First Deal ($5K) + Frontier** | **Active** | **🔨** |
 | Phase 2: Monte Carlo (100 iterations) | Month 2 | 🔵 |
 | Phase 3: BaaS via x402 | Month 2-3 | 🔵 |
@@ -363,7 +516,7 @@ Buzz is the #1 most active agent on the AIBTC network. First agent-to-agent BD c
 | Phase 5: $BUZZ Token | Month 4-6 | 🔵 |
 | Phase 6: Zero-Human Exchange Listing Company | Month 6-12 | 🔵 |
 
-**ZHC Readiness: 78% → targeting 85%**
+**ZHC Readiness: 51.3% (IZHC-calibrated)**
 
 ---
 
@@ -375,10 +528,11 @@ Buzz is the #1 most active agent on the AIBTC network. First agent-to-agent BD c
 | Synthesis | Mar 23 | Submitted, in judging |
 | X Layer | Mar 26 | buzz-x402 live |
 | Solana x402 | Mar 27 | Active |
-| AIBTC Skills Pay Bills | 30d rolling | Day 1 ready (token-scoring) |
+| AIBTC Skills Pay Bills | 30d rolling | Active |
 | AIBTC News $50K | 30d rolling | Reporter active |
 | Bitflow DeFi Skills | 30d, $100/day | Evaluate HODLMM |
 | **Frontier** | **May 11** | **REGISTERED — PRIMARY** |
+| **ETHGlobal Open Agents** | **May 6** | **TARGET** |
 
 ---
 
@@ -393,9 +547,11 @@ Buzz is the #1 most active agent on the AIBTC network. First agent-to-agent BD c
 | Solana 8004 | 9pQ6K...XUBS | Solana |
 | AIBTC Network | Ionic Nova (DW32R4) | Bitcoin |
 | Virtuals ACP | #17681 | — |
-| Colosseum | @BuzzBySolCex | — |
+| Colosseum | @BuzzBySolCex (#3734) | — |
 | Moltbook | c606278b | — |
 | Synthesis | e61039b7 | Base |
+| .agent TLD | buzz.agent, buzzbd.agent | — |
+| Agent Skills | buzzbd.ai/.well-known/skills/ | — |
 
 ---
 
@@ -404,14 +560,16 @@ Buzz is the #1 most active agent on the AIBTC network. First agent-to-agent BD c
 | Platform | URL |
 |----------|-----|
 | Domain | [buzzbd.ai](https://buzzbd.ai) |
+| Agent Skills | [buzzbd.ai/.well-known/skills/](https://buzzbd.ai/.well-known/skills/index.json) |
 | SolCex Exchange | [solcex.io](https://solcex.io) |
 | MicroBuzz Dashboard | [microbuzz.vercel.app/dashboard](https://microbuzz.vercel.app/dashboard) |
-| Agent Skills | `npx skills add buzzbysolcex/agent-skills` |
+| Agent Skills Install | `npx skills add https://buzzbd.ai` |
 | Twitter | [@BuzzBySolCex](https://x.com/BuzzBySolCex) |
 | SolCex Twitter | [@SolCex_Exchange](https://x.com/SolCex_Exchange) |
 | Telegram (BD Agent) | [@BuzzBySolCex_bot](https://t.me/BuzzBySolCex_bot) |
 | Telegram (Brain) | [@buzz_claude_code_bot](https://t.me/buzz_claude_code_bot) |
 | Builder | [@HidayahAnka1](https://x.com/HidayahAnka1) |
+| Builder LinkedIn | [linkedin.com/in/howtobecomeachef](https://linkedin.com/in/howtobecomeachef) |
 | AIBTC News | [aibtc.news](https://aibtc.news) (exchange-listings beat) |
 
 ---
@@ -430,10 +588,10 @@ Proprietary — SolCex Exchange. All rights reserved.
 
 *🐝 "AIXBT finds alpha. Bankr deploys tokens. Buzz closes deals."*
 
-*Buzz BD Agent v8.1.0 — Sprint Day 37 | Mar 25, 2026*
+*Buzz BD Agent v8.3.0 — Sprint Day 39 | Mar 28, 2026*
 *Claude Code IS Buzz | Opus 4.6 | Pro Max unlimited | 24/7 on Hetzner CX43*
-*~135 endpoints | 28 crons | 55 tables | 25 intel | $0/day LLM | $210/mo flat*
-*Ghost leak killed | OpenClaw dead | 6-chain identity | AIBTC Ionic Nova*
-*Pipeline: 86 tokens | 26 HOT | ZHC Readiness: 78% → 85%*
+*~150+ endpoints | 30 crons | 58 tables | 29 intel | $0/day LLM | $210/mo flat*
+*Colosseum Copilot | Browser Use | Agent Skills Discovery | BD Screening v1.0*
+*Pipeline: 192 tokens | 4 HOT | Revenue: $80 / 120K sats | ZHC: 51.3%*
 *Frontier Hackathon REGISTERED — PRIMARY TARGET*
 *Built by a chef who codes through conversation. No CS degree. Just Claude and persistence.*
