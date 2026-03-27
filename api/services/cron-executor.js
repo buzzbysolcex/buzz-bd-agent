@@ -262,6 +262,34 @@ function registerAllJobs() {
     }
   });
 
+  // v8.2.1: Browser-Use visual scans
+  register('dexscreener-visual-scan', '0 */4 * * *', async () => {
+    try {
+      const { execSync } = require('child_process');
+      const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
+      execSync(`browser-use --cdp-url http://localhost:9222 open https://dexscreener.com/solana/trending`, { timeout: 10000 });
+      execSync('sleep 3');
+      execSync(`browser-use --cdp-url http://localhost:9222 screenshot /tmp/dex-scan-${ts}.png`, { timeout: 5000 });
+      execSync('browser-use --cdp-url http://localhost:9222 close', { timeout: 5000 });
+      return `dex visual scan: /tmp/dex-scan-${ts}.png`;
+    } catch (e) {
+      return `dex visual scan error: ${e.message.slice(0, 100)}`;
+    }
+  });
+
+  register('virtuals-daily-check', '0 8 * * *', async () => {
+    try {
+      const { execSync } = require('child_process');
+      execSync('browser-use --cdp-url http://localhost:9222 open https://app.virtuals.io/acp', { timeout: 10000 });
+      execSync('sleep 3');
+      execSync('browser-use --cdp-url http://localhost:9222 screenshot /tmp/virtuals-daily.png', { timeout: 5000 });
+      execSync('browser-use --cdp-url http://localhost:9222 close', { timeout: 5000 });
+      return 'virtuals daily check: screenshot saved';
+    } catch (e) {
+      return `virtuals check error: ${e.message.slice(0, 100)}`;
+    }
+  });
+
   register('moltbook-engage', '0 5,11,17,23 * * *', async () => {
     await triggerBrain('Buzz: MOLTBOOK ENGAGEMENT — Read feed, upvote 2 relevant posts, draft 1 quality comment for War Room approval. If in posting window and past spam cooldown, draft post for approval. Check notifications for replies.');
     return 'triggered';
