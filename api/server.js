@@ -614,6 +614,14 @@ async function start() {
     app.use('/api/v1/board', apiKeyAuth, require('./routes/board')(db, activityBoard, taskChainExecutor));
     console.log('[v8.2.0] ✓ ClawTeam patterns: chains(4) + inbox(4) + board(3) = 11 endpoints');
 
+    // v8.2.1: Colosseum Copilot — Intel Source #18
+    if (process.env.COLOSSEUM_COPILOT_PAT) {
+      app.use('/api/v1/copilot', apiKeyAuth, require('./routes/copilot')());
+      console.log('[v8.2.1] ✓ Colosseum Copilot: search, enrich, cluster, trends, landscape, status = 6 endpoints');
+    } else {
+      console.log('[v8.2.1] ⚠ Colosseum Copilot: COLOSSEUM_COPILOT_PAT not set, endpoints disabled');
+    }
+
     // ─── 404 Handler (must be after all route registrations) ───
     app.use((req, res) => {
       res.status(404).json({
