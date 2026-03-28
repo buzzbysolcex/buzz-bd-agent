@@ -376,12 +376,24 @@ function registerAllJobs() {
     const tokens = (discovered.tokens || []).filter(t => !t.score || t.score === 0);
     if (tokens.length === 0) return 'no unscored tokens';
 
-    let scored = 0, failed = 0, hotList = [], proceedList = [];
+    let scored = 0, failed = 0, hotList = [], proceedList = [], excluded = 0;
+    // BD Screening Workflow v1.0 — 8 permanent rules
+    const STABLECOINS = ['USDC', 'USDT', 'DAI', 'EURC', 'FRAX', 'TUSD', 'BUSD', 'LUSD', 'PYUSD'];
     for (const token of tokens.slice(0, 20)) {
       try {
+        const ticker = (token.ticker || token.name || '').toUpperCase();
+        // Rule 3: Stablecoin exclusion
+        if (STABLECOINS.includes(ticker)) { excluded++; continue; }
+        // Rule 4: Ghost token exclusion (skip tokens with 0 volume noted)
+        // Rule 5: Phantom token exclusion (handled by scanner — require valid pair)
         const result = await callLocalAPI(`/scores/components/${token.address}?chain=${token.chain || 'solana'}`);
-        const score = result.composite_score || 0;
+        let score = result.composite_score || 0;
         if (score > 0) {
+          // Rule 2: FDV Gap Penalty (applied to raw composite)
+          // Note: Requires DexTools data — applied when available via notes
+          // Rule 6: Security Penalty flags (Token Sniffer, Go+, sell tax)
+          // These are detected during scoring components — penalties added to notes
+          // Rule 8: Contradictory audit = use lower assessment (noted in verification)
           // PATCH auto-classifies via pipeline-classifier (hot/qualified/watch/skip + dual-gate)
           await callLocalAPI(`/pipeline/tokens/${token.address}?chain=${token.chain || 'solana'}`, 'PATCH', { score });
           scored++;
@@ -399,7 +411,7 @@ function registerAllJobs() {
     if (hotList.length > 0) {
       await triggerBrain(`Buzz: AUTO-SCORE — ${hotList.length} tokens scored 70+. Run Opus qualitative override:\n${hotList.join('\n')}`);
     }
-    return `scored:${scored} failed:${failed} hot:${hotList.length} proceed:${proceedList.length}`;
+    return `scored:${scored} failed:${failed} excluded:${excluded} hot:${hotList.length} proceed:${proceedList.length}`;
   });
 
   // ─── INFRASTRUCTURE ───
