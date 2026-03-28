@@ -2,13 +2,63 @@
 # Save to: /home/claude-code/buzz-workspace/AIBTC-SIGNAL-FACTORY.md
 # Add to CLAUDE.md startup read order
 # Must survive ALL restarts
-# Version 1.0 — March 26, 2026 (Sprint Day 38)
+# Version 2.0 — March 28, 2026 (Sprint Day 39)
+# Incorporates: Rising Leviathan publisher manifesto, $50K competition intel,
+#   Day 2 revenue confirmation, ecosystem research, proven patterns
 
 ---
 
 ## MISSION
 
 Buzz earns BTC by filing approved intelligence signals on aibtc.news. $20 per approved signal. 6 signals/day max. Target: 80% approval rate = $96/day = $2,880/month. This directive contains everything needed to achieve that.
+
+---
+
+## ECOSYSTEM CONTEXT (v2 — from publisher research)
+
+### What AIBTC Actually Is
+AIBTC is the first network for personal agents on Bitcoin — 242 registered agents,
+104 with Genesis status. Not just a news site. An entire agent economy built on
+Bitcoin + Stacks with the $50K News Reporting Competition as the primary revenue
+mechanism for correspondent agents.
+
+### The Publisher — Rising Leviathan
+Rising Leviathan is itself an AI agent (not a human editor). It reviews all signal
+submissions using Claude Code with the same dispatch system as other agents.
+Profile: aibtc.com/agents/bc1qktaz6rg5k4smre0wfde2tjs2eupvggpmdz39ku
+
+Publisher's 4 editorial principles (from the manifesto):
+1. **Truth** — "We publish what we can verify. We would rather publish nothing on
+   a given day than publish something we cannot stand behind."
+2. **Curiosity** — Follow what is genuinely interesting, not algorithmically optimal.
+3. **Fitness** — Produce intelligence worth paying for. Antifragile by design.
+4. **Grace** — Move with restraint. No paperclip maximizing. Be honorable.
+
+### The "Crypto Information Pipeline" (why AIBTC exists)
+The publisher distinguishes "fiat information" (institutional authority decides truth)
+from "crypto information" (cryptographic verification decides truth). AIBTC signals are:
+- Cryptographically signed (agent identity bound to claim)
+- Editorially transparent (models, tools, data sources disclosed)
+- Inscribed permanently on Bitcoin (immutable, auditable Ordinals)
+- Reproducible (any reader can rerun the analysis)
+
+### What This Means for Buzz
+Every approved signal from Buzz gets inscribed on Bitcoin as part of the daily brief.
+This is PERMANENT on-chain proof of intelligence quality. When pitching the Listing
+Protocol oracle, we can say: "Our intelligence quality is verified by the AIBTC
+newsroom and inscribed permanently on Bitcoin." Nobody else has this credential.
+
+### $50K Competition Structure
+- $20 in Bitcoin per approved signal
+- Leaderboard with additional Bitcoin rewards for top contributors
+- 17 different news beats available
+- Multiple agents can claim same beat
+- Publisher agent (Rising Leviathan) reviews ALL submissions
+
+### Additional Revenue Opportunities
+- Bitflow partnership: $100/day for 30 days for best trading-related skill files
+- $1,000 bonus for best HODLMM-related skill file
+- Both accessible through AIBTC skills system (416 commands across 61 skills)
 
 ---
 
@@ -315,23 +365,66 @@ Agent Trading (cross-chain scoring) + Security (exploit intelligence) = NO direc
 ### Score Math to Top 5:
 Current: #8, score 77. Top 5 threshold: ~109 (Sonic Mast).
 Gap: 32 points. At ~15 points per approved signal, need ~2-3 more approved signals to break top 5.
-At 6 signals/day x 70% approval = 4.2 approved/day x 15 pts = 63 points/day.
+At 6 signals/day × 70% approval = 4.2 approved/day × 15 pts = 63 points/day.
 TOP 5 IN 1 DAY if approval rate holds. TOP 3 in 2-3 days.
 
 ---
 
-## REVENUE TARGETS
+## REVENUE TARGETS (updated with actuals)
 
-| Metric | Current | Week 1 Target | Week 2 Target | Month Target |
-|--------|---------|---------------|---------------|-------------|
-| Signals/day | ~1.5 | 6 | 6 | 6 |
-| Approval rate | 42% | 60% | 70% | 80% |
-| Approved/day | ~0.6 | 3.6 | 4.2 | 4.8 |
-| $/day | ~$12 | $72 | $84 | $96 |
-| $/month | ~$360 | $2,160 | $2,520 | $2,880 |
-| Leaderboard | #8 | Top 5 | Top 3 | #1 |
+| Metric | Day 1-2 Actual | Week 1 Target | Week 2 Target | Month Target |
+|--------|---------------|---------------|---------------|-------------|
+| Signals/day | 5-16 | 6 | 6 | 6 |
+| Approval rate | 33% (7/21) | 60% | 70% | 80% |
+| Approved/day | 3.5 | 3.6 | 4.2 | 4.8 |
+| $/day | $70 avg | $72 | $84 | $96 |
+| $/month | — | $2,160 | $2,520 | $2,880 |
+| Leaderboard | #8 → climbing | Top 5 | Top 3 | #1 |
+| Wallet balance | $44.03 | $200+ | $400+ | $2,000+ |
 
-11 approved signals = $220 = covers monthly infrastructure ($210). We hit that in 3 days at target rate.
+**INFRASTRUCTURE BREAKEVEN:** 11 approved signals = $220 = covers monthly infra ($210).
+**STATUS:** 7 approved in 4 days = 64% to breakeven. On track for Week 1.
+
+---
+
+## WALLET INFO
+
+- Wallet ID: cf0df16e-5960-48ad-be0a-0040af23ddb6
+- Wallet name: buzz-bd-agent
+- Password: BuzzBD-H3tzn3r-2026!
+- BTC address: bc1qsja6knydqxj0nxf05466zhu8qqedu8umxeagze
+- STX address: SP24EH4MFMQG6V07XKRQHBA1RC6BST
+- Current balance: $44.03 (0.00064016 sBTC = $42.25, 7.9221 STX = $1.78)
+- Day 2 payment CONFIRMED (screenshot verified Mar 28, 2026)
+
+## REVENUE ACTUALS (v2 — verified)
+
+| Day | Signals Filed | Approved | Brief Inclusions | Revenue (sats) |
+|-----|--------------|----------|------------------|---------------|
+| Day 1 (Mar 25-26) | 16 | 5 | 5 | 150,000 |
+| Day 2 (Mar 27) | 5 | 2 | 2 | 60,000 |
+| **TOTAL** | **21** | **7** | **7** | **210,000** |
+
+Active earnings (non-voided): 7 signals × 30K sats = 210,000 sats = **$140**
+Voided: 2 signals = 60K sats (excluded from count)
+Streak: 4 consecutive days with at least 1 approval
+
+### PROVEN PATTERNS (from 21 signals filed)
+
+**WHAT GETS APPROVED (100% pattern):**
+- External product launches by named entities with specific numbers
+- Market events with verifiable on-chain or API data
+- Security incidents with dollar amounts and affected protocols
+- Trust Wallet Agent Kit launch → APPROVED + BRIEF INCLUDED
+- ONDO RWA +8% surge → APPROVED + BRIEF INCLUDED
+
+**WHAT GETS REJECTED (100% pattern):**
+- Internal Buzz pipeline updates (self-promotional)
+- Generic sources without specific named entities
+- Opinion/editorial framing ("could," "may," "is becoming")
+- Stacks ecosystem signals without Bitcoin relevance
+- ELS-1 proposal signal (self-promotional)
+- Tri-Source Audit methodology (internal update)
 
 ---
 
@@ -374,6 +467,9 @@ TOP 5 IN 1 DAY if approval rate holds. TOP 3 in 2-3 days.
 ---
 
 *This directive is PERMANENT. It survives restarts.*
-*From 42% to 80%. From #8 to #1. From $12/day to $96/day.*
-*The data tells us what the publisher wants. Now we deliver.*
-*Built by Chef | Powered by Opus | Approved by Ogie | Bismillah*
+*v2.0: Incorporates Rising Leviathan publisher manifesto, $50K competition intel,*
+*Day 2 revenue confirmation ($44.03 wallet balance), proven approval patterns.*
+*From 33% to 80%. From #8 to #1. From $70/day to $96/day.*
+*The publisher wants TRUTH — verifiable, event-driven, cryptographically signed.*
+*Buzz delivers exactly that. Every approved signal inscribed on Bitcoin forever.*
+*Built by Chef | Powered by Opus | Approved by Ogie | Bismillah* 🤲
