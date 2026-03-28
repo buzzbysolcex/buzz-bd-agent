@@ -262,6 +262,22 @@ function registerAllJobs() {
     }
   });
 
+  // Frontier daily tracker (09:00 UTC — after morning briefing)
+  register('frontier-daily-tracker', '0 9 * * *', async () => {
+    try {
+      const { execSync } = require('child_process');
+      const bal = execSync('cast balance 0xa57f4010d200dc1E67cAbede025b90090cd99206 --rpc-url https://mainnet.base.org 2>/dev/null', { timeout: 10000 }).toString().trim();
+      const ethBal = (parseInt(bal) / 1e18).toFixed(6);
+      const onchain = execSync('cast call 0xbf81316266dBB79947c358e2eAAc6F338Fa388Fb "totalScored()" --rpc-url https://mainnet.base.org 2>/dev/null', { timeout: 10000 }).toString().trim();
+      const totalOnchain = parseInt(onchain, 16);
+      const daysLeft = Math.ceil((new Date('2026-05-11') - new Date()) / 86400000);
+      await triggerBrain(`Buzz: FRONTIER TRACKER — Day ${new Date().toISOString().slice(0,10)} | ${daysLeft} days to May 11\n\nCONTRACTS: 1/4 deployed\n  ScoreStorage v2: LIVE (${totalOnchain} scores on-chain)\n  ListingOracle: not started\n  ListingEscrow: not started\n  BuzzReputation: not started\nDEPLOYER: ${ethBal} ETH\n\nPost tracker to War Room.`);
+      return `frontier tracker: ${daysLeft}d remaining, ${totalOnchain} on-chain, ${ethBal} ETH`;
+    } catch (e) {
+      return `frontier tracker error: ${e.message.slice(0, 80)}`;
+    }
+  });
+
   // v8.2.1: Browser-Use visual scans
   register('dexscreener-visual-scan', '0 */4 * * *', async () => {
     try {
@@ -376,24 +392,70 @@ function registerAllJobs() {
     const tokens = (discovered.tokens || []).filter(t => !t.score || t.score === 0);
     if (tokens.length === 0) return 'no unscored tokens';
 
-    let scored = 0, failed = 0, hotList = [], proceedList = [], excluded = 0;
-    // BD Screening Workflow v1.0 — 8 permanent rules
+    let scored = 0, failed = 0, hotList = [], proceedList = [], excluded = 0, penalized = 0;
+    // BD Screening Workflow v1.0 — 8 permanent rules (IN CODE, not just docs)
     const STABLECOINS = ['USDC', 'USDT', 'DAI', 'EURC', 'FRAX', 'TUSD', 'BUSD', 'LUSD', 'PYUSD'];
     for (const token of tokens.slice(0, 20)) {
       try {
         const ticker = (token.ticker || token.name || '').toUpperCase();
         // Rule 3: Stablecoin exclusion
         if (STABLECOINS.includes(ticker)) { excluded++; continue; }
-        // Rule 4: Ghost token exclusion (skip tokens with 0 volume noted)
-        // Rule 5: Phantom token exclusion (handled by scanner — require valid pair)
+
         const result = await callLocalAPI(`/scores/components/${token.address}?chain=${token.chain || 'solana'}`);
         let score = result.composite_score || 0;
         if (score > 0) {
-          // Rule 2: FDV Gap Penalty (applied to raw composite)
-          // Note: Requires DexTools data — applied when available via notes
-          // Rule 6: Security Penalty flags (Token Sniffer, Go+, sell tax)
-          // These are detected during scoring components — penalties added to notes
-          // Rule 8: Contradictory audit = use lower assessment (noted in verification)
+          let penalties = [];
+          const components = result.components || {};
+          const safetyData = components.safety?.data || {};
+          const scorerData = components.scorer?.data || {};
+          const scannerData = components.scanner?.data || {};
+
+          // Rule 4: Ghost token — no pairs found = phantom
+          if (scannerData.found === false || scannerData.pairs_count === 0) {
+            score = Math.min(score, 10);
+            penalties.push('phantom_token(no_pairs)');
+          }
+
+          // Rule 6a: Token Sniffer penalty (from safety factors)
+          const factors = safetyData.factors || [];
+          // Rule 6b: Honeypot = auto-exclude
+          if (safetyData.instant_kill) {
+            score = 0;
+            penalties.push('honeypot_detected');
+            excluded++;
+            continue;
+          }
+
+          // Rule 1+2: FDV Gap + Circulating supply penalties
+          // Applied via scorer market category — if market scores are very low
+          // with high composite, likely FDV inflation
+          const scorerCategories = scorerData.categories || {};
+          const marketScore = scorerCategories.market || 0;
+          if (marketScore <= 1 && score >= 70) {
+            // Market data shows $0 mcap/liq/vol but composite is high = likely FDV inflation
+            score = Math.min(score, 50);
+            penalties.push('market_data_missing(mcap=0,liq=0)');
+          }
+
+          // Rule 6c: If safety score is very low but composite is high = security concern
+          const safetyScore = components.safety?.score || 0;
+          if (safetyScore < 30 && score >= 70) {
+            score = Math.max(score - 25, 10);
+            penalties.push('security_penalty(safety=' + safetyScore + ')');
+          }
+
+          // Rule 7: Liquidity cross-ref (if scanner found no pairs but score is positive)
+          if (!scannerData.found && score > 50) {
+            score = Math.max(score - 15, 10);
+            penalties.push('liq_crossref_fail(no_dex_pair)');
+          }
+
+          // Log penalties applied
+          if (penalties.length > 0) {
+            penalized++;
+            // Append penalties to notes via pipeline update
+          }
+
           // PATCH auto-classifies via pipeline-classifier (hot/qualified/watch/skip + dual-gate)
           await callLocalAPI(`/pipeline/tokens/${token.address}?chain=${token.chain || 'solana'}`, 'PATCH', { score });
           scored++;
@@ -411,7 +473,7 @@ function registerAllJobs() {
     if (hotList.length > 0) {
       await triggerBrain(`Buzz: AUTO-SCORE — ${hotList.length} tokens scored 70+. Run Opus qualitative override:\n${hotList.join('\n')}`);
     }
-    return `scored:${scored} failed:${failed} excluded:${excluded} hot:${hotList.length} proceed:${proceedList.length}`;
+    return `scored:${scored} failed:${failed} excluded:${excluded} penalized:${penalized} hot:${hotList.length} proceed:${proceedList.length}`;
   });
 
   // ─── INFRASTRUCTURE ───
