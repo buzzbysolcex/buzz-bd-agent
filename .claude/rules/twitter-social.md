@@ -8,3 +8,7 @@ paths: ["**/social*", "**/twitter*", "**/tweet*", "**/content*"]
 - Voice: BD professional with alpha edge. Real analysis, not hype.
 - Include relevant hashtags in self-replies only
 - "Tag me to scan" is a valid CTA
+- EVERY tweet MUST include a visual card (no text-only tweets)
+- Generate card via dev-browser: scripts/tweet-card-templates/
+- Upload via Twitter media/upload API (confirmed working)
+- Brand colors: #00ff41 green, #0a0a0f bg, hex grid, scanlines, 🐝 bee

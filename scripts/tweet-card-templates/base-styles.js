@@ -1,91 +1,95 @@
-// Shared BuzzBD card styles — import into all templates
-// Usage: const { BASE_CSS } = require('./base-styles');
+// Shared BuzzBD card styles — EXACT match to buzzbd.ai
+// Colors: --g:#00ff41, --bg:#0a0a0f, --card:#111118, --border:#1a1a22
+// Font: JetBrains Mono (Google Fonts)
 
 const BASE_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; }
+  :root { --g:#00ff41; --bg:#0a0a0f; --card:#111118; --border:#1a1a22; --y:#ffaa00; --r:#ff0040; --b:#4488ff; }
   body {
-    background:#0a0a0f;
-    color:#00ff88;
-    font-family:'JetBrains Mono',monospace;
-    width:1200px; height:675px;
-    position:relative; overflow:hidden;
+    background: var(--bg);
+    color: #c0c0c0;
+    font-family: 'JetBrains Mono', monospace;
+    width: 1200px; height: 675px;
+    position: relative; overflow: hidden;
   }
-  /* Scanline overlay */
+  /* Scanline — EXACT from buzzbd.ai */
   body::after {
-    content:''; position:absolute; top:0; left:0;
-    width:100%; height:100%;
-    background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
-    pointer-events:none; z-index:100;
+    content: ''; position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.015) 2px, rgba(0,255,65,0.015) 4px);
+    z-index: 9999;
   }
-  /* Hex grid background */
+  /* Hex grid — matched to buzzbd.ai proposal page */
   .hex-bg {
-    position:absolute; top:0; left:0;
-    width:100%; height:100%; opacity:0.06;
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='70' viewBox='0 0 60 70' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5L55 20V50L30 65L5 50V20z' fill='none' stroke='%2300ff88' stroke-width='0.5'/%3E%3C/svg%3E");
-    pointer-events:none; z-index:0;
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%; opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='70' viewBox='0 0 60 70' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5L55 20V50L30 65L5 50V20z' fill='none' stroke='%2300ff41' stroke-width='0.5'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
   }
-  /* Glow effect */
+  /* Glow orb */
   .glow {
-    position:absolute; top:-80px; right:-80px;
-    width:400px; height:400px;
-    background:radial-gradient(circle,rgba(0,255,136,0.08),transparent 70%);
-    pointer-events:none; z-index:0;
+    position: absolute; top: -100px; right: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(0,255,65,0.06), transparent 70%);
+    pointer-events: none; z-index: 0;
   }
   /* Container */
-  .container { padding:40px 50px; position:relative; z-index:1; }
-  /* Header with bee */
-  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
-  .brand { display:flex; align-items:center; gap:12px; }
-  .bee { font-size:48px; filter:drop-shadow(0 0 15px rgba(0,255,136,0.4)); }
-  .brand-text { font-family:'Space Grotesk',sans-serif; font-size:14px; color:#666; letter-spacing:2px; text-transform:uppercase; }
-  /* Title */
-  h1 { font-family:'Space Grotesk',sans-serif; font-size:32px; color:#fff; margin-bottom:6px; }
-  h1 span { color:#00ff88; }
-  .subtitle { font-size:14px; color:#666; margin-bottom:24px; }
-  /* Stat boxes */
-  .stats { display:flex; gap:16px; margin-bottom:22px; }
-  .stat { background:#0d0d14; border:1px solid #1a1a28; border-radius:8px; padding:14px 18px; text-align:center; flex:1; }
-  .stat .num { font-size:26px; font-weight:700; color:#00ff88; line-height:1; }
-  .stat .label { font-size:10px; color:#666; margin-top:5px; text-transform:uppercase; letter-spacing:1px; }
-  /* Content */
-  .content { font-size:14px; color:#c8c8d4; line-height:1.8; margin-bottom:16px; }
-  .cta { color:#ff6b6b; font-size:17px; font-weight:700; }
-  .accent { color:#00ff88; }
-  .cyan { color:#00ccff; }
-  .orange { color:#ff6b35; }
-  /* Footer */
-  .footer {
-    position:absolute; bottom:25px; left:50px; right:50px;
-    display:flex; justify-content:space-between; color:#444; font-size:12px; z-index:1;
+  .container { padding: 40px 50px; position: relative; z-index: 1; height: 100%; }
+  /* Header */
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .bee { font-size: 56px; filter: drop-shadow(0 0 20px rgba(0,255,65,0.5)); }
+  .brand-text { font-size: 13px; color: #666; letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,255,65,0.2); }
+  /* Titles */
+  h1 { font-size: 30px; color: var(--g); letter-spacing: 3px; font-weight: 700; text-shadow: 0 0 30px rgba(0,255,65,0.15); margin-bottom: 4px; }
+  h1 .white { color: #fff; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 22px; letter-spacing: 1px; }
+  /* Stat boxes — GLOW */
+  .stats { display: flex; gap: 14px; margin-bottom: 20px; }
+  .stat {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; text-align: center; flex: 1;
+    box-shadow: 0 0 12px rgba(0,255,65,0.08);
+    transition: border-color 0.2s;
   }
-  /* Tag/badge */
-  .tag { display:inline-block; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:700; margin-right:8px; }
-  .tag-green { background:rgba(0,255,136,0.15); color:#00ff88; border:1px solid rgba(0,255,136,0.3); }
-  .tag-red { background:rgba(255,68,68,0.15); color:#ff4444; border:1px solid rgba(255,68,68,0.3); }
-  .tag-cyan { background:rgba(0,204,255,0.15); color:#00ccff; border:1px solid rgba(0,204,255,0.3); }
-  .tag-orange { background:rgba(255,107,53,0.15); color:#ff6b35; border:1px solid rgba(255,107,53,0.3); }
+  .stat:hover { border-color: var(--g); }
+  .stat .num { font-size: 26px; font-weight: 700; color: var(--g); line-height: 1; text-shadow: 0 0 20px rgba(0,255,65,0.3); }
+  .stat .label { font-size: 9px; color: #666; margin-top: 5px; text-transform: uppercase; letter-spacing: 1.5px; }
+  /* Content */
+  .content { font-size: 14px; color: #c0c0c0; line-height: 1.7; margin-bottom: 14px; }
+  .cta { color: var(--r); font-size: 16px; font-weight: 700; text-shadow: 0 0 15px rgba(255,0,64,0.2); }
+  /* Tags */
+  .tag { display: inline-block; padding: 3px 10px; border-radius: 8px; font-size: 10px; font-weight: 600; margin-right: 6px; }
+  .tag-live { background: #003300; color: var(--g); }
+  .tag-warn { background: #332200; color: var(--y); }
+  .tag-alert { background: #330000; color: var(--r); }
+  .tag-info { background: #001133; color: var(--b); }
+  /* Footer bar — gradient top border */
+  .footer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 12px 50px; display: flex; justify-content: space-between;
+    color: #444; font-size: 11px; z-index: 1;
+    border-top: 1px solid var(--border);
+    background: linear-gradient(180deg, transparent, rgba(0,255,65,0.02));
+  }
+  /* Table */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 8px 12px; color: #666; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; font-size: 13px; color: #c0c0c0; border-bottom: 1px solid #0d0d14; }
+  /* Metrics grid */
+  .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 40px; }
+  .metric { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .metric-label { font-size: 13px; color: #888; }
+  .metric-value { font-size: 13px; font-weight: 700; }
+  /* Detail items */
+  .detail-item { font-size: 14px; color: #c0c0c0; line-height: 2; padding-left: 20px; position: relative; }
+  .detail-item::before { content: '>'; position: absolute; left: 0; color: var(--g); }
+  /* Signal header */
+  .signal-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .signal-num { font-size: 13px; color: #666; }
+  .body { font-size: 15px; color: #c0c0c0; line-height: 1.7; max-width: 900px; margin-bottom: 20px; }
+  .source { font-size: 12px; color: #444; }
 `;
 
-const HEADER_HTML = `
-<div class="hex-bg"></div>
-<div class="glow"></div>
-<div class="container">
-  <div class="header">
-    <div></div>
-    <div class="brand">
-      <span class="brand-text">BUZZ BD AGENT</span>
-      <span class="bee">🐝</span>
-    </div>
-  </div>
-`;
-
-const FOOTER_HTML = `
-</div>
-<div class="footer">
-  <span>__LEFT__</span>
-  <span>🐝 buzzbd.ai/report | @BuzzBySolCex</span>
-</div>
-`;
-
-module.exports = { BASE_CSS, HEADER_HTML, FOOTER_HTML };
+module.exports = { BASE_CSS };
