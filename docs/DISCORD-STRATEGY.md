@@ -4,10 +4,23 @@
 
 ---
 
+## CURRENT STATUS (updated Mar 29, 2026)
+- Bot app: "Buzz BD Agent" (created Feb 24, token reset Mar 29)
+- Bot in server: YES (joined Mar 29)
+- Bot token stored: YES (.env.discord, gitignored)
+- Intents: Message Content ON, Server Members ON
+- Permissions: Send Messages, Read History, View Channels, Embed Links, Reactions, Slash Commands
+- Channels created: PENDING (#general only)
+- Bot wired to Hetzner: PENDING
+- AIBTC Discord invite: PENDING
+- Invite URL: https://discord.com/oauth2/authorize?client_id=1475792150380941372&permissions=2147568704&scope=bot
+
+---
+
 ## Phase 1 (Post-Sprint Week 1): Webhook Bridge
 
 ### Server Setup
-- Create BuzzBD Discord server
+- ~~Create BuzzBD Discord server~~ DONE (Mar 29)
 - Channel structure:
 
 **Getting Started:**
