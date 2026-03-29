@@ -262,6 +262,20 @@ function registerAllJobs() {
     }
   });
 
+  // ARIA discovery scan (06:00 UTC daily — multi-source token discovery)
+  register('aria-discovery-scan', '0 6 * * *', async () => {
+    try {
+      const result = await callLocalAPI('/aria/discover');
+      const msg = `ARIA SCAN: ${result.discovered || 0} discovered, ${result.persisted || 0} persisted`;
+      const sources = result.sources || {};
+      const srcSummary = Object.entries(sources).map(([k, v]) => `${k}: ${v.count || 0}`).join(', ');
+      await triggerBrain(`Buzz: ${msg}. Sources: ${srcSummary}. Check /aria/filter for qualified candidates. Report to War Room.`);
+      return msg;
+    } catch (e) {
+      return `aria scan error: ${e.message.slice(0, 80)}`;
+    }
+  });
+
   // Frontier daily tracker (09:00 UTC — after morning briefing)
   register('frontier-daily-tracker', '0 9 * * *', async () => {
     try {

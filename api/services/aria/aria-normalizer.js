@@ -203,11 +203,49 @@ function deduplicateTokens(tokens) {
   return Array.from(seen.values());
 }
 
+// ─── Normalizer: Bags.fm ─────────────────────────────
+function fromBagsFm(row) {
+  const token = emptyToken(row.token_mint, 'solana');
+  token.symbol = row.symbol || '';
+  token.name = row.name || '';
+  token.discovery.source = 'bags_fm';
+  token.discovery.discovery_type = row.status || 'graduated';
+  token.discovery.discovered_at = row.scanned_at || new Date().toISOString();
+  if (row.twitter) token.social.twitter_handle = row.twitter;
+  if (row.website) token.social.website = row.website;
+  token.social.source = 'bags_fm';
+  token.metadata.bags_fm = { status: row.status, bags_score: row.bags_score || 0 };
+  return token;
+}
+
+// ─── Normalizer: Colosseum Copilot ───────────────────
+function fromColosseum(project) {
+  const addr = project.token_address || project.contract_address || '';
+  const chain = project.chain || 'solana';
+  const token = emptyToken(addr, chain);
+  token.symbol = project.token_symbol || project.ticker || '';
+  token.name = project.name || project.project_name || '';
+  token.discovery.source = 'colosseum';
+  token.discovery.discovery_type = 'hackathon';
+  if (project.website) token.social.website = project.website;
+  if (project.twitter) token.social.twitter_handle = project.twitter;
+  if (project.github) token.technical.github_url = project.github;
+  token.social.source = 'colosseum';
+  token.metadata.colosseum = {
+    hackathon: project.hackathon || null,
+    result: project.result || null,
+    slug: project.slug || null
+  };
+  return token;
+}
+
 module.exports = {
   emptyToken,
   fromDexScreener,
   fromJupiter,
   fromCoinGecko,
+  fromBagsFm,
+  fromColosseum,
   mapChainId,
   deduplicateTokens
 };
