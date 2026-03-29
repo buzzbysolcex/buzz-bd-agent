@@ -1,23 +1,24 @@
 # BUZZ BRAIN ACTIVATION — Hetzner Claude Code Identity & Operations
 
-## STARTUP READ ORDER (MANDATORY — read in this order on every session)
-1. CLAUDE.md (this file — identity + rules)
-2. BUZZ-ZHC-HANDOVER-v3.md ← THE GENOME (supersedes ALL previous handovers)
-3. docs/MASTER-OPS-BD-SCREENING.md (7-phase pipeline, tri-source verification)
-4. docs/COLOSSEUM-COPILOT-INTEGRATION.md (Intel Source #18, hackathon data)
-5. docs/AIBTC-SIGNAL-FACTORY.md (revenue engine)
-6. docs/FRONTIER-PROGRESS-TRACKER.md (Frontier build plan vs reality)
-7. docs/FRONTIER-TRACKER-DIRECTIVE.md (daily tracker + tweet-on-deploy rules)
-8. docs/BUZZ-SMART-CONTRACTS.md (Foundry capabilities, deployment plan)
-9. docs/DEV-BROWSER-INTEGRATION.md (dev-browser upgrade roadmap)
-10. docs/BD-WORKFLOW-V2-BROWSER-ENHANCED.md (browser-enhanced BD screening, supersedes browser sections)
-11. docs/ARIA-DEEP-RESEARCH-v2.md (ARIA discovery engine — service layer inside Buzz)
-12. docs/PLATFORM-DOMINANCE-DIRECTIVE.md (3 platforms)
-5. docs/MOLTBOOK-CONTENT-STRATEGY.md (content patterns)
-6. CREATIVE-AUTONOMY-DIRECTIVE.md (entrepreneur mode)
-7. TWITTER-SCAN-FUNNEL.md (Twitter strategy)
-8. HANDOVER.md (auto-updated state snapshot)
-9. GSD.md (context management)
+## STARTUP READ ORDER (MANDATORY — read in this order on every restart)
+1. CLAUDE.md (this file)
+2. BUZZ-ZHC-HANDOVER-v3.md
+3. docs/AIBTC-SIGNAL-FACTORY.md
+4. docs/MASTER-OPS-BD-SCREENING.md
+5. docs/FRONTIER-PROGRESS-TRACKER.md
+6. docs/FRONTIER-TRACKER-DIRECTIVE.md
+7. docs/BUZZ-SMART-CONTRACTS.md
+8. docs/BD-WORKFLOW-V2-BROWSER-ENHANCED.md
+9. docs/ARIA-DEEP-RESEARCH-v2.md
+10. docs/DEV-BROWSER-INTEGRATION.md
+11. docs/COLOSSEUM-COPILOT-INTEGRATION.md
+12. docs/PLATFORM-DOMINANCE-DIRECTIVE.md
+13. docs/MOLTBOOK-CONTENT-STRATEGY.md
+14. docs/CREATIVE-AUTONOMY-DIRECTIVE.md
+15. docs/TWITTER-SCAN-FUNNEL.md
+16. docs/DISCORD-STRATEGY.md
+17. .claude/HANDOVER.md
+18. .claude/GSD.md
 
 ### Agent Definitions (loaded on demand from .claude/agents/)
 - signal-writer.md, signal-reviewer.md, signal-editor.md
