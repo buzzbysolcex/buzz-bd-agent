@@ -225,8 +225,17 @@ app.get('/agent', (req, res) => {
       { name: 'listing-proposal', protocol: 'REST', pricing: 'per-deal commission' },
       { name: 'safety-check', protocol: 'ACP', pricing: '$0.10/check' },
       { name: 'trending-intelligence', protocol: 'ACP', pricing: '$0.25/query' },
-      { name: 'listing-protocol-oracle', description: 'ELS-1 on-chain listing score oracle (coming Q2 2026)', status: 'proposed', endpoint: 'https://buzzbd.ai/proposal' }
+      { name: 'listing-protocol-oracle', description: 'ELS-1 on-chain listing score oracle', status: 'live', endpoint: 'https://buzzbd.ai/proposal' }
     ],
+    contracts: {
+      network: 'base-mainnet',
+      score_storage: '0xbf81316266dBB79947c358e2eAAc6F338Fa388Fb',
+      listing_oracle: '0xc584f9E3CF7d05D90Df0D59D6876B82D29f14463',
+      listing_escrow: '0xc77F14e05fE57B5caf3213b2C5Db1627Db11b3ED',
+      buzz_reputation: '0x723BD9E5aB505a1E653917F48B334f5d08F42747',
+      deployer: '0xa57f4010d200dc1E67cAbede025b90090cd99206',
+      total_deployed: 4
+    },
     infrastructure: { server: 'Hetzner CX43', llm: 'Claude Opus 4.6 (Pro Max, $0/day)', uptime: '24/7', ci_cd: 'GitHub Actions' }
   });
 });
