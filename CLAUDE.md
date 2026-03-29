@@ -6,7 +6,13 @@
 3. docs/MASTER-OPS-BD-SCREENING.md (7-phase pipeline, tri-source verification)
 4. docs/COLOSSEUM-COPILOT-INTEGRATION.md (Intel Source #18, hackathon data)
 5. docs/AIBTC-SIGNAL-FACTORY.md (revenue engine)
-4. docs/PLATFORM-DOMINANCE-DIRECTIVE.md (3 platforms)
+6. docs/FRONTIER-PROGRESS-TRACKER.md (Frontier build plan vs reality)
+7. docs/FRONTIER-TRACKER-DIRECTIVE.md (daily tracker + tweet-on-deploy rules)
+8. docs/BUZZ-SMART-CONTRACTS.md (Foundry capabilities, deployment plan)
+9. docs/DEV-BROWSER-INTEGRATION.md (dev-browser upgrade roadmap)
+10. docs/BD-WORKFLOW-V2-BROWSER-ENHANCED.md (browser-enhanced BD screening, supersedes browser sections)
+11. docs/ARIA-DEEP-RESEARCH-v2.md (ARIA discovery engine — service layer inside Buzz)
+12. docs/PLATFORM-DOMINANCE-DIRECTIVE.md (3 platforms)
 5. docs/MOLTBOOK-CONTENT-STRATEGY.md (content patterns)
 6. CREATIVE-AUTONOMY-DIRECTIVE.md (entrepreneur mode)
 7. TWITTER-SCAN-FUNNEL.md (Twitter strategy)
@@ -169,6 +175,7 @@ Old LLM burn: $3-4/day → New burn: **$0/day** (Pro Max unlimited)
 - Solana 8004: 9pQ6K...XUBS
 - Colosseum: Agent #3734
 - Moltbook: c606278b
+- Agentic Web Map: Recognized builder (agent community profile)
 - SolCex: Colorado SOS Entity #20248006798, FinCEN MSB
 - Domain: buzzbd.ai (Porkbun 2yr, Caddy HTTPS)
 - Subdomains: api.buzzbd.ai, sentinel.buzzbd.ai, dash.buzzbd.ai

@@ -102,6 +102,9 @@ const whaleSignalRoutes = require('./routes/whale-signal');
 // Project Opus Brain — Raw Data Endpoints for Claude Code
 const rawDataRoutes = require('./routes/raw-data');
 
+// ARIA — Autonomous Research & Intelligence Agent
+const ariaRoutes = require('./routes/aria');
+
 // x402 Premium endpoints (paywalled)
 const premiumRoutes = require('./routes/premium');
 
@@ -197,11 +200,11 @@ app.get('/agent', (req, res) => {
     dna: '3.0',
     type: 'autonomous-bd-agent',
     specialization: 'exchange-listing-intelligence',
-    description: 'Autonomous AI agent for exchange listing business development. Scores tokens across 5 dimensions using 28 intelligence sources with tri-source verification.',
+    description: 'Autonomous AI agent for exchange listing business development. Scores tokens across 5 dimensions using 29 intelligence sources with tri-source verification. ScoreStorage.sol live on Base mainnet.',
     capabilities: ['token-scoring', 'triple-verification', 'adversarial-debate', 'listing-simulation', 'signal-generation', 'deal-proposal', 'els-1-oracle'],
     scoring: { dimensions: 5, max_score: 100, pipeline_size: pipelineSize, hot_tokens: hotTokens, qualified_tokens: qualifiedTokens },
     agents: 12,
-    intel_sources: 28,
+    intel_sources: 29,
     data_platforms: ['DexScreener', 'DexTools', 'Jupiter', 'CoinGecko', 'RugCheck'],
     verification: { method: 'tri-source', sources: 3, tiers: ['on-chain (1.0)', 'market (0.6)', 'social (0.3)'] },
     identity: {
@@ -213,7 +216,8 @@ app.get('/agent', (req, res) => {
       aibtc_correspondent: 'Ionic Nova',
       agent_tld: ['buzz.agent', 'buzzbd.agent'],
       colosseum: '#3734',
-      izhc: { name: 'IZHC', description: 'Institute for Zero-Human Companies member', url: 'https://zhcinstitute.com', status: 'active', joined: '2026-03-27' }
+      izhc: { name: 'IZHC', description: 'Institute for Zero-Human Companies member', url: 'https://zhcinstitute.com', status: 'active', joined: '2026-03-27' },
+      agentic_web_map: { name: 'Agentic Web Map', description: 'Agent Community recognized builder', status: 'active', joined: '2026-03-29' }
     },
     contact: { twitter: '@BuzzBySolCex', telegram: '@Ogie2', api: 'https://api.buzzbd.ai', website: 'https://buzzbd.ai' },
     services: [
@@ -367,6 +371,9 @@ app.use('/api/v1/whale-signal', apiKeyAuth, whaleSignalRoutes);
 
 // Project Opus Brain — Raw data endpoints for Claude Code
 app.use('/api/v1', apiKeyAuth, rawDataRoutes);
+
+// ARIA — Autonomous Research & Intelligence Agent
+app.use('/api/v1/aria', apiKeyAuth, ariaRoutes);
 
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 
