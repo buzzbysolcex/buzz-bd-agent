@@ -248,6 +248,13 @@ async function runSimulation(tokenAddress, chain, options = {}) {
   const simulationId = `sim_${require('crypto').randomBytes(8).toString('hex')}`;
   const db = getDB();
 
+  // Track simulation count
+  try {
+    db.prepare(`CREATE TABLE IF NOT EXISTS simulation_counter (id INTEGER PRIMARY KEY, count INTEGER DEFAULT 0, last_run TEXT)`).run();
+    db.prepare(`INSERT OR IGNORE INTO simulation_counter (id, count) VALUES (1, 0)`).run();
+    db.prepare(`UPDATE simulation_counter SET count = count + 1, last_run = datetime('now') WHERE id = 1`).run();
+  } catch (e) { /* non-critical */ }
+
   // 1. Fetch token data
   const { token, scores } = lookupToken(db, tokenAddress, chain);
   const symbol = token?.ticker || token?.name || tokenAddress.slice(0, 8);
