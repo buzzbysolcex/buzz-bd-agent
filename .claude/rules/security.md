@@ -10,3 +10,10 @@ paths: ["**/auth*", "**/security*", "**/wallet*", "**/.env*", "**/credential*"]
 - SSH: key-only auth, no passwords
 - transfer_tokens + buy_token = REQUIRE Ogie approval via Telegram
 - Discord bot token, Firecrawl key, Moltbook key = NEVER in Git
+- HEYANON WALLET KEYS:
+  - Location: /home/claude-code/.env.heyanon (chmod 600)
+  - NEVER log, print, echo, or transmit private keys or seed phrase
+  - NEVER include in git commits, War Room messages, tweets, or logs
+  - File permissions must remain 600 (owner read/write only)
+  - READ ops autonomous. WRITE/TRANSFER requires CEO approval.
+  - Compromise protocol: if keys exposed, Ogie must transfer all funds immediately
