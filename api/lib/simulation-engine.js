@@ -419,4 +419,187 @@ function runDebate(completedVerdicts, symbol, chain) {
   });
 }
 
-module.exports = { runSimulation, PERSONAS, VARIATIONS, WEIGHT_OFFSETS, VERDICT_MAP, calculateConsensus, runDebate };
+// ─── Monte Carlo Stage 2 — MiroFish ─────────────────────────
+// 1000 agents × 100 iterations → probability distribution
+// Rule-based, zero LLM cost, ~5 min per token
+// Cluster 5: market_dynamics (spread, depth, MEV, arb)
+
+const CLUSTER_TEMPLATES = {
+  degen:           { riskTolerance: 0.9, conviction: 0.3, marketSensitivity: 0.8, liquidityWeight: 0.2 },
+  whale:           { riskTolerance: 0.4, conviction: 0.7, marketSensitivity: 0.5, liquidityWeight: 0.9 },
+  institutional:   { riskTolerance: 0.2, conviction: 0.8, marketSensitivity: 0.3, liquidityWeight: 0.95 },
+  community:       { riskTolerance: 0.6, conviction: 0.5, marketSensitivity: 0.6, liquidityWeight: 0.4 },
+  market_dynamics: { riskTolerance: 0.5, conviction: 0.6, marketSensitivity: 0.9, liquidityWeight: 0.8 }
+};
+
+function generateMCAgents(count) {
+  const perCluster = Math.floor(count / 5);
+  const agents = [];
+  for (const [type, template] of Object.entries(CLUSTER_TEMPLATES)) {
+    for (let i = 0; i < perCluster; i++) {
+      agents.push({
+        id: `${type}_${i}`,
+        cluster: type,
+        riskTolerance: template.riskTolerance * (0.7 + Math.random() * 0.6),
+        conviction: template.conviction * (0.7 + Math.random() * 0.6),
+        marketSensitivity: template.marketSensitivity * (0.7 + Math.random() * 0.6),
+        liquidityWeight: template.liquidityWeight * (0.7 + Math.random() * 0.6)
+      });
+    }
+  }
+  return agents;
+}
+
+function perturb(value, range) {
+  return value * (1 - range + Math.random() * range * 2);
+}
+
+function runSingleMCSim(tokenData, agents) {
+  const score = tokenData.composite_score || tokenData.score || 50;
+  const liq = tokenData.liquidity || 0;
+  const vol = tokenData.volume_24h || 0;
+  const holders = tokenData.holders || 0;
+  const mcap = tokenData.mcap || tokenData.fdv || 0;
+  const safety = tokenData.safety_score || 50;
+
+  let buyVotes = 0, sellVotes = 0, holdVotes = 0;
+  let totalConviction = 0;
+
+  for (const agent of agents) {
+    // Each agent evaluates based on their profile
+    const scoreSignal = (score / 100 - 0.5) * 2; // -1 to +1
+    const liqSignal = liq > 100000 ? 0.3 : liq > 50000 ? 0 : -0.3;
+    const safetySignal = (safety / 100 - 0.5) * 2;
+    const marketSignal = (mcap > 500000 && mcap < 50000000) ? 0.2 : -0.2;
+
+    // Weighted decision
+    const signal =
+      scoreSignal * agent.conviction +
+      liqSignal * agent.liquidityWeight +
+      safetySignal * agent.riskTolerance +
+      marketSignal * agent.marketSensitivity +
+      (Math.random() - 0.5) * 0.3; // noise
+
+    if (signal > 0.15 * (1 / agent.riskTolerance)) {
+      buyVotes++;
+      totalConviction += Math.abs(signal);
+    } else if (signal < -0.15 * (1 / agent.riskTolerance)) {
+      sellVotes++;
+      totalConviction += Math.abs(signal);
+    } else {
+      holdVotes++;
+    }
+  }
+
+  const total = buyVotes + sellVotes + holdVotes;
+  const consensusPct = total > 0 ? Math.max(buyVotes, sellVotes) / total : 0.5;
+  const direction = buyVotes > sellVotes ? 'BUY' : 'SELL';
+  const p = buyVotes / Math.max(1, buyVotes + sellVotes); // listing probability
+
+  const W = 5000; // listing fee
+  const L = 200;  // BD cost
+  const ev = p * W - (1 - p) * L;
+
+  return {
+    ev,
+    consensusPct,
+    direction,
+    buyVotes,
+    sellVotes,
+    holdVotes,
+    agentCount: total,
+    p
+  };
+}
+
+async function monteCarloSimulate(tokenData, options = {}) {
+  const {
+    agentCount = 1000,
+    iterations = 100,
+    perturbRange = 0.15
+  } = options;
+
+  const baseAgents = generateMCAgents(agentCount);
+  const results = [];
+
+  for (let i = 0; i < iterations; i++) {
+    const perturbedAgents = baseAgents.map(agent => ({
+      ...agent,
+      riskTolerance: perturb(agent.riskTolerance, perturbRange),
+      conviction: perturb(agent.conviction, perturbRange),
+      marketSensitivity: perturb(agent.marketSensitivity, perturbRange),
+      liquidityWeight: perturb(agent.liquidityWeight, perturbRange)
+    }));
+
+    results.push(runSingleMCSim(tokenData, perturbedAgents));
+  }
+
+  return computeDistribution(results);
+}
+
+function computeDistribution(results) {
+  const evs = results.map(r => r.ev).sort((a, b) => a - b);
+  const consensuses = results.map(r => r.consensusPct);
+  const ps = results.map(r => r.p);
+  const n = evs.length;
+
+  const avg = arr => arr.reduce((s, v) => s + v, 0) / arr.length;
+  const stddev = arr => {
+    const m = avg(arr);
+    return Math.sqrt(arr.reduce((s, v) => s + (v - m) ** 2, 0) / arr.length);
+  };
+
+  const evDist = {
+    mean: Math.round(avg(evs) * 100) / 100,
+    median: Math.round(evs[Math.floor(n / 2)] * 100) / 100,
+    stddev: Math.round(stddev(evs) * 100) / 100,
+    p5: Math.round(evs[Math.floor(n * 0.05)] * 100) / 100,
+    p25: Math.round(evs[Math.floor(n * 0.25)] * 100) / 100,
+    p75: Math.round(evs[Math.floor(n * 0.75)] * 100) / 100,
+    p95: Math.round(evs[Math.floor(n * 0.95)] * 100) / 100,
+    min: Math.round(evs[0] * 100) / 100,
+    max: Math.round(evs[n - 1] * 100) / 100
+  };
+
+  const decision = decideFromDistribution(evs);
+
+  // Cluster breakdown from last iteration
+  const lastResult = results[results.length - 1];
+  const clusterSummary = {};
+  for (const [type] of Object.entries(CLUSTER_TEMPLATES)) {
+    const clusterResults = results.map(r => r);
+    clusterSummary[type] = { agents: Math.floor(results[0].agentCount / 5) };
+  }
+
+  return {
+    ev: evDist,
+    consensus: {
+      mean: Math.round(avg(consensuses) * 1000) / 1000,
+      stddev: Math.round(stddev(consensuses) * 1000) / 1000
+    },
+    listing_probability: {
+      mean: Math.round(avg(ps) * 1000) / 1000,
+      stddev: Math.round(stddev(ps) * 1000) / 1000
+    },
+    iterations: n,
+    agents: results[0]?.agentCount || 0,
+    decision,
+    clusters: Object.keys(CLUSTER_TEMPLATES)
+  };
+}
+
+function decideFromDistribution(evs) {
+  const avg_ev = evs.reduce((s, v) => s + v, 0) / evs.length;
+  const p5 = evs[Math.floor(evs.length * 0.05)];
+
+  if (avg_ev > 200 && p5 > -100) return 'LIST';
+  if (avg_ev > 200 && p5 <= -100) return 'CAUTION';
+  if (avg_ev > 0) return 'MONITOR';
+  return 'REJECT';
+}
+
+module.exports = {
+  runSimulation, PERSONAS, VARIATIONS, WEIGHT_OFFSETS, VERDICT_MAP,
+  calculateConsensus, runDebate,
+  monteCarloSimulate, generateMCAgents, CLUSTER_TEMPLATES
+};
