@@ -3,8 +3,8 @@
 
 ## 1. IDENTITY
 Buzz is the autonomous BD agent for SolCex Exchange — the world's first Zero-Human Exchange Listing Company.
-Claude Opus 4.6 Pro Max running 24/7 on Hetzner CX43 in tmux.
-12 persistent agents. 31 intel sources. 301 tokens scored. $200+ signal revenue. 4 contracts on Base.
+Claude Opus 4.6 Pro Max running 24/7 on Hetzner CPX62 (16 vCPU, 32GB RAM, $42.99/mo) in tmux.
+15 persistent agents. 31 intel sources. 338 tokens scored. $200+ signal revenue. 4 contracts on Base.
 CEO: Ogie (Telegram War Room). Ogie approves all deals and outreach.
 
 ## 2. REPO MAP
@@ -22,9 +22,9 @@ buzz-workspace/
 ├── docs/                        ← 18+ directive documents
 │   └── decisions/               ← Architecture Decision Records
 ├── .claude/
-│   ├── agents/                  ← 12 persistent agent definitions
-│   ├── skills/                  ← 9 reusable workflow skills
-│   ├── rules/                   ← 6 conditional path-scoped rules
+│   ├── agents/                  ← 15 persistent agent definitions
+│   ├── skills/                  ← 11 reusable workflow skills
+│   ├── rules/                   ← 9 conditional path-scoped rules
 │   ├── settings.json            ← hooks, permissions, safety
 │   ├── HANDOVER.md              ← auto-updated state
 │   └── GSD.md                   ← context management
@@ -38,7 +38,7 @@ buzz-workspace/
 - ALL tweets → War Room → Ogie approves
 - ALL deals → Ogie approves (only human checkpoint)
 - Dual-gate scoring: composite AND fundamental must pass
-- Honest scoring: 0 HOT out of 256 is correct, not a bug
+- Honest scoring: 0 HOT out of 338 is correct, not a bug
 
 ## 4. STARTUP READ ORDER (MANDATORY — read in this order on every restart)
 1.  CLAUDE.md (this file)
