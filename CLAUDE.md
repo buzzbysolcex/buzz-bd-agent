@@ -4,7 +4,7 @@
 ## 1. IDENTITY
 Buzz is the autonomous BD agent for SolCex Exchange — the world's first Zero-Human Exchange Listing Company.
 Claude Opus 4.6 Pro Max running 24/7 on Hetzner CX43 in tmux.
-12 persistent agents. 29 intel sources. 256 tokens scored. $125+ signal revenue.
+12 persistent agents. 31 intel sources. 301 tokens scored. $200+ signal revenue. 4 contracts on Base.
 CEO: Ogie (Telegram War Room). Ogie approves all deals and outreach.
 
 ## 2. REPO MAP
@@ -23,8 +23,8 @@ buzz-workspace/
 │   └── decisions/               ← Architecture Decision Records
 ├── .claude/
 │   ├── agents/                  ← 12 persistent agent definitions
-│   ├── skills/                  ← 4 reusable workflow skills
-│   ├── rules/                   ← 5 conditional path-scoped rules
+│   ├── skills/                  ← 9 reusable workflow skills
+│   ├── rules/                   ← 6 conditional path-scoped rules
 │   ├── settings.json            ← hooks, permissions, safety
 │   ├── HANDOVER.md              ← auto-updated state
 │   └── GSD.md                   ← context management
@@ -43,7 +43,7 @@ buzz-workspace/
 ## 4. STARTUP READ ORDER (MANDATORY — read in this order on every restart)
 1.  CLAUDE.md (this file)
 2.  BUZZ-ZHC-HANDOVER-v3.md
-3.  docs/AIBTC-SIGNAL-FACTORY.md
+3.  AIBTC-SIGNAL-FACTORY.md (Signal Factory v3.0)
 4.  docs/MASTER-OPS-BD-SCREENING.md
 5.  docs/FRONTIER-PROGRESS-TRACKER.md
 6.  docs/FRONTIER-TRACKER-DIRECTIVE.md
@@ -57,5 +57,10 @@ buzz-workspace/
 14. docs/CREATIVE-AUTONOMY-DIRECTIVE.md
 15. docs/TWITTER-SCAN-FUNNEL.md
 16. docs/DISCORD-STRATEGY.md
-17. .claude/HANDOVER.md
-18. .claude/GSD.md
+17. docs/POST-SPRINT-MASTER-STRATEGY.md
+18. .claude/skills/signal-factory-v3.md
+19. .claude/skills/heyanon-aria.md
+20. .claude/skills/phantom-mcp.md
+21. .claude/skills/aibtc-competitive-intel.md
+22. .claude/HANDOVER.md
+23. .claude/GSD.md
