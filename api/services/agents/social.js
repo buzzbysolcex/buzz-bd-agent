@@ -19,6 +19,10 @@ async function runSocialAgent({ address, chain, requestId }) {
   let rawScore = 50; // Start neutral
 
   try {
+    // ─── Check DexScreener + CoinGecko for social data first (P0 fix) ───
+    const dexSocials = await checkDexScreenerSocials(address, chain, factors, requestId);
+    const cgListed = await checkCoinGeckoListed(address, chain, factors, requestId);
+
     // ─── Run social checks in parallel ───
     const [atvResult, serperResult, grokResult] = await Promise.allSettled([
       checkAtvIdentity(address, chain, factors, requestId),
@@ -340,6 +344,79 @@ async function checkSocialSentiment(address, chain, factors, requestId) {
   } catch (err) {
     factors.push({ name: 'social_sentiment_error', impact: 0, detail: err.message });
     return defaultResult;
+  }
+}
+
+/**
+ * Check DexScreener .info.socials and .info.websites (P0 fix)
+ * Many tokens have socials in .pairs[0].info but not at top level
+ */
+async function checkDexScreenerSocials(address, chain, factors, requestId) {
+  try {
+    const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${address}`, {
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const pair = data.pairs?.[0];
+    if (!pair) return null;
+
+    const info = pair.info || {};
+    const websites = info.websites || [];
+    const socials = info.socials || [];
+
+    // Check websites
+    if (websites.length > 0) {
+      factors.push({ name: 'dex_website_found', impact: 10, detail: `Website: ${websites[0].url}` });
+    }
+
+    // Check socials (twitter, telegram, discord)
+    for (const s of socials) {
+      if (s.type === 'twitter' || s.url?.includes('x.com') || s.url?.includes('twitter.com')) {
+        factors.push({ name: 'dex_twitter_found', impact: 10, detail: `Twitter: ${s.url}` });
+      }
+      if (s.type === 'telegram' || s.url?.includes('t.me')) {
+        factors.push({ name: 'dex_telegram_found', impact: 5, detail: `Telegram: ${s.url}` });
+      }
+      if (s.type === 'discord' || s.url?.includes('discord')) {
+        factors.push({ name: 'dex_discord_found', impact: 5, detail: `Discord: ${s.url}` });
+      }
+    }
+
+    return { websites, socials };
+  } catch (e) {
+    console.log(`[${requestId}] DexScreener social check failed: ${e.message}`);
+    return null;
+  }
+}
+
+/**
+ * Check if token is listed on CoinGecko (P0 fix)
+ */
+async function checkCoinGeckoListed(address, chain, factors, requestId) {
+  try {
+    const cgChain = chain === 'bsc' ? 'binance-smart-chain' : chain;
+    const res = await fetch(`https://api.coingecko.com/api/v3/coins/${cgChain}/contract/${address}`, {
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    if (data.id) {
+      factors.push({ name: 'coingecko_listed', impact: 10, detail: `CoinGecko: ${data.name} (${data.symbol})` });
+      if (data.links?.twitter_screen_name) {
+        factors.push({ name: 'cg_twitter', impact: 5, detail: `CG Twitter: @${data.links.twitter_screen_name}` });
+      }
+      if (data.links?.homepage?.[0]) {
+        factors.push({ name: 'cg_homepage', impact: 5, detail: `CG Homepage: ${data.links.homepage[0]}` });
+      }
+      return true;
+    }
+    return false;
+  } catch (e) {
+    console.log(`[${requestId}] CoinGecko check failed: ${e.message}`);
+    return false;
   }
 }
 
