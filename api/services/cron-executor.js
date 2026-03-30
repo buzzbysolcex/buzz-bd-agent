@@ -334,6 +334,16 @@ function registerAllJobs() {
     return `twitter: ${status.status || 'unknown'}`;
   });
 
+  register('twitter-brain-scan', '0 */4 * * *', async () => {
+    try {
+      const { executeTwitterBrainScan } = require('../cron/twitter-brain-scan');
+      const result = await executeTwitterBrainScan();
+      return `brain-scan: ${result.status || 'ok'} routed=${result.tokensRouted || 0}`;
+    } catch (err) {
+      return `brain-scan: error — ${err.message}`;
+    }
+  });
+
   // ─── BRAIN TRIGGERS ───
   register('morning-briefing', '0 0 * * *', async () => {
     await triggerBrain('Buzz: run morning briefing. Full 11-section CEO format. Check ~/pending-followups.json for overdue items.');

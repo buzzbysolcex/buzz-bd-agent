@@ -46,14 +46,15 @@ async function enrichToken(token) {
   const addr = token.address;
   const started = Date.now();
 
-  // Fire all enrichment calls in parallel
-  const [scanResult, safetyResult, walletResult, socialResult, technicalResult, scoresResult] = await Promise.allSettled([
+  // Fire all enrichment calls in parallel (including HeyAnon rug-check)
+  const [scanResult, safetyResult, walletResult, socialResult, technicalResult, scoresResult, rugCheckResult] = await Promise.allSettled([
     buzzFetch(`/api/v1/scan/raw/${addr}?chain=${chain}`),
     buzzFetch(`/api/v1/safety/raw/${addr}?chain=${chain}`),
     buzzFetch(`/api/v1/wallet/raw/${addr}?chain=${chain}`),
     buzzFetch(`/api/v1/social/raw/${addr}?chain=${chain}`),
     buzzFetch(`/api/v1/technical/raw/${addr}?chain=${chain}`),
-    buzzFetch(`/api/v1/scores/components/${addr}`)
+    buzzFetch(`/api/v1/scores/components/${addr}`),
+    buzzFetch(`/api/v1/heyanon/rug-check/${addr}?chain=${chain}`)
   ]);
 
   const sources = [];
@@ -128,6 +129,13 @@ async function enrichToken(token) {
     if (d.bdClass) token.classification.bd_class = d.bdClass;
     if (d.dualGate != null) token.classification.dual_gate = d.dualGate;
     if (d.outreachReady != null) token.classification.outreach_ready = d.outreachReady;
+  }
+
+  // ─── Merge HeyAnon rug-check data ───────────────────
+  if (rugCheckResult.status === 'fulfilled' && rugCheckResult.value.success) {
+    const d = rugCheckResult.value.data;
+    sources.push('heyanon-rug-check');
+    if (d.rug_check) token.safety.heyanon_rug_check = d.rug_check;
   }
 
   token.metadata.enriched_at = new Date().toISOString();
