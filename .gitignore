@@ -70,3 +70,5 @@ deploy*.yaml
 # API keys
 *.env
 .env.*
+.env.heyanon
+.env.heyanon
