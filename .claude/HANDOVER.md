@@ -1,5 +1,5 @@
 # BUZZ STATE HANDOVER
-## Auto-updated: 2026-03-30 16:30 UTC | Day 407 | Monday
+## Auto-updated: 2026-03-30 23:30 UTC | Day 407 | Monday
 
 ## WHAT TO DO FIRST
 1. Read CLAUDE.md (identity)
@@ -10,7 +10,7 @@
 
 ## SYSTEM STATUS
 - API: healthy (135 endpoints, 62 tables)
-- Pipeline: 349 tokens tracked
+- Pipeline: 363 tokens tracked
 
 ## TOP 5 PROSPECTS
 - BALLWARS: 95 (solana) — scored
