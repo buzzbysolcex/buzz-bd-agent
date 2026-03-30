@@ -105,9 +105,6 @@ const rawDataRoutes = require('./routes/raw-data');
 // ARIA — Autonomous Research & Intelligence Agent
 const ariaRoutes = require('./routes/aria');
 
-// v8.3.0: HeyAnon MCP — Intel Source #30 (19 chains, Rug-O-Meter)
-const heyanonRoutes = require('./routes/heyanon');
-
 // v8.3.0: Phantom MCP — Intel Source #31 (wallet ops, price verification)
 const phantomRoutes = require('./routes/phantom');
 
@@ -403,9 +400,6 @@ app.use('/api/v1', apiKeyAuth, rawDataRoutes);
 
 // ARIA — Autonomous Research & Intelligence Agent
 app.use('/api/v1/aria', apiKeyAuth, ariaRoutes);
-
-// v8.3.0: HeyAnon MCP — Intel Source #30
-app.use('/api/v1/heyanon', apiKeyAuth, heyanonRoutes);
 
 // v8.3.0: Phantom MCP — Intel Source #31
 app.use('/api/v1/phantom', apiKeyAuth, phantomRoutes);
