@@ -52,7 +52,12 @@ function ensureTable() {
 }
 
 // Run on module load
-try { ensureTable(); } catch (e) { /* DB may not be ready yet at require time */ }
+try {
+  ensureTable();
+  // v8.3.0: Add rug_score column for HeyAnon Rug-O-Meter integration
+  const db = getDB();
+  try { db.exec('ALTER TABLE aria_tokens ADD COLUMN rug_score TEXT'); } catch { /* already exists */ }
+} catch (e) { /* DB may not be ready yet at require time */ }
 
 /**
  * Upsert a normalized token into aria_tokens
