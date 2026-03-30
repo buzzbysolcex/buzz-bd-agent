@@ -178,6 +178,20 @@ app.use(rateLimit);
 // ─── Public Routes (no auth) ─────────────────────────
 app.get('/.well-known/x402.json', (req, res) => res.json(X402_DISCOVERY));
 
+// OpenAI/MCP plugin manifest
+app.get('/.well-known/ai-plugin.json', (req, res) => res.json({
+  schema_version: 'v1',
+  name_for_human: 'Buzz BD Agent',
+  name_for_model: 'buzz_bd_agent',
+  description_for_human: 'Honest token scoring and exchange listing intelligence. 11-factor scoring, 50-agent simulation, on-chain proof on Base.',
+  description_for_model: 'Query Buzz for token scores, pipeline data, and listing intelligence. Buzz scores tokens across 11 factors with dual-gate verification and records scores on-chain via ScoreStorage on Base mainnet.',
+  auth: { type: 'none' },
+  api: { type: 'openapi', url: 'https://api.buzzbd.ai/api/v1/info' },
+  logo_url: 'https://buzzbd.ai/images/buzz-bee-mascot.jpg',
+  contact_email: 'buzzbysolcex@gmail.com',
+  legal_info_url: 'https://buzzbd.ai/proposal'
+}));
+
 // v8.2.0: Machine-readable agent identity (P0 for ZHC readiness)
 // JSON-LD / Schema.org compatible for agent-to-agent discovery
 app.get('/agent', (req, res) => {
