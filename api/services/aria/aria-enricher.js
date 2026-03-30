@@ -6,6 +6,8 @@
  * Buzz BD Agent | ARIA Service Layer
  */
 
+const { getHyperliquidOI, checkLendingMarkets, checkMultiDEXPresence, calculateARIADepth } = require('../../lib/heyanon-defi');
+
 const BUZZ_API = 'http://127.0.0.1:3000';
 const ADMIN_KEY = process.env.BUZZ_API_ADMIN_KEY;
 const TIMEOUT_MS = 20000;
@@ -131,7 +133,20 @@ async function enrichToken(token) {
     if (d.outreachReady != null) token.classification.outreach_ready = d.outreachReady;
   }
 
-  // NOTE: HeyAnon rug-check merge will go here when MCP session is connected
+  // ─── HeyAnon DeFi depth enrichment ─────────────────
+  try {
+    const symbol = token.symbol || token.name;
+    const depth = await calculateARIADepth(addr, symbol);
+    if (depth.aria_depth_score > 0) {
+      sources.push('heyanon_defi');
+      if (!token.defi) token.defi = {};
+      token.defi.depth_score = depth.aria_depth_score;
+      token.defi.depth_factors = depth.factors;
+      token.defi.depth_calculated_at = depth.calculated_at;
+    }
+  } catch {
+    // HeyAnon enrichment is best-effort — never block on failure
+  }
 
   token.metadata.enriched_at = new Date().toISOString();
   token.metadata.enrichment_sources = sources;

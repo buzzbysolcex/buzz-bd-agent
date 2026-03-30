@@ -58,16 +58,28 @@ function dualGateCheck(scoreBreakdown) {
   };
 }
 
+// Map classification labels to valid pipeline_tokens.stage values
+const CLASSIFICATION_TO_STAGE = {
+  hot: 'prospect',       // 85+ → ready for BD outreach
+  qualified: 'scored',   // 70-84 → scored, needs review
+  watch: 'scored',       // 50-69 → scored but not actionable
+  skip: 'discovered'     // <50 → stay in discovered
+};
+
 function classifyAndGate(score, scoreBreakdown) {
-  const stage = classifyToken(score);
+  const classification = classifyToken(score);
   const gate = dualGateCheck(scoreBreakdown);
 
+  // Determine effective classification (dual-gate can downgrade)
+  const effectiveClassification = (classification === 'hot' || classification === 'qualified') && !gate.pass
+    ? 'watch' : classification;
+
   return {
-    stage,
+    stage: classification,
     dual_gate_pass: gate.pass,
     gate_details: gate,
-    // Only advance to hot/qualified if dual gate passes
-    effective_stage: (stage === 'hot' || stage === 'qualified') && !gate.pass ? 'watch' : stage
+    // effective_stage must be a valid pipeline stage for DB constraint
+    effective_stage: CLASSIFICATION_TO_STAGE[effectiveClassification] || 'discovered'
   };
 }
 
