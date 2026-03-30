@@ -6,7 +6,13 @@
  * Buzz BD Agent | ARIA Service Layer
  */
 
-const { getHyperliquidOI, checkLendingMarkets, checkMultiDEXPresence, calculateARIADepth } = require('../../lib/heyanon-defi');
+// Lazy-load HeyAnon DeFi module — ethers may not be installed in all environments
+let heyanonDefi = null;
+try {
+  heyanonDefi = require('../../lib/heyanon-defi');
+} catch {
+  // HeyAnon DeFi module not available — enrichment will skip gracefully
+}
 
 const BUZZ_API = 'http://127.0.0.1:3000';
 const ADMIN_KEY = process.env.BUZZ_API_ADMIN_KEY;
@@ -135,8 +141,9 @@ async function enrichToken(token) {
 
   // ─── HeyAnon DeFi depth enrichment ─────────────────
   try {
+    if (!heyanonDefi) throw new Error('heyanon-defi not loaded');
     const symbol = token.symbol || token.name;
-    const depth = await calculateARIADepth(addr, symbol);
+    const depth = await heyanonDefi.calculateARIADepth(addr, symbol);
     if (depth.aria_depth_score > 0) {
       sources.push('heyanon_defi');
       if (!token.defi) token.defi = {};
