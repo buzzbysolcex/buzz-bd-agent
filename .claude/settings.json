@@ -114,5 +114,14 @@
   },
   "env": {
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "50"
+  },
+  "mcpServers": {
+    "phantom": {
+      "command": "node",
+      "args": ["/home/claude-code/.local/node_modules/@phantom/mcp-server/dist/cli.js"],
+      "env": {
+        "HOME": "/home/claude-code"
+      }
+    }
   }
 }
