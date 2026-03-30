@@ -107,6 +107,7 @@ const ariaRoutes = require('./routes/aria');
 
 // v8.3.0: Phantom MCP — Intel Source #31 (wallet ops, price verification)
 const phantomRoutes = require('./routes/phantom');
+const microbuzzV2Routes = require('./routes/microbuzz-v2');
 
 // x402 Premium endpoints (paywalled)
 const premiumRoutes = require('./routes/premium');
@@ -403,6 +404,9 @@ app.use('/api/v1/aria', apiKeyAuth, ariaRoutes);
 
 // v8.3.0: Phantom MCP — Intel Source #31
 app.use('/api/v1/phantom', apiKeyAuth, phantomRoutes);
+
+// v8.3.0+: MicroBuzz v2 — 500-agent hybrid AMM prediction (ADR-010)
+app.use('/api/v1/microbuzz', apiKeyAuth, microbuzzV2Routes);
 
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 
