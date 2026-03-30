@@ -11,8 +11,26 @@
  * SAFETY: All read-only. No auth needed for public data.
  */
 
-const { ethers } = require('ethers');
-const { RPC } = require('./heyanon-wallet');
+let ethers;
+try {
+  ethers = require('ethers');
+} catch {
+  // ethers not installed — EVM contract reads disabled, Hyperliquid still works
+}
+
+let RPC;
+try {
+  ({ RPC } = require('./heyanon-wallet'));
+} catch {
+  RPC = {
+    ethereum: 'https://eth.llamarpc.com',
+    base: 'https://mainnet.base.org',
+    bsc: 'https://bsc-dataseed1.binance.org',
+    arbitrum: 'https://arb1.arbitrum.io/rpc',
+    optimism: 'https://mainnet.optimism.io',
+    polygon: 'https://polygon-rpc.com'
+  };
+}
 
 // ─── HYPERLIQUID (public API, no auth) ───────────────
 
@@ -83,6 +101,7 @@ const AAVE_POOL_ABI = [
 ];
 
 async function getAaveMarkets(chain = 'ethereum') {
+  if (!ethers) return { chain, supported: false, error: 'ethers not installed' };
   const poolAddr = AAVE_V3_POOL[chain];
   if (!poolAddr) return { chain, supported: false };
 
@@ -145,6 +164,7 @@ const WETH = {
 const FEE_TIERS = [500, 3000, 10000];
 
 async function checkDEXLiquidity(tokenAddress, chain = 'ethereum') {
+  if (!ethers) return { chain, pools_found: 0, error: 'ethers not installed' };
   const factoryAddr = UNISWAP_V3_FACTORY[chain];
   const weth = WETH[chain];
   if (!factoryAddr || !weth) return { chain, pools_found: 0 };
