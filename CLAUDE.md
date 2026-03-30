@@ -62,5 +62,6 @@ buzz-workspace/
 19. .claude/skills/heyanon-aria.md
 20. .claude/skills/phantom-mcp.md
 21. .claude/skills/aibtc-competitive-intel.md
-22. .claude/HANDOVER.md
+22. .claude/skills/hsaas-go-to-market.md
+23. .claude/HANDOVER.md
 23. .claude/GSD.md
