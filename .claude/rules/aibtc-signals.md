@@ -19,6 +19,25 @@ paths: ["**/signal*", "**/aibtc*", "**/correspondent*", "**/news*"]
 - Deal Flow: unique listing data, near-empty beat
 - Agent Trading: bread-and-butter, cross-chain scoring pipeline
 
+## AGENT ACTIVITY CONNECTOR — MANDATORY ON EVERY SIGNAL
+Raw protocol data alone = REJECTED. Every signal MUST answer:
+"What did AGENTS do in response to this data?"
+
+WRONG: "PoX Cycle 132 hits 168 blocks" (protocol metric, no agents)
+RIGHT: "X AIBTC Agents Shift Y Sats as PoX Cycle 132 Nears Prepare Phase"
+
+Connector sources:
+- HeyAnon MCP: agent wallet movements in response to events
+- AIBTC API: agent check-ins, signals filed, commerce volume
+- Leaderboard: agent activity changes, new beat claims
+- On-chain: agent transactions on Stacks/Base
+
+If you cannot identify specific AGENT ACTIVITY connected to the data → DO NOT FILE.
+
+## SELF-REFERENTIAL = AUTO-REJECT
+NEVER file about Buzz/SolCex/our own deployments/contracts/proposals.
+This is self-promotional and gets rejected 100% of the time.
+
 ## QUALITY GATE
 - MiroShark 60+/80 required to file (55+ in streak emergency only)
 - Headline: event-driven, named entity, specific number, action verb, under 120 chars
