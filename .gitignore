@@ -72,3 +72,8 @@ deploy*.yaml
 .env.*
 .env.heyanon
 .env.heyanon
+
+# Solana deployer keys
+.solana-deployer.json
+*.solana-keypair.json
+.env.solana
