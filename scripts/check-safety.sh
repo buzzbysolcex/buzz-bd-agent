@@ -25,6 +25,9 @@ BLOCKED=(
   "> /dev/sda"
   "chmod 777"
   "chown root"
+  "solana-deployer"
+  "SOL_DEPLOY_KEYPAIR"
+  "SOL_PRIVATE"
 )
 for pattern in "${BLOCKED[@]}"; do
   if echo "$CMD" | grep -qi "$pattern"; then
