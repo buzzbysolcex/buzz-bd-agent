@@ -414,34 +414,18 @@ app.use('/api/v1/microbuzz', apiKeyAuth, microbuzzV2Routes);
 // v9.0: Feature flags endpoint
 app.get('/api/v1/flags', apiKeyAuth, (req, res) => res.json(allFlags()));
 
-// v9.0: Claude Code architecture modules (feature-gated)
+// v9.0: Claude Code architecture modules (routes registered, init deferred to start())
 if (feature('MAILBOX')) {
-  const { initMailbox } = require('./services/mailbox/mailbox');
-  const mailboxRoutes = require('./services/mailbox/mailbox-routes');
-  initMailbox();
-  app.use('/api/v1/mailbox', apiKeyAuth, mailboxRoutes);
+  app.use('/api/v1/mailbox', apiKeyAuth, require('./services/mailbox/mailbox-routes'));
 }
 if (feature('TASK_DAG')) {
-  const { initTasks } = require('./services/tasks/task-manager');
-  const taskRoutes = require('./services/tasks/task-routes');
-  initTasks();
-  app.use('/api/v1/tasks', apiKeyAuth, taskRoutes);
+  app.use('/api/v1/tasks', apiKeyAuth, require('./services/tasks/task-routes'));
 }
 if (feature('DYNAMIC_CRONS')) {
-  const { initDynamicCrons, getDueCrons, recordRun } = require('./services/cron/dynamic-cron');
-  const cronDynRoutes = require('./services/cron/cron-routes');
-  initDynamicCrons();
-  app.use('/api/v1/dynamic-crons', apiKeyAuth, cronDynRoutes);
+  app.use('/api/v1/dynamic-crons', apiKeyAuth, require('./services/cron/cron-routes'));
 }
 if (feature('EVENT_BUS')) {
-  const { initEventBus, subscribe, EVENT_TYPES } = require('./services/events/event-bus');
-  const eventRoutes = require('./services/events/event-routes');
-  initEventBus();
-  app.use('/api/v1/events', apiKeyAuth, eventRoutes);
-  subscribe('bd-agent', EVENT_TYPES.TOKEN_HOT);
-  subscribe('signal-agent', EVENT_TYPES.SIGNAL_APPROVED);
-  subscribe('bd-agent', EVENT_TYPES.SIMULATION_COMPLETE);
-  subscribe('sentinel-agent', EVENT_TYPES.TOKEN_SCORED);
+  app.use('/api/v1/events', apiKeyAuth, require('./services/events/event-routes'));
 }
 
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
@@ -635,6 +619,24 @@ async function start() {
       console.log(`[Boot Sync] ⚠️ Pipeline MD sync failed: ${e.message}`);
     }
     console.log(`[Boot Sync] ✓ Complete — ${pipelineSynced} pipeline tokens, ${cronsSynced} cron jobs`);
+
+    // v9.0: Initialize Claude Code architecture modules (DB is now ready)
+    try {
+      if (feature('MAILBOX')) { require('./services/mailbox/mailbox').initMailbox(); console.log('[v9.0] ✓ Mailbox initialized'); }
+      if (feature('TASK_DAG')) { require('./services/tasks/task-manager').initTasks(); console.log('[v9.0] ✓ Task DAG initialized'); }
+      if (feature('DYNAMIC_CRONS')) { require('./services/cron/dynamic-cron').initDynamicCrons(); console.log('[v9.0] ✓ Dynamic crons initialized'); }
+      if (feature('EVENT_BUS')) {
+        const { initEventBus, subscribe, EVENT_TYPES } = require('./services/events/event-bus');
+        initEventBus();
+        subscribe('bd-agent', EVENT_TYPES.TOKEN_HOT);
+        subscribe('signal-agent', EVENT_TYPES.SIGNAL_APPROVED);
+        subscribe('bd-agent', EVENT_TYPES.SIMULATION_COMPLETE);
+        subscribe('sentinel-agent', EVENT_TYPES.TOKEN_SCORED);
+        console.log('[v9.0] ✓ Event bus initialized + 4 default subscriptions');
+      }
+    } catch (e) {
+      console.error('[v9.0] ⚠️ Module init error (non-fatal):', e.message);
+    }
 
     // Score Calibration — apply mcap/liquidity penalties after pipeline sync
     try {
