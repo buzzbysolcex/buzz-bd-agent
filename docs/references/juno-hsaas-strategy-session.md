@@ -1,12 +1,13 @@
-# REFERENCE: Juno Strategy Session — ZHC Discord #business-guides
-# Date: March 30, 2026
+# REFERENCE: Juno Strategy Sessions — ZHC Discord
+# Date: March 30-31, 2026
 # Location: docs/references/juno-hsaas-strategy-session.md
-# Status: RAW TRANSCRIPT — Do not modify
+# Status: RAW TRANSCRIPT — Do not modify session content
 # Value: ~$5,000 worth of free strategy consulting
+# Version: 2.0 — Session 2 added March 31, 2026
 
 ---
 
-## SESSION CONTEXT
+## SESSION 1 CONTEXT (March 30, 2026)
 - Platform: ZHC (Zero-Human Company) Discord, #business-guides channel
 - AI: Juno (ZHC's built-in strategy bot)
 - Participant: Ogie (BuzzBD / SolCex)
@@ -15,7 +16,7 @@
 
 ---
 
-## FULL TRANSCRIPT
+## SESSION 1 FULL TRANSCRIPT
 
 **Ogie:**
 @Juno How should a Zero-Human Exchange Listing Company price its services? We have an autonomous agent that scores tokens across 31 intel sources on 19 chains, runs 50-agent adversarial simulations, and records scores on-chain via smart contracts. Current revenue is $200/month from intelligence signals. What's the optimal pricing strategy for scaling to $5K+/month with honest token audits as the core product?
@@ -86,8 +87,56 @@ Pushback:
 
 ---
 
-## KEY ACTIONABLES EXTRACTED
+## SESSION 2 CONTEXT (March 31, 2026)
+- Platform: ZHC Discord, DM with Juno
+- Topic: MiroFish upgrade changes pricing math
+- Trigger: Ogie reported 50 → 1000 agent upgrade, Monte Carlo 26ms
 
+---
+
+## SESSION 2 TRANSCRIPT
+
+**Ogie:**
+@Juno Update from yesterday's session — shipped fast.
+
+Since we talked:
+- MiroFish upgraded: 1000-agent swarm (200 LLM + 800 heuristic), not 50. Monte Carlo runs in 26ms.
+- Pipeline: 363 tokens now (was 256), 66 scored
+- Server: CPX62 (16 vCPU, 32GB RAM) — MiroFish runs as sidecar
+- Submitted Buzz to Factory Floor today (you're #2 on that board)
+- Tom Osman creating a bot-only channel in IZHC Discord — Buzz invited
+
+Week 1 execution starts tomorrow. buzzbd.ai/scores + free score funnel + tweet-on-score — all from your framework.
+
+Question: Does the 1000-agent sim change the pricing math? A 50-agent adversarial report at $1,500 felt right. A 1000-agent swarm simulation might be a different tier entirely.
+
+**Juno:**
+Absolutely changes the math. 50 → 1000 agents at 26ms isn't just more — it's a different product tier entirely. My take:
+
+| Tier          | Agents | Speed | Price        | Target                              |
+| ------------- | ------ | ----- | ------------ | ----------------------------------- |
+| Basic         | 100    | 26ms  | $500         | Independent devs, small teams       |
+| Pro (current) | 500    | 26ms  | $1,500       | Protocols seeking listing           |
+| Swarm         | 1000   | 26ms  | $2,500-3,000 | Exchanges, funds, serious protocols |
+
+You're not charging for "more agents." You're charging for resolution. 1000 agents catches failure modes 50 agents miss. That's the value to the client.
+
+Pricing philosophy:
+- $500 for 50-agent report was fair when that was the limit
+- $1,500 for 1000-agent swarm is underpriced for what it actually does
+- The 26ms execution time is your differentiator — most can't run this fast at this scale
+
+Don't leave money on the table. The swarm simulation is genuinely worth $2,500+. You can still offer the $500 tier as "quick scan" and $1,500 as "full analysis" — but add $2,500 as "comprehensive swarm audit" for clients who need the resolution.
+
+The smart move: Launch $1,500 as the base (what we discussed), but make the 1000-agent capability the headline feature. Then add a premium tier later once you have case studies proving the extra agents catch more.
+
+First, get those 3 pilots. Then tier up.
+
+---
+
+## KEY ACTIONABLES EXTRACTED (Combined Sessions)
+
+### From Session 1:
 1. buzzbd.ai/scores — public leaderboard THIS WEEK
 2. Free Score funnel — paste address, get basic score
 3. "11 tokens caught" on landing page
@@ -99,7 +148,14 @@ Pushback:
 9. Watch for rug catches — post immediately
 10. Base airdrop hunter audience
 
+### From Session 2:
+11. 3-tier pricing: Quick Scan ($500) / Full Analysis ($1,500) / Swarm ($2,500-3K)
+12. "Resolution, not agents" — pricing philosophy
+13. Launch at $1,500 with 1000-agent as headline, tier up after case studies
+14. Factory Floor listing as credibility signal
+15. Tom Osman bot-only channel as distribution
+
 ---
 
-*Session value: priceless. Execution: 4 weeks to $1K.*
-*Saved permanently for reference.* 🐝
+*Session 1 value: priceless. Session 2 value: $1,000+ in pricing uplift.*
+*Execution: 4 weeks to $1K. The math is there.* 🐝
