@@ -1,19 +1,35 @@
-# MicroBuzz v2 — 500-Agent Hybrid AMM Prediction Skill
+# MiroFish — Swarm Intelligence Simulation Skill
 
-> 500-agent simulation. 30 LLM + 470 heuristic. 3 rounds. AMM pricing.
-> ADR-010. MiroShark-informed. $0/sim. Frontier hackathon alignment.
+> 50-1000 agent OASIS simulation. Dual-Brain: 90% Opus / 10% Ollama.
+> ADR-010 + ADR-012. $0/sim. Frontier hackathon + HSaaS + AIBTC signals.
 
 ---
+
+## MiroFish Dual-Brain (90% Opus / 10% Ollama)
+MiroFish Real Sim uses Claude Opus 4.6 Pro Max for 90% of all LLM calls.
+Ollama qwen3:8b handles only degen early-round FOMO (rounds 1-4).
+
+Every agent that matters — institutional, whale, market dynamics, community,
+and degen round 5+ — thinks with frontier-model reasoning at $0 cost.
+
+The router (llm_router.py) makes this automatic:
+  degen R1-4 → Ollama (fast FOMO, 10% of calls)
+  EVERYTHING ELSE → Opus (genius reasoning, 90% of calls)
+  Default → Opus. When in doubt → Opus. Always → Opus.
+
+Pro Max = $200/month for UNLIMITED genius. 90% usage.
+The simulation quality IS the product. Genius reasoning = better predictions.
 
 ## TOOLCHAIN
 
 ```
-LLM: Ollama qwen3:14b (9.3GB, 8.6 tok/s CPU)
-Endpoint: http://localhost:11434/api/generate
+Primary LLM: Claude Opus 4.6 via claude -p (Pro Max, $0, ~4s/call)
+Fallback LLM: Ollama qwen3:8b (local, $0, ~9s/call, degen R1-4 only)
+Sidecar: api/services/mirofish/server.py (Flask, port 5000)
+Router: api/services/mirofish/llm_router.py
 Server: Hetzner CPX62 (16 vCPU, 32GB RAM)
-RAM: ~11GB when model loaded, 19GB free headroom
 Storage: SQLite (microbuzz_v2_simulations + microbuzz_v2_trades)
-Workspace: api/lib/microbuzz-*.js
+JS modules: api/lib/microbuzz-*.js + api/lib/mirofish-oasis.js
 ```
 
 ## MODULES
