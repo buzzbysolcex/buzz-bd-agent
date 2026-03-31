@@ -109,6 +109,9 @@ const ariaRoutes = require('./routes/aria');
 const phantomRoutes = require('./routes/phantom');
 const microbuzzV2Routes = require('./routes/microbuzz-v2');
 
+// v9.0: Feature flags + Claude Code architecture modules
+const { feature, allFlags } = require('./lib/feature-flags');
+
 // x402 Premium endpoints (paywalled)
 const premiumRoutes = require('./routes/premium');
 
@@ -407,6 +410,39 @@ app.use('/api/v1/phantom', apiKeyAuth, phantomRoutes);
 
 // v8.3.0+: MicroBuzz v2 — 500-agent hybrid AMM prediction (ADR-010)
 app.use('/api/v1/microbuzz', apiKeyAuth, microbuzzV2Routes);
+
+// v9.0: Feature flags endpoint
+app.get('/api/v1/flags', apiKeyAuth, (req, res) => res.json(allFlags()));
+
+// v9.0: Claude Code architecture modules (feature-gated)
+if (feature('MAILBOX')) {
+  const { initMailbox } = require('./services/mailbox/mailbox');
+  const mailboxRoutes = require('./services/mailbox/mailbox-routes');
+  initMailbox();
+  app.use('/api/v1/mailbox', apiKeyAuth, mailboxRoutes);
+}
+if (feature('TASK_DAG')) {
+  const { initTasks } = require('./services/tasks/task-manager');
+  const taskRoutes = require('./services/tasks/task-routes');
+  initTasks();
+  app.use('/api/v1/tasks', apiKeyAuth, taskRoutes);
+}
+if (feature('DYNAMIC_CRONS')) {
+  const { initDynamicCrons, getDueCrons, recordRun } = require('./services/cron/dynamic-cron');
+  const cronDynRoutes = require('./services/cron/cron-routes');
+  initDynamicCrons();
+  app.use('/api/v1/dynamic-crons', apiKeyAuth, cronDynRoutes);
+}
+if (feature('EVENT_BUS')) {
+  const { initEventBus, subscribe, EVENT_TYPES } = require('./services/events/event-bus');
+  const eventRoutes = require('./services/events/event-routes');
+  initEventBus();
+  app.use('/api/v1/events', apiKeyAuth, eventRoutes);
+  subscribe('bd-agent', EVENT_TYPES.TOKEN_HOT);
+  subscribe('signal-agent', EVENT_TYPES.SIGNAL_APPROVED);
+  subscribe('bd-agent', EVENT_TYPES.SIMULATION_COMPLETE);
+  subscribe('sentinel-agent', EVENT_TYPES.TOKEN_SCORED);
+}
 
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 
