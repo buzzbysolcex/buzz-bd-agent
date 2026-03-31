@@ -13,18 +13,20 @@ CEO: Ogie (Telegram War Room). Ogie approves all deals and outreach.
 buzz-workspace/
 ├── CLAUDE.md                    ← you are here
 ├── BUZZ-ZHC-HANDOVER-v3.md      ← the genome
+├── gsd-browser.toml             ← gsd-browser config (headless)
 ├── api/
-│   ├── lib/                     ← simulation-engine.js (MiroFish)
+│   ├── lib/                     ← simulation-engine.js (Monte Carlo)
 │   ├── routes/                  ← all API routes
 │   ├── services/aria/           ← ARIA v2 intelligence feed
-│   ├── cron/                    ← 30+ scheduled jobs
+│   ├── services/mirofish/       ← MiroFish OASIS sidecar (Python)
+│   ├── cron/                    ← 45 scheduled jobs
 │   └── intel/                   ← intel source integrations
-├── scripts/                     ← dev-browser scripts, safety guard
-├── docs/                        ← 18+ directive documents
-│   └── decisions/               ← Architecture Decision Records
+├── scripts/                     ← dev-browser + gsd-browser scripts
+├── docs/                        ← 20+ directive documents
+│   └── decisions/               ← Architecture Decision Records (11)
 ├── .claude/
 │   ├── agents/                  ← 15 persistent agent definitions
-│   ├── skills/                  ← 12 reusable workflow skills
+│   ├── skills/                  ← 8 reusable workflow skills
 │   ├── rules/                   ← 10 conditional path-scoped rules
 │   ├── settings.json            ← hooks, permissions, safety
 │   ├── HANDOVER.md              ← auto-updated state

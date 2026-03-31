@@ -1,0 +1,18 @@
+# GSD-Browser Configuration for Buzz BD Agent
+# Headless mode for Hetzner server operation
+
+[browser]
+headless = true
+
+[daemon]
+port = 9222
+host = "127.0.0.1"
+
+[screenshot]
+quality = 90
+full_page = true
+
+[settle]
+timeout_ms = 3000
+poll_ms = 50
+quiet_window_ms = 200
