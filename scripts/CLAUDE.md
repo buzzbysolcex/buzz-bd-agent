@@ -19,3 +19,22 @@
 - QuickJS WASM sandbox (no host filesystem/network access)
 - Persistent named pages (survive between runs)
 - Path: /home/claude-code/.local/bin/dev-browser
+
+## gsd-browser (NEW — Rust native)
+- 63-command browser automation CLI (Chrome DevTools Protocol)
+- Single Rust binary, no Node.js runtime
+- JSON output on every command (--json flag)
+- Daemon mode: persistent Chrome connection for fast repeated operations
+- Path: /home/claude-code/.gsd-browser/bin/gsd-browser
+- Config: gsd-browser.toml in project root (headless = true for Hetzner)
+- Skill: .claude/skills/gsd-browser/SKILL.md
+- CONFIRMED WORKING on Hetzner CPX62 (headless Linux)
+
+## Three Browser Tools — When to Use Each
+| Tool | Speed | Best For | Runtime |
+|------|-------|---------|---------|
+| gsd-browser | Fastest | New extraction, screenshots, network mock, forms, signal feed scanning | Rust native binary |
+| dev-browser | Fast | Existing scripts, quick evaluate, persistent pages | QuickJS sandbox |
+| Browser Use CLI | Slow | Visual proof screenshots, authenticated site navigation | Chrome/146 + Python |
+
+RULE: gsd-browser for new tasks. dev-browser for existing scripts. Browser Use CLI for visual proof only.

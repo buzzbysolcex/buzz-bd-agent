@@ -53,6 +53,7 @@
       "mcp__aibtc__bounty_list",
       "mcp__aibtc__bounty_get",
       "dev-browser *",
+      "gsd-browser *",
       "ah *"
     ],
     "deny": [
