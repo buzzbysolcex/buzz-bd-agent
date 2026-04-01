@@ -21,10 +21,10 @@ const FLAGS = {
   HERMES_SENTINEL: true,
   GPU_BURST: false,
   ILSHIELD_ENABLED: false,
-  PULSE_ENGINE: false,
-  PULSE_LOAD_AWARE: false,
+  PULSE_ENGINE: true,
+  PULSE_LOAD_AWARE: true,
   AUTODREAM: false,
-  OBSERVATION_LOG: false,
+  OBSERVATION_LOG: true,
   ANTI_DISTILLATION: false,
 };
 
