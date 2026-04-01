@@ -468,7 +468,7 @@ SECURITY CHECKLIST (CRITICAL)
 ═══════════════════════════════════════
 
 Before deploying, verify NONE of these appear in ANY skill file:
-- ❌ Hetzner IP (204.168.137.253) — use domain names only
+- ❌ Hetzner IP (api.buzzbd.ai) — use domain names only
 - ❌ Admin API keys or PATs
 - ❌ Listing fee details ($5K USDT, $1K commission)
 - ❌ Internal War Room chat IDs
