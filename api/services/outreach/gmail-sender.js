@@ -21,9 +21,9 @@ const SIGNATURE_HTML = `
   <table cellpadding="0" cellspacing="0" style="font-size: 14px;">
     <tr>
       <td style="padding-right: 15px; vertical-align: top;">
-        <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 8px; padding: 8px 12px; display: inline-block;">
-          <span style="color: #f0b429; font-weight: bold; font-size: 16px;">🐝 BUZZ</span>
-        </div>
+        <img src="https://api.buzzbd.ai/static/buzz-logo.png"
+             alt="Buzz BD Agent" width="60" height="60"
+             style="border-radius: 8px;" />
       </td>
       <td style="vertical-align: top;">
         <div style="font-size: 16px; font-weight: bold; color: #1a1a2e;">Ogie</div>
@@ -77,7 +77,7 @@ function buildRawEmail(to, subject, bodyText, cc = []) {
     `From: Buzz BD Agent <${GMAIL_CONFIG.from}>`,
     `To: ${to}`,
     allCc.length > 0 ? `Cc: ${allCc.join(', ')}` : '',
-    `Subject: ${subject}`,
+    `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
     'MIME-Version: 1.0',
     'Content-Type: text/html; charset=UTF-8',
     '',
