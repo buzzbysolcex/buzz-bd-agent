@@ -10,20 +10,23 @@
     "test:strategic": "jest __tests__/strategic.test.js --verbose"
   },
   "dependencies": {
-    "express": "^4.21.0",
     "better-sqlite3": "^11.7.0",
     "cors": "^2.8.5",
-    "ws": "^8.18.0",
-    "oauth-1.0a": "^2.2.6",
     "crypto": "^1.0.1",
-    "ethers": "^6.13.0"
+    "ethers": "^6.13.0",
+    "express": "^4.21.0",
+    "googleapis": "^171.4.0",
+    "oauth-1.0a": "^2.2.6",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "jest": "^29.7.0"
   },
   "jest": {
     "testEnvironment": "node",
-    "testMatch": ["**/__tests__/**/*.test.js"]
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
   },
   "author": "Ogie @ SolCex Exchange",
   "license": "MIT"
