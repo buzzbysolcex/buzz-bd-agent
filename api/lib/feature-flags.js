@@ -20,7 +20,7 @@ const FLAGS = {
   GSD_BROWSER: true,
   HERMES_SENTINEL: true,
   GPU_BURST: false,
-  ILSHIELD_ENABLED: false,
+  ILSHIELD_ENABLED: true,
   PULSE_ENGINE: true,
   PULSE_LOAD_AWARE: true,
   AUTODREAM: false,
