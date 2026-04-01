@@ -1,8 +1,9 @@
 /**
- * Orchestrator Service — 9 Parallel Agent Dispatch (5 Sub-Agents + 4 Personas)
+ * Orchestrator Service — 10 Parallel Agent Dispatch (5 Sub-Agents + 4 Personas + IL Shield)
  *
  * v6.1.1: 5 sub-agents (scanner, safety, wallet, social, scorer)
  * v7.4.0: + 4 persona agents (degen, whale, institutional, community)
+ * v9.0:   + IL Shield agent (Flying Whale x402 partnership) — post-composite adjustment
  *
  * Final composite: 70% sub-agent score + 30% persona consensus
  * BD recommendation: 3+ bullish + score >= 75 = outreach_now
@@ -22,6 +23,12 @@ const degenAgent = require('./agents/personas/degen-agent');
 const whaleAgent = require('./agents/personas/whale-agent');
 const institutionalAgent = require('./agents/personas/institutional-agent');
 const communityAgent = require('./agents/personas/community-agent');
+
+// v9.0: IL Shield agent (Flying Whale partnership)
+let checkILRisk;
+try {
+  checkILRisk = require('./agents/il-shield').checkILRisk;
+} catch { checkILRisk = null; }
 
 // SSE broadcasting (optional — only if pipeline-stream is loaded)
 let sseEmit;
@@ -97,11 +104,12 @@ async function orchestrateScore({ address, chain, depth, requestId, db }) {
     sseEmit.progress('social', address, 'started');
   }
 
-  const [scannerResult, safetyResult, walletResult, socialResult] = await Promise.allSettled([
+  const [scannerResult, safetyResult, walletResult, socialResult, ilShieldResult] = await Promise.allSettled([
     withTimeout(runScannerAgent({ address, chain, requestId }), TIMEOUTS.scanner, 'scanner'),
     withTimeout(runSafetyAgent({ address, chain, requestId }), TIMEOUTS.safety, 'safety'),
     withTimeout(runWalletAgent({ address, chain, requestId }), TIMEOUTS.wallet, 'wallet'),
-    withTimeout(runSocialAgent({ address, chain, requestId }), TIMEOUTS.social, 'social')
+    withTimeout(runSocialAgent({ address, chain, requestId }), TIMEOUTS.social, 'social'),
+    checkILRisk ? checkILRisk(address, chain) : Promise.resolve({ adjustment: 0, ilRisk: null, status: 'not_loaded', source: 'n/a' })
   ]);
 
   // Process Phase 1 results
@@ -117,7 +125,13 @@ async function orchestrateScore({ address, chain, depth, requestId, db }) {
   results.social = processAgentResult('social', socialResult, errors);
   timings.social = results.social.duration_ms || (Date.now() - phase1Start);
 
-  console.log(`[${requestId}] ⏱️ Phase 1 complete: ${Date.now() - phase1Start}ms`);
+  // IL Shield result (non-critical — graceful degradation)
+  const ilShield = ilShieldResult.status === 'fulfilled'
+    ? ilShieldResult.value
+    : { adjustment: 0, ilRisk: null, status: 'error', source: 'il-shield' };
+  timings.ilShield = Date.now() - phase1Start;
+
+  console.log(`[${requestId}] ⏱️ Phase 1 complete: ${Date.now() - phase1Start}ms (IL Shield: ${ilShield.status}, adj: ${ilShield.adjustment})`);
 
   // ─── Phase 2: Run scorer + 4 persona agents in parallel ───
   // Scorer needs Phase 1 data; personas also use Phase 1 data
@@ -205,7 +219,8 @@ async function orchestrateScore({ address, chain, depth, requestId, db }) {
   // ─── Phase 3: Compute composite score (70% sub-agents + 30% personas) ───
   const subAgentScore = computeWeightedScore(results);
   const personaScore = computePersonaScore(personaResults);
-  const finalScore = Math.round((subAgentScore * SUB_AGENT_RATIO + personaScore * PERSONA_RATIO) * 100) / 100;
+  const rawComposite = Math.round((subAgentScore * SUB_AGENT_RATIO + personaScore * PERSONA_RATIO) * 100) / 100;
+  const finalScore = Math.max(0, Math.min(100, rawComposite + ilShield.adjustment));
   const verdict = getVerdict(finalScore);
 
   // Persona consensus
@@ -246,10 +261,17 @@ async function orchestrateScore({ address, chain, depth, requestId, db }) {
       status: results.scorer?.status || 'error',
       factors: results.scorer?.data?.factors || []
     },
+    il_shield: {
+      adjustment: ilShield.adjustment,
+      il_risk_pct: ilShield.ilRisk,
+      status: ilShield.status,
+      source: ilShield.source,
+    },
     sub_agent_composite: subAgentScore,
     persona_composite: personaScore,
+    raw_composite: rawComposite,
     composite: finalScore,
-    formula: '(safety*0.30 + wallet*0.30 + social*0.20 + scorer*0.20) * 0.70 + persona_consensus * 0.30',
+    formula: '((safety*0.30 + wallet*0.30 + social*0.20 + scorer*0.20) * 0.70 + persona_consensus * 0.30) + il_shield_adjustment',
     persona_consensus: personaConsensus,
   };
 

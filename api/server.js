@@ -641,6 +641,60 @@ async function start() {
       console.error('[v9.0] ⚠️ Module init error (non-fatal):', e.message);
     }
 
+    // ═══════════════════════════════════════════════════════
+    // TASKS 14-18: KAIROS-CLASS EXTENSIONS
+    // ═══════════════════════════════════════════════════════
+
+    // TASK 14+16: PULSE ENGINE + OBSERVATION LOG
+    if (feature('PULSE_ENGINE')) {
+      // Init observation log + pulse_state tables first
+      if (feature('OBSERVATION_LOG')) {
+        require('./services/pulse/observation-schema').initObservationLog();
+      }
+      // Start tick loop (resumes from persisted state)
+      require('./services/pulse/pulse-engine').initPulse();
+      app.use('/api/v1/pulse', require('./routes/pulse-routes'));
+    }
+
+    // TASK 15: AUTODREAM
+    if (feature('AUTODREAM')) {
+      const { runDreamCycle, dreamRanToday } = require('./services/autodream/autodream');
+      app.use('/api/v1/dream', require('./routes/autodream-routes'));
+
+      // Nightly dream at 02:00 UTC (with reboot dedup)
+      const scheduleNightlyDream = () => {
+        const now = new Date();
+        const next2am = new Date(now);
+        next2am.setUTCHours(2, 0, 0, 0);
+        if (next2am <= now) next2am.setDate(next2am.getDate() + 1);
+        const delay = next2am - now;
+
+        setTimeout(() => {
+          if (dreamRanToday()) {
+            console.log('[AUTODREAM] Nightly dream already ran today — skipping (reboot dedup)');
+          } else {
+            runDreamCycle('nightly');
+          }
+          scheduleNightlyDream();
+        }, delay);
+
+        console.log(`[AUTODREAM] Nightly dream scheduled in ${Math.round(delay / 60000)}min`);
+      };
+      scheduleNightlyDream();
+
+      // Event-triggered dream (from PULSE idle threshold)
+      if (feature('EVENT_BUS')) {
+        const { subscribe } = require('./services/events/event-bus');
+        subscribe('autodream', 'autodream.trigger');
+      }
+    }
+
+    // TASK 17: ANTI-DISTILLATION
+    if (feature('ANTI_DISTILLATION')) {
+      const { antiDistillation } = require('./middleware/anti-distillation');
+      app.use('/api/v1', antiDistillation);
+    }
+
     // Score Calibration — apply mcap/liquidity penalties after pipeline sync
     try {
       const { calibrateScores } = require('./lib/score-calibrator');

@@ -17,7 +17,12 @@ const EVENT_TYPES = {
   BD_OUTREACH_SENT: 'bd.outreach.sent',
   BD_RESPONSE: 'bd.response',
   DEPLOY_COMPLETE: 'deploy.complete',
-  STREAK_WARNING: 'streak.warning'
+  STREAK_WARNING: 'streak.warning',
+  PULSE_ACT: 'pulse.act',
+  PULSE_SLEEP: 'pulse.sleep',
+  AUTODREAM_TRIGGER: 'autodream.trigger',
+  AUTODREAM_COMPLETE: 'autodream.complete',
+  STREAK_EMERGENCY: 'streak.emergency'
 };
 
 function initEventBus() {

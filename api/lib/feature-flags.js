@@ -20,6 +20,12 @@ const FLAGS = {
   GSD_BROWSER: true,
   HERMES_SENTINEL: true,
   GPU_BURST: false,
+  ILSHIELD_ENABLED: false,
+  PULSE_ENGINE: false,
+  PULSE_LOAD_AWARE: false,
+  AUTODREAM: false,
+  OBSERVATION_LOG: false,
+  ANTI_DISTILLATION: false,
 };
 
 function feature(name) { return FLAGS[name] === true; }
