@@ -209,7 +209,7 @@ ION (BSC 83): BD prospect Day 32 | @0xDeployer: Bankr partner
 
 ## INFRASTRUCTURE
 
-Server: 204.168.137.253 | $4.09/mo | Hetzner CX23
+Server: api.buzzbd.ai | $4.09/mo | Hetzner CX23
 Container: ah-managed | OpenClaw v2026.3.13
 DB: SQLite WAL /data/buzz-api/buzz.db (PERSISTENT VOLUME — survives redeploys)
 CI/CD: GitHub Actions → Docker Hub → Hetzner → ah → auto directive reload

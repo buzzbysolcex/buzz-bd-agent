@@ -62,7 +62,7 @@ This was a marathon research + planning session. Here's everything we covered an
 | Component | Value |
 |-----------|-------|
 | Server | Hetzner CX23, Helsinki |
-| IP | 204.168.137.253 |
+| IP | api.buzzbd.ai |
 | Image | buzzbd/buzz-bd-agent:v7.4.0a |
 | Telegram | @BuzzTestAgent_bot (token: 8705181842:AAEGy4FAHJyA99VmOAtY0tw2gnNfC2_tcB4) |
 | Status | RUNNING — 48h test PASSED (15 tokens tracked, 6 qualified) |
@@ -121,13 +121,13 @@ ssh-keygen -t ed25519 -C "ogie-m5-macbook"
 cat ~/.ssh/id_ed25519.pub
 # Add this public key to Hetzner server:
 # (from any device with current access, or Hetzner web console)
-# ssh root@204.168.137.253 "echo 'YOUR_NEW_PUB_KEY' >> ~/.ssh/authorized_keys"
+# ssh root@api.buzzbd.ai "echo 'YOUR_NEW_PUB_KEY' >> ~/.ssh/authorized_keys"
 ```
 
 ## Step 4: Verify SSH access
 
 ```bash
-ssh root@204.168.137.253
+ssh root@api.buzzbd.ai
 # Should connect to Hetzner instance
 ```
 
@@ -268,7 +268,7 @@ docker tag ghcr.io/buzzbysolcex/buzz-bd-agent:v7.4.0 buzzbd/buzz-bd-agent:v7.4.0
 docker push buzzbd/buzz-bd-agent:v7.4.0
 
 # Deploy to Hetzner
-ssh root@204.168.137.253
+ssh root@api.buzzbd.ai
 docker stop buzz-agent
 docker pull buzzbd/buzz-bd-agent:v7.4.0
 docker run -d --name buzz-agent \

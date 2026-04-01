@@ -336,7 +336,7 @@ This is production config. Get it 100% right. No "good enough."
 - Option B: SSH into Hetzner tmux and paste directly
 - Option C: Save as a file on Hetzner and tell Buzz to read it:
   ```
-  scp this-file.md root@204.168.137.253:/home/claude-code/buzz-workspace/
+  scp this-file.md root@api.buzzbd.ai:/home/claude-code/buzz-workspace/
   ```
   Then tell Buzz: "Read /home/claude-code/buzz-workspace/war-room-prompt-poweruser.md and execute all tasks"
 

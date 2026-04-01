@@ -168,7 +168,7 @@ curl -s -X POST http://localhost:3000/api/v1/twitter/brain/scan \
 ## Architecture
 
 ```
-Hetzner CX23 (204.168.137.253)
+Hetzner CX23 (api.buzzbd.ai)
 ├── Buzz Container (Docker)
 │   ├── OpenClaw v2026.3.13 (gateway :18789)
 │   ├── REST API (:3000)
@@ -188,7 +188,7 @@ Hetzner CX23 (204.168.137.253)
 ### Step 1: Install Chrome on Hetzner
 
 ```bash
-ssh root@204.168.137.253
+ssh root@api.buzzbd.ai
 
 # Install Chrome
 wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
@@ -322,7 +322,7 @@ docker build --platform linux/amd64 --no-cache -t buzzbd/buzz-bd-agent:v7.4.1 .
 docker push buzzbd/buzz-bd-agent:v7.4.1
 
 # Hetzner
-ssh root@204.168.137.253
+ssh root@api.buzzbd.ai
 cd /data/buzz
 sed -i 's/v7.4.0/v7.4.1/' docker-compose.yml
 docker pull buzzbd/buzz-bd-agent:v7.4.1
@@ -333,7 +333,7 @@ docker compose down && docker compose up -d
 
 ```bash
 # Same as above plus Chrome installation
-ssh root@204.168.137.253
+ssh root@api.buzzbd.ai
 apt-get install -y google-chrome-stable
 # Start Chrome headless
 # Configure OpenClaw browser settings

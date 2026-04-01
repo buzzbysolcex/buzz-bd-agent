@@ -66,7 +66,7 @@ LAYER 1 — FOUNDATION (LIVE v7.3.2a)
 | Instance | Provider | Host | Ports | Bot | Status |
 |----------|----------|------|-------|-----|--------|
 | **Production** | Akash (boogle.cloud) | Decentralized | API :32120 / OC :30731 | @BuzzBySolCex_bot | LIVE v7.4.0a |
-| **Test** | Hetzner CX23 (Helsinki) | 204.168.137.253 | Standard Docker | @BuzzTestAgent_bot | 48h OBSERVATION |
+| **Test** | Hetzner CX23 (Helsinki) | api.buzzbd.ai | Standard Docker | @BuzzTestAgent_bot | 48h OBSERVATION |
 | **Sentinel** | Akash (akashprovid.com) | Decentralized | :30941 / :31578 | @BuzzSentinel_bot | LIVE v1.1.0 |
 
 ## Why Agentic.hosting on Hetzner
@@ -365,7 +365,7 @@ MIGRATION:
   2. Stop Akash production instance
   3. Start Hetzner with production bot token + all env vars
   4. Verify boot: 37 tables, Supermemory connected, OpenClaw gateway
-  5. Retarget Sentinel to Hetzner IP (204.168.137.253)
+  5. Retarget Sentinel to Hetzner IP (api.buzzbd.ai)
   6. Update mobile app backend URL
   7. Close Akash deployment permanently
   8. Update Master Ops + BD Agent skills
@@ -500,7 +500,7 @@ docker push buzzbd/buzz-bd-agent:v7.4.0
 ## Hetzner Deploy Command
 
 ```bash
-ssh root@204.168.137.253
+ssh root@api.buzzbd.ai
 
 # Stop current instance
 docker stop buzz-agent
