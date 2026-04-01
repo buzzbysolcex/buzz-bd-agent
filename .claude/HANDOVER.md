@@ -1,57 +1,50 @@
 # BUZZ STATE HANDOVER
-## Auto-updated: 2026-03-31 23:00 UTC | Day 408 | Tuesday
+## Auto-updated: 2026-04-01 01:25 UTC | Post-Sprint Day 2
 
 ## WHAT TO DO FIRST
-1. Read CLAUDE.md (identity)
-2. Read docs/buzz-zhc-complete-handover.md (operating manual)
-3. Check ~/pending-followups.json (deal tracking)
-4. Execute today's creative output (Tuesday schedule)
-5. Send morning briefing to War Room if near 07:00 WIB
+1. Read CLAUDE.md (identity — v9.0)
+2. Claim 5 beats: infrastructure, security, deal-flow, agent-skills, governance
+   MCP v1.46.2 installed. Tool news_claim_beat now includes created_by field.
+3. Check signal streak (Day 9 — must file daily)
+4. Execute pending from queue below
 
 ## SYSTEM STATUS
-- API: healthy (135 endpoints, 68 tables)
-- Pipeline: 400 tokens tracked
+- API: healthy (175+ endpoints, 70 tables, v9.0 modules live)
+- Pipeline: 363 tokens tracked, 66 scored, 0 HOT
+- MiroFish: 1000-agent R20 complete (Nasdog 0.669, stored in DB)
+- Hermes: gateway running (Haiku brain, crons on disk)
+- Solana: build 3/3 passing, devnet faucet rate-limited
 
-## TOP 5 PROSPECTS
-- BALLWARS: 95 (solana) — scored
-- BANANAS31: 95 (bsc) — scored
-- TRUMP: 95 (solana) — scored
-- VELO: 95 (bsc) — scored
-- EURC: 90 (solana) — scored
+## COMPLETED (Apr 1)
+- Signal Factory v4.0 (5761c38) + HSaaS v2.0 (8e2a211)
+- v9.0: mailbox, task-dag, event-bus, dynamic-crons, flags (8d58b05)
+- MiroFish DB wired + Nasdog R20 stored (c6f33b7)
+- Bitflow PRs #282 + #283 submitted
+- 3 signals filed, 7 tweets, 2 Moltbook posts
+- Flash Vega data pilot proposed
+- Rules: reporting, handover-auto, execution-priority
 
-## PENDING FOLLOW-UPS
-- BANANAS31: no_response (due: 2026-03-25T02:22:00Z)
-- $COW: no_response (due: 2026-03-25T02:22:00Z)
-- ELS-1_SPEC: warm_interested (due: 2026-03-30T00:00:00Z)
-- No pending followups
+## PENDING
+- Beat claiming (5 beats on next restart)
+- Solana devnet deploy (retry when faucet clears)
+- Signals 4-6 (cooldown rotation on AE/AT)
+- buzzbd.ai landing page stat updates
+- microbuzz.vercel.app (buzzbysolcex/mirofish-web)
 
-## ACTIVE DEALS
-- BANANAS31 (BSC, score 95) — outreach sent 2026-03-23 via Twitter DM to @BananaS31_bsc
-- $COW (BSC, score 84) — outreach sent 2026-03-23 via email to @cowcmweb3
+## BLOCKERS
+- Beat claiming: session restart needed for new MCP tools
+- Solana: 0 SOL (devnet faucet down, mainnet needs ~5 SOL)
 
-## CREATIVE SCHEDULE
-- Monday: Token deep-dive Twitter thread
-- Tuesday: Code improvement (OpenClaw→Express cron migration)
-- Wednesday: Kill OpenClaw, free 810MB RAM
-- Thursday: Moltbook article
-- Friday: Ecosystem engagement (5 agent accounts)
-- Saturday: buzzbd.ai update
-- Sunday: Weekly Intelligence Report
+## SIGNAL STATUS
+- Streak: Day 9 | Filed today: 3/6 | Beats: AE + AT
+- Brief inclusions: 9 total | Revenue: ~210K sats
 
 ## HACKATHONS
-| Hackathon | Deadline | Status |
-|-----------|----------|--------|
-| Synthesis | Mar 23 | Submitted, in judging |
-| X Layer | Mar 26 | buzz-x402 live |
-| Solana x402 | Mar 27 | Active |
-| AIBTC Skills Pay the Bills | 30d rolling | Day 1 ready (token-scoring) |
-| AIBTC News $50K | 30d rolling | Reporter active, exchange-listings beat |
-| Bitflow DeFi Skills | 30d, $100/day | Evaluate HODLMM |
-| **Frontier** | **May 11** | **REGISTERED — PRIMARY TARGET** |
+- Frontier: May 11 (REGISTERED — PRIMARY TARGET)
+- Bitflow Skills: PRs #282 + #283 submitted
+- AIBTC News: active, 9 BIs earned
 
-## PRIORITY LADDER
-1. Urgent tasks (deal responses, security, deadlines)
-2. Scheduled tasks (briefings, reviews)
-3. Creative output (daily schedule)
-4. Proactive scouting (trending, hackathons, partnerships)
-5. Self-improvement (bugs, code, skills)
+## PARTNERSHIPS
+- Flying Whale: data pilot proposed (awaiting response)
+- Flash Vega: MiroFish collab proposed (responded positively)
+- Diamond Elio: DM sent (no response)
