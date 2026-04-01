@@ -140,7 +140,7 @@ jobs:
 
           🐝 *Deploy Summary*
           Image: \`buzzbd/buzz-bd-agent:${VERSION}\`
-          Server: 204.168.137.253
+          Server: api.buzzbd.ai
           Health: PASSED
           Commit: [\`${GITHUB_SHA::7}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
 
@@ -162,7 +162,7 @@ jobs:
             -d parse_mode=Markdown \
             -d text="❌ *Buzz ${VERSION} deploy FAILED*
 
-          Server: 204.168.137.253
+          Server: api.buzzbd.ai
           Commit: [\`${GITHUB_SHA::7}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
           Action: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
