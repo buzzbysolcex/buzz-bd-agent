@@ -427,6 +427,9 @@ if (feature('DYNAMIC_CRONS')) {
 if (feature('EVENT_BUS')) {
   app.use('/api/v1/events', apiKeyAuth, require('./services/events/event-routes'));
 }
+if (feature('MIROFISH_REALTIME')) {
+  app.use('/api/v1/mirofish', apiKeyAuth, require('./routes/mirofish-routes'));
+}
 
 // NOTE: 404 + Error handlers registered in start() after v7.0 strategy routes
 

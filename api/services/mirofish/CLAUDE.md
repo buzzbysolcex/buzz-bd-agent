@@ -1,40 +1,37 @@
-# MiroFish — Real Swarm Intelligence Simulation Engine
+# MiroFish Swarm Simulation Engine
 
 ## Architecture
-- server.py: Flask sidecar on port 5000 (Python)
-- llm_router.py: 90% Opus 4.6 / 10% Ollama qwen3:8b
-- Buzz API (port 3000) calls MiroFish sidecar for simulations
-- NOT MiroShark. This is the REAL OASIS simulation engine.
+- Flask Python sidecar on port 5000
+- 1000 agents: 200 LLM (Ollama qwen3:8b) + 800 heuristic (JS rules)
+- Dual-Brain: 90% Opus (quality gates) / 10% Ollama (bulk simulation)
+- 5 clusters: degen, whale, institutional, community, market_dynamics
+- Monte Carlo: 1000x100 iterations in 26ms (separate rule-based engine)
 
-## Dual-Brain (90% Opus / 10% Ollama)
-- Opus 4.6 via `claude -p`: 90% of all calls (Pro Max unlimited, $0)
-- Ollama qwen3:8b: 10% of calls (degen early rounds 1-4 only)
-- Default: ALWAYS Opus. When in doubt: Opus.
+## Endpoints (port 5000)
+- POST /simulate — run simulation (agents, rounds, token config)
+- POST /simulate-10k — wave-batched 10K agent run (4x2500)
+- POST /generate-personas — create persona set for token
+- POST /report — generate ReACT analysis report
 
-### Opus handles (90%):
-- ALL persona generation
-- ALL institutional reasoning (every round)
-- ALL whale decisions (every round)
-- ALL market dynamics (every round)
-- ALL community agents (every round)
-- ALL degen agents round 5+
-- ALL adversarial debates
-- ALL report generation
-- ALL final consensus
+## DB Integration (port 3000)
+- POST /api/v1/mirofish/store — save simulation results
+- GET /api/v1/mirofish/token/:address — get results by token
+- GET /api/v1/mirofish/token/:address/latest — latest result
+- GET /api/v1/mirofish/list — all simulations (paginated)
+- GET /api/v1/mirofish/stats — aggregate stats
 
-### Ollama handles (10%):
-- Degen agents rounds 1-4 only (FOMO is simple)
-- If Ollama fails → auto-escalate to Opus
+## Table: mirofish_simulations (70th table)
+- Stores all simulation runs with cluster beliefs and Monte Carlo comparison
+- Indexed on token_address+chain and created_at
 
-## Endpoints
-- GET /health — sidecar status + brain config
-- POST /simulate — full OASIS simulation (agents × rounds)
-- POST /generate-personas — create personas from token data
-- POST /report — ReACT analysis report
+## Validated Results
+- Nasdog R20: 0.669 final belief, institutional 0.440, 8.17h, $0 cost
+- Monte Carlo: 0.94 (too bullish) vs MiroFish: 0.669 (honest)
+- Emergent behavior: institutional cluster resisted peer pressure for all 20 rounds
 
 ## Danger Zones
-- claude -p spawns subprocess — max 5 concurrent, sequential safer
-- 60s timeout per Opus call — auto-fallback to Ollama
-- Python venv at /opt/mirofish-env — keep separate from Node.js
-- Ollama model must be loaded before simulation starts
-- CLAUDE_CODE_SUBPROCESS_ENV_SCRUB=1 for security
+- Port 5000 is NOT a persistent service — needs manual start
+- qwen3:8b must be loaded in Ollama before LLM agents can run
+- 1000-agent sim takes ~8 hours on CPU (GPU would be <30 min)
+- Don't run simulations during signal filing (CPU contention)
+- Feature flag: MIROFISH_REALTIME must be TRUE
