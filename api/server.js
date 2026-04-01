@@ -695,6 +695,72 @@ async function start() {
       app.use('/api/v1', antiDistillation);
     }
 
+    // ═══════════════════════════════════════════════════════
+    // OUTREACH AUTOMATION (Tasks 14-17 v9.1)
+    // ═══════════════════════════════════════════════════════
+
+    // Task 15: Trust Gates (init first — outreach depends on it)
+    if (feature('TRUST_GATES')) {
+      try {
+        const { initTrustGates } = require('./services/trust/trust-gates');
+        const trustRoutes = require('./routes/trust-routes');
+        initTrustGates();
+        app.use('/api/v1/trust', trustRoutes);
+        console.log('[v9.1] ✓ Trust gates initialized (TRUST_GATES=true)');
+      } catch (e) {
+        console.error('[v9.1] ⚠️ Trust gates init error (non-fatal):', e.message);
+      }
+    }
+
+    // Task 14: Outreach Engine
+    if (feature('AUTO_OUTREACH')) {
+      try {
+        const { initOutreach } = require('./services/outreach/outreach-engine');
+        const { initGmail } = require('./services/outreach/gmail-sender');
+        const { startSenderLoop } = require('./services/outreach/sender-loop');
+        const outreachRoutes = require('./routes/outreach-routes');
+
+        initOutreach();
+        initGmail();
+        app.use('/api/v1/outreach', outreachRoutes);
+        startSenderLoop();
+        console.log('[v9.1] ✓ Outreach engine initialized (AUTO_OUTREACH=true)');
+      } catch (e) {
+        console.error('[v9.1] ⚠️ Outreach engine init error (non-fatal):', e.message);
+      }
+    }
+
+    // Task 16: Inbox Monitor
+    if (feature('INBOX_MONITOR')) {
+      try {
+        const { initInboxMonitor, checkInbox } = require('./services/outreach/inbox-monitor');
+        initInboxMonitor();
+
+        setInterval(async () => {
+          try {
+            const { google } = require('googleapis');
+            const oauth2Client = new google.auth.OAuth2(
+              process.env.GMAIL_CLIENT_ID,
+              process.env.GMAIL_CLIENT_SECRET,
+              'http://localhost'
+            );
+            oauth2Client.setCredentials({ refresh_token: process.env.GMAIL_REFRESH_TOKEN });
+            await checkInbox(oauth2Client);
+          } catch (e) {
+            console.error('[inbox-monitor] Error:', e.message);
+          }
+        }, 30 * 60 * 1000);
+        console.log('[v9.1] ✓ Inbox monitor initialized (INBOX_MONITOR=true, 30min interval)');
+      } catch (e) {
+        console.error('[v9.1] ⚠️ Inbox monitor init error (non-fatal):', e.message);
+      }
+    }
+
+    // Task 17: Wallet Guard
+    if (feature('WALLET_GUARD')) {
+      console.log('[v9.1] ✓ Wallet Guard enabled — AION evaluation active');
+    }
+
     // Score Calibration — apply mcap/liquidity penalties after pipeline sync
     try {
       const { calibrateScores } = require('./lib/score-calibrator');

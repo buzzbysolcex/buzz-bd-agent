@@ -22,7 +22,15 @@ const EVENT_TYPES = {
   PULSE_SLEEP: 'pulse.sleep',
   AUTODREAM_TRIGGER: 'autodream.trigger',
   AUTODREAM_COMPLETE: 'autodream.complete',
-  STREAK_EMERGENCY: 'streak.emergency'
+  STREAK_EMERGENCY: 'streak.emergency',
+  OUTREACH_QUEUED: 'outreach.queued',
+  OUTREACH_SENT: 'outreach.sent',
+  OUTREACH_VETOED: 'outreach.vetoed',
+  OUTREACH_REPLY: 'outreach.reply',
+  TRUST_LEVEL_CHANGE: 'trust.level.change',
+  GUARD_ALLOW: 'guard.allow',
+  GUARD_WARN: 'guard.warn',
+  GUARD_BLOCK: 'guard.block'
 };
 
 function initEventBus() {
