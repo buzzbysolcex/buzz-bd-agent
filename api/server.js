@@ -173,6 +173,9 @@ const PORT = process.env.BUZZ_API_PORT || 3000;
 const PIPELINE_DIR = process.env.PIPELINE_DIR || '/data/workspace/memory/pipeline';
 const CRON_SCHEDULE_FILE = process.env.CRON_SCHEDULE_FILE || '/data/.openclaw/cron/jobs.json';
 
+// ─── Static Files ────────────────────────────────────
+app.use('/static', express.static(path.join(__dirname, 'static')));
+
 // ─── Middleware ───────────────────────────────────────
 app.use(cors({
   origin: process.env.BUZZ_API_CORS_ORIGIN || '*',
