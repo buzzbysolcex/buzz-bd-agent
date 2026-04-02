@@ -26,11 +26,12 @@ const FLAGS = {
   AUTODREAM: false,
   OBSERVATION_LOG: true,
   ANTI_DISTILLATION: false,
-  AUTO_OUTREACH: false,
-  TRUST_GATES: false,
+  AUTO_OUTREACH: true,
+  TRUST_GATES: true,
   SILENCE_CONSENT: false,
   INBOX_MONITOR: false,
   WALLET_GUARD: false,
+  ATV_IDENTITY: false,
 };
 
 function feature(name) { return FLAGS[name] === true; }
