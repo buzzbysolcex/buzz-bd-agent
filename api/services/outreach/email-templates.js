@@ -14,6 +14,7 @@ Ogie here, BD Lead at SolCex Exchange.
 Our autonomous scoring engine evaluated \${tokenName} across 31 intelligence sources on 19 blockchain networks. Here's what we found:
 
   Token: \${tokenName} (\${chain})
+  Contract: \${contractAddress}
   Buzz Score: \${score}/100
   Market Cap: \${mcap}
   24h Volume: \${volume}
