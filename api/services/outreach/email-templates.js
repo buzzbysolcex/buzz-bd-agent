@@ -38,10 +38,7 @@ Either way, your score is already live and verifiable:
   Report: buzzbd.ai/scores
   On-chain: ScoreStorage on Base (immutable)
 
-Worth a quick chat? Reply here or Telegram: @Ogie2
-
-Best,
-Ogie`
+Worth a quick chat? Reply here or Telegram: @Ogie2`
   },
 
   followup_48h: {
@@ -54,10 +51,7 @@ Your metrics are still tracking strong at \${score}/100 — that puts \${tokenNa
 
 If a full listing isn't the right timing, we also offer standalone audit reports — our 1,000-agent swarm simulation catches failure modes that 50-agent runs miss. Reports start at $500 for a Quick Scan.
 
-Either way, happy to chat. Reply here or Telegram: @Ogie2
-
-Best,
-Ogie`
+Either way, happy to chat. Reply here or Telegram: @Ogie2`
   },
 
   breakup_7d: {
@@ -70,10 +64,7 @@ Your score, simulation history, and on-chain record are persistent — they don'
 
 Free instant score anytime: buzzbd.ai/score
 
-Best of luck with the build.
-
-Ogie
-buzzbd.ai | @Ogie2`
+Best of luck with the build.`
   },
 
   hsaas_audit_pitch: {
@@ -92,10 +83,7 @@ What you get: every score dimension broken down, adversarial debate results (bul
 
 "11 tokens passed every other audit. Our calibration caught them all."
 
-Interested? Reply here or buzzbd.ai/score for a free instant score.
-
-Best,
-Ogie`
+Interested? Reply here or buzzbd.ai/score for a free instant score.`
   }
 };
 
