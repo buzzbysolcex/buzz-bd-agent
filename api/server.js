@@ -764,6 +764,16 @@ async function start() {
       console.log('[v9.1] ✓ Wallet Guard enabled — AION evaluation active');
     }
 
+    // ATV IDENTITY (Web3 deployer verification)
+    if (feature('ATV_IDENTITY')) {
+      try {
+        require('./services/identity/atv-identity').initIdentityTables();
+        console.log('[v9.1] ✓ ATV Identity tables initialized (ATV_IDENTITY=true)');
+      } catch (e) {
+        console.error('[v9.1] ⚠️ ATV Identity init error:', e.message);
+      }
+    }
+
     // Score Calibration — apply mcap/liquidity penalties after pipeline sync
     try {
       const { calibrateScores } = require('./lib/score-calibrator');
