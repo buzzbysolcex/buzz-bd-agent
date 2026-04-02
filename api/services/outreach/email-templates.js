@@ -1,55 +1,100 @@
 // Email Templates — data-driven, no LLM generation
 // Templates are static. Token data fills the variables.
 // NEVER include listing fees ($5K/$1K) — CRITICAL SECURITY RULE
+// v9.1: HSaaS Go-to-Market + Juno strategy session templates
+// Two funnels: listing AND audit. Doubles conversion.
 
 const TEMPLATES = {
   initial_outreach: {
-    subject: 'SolCex Exchange — Listing Opportunity for ${tokenName}',
+    subject: '${tokenName} scored ${score}/100 — autonomous listing intelligence report',
     body: `Hi \${tokenName} team,
 
-Buzz here from SolCex Exchange. Our autonomous scoring pipeline flagged \${tokenName} at \${score}/100 — that puts it in our qualified range.
+Ogie here, BD Lead at SolCex Exchange.
 
-Key metrics we noticed:
-- Market cap: \${mcap}
-- 24h volume: \${volume}
-- Liquidity: \${liquidity}
+Our autonomous scoring engine evaluated \${tokenName} across 31 intelligence sources on 19 blockchain networks. Here's what we found:
 
-SolCex offers fast-track listing (10-14 days) with included market making and whale trader distribution.
+  Token: \${tokenName} (\${chain})
+  Buzz Score: \${score}/100
+  Market Cap: \${mcap}
+  24h Volume: \${volume}
+  Liquidity: \${liquidity}
+  Liq/MCap Ratio: \${liqRatio}
 
-Would your team be open to a quick chat about listing? Reply here or reach us on Telegram: @Ogie2
+  Scoring: 11 factors, 8 penalty rules, dual-gate verification
+  Simulation: 1,000-agent adversarial swarm (26ms)
+  On-chain: Score recorded immutably on Base mainnet
+
+For context — we track 363 tokens. Most don't pass 70. \${tokenName} did.
+
+Why this matters: 11 tokens previously scored 85+ across other audit tools. Our honest calibration dropped all 11 below 50. We catch what others miss.
+
+Two ways we can work together:
+
+  1. SolCex Listing — fast-track (10-14 days) with market making support and whale trader distribution
+  2. Full Swarm Audit Report — detailed 1,000-agent simulation analysis with on-chain proof, starting at $500
+
+Either way, your score is already live and verifiable:
+  Report: buzzbd.ai/scores
+  On-chain: ScoreStorage on Base (immutable)
+
+Worth a quick chat? Reply here or Telegram: @Ogie2
 
 Best,
-Buzz BD Agent | SolCex Exchange
-@BuzzBySolCex | buzzbd.ai`
+Ogie`
   },
 
   followup_48h: {
-    subject: 'Re: SolCex Exchange — Listing Opportunity for ${tokenName}',
+    subject: 'Re: ${tokenName} scored ${score}/100 — following up',
     body: `Hi \${tokenName} team,
 
-Following up on my message from a couple days ago about listing \${tokenName} on SolCex.
+Quick follow-up on \${tokenName}'s scoring report.
 
-Your metrics are still looking strong and we'd love to explore a partnership. Happy to walk through our listing process — it's straightforward and fast.
+Your metrics are still tracking strong at \${score}/100 — that puts \${tokenName} in the top \${pipelinePosition}% of 363 tokens in our pipeline.
 
-Let me know if you have any questions.
+If a full listing isn't the right timing, we also offer standalone audit reports — our 1,000-agent swarm simulation catches failure modes that 50-agent runs miss. Reports start at $500 for a Quick Scan.
+
+Either way, happy to chat. Reply here or Telegram: @Ogie2
 
 Best,
-Buzz BD Agent | SolCex Exchange
-@BuzzBySolCex | buzzbd.ai`
+Ogie`
   },
 
   breakup_7d: {
-    subject: 'Re: SolCex Exchange — Listing Opportunity for ${tokenName}',
+    subject: 'Re: ${tokenName} — your score stays live',
     body: `Hi \${tokenName} team,
 
-Last message from me — wanted to keep the door open on a SolCex listing for \${tokenName}.
+Last note from me. \${tokenName} remains in our pipeline at \${score}/100.
 
-If timing isn't right now, no worries. We'll keep tracking your project and can revisit anytime.
+Your score, simulation history, and on-chain record are persistent — they don't expire. If listing or an audit report makes sense later, the data is already there. No need to restart.
+
+Free instant score anytime: buzzbd.ai/score
 
 Best of luck with the build.
 
-Buzz BD Agent | SolCex Exchange
-@BuzzBySolCex | buzzbd.ai`
+Ogie
+buzzbd.ai | @Ogie2`
+  },
+
+  hsaas_audit_pitch: {
+    subject: '${tokenName} — 1,000-agent swarm audit available',
+    body: `Hi \${tokenName} team,
+
+Thanks for engaging with us on \${tokenName}'s score.
+
+If a SolCex listing isn't the right fit right now, our Honest Scoring audit is available as a standalone product:
+
+  Quick Scan ($500) — 100-agent simulation, basic report
+  Full Analysis ($1,500) — 500-agent simulation, detailed breakdown
+  Swarm Audit ($2,500) — 1,000-agent adversarial simulation, complete report with on-chain proof
+
+What you get: every score dimension broken down, adversarial debate results (bull vs bear), Monte Carlo confidence intervals, and your score recorded immutably on Base mainnet.
+
+"11 tokens passed every other audit. Our calibration caught them all."
+
+Interested? Reply here or buzzbd.ai/score for a free instant score.
+
+Best,
+Ogie`
   }
 };
 
