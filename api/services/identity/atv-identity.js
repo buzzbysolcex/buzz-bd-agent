@@ -77,23 +77,27 @@ async function resolveIdentity(address) {
     };
   }
 
-  // Step 2: Call ATV API
+  // Step 2: Call ATV API (partner key — no x402 payment needed)
   try {
-    const url = `${ATV_API}?addresses=${normalized}&include=name,twitter,github`;
-    const response = await fetch(url);
+    const apiKey = process.env.ATV_API_KEY;
+    const endpoint = process.env.ATV_ENDPOINT || 'https://api.web3identity.com/api/reverse';
+    if (!apiKey) {
+      return { status: 'error', reason: 'ATV_API_KEY not configured' };
+    }
 
-    // Step 3: Handle x402 payment requirement
-    if (response.status === 402) {
-      const paymentDetails = await response.json().catch(() => ({}));
-      console.log('[ATV Identity] x402 payment required:', JSON.stringify(paymentDetails));
-      // NOTE: Actual x402 payment signing is complex.
-      // For now, log the requirement and return payment_required.
-      // The actual payment flow will be wired when we test with a real wallet.
-      return {
-        status: 'payment_required',
-        payment_details: paymentDetails,
-        reason: 'x402 payment signing not yet wired — needs real wallet test'
-      };
+    const url = `${endpoint}/${normalized}`;
+    const response = await fetch(url, {
+      headers: { 'X-API-Key': apiKey },
+      signal: AbortSignal.timeout(10000)
+    });
+
+    // Check credits remaining
+    const creditsRemaining = response.headers.get('X-Credits-Remaining');
+    if (creditsRemaining !== null) {
+      const credits = parseInt(creditsRemaining);
+      if (credits < 500) {
+        console.warn(`[ATV Identity] ⚠️ LOW CREDITS: ${credits} remaining`);
+      }
     }
 
     if (!response.ok) {
@@ -105,30 +109,30 @@ async function resolveIdentity(address) {
     const result = Array.isArray(data) ? data[0] : data;
 
     const identity = {
-      ens_name: result.ens_name || result.name || null,
-      twitter: result.twitter || null,
-      github: result.github || null
+      ens_name: result.ens_name || result.name || result.ens || null,
+      twitter: result.twitter || result.social?.twitter || null,
+      github: result.github || result.social?.github || null
     };
 
-    // Step 5: Cache result
+    // Step 3: Cache result
     db().prepare(`
       INSERT OR REPLACE INTO identity_cache (address, ens_name, twitter, github, resolved_at, expires_at)
       VALUES (?, ?, ?, ?, datetime('now'), datetime('now', '+24 hours'))
     `).run(normalized, identity.ens_name, identity.twitter, identity.github);
 
-    // Step 6: Log payment
+    // Step 4: Log credit usage
     db().prepare(`
       INSERT INTO x402_payments (service, amount_usd, tx_hash)
       VALUES (?, ?, ?)
-    `).run('atv-ens', 0.01, null);
+    `).run('atv-partner', 0.008, `credits_remaining:${creditsRemaining || 'unknown'}`);
 
-    // Step 7: Return
     return {
       ens_name: identity.ens_name,
       twitter: identity.twitter,
       github: identity.github,
       source: 'atv-ens',
-      cached: false
+      cached: false,
+      credits_remaining: creditsRemaining ? parseInt(creditsRemaining) : null
     };
   } catch (err) {
     console.error('[ATV Identity] Resolve error:', err.message);
