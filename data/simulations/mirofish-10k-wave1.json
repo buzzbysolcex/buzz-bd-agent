@@ -1,0 +1,167 @@
+{
+  "engine": "mirofish-10k-wave1-v2",
+  "token": "Nasdog",
+  "chain": "solana",
+  "agents": 2500,
+  "llm_agents": 100,
+  "heuristic_agents": 2400,
+  "rounds": 10,
+  "final_belief": 0.62,
+  "consensus": "BULLISH",
+  "belief_history": [
+    {
+      "round": 1,
+      "avg_belief": 0.523,
+      "clusters": {
+        "degen": 0.605,
+        "whale": 0.504,
+        "institutional": 0.498,
+        "community": 0.5,
+        "market_dynamics": 0.506
+      },
+      "buys": 268,
+      "sells": 0,
+      "holds": 2232
+    },
+    {
+      "round": 2,
+      "avg_belief": 0.539,
+      "clusters": {
+        "degen": 0.7,
+        "whale": 0.507,
+        "institutional": 0.496,
+        "community": 0.484,
+        "market_dynamics": 0.51
+      },
+      "buys": 499,
+      "sells": 0,
+      "holds": 2001
+    },
+    {
+      "round": 3,
+      "avg_belief": 0.557,
+      "clusters": {
+        "degen": 0.795,
+        "whale": 0.509,
+        "institutional": 0.495,
+        "community": 0.474,
+        "market_dynamics": 0.511
+      },
+      "buys": 506,
+      "sells": 4,
+      "holds": 1990
+    },
+    {
+      "round": 4,
+      "avg_belief": 0.576,
+      "clusters": {
+        "degen": 0.889,
+        "whale": 0.511,
+        "institutional": 0.494,
+        "community": 0.474,
+        "market_dynamics": 0.514
+      },
+      "buys": 509,
+      "sells": 5,
+      "holds": 1986
+    },
+    {
+      "round": 5,
+      "avg_belief": 0.595,
+      "clusters": {
+        "degen": 0.964,
+        "whale": 0.512,
+        "institutional": 0.493,
+        "community": 0.493,
+        "market_dynamics": 0.514
+      },
+      "buys": 516,
+      "sells": 5,
+      "holds": 1979
+    },
+    {
+      "round": 6,
+      "avg_belief": 0.607,
+      "clusters": {
+        "degen": 0.984,
+        "whale": 0.513,
+        "institutional": 0.492,
+        "community": 0.531,
+        "market_dynamics": 0.514
+      },
+      "buys": 524,
+      "sells": 7,
+      "holds": 1969
+    },
+    {
+      "round": 7,
+      "avg_belief": 0.613,
+      "clusters": {
+        "degen": 0.987,
+        "whale": 0.514,
+        "institutional": 0.491,
+        "community": 0.555,
+        "market_dynamics": 0.517
+      },
+      "buys": 536,
+      "sells": 8,
+      "holds": 1956
+    },
+    {
+      "round": 8,
+      "avg_belief": 0.615,
+      "clusters": {
+        "degen": 0.989,
+        "whale": 0.516,
+        "institutional": 0.49,
+        "community": 0.561,
+        "market_dynamics": 0.519
+      },
+      "buys": 544,
+      "sells": 9,
+      "holds": 1947
+    },
+    {
+      "round": 9,
+      "avg_belief": 0.619,
+      "clusters": {
+        "degen": 0.99,
+        "whale": 0.516,
+        "institutional": 0.489,
+        "community": 0.581,
+        "market_dynamics": 0.521
+      },
+      "buys": 637,
+      "sells": 11,
+      "holds": 1852
+    },
+    {
+      "round": 10,
+      "avg_belief": 0.62,
+      "clusters": {
+        "degen": 0.99,
+        "whale": 0.518,
+        "institutional": 0.488,
+        "community": 0.58,
+        "market_dynamics": 0.523
+      },
+      "buys": 628,
+      "sells": 10,
+      "holds": 1862
+    }
+  ],
+  "cluster_beliefs": {
+    "degen": 0.99,
+    "whale": 0.518,
+    "institutional": 0.488,
+    "community": 0.58,
+    "market_dynamics": 0.523
+  },
+  "model_stats": {
+    "ollama_calls": 162,
+    "ollama_errors": 838
+  },
+  "total_time_hours": 15.55,
+  "social_posts": 162,
+  "log_file": "/home/claude-code/mirofish-10k-wave1.log"
+}
