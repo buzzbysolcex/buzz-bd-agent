@@ -67,5 +67,6 @@ buzz-workspace/
 20. .claude/skills/phantom-mcp.md
 21. .claude/skills/aibtc-competitive-intel.md
 22. .claude/skills/hsaas-go-to-market.md
-23. .claude/HANDOVER.md
-23. .claude/GSD.md
+23. .claude/rules/tweet-on-score.md
+24. .claude/HANDOVER.md
+25. .claude/GSD.md
