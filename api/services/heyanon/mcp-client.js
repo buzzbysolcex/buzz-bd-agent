@@ -37,12 +37,12 @@ async function mcpCall(toolName, args = {}) {
   const endpoint = process.env.HEYANON_ENDPOINT;
   const apiKey = process.env.HEYANON_API_KEY;
 
-  const res = await fetch(`${endpoint}/mcp`, {
+  const res = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'X-API-Key': apiKey,
-      'Accept': 'text/event-stream'
+      'Accept': 'application/json, text/event-stream'
     },
     body: JSON.stringify({
       jsonrpc: '2.0',
