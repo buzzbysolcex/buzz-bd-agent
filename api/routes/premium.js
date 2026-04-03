@@ -4,8 +4,8 @@
  * Admin key holders bypass the paywall.
  *
  * GET /api/v1/premium/pipeline     — Hot token pipeline ($0.01)
- * GET /api/v1/premium/score/:addr  — Token score ($0.005)
- * GET /api/v1/premium/sim/:addr    — Simulation result ($0.02)
+ * GET /api/v1/premium/score/:addr  — Token score ($0.01)
+ * GET /api/v1/premium/sim/:addr    — Simulation result ($0.05)
  *
  * Buzz BD Agent | 402 Index Registration
  */
@@ -45,7 +45,7 @@ router.get('/pipeline',
 // ─── GET /premium/score/:address — Token score ──────────
 router.get('/score/:address',
   x402Paywall({
-    price: '5000', // $0.005
+    price: '10000', // $0.01
     resource: '/api/v1/premium/score',
     description: 'Individual token intelligence score with triple verification across 5 dimensions.',
   }),
@@ -87,7 +87,7 @@ router.get('/score/:address',
 // ─── GET /premium/sim/:address — Simulation result ──────
 router.get('/sim/:address',
   x402Paywall({
-    price: '20000', // $0.02
+    price: '50000', // $0.05
     resource: '/api/v1/premium/sim',
     description: '20-agent MiroFish simulation with adversarial bull/bear debate. LIST or REJECT verdict.',
   }),
