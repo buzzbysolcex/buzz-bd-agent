@@ -332,6 +332,11 @@ app.get('/api/v1/info', (req, res) => {
   });
 });
 
+// ─── HSaaS Public Revenue Routes (NO auth) ──────────
+// Free score + audit intake — public-facing HSaaS funnel
+app.use('/api/v1/score', require('./routes/free-score'));
+app.use('/api/v1/audit', require('./routes/audit-request'));
+
 // ─── Authenticated Routes ────────────────────────────
 // Existing (Day 9)
 app.use('/api/v1/agents', apiKeyAuth, agentRoutes);
