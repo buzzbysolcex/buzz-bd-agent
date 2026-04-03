@@ -91,6 +91,37 @@ async function calibrateScores() {
         penalties.push('pumpfun_penalty_-10');
       }
 
+      // RULE 9: Ghost volume penalty (tokens nobody trades have no BD value)
+      if (data.volume24h !== undefined) {
+        if (data.volume24h < 5000) {
+          newScore = Math.max(0, newScore - 15);
+          penalties.push(`ghost_volume_-15 (vol=$${Math.round(data.volume24h)})`);
+        } else if (data.volume24h < 10000) {
+          newScore = Math.max(0, newScore - 10);
+          penalties.push(`ghost_volume_-10 (vol=$${Math.round(data.volume24h)})`);
+        }
+      }
+      if (data.txns24h !== undefined && data.txns24h < 100) {
+        newScore = Math.max(0, newScore - 5);
+        penalties.push(`low_txns_-5 (txns=${data.txns24h})`);
+      }
+
+      // RULE 10: CTO flag (community takeover = post-rug shell pattern)
+      const desc = (token.name || '').toLowerCase() + ' ' + (token.notes || '').toLowerCase();
+      if (desc.includes('community takeover') || desc.includes('devs dumped') || desc.includes('abandoned by dev')) {
+        newScore = Math.max(0, newScore - 15);
+        penalties.push('cto_shell_-15');
+      }
+
+      // RULE 11: Volume/liquidity ratio (dead utilization check)
+      if (data.volume24h !== undefined && data.liquidity > 0) {
+        const vlRatio = data.volume24h / data.liquidity;
+        if (vlRatio < 0.05) {
+          newScore = Math.max(0, newScore - 5);
+          penalties.push(`dead_util_-5 (v/l=${vlRatio.toFixed(3)})`);
+        }
+      }
+
       // Ensure score stays in 0-100 range
       newScore = Math.max(0, Math.min(100, Math.round(newScore)));
 
