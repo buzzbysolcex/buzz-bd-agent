@@ -30,7 +30,11 @@ const EVENT_TYPES = {
   TRUST_LEVEL_CHANGE: 'trust.level.change',
   GUARD_ALLOW: 'guard.allow',
   GUARD_WARN: 'guard.warn',
-  GUARD_BLOCK: 'guard.block'
+  GUARD_BLOCK: 'guard.block',
+  MOLTBOOK_COMMENT_NEW: 'moltbook.comment.new',
+  MOLTBOOK_REPLY_SENT: 'moltbook.reply.sent',
+  MOLTBOOK_AGENT_FOUND: 'moltbook.agent.found',
+  MOLTBOOK_SERVICE_PROMOTED: 'moltbook.service.promoted'
 };
 
 function initEventBus() {

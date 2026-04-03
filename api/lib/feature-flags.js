@@ -34,6 +34,7 @@ const FLAGS = {
   ATV_IDENTITY: true,
   HEYANON_MCP: true,
   HEYANON_EXEC: false,
+  PULSE_MOLTBOOK: true,
   NANSEN_MCP: false,
   NANSEN_AGENT: false,
 };
