@@ -31,7 +31,7 @@ const FLAGS = {
   SILENCE_CONSENT: false,
   INBOX_MONITOR: true,
   WALLET_GUARD: true,
-  ATV_IDENTITY: false,
+  ATV_IDENTITY: true,
   HEYANON_MCP: true,
   HEYANON_EXEC: false,
   NANSEN_MCP: false,
