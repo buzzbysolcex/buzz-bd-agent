@@ -1,0 +1,53 @@
+/**
+ * Service Catalog — 21 Buzz BD Agent Services
+ * 4 categories: scoring, execution, automation, orchestration
+ * Wired into PULSE and autoDream
+ */
+
+const SERVICES = [
+  { id: 1, name: 'Token Scorer', category: 'scoring', status: 'live', featureFlag: null, priceTiers: { t1: 600 }, description: 'Composite token scoring across 31 sources on 19 chains' },
+  { id: 2, name: 'MiroFish 10K Sim', category: 'scoring', status: 'ready', featureFlag: 'MIROFISH_REALTIME', priceTiers: { t2: 2500 }, description: '1000-agent swarm simulation with dual-brain AMM' },
+  { id: 3, name: 'Smart Money Tracker', category: 'scoring', status: 'pending', featureFlag: 'NANSEN_MCP', priceTiers: { t2: 2500 }, description: 'Nansen-powered smart money flow detection' },
+  { id: 4, name: 'CEX Listing Gap', category: 'scoring', status: 'ready', featureFlag: 'HEYANON_MCP', priceTiers: { t1: 600 }, description: 'Identify tokens listed on DEX but missing from CEX' },
+  { id: 5, name: 'DeFi Safety Audit', category: 'scoring', status: 'ready', featureFlag: null, priceTiers: { t1: 600, t2: 2500, t3: 5000, t4: 25000 }, description: 'Multi-tier DeFi protocol safety audit with on-chain proof' },
+  { id: 6, name: 'PumpFun Creator Intel', category: 'scoring', status: 'ready', featureFlag: null, priceTiers: { t1: 600 }, description: 'Creator history and pattern analysis for PumpFun launches' },
+  { id: 7, name: 'Yield Comparison', category: 'scoring', status: 'ready', featureFlag: 'HEYANON_MCP', priceTiers: { t1: 600 }, description: 'Cross-protocol yield comparison via HeyAnon' },
+  { id: 8, name: 'Wallet Portfolio', category: 'scoring', status: 'ready', featureFlag: 'HEYANON_MCP', priceTiers: { t1: 600 }, description: 'Wallet portfolio analysis across 18 chains' },
+  { id: 9, name: 'Score-to-Swap', category: 'execution', status: 'pre_frontier', featureFlag: 'HEYANON_EXEC', priceTiers: { t2: 2500 }, description: 'Score a token then execute swap in one pipeline' },
+  { id: 10, name: 'Perps Trading', category: 'execution', status: 'pre_frontier', featureFlag: 'HEYANON_EXEC', priceTiers: { t3: 5000 }, description: 'Perpetuals trading across supported DEXs' },
+  { id: 11, name: 'Meteora LP', category: 'execution', status: 'pre_frontier', featureFlag: 'HEYANON_EXEC', priceTiers: { t2: 2500 }, description: 'Meteora liquidity pool position management' },
+  { id: 12, name: 'Cross-Chain Bridge', category: 'execution', status: 'pre_frontier', featureFlag: 'HEYANON_EXEC', priceTiers: { t1: 600 }, description: 'Cross-chain token bridging via HeyAnon routing' },
+  { id: 13, name: 'LST Staking', category: 'execution', status: 'pre_frontier', featureFlag: 'HEYANON_EXEC', priceTiers: { t2: 2500 }, description: 'Liquid staking token operations' },
+  { id: 14, name: 'Lending Router', category: 'execution', status: 'pre_frontier', featureFlag: 'HEYANON_EXEC', priceTiers: { t2: 2500 }, description: 'Optimal lending rate routing across protocols' },
+  { id: 15, name: 'Price Triggers', category: 'automation', status: 'ready', featureFlag: null, priceTiers: { t1: 600 }, description: 'Automated alerts on price threshold breaches' },
+  { id: 16, name: 'DCA Automation', category: 'automation', status: 'pre_frontier', featureFlag: 'HEYANON_EXEC', priceTiers: { t2: 2500 }, description: 'Dollar-cost averaging automation' },
+  { id: 17, name: 'Yield Protection', category: 'automation', status: 'pre_frontier', featureFlag: 'HEYANON_EXEC', priceTiers: { t2: 2500 }, description: 'Automated yield protection and rebalancing' },
+  { id: 18, name: 'Full Pipeline', category: 'orchestration', status: 'pre_frontier', featureFlag: null, priceTiers: { t4: 25000 }, description: 'End-to-end token analysis to execution pipeline' },
+  { id: 19, name: 'Multi-Step DeFi', category: 'orchestration', status: 'pre_frontier', featureFlag: 'HEYANON_EXEC', priceTiers: { t3: 5000 }, description: 'Multi-step DeFi strategy execution' },
+  { id: 20, name: 'Wallet Guard', category: 'orchestration', status: 'with_aldo', featureFlag: 'WALLET_GUARD', priceTiers: { t2: 2500 }, description: 'Real-time wallet monitoring and protection' },
+  { id: 21, name: 'ERC-8004 Reputation', category: 'orchestration', status: 'ready', featureFlag: null, priceTiers: { t1: 600 }, description: 'On-chain reputation scoring via ERC-8004 standard' }
+];
+
+function getService(id) {
+  return SERVICES.find(s => s.id === id) || null;
+}
+
+function getByCategory(category) {
+  return SERVICES.filter(s => s.category === category);
+}
+
+function getReady() {
+  return SERVICES.filter(s => s.status === 'live' || s.status === 'ready');
+}
+
+function getStats() {
+  return {
+    total: SERVICES.length,
+    live: SERVICES.filter(s => s.status === 'live').length,
+    ready: SERVICES.filter(s => s.status === 'ready').length,
+    pending: SERVICES.filter(s => s.status === 'pending').length,
+    pre_frontier: SERVICES.filter(s => s.status === 'pre_frontier').length
+  };
+}
+
+module.exports = { SERVICES, getService, getByCategory, getReady, getStats };
