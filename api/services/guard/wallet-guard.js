@@ -75,4 +75,24 @@ async function evaluate(action) {
   }
 }
 
-module.exports = { evaluate };
+// Map AION response to Buzz action (frozen interface — 3 states)
+function mapDecision(wgResponse) {
+  const map = {
+    'ALLOW': 'PROCEED',
+    'WARN': 'WAR_ROOM_REVIEW',
+    'BLOCK': 'STOP'
+  };
+  return {
+    action: map[wgResponse.decision] || 'WAR_ROOM_REVIEW',
+    decision: wgResponse.decision,
+    reasoning: wgResponse.reasoning,
+    consequence: wgResponse.consequence,
+    riskLevel: wgResponse.riskLevel,
+    reasonCode: wgResponse.reasonCode,
+    ruleHits: wgResponse.ruleHits || [],
+    recommendedAction: wgResponse.recommendedAction,
+    receipt: wgResponse.receipt
+  };
+}
+
+module.exports = { evaluate, mapDecision };

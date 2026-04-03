@@ -30,8 +30,10 @@ const FLAGS = {
   TRUST_GATES: true,
   SILENCE_CONSENT: false,
   INBOX_MONITOR: false,
-  WALLET_GUARD: false,
+  WALLET_GUARD: true,
   ATV_IDENTITY: false,
+  NANSEN_MCP: false,
+  NANSEN_AGENT: false,
 };
 
 function feature(name) { return FLAGS[name] === true; }
