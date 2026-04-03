@@ -664,6 +664,17 @@ async function start() {
       app.use('/api/v1/pulse', require('./routes/pulse-routes'));
     }
 
+    // PULSE_MOLTBOOK (persistent Moltbook engagement)
+    if (feature('PULSE_MOLTBOOK') && feature('PULSE_ENGINE')) {
+      try {
+        const { initMoltbookPulse } = require('./services/moltbook/pulse-moltbook');
+        initMoltbookPulse();
+        console.log('[PULSE_MOLTBOOK] Moltbook engagement wired to PULSE');
+      } catch (e) {
+        console.error('[PULSE_MOLTBOOK] Init error:', e.message);
+      }
+    }
+
     // TASK 15: AUTODREAM
     if (feature('AUTODREAM')) {
       const { runDreamCycle, dreamRanToday } = require('./services/autodream/autodream');
