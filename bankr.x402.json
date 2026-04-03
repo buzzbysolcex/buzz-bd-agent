@@ -1,0 +1,94 @@
+{
+  "network": "base",
+  "currency": "USDC",
+  "services": {
+    "token-scorer": {
+      "description": "100-point token scoring. 11 factors, 8 penalties, 19 chains, 482 tokens scored, 0 false positives. On-chain verified on Base. Full intelligence suite at buzzbd.ai",
+      "price": "0.01",
+      "methods": ["GET"],
+      "endpoint": "https://api.buzzbd.ai/api/v1/score-token",
+      "tags": ["token-scoring", "intelligence", "defi", "exchange-listing"],
+      "schema": {
+        "input": { "type": "object", "properties": { "address": { "type": "string" }, "chain": { "type": "string", "default": "auto" } }, "required": ["address"] },
+        "output": { "type": "object", "properties": { "score": { "type": "number" }, "factors": { "type": "object" }, "classification": { "type": "string" } } }
+      }
+    },
+    "mirofish-sim": {
+      "description": "1,000-agent swarm consensus. 5 behavioral clusters, Monte Carlo EV, institutional skepticism index. 10K agents + full report at buzzbd.ai",
+      "price": "0.05",
+      "methods": ["POST"],
+      "endpoint": "https://api.buzzbd.ai/api/v1/simulate",
+      "tags": ["simulation", "swarm", "consensus", "institutional-skepticism"],
+      "schema": {
+        "input": { "type": "object", "properties": { "token_address": { "type": "string" }, "agents": { "type": "number", "default": 1000 }, "rounds": { "type": "number", "default": 10 } }, "required": ["token_address"] },
+        "output": { "type": "object", "properties": { "belief": { "type": "number" }, "clusters": { "type": "object" }, "ev": { "type": "number" } } }
+      }
+    },
+    "cex-gap": {
+      "description": "Token presence across 6 CEX exchanges in one query. DEX-only tokens = listing opportunity signal. Full BD screening pipeline at buzzbd.ai",
+      "price": "0.01",
+      "methods": ["GET"],
+      "endpoint": "https://api.buzzbd.ai/api/v1/cex-gap",
+      "tags": ["cex", "exchange-listing", "gap-analysis", "bd-intelligence"],
+      "schema": {
+        "input": { "type": "object", "properties": { "symbol": { "type": "string" } }, "required": ["symbol"] },
+        "output": { "type": "object", "properties": { "symbol": { "type": "string" }, "exchanges": { "type": "object" }, "listed_count": { "type": "number" } } }
+      }
+    },
+    "defi-audit": {
+      "description": "Token scoring + Rug-O-Meter + IL risk + holder analysis. Professional ($1,500) and Enterprise ($2,500) tiers with 10K sim + Nansen smart money at buzzbd.ai",
+      "price": "0.10",
+      "methods": ["POST"],
+      "endpoint": "https://api.buzzbd.ai/api/v1/audit",
+      "tags": ["security", "audit", "rug-detection", "safety", "hsaas"],
+      "schema": {
+        "input": { "type": "object", "properties": { "token_address": { "type": "string" } }, "required": ["token_address"] },
+        "output": { "type": "object", "properties": { "safety_score": { "type": "number" }, "rug_risk": { "type": "string" }, "il_risk": { "type": "string" } } }
+      }
+    },
+    "yield-compare": {
+      "description": "Best DeFi yields across 51 protocols ranked by APY. One query, all protocols. Automated yield optimization at buzzbd.ai",
+      "price": "0.01",
+      "methods": ["GET"],
+      "endpoint": "https://api.buzzbd.ai/api/v1/yield",
+      "tags": ["yield", "defi", "lending", "staking", "comparison"],
+      "schema": {
+        "input": { "type": "object", "properties": { "asset": { "type": "string" }, "chain": { "type": "string" } }, "required": ["asset"] },
+        "output": { "type": "object", "properties": { "asset": { "type": "string" }, "protocols": { "type": "array" }, "best": { "type": "string" } } }
+      }
+    },
+    "portfolio": {
+      "description": "Cross-chain + cross-CEX portfolio tracking. EVM + Solana + TON via HeyAnon. Full wallet intelligence at buzzbd.ai",
+      "price": "0.01",
+      "methods": ["GET"],
+      "endpoint": "https://api.buzzbd.ai/api/v1/portfolio",
+      "tags": ["portfolio", "wallet", "cross-chain", "tracking"],
+      "schema": {
+        "input": { "type": "object", "properties": { "wallet_address": { "type": "string" } }, "required": ["wallet_address"] },
+        "output": { "type": "object", "properties": { "tokens": { "type": "array" }, "total_usd": { "type": "number" }, "chains": { "type": "array" } } }
+      }
+    },
+    "price-alerts": {
+      "description": "24/7 server-side price monitoring. Auto re-score on trigger, escalate if threshold crossed. Full automation suite at buzzbd.ai",
+      "price": "0.01",
+      "methods": ["POST"],
+      "endpoint": "https://api.buzzbd.ai/api/v1/alerts/price",
+      "tags": ["alerts", "monitoring", "price", "automation"],
+      "schema": {
+        "input": { "type": "object", "properties": { "token_address": { "type": "string" }, "condition": { "type": "string", "enum": ["above", "below", "change_pct"] }, "value": { "type": "number" } }, "required": ["token_address", "condition", "value"] },
+        "output": { "type": "object", "properties": { "alert_id": { "type": "string" }, "status": { "type": "string" } } }
+      }
+    },
+    "reputation": {
+      "description": "On-chain agent reputation from BuzzReputation contract. Cross-marketplace trust via ERC-8004. Full agent identity suite at buzzbd.ai",
+      "price": "0.01",
+      "methods": ["GET"],
+      "endpoint": "https://api.buzzbd.ai/api/v1/reputation",
+      "tags": ["reputation", "identity", "erc-8004", "trust", "on-chain"],
+      "schema": {
+        "input": { "type": "object", "properties": { "agent_id": { "type": "string" } }, "required": ["agent_id"] },
+        "output": { "type": "object", "properties": { "agent_id": { "type": "string" }, "reputation_score": { "type": "number" }, "chains": { "type": "array" } } }
+      }
+    }
+  }
+}
