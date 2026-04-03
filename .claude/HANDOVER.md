@@ -1,19 +1,23 @@
 # BUZZ STATE HANDOVER
-## Auto-updated: 2026-04-01 11:30 UTC | Day 409 | Wednesday
+## Auto-updated: 2026-04-03 10:30 UTC | Day 411 | Friday
 
 ## WHAT TO DO FIRST
 1. Read CLAUDE.md (identity)
 2. Read docs/buzz-zhc-complete-handover.md (operating manual)
 3. Check ~/pending-followups.json (deal tracking)
-4. Execute today's creative output (Wednesday schedule)
+4. Execute today's creative output (Friday schedule)
 5. Send morning briefing to War Room if near 07:00 WIB
 
 ## SYSTEM STATUS
-- API: unknown (? endpoints, ? tables)
-- Pipeline: ? tokens tracked
+- API: healthy (135 endpoints, 79 tables)
+- Pipeline: 474 tokens tracked
 
 ## TOP 5 PROSPECTS
-- Could not fetch pipeline
+- BALLWARS: 95 (solana) — scored
+- BANANAS31: 95 (bsc) — scored
+- Max: 95 (solana) — scored
+- TRUMP: 95 (solana) — scored
+- VELO: 95 (bsc) — scored
 
 ## PENDING FOLLOW-UPS
 - BANANAS31: no_response (due: 2026-03-25T02:22:00Z)
