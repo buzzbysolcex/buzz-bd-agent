@@ -29,9 +29,11 @@ const FLAGS = {
   AUTO_OUTREACH: true,
   TRUST_GATES: true,
   SILENCE_CONSENT: false,
-  INBOX_MONITOR: false,
+  INBOX_MONITOR: true,
   WALLET_GUARD: true,
   ATV_IDENTITY: false,
+  HEYANON_MCP: true,
+  HEYANON_EXEC: false,
   NANSEN_MCP: false,
   NANSEN_AGENT: false,
 };

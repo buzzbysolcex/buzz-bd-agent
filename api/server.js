@@ -774,6 +774,52 @@ async function start() {
       }
     }
 
+    // HEYANON MCP (Brain #2 — 51 protocols)
+    if (feature('HEYANON_MCP')) {
+      try {
+        const { initHeyAnon } = require('./services/heyanon/mcp-client');
+        const connected = await initHeyAnon();
+        console.log(`[v9.2] ${connected ? '✓' : '⚠️'} HeyAnon MCP ${connected ? 'connected (51 protocols)' : 'failed to connect'}`);
+      } catch (e) {
+        console.error('[v9.2] ⚠️ HeyAnon init error:', e.message);
+      }
+    }
+
+    // SERVICE CATALOG
+    app.use('/api/v1/catalog', require('./routes/catalog-routes'));
+
+    // WALLET GUARD ROUTES + RECEIPT TABLE
+    if (feature('WALLET_GUARD')) {
+      try {
+        const db = getDB();
+        db.exec(`CREATE TABLE IF NOT EXISTS wallet_guard_receipts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          request_id TEXT UNIQUE,
+          decision TEXT NOT NULL,
+          risk_level TEXT,
+          reason_code TEXT,
+          reasoning TEXT,
+          receipt_hash TEXT,
+          receipt_json TEXT,
+          tx_fingerprint TEXT,
+          policy_version TEXT,
+          override_required INTEGER DEFAULT 0,
+          override_used INTEGER DEFAULT 0,
+          token_address TEXT,
+          token_chain TEXT,
+          buzz_score REAL,
+          sim_consensus REAL,
+          sim_ev REAL,
+          screening_class TEXT,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )`);
+        app.use('/api/v1/guard', require('./routes/guard-routes'));
+        console.log('[v9.2] ✓ Wallet Guard routes + receipt table initialized');
+      } catch (e) {
+        console.error('[v9.2] ⚠️ Wallet Guard init error:', e.message);
+      }
+    }
+
     // Score Calibration — apply mcap/liquidity penalties after pipeline sync
     try {
       const { calibrateScores } = require('./lib/score-calibrator');
