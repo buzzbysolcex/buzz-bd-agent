@@ -18,7 +18,7 @@ const FLAGS = {
   ELS1_PROTOCOL: false,
   BROWSER_USE_CLI: true,
   GSD_BROWSER: true,
-  HERMES_SENTINEL: true,
+  HERMES_SENTINEL: false,
   GPU_BURST: false,
   ILSHIELD_ENABLED: true,
   PULSE_ENGINE: true,
