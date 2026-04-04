@@ -836,6 +836,12 @@ async function start() {
       }
     }
 
+    // SOLANA AGENT SKILLS (/.well-known/skills)
+    if (feature('SOLANA_AGENT_SKILL')) {
+      require('./routes/skills-route')(app);
+      console.log('[v9.2] ✓ Solana Agent Skills endpoint wired: /.well-known/skills');
+    }
+
     // Score Calibration — apply mcap/liquidity penalties after pipeline sync
     try {
       const { calibrateScores } = require('./lib/score-calibrator');

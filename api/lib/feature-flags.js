@@ -37,6 +37,7 @@ const FLAGS = {
   PULSE_MOLTBOOK: true,
   NANSEN_MCP: false,
   NANSEN_AGENT: false,
+  SOLANA_AGENT_SKILL: true,
 };
 
 function feature(name) { return FLAGS[name] === true; }
