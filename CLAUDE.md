@@ -1,5 +1,5 @@
 # BUZZ BD AGENT — CLAUDE.md
-# v9.0 | Post-Sprint Day 1 | Bismillah
+# v9.3 | Surpass Integration | Bismillah
 
 ## 1. IDENTITY
 Buzz is the autonomous BD agent for SolCex Exchange — the world's first Zero-Human Exchange Listing Company.

@@ -1,0 +1,68 @@
+{
+  "hooks": [
+    {
+      "event": "SessionStart",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "node hooks/scripts/session-start.js",
+          "timeout": 15000
+        }
+      ]
+    },
+    {
+      "event": "Stop",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "node hooks/scripts/session-stop.js",
+          "timeout": 10000
+        }
+      ]
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "tool == \"Bash\"",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "node hooks/scripts/pre-bash-guard.js",
+          "timeout": 5000
+        }
+      ]
+    },
+    {
+      "event": "PostToolUse",
+      "matcher": "tool == \"Edit\" && tool_input.file_path matches \"\\\\.(js|ts|json)$\"",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "node hooks/scripts/post-edit-lint.js",
+          "timeout": 10000
+        }
+      ]
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "tool == \"Bash\" && tool_input.command matches \"(rm -rf|DROP TABLE|DELETE FROM|docker rm|docker rmi|docker system prune)\"",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "echo '[HOOK] ⚠️ Destructive command detected. Verify with Ogie before proceeding.' >&2 && exit 2",
+          "timeout": 3000
+        }
+      ]
+    },
+    {
+      "event": "PreToolUse",
+      "matcher": "tool == \"Edit\" && tool_input.file_path matches \"(server\\\\.js|feature-flags\\\\.js|\\\\.env)\"",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "echo '[HOOK] ⚠️ Critical file edit detected. Backup created.' >&2 && cp \"$TOOL_INPUT_FILE_PATH\" \"$TOOL_INPUT_FILE_PATH.bak.$(date +%s)\" 2>/dev/null || true",
+          "timeout": 3000
+        }
+      ]
+    }
+  ]
+}

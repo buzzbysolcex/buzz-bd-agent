@@ -1,0 +1,44 @@
+{
+  "name": "@buzzbd/scorer",
+  "version": "9.2.0",
+  "description": "Buzz Token Scorer — 11-rule crypto token scoring engine. Zero LLM cost. Score any token from your terminal in seconds.",
+  "main": "index.js",
+  "bin": {
+    "buzz-score": "./bin/cli.js"
+  },
+  "scripts": {
+    "start": "node bin/cli.js",
+    "test": "node tests/scorer.test.js"
+  },
+  "keywords": [
+    "crypto",
+    "token",
+    "scoring",
+    "defi",
+    "security",
+    "dexscreener",
+    "exchange",
+    "listing",
+    "web3",
+    "agent",
+    "buzz",
+    "solcex"
+  ],
+  "author": "Ogie @ SolCex Exchange <buzzbysolcex@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://buzzbd.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BuzzBySolCex/buzz-scorer"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {},
+  "files": [
+    "bin/",
+    "lib/",
+    "index.js",
+    "README.md"
+  ]
+}
