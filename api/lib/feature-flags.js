@@ -35,7 +35,7 @@ const FLAGS = {
   HEYANON_MCP: true,
   HEYANON_EXEC: false,
   PULSE_MOLTBOOK: true,
-  NANSEN_MCP: false,
+  NANSEN_MCP: true,
   NANSEN_AGENT: false,
   SOLANA_AGENT_SKILL: true,
 };
