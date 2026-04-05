@@ -159,15 +159,28 @@ function decideAction(ctx) {
     }
   }
 
-  // Priority 5: Streak protection (16:00 UTC)
-  if (ctx.hour_utc === 16) {
-    const hasSignalToday = ctx.recent_event_types.includes('signal.approved');
+  // Priority 5: Streak protection (14:00-16:00 UTC graduated alerts)
+  if (ctx.hour_utc >= 14 && ctx.hour_utc <= 16) {
+    const hasSignalToday = ctx.recent_event_types.includes('signal.filed') ||
+                           ctx.recent_event_types.includes('signal.approved');
+    const alertSent = getState('streak_alert_date') === new Date().toISOString().split('T')[0];
+
     if (!hasSignalToday) {
-      return {
-        type: 'ACT',
-        reason: 'Streak protection: 16:00 UTC, no approved signal today',
-        action: 'streak-protection'
-      };
+      if (ctx.hour_utc >= 15) {
+        return {
+          type: 'ACT',
+          reason: `STREAK CRITICAL: ${ctx.hour_utc}:00 UTC, no signal filed today`,
+          action: 'streak-protection'
+        };
+      }
+      if (!alertSent) {
+        setState('streak_alert_date', new Date().toISOString().split('T')[0]);
+        return {
+          type: 'ACT',
+          reason: 'Streak warning: 14:00 UTC, no signal filed today',
+          action: 'streak-warning'
+        };
+      }
     }
   }
 
@@ -215,8 +228,12 @@ async function executeAction(action) {
         emit('pulse-engine', EVENT_TYPES.ARIA_DISCOVERY, { trigger: 'pulse-window' });
         return { triggered: 'aria-discovery' };
 
+      case 'streak-warning':
+        emit('pulse-engine', EVENT_TYPES.STREAK_WARNING, { trigger: 'pulse-14utc', level: 'warning' });
+        return { triggered: 'streak-warning' };
+
       case 'streak-protection':
-        emit('pulse-engine', EVENT_TYPES.STREAK_WARNING, { trigger: 'pulse-16utc' });
+        emit('pulse-engine', EVENT_TYPES.STREAK_WARNING, { trigger: 'pulse-15utc', level: 'critical' });
         return { triggered: 'streak-protection' };
 
       default:
