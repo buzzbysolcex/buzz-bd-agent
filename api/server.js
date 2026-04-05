@@ -726,6 +726,27 @@ async function start() {
       }
     }
 
+    // AUTODREAM EVOLUTION — Telegram Intel + Hill-Climbing
+    if (feature('TELEGRAM_CHANNEL_INTEL')) {
+      try {
+        const { initTelegramIntelTables } = require('./services/intel/telegram-channel');
+        initTelegramIntelTables();
+        console.log('[INTEL] ✓ Telegram channel intel tables initialized');
+      } catch (e) {
+        console.error('[INTEL] Init error (non-fatal):', e.message);
+      }
+    }
+    if (feature('AUTODREAM_HILLCLIMB')) {
+      try {
+        const { initHillClimberTables, seedGroundTruth } = require('./services/autodream/hill-climber');
+        initHillClimberTables();
+        const seeded = seedGroundTruth();
+        console.log(`[HILLCLIMB] ✓ Hill-climber tables initialized (${seeded} ground truth seeded)`);
+      } catch (e) {
+        console.error('[HILLCLIMB] Init error (non-fatal):', e.message);
+      }
+    }
+
     // TASK 17: ANTI-DISTILLATION
     if (feature('ANTI_DISTILLATION')) {
       const { antiDistillation } = require('./middleware/anti-distillation');

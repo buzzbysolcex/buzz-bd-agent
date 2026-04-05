@@ -65,6 +65,9 @@ const FLAGS = {
   SHIELD_X402_PAYMENTS: false,
   // Pyth Oracle Verification — Intel Source #33
   SHIELD_PYTH_ORACLE: true,
+  // autoDream Evolution
+  AUTODREAM_HILLCLIMB: false,
+  TELEGRAM_CHANNEL_INTEL: false,
   // Shield Phase 3 (future)
   SHIELD_ANOMALY_DETECTION: false,
   SHIELD_MEMPOOL: false,

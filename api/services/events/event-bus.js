@@ -41,7 +41,14 @@ const EVENT_TYPES = {
   SHIELD_WARNING: 'shield.warning_detected',
   SHIELD_DEGRADED: 'shield.degraded',
   SHIELD_PATTERN_ADDED: 'shield.pattern_added',
-  SHIELD_DAILY_REPORT: 'shield.daily_report'
+  SHIELD_DAILY_REPORT: 'shield.daily_report',
+  // Intel events
+  INTEL_TELEGRAM_NEW: 'intel.telegram.new',
+  INTEL_BLACKLIST_MATCH: 'intel.blacklist.match',
+  // autoDream evolution
+  AUTODREAM_EXPERIMENT_KEEP: 'autodream.experiment.keep',
+  AUTODREAM_EXPERIMENT_DISCARD: 'autodream.experiment.discard',
+  AUTODREAM_OVERNIGHT_COMPLETE: 'autodream.overnight.complete'
 };
 
 function initEventBus() {
