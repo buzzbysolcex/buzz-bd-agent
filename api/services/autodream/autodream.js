@@ -309,6 +309,25 @@ function runDreamCycle(trigger = 'scheduled') {
   const consolidation = consolidateMemory(staleData);
   const revenue = consolidateRevenue();
   const shieldNightly = shieldNightlyAnalysis();
+
+  // Phase 8: Intel sync (Telegram channel intel)
+  let intelSync = { skipped: true };
+  if (feature('TELEGRAM_CHANNEL_INTEL')) {
+    try {
+      const { getBlacklistStats } = require('../intel/telegram-channel');
+      intelSync = getBlacklistStats();
+    } catch (e) { intelSync = { error: e.message }; }
+  }
+
+  // Phase 9: Hill-climbing optimization
+  let hillClimbResult = { skipped: true };
+  if (feature('AUTODREAM_HILLCLIMB')) {
+    try {
+      const { hillClimbLoop } = require('./hill-climber');
+      hillClimbResult = hillClimbLoop(5, 4 * 60 * 60 * 1000);
+    } catch (e) { hillClimbResult = { error: e.message }; }
+  }
+
   const optimization = optimizeIndexes();
 
   const duration_ms = Date.now() - dreamStart;
@@ -326,7 +345,7 @@ function runDreamCycle(trigger = 'scheduled') {
   `).run(
     dreamId, new Date().toISOString(), trigger, duration_ms,
     consolidation.total_cleaned, optimization.db_size_kb,
-    JSON.stringify({ memoryState, staleData, consolidation, revenue, shieldNightly, optimization })
+    JSON.stringify({ memoryState, staleData, consolidation, revenue, shieldNightly, intelSync, hillClimbResult, optimization })
   );
 
   emit('autodream', 'autodream.complete', {
