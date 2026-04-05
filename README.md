@@ -18,7 +18,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-v9.2-00ff41?style=flat-square" alt="Version"/>
-  <img src="https://img.shields.io/badge/MiroFish-1000%20agents-ff6600?style=flat-square" alt="MiroFish"/>
+  <img src="https://img.shields.io/badge/MiroFish-10%2C000%20agents-ff6600?style=flat-square" alt="MiroFish"/>
   <img src="https://img.shields.io/badge/contracts-4%20on%20Base-blue?style=flat-square" alt="Contracts"/>
   <img src="https://img.shields.io/badge/intel%20sources-32-orange?style=flat-square" alt="Intel Sources"/>
   <img src="https://img.shields.io/badge/chains-19-purple?style=flat-square" alt="Chains"/>
@@ -290,7 +290,7 @@ Guard:      Wallet Guard / AION (3-state adapter, schema-frozen)
 Outreach:   Gmail OAuth + Trust Gates (5 levels) + Inbox Monitor
 Browser:    gsd-browser (63 cmd) + dev-browser + Browser Use CLI
 Engine:     PULSE (60s tick) + autoDream (02:00 UTC nightly)
-Signals:    AIBTC Signal Factory v4.0 (7 beats, Genome Stack)
+Signals:    AIBTC Signal Factory v4.0 (12 beats, Genome Stack)
 Context:    Subagent mandate + ultrathink triggers + /compact preservation
 Repo:       AI-native (8+ skills, 18 rules, 17+ ADRs, hooks)
 Skills:     Solana Agent Skills directory + buzzbd.ai/.well-known/skills/
@@ -304,7 +304,7 @@ Buzz earns BTC by filing intelligence signals on [aibtc.news](https://aibtc.news
 | Metric | Value |
 |--------|-------|
 | Brief Inclusions | 8 ($200 revenue) |
-| Beats Claimed | 7 (agent-economy, agent-trading, infrastructure, security, deal-flow, agent-skills, governance) |
+| Beats Claimed | 12 (agent-economy, agent-trading, infrastructure, security, deal-flow, agent-skills, governance, agent-security, agent-infrastructure, defi, agent-governance, agent-commerce) |
 | Daily Target | 6 signals/day |
 | Unique Signals | MiroFish Swarm Prediction Alerts |
 | Revenue Model | 70/30 split with Flying Whale (600 sats/query) |
@@ -344,10 +344,10 @@ No CS degree. No VC. No team. Just persistence.
 ---
 
 <p align="center">
-  <strong>Built by a chef. Powered by Claude. Simulated by 1000 agents. Verified on-chain.</strong><br/>
+  <strong>Built by a chef. Powered by Claude. Simulated by 10,000 agents. Verified on-chain.</strong><br/>
   <em>Mise en place — everything in its place before the service begins.</em>
 </p>
 
 <p align="center">
-  <sub>v9.2 | Post-Sprint Day 5 | 32 Intel Sources | 4 Contracts | 19 Chains | 1000 Agents | 21 Services | $0/day LLM</sub>
+  <sub>v9.2 | Post-Sprint Day 5 | 32 Intel Sources | 4 Contracts | 19 Chains | 10,000 Agents | 21 Services | $0/day LLM</sub>
 </p>
