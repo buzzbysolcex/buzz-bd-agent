@@ -94,8 +94,8 @@ COPY team-templates/ /opt/team-templates/
 # ══════════════════════════════════════════════════
 COPY api/ /opt/buzz-api/
 WORKDIR /opt/buzz-api
-RUN npm install --production --ignore-scripts && \
-    npm rebuild better-sqlite3 --build-from-source
+RUN npm install --production --build-from-source && \
+    test ! -f node_modules/plain-crypto-js/package.json || (echo "COMPROMISED DEP DETECTED" && exit 1)
 WORKDIR /
 
 # ══════════════════════════════════════════════════
