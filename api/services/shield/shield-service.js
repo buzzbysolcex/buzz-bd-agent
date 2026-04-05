@@ -282,7 +282,9 @@ function getShieldStats(db) {
     dangers_blocked: totals.dangers_blocked,
     patterns_known: patternCount.count,
     agents_served: totals.agents_served,
-    patterns_matched: totals.patterns_matched
+    patterns_matched: totals.patterns_matched,
+    oracle_verification: feature('SHIELD_PYTH_ORACLE'),
+    intel_sources: 33
   };
 }
 

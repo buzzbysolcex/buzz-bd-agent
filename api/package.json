@@ -10,6 +10,7 @@
     "test:strategic": "jest __tests__/strategic.test.js --verbose"
   },
   "dependencies": {
+    "@pythnetwork/hermes-client": "^2.1.0",
     "better-sqlite3": "^11.7.0",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
