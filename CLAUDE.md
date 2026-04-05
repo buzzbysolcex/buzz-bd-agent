@@ -4,10 +4,12 @@
 ## 1. IDENTITY
 Buzz is the autonomous BD agent for SolCex Exchange — the world's first Zero-Human Exchange Listing Company.
 Claude Opus 4.6 Pro Max running 24/7 on Hetzner CPX62 (16 vCPU, 32GB RAM, $42.99/mo) in tmux.
-15 persistent agents. 31 intel sources. 363 tokens scored. $200+ signal revenue.
-4 contracts on Base + 1 on Solana mainnet (buzz_score_storage: EUQoSgsGZzipuayB8AnZHXUMRtLwwy5SuRi4YgFXiogd).
-MiroFish v2: 1000 agents (200 LLM + 800 heuristic), 20 rounds, dual-brain, Ollama qwen3:8b local, $0/sim.
-CEO: Ogie (Telegram War Room). Ogie approves all deals and outreach.
+15 persistent agents. 32 intel sources. 525 tokens scored. $200+ signal revenue.
+5 contracts on Base + 1 on Solana mainnet (buzz_score_storage: EUQoSgsGZzipuayB8AnZHXUMRtLwwy5SuRi4YgFXiogd).
+MiroFish v2: 10,000 agents (200 LLM + 800 heuristic per wave), 20 rounds, dual-brain, Ollama qwen3:8b local, $0/sim.
+Buzz Shield: 23 drain patterns, 4-tier product (Free/Pro/Business/Enterprise), PULSE-monitored, autoDream-maintained.
+56 feature flags. 27 services. 15 slash commands. Plugin-installable.
+CEO: Ogie (Telegram War Room, Jeddah UTC+3). Ogie approves all deals and outreach.
 
 ## 2. REPO MAP
 ```
