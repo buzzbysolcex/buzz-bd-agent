@@ -27,7 +27,11 @@ const SERVICES = [
   { id: 20, name: 'Wallet Guard', category: 'orchestration', status: 'with_aldo', featureFlag: 'WALLET_GUARD', priceTiers: { t2: 2500 }, description: 'Real-time wallet monitoring and protection' },
   { id: 21, name: 'ERC-8004 Reputation', category: 'orchestration', status: 'ready', featureFlag: null, priceTiers: { t1: 600 }, description: 'On-chain reputation scoring via ERC-8004 standard' },
   { id: 22, name: 'Solana Agent Skill', category: 'orchestration', status: 'live', featureFlag: 'SOLANA_AGENT_SKILL', priceTiers: { free: 0 }, description: 'Public SKILL.md for AI agent consumption via Solana Skills directory' },
-  { id: 23, name: 'Buzz Shield', category: 'scoring', status: 'pending', featureFlag: 'SHIELD_ENGINE', priceTiers: { free: 0, t1: 100, t2: 500, t3: 1000 }, description: 'Pre-action security intelligence — program risk scoring, drain pattern matching, verdict engine' }
+  { id: 23, name: 'Shield Health Check', category: 'scoring', status: 'live', featureFlag: 'SHIELD_FREE_TIER', priceTiers: { free: 0 }, description: 'Free wallet health check — basic exposure summary' },
+  { id: 24, name: 'Shield Full Scan', category: 'scoring', status: 'live', featureFlag: 'SHIELD_ENGINE', priceTiers: { t1: 1000 }, description: 'Full deep scan — all 23+ patterns, address poisoning, temporal analysis ($0.10/scan)' },
+  { id: 25, name: 'Shield Program Risk', category: 'scoring', status: 'live', featureFlag: 'SHIELD_PROGRAM_SCORER', priceTiers: { t1: 1000 }, description: 'Program risk scoring 0-100 — verified, immutable, age, deployer ($0.10/scan)' },
+  { id: 26, name: 'Shield Bridge Verify', category: 'scoring', status: 'pending', featureFlag: 'SHIELD_CROSS_CHAIN', priceTiers: { t2: 500 }, description: 'Cross-chain bridge verification — registry lookup, gateway proof check ($0.05/scan)' },
+  { id: 27, name: 'Shield Custom Pattern', category: 'scoring', status: 'planned', featureFlag: 'SHIELD_ENTERPRISE_TIER', priceTiers: { custom: 0 }, description: 'Enterprise custom drain pattern development — tailored to client operations' }
 ];
 
 function getService(id) {

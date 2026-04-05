@@ -55,6 +55,18 @@ const FLAGS = {
   SHIELD_ADDRESS_POISONING: false,
   SHIELD_TEMPORAL_ANALYSIS: false,
   SHIELD_CROSS_CHAIN: false,
+  // Shield Tiers
+  SHIELD_BUSINESS_TIER: false,
+  SHIELD_ENTERPRISE_TIER: false,
+  // Shield Integration
+  SHIELD_PULSE_MONITOR: true,
+  AUTODREAM_SHIELD: true,
+  SHIELD_WAR_ROOM_ALERTS: true,
+  SHIELD_X402_PAYMENTS: false,
+  // Shield Phase 3 (future)
+  SHIELD_ANOMALY_DETECTION: false,
+  SHIELD_MEMPOOL: false,
+  SHIELD_INPUT_VERIFICATION: false,
 };
 
 function feature(name) { return FLAGS[name] === true; }
