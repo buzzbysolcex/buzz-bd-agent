@@ -262,6 +262,31 @@ function generateSignalAngles() {
   return angles;
 }
 
+// ── PHASE 7: SHIELD PATTERN UPDATE ──────────────────────────
+function updateShieldPatterns() {
+  if (!feature('SHIELD_ENGINE')) return { skipped: true, reason: 'SHIELD_ENGINE=false' };
+
+  try {
+    // Update match counts and last_seen for active patterns
+    const patterns = db().prepare('SELECT id, pattern_id, match_count FROM drain_patterns WHERE active = 1').all();
+
+    // Check for repeated DANGER verdicts that might indicate new patterns
+    const dangerTargets = db().prepare(`
+      SELECT target, COUNT(*) as cnt FROM shield_scans
+      WHERE verdict = 'DANGER' AND created_at > datetime('now', '-7 days')
+      GROUP BY target HAVING cnt >= 3
+    `).all();
+
+    return {
+      active_patterns: patterns.length,
+      danger_repeat_targets: dangerTargets.length,
+      targets: dangerTargets.map(t => ({ target: t.target, count: t.cnt }))
+    };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
 // ── PHASE 4: OPTIMIZE (load-aware) ──────────────────────────
 function optimizeIndexes() {
   const loadPct = Math.round((os.loadavg()[0] / os.cpus().length) * 100);
@@ -306,6 +331,7 @@ function runDreamCycle(trigger = 'scheduled') {
   const consolidation = consolidateMemory(staleData);
   const revenue = consolidateRevenue();
   const signalAngles = generateSignalAngles();
+  const shieldUpdate = updateShieldPatterns();
   const optimization = optimizeIndexes();
 
   const duration_ms = Date.now() - dreamStart;
@@ -323,7 +349,7 @@ function runDreamCycle(trigger = 'scheduled') {
   `).run(
     dreamId, new Date().toISOString(), trigger, duration_ms,
     consolidation.total_cleaned, optimization.db_size_kb,
-    JSON.stringify({ memoryState, staleData, consolidation, revenue, signalAngles, optimization })
+    JSON.stringify({ memoryState, staleData, consolidation, revenue, signalAngles, shieldUpdate, optimization })
   );
 
   emit('autodream', 'autodream.complete', {
