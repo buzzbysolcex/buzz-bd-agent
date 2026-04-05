@@ -664,6 +664,26 @@ Dependencies:
   - Claude Code restart (for fresh MCP + beat expansion)
 ```
 
+## PHASE 1.5: P0 PATTERN EXPANSION (COMPLETED Apr 5, 2026)
+**Goal: 3 critical patterns from ADR-025 gap analysis**
+
+```
+COMPLETED:
+  ✅ address_poisoning_lookalike (65.4M incidents, $12.4M single loss)
+  ✅ durable_nonce_temporal_delay (Drift $270M attack vector)
+  ✅ cross_chain_bridge_spoof (69% of DeFi theft)
+  ✅ checkAddressPoisoning() detection function
+  ✅ checkTemporalAnomaly() with shield_presigned_txs table
+  ✅ checkBridgeVerification() with bridge_registry table
+  ✅ PULSE Shield monitoring (every 100 ticks)
+  ✅ autoDream Phase 7 — Shield nightly analysis
+  ✅ 6 Shield event types in event bus
+  ✅ 56 feature flags, 27 services
+
+Total patterns: 23 (20 Phase 1 + 3 Phase 1.5 P0)
+See ADR-025 for full gap analysis (15 vectors, 5 structural findings)
+```
+
 ## PHASE 2: INSTRUCTION SCANNER (Week 2-3, Apr 14-25)
 **Goal: Parse unsigned Solana transactions, flag dangerous instructions**
 
