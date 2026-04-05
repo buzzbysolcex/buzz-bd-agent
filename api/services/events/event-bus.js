@@ -34,7 +34,14 @@ const EVENT_TYPES = {
   MOLTBOOK_COMMENT_NEW: 'moltbook.comment.new',
   MOLTBOOK_REPLY_SENT: 'moltbook.reply.sent',
   MOLTBOOK_AGENT_FOUND: 'moltbook.agent.found',
-  MOLTBOOK_SERVICE_PROMOTED: 'moltbook.service.promoted'
+  MOLTBOOK_SERVICE_PROMOTED: 'moltbook.service.promoted',
+  // Shield events (Phase 2)
+  SHIELD_SCAN_COMPLETE: 'shield.scan_complete',
+  SHIELD_DANGER: 'shield.danger_detected',
+  SHIELD_WARNING: 'shield.warning_detected',
+  SHIELD_DEGRADED: 'shield.degraded',
+  SHIELD_PATTERN_ADDED: 'shield.pattern_added',
+  SHIELD_DAILY_REPORT: 'shield.daily_report'
 };
 
 function initEventBus() {

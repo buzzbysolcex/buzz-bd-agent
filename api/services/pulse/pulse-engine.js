@@ -184,6 +184,26 @@ function decideAction(ctx) {
     }
   }
 
+  // Priority 6: Shield health check (every 100 ticks)
+  if (feature('SHIELD_PULSE_MONITOR') && ctx.tick % 100 === 0) {
+    try {
+      const patternCount = db().prepare('SELECT COUNT(*) as c FROM drain_patterns WHERE active = 1').get();
+      if (!patternCount || patternCount.c === 0) {
+        emit('pulse-engine', EVENT_TYPES.SHIELD_DEGRADED, { patterns: 0 });
+        return {
+          type: 'ACT',
+          reason: 'SHIELD DEGRADED: 0 active drain patterns',
+          action: 'shield-health-alert'
+        };
+      }
+      // Log Shield health silently
+      setState('shield_last_check', new Date().toISOString());
+      setState('shield_pattern_count', patternCount.c);
+    } catch (e) {
+      // Shield tables may not exist — not critical
+    }
+  }
+
   // Nothing actionable
   return { type: 'SLEEP', reason: 'No actionable context' };
 }
@@ -227,6 +247,10 @@ async function executeAction(action) {
       case 'trigger-aria-discovery':
         emit('pulse-engine', EVENT_TYPES.ARIA_DISCOVERY, { trigger: 'pulse-window' });
         return { triggered: 'aria-discovery' };
+
+      case 'shield-health-alert':
+        emit('pulse-engine', EVENT_TYPES.SHIELD_DEGRADED, { trigger: 'pulse-100tick' });
+        return { triggered: 'shield-health-alert' };
 
       case 'streak-warning':
         emit('pulse-engine', EVENT_TYPES.STREAK_WARNING, { trigger: 'pulse-14utc', level: 'warning' });
