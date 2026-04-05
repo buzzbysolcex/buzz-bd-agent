@@ -55,6 +55,7 @@ DISCOVER → SCORE → SIMULATE → VERIFY → OUTREACH → NEGOTIATE → LIST
 | **Identity** | ATV Web3 Identity — deployer verification via x402 micropayment |
 | **Outreach** | Email-first autonomous BD — trust-gated, template-driven, dual-funnel |
 | **Guard** | Wallet Guard (AION) — pre-execution governance with cryptographic receipts |
+| **Shield** | Buzz Shield — pre-transaction scanning, 20 drain patterns, SAFE/WARNING/DANGER |
 | **Propose** | Only tokens scoring 70+ with MiroFish consensus > 50% get a listing conversation |
 
 ## MiroFish — Swarm Intelligence Engine
@@ -143,9 +144,10 @@ Layer 3: ENRICHMENT (context, non-price)
   ├── dev-browser — QuickJS sandbox, structured data extraction
   └── GeckoTerminal — circulating MCap, gt_score
 
-Layer 4: IDENTITY & TRUST
+Layer 4: IDENTITY & TRUST & SECURITY
   ├── ATV Web3 Identity — ENS + social resolution via x402
   ├── Wallet Guard (AION) — pre-execution governance, 3-state adapter
+  ├── Buzz Shield — pre-transaction scanning, 20 drain patterns, verdict engine
   └── BuzzReputation — on-chain accuracy tracking
 
 Layer 5: EXECUTION (CEO-approved only)
@@ -198,6 +200,41 @@ Email-first autonomous BD with graduated trust:
 | **Inbox Monitor** | Reply detection, 30min interval, War Room alerts |
 | **Wallet Guard** | AION pre-execution governance (BLOCK/WARN/ALLOW) |
 | **ATV Identity** | Deployer verification via x402 micropayment |
+
+## Buzz Shield — Pre-Transaction Security Intelligence (v9.2)
+
+Born from surviving a North Korean state-actor supply chain attack on axios (March 31, 2026). Before a user signs ANY transaction, Buzz Shield analyzes it and returns a SAFE / WARNING / DANGER verdict.
+
+```
+┌────────────────────────────────────────────────┐
+│              BUZZ SHIELD                       │
+│                                                │
+│  "On March 31, a North Korean state actor      │
+│   compromised the most popular JavaScript      │
+│   HTTP client. Our CI/CD runners talked to     │
+│   their C2 server. We survived. Then we built  │
+│   the thing that would have caught it."        │
+│                                                │
+│  Instruction Scanner → Program Risk Score →    │
+│  Known Pattern Matcher → Wallet Exposure →     │
+│  VERDICT: SAFE / WARNING / DANGER              │
+│                                                │
+│  20 drain patterns seeded (4 critical, 6 high) │
+│  x402: $0.01 per scan (USDC on Base)           │
+│  Service #23 in catalog                        │
+└────────────────────────────────────────────────┘
+```
+
+| Component | What It Does |
+|-----------|-------------|
+| **Instruction Scanner** | Parse every instruction — flag `assign`, `setAuthority`, transfers to unknown addresses |
+| **Program Risk Score** | Verified? Immutable? Deploy date? Flagged before? Source available? |
+| **Pattern Matcher** | 20 known drainer patterns (owner_reassign, TOCTOU, bulk_spl_drain, supply chain poison) |
+| **Wallet Exposure** | Connected dApps, old approvals, total value at risk |
+
+**Free endpoints:** `/shield/health/:wallet`, `/shield/program/:programId`, `/shield/patterns`, `/shield/stats`
+
+**The Frontier play:** Wallet Guard (Aldo/AION) + Buzz Shield = complete pre-execution governance. Score the token AND scan the transaction.
 
 ## Context Optimization (v9.2)
 
@@ -287,6 +324,7 @@ Chain:      4 smart contracts (Base mainnet, Foundry)
 MCP:        HeyAnon (19 chains) + Phantom (4 chains) + Nansen (Phase 1)
 Identity:   ATV Web3 Identity (x402) + ERC-8004 (5 chains)
 Guard:      Wallet Guard / AION (3-state adapter, schema-frozen)
+Shield:     Buzz Shield (pre-tx scanning, 20 drain patterns, Service #23)
 Outreach:   Gmail OAuth + Trust Gates (5 levels) + Inbox Monitor
 Browser:    gsd-browser (63 cmd) + dev-browser + Browser Use CLI
 Engine:     PULSE (60s tick) + autoDream (02:00 UTC nightly)
@@ -337,6 +375,7 @@ Day 42: 4 contracts. ARIA v2. 1000-agent MiroFish simulation. $200 signal revenu
 Day 42+: MiroFish validated — institutional skepticism deepens at scale. That's emergent intelligence.
 Day 44: Outreach automation live. Email-first. Trust-gated. Wallet Guard integration.
 Day 46: Solana Agent Skills submission. First BD intelligence skill in the ecosystem.
+Day 47: Buzz Shield Phase 1 deployed. 20 drain patterns. Born from surviving a nation-state attack.
 Day 47: Context optimization deployed. 81 tables. 200+ endpoints. 18 rules. 392 commits.
 
 No CS degree. No VC. No team. Just persistence.
