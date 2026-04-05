@@ -70,3 +70,38 @@ buzz-workspace/
 23. .claude/rules/tweet-on-score.md
 24. .claude/HANDOVER.md
 25. .claude/GSD.md
+
+---
+
+## CONTEXT HYGIENE (v9.2 — Apr 5, 2026)
+
+### Architecture
+This project uses Claude Code context optimization patterns:
+
+1. SUBAGENTS for exploration — any codebase scan of >5 files uses
+   subagents. Main context receives summary only. See
+   .claude/rules/context-optimization.md for triggers.
+
+2. THINKING DEPTH — ultrathink for critical decisions (security,
+   architecture, scoring, contracts, hackathons). Default for routine ops.
+
+3. COMPACT DISCIPLINE — when compacting, preserve feature flags,
+   deadlines, streak count, modified files, pending tasks, trust state.
+
+4. SESSION NAMING — descriptive names (feature-X, bugfix-Y) for
+   --from-pr and --resume continuity.
+
+5. EFFORT LEVEL — CLAUDE_CODE_EFFORT_LEVEL=high set in .bashrc.
+   Persists across reboots. Current session: /effort high.
+
+### Operator Commands (Ogie via War Room)
+- /btw [question] — side question, no context cost (operator use only)
+- /compact Focus on [X] — targeted compression preserving critical state
+- /effort high — ensure high effort for current session
+- "ultrathink" in any prompt — max reasoning for that turn
+
+### Why This Matters
+81 tables. 200+ endpoints. 21 services. 31 intel sources.
+Without context hygiene, a single exploration session can fill the
+context window and degrade War Room performance. Subagents + targeted
+thinking + smart compaction = longer, more productive sessions.
