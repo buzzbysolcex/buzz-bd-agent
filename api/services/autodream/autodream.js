@@ -201,6 +201,67 @@ function consolidateRevenue() {
   return { date: today, signals: signalsToday, shield_scans: shieldScans };
 }
 
+// ── PHASE 6: SIGNAL ANGLE GENERATION ────────────────────────
+function generateSignalAngles() {
+  const angles = [];
+
+  // Analyze pipeline for new/changed tokens
+  try {
+    const newTokens = db().prepare(`
+      SELECT ticker, name, chain, score FROM pipeline_tokens
+      WHERE created_at > datetime('now', '-24 hours') AND score IS NOT NULL
+      ORDER BY score DESC LIMIT 5
+    `).all();
+    if (newTokens.length > 0) {
+      angles.push({
+        beat: 'agent-trading',
+        angle: `${newTokens.length} new tokens scored in last 24h. Top: ${newTokens[0]?.ticker} at ${newTokens[0]?.score}`,
+        data: newTokens.map(t => `${t.ticker}:${t.score}`)
+      });
+    }
+  } catch (e) { /* skip */ }
+
+  // Check for score changes
+  try {
+    const chainStats = db().prepare(`
+      SELECT chain, COUNT(*) as cnt, AVG(score) as avg_score
+      FROM pipeline_tokens WHERE score IS NOT NULL
+      GROUP BY chain ORDER BY cnt DESC
+    `).all();
+    if (chainStats.length > 0) {
+      angles.push({
+        beat: 'deal-flow',
+        angle: `Pipeline by chain: ${chainStats.map(c => `${c.chain}:${c.cnt}`).join(', ')}`,
+        data: chainStats
+      });
+    }
+  } catch (e) { /* skip */ }
+
+  // Shield patterns angle (if Shield active)
+  try {
+    const patternCount = db().prepare('SELECT COUNT(*) as c FROM drain_patterns WHERE active = 1').get();
+    if (patternCount && patternCount.c > 0) {
+      angles.push({
+        beat: 'security',
+        angle: `${patternCount.c} active drain patterns in Shield database`,
+        data: { pattern_count: patternCount.c }
+      });
+    }
+  } catch (e) { /* shield tables may not exist */ }
+
+  // Log angles to observation_log
+  if (angles.length > 0) {
+    try {
+      db().prepare(`
+        INSERT INTO observation_log (tick, timestamp, decision, reason, action, result)
+        VALUES (0, datetime('now'), 'ACT', 'autodream signal angle generation', 'signal-angles', ?)
+      `).run(JSON.stringify(angles));
+    } catch (e) { /* skip */ }
+  }
+
+  return angles;
+}
+
 // ── PHASE 4: OPTIMIZE (load-aware) ──────────────────────────
 function optimizeIndexes() {
   const loadPct = Math.round((os.loadavg()[0] / os.cpus().length) * 100);
@@ -244,6 +305,7 @@ function runDreamCycle(trigger = 'scheduled') {
   const staleData = identifyStaleData();
   const consolidation = consolidateMemory(staleData);
   const revenue = consolidateRevenue();
+  const signalAngles = generateSignalAngles();
   const optimization = optimizeIndexes();
 
   const duration_ms = Date.now() - dreamStart;
@@ -261,7 +323,7 @@ function runDreamCycle(trigger = 'scheduled') {
   `).run(
     dreamId, new Date().toISOString(), trigger, duration_ms,
     consolidation.total_cleaned, optimization.db_size_kb,
-    JSON.stringify({ memoryState, staleData, consolidation, revenue, optimization })
+    JSON.stringify({ memoryState, staleData, consolidation, revenue, signalAngles, optimization })
   );
 
   emit('autodream', 'autodream.complete', {
