@@ -49,6 +49,8 @@ const FLAGS = {
   SHIELD_MIROFISH_TRIGGER: false,
   SHIELD_WALLET_GUARD_LINK: false,
   SHIELD_ON_CHAIN: false,
+  // autoDream v2 — pattern extraction + instinct system
+  AUTODREAM_PATTERNS: false,
 };
 
 function feature(name) { return FLAGS[name] === true; }

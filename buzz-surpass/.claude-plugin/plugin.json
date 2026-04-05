@@ -1,0 +1,55 @@
+{
+  "name": "buzz-crypto-bd",
+  "version": "9.2.0",
+  "description": "Crypto BD Agent Intelligence — Token scoring, wallet guard, BD screening, swarm simulation, and security scanning for autonomous exchange listing pipelines. Built by a chef.",
+  "homepage": "https://buzzbd.ai",
+  "repository": "https://github.com/BuzzBySolCex/buzz-crypto-bd",
+  "author": "Ogie @ SolCex Exchange",
+  "license": "MIT",
+  "agents": [
+    "agents/pipeline-scorer.md",
+    "agents/pipeline-verifier.md",
+    "agents/signal-analyst.md",
+    "agents/outreach-agent.md",
+    "agents/security-auditor.md",
+    "agents/mirofish-simulator.md",
+    "agents/wallet-guard.md",
+    "agents/trust-manager.md",
+    "agents/identity-resolver.md",
+    "agents/aria-intel.md",
+    "agents/dream-consolidator.md",
+    "agents/pulse-monitor.md"
+  ],
+  "skills": [
+    "skills/token-scorer/SKILL.md",
+    "skills/wallet-guard/SKILL.md",
+    "skills/bd-screening/SKILL.md",
+    "skills/buzzshield/SKILL.md"
+  ],
+  "commands": [
+    "commands/scan.md",
+    "commands/score.md",
+    "commands/simulate.md",
+    "commands/screen.md",
+    "commands/outreach.md",
+    "commands/signal.md",
+    "commands/deploy.md",
+    "commands/guard.md",
+    "commands/trust.md",
+    "commands/dream.md",
+    "commands/pulse.md",
+    "commands/streak.md",
+    "commands/leaderboard.md",
+    "commands/security-scan.md",
+    "commands/reboot.md"
+  ],
+  "rules": [
+    "rules/common/security.md",
+    "rules/common/scoring.md",
+    "rules/common/outreach.md",
+    "rules/common/context-optimization.md",
+    "rules/crypto/token-verification.md",
+    "rules/crypto/wallet-safety.md",
+    "rules/crypto/contract-deployment.md"
+  ]
+}
