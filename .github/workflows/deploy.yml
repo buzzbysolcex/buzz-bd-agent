@@ -23,17 +23,14 @@ jobs:
 
       - name: Supply chain security checks
         run: |
-          echo ">>> Checking for compromised dependencies"
-          if grep -q "plain-crypto-js" package-lock.json api/package-lock.json 2>/dev/null; then
-            echo "COMPROMISED DEPENDENCY: plain-crypto-js found in lockfile"
-            exit 1
-          fi
+          echo ">>> Checking lockfiles for compromised dependencies"
+          for lockfile in package-lock.json api/package-lock.json; do
+            if [ -f "$lockfile" ] && grep -q "plain-crypto-js" "$lockfile"; then
+              echo "COMPROMISED DEPENDENCY: plain-crypto-js found in $lockfile"
+              exit 1
+            fi
+          done
           echo ">>> Lockfile integrity: CLEAN"
-
-          echo ">>> Running npm audit on API"
-          cd api && npm audit --audit-level=critical --omit=dev || true
-          cd ..
-          echo ">>> Security checks passed"
 
       - name: Extract version from package.json
         id: version
