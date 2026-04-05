@@ -21,6 +21,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Supply chain security check
+        run: |
+          for lockfile in package-lock.json api/package-lock.json; do
+            if [ -f "$lockfile" ] && grep -q "plain-crypto-js" "$lockfile"; then
+              echo "BLOCKED: plain-crypto-js in $lockfile" && exit 1
+            fi
+          done
+          echo "Lockfile integrity: CLEAN"
+
       - name: Extract version from package.json
         id: version
         run: |
