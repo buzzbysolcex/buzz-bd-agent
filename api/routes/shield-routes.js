@@ -15,6 +15,7 @@ const {
   recordScan,
   getShieldStats
 } = require('../services/shield/shield-service');
+const { verifyPriceIntegrity, getSupportedSymbols } = require('../services/shield/pyth-oracle-verify');
 const crypto = require('crypto');
 
 // Middleware: check master switch
@@ -176,6 +177,24 @@ router.get('/scans/recent', apiKeyAuth, (req, res) => {
     'SELECT scan_id, scan_type, target, chain, verdict, program_score, scan_duration_ms, created_at FROM shield_scans ORDER BY id DESC LIMIT ?'
   ).all(limit);
   res.json(scans);
+});
+
+// GET /shield/oracle/verify/:symbol/:price — Pyth oracle price verification (public)
+router.get('/oracle/verify/:symbol/:price', shieldEnabled, async (req, res) => {
+  const { symbol, price } = req.params;
+  const claimedPrice = parseFloat(price);
+
+  if (isNaN(claimedPrice) || claimedPrice <= 0) {
+    return res.status(400).json({ error: 'invalid_price', message: 'Price must be a positive number' });
+  }
+
+  const result = await verifyPriceIntegrity(symbol, claimedPrice);
+  res.json(result);
+});
+
+// GET /shield/oracle/symbols — list supported Pyth symbols (public)
+router.get('/oracle/symbols', shieldEnabled, (req, res) => {
+  res.json({ symbols: getSupportedSymbols(), source: 'pyth_hermes_v2', intel_source: 33 });
 });
 
 // GET /shield/info — product page data (public, no auth)
