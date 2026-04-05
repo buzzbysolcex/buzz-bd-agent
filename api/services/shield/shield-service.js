@@ -3,10 +3,136 @@
  * "Security before performance. Intelligence before execution."
  *
  * Phase 1: Program risk scoring + drain pattern matching + free endpoints
+ * Phase 2 P0: Address poisoning, temporal analysis, cross-chain bridge verification
  */
 
 const crypto = require('crypto');
 const { feature } = require('../../lib/feature-flags');
+
+/**
+ * P0-A: Address Poisoning Detection
+ * Checks if a destination address is a lookalike of a known trusted address.
+ * 65.4M poisoning txs flagged since Jan 2025, single loss $12.4M.
+ */
+function checkAddressPoisoning(db, destinationAddr, walletAddress) {
+  if (!feature('SHIELD_ADDRESS_POISONING')) return null;
+
+  // Get recent scan history for this wallet to build trusted address list
+  const recentScans = db.prepare(`
+    SELECT DISTINCT target FROM shield_scans
+    WHERE requester = ? AND verdict = 'SAFE' AND created_at > datetime('now', '-30 days')
+  `).all(walletAddress);
+
+  const trustedAddresses = recentScans.map(s => s.target);
+
+  for (const trusted of trustedAddresses) {
+    if (trusted === destinationAddr) continue; // exact match = fine
+    if (trusted.length < 8 || destinationAddr.length < 8) continue;
+
+    // Check first 4 + last 4 chars match (poisoning signature)
+    const firstMatch = trusted.slice(0, 4) === destinationAddr.slice(0, 4);
+    const lastMatch = trusted.slice(-4) === destinationAddr.slice(-4);
+
+    if (firstMatch && lastMatch && trusted !== destinationAddr) {
+      return {
+        poisoned: true,
+        confidence: 0.9,
+        similar_to: trusted,
+        destination: destinationAddr,
+        pattern: 'address_poisoning_lookalike'
+      };
+    }
+  }
+
+  return { poisoned: false, confidence: 0 };
+}
+
+/**
+ * P0-B: Temporal Analysis — Track pre-signed durable nonce transactions
+ * Drift Protocol lost $270M via temporal separation attack (Apr 2, 2026)
+ */
+function checkTemporalAnomaly(db, nonceAccount, executeTime) {
+  if (!feature('SHIELD_TEMPORAL_ANALYSIS')) return null;
+
+  // Create tracking table if needed
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS shield_presigned_txs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nonce_account TEXT NOT NULL,
+      sign_time TEXT,
+      signers JSON,
+      tx_hash TEXT,
+      executed_at TEXT,
+      delay_hours REAL,
+      flagged INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_presigned_nonce ON shield_presigned_txs(nonce_account);
+  `);
+
+  // Check for rapid sequential submissions (Drift-style)
+  const recentSubmissions = db.prepare(`
+    SELECT COUNT(*) as cnt FROM shield_presigned_txs
+    WHERE nonce_account = ? AND executed_at > datetime('now', '-10 minutes')
+  `).get(nonceAccount);
+
+  const result = { anomaly: false, severity: 'none', details: {} };
+
+  if (recentSubmissions && recentSubmissions.cnt >= 2) {
+    result.anomaly = true;
+    result.severity = 'critical';
+    result.details = {
+      pattern: 'rapid_sequential_nonce_submit',
+      count: recentSubmissions.cnt,
+      nonce_account: nonceAccount
+    };
+  }
+
+  return result;
+}
+
+/**
+ * P0-C: Cross-Chain Bridge Verification
+ * Bridges account for 69% of DeFi theft. CrossCurve lost $3M Feb 2026.
+ */
+function checkBridgeVerification(db, programAddress) {
+  if (!feature('SHIELD_CROSS_CHAIN')) return null;
+
+  // Create bridge registry table if needed
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS bridge_registry (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      bridge_name TEXT NOT NULL,
+      program_address TEXT NOT NULL,
+      chain TEXT DEFAULT 'solana',
+      status TEXT CHECK(status IN ('safe', 'caution', 'exploited', 'unknown')) DEFAULT 'unknown',
+      last_verified TEXT,
+      exploit_date TEXT,
+      exploit_details TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(program_address, chain)
+    );
+  `);
+
+  // Check against registry
+  const bridge = db.prepare(
+    'SELECT * FROM bridge_registry WHERE program_address = ?'
+  ).get(programAddress);
+
+  if (!bridge) {
+    return { known: false, status: 'unknown', risk: 'WARNING', reason: 'Unregistered bridge contract' };
+  }
+
+  if (bridge.status === 'exploited') {
+    return { known: true, status: 'exploited', risk: 'DANGER', reason: `Bridge exploited on ${bridge.exploit_date}`, details: bridge.exploit_details };
+  }
+
+  if (bridge.status === 'safe') {
+    return { known: true, status: 'safe', risk: 'SAFE', reason: 'Verified bridge' };
+  }
+
+  return { known: true, status: bridge.status, risk: 'CAUTION', reason: 'Bridge registered but not fully verified' };
+}
 
 /**
  * Score a Solana program's risk (0-100, 100 = safest)
@@ -166,5 +292,8 @@ module.exports = {
   generateVerdict,
   generateReceipt,
   recordScan,
-  getShieldStats
+  getShieldStats,
+  checkAddressPoisoning,
+  checkTemporalAnomaly,
+  checkBridgeVerification
 };

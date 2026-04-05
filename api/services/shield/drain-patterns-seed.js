@@ -203,6 +203,37 @@ const SEED_PATTERNS = [
     source: 'novel_2026_vector',
     confirmed: 0,
     first_seen: '2026-04-01'
+  },
+  // Phase 2 P0 patterns
+  {
+    pattern_id: 'address_poisoning_lookalike',
+    name: 'Address Poisoning — Lookalike Substitution',
+    description: 'Attacker sends dust from address matching first/last 4 chars of trusted recipient. Agent picks poisoned address from tx history. 65.4M incidents since Jan 2025, $12.4M single loss.',
+    instruction_sequence: JSON.stringify(['dust_send_to_victim', 'victim_copies_from_history', 'transfer_to_lookalike']),
+    severity: 'critical',
+    source: 'blockaid_address_poisoning_2026',
+    confirmed: 1,
+    first_seen: '2025-01-01'
+  },
+  {
+    pattern_id: 'durable_nonce_temporal_delay',
+    name: 'Temporal Delay Attack — Pre-Signed Nonce Exploitation',
+    description: 'Pre-signed durable nonce transaction held for days/weeks then submitted. Drift Protocol lost $270M via this vector (Apr 2 2026). Social engineering obtains signatures, temporal separation hides intent.',
+    instruction_sequence: JSON.stringify(['social_eng_sign', 'durable_nonce_store', 'delay_days_weeks', 'rapid_sequential_submit']),
+    severity: 'critical',
+    source: 'drift_hack_april_2026',
+    confirmed: 1,
+    first_seen: '2026-04-02'
+  },
+  {
+    pattern_id: 'cross_chain_bridge_spoof',
+    name: 'Cross-Chain Bridge Message Spoofing',
+    description: 'Spoofed bridge message with zero gateway verification. Receiver contract trusts unverified source. CrossCurve lost $3M Feb 2026. Bridges account for 69% of DeFi theft.',
+    instruction_sequence: JSON.stringify(['spoofed_bridge_message', 'missing_gateway_proof', 'execute_on_destination']),
+    severity: 'critical',
+    source: 'crosscurve_bridge_2026',
+    confirmed: 1,
+    first_seen: '2026-02-01'
   }
 ];
 
