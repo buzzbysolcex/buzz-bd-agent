@@ -717,8 +717,8 @@ async function start() {
       try {
         const { createShieldTables } = require('./services/shield/shield-schema');
         const { seedDrainPatterns } = require('./services/shield/drain-patterns-seed');
-        createShieldTables(db);
-        const seeded = seedDrainPatterns(db);
+        createShieldTables(getDB());
+        const seeded = seedDrainPatterns(getDB());
         app.use('/api/v1/shield', require('./routes/shield-routes'));
         console.log(`[SHIELD] ✓ Buzz Shield initialized (${seeded} drain patterns, 5 tables, 6 endpoints)`);
       } catch (e) {
