@@ -51,6 +51,10 @@ const FLAGS = {
   SHIELD_ON_CHAIN: false,
   // autoDream v2 — pattern extraction + instinct system
   AUTODREAM_PATTERNS: false,
+  // Buzz Shield Phase 2 — expanded detection
+  SHIELD_ADDRESS_POISONING: false,
+  SHIELD_TEMPORAL_ANALYSIS: false,
+  SHIELD_CROSS_CHAIN: false,
 };
 
 function feature(name) { return FLAGS[name] === true; }
