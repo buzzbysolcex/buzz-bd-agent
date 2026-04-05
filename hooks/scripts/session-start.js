@@ -31,7 +31,7 @@ function check(label, fn) {
 }
 
 function main() {
-  console.log('[SessionStart] Buzz BD Agent v9.2 — Auto-Recovery');
+  console.log('[SessionStart] Buzz BD Agent v9.3 — Auto-Recovery');
   console.log('─'.repeat(50));
 
   let passed = 0;
@@ -41,8 +41,8 @@ function main() {
   total++;
   if (check('CLAUDE.md version', () => {
     const content = fs.readFileSync(path.join(WORKSPACE, 'CLAUDE.md'), 'utf8');
-    if (!content.includes('v9.2')) throw new Error('Not v9.2 — check CLAUDE.md');
-    return 'v9.2';
+    if (!content.includes('v9.3')) throw new Error('Not v9.3 — check CLAUDE.md');
+    return 'v9.3';
   })) passed++;
 
   // 2. Context Hygiene section
@@ -95,6 +95,21 @@ function main() {
     const envPath = path.join(WORKSPACE, '.env');
     if (!fs.existsSync(envPath)) throw new Error('.env missing');
     return 'Present';
+  })) passed++;
+
+  // 8. Shield verification
+  total++;
+  if (check('Buzz Shield', () => {
+    try {
+      const output = execSync('curl -s http://localhost:3000/api/v1/shield/stats 2>/dev/null').toString();
+      const stats = JSON.parse(output);
+      if (stats.patterns_known === 0) throw new Error('Shield has 0 patterns — tables may not have initialized');
+      if (stats.patterns_known < 20) throw new Error(`Only ${stats.patterns_known} patterns (expected 20+)`);
+      return `${stats.patterns_known} patterns, ${stats.total_scans} scans`;
+    } catch (e) {
+      if (e.message.includes('patterns')) throw e;
+      throw new Error('Shield endpoint not responding — check SHIELD_ENGINE flag');
+    }
   })) passed++;
 
   console.log('─'.repeat(50));
