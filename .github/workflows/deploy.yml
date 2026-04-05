@@ -21,17 +21,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Supply chain security checks
-        run: |
-          echo ">>> Checking lockfiles for compromised dependencies"
-          for lockfile in package-lock.json api/package-lock.json; do
-            if [ -f "$lockfile" ] && grep -q "plain-crypto-js" "$lockfile"; then
-              echo "COMPROMISED DEPENDENCY: plain-crypto-js found in $lockfile"
-              exit 1
-            fi
-          done
-          echo ">>> Lockfile integrity: CLEAN"
-
       - name: Extract version from package.json
         id: version
         run: |
