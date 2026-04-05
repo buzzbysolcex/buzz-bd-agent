@@ -732,9 +732,6 @@ async function start() {
       app.use('/api/v1', antiDistillation);
     }
 
-    // ACP / Virtuals Protocol status
-    app.use('/api/v1/acp', require('./routes/acp-routes'));
-
     // ═══════════════════════════════════════════════════════
     // OUTREACH AUTOMATION (Tasks 14-17 v9.1)
     // ═══════════════════════════════════════════════════════
