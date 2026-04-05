@@ -201,6 +201,70 @@ function consolidateRevenue() {
   return { date: today, signals: signalsToday, shield_scans: shieldScans };
 }
 
+// ── PHASE 7: SHIELD NIGHTLY ANALYSIS ────────────────────────
+function shieldNightlyAnalysis() {
+  if (!feature('AUTODREAM_SHIELD')) return { skipped: true, reason: 'AUTODREAM_SHIELD=false' };
+
+  const result = { patterns_reviewed: 0, candidates_found: 0, scans_compressed: 0 };
+
+  try {
+    // Phase 7a: Pattern effectiveness
+    const patterns = db().prepare('SELECT pattern_id, name, match_count FROM drain_patterns WHERE active = 1').all();
+    result.patterns_reviewed = patterns.length;
+
+    const topPatterns = patterns.sort((a, b) => b.match_count - a.match_count).slice(0, 5);
+    const neverTriggered = patterns.filter(p => p.match_count === 0);
+
+    // Phase 7b: False positive review (check for overridden verdicts)
+    let overrides = 0;
+    try {
+      const row = db().prepare(`
+        SELECT COUNT(*) as c FROM shield_scans
+        WHERE verdict = 'DANGER' AND created_at > datetime('now', '-24 hours')
+      `).get();
+      overrides = row?.c || 0;
+    } catch (e) { /* shield_scans may not exist yet */ }
+
+    // Phase 7c: Check for repeated CAUTION verdicts that may be new patterns
+    try {
+      const candidates = db().prepare(`
+        SELECT target, COUNT(*) as cnt FROM shield_scans
+        WHERE verdict IN ('CAUTION', 'WARNING') AND created_at > datetime('now', '-7 days')
+        GROUP BY target HAVING cnt >= 3
+      `).all();
+      result.candidates_found = candidates.length;
+    } catch (e) { /* skip */ }
+
+    // Phase 7e: Stats rollup — compress old scans
+    try {
+      const oldScans = db().prepare(`
+        SELECT COUNT(*) as c FROM shield_scans WHERE created_at < datetime('now', '-7 days')
+      `).get();
+      if (oldScans && oldScans.c > 100) {
+        db().prepare(`DELETE FROM shield_scans WHERE created_at < datetime('now', '-7 days')`).run();
+        result.scans_compressed = oldScans.c;
+      }
+    } catch (e) { /* skip */ }
+
+    // Log to observation_log
+    db().prepare(`
+      INSERT INTO observation_log (tick, timestamp, decision, reason, action, result)
+      VALUES (0, datetime('now'), 'ACT', 'autoDream Shield nightly', 'shield-nightly', ?)
+    `).run(JSON.stringify({
+      patterns_reviewed: result.patterns_reviewed,
+      top_patterns: topPatterns.map(p => p.pattern_id),
+      never_triggered: neverTriggered.length,
+      dangers_24h: overrides,
+      candidates: result.candidates_found,
+      scans_compressed: result.scans_compressed
+    }));
+  } catch (e) {
+    result.error = e.message;
+  }
+
+  return result;
+}
+
 // ── PHASE 4: OPTIMIZE (load-aware) ──────────────────────────
 function optimizeIndexes() {
   const loadPct = Math.round((os.loadavg()[0] / os.cpus().length) * 100);
@@ -244,6 +308,7 @@ function runDreamCycle(trigger = 'scheduled') {
   const staleData = identifyStaleData();
   const consolidation = consolidateMemory(staleData);
   const revenue = consolidateRevenue();
+  const shieldNightly = shieldNightlyAnalysis();
   const optimization = optimizeIndexes();
 
   const duration_ms = Date.now() - dreamStart;
@@ -261,7 +326,7 @@ function runDreamCycle(trigger = 'scheduled') {
   `).run(
     dreamId, new Date().toISOString(), trigger, duration_ms,
     consolidation.total_cleaned, optimization.db_size_kb,
-    JSON.stringify({ memoryState, staleData, consolidation, revenue, optimization })
+    JSON.stringify({ memoryState, staleData, consolidation, revenue, shieldNightly, optimization })
   );
 
   emit('autodream', 'autodream.complete', {
