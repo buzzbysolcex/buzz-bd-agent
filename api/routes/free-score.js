@@ -15,20 +15,26 @@ const router = express.Router();
 const crypto = require('crypto');
 const { getDB } = require('../db');
 
-// ─── Create rate limit table on load ─────────────────
-try {
+// ─── Create rate limit table (lazy init on first request) ─────────────────
+let tableReady = false;
+function ensureTable() {
+  if (tableReady) return;
   const db = getDB();
   db.exec(`
     CREATE TABLE IF NOT EXISTS free_score_requests (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       ip_hash TEXT NOT NULL,
       address TEXT NOT NULL,
+      chain TEXT DEFAULT 'solana',
+      score INTEGER,
+      source TEXT DEFAULT 'web',
+      converted INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now'))
     );
     CREATE INDEX IF NOT EXISTS idx_free_score_ip ON free_score_requests(ip_hash, created_at);
+    CREATE INDEX IF NOT EXISTS idx_fsr_address ON free_score_requests(address);
   `);
-} catch (e) {
-  console.error('[free-score] Table init deferred:', e.message);
+  tableReady = true;
 }
 
 /**
@@ -72,6 +78,7 @@ function hashIP(ip) {
 // ─── GET /free/:address — Public free score lookup ───
 router.get('/free/:address', (req, res) => {
   try {
+    ensureTable();
     const db = getDB();
     const { address } = req.params;
     const clientIp = req.headers['x-forwarded-for'] || req.ip || req.connection?.remoteAddress || '';
