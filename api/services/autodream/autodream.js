@@ -154,6 +154,53 @@ function consolidateMemory(stale) {
   return { actions, total_cleaned: actions.reduce((sum, a) => sum + a.count, 0) };
 }
 
+// ── PHASE 5: REVENUE CONSOLIDATION ──────────────────────────
+function consolidateRevenue() {
+  const today = new Date().toISOString().split('T')[0];
+
+  // Create table if needed
+  db().prepare(`CREATE TABLE IF NOT EXISTS revenue_daily (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL UNIQUE,
+    aibtc_sats INTEGER DEFAULT 0,
+    bankr_usdc REAL DEFAULT 0,
+    shield_scans INTEGER DEFAULT 0,
+    total_signals INTEGER DEFAULT 0,
+    brief_inclusions INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now'))
+  )`).run();
+
+  // Count today's signals (from observation_log or estimate from PULSE)
+  let signalsToday = 0;
+  try {
+    const row = db().prepare(`
+      SELECT COUNT(*) as c FROM observation_log
+      WHERE action = 'streak-protection' AND DATE(created_at) = ?
+    `).get(today);
+    signalsToday = row?.c || 0;
+  } catch (e) { /* table may not have data */ }
+
+  // Count shield scans if Shield is active
+  let shieldScans = 0;
+  try {
+    const row = db().prepare(`
+      SELECT COUNT(*) as c FROM shield_scans WHERE DATE(created_at) = ?
+    `).get(today);
+    shieldScans = row?.c || 0;
+  } catch (e) { /* shield tables may not exist */ }
+
+  // Upsert daily revenue record
+  db().prepare(`
+    INSERT INTO revenue_daily (date, total_signals, shield_scans)
+    VALUES (?, ?, ?)
+    ON CONFLICT(date) DO UPDATE SET
+      total_signals = excluded.total_signals,
+      shield_scans = excluded.shield_scans
+  `).run(today, signalsToday, shieldScans);
+
+  return { date: today, signals: signalsToday, shield_scans: shieldScans };
+}
+
 // ── PHASE 4: OPTIMIZE (load-aware) ──────────────────────────
 function optimizeIndexes() {
   const loadPct = Math.round((os.loadavg()[0] / os.cpus().length) * 100);
@@ -196,6 +243,7 @@ function runDreamCycle(trigger = 'scheduled') {
   const memoryState = scanMemoryState();
   const staleData = identifyStaleData();
   const consolidation = consolidateMemory(staleData);
+  const revenue = consolidateRevenue();
   const optimization = optimizeIndexes();
 
   const duration_ms = Date.now() - dreamStart;
@@ -213,7 +261,7 @@ function runDreamCycle(trigger = 'scheduled') {
   `).run(
     dreamId, new Date().toISOString(), trigger, duration_ms,
     consolidation.total_cleaned, optimization.db_size_kb,
-    JSON.stringify({ memoryState, staleData, consolidation, optimization })
+    JSON.stringify({ memoryState, staleData, consolidation, revenue, optimization })
   );
 
   emit('autodream', 'autodream.complete', {
