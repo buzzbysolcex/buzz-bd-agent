@@ -22,6 +22,16 @@ Crypto-native security audit for agent configurations.
 - **Contracts**: 7 patterns (ownership, reentrancy, verification)
 - **Infrastructure**: 5 patterns (SSH keys, Docker, rate limiting)
 
+## Exclusions (known false positives)
+These paths contain detection PATTERNS, not actual secrets. Skip from secret scans:
+- `hooks/scripts/post-edit-lint.js` — regex patterns for detecting secrets
+- `hooks/scripts/pre-bash-guard.js` — regex patterns for blocking commands
+- `buzz-surpass/hooks/scripts/*` — source copies of above
+- `.claude/skills/buzzshield/SKILL.md` — documents detection patterns
+- `.github/workflows/deploy.yml` — server IP needed for SSH deploy (known exception)
+
+When running grep-based scans, exclude these with: `--exclude=post-edit-lint.js --exclude=pre-bash-guard.js`
+
 ## Output
 Graded A-F. Exit code 2 on CRITICAL findings for CI/CD gates.
 CRITICAL = must fix before deployment.
