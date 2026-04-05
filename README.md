@@ -235,6 +235,25 @@ Token audit product powered by MiroFish swarm intelligence.
 
 Public leaderboard: [buzzbd.ai/scores](https://buzzbd.ai/scores) (482 tokens)
 
+## Solana Agent Skills
+
+Buzz is an installable agent skill on the [Solana Agent Skills](https://solana.com/skills) ecosystem. Any AI coding agent can add Buzz's token intelligence capabilities:
+
+```bash
+npx skills add https://github.com/buzzbysolcex/buzz-token-intelligence-skill
+```
+
+| Capability | What the Skill Provides |
+|------------|------------------------|
+| **Token Scoring** | 11-rule scoring engine via x402 ($0.01/call) |
+| **Swarm Simulation** | 1000-agent MiroFish analysis via x402 ($0.05/call) |
+| **Listing Readiness** | BD screening workflow + dual-gate verification |
+| **On-Chain Proof** | ScoreStorage v2 on Base — immutable score records |
+
+**Why this matters:** Buzz is the only exchange listing intelligence skill in the Solana ecosystem. DeFi execution skills (Jupiter, Orca, Meteora) handle the trade. Buzz handles the intelligence upstream — score before you trade, simulate before you list.
+
+Skills discovery: [buzzbd.ai/.well-known/skills/](https://buzzbd.ai/.well-known/skills/)
+
 ## ELS-1: Exchange Listing Standard
 
 An open protocol proposal for honest, data-driven exchange listings.
@@ -274,6 +293,7 @@ Engine:     PULSE (60s tick) + autoDream (02:00 UTC nightly)
 Signals:    AIBTC Signal Factory v4.0 (7 beats, Genome Stack)
 Context:    Subagent mandate + ultrathink triggers + /compact preservation
 Repo:       AI-native (8+ skills, 18 rules, 17+ ADRs, hooks)
+Skills:     Solana Agent Skills directory + buzzbd.ai/.well-known/skills/
 Brand:      Cyberpunk robotic bee (deployed everywhere)
 ```
 
@@ -296,6 +316,8 @@ Buzz earns BTC by filing intelligence signals on [aibtc.news](https://aibtc.news
 | Website | [buzzbd.ai](https://buzzbd.ai) |
 | Free Score | [buzzbd.ai/score](https://buzzbd.ai/score) |
 | Public Leaderboard | [buzzbd.ai/scores](https://buzzbd.ai/scores) |
+| Skills Discovery | [buzzbd.ai/.well-known/skills/](https://buzzbd.ai/.well-known/skills/) |
+| Agent Skill | [buzz-token-intelligence-skill](https://github.com/buzzbysolcex/buzz-token-intelligence-skill) |
 | API | [api.buzzbd.ai](https://api.buzzbd.ai) |
 | Agent Endpoint | [api.buzzbd.ai/agent](https://api.buzzbd.ai/agent) |
 | Twitter | [@BuzzBySolCex](https://x.com/BuzzBySolCex) |
@@ -314,6 +336,7 @@ Day 35: Scoring engine calibrated. 0 out of 254 tokens pass honestly.
 Day 42: 4 contracts. ARIA v2. 1000-agent MiroFish simulation. $200 signal revenue.
 Day 42+: MiroFish validated — institutional skepticism deepens at scale. That's emergent intelligence.
 Day 44: Outreach automation live. Email-first. Trust-gated. Wallet Guard integration.
+Day 46: Solana Agent Skills submission. First BD intelligence skill in the ecosystem.
 Day 47: Context optimization deployed. 81 tables. 200+ endpoints. 18 rules. 392 commits.
 
 No CS degree. No VC. No team. Just persistence.
