@@ -178,4 +178,59 @@ router.get('/scans/recent', apiKeyAuth, (req, res) => {
   res.json(scans);
 });
 
+// GET /shield/info — product page data (public, no auth)
+router.get('/info', shieldEnabled, (req, res) => {
+  const stats = getShieldStats(getDB());
+
+  res.json({
+    product: 'Buzz Shield',
+    tagline: 'Agent Security Intelligence',
+    motto: 'Security before performance. Intelligence before execution.',
+    version: '1.5',
+    stats,
+    tiers: {
+      free: {
+        price: '$0',
+        features: ['Wallet health check (10/day)', 'Public pattern feed', 'Shield stats', 'Public leaderboard'],
+        cta: 'Start scanning free'
+      },
+      pro: {
+        price: '$99/month or $0.10/scan (x402)',
+        features: ['Full deep scan (100/day)', 'All 23+ patterns', 'Address poisoning detection', 'Temporal analysis', 'Token score API', 'Email alerts on DANGER'],
+        cta: 'Upgrade to Pro'
+      },
+      business: {
+        price: '$499/month or $0.05/scan (x402)',
+        features: ['Everything in Pro', 'MiroFish simulation (100 agents)', 'Cross-chain bridge verification', 'Wallet Guard integration', 'Custom patterns (up to 10)', 'Weekly threat briefing', '1,000 scans/day'],
+        cta: 'Contact for Business'
+      },
+      enterprise: {
+        price: '$2,500/month (custom)',
+        features: ['Everything in Business', 'MiroFish swarm (1K-10K agents)', 'Anomaly detection engine', 'Unlimited scans', 'Full BD screening pipeline', 'On-call incident response', 'Quarterly security audit', 'White-label option'],
+        cta: 'Contact for Enterprise'
+      }
+    },
+    trust_stack: [
+      'ATV.eth identity verification',
+      'BuzzShield drain pattern scan (23+ patterns)',
+      '11-rule honest scoring engine',
+      'MiroFish swarm simulation (1K-10K agents)',
+      'Wallet Guard execution gate (BLOCK/WARN/ALLOW)',
+      'BuzzReputation on-chain verification'
+    ],
+    research: {
+      adr: 'ADR-025',
+      deepmind_coverage: '4/6 categories covered (was 3/6)',
+      sources: 'DeepMind, Anthropic SCONE-bench, Drift $270M, Blockaid, OWASP Agentic AI 2026',
+      gap_analysis: '15 vectors identified, 3 P0 implemented'
+    },
+    links: {
+      scan: 'https://buzzbd.ai/score',
+      leaderboard: 'https://buzzbd.ai/scores',
+      api: 'https://api.buzzbd.ai/api/v1/shield',
+      github: 'https://github.com/buzzbysolcex/buzz-bd-agent'
+    }
+  });
+});
+
 module.exports = router;
