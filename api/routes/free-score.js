@@ -139,4 +139,79 @@ router.get('/free/:address', (req, res) => {
   }
 });
 
+// ─── GET /scores — Public token leaderboard ───
+let scoresCache = null;
+let scoresCacheTime = 0;
+
+router.get('/scores', (req, res) => {
+  try {
+    const db = getDB();
+    const now = Date.now();
+
+    // 5-minute cache
+    if (scoresCache && (now - scoresCacheTime) < 300000) {
+      return res.json(scoresCache);
+    }
+
+    const chain = req.query.chain;
+    let query = `SELECT address, ticker, name, chain, score, stage, updated_at
+                 FROM pipeline_tokens WHERE score IS NOT NULL`;
+    const params = [];
+
+    if (chain) {
+      query += ' AND chain = ?';
+      params.push(chain);
+    }
+
+    query += ' ORDER BY score DESC LIMIT 100';
+    const tokens = db.prepare(query).all(...params);
+    const total = db.prepare('SELECT COUNT(*) as c FROM pipeline_tokens WHERE score IS NOT NULL').get();
+
+    const result = {
+      tokens: tokens.map(t => ({
+        address: t.address,
+        ticker: t.ticker,
+        name: t.name,
+        chain: t.chain,
+        score: t.score,
+        classification: classify(t.score),
+        stage: t.stage
+      })),
+      total: total.c,
+      updated: new Date().toISOString(),
+      provider: 'Buzz BD Agent | SolCex Exchange'
+    };
+
+    scoresCache = result;
+    scoresCacheTime = now;
+    res.json(result);
+  } catch (err) {
+    console.error('[scores] Error:', err.message);
+    res.status(500).json({ error: 'Internal error', message: err.message });
+  }
+});
+
+// ─── GET /scores/top/:n — Top N tokens ───
+router.get('/scores/top/:n', (req, res) => {
+  try {
+    const db = getDB();
+    const n = Math.min(parseInt(req.params.n) || 10, 50);
+    const tokens = db.prepare(
+      `SELECT address, ticker, name, chain, score, stage, updated_at
+       FROM pipeline_tokens WHERE score IS NOT NULL
+       ORDER BY score DESC LIMIT ?`
+    ).all(n);
+
+    res.json({
+      tokens: tokens.map(t => ({
+        address: t.address, ticker: t.ticker, name: t.name,
+        chain: t.chain, score: t.score, classification: classify(t.score)
+      })),
+      count: tokens.length
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Internal error', message: err.message });
+  }
+});
+
 module.exports = router;
