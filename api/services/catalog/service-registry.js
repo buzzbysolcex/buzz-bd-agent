@@ -26,7 +26,8 @@ const SERVICES = [
   { id: 19, name: 'Multi-Step DeFi', category: 'orchestration', status: 'pre_frontier', featureFlag: 'HEYANON_EXEC', priceTiers: { t3: 5000 }, description: 'Multi-step DeFi strategy execution' },
   { id: 20, name: 'Wallet Guard', category: 'orchestration', status: 'with_aldo', featureFlag: 'WALLET_GUARD', priceTiers: { t2: 2500 }, description: 'Real-time wallet monitoring and protection' },
   { id: 21, name: 'ERC-8004 Reputation', category: 'orchestration', status: 'ready', featureFlag: null, priceTiers: { t1: 600 }, description: 'On-chain reputation scoring via ERC-8004 standard' },
-  { id: 22, name: 'Solana Agent Skill', category: 'orchestration', status: 'live', featureFlag: 'SOLANA_AGENT_SKILL', priceTiers: { free: 0 }, description: 'Public SKILL.md for AI agent consumption via Solana Skills directory' }
+  { id: 22, name: 'Solana Agent Skill', category: 'orchestration', status: 'live', featureFlag: 'SOLANA_AGENT_SKILL', priceTiers: { free: 0 }, description: 'Public SKILL.md for AI agent consumption via Solana Skills directory' },
+  { id: 23, name: 'Buzz Shield', category: 'scoring', status: 'pending', featureFlag: 'SHIELD_ENGINE', priceTiers: { free: 0, t1: 100, t2: 500, t3: 1000 }, description: 'Pre-action security intelligence — program risk scoring, drain pattern matching, verdict engine' }
 ];
 
 function getService(id) {

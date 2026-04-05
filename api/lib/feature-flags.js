@@ -38,6 +38,17 @@ const FLAGS = {
   NANSEN_MCP: true,
   NANSEN_AGENT: false,
   SOLANA_AGENT_SKILL: true,
+  // Buzz Shield — Agent Security Intelligence (Phase 1)
+  SHIELD_ENGINE: false,
+  SHIELD_FREE_TIER: false,
+  SHIELD_PAID_TIER: false,
+  SHIELD_PROGRAM_SCORER: false,
+  SHIELD_PATTERN_MATCHER: false,
+  SHIELD_INSTRUCTION_SCANNER: false,
+  SHIELD_COMMUNITY_REPORTS: false,
+  SHIELD_MIROFISH_TRIGGER: false,
+  SHIELD_WALLET_GUARD_LINK: false,
+  SHIELD_ON_CHAIN: false,
 };
 
 function feature(name) { return FLAGS[name] === true; }
