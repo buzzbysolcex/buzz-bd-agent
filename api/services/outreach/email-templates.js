@@ -1,12 +1,12 @@
-// Email Templates — data-driven, no LLM generation
+// Email Templates - data-driven, no LLM generation
 // Templates are static. Token data fills the variables.
-// NEVER include listing fees ($5K/$1K) — CRITICAL SECURITY RULE
+// NEVER include listing fees ($5K/$1K) - CRITICAL SECURITY RULE
 // v9.1: HSaaS Go-to-Market + Juno strategy session templates
 // Two funnels: listing AND audit. Doubles conversion.
 
 const TEMPLATES = {
   initial_outreach: {
-    subject: '${tokenName} scored ${score}/100 — autonomous listing intelligence report',
+    subject: '${tokenName} scored ${score}/100 - autonomous listing intelligence report',
     body: `Hi \${tokenName} team,
 
 Ogie here, BD Lead at SolCex Exchange.
@@ -25,14 +25,14 @@ Our autonomous scoring engine evaluated \${tokenName} across 31 intelligence sou
   Simulation: 1,000-agent adversarial swarm (26ms)
   On-chain: Score recorded immutably on Base mainnet
 
-For context — we track 363 tokens. Most don't pass 70. \${tokenName} did.
+For context -we track 363 tokens. Most don't pass 70. \${tokenName} did.
 
 Why this matters: 11 tokens previously scored 85+ across other audit tools. Our honest calibration dropped all 11 below 50. We catch what others miss.
 
 Two ways we can work together:
 
-  1. SolCex Listing — fast-track (10-14 days) with market making support and whale trader distribution
-  2. Full Swarm Audit Report — detailed 1,000-agent simulation analysis with on-chain proof, starting at $500
+  1. SolCex Listing - fast-track (10-14 days) with market making support and whale trader distribution
+  2. Full Swarm Audit Report - detailed 1,000-agent simulation analysis with on-chain proof, starting at $500
 
 Either way, your score is already live and verifiable:
   Report: buzzbd.ai/scores
@@ -42,25 +42,25 @@ Worth a quick chat? Reply here or Telegram: @Ogie2`
   },
 
   followup_48h: {
-    subject: 'Re: ${tokenName} scored ${score}/100 — following up',
+    subject: 'Re: ${tokenName} scored ${score}/100 - following up',
     body: `Hi \${tokenName} team,
 
 Quick follow-up on \${tokenName}'s scoring report.
 
-Your metrics are still tracking strong at \${score}/100 — that puts \${tokenName} in the top \${pipelinePosition}% of 363 tokens in our pipeline.
+Your metrics are still tracking strong at \${score}/100 - that puts \${tokenName} in the top \${pipelinePosition}% of 363 tokens in our pipeline.
 
-If a full listing isn't the right timing, we also offer standalone audit reports — our 1,000-agent swarm simulation catches failure modes that 50-agent runs miss. Reports start at $500 for a Quick Scan.
+If a full listing isn't the right timing, we also offer standalone audit reports - our 1,000-agent swarm simulation catches failure modes that 50-agent runs miss. Reports start at $500 for a Quick Scan.
 
 Either way, happy to chat. Reply here or Telegram: @Ogie2`
   },
 
   breakup_7d: {
-    subject: 'Re: ${tokenName} — your score stays live',
+    subject: 'Re: ${tokenName} - your score stays live',
     body: `Hi \${tokenName} team,
 
 Last note from me. \${tokenName} remains in our pipeline at \${score}/100.
 
-Your score, simulation history, and on-chain record are persistent — they don't expire. If listing or an audit report makes sense later, the data is already there. No need to restart.
+Your score, simulation history, and on-chain record are persistent - they don't expire. If listing or an audit report makes sense later, the data is already there. No need to restart.
 
 Free instant score anytime: buzzbd.ai/score
 
@@ -68,16 +68,16 @@ Best of luck with the build.`
   },
 
   hsaas_audit_pitch: {
-    subject: '${tokenName} — 1,000-agent swarm audit available',
+    subject: '${tokenName} - 1,000-agent swarm audit available',
     body: `Hi \${tokenName} team,
 
 Thanks for engaging with us on \${tokenName}'s score.
 
 If a SolCex listing isn't the right fit right now, our Honest Scoring audit is available as a standalone product:
 
-  Quick Scan ($500) — 100-agent simulation, basic report
-  Full Analysis ($1,500) — 500-agent simulation, detailed breakdown
-  Swarm Audit ($2,500) — 1,000-agent adversarial simulation, complete report with on-chain proof
+  Quick Scan ($500) -100-agent simulation, basic report
+  Full Analysis ($1,500) -500-agent simulation, detailed breakdown
+  Swarm Audit ($2,500) - 1,000-agent adversarial simulation, complete report with on-chain proof
 
 What you get: every score dimension broken down, adversarial debate results (bull vs bear), Monte Carlo confidence intervals, and your score recorded immutably on Base mainnet.
 
