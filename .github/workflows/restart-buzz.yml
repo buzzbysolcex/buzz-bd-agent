@@ -1,0 +1,24 @@
+name: Restart Buzz
+
+on:
+  workflow_dispatch:
+
+jobs:
+  restart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH and restart Buzz
+        uses: appleboy/ssh-action@v1
+        with:
+          host: api.buzzbd.ai
+          username: root
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            echo "=== TMUX STATUS ==="
+            tmux ls 2>&1 || echo "No tmux sessions"
+            echo "=== DOCKER STATUS ==="
+            docker ps --format "table {{.Names}}\t{{.Status}}" 2>&1
+            echo "=== BUZZ HEALTH ==="
+            curl -s http://localhost:3000/api/v1/health 2>&1 || echo "Buzz API not responding"
+            echo "=== SENTINEL HEALTH ==="
+            curl -s http://localhost:3001/health 2>&1 || echo "Sentinel not responding"
