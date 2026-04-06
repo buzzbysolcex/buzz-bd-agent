@@ -93,7 +93,15 @@ function buildRawEmail(to, subject, bodyText, cc = []) {
 
 // Send an email via Gmail API
 // Set skipFlagCheck=true for direct test sends
-async function sendEmail(to, subject, body, { skipFlagCheck = false } = {}) {
+async function sendEmail(toOrOpts, subject, body, { skipFlagCheck = false } = {}) {
+  // Support both sendEmail(to, subject, body) and sendEmail({to, subject, body/html})
+  let to = toOrOpts;
+  if (typeof toOrOpts === 'object' && toOrOpts !== null) {
+    to = toOrOpts.to;
+    subject = toOrOpts.subject || subject;
+    body = toOrOpts.body || toOrOpts.html || body;
+    skipFlagCheck = toOrOpts.skipFlagCheck || skipFlagCheck;
+  }
   if (!skipFlagCheck && !feature('AUTO_OUTREACH')) {
     return { sent: false, error: 'AUTO_OUTREACH flag disabled' };
   }
