@@ -194,6 +194,17 @@ function decideAction(ctx) {
     }
   }
 
+  // Priority 7: Bankr x402 health check (every 100 ticks, offset by 50)
+  // Checks the 8 x402 paywall endpoints — must return 402 (payment required)
+  // when called without payment. 404/5xx → degraded → War Room alert.
+  if (feature('PULSE_BANKR_HEALTH') && ctx.tick > 0 && ctx.tick % 100 === 50) {
+    return {
+      type: 'ACT',
+      reason: `Bankr x402 health check (tick ${ctx.tick}, every 100 ticks)`,
+      action: 'bankr-health-check'
+    };
+  }
+
   // Priority 6: Shield health check (every 100 ticks)
   if (feature('SHIELD_PULSE_MONITOR') && ctx.tick % 100 === 0) {
     try {
@@ -261,6 +272,60 @@ async function executeAction(action) {
       case 'shield-health-alert':
         emit('pulse-engine', EVENT_TYPES.SHIELD_DEGRADED, { trigger: 'pulse-100tick' });
         return { triggered: 'shield-health-alert' };
+
+      case 'bankr-health-check': {
+        // Check 8 x402 paywall endpoints. Healthy = 402/405/200, degraded = 404/5xx/timeout.
+        const endpoints = [
+          'score', 'simulate', 'audit', 'listing',
+          'discover', 'pipeline', 'whale', 'identity'
+        ];
+        const checks = await Promise.allSettled(
+          endpoints.map(async (name) => {
+            const ctrl = new AbortController();
+            const t = setTimeout(() => ctrl.abort(), 2000);
+            try {
+              const res = await fetch(`http://localhost:3000/api/v1/x402/${name}`, {
+                method: 'GET', signal: ctrl.signal
+              });
+              clearTimeout(t);
+              return { name, status: res.status, healthy: [402, 405, 200].includes(res.status) };
+            } catch (err) {
+              clearTimeout(t);
+              return { name, status: 0, healthy: false, error: err.message };
+            }
+          })
+        );
+        const results = checks.map(c => c.status === 'fulfilled' ? c.value : { healthy: false, error: c.reason?.message });
+        const degraded = results.filter(r => !r.healthy);
+
+        setState('bankr_last_check', new Date().toISOString());
+        setState('bankr_status_json', JSON.stringify(results));
+        setState('bankr_healthy_count', String(results.length - degraded.length));
+
+        // Alert War Room at most once per day on degradation
+        if (degraded.length > 0) {
+          const today = new Date().toISOString().split('T')[0];
+          const lastAlert = getState('bankr_alert_date');
+          if (lastAlert !== today) {
+            setState('bankr_alert_date', today);
+            mailbox.send('pulse-engine', 'war-room-reporter', 'ALERT', {
+              type: 'BANKR_X402_DEGRADED',
+              total: results.length,
+              degraded: degraded.length,
+              failing: degraded.map(d => ({ name: d.name, status: d.status, error: d.error })),
+              message: `Bankr x402: ${degraded.length}/${results.length} endpoints degraded`
+            });
+            emit('pulse-engine', 'bankr.degraded', { degraded: degraded.length, total: results.length });
+          }
+        }
+
+        return {
+          triggered: 'bankr-health-check',
+          total: results.length,
+          healthy: results.length - degraded.length,
+          degraded: degraded.length
+        };
+      }
 
       case 'streak-warning':
         emit('pulse-engine', EVENT_TYPES.STREAK_WARNING, { trigger: 'pulse-14utc', level: 'warning' });
