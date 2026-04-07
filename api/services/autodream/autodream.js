@@ -9,6 +9,7 @@ const os = require('os');
 const { feature } = require('../../lib/feature-flags');
 const { emit } = require('../events/event-bus');
 const { getDB } = require('../../db');
+const mailbox = require('../mailbox/mailbox');
 function db() { return getDB(); }
 
 // ── PHASE 1: SCAN ────────────────────────────────────────────
@@ -282,6 +283,71 @@ function optimizeIndexes() {
   return { skipped: false, db_size_kb: Math.round((pageCount.page_count * pageSize.page_size) / 1024) };
 }
 
+// ── WAR ROOM DASHBOARD REPORT ───────────────────────────────
+// Send nightly dashboard summary to war-room-reporter mailbox.
+// Gated by AUTODREAM_WARROOM_DASHBOARD flag (default true).
+function reportToWarRoom({ dreamId, durationMs, memoryState, staleData, consolidation, revenue, shieldNightly, intelSync, hillClimbResult, optimization }) {
+  if (!feature('AUTODREAM_WARROOM_DASHBOARD')) {
+    return { skipped: true, reason: 'AUTODREAM_WARROOM_DASHBOARD=false' };
+  }
+  try {
+    const lines = [];
+    lines.push(`autoDream nightly report — ${new Date().toISOString().split('T')[0]}`);
+    lines.push(`cycle ${dreamId} | duration ${durationMs}ms`);
+    lines.push('');
+    lines.push('📊 MEMORY STATE');
+    lines.push(`  db ${memoryState._db_size_kb}kb · tokens ${memoryState.tokens ?? 0} · observations ${memoryState.observation_log ?? 0}`);
+    lines.push(`  mailbox ${memoryState.agent_mailbox ?? 0} · tasks ${memoryState.buzz_tasks ?? 0} · crons ${memoryState.dynamic_crons ?? 0}`);
+    lines.push('');
+    lines.push('🧹 CONSOLIDATION');
+    lines.push(`  ${consolidation.total_cleaned} records cleaned across ${consolidation.actions.length} actions`);
+    for (const a of consolidation.actions) lines.push(`  · ${a.action}: ${a.count}`);
+    lines.push('');
+    lines.push('💰 REVENUE (today)');
+    lines.push(`  signals ${revenue.signals} · shield scans ${revenue.shield_scans}`);
+    lines.push('');
+    if (shieldNightly && !shieldNightly.skipped) {
+      lines.push('🛡️ SHIELD NIGHTLY');
+      lines.push(`  patterns ${shieldNightly.patterns_reviewed} · candidates ${shieldNightly.candidates_found} · compressed ${shieldNightly.scans_compressed}`);
+      lines.push('');
+    }
+    if (intelSync && !intelSync.skipped && !intelSync.error) {
+      lines.push('📡 INTEL SYNC');
+      lines.push(`  ${JSON.stringify(intelSync)}`);
+      lines.push('');
+    }
+    if (hillClimbResult && !hillClimbResult.skipped && !hillClimbResult.error) {
+      lines.push('⛰️ HILL-CLIMBING');
+      lines.push(`  ${JSON.stringify(hillClimbResult)}`);
+      lines.push('');
+    }
+    lines.push('⚡ OPTIMIZE');
+    lines.push(optimization.skipped
+      ? `  skipped: ${optimization.reason}`
+      : `  VACUUM+ANALYZE ok · db ${optimization.db_size_kb}kb`);
+
+    const summary = lines.join('\n');
+
+    mailbox.send('autodream', 'war-room-reporter', 'DASHBOARD', {
+      type: 'AUTODREAM_DASHBOARD',
+      dream_id: dreamId,
+      date: new Date().toISOString().split('T')[0],
+      duration_ms: durationMs,
+      summary,
+      stats: {
+        total_cleaned: consolidation.total_cleaned,
+        signals_today: revenue.signals,
+        shield_scans_today: revenue.shield_scans,
+        db_size_kb: memoryState._db_size_kb
+      }
+    });
+
+    return { sent: true, summary_lines: lines.length };
+  } catch (err) {
+    return { sent: false, error: err.message };
+  }
+}
+
 // ── REBOOT SAFETY: check if dream already ran today ─────────
 function dreamRanToday() {
   try {
@@ -348,13 +414,20 @@ function runDreamCycle(trigger = 'scheduled') {
     JSON.stringify({ memoryState, staleData, consolidation, revenue, shieldNightly, intelSync, hillClimbResult, optimization })
   );
 
+  // War Room dashboard report (GAP-2)
+  const warRoomReport = reportToWarRoom({
+    dreamId, durationMs: duration_ms,
+    memoryState, staleData, consolidation, revenue,
+    shieldNightly, intelSync, hillClimbResult, optimization
+  });
+
   emit('autodream', 'autodream.complete', {
     dream_id: dreamId, duration_ms, total_cleaned: consolidation.total_cleaned
   });
 
-  console.log(`[AUTODREAM] Complete: cleaned ${consolidation.total_cleaned} records in ${duration_ms}ms`);
+  console.log(`[AUTODREAM] Complete: cleaned ${consolidation.total_cleaned} records in ${duration_ms}ms · war_room_report=${warRoomReport.sent ? 'sent' : 'skipped'}`);
 
-  return { dream_id: dreamId, trigger, duration_ms, memoryState, staleData, consolidation, optimization };
+  return { dream_id: dreamId, trigger, duration_ms, memoryState, staleData, consolidation, optimization, warRoomReport };
 }
 
 module.exports = { runDreamCycle, scanMemoryState, identifyStaleData, dreamRanToday };

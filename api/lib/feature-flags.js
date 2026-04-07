@@ -71,6 +71,7 @@ const FLAGS = {
   // autoDream Evolution
   AUTODREAM_HILLCLIMB: true,
   TELEGRAM_CHANNEL_INTEL: true,
+  AUTODREAM_WARROOM_DASHBOARD: true,
   // Shield Phase 3 (future)
   SHIELD_ANOMALY_DETECTION: false,
   SHIELD_MEMPOOL: false,
