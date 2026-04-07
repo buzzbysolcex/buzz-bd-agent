@@ -643,9 +643,59 @@ async function start() {
         initEventBus();
         subscribe('bd-agent', EVENT_TYPES.TOKEN_HOT);
         subscribe('signal-agent', EVENT_TYPES.SIGNAL_APPROVED);
+        subscribe('signal-agent', EVENT_TYPES.SIGNAL_FILED);
         subscribe('bd-agent', EVENT_TYPES.SIMULATION_COMPLETE);
         subscribe('sentinel-agent', EVENT_TYPES.TOKEN_SCORED);
-        console.log('[v9.0] ✓ Event bus initialized + 4 default subscriptions');
+        subscribe('pulse-engine', EVENT_TYPES.SIGNAL_FILED);
+        console.log('[v9.0] ✓ Event bus initialized + 6 default subscriptions');
+      }
+
+      // AIBTC Signal Tracker — lifecycle tracking + event emission
+      try {
+        const { initSignalTracker } = require('./services/signals/signal-tracker');
+        initSignalTracker();
+        app.use('/api/v1/signals', apiKeyAuth, require('./routes/signal-routes'));
+        console.log('[v9.3] ✓ Signal tracker initialized (persona_signals table + 3 routes)');
+      } catch (e) {
+        console.error('[v9.3] ⚠️ Signal tracker init error (non-fatal):', e.message);
+      }
+
+      // AIBTC Wallet Auto-Unlock — read password from .env.aibtc
+      try {
+        const envPath = '/home/claude-code/.env.aibtc';
+        if (fs.existsSync(envPath)) {
+          const envContent = fs.readFileSync(envPath, 'utf8');
+          const match = envContent.match(/AIBTC_WALLET_PASSWORD=(.+)/);
+          if (match) {
+            process.env.AIBTC_WALLET_PASSWORD = match[1].trim();
+            console.log('[v9.3] ✓ AIBTC wallet password loaded from .env.aibtc');
+          }
+        } else {
+          console.log('[v9.3] ⚠️ /home/claude-code/.env.aibtc not found — manual wallet unlock required');
+        }
+      } catch (e) {
+        console.error('[v9.3] ⚠️ AIBTC env load error:', e.message);
+      }
+
+      // AIBTC Signal Status Polling — every 30 min via dynamic cron
+      if (feature('DYNAMIC_CRONS') && feature('EVENT_BUS')) {
+        try {
+          const { createCron } = require('./services/cron/dynamic-cron');
+          const existing = getDB().prepare(
+            "SELECT id FROM dynamic_crons WHERE name = 'aibtc-signal-poll' AND active = 1"
+          ).get();
+          if (!existing) {
+            createCron('signal-agent', 'aibtc-signal-poll', '*/30 * * * *', {
+              action: 'poll-signal-status',
+              description: 'Poll AIBTC news_check_status for signal approvals/rejections'
+            }, { expiresAt: '2027-01-01T00:00:00Z' });
+            console.log('[v9.3] ✓ AIBTC signal status polling cron registered (every 30min)');
+          } else {
+            console.log('[v9.3] ✓ AIBTC signal status polling cron already active');
+          }
+        } catch (e) {
+          console.error('[v9.3] ⚠️ Signal polling cron error:', e.message);
+        }
       }
     } catch (e) {
       console.error('[v9.0] ⚠️ Module init error (non-fatal):', e.message);
