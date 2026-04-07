@@ -29,6 +29,7 @@ const FLAGS = {
   AUTO_OUTREACH: true,
   TRUST_GATES: true,
   GITHUB_MONITOR: true,
+  HSAAS_EVENT_WIRING: true,
   SILENCE_CONSENT: false,
   INBOX_MONITOR: true,
   WALLET_GUARD: true,
