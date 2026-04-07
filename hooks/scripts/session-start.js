@@ -121,9 +121,18 @@ function main() {
     console.error('[SessionStart] ⚠️ Some checks failed — review above');
   }
 
+  // 9. AIBTC wallet password
+  total++;
+  if (check('AIBTC wallet password', () => {
+    const envPath = '/home/claude-code/.env.aibtc';
+    if (!fs.existsSync(envPath)) throw new Error('.env.aibtc missing — wallet unlock will fail');
+    return 'Present — auto-unlock on signal filing';
+  })) passed++;
+
   console.log('');
   console.log('[SessionStart] 📋 REMEMBER: Run /effort high for this session');
   console.log('[SessionStart] 📋 Current trust level: 0 (FULL_APPROVAL)');
+  console.log('[SessionStart] 📋 AIBTC: Unlock wallet before filing signals (password in .env.aibtc)');
 }
 
 main();

@@ -10,6 +10,7 @@ const EVENT_TYPES = {
   TOKEN_HOT: 'token.hot',
   TOKEN_WATCH: 'token.watch',
   ARIA_DISCOVERY: 'aria.discovery',
+  SIGNAL_FILED: 'signal.filed',
   SIGNAL_APPROVED: 'signal.approved',
   SIGNAL_REJECTED: 'signal.rejected',
   SIMULATION_COMPLETE: 'sim.complete',
