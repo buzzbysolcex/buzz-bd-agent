@@ -202,6 +202,166 @@ function consolidateRevenue() {
   return { date: today, signals: signalsToday, shield_scans: shieldScans };
 }
 
+// ── PHASE 6: SIGNAL ANGLE PRE-GENERATOR (GAP-1) ─────────────
+// Generates 4 AIBTC signal angle drafts for morning filing
+// across the 6 canonical beats, with beat rotation to avoid
+// filing the same beat twice in a row.
+// Gated by AUTODREAM_SIGNAL_ANGLES (default true).
+const CANONICAL_BEATS = ['security', 'infrastructure', 'deal-flow', 'governance', 'markets', 'narrative'];
+
+function generateSignalAngles() {
+  if (!feature('AUTODREAM_SIGNAL_ANGLES')) {
+    return { skipped: true, reason: 'AUTODREAM_SIGNAL_ANGLES=false' };
+  }
+
+  try {
+    // Ensure tracking table exists
+    db().prepare(`CREATE TABLE IF NOT EXISTS signal_angles_drafted (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      draft_date TEXT NOT NULL,
+      beat TEXT NOT NULL,
+      headline TEXT NOT NULL,
+      hook TEXT,
+      data_points TEXT,
+      status TEXT DEFAULT 'draft',
+      created_at TEXT DEFAULT (datetime('now'))
+    )`).run();
+    db().prepare(`CREATE INDEX IF NOT EXISTS idx_sad_date ON signal_angles_drafted(draft_date)`).run();
+
+    const today = new Date().toISOString().split('T')[0];
+
+    // Skip if already drafted today
+    const existing = db().prepare(`SELECT COUNT(*) as c FROM signal_angles_drafted WHERE draft_date = ?`).get(today);
+    if (existing && existing.c >= 4) {
+      return { skipped: true, reason: 'already drafted today', existing: existing.c };
+    }
+
+    // Pull fresh pipeline data (graceful on empty tables)
+    const pipelineData = {
+      fresh_scores: [],
+      score_changes: [],
+      flagged: [],
+      aria_new: 0
+    };
+
+    try {
+      pipelineData.fresh_scores = db().prepare(`
+        SELECT address, symbol, chain, score FROM pipeline_tokens
+        WHERE score IS NOT NULL AND score >= 60
+          AND updated_at > datetime('now','-24 hours')
+        ORDER BY score DESC LIMIT 5
+      `).all();
+    } catch (e) { /* table shape may differ */ }
+
+    try {
+      pipelineData.aria_new = db().prepare(`
+        SELECT COUNT(*) as c FROM aria_tokens WHERE created_at > datetime('now','-24 hours')
+      `).get()?.c || 0;
+    } catch (e) { /* skip */ }
+
+    try {
+      pipelineData.flagged = db().prepare(`
+        SELECT target, verdict FROM shield_scans
+        WHERE verdict IN ('DANGER','WARNING') AND created_at > datetime('now','-24 hours')
+        LIMIT 5
+      `).all();
+    } catch (e) { /* skip */ }
+
+    // Beat rotation: find yesterday's last beat and avoid repeating it first
+    let lastBeatUsed = null;
+    try {
+      const row = db().prepare(`
+        SELECT beat FROM signal_angles_drafted
+        WHERE draft_date < ? ORDER BY draft_date DESC, id DESC LIMIT 1
+      `).get(today);
+      lastBeatUsed = row?.beat || null;
+    } catch (e) { /* first run */ }
+
+    const rotatedBeats = lastBeatUsed
+      ? [...CANONICAL_BEATS.filter(b => b !== lastBeatUsed), lastBeatUsed]
+      : CANONICAL_BEATS;
+
+    // Draft 4 angles — one per top-4 rotated beats
+    const drafts = [];
+    const targetBeats = rotatedBeats.slice(0, 4);
+
+    for (const beat of targetBeats) {
+      let headline, hook;
+      switch (beat) {
+        case 'security':
+          headline = pipelineData.flagged.length > 0
+            ? `${pipelineData.flagged.length} new DANGER/WARNING verdicts in 24h`
+            : `Shield pattern sweep — no new threats in 24h`;
+          hook = pipelineData.flagged.length > 0
+            ? `Targets: ${pipelineData.flagged.slice(0,2).map(f => f.target).join(', ')}`
+            : `Clean window. Document the baseline for future comparison.`;
+          break;
+        case 'infrastructure':
+          headline = `PULSE tick baseline + autoDream consolidation report`;
+          hook = `Operational transparency — how many records moved through the pipeline in the last cycle.`;
+          break;
+        case 'deal-flow':
+          headline = pipelineData.fresh_scores.length > 0
+            ? `${pipelineData.fresh_scores.length} tokens scored ≥60 in 24h · top: ${pipelineData.fresh_scores[0]?.symbol || 'n/a'}`
+            : `Pipeline quiet — 0 high-signal tokens in 24h`;
+          hook = pipelineData.fresh_scores.length > 0
+            ? `Lead: ${pipelineData.fresh_scores[0]?.symbol} @ ${pipelineData.fresh_scores[0]?.score}`
+            : `Quiet markets are a signal too — document what's missing.`;
+          break;
+        case 'governance':
+          headline = `Trust-gate posture and autonomous-action boundaries`;
+          hook = `Which decisions this agent makes without human approval and which require gates — with receipts.`;
+          break;
+        case 'markets':
+          headline = `FDV gap screening — ${pipelineData.aria_new} new ARIA observations`;
+          hook = `Data-driven market scan, not narrative.`;
+          break;
+        case 'narrative':
+          headline = `What the pipeline noticed this week that the feeds missed`;
+          hook = `Counter-narrative from on-chain signal vs. social consensus.`;
+          break;
+      }
+
+      drafts.push({
+        beat,
+        headline,
+        hook,
+        data_points: JSON.stringify({
+          fresh_score_count: pipelineData.fresh_scores.length,
+          aria_new_24h: pipelineData.aria_new,
+          flagged_count: pipelineData.flagged.length
+        })
+      });
+    }
+
+    // Persist drafts
+    const insert = db().prepare(`
+      INSERT INTO signal_angles_drafted (draft_date, beat, headline, hook, data_points)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    for (const d of drafts) {
+      insert.run(today, d.beat, d.headline, d.hook, d.data_points);
+    }
+
+    // Mailbox to war-room-reporter for morning review
+    mailbox.send('autodream', 'war-room-reporter', 'SIGNAL_ANGLES', {
+      type: 'AUTODREAM_SIGNAL_ANGLES',
+      date: today,
+      count: drafts.length,
+      drafts: drafts.map(d => ({ beat: d.beat, headline: d.headline, hook: d.hook })),
+      pipeline_snapshot: {
+        fresh_scores: pipelineData.fresh_scores.length,
+        aria_new_24h: pipelineData.aria_new,
+        flagged_24h: pipelineData.flagged.length
+      }
+    });
+
+    return { drafted: drafts.length, beats: targetBeats, last_beat_avoided: lastBeatUsed };
+  } catch (err) {
+    return { error: err.message };
+  }
+}
+
 // ── PHASE 7: SHIELD NIGHTLY ANALYSIS ────────────────────────
 function shieldNightlyAnalysis() {
   if (!feature('AUTODREAM_SHIELD')) return { skipped: true, reason: 'AUTODREAM_SHIELD=false' };
@@ -286,7 +446,7 @@ function optimizeIndexes() {
 // ── WAR ROOM DASHBOARD REPORT ───────────────────────────────
 // Send nightly dashboard summary to war-room-reporter mailbox.
 // Gated by AUTODREAM_WARROOM_DASHBOARD flag (default true).
-function reportToWarRoom({ dreamId, durationMs, memoryState, staleData, consolidation, revenue, shieldNightly, intelSync, hillClimbResult, optimization }) {
+function reportToWarRoom({ dreamId, durationMs, memoryState, staleData, consolidation, revenue, signalAngles, shieldNightly, intelSync, hillClimbResult, optimization }) {
   if (!feature('AUTODREAM_WARROOM_DASHBOARD')) {
     return { skipped: true, reason: 'AUTODREAM_WARROOM_DASHBOARD=false' };
   }
@@ -306,6 +466,11 @@ function reportToWarRoom({ dreamId, durationMs, memoryState, staleData, consolid
     lines.push('💰 REVENUE (today)');
     lines.push(`  signals ${revenue.signals} · shield scans ${revenue.shield_scans}`);
     lines.push('');
+    if (signalAngles && !signalAngles.skipped && !signalAngles.error) {
+      lines.push('📝 SIGNAL ANGLES (drafts for morning)');
+      lines.push(`  ${signalAngles.drafted} drafts across beats: ${(signalAngles.beats || []).join(', ')}`);
+      lines.push('');
+    }
     if (shieldNightly && !shieldNightly.skipped) {
       lines.push('🛡️ SHIELD NIGHTLY');
       lines.push(`  patterns ${shieldNightly.patterns_reviewed} · candidates ${shieldNightly.candidates_found} · compressed ${shieldNightly.scans_compressed}`);
@@ -374,6 +539,7 @@ function runDreamCycle(trigger = 'scheduled') {
   const staleData = identifyStaleData();
   const consolidation = consolidateMemory(staleData);
   const revenue = consolidateRevenue();
+  const signalAngles = generateSignalAngles();
   const shieldNightly = shieldNightlyAnalysis();
 
   // Phase 8: Intel sync (Telegram channel intel)
@@ -418,7 +584,7 @@ function runDreamCycle(trigger = 'scheduled') {
   const warRoomReport = reportToWarRoom({
     dreamId, durationMs: duration_ms,
     memoryState, staleData, consolidation, revenue,
-    shieldNightly, intelSync, hillClimbResult, optimization
+    signalAngles, shieldNightly, intelSync, hillClimbResult, optimization
   });
 
   emit('autodream', 'autodream.complete', {
@@ -430,4 +596,4 @@ function runDreamCycle(trigger = 'scheduled') {
   return { dream_id: dreamId, trigger, duration_ms, memoryState, staleData, consolidation, optimization, warRoomReport };
 }
 
-module.exports = { runDreamCycle, scanMemoryState, identifyStaleData, dreamRanToday };
+module.exports = { runDreamCycle, scanMemoryState, identifyStaleData, dreamRanToday, generateSignalAngles };
