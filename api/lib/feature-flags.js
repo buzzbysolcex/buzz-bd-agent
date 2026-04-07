@@ -30,6 +30,7 @@ const FLAGS = {
   TRUST_GATES: true,
   GITHUB_MONITOR: true,
   HSAAS_EVENT_WIRING: true,
+  STREAK_EMERGENCY_FILER: false,
   SILENCE_CONSENT: false,
   INBOX_MONITOR: true,
   WALLET_GUARD: true,

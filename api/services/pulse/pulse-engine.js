@@ -162,10 +162,20 @@ function decideAction(ctx) {
   // Priority 5: Streak protection (14:00-16:00 UTC graduated alerts)
   if (ctx.hour_utc >= 14 && ctx.hour_utc <= 16) {
     const hasSignalToday = ctx.recent_event_types.includes('signal.filed') ||
-                           ctx.recent_event_types.includes('signal.approved');
+                           ctx.recent_event_types.includes('signal.approved') ||
+                           ctx.recent_event_types.includes('signal.filed.emergency');
     const alertSent = getState('streak_alert_date') === new Date().toISOString().split('T')[0];
+    const emergencyFiledToday = getState('emergency_file_date') === new Date().toISOString().split('T')[0];
 
     if (!hasSignalToday) {
+      // 14:00 UTC: emergency container-side filing (if STREAK_EMERGENCY_FILER on and not already filed today)
+      if (ctx.hour_utc >= 14 && feature('STREAK_EMERGENCY_FILER') && !emergencyFiledToday) {
+        return {
+          type: 'ACT',
+          reason: `STREAK EMERGENCY: ${ctx.hour_utc}:00 UTC, no signal filed today — container takeover`,
+          action: 'streak-emergency-file'
+        };
+      }
       if (ctx.hour_utc >= 15) {
         return {
           type: 'ACT',
@@ -259,6 +269,29 @@ async function executeAction(action) {
       case 'streak-protection':
         emit('pulse-engine', EVENT_TYPES.STREAK_WARNING, { trigger: 'pulse-15utc', level: 'critical' });
         return { triggered: 'streak-protection' };
+
+      case 'streak-emergency-file':
+        try {
+          const { fileSignalDirect, checkFilerReady } = require('../signals/aibtc-direct-filer');
+          const { buildHeartbeatSignal } = require('../signals/heartbeat-template');
+          const ready = checkFilerReady();
+          if (!ready.ready) {
+            emit('pulse-engine', EVENT_TYPES.STREAK_WARNING, {
+              trigger: 'pulse-14utc-emergency',
+              level: 'critical',
+              error: 'filer_not_ready',
+              detail: ready
+            });
+            return { triggered: 'streak-emergency-file', error: 'filer_not_ready', detail: ready };
+          }
+          const signal = buildHeartbeatSignal();
+          const result = await fileSignalDirect(signal);
+          // Mark as filed today to prevent re-trigger this Pacific date
+          setState('emergency_file_date', new Date().toISOString().split('T')[0]);
+          return { triggered: 'streak-emergency-file', filing: result };
+        } catch (e) {
+          return { triggered: 'streak-emergency-file', error: e.message };
+        }
 
       default:
         return { unknown_action: action.action };
