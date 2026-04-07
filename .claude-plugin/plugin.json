@@ -1,6 +1,6 @@
 {
   "name": "buzz-crypto-bd",
-  "version": "9.2.0",
+  "version": "9.3.0",
   "description": "Crypto BD Agent Intelligence — Token scoring, wallet guard, BD screening, swarm simulation, and security scanning for autonomous exchange listing pipelines. Built by a chef.",
   "homepage": "https://buzzbd.ai",
   "repository": "https://github.com/BuzzBySolCex/buzz-crypto-bd",

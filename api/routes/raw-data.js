@@ -40,6 +40,8 @@ router.get('/scan/raw/:address', async (req, res) => {
   try {
     const result = await runScannerAgent({ address, chain, requestId });
     res.json({
+      disclaimer: 'QUICK SCORE — NOT PIPELINE VERIFIED',
+      max_classification: 'WARM',
       address,
       chain,
       raw: result.data,
@@ -160,7 +162,12 @@ router.get('/scores/components/:address', async (req, res) => {
     // Run technical analysis
     const technical = await analyzeTechnical(address, chain);
 
+    // Quick scan cap: max classification WARM, never HOT
+    const quickClassification = scorerResult.score >= 70 ? 'WARM' :
+                                 scorerResult.score >= 40 ? 'WATCH' : 'SKIP';
     res.json({
+      disclaimer: 'QUICK SCORE — NOT PIPELINE VERIFIED',
+      max_classification: quickClassification,
       address,
       chain,
       composite_score: scorerResult.score,

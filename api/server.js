@@ -822,8 +822,33 @@ async function start() {
     // ATV IDENTITY (Web3 deployer verification)
     if (feature('ATV_IDENTITY')) {
       try {
-        require('./services/identity/atv-identity').initIdentityTables();
-        console.log('[v9.1] ✓ ATV Identity tables initialized (ATV_IDENTITY=true)');
+        const atvIdentity = require('./services/identity/atv-identity');
+        atvIdentity.initIdentityTables();
+
+        // ATV status endpoint
+        app.get('/api/v1/identity/atv/status', apiKeyAuth, (req, res) => {
+          const identityDb = getDB();
+          const cached = identityDb.prepare('SELECT COUNT(*) as c FROM identity_cache').get();
+          const payments = identityDb.prepare('SELECT COUNT(*) as c FROM x402_payments WHERE service LIKE ?').get('atv%');
+          const recent = identityDb.prepare(
+            'SELECT address, ens_name, twitter, github, resolved_at FROM identity_cache ORDER BY resolved_at DESC LIMIT 5'
+          ).all();
+
+          res.json({
+            enabled: true,
+            flag: 'ATV_IDENTITY',
+            cached_identities: cached.c,
+            total_lookups: payments.c,
+            recent_resolutions: recent,
+            scoring: {
+              identity_verified: '+5 (ENS + twitter/github)',
+              ens_holder: '+3 (ENS only)',
+              anon_deployer: '-3 (no ENS)'
+            }
+          });
+        });
+
+        console.log('[v9.1] ✓ ATV Identity tables + status route initialized (ATV_IDENTITY=true)');
       } catch (e) {
         console.error('[v9.1] ⚠️ ATV Identity init error:', e.message);
       }
