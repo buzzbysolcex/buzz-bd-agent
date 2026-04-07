@@ -11,11 +11,11 @@ const { feature } = require('../../lib/feature-flags');
 function db() { return getDB(); }
 
 /**
- * Initialize persona_signals table (idempotent)
+ * Initialize aibtc_signals_filed table (idempotent)
  */
 function initSignalTracker() {
   db().exec(`
-    CREATE TABLE IF NOT EXISTS persona_signals (
+    CREATE TABLE IF NOT EXISTS aibtc_signals_filed (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       signal_id TEXT UNIQUE NOT NULL,
       beat_slug TEXT NOT NULL,
@@ -27,8 +27,8 @@ function initSignalTracker() {
       pacific_date TEXT,
       created_at TEXT DEFAULT (datetime('now'))
     );
-    CREATE INDEX IF NOT EXISTS idx_ps_date ON persona_signals(pacific_date);
-    CREATE INDEX IF NOT EXISTS idx_ps_status ON persona_signals(status);
+    CREATE INDEX IF NOT EXISTS idx_ps_date ON aibtc_signals_filed(pacific_date);
+    CREATE INDEX IF NOT EXISTS idx_ps_status ON aibtc_signals_filed(status);
   `);
 }
 
@@ -41,7 +41,7 @@ function recordSignalFiled({ signal_id, beat_slug, headline, pacific_date }) {
   const pDate = pacific_date || new Date().toISOString().split('T')[0];
 
   db().prepare(`
-    INSERT OR IGNORE INTO persona_signals (signal_id, beat_slug, headline, status, filed_at, pacific_date)
+    INSERT OR IGNORE INTO aibtc_signals_filed (signal_id, beat_slug, headline, status, filed_at, pacific_date)
     VALUES (?, ?, ?, 'submitted', ?, ?)
   `).run(signal_id, beat_slug, headline || '', now, pDate);
 
@@ -61,12 +61,12 @@ function recordSignalFiled({ signal_id, beat_slug, headline, pacific_date }) {
  * Emits signal.approved or signal.rejected events
  */
 function updateSignalStatus({ signal_id, status, publisher_feedback }) {
-  const existing = db().prepare('SELECT status FROM persona_signals WHERE signal_id = ?').get(signal_id);
+  const existing = db().prepare('SELECT status FROM aibtc_signals_filed WHERE signal_id = ?').get(signal_id);
   if (!existing) return { updated: false, reason: 'signal_not_found' };
   if (existing.status === status) return { updated: false, reason: 'no_change' };
 
   db().prepare(`
-    UPDATE persona_signals SET status = ?, publisher_feedback = ?, reviewed_at = datetime('now')
+    UPDATE aibtc_signals_filed SET status = ?, publisher_feedback = ?, reviewed_at = datetime('now')
     WHERE signal_id = ?
   `).run(status, publisher_feedback || null, signal_id);
 
@@ -86,7 +86,7 @@ function updateSignalStatus({ signal_id, status, publisher_feedback }) {
 function getSignalsToday() {
   const today = new Date().toISOString().split('T')[0];
   const row = db().prepare(
-    'SELECT COUNT(*) as c FROM persona_signals WHERE pacific_date = ?'
+    'SELECT COUNT(*) as c FROM aibtc_signals_filed WHERE pacific_date = ?'
   ).get(today);
   return row?.c || 0;
 }
@@ -96,7 +96,7 @@ function getSignalsToday() {
  */
 function getStreakInfo() {
   const signals = db().prepare(
-    'SELECT pacific_date, COUNT(*) as c FROM persona_signals GROUP BY pacific_date ORDER BY pacific_date DESC LIMIT 30'
+    'SELECT pacific_date, COUNT(*) as c FROM aibtc_signals_filed GROUP BY pacific_date ORDER BY pacific_date DESC LIMIT 30'
   ).all();
 
   let streak = 0;
