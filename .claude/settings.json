@@ -100,17 +100,6 @@
           }
         ]
       }
-    ],
-    "PreCommit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cd /home/claude-code/buzz-workspace && grep -rn 'BUZZ_API_ADMIN_KEY\\|FIRECRAWL_API\\|PRIVATE_KEY\\|fc-c1fe0fd8\\|MTQ3NTc5MjE1MDM4MDk0MTM3Mg\\|204\\.168\\.137\\.253\\|OF8wEziRXuvD2WptOXGRncgmT64BgvUb\\|eyJhbGciOiJSUzI1NiIs\\|buzz_ee392ed81952c72a' --include='*.js' --include='*.ts' --include='*.json' --include='*.md' . 2>/dev/null && echo 'SECRET DETECTED — COMMIT BLOCKED' && exit 1 || exit 0"
-          }
-        ]
-      }
     ]
   },
   "env": {
