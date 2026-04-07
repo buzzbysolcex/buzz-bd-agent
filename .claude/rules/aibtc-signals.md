@@ -12,8 +12,8 @@ paths: ["**/signal*", "**/aibtc*", "**/correspondent*", "**/news*"]
 - PROACTIVE AND AUTONOMOUS: scan when cooldown clears, file immediately, report after.
 - NEVER wait for Ogie to ask. NEVER batch for a scheduled window.
 
-## BEAT STRATEGY (7 beats claimed)
-- Rotate across: Agent Trading, Agent Economy, Infrastructure, Security, Deal Flow, Agent Skills, Governance
+## BEAT STRATEGY (12 beats claimed)
+- Rotate across: Agent Trading, Agent Economy, Infrastructure, Security, Deal Flow, Agent Skills, Governance, DeFi, NFTs & Digital Assets, DAOs, Identity & Reputation, Interoperability
 - NEVER file 2 signals on the same beat in one day
 - Infrastructure signals: file about OUR deployments (4 Base contracts, ARIA, 31 intel)
 - Deal Flow: unique listing data, near-empty beat
