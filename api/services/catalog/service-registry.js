@@ -31,7 +31,10 @@ const SERVICES = [
   { id: 24, name: 'Shield Full Scan', category: 'scoring', status: 'live', featureFlag: 'SHIELD_ENGINE', priceTiers: { t1: 1000 }, description: 'Full deep scan — all 23+ patterns, address poisoning, temporal analysis ($0.10/scan)' },
   { id: 25, name: 'Shield Program Risk', category: 'scoring', status: 'live', featureFlag: 'SHIELD_PROGRAM_SCORER', priceTiers: { t1: 1000 }, description: 'Program risk scoring 0-100 — verified, immutable, age, deployer ($0.10/scan)' },
   { id: 26, name: 'Shield Bridge Verify', category: 'scoring', status: 'pending', featureFlag: 'SHIELD_CROSS_CHAIN', priceTiers: { t2: 500 }, description: 'Cross-chain bridge verification — registry lookup, gateway proof check ($0.05/scan)' },
-  { id: 27, name: 'Shield Custom Pattern', category: 'scoring', status: 'planned', featureFlag: 'SHIELD_ENTERPRISE_TIER', priceTiers: { custom: 0 }, description: 'Enterprise custom drain pattern development — tailored to client operations' }
+  { id: 27, name: 'Shield Custom Pattern', category: 'scoring', status: 'planned', featureFlag: 'SHIELD_ENTERPRISE_TIER', priceTiers: { custom: 0 }, description: 'Enterprise custom drain pattern development — tailored to client operations' },
+  { id: 28, name: 'PULSE Engine', category: 'infrastructure', status: 'live', featureFlag: 'PULSE_ENGINE', priceTiers: { internal: 0 }, description: 'KAIROS-class heartbeat tick loop with load-aware scheduling, streak protection, and event-driven agent wake. Persists across reboots via pulse_state table.' },
+  { id: 29, name: 'autoDream', category: 'infrastructure', status: 'live', featureFlag: 'AUTODREAM', priceTiers: { internal: 0 }, description: 'Nightly memory consolidation engine. 4-phase cycle: scan, identify stale data, consolidate/archive, optimize indexes. Runs at 02:00 UTC with reboot-safe dedup.' },
+  { id: 30, name: 'HSaaS Funnel', category: 'orchestration', status: 'live', featureFlag: 'HSAAS_FREE', priceTiers: { free: 0, t1: 500, t2: 1500, t3: 2500 }, description: 'Honest Scoring as a Service unified funnel. Free score → audit upsell. Wires Token Scorer (#1), DeFi Safety Audit (#5), Score-to-Swap (#9). Event-driven via token.scored subscription.' }
 ];
 
 function getService(id) {
@@ -52,7 +55,8 @@ function getStats() {
     live: SERVICES.filter(s => s.status === 'live').length,
     ready: SERVICES.filter(s => s.status === 'ready').length,
     pending: SERVICES.filter(s => s.status === 'pending').length,
-    pre_frontier: SERVICES.filter(s => s.status === 'pre_frontier').length
+    pre_frontier: SERVICES.filter(s => s.status === 'pre_frontier').length,
+    infrastructure: SERVICES.filter(s => s.category === 'infrastructure').length
   };
 }
 

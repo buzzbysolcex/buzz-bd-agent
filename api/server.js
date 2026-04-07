@@ -677,6 +677,17 @@ async function start() {
         console.error('[v9.3] ⚠️ AIBTC env load error:', e.message);
       }
 
+      // HSaaS Event Wiring — auto-funnel from token.scored to upsell drafts
+      if (feature('HSAAS_EVENT_WIRING')) {
+        try {
+          const { initHsaasEventWiring } = require('./services/hsaas/event-wiring');
+          initHsaasEventWiring();
+          console.log('[v9.3] ✓ HSaaS event wiring initialized (token.scored → audit_request + upsell draft)');
+        } catch (e) {
+          console.error('[v9.3] ⚠️ HSaaS event wiring init error:', e.message);
+        }
+      }
+
       // GitHub PR Monitor — autonomous PR/issue watching
       if (feature('GITHUB_MONITOR')) {
         try {
