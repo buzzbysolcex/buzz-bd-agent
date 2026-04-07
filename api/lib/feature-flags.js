@@ -28,6 +28,7 @@ const FLAGS = {
   ANTI_DISTILLATION: false,
   AUTO_OUTREACH: true,
   TRUST_GATES: true,
+  GITHUB_MONITOR: true,
   SILENCE_CONSENT: false,
   INBOX_MONITOR: true,
   WALLET_GUARD: true,
