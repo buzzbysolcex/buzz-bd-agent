@@ -655,7 +655,7 @@ async function start() {
         const { initSignalTracker } = require('./services/signals/signal-tracker');
         initSignalTracker();
         app.use('/api/v1/signals', apiKeyAuth, require('./routes/signal-routes'));
-        console.log('[v9.3] ✓ Signal tracker initialized (persona_signals table + 3 routes)');
+        console.log('[v9.3] ✓ Signal tracker initialized (aibtc_signals_filed table + 3 routes)');
       } catch (e) {
         console.error('[v9.3] ⚠️ Signal tracker init error (non-fatal):', e.message);
       }
