@@ -72,6 +72,7 @@ buzz-workspace/
 23. .claude/rules/tweet-on-score.md
 24. .claude/HANDOVER.md
 25. .claude/GSD.md
+26. MOLTBOOK-AUTONOMOUS.md
 
 ---
 
