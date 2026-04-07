@@ -17,15 +17,17 @@ function db() { return getDB(); }
 // Load PAT from env file (set by server.js startup)
 function getPAT() {
   if (process.env.GITHUB_PAT) return process.env.GITHUB_PAT;
-  try {
-    const envContent = fs.readFileSync('/home/claude-code/.env.github', 'utf8');
-    const match = envContent.match(/GITHUB_PAT=(.+)/);
-    if (match) {
-      process.env.GITHUB_PAT = match[1].trim();
-      return process.env.GITHUB_PAT;
-    }
-  } catch (e) {
-    console.error('[github-monitor] PAT load error:', e.message);
+  const paths = ['/data/.env.github', '/home/claude-code/.env.github'];
+  for (const p of paths) {
+    try {
+      if (!fs.existsSync(p)) continue;
+      const envContent = fs.readFileSync(p, 'utf8');
+      const match = envContent.match(/GITHUB_PAT=(.+)/);
+      if (match) {
+        process.env.GITHUB_PAT = match[1].trim();
+        return process.env.GITHUB_PAT;
+      }
+    } catch (e) {}
   }
   return null;
 }

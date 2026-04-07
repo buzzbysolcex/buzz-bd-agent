@@ -660,18 +660,19 @@ async function start() {
         console.error('[v9.3] ⚠️ Signal tracker init error (non-fatal):', e.message);
       }
 
-      // AIBTC Wallet Auto-Unlock — read password from .env.aibtc
+      // AIBTC Wallet Auto-Unlock — read password from .env.aibtc (container or host path)
       try {
-        const envPath = '/home/claude-code/.env.aibtc';
-        if (fs.existsSync(envPath)) {
+        const envPaths = ['/data/.env.aibtc', '/home/claude-code/.env.aibtc'];
+        const envPath = envPaths.find(p => fs.existsSync(p));
+        if (envPath) {
           const envContent = fs.readFileSync(envPath, 'utf8');
           const match = envContent.match(/AIBTC_WALLET_PASSWORD=(.+)/);
           if (match) {
             process.env.AIBTC_WALLET_PASSWORD = match[1].trim();
-            console.log('[v9.3] ✓ AIBTC wallet password loaded from .env.aibtc');
+            console.log(`[v9.3] ✓ AIBTC wallet password loaded from ${envPath}`);
           }
         } else {
-          console.log('[v9.3] ⚠️ /home/claude-code/.env.aibtc not found — manual wallet unlock required');
+          console.log('[v9.3] ⚠️ .env.aibtc not found at /data/ or /home/claude-code/ — manual unlock required');
         }
       } catch (e) {
         console.error('[v9.3] ⚠️ AIBTC env load error:', e.message);
@@ -698,9 +699,10 @@ async function start() {
           // Auto-track current PRs
           trackPR('aibtcdev/skills', 283);
 
-          // Load PAT into process.env from .env.github
-          const ghEnvPath = '/home/claude-code/.env.github';
-          if (fs.existsSync(ghEnvPath)) {
+          // Load PAT into process.env from .env.github (container or host path)
+          const ghPaths = ['/data/.env.github', '/home/claude-code/.env.github'];
+          const ghEnvPath = ghPaths.find(p => fs.existsSync(p));
+          if (ghEnvPath) {
             const ghContent = fs.readFileSync(ghEnvPath, 'utf8');
             const m = ghContent.match(/GITHUB_PAT=(.+)/);
             if (m) process.env.GITHUB_PAT = m[1].trim();
