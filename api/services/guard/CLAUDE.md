@@ -28,6 +28,27 @@ Before outreach sends, before escrow triggers, before listing executes:
 - Currently Windows-first, EVM-first — Linux compatibility TBD
 - Controlled test on escrow flow planned
 
+## Schema Freeze (AION / Aldo collaboration)
+Three schemas frozen with Aldo as of Apr 5, 2026:
+
+1. **Evaluate Request Schema** — locked
+   ```json
+   { "action": "string", "target": "string", "chain": "string",
+     "buzz_score": "number", "sim_consensus": "number", "context": "object" }
+   ```
+
+2. **Evaluate Response Schema** — locked
+   ```json
+   { "decision": "ALLOW|WARN|BLOCK", "risk_level": "string",
+     "reason_code": "string", "reasoning": "string",
+     "receipt": { "hash": "string", "timestamp": "string", "policy_version": "string" } }
+   ```
+
+3. **Receipt Storage Schema** — locked (wallet_guard_receipts table in DB)
+
+Counterfactual overlay proposed by Aldo — under review.
+Do NOT modify these schemas without Aldo + Ogie approval.
+
 ## Danger Zones
 - AION is closed-core — we call the API, don't see internals
 - If AION API is unreachable → fallback to trust gates (Task 15) only
