@@ -677,6 +677,45 @@ async function start() {
         console.error('[v9.3] ⚠️ AIBTC env load error:', e.message);
       }
 
+      // GitHub PR Monitor — autonomous PR/issue watching
+      if (feature('GITHUB_MONITOR')) {
+        try {
+          const { initGithubMonitor, trackPR } = require('./services/github/pr-monitor');
+          initGithubMonitor();
+          app.use('/api/v1/github', apiKeyAuth, require('./routes/github-routes'));
+
+          // Auto-track current PRs
+          trackPR('aibtcdev/skills', 283);
+
+          // Load PAT into process.env from .env.github
+          const ghEnvPath = '/home/claude-code/.env.github';
+          if (fs.existsSync(ghEnvPath)) {
+            const ghContent = fs.readFileSync(ghEnvPath, 'utf8');
+            const m = ghContent.match(/GITHUB_PAT=(.+)/);
+            if (m) process.env.GITHUB_PAT = m[1].trim();
+          }
+
+          // Register 6-hour polling cron
+          if (feature('DYNAMIC_CRONS')) {
+            const { createCron } = require('./services/cron/dynamic-cron');
+            const existing = getDB().prepare(
+              "SELECT id FROM dynamic_crons WHERE name = 'github-pr-monitor' AND active = 1"
+            ).get();
+            if (!existing) {
+              createCron('github-monitor', 'github-pr-monitor', '0 */6 * * *', {
+                action: 'check-pr-comments',
+                description: 'Poll tracked GitHub PRs for new comments and reviews'
+              }, { expiresAt: '2027-01-01T00:00:00Z' });
+              console.log('[v9.3] ✓ GitHub PR monitor cron registered (every 6h)');
+            }
+          }
+
+          console.log('[v9.3] ✓ GitHub PR Monitor initialized (tracking aibtcdev/skills#283)');
+        } catch (e) {
+          console.error('[v9.3] ⚠️ GitHub PR Monitor init error:', e.message);
+        }
+      }
+
       // AIBTC Signal Status Polling — every 30 min via dynamic cron
       if (feature('DYNAMIC_CRONS') && feature('EVENT_BUS')) {
         try {
