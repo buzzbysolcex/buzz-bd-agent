@@ -27,23 +27,22 @@ const SIGNATURE_HTML = `
       </td>
       <td style="vertical-align: top;">
         <div style="font-size: 16px; font-weight: bold; color: #1a1a2e;">Ogie</div>
-        <div style="font-size: 13px; color: #27ae60; font-weight: bold;">Business Development Lead</div>
-        <div style="font-size: 12px; color: #666;">SolCex Exchange — Solana-Native CEX</div>
+        <div style="font-size: 13px; color: #27ae60; font-weight: bold;">Creator, Buzz BD Agent</div>
+        <div style="font-size: 12px; color: #666;">Zero-Human Exchange Listing Company</div>
       </td>
     </tr>
   </table>
   <div style="margin-top: 10px; font-size: 12px; color: #555; line-height: 1.6;">
-    🌐 <a href="https://solcex.cc" style="color: #2980b9;">solcex.cc</a><br>
+    🌐 <a href="https://buzzbd.ai" style="color: #2980b9;">buzzbd.ai</a><br>
     📧 buzzbysolcex@gmail.com<br>
     💬 Telegram: <a href="https://t.me/Ogie2" style="color: #2980b9;">@Ogie2</a><br>
-    𝕏 <a href="https://x.com/SolCex_Exchange" style="color: #2980b9;">@SolCex_Exchange</a> | <a href="https://x.com/BuzzBySolCex" style="color: #2980b9;">@BuzzBySolCex</a>
+    𝕏 <a href="https://x.com/BuzzBySolCex" style="color: #2980b9;">@BuzzBySolCex</a> | <a href="https://x.com/SolCex_Exchange" style="color: #2980b9;">@SolCex_Exchange</a>
   </div>
   <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #e0e0e0; font-size: 11px; color: #888;">
     <strong style="color: #666;">ON-CHAIN VERIFIED</strong><br>
     🐝 Powered by Buzz BD Agent — <a href="https://eips.ethereum.org/EIPS/eip-8004" style="color: #2980b9;">ERC-8004 #25045</a><br>
     ⛓ Ethereum #25045 | Base #17483<br>
-    📊 31 Intelligence Sources | 100-Point Scoring Algorithm | 19 Chains<br>
-    🔧 Running on Hetzner CPX62 Infrastructure
+    📊 31 Intelligence Sources | 100-Point Scoring Algorithm | 19 Chains
   </div>
 </div>`;
 
