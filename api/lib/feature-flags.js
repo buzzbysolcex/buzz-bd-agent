@@ -53,6 +53,7 @@ const FLAGS = {
   SHIELD_MIROFISH_TRIGGER: false,
   SHIELD_WALLET_GUARD_LINK: false,
   SHIELD_ON_CHAIN: false,
+  SHIELD_PUBLIC_API: true,
   // autoDream v2 — pattern extraction + instinct system
   AUTODREAM_PATTERNS: false,
   // Buzz Shield Phase 2 — expanded detection
