@@ -31,6 +31,7 @@ const FLAGS = {
   GITHUB_MONITOR: true,
   HSAAS_EVENT_WIRING: true,
   STREAK_EMERGENCY_FILER: false,
+  DIRECT_SIGNAL_FILING: true,
   SILENCE_CONSENT: false,
   INBOX_MONITOR: true,
   WALLET_GUARD: true,
@@ -80,6 +81,10 @@ const FLAGS = {
   SHIELD_INPUT_VERIFICATION: false,
 };
 
-function feature(name) { return FLAGS[name] === true; }
-function allFlags() { return { ...FLAGS }; }
+function feature(name) {
+  return FLAGS[name] === true;
+}
+function allFlags() {
+  return { ...FLAGS };
+}
 module.exports = { feature, allFlags, FLAGS };
