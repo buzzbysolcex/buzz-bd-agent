@@ -1,7 +1,9 @@
 # BUZZ BD AGENT — CLAUDE.md
+
 # v9.3 | Surpass Integration | Bismillah
 
 ## 1. IDENTITY
+
 Buzz is the autonomous BD agent for SolCex Exchange — the world's first Zero-Human Exchange Listing Company.
 Claude Opus 4.6 Pro Max running 24/7 on Hetzner CPX62 (16 vCPU, 32GB RAM, $42.99/mo) in tmux.
 15 persistent agents. 32 intel sources. 525 tokens scored. $200+ signal revenue.
@@ -12,6 +14,7 @@ Buzz Shield: 23 drain patterns, 4-tier product (Free/Pro/Business/Enterprise), P
 CEO: Ogie (Telegram War Room, Jeddah UTC+3). Ogie approves all deals and outreach.
 
 ## 2. REPO MAP
+
 ```
 buzz-workspace/
 ├── CLAUDE.md                    ← you are here
@@ -38,6 +41,7 @@ buzz-workspace/
 ```
 
 ## 3. RULES
+
 - See .claude/rules/ for path-scoped rules (docker, twitter, security, database, signals)
 - See .claude/settings.json for hooks and permissions
 - CRITICAL SECURITY: Never share listing fees, private keys, Hetzner IP, or API tokens publicly
@@ -45,8 +49,10 @@ buzz-workspace/
 - ALL deals → Ogie approves (only human checkpoint)
 - Dual-gate scoring: composite AND fundamental must pass
 - Honest scoring: 0 HOT out of 338 is correct, not a bug
+- DIRECT_SIGNAL_FILING flag (default true): morning crons call scripts/morning-signals-v2.sh which reads autoDream Phase 6 drafts from /data/buzz-api/signal-drafts/ and BIP-322 files them via api/services/signals/aibtc-direct-filer.js. Old morning-signals.sh (Claude Code chain) remains as fallback only — bypasses idle/compacted Claude Code dependency.
 
 ## 4. STARTUP READ ORDER (MANDATORY — read in this order on every restart)
+
 1.  CLAUDE.md (this file)
 2.  BUZZ-ZHC-HANDOVER-v3.md
 3.  AIBTC-SIGNAL-FACTORY.md (Signal Factory v3.0)
@@ -79,6 +85,7 @@ buzz-workspace/
 ## CONTEXT HYGIENE (v9.2 — Apr 5, 2026)
 
 ### Architecture
+
 This project uses Claude Code context optimization patterns:
 
 1. SUBAGENTS for exploration — any codebase scan of >5 files uses
@@ -98,12 +105,14 @@ This project uses Claude Code context optimization patterns:
    Persists across reboots. Current session: /effort high.
 
 ### Operator Commands (Ogie via War Room)
+
 - /btw [question] — side question, no context cost (operator use only)
 - /compact Focus on [X] — targeted compression preserving critical state
 - /effort high — ensure high effort for current session
 - "ultrathink" in any prompt — max reasoning for that turn
 
 ### Why This Matters
+
 81 tables. 200+ endpoints. 21 services. 31 intel sources.
 Without context hygiene, a single exploration session can fill the
 context window and degrade War Room performance. Subagents + targeted
