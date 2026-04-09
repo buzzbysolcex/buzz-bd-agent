@@ -80,6 +80,21 @@ buzz-workspace/
 25. .claude/GSD.md
 26. MOLTBOOK-AUTONOMOUS.md
 
+### WIKI (Karpathy LLM Knowledge Base — v1.0, Apr 9 2026)
+
+Read after the numbered startup sequence above. Persistent markdown wiki at
+`/data/buzz/persistent/wiki/` (survives tmux/container/server reboots,
+NOT in git). Flag: `KARPATHY_WIKI` (off by default — Ogie flips after review).
+
+27. `/data/buzz/persistent/wiki/WIKI.md` — schema (HOW to maintain the wiki)
+28. `/data/buzz/persistent/wiki/INDEX.md` — master index (WHAT exists)
+29. `/data/buzz/persistent/wiki/LOG.md` — last 20 entries (WHAT happened recently)
+
+Wiki writes go through `api/services/wiki/wiki-manager.js`. autoDream Phase
+10 lints the wiki nightly; Phase 11 does weekly ingest on Sundays. Scoring
+pipeline and signal factory call non-blocking `hookTokenScored` /
+`hookSignalResearch` from the same module.
+
 ---
 
 ## CONTEXT HYGIENE (v9.2 — Apr 5, 2026)
