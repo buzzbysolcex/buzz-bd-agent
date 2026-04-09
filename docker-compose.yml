@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   buzz:
@@ -81,6 +81,9 @@ services:
       - BUZZ_API_ADMIN_KEY=${BUZZ_API_ADMIN_KEY}
       - BUZZ_API_PORT=3000
       - NODE_ENV=production
+      # ─── Wallet Guard (Aldo / AION) — Apr 9 2026 demo ───
+      - GUARD_DEMO_MODE=${GUARD_DEMO_MODE:-0}
+      - AION_GUARD_URL=${AION_GUARD_URL:-http://localhost:7700/api/v1/evaluate}
 
 volumes:
   buzz-data:
