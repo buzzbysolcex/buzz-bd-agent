@@ -55,8 +55,9 @@ const FLAGS = {
   SHIELD_ON_CHAIN: false,
   SHIELD_PUBLIC_API: true,
   // Karpathy LLM Wiki — persistent knowledge base at /data/buzz/persistent/wiki
-  // Stays false until Ogie reviews seed pages and flips manually (Apr 9 2026)
-  KARPATHY_WIKI: false,
+  // Flipped true Apr 9 2026 06:07 UTC after Ogie reviewed seed pages
+  // (fdv-gap-penalty, scoring-pipeline-v2, aldo-aion). 43 seed pages live.
+  KARPATHY_WIKI: true,
   // autoDream v2 — pattern extraction + instinct system
   AUTODREAM_PATTERNS: false,
   // Buzz Shield Phase 2 — expanded detection
