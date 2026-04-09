@@ -532,6 +532,15 @@ function generateSignalAngles() {
           hook = `Auto-generated placeholder. Claude Code rewrites during the day.`;
       }
 
+      // Karpathy Wiki research hook — pulls compiled synthesis/concept pages
+      // relevant to this beat. Adds context into data_points so direct filer
+      // can surface it to Claude Code when hand-writing bodies in the morning.
+      let wiki_research = null;
+      try {
+        const { hookSignalResearch } = require("../wiki/wiki-manager");
+        wiki_research = hookSignalResearch(beat);
+      } catch {}
+
       drafts.push({
         beat,
         headline,
@@ -540,6 +549,10 @@ function generateSignalAngles() {
           fresh_score_count: pipelineData.fresh_scores.length,
           aria_new_24h: pipelineData.aria_new,
           flagged_count: pipelineData.flagged.length,
+          wiki_research_chars: wiki_research ? wiki_research.length : 0,
+          wiki_research_preview: wiki_research
+            ? wiki_research.slice(0, 400)
+            : null,
         }),
       });
     }
@@ -902,6 +915,60 @@ async function runDreamCycle(trigger = "scheduled") {
 
   const optimization = optimizeIndexes();
 
+  // Phase 10: Wiki Lint (Karpathy LLM Wiki) — runs nightly, 30 min max
+  let wikiLintResult = { skipped: true };
+  if (feature("KARPATHY_WIKI")) {
+    try {
+      const wiki = require("../wiki/wiki-manager");
+      wikiLintResult = wiki.wikiLint();
+    } catch (e) {
+      wikiLintResult = { error: e.message };
+    }
+  }
+
+  // Phase 11: Wiki Ingest — runs weekly on Sundays, 60 min max
+  // Regenerates INDEX.md and creates entity pages for any HOT token
+  // (score >= 70) that doesn't yet have one.
+  let wikiIngestResult = { skipped: true };
+  if (feature("KARPATHY_WIKI") && new Date().getUTCDay() === 0) {
+    try {
+      const wiki = require("../wiki/wiki-manager");
+      const rows = db()
+        .prepare(
+          "SELECT address, chain, ticker, name, score FROM pipeline_tokens WHERE score >= 70",
+        )
+        .all();
+      let created = 0;
+      for (const t of rows) {
+        const slug = wiki.slugify(t.ticker || t.address);
+        if (!slug) continue;
+        if (wiki.readPage("entities", slug)) continue;
+        wiki.createEntityPage({
+          ticker: t.ticker,
+          slug,
+          chain: t.chain,
+          score: t.score,
+          summary: `${t.ticker || slug} on ${t.chain}. Buzz score ${t.score}.`,
+          content: `**Chain**: ${t.chain}\n**Address**: \`${t.address}\`\n**Score**: ${t.score}\n\n_Auto-created by autoDream Phase 11 wiki ingest._`,
+          changelog: [
+            `${new Date().toISOString().split("T")[0]}: Created by Phase 11 weekly ingest`,
+          ],
+          tags: ["token", `chain-${t.chain}`],
+        });
+        created++;
+      }
+      wiki.generateIndex();
+      wiki.appendLog(
+        "ingest",
+        `Weekly ingest — created ${created} new entity pages`,
+        [],
+      );
+      wikiIngestResult = { created, total_hot: rows.length };
+    } catch (e) {
+      wikiIngestResult = { error: e.message };
+    }
+  }
+
   const duration_ms = Date.now() - dreamStart;
 
   // Log to dream_log table
@@ -939,6 +1006,8 @@ async function runDreamCycle(trigger = "scheduled") {
         intelSync,
         hillClimbResult,
         optimization,
+        wikiLintResult,
+        wikiIngestResult,
       }),
     );
 
