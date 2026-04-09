@@ -74,7 +74,9 @@ router.post("/evaluate", async (req, res) => {
         req.body.sim_consensus ?? ctx.sim_consensus ?? null,
         ctx.sim_ev ?? null,
         ctx.screening_class || null,
-        r.counterfactual_summary || r.counterfactualSummary || null,
+        typeof (r.counterfactual_summary || r.counterfactualSummary) === "object"
+          ? JSON.stringify(r.counterfactual_summary || r.counterfactualSummary)
+          : r.counterfactual_summary || r.counterfactualSummary || null,
         typeof r.normalized === "object"
           ? JSON.stringify(r.normalized)
           : r.normalized || null,
