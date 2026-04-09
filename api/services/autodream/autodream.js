@@ -860,7 +860,7 @@ function dreamRanToday() {
 }
 
 // ── DREAM CYCLE (Main entry) ─────────────────────────────────
-function runDreamCycle(trigger = "scheduled") {
+async function runDreamCycle(trigger = "scheduled") {
   if (!feature("AUTODREAM"))
     return { skipped: true, reason: "AUTODREAM flag is false" };
 
@@ -892,7 +892,9 @@ function runDreamCycle(trigger = "scheduled") {
   if (feature("AUTODREAM_HILLCLIMB")) {
     try {
       const { hillClimbLoop } = require("./hill-climber");
-      hillClimbResult = hillClimbLoop(5, 4 * 60 * 60 * 1000);
+      // hillClimbLoop is async — must await or hillClimbResult ends up
+      // as a Promise that JSON.stringifies to {} (Apr 9 fix)
+      hillClimbResult = await hillClimbLoop(5, 4 * 60 * 60 * 1000);
     } catch (e) {
       hillClimbResult = { error: e.message };
     }
@@ -932,6 +934,7 @@ function runDreamCycle(trigger = "scheduled") {
         staleData,
         consolidation,
         revenue,
+        signalAngles,
         shieldNightly,
         intelSync,
         hillClimbResult,
