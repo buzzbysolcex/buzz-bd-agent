@@ -294,14 +294,16 @@ function publicScanCors(req, res, next) {
   next();
 }
 
-router.options("/public/scan", publicScanCors, (req, res) => res.status(204).end());
+router.options("/public/scan", publicScanCors, (req, res) =>
+  res.status(204).end(),
+);
 
 router.get(
   "/public/scan",
   publicScanCors,
   shieldEnabled,
   publicScanRateLimit,
-  (req, res) => {
+  async (req, res) => {
     if (!feature("SHIELD_PUBLIC_API")) {
       return res.status(503).json({
         error: "public_api_disabled",
@@ -317,7 +319,7 @@ router.get(
         error: "missing_token",
         message: "Query param 'token' (contract address) required",
         example:
-          "/api/v1/shield/public/scan?token=EUQoSgsGZzipuayB8AnZHXUMRtLwwy5SuRi4YgFXiogd&chain=solana",
+          "/api/v1/shield/public/scan?token=DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263&chain=solana",
       });
     }
     if (!["solana", "base", "ethereum", "bitcoin"].includes(chain)) {
@@ -329,72 +331,369 @@ router.get(
 
     const startMs = Date.now();
     const db = getDB();
+    const sourcesChecked = [];
 
-    // 1) Pull pipeline token (if scored)
+    // ─── 1) Pull pipeline token (if scored) ───
     let pipelineToken = null;
     try {
       pipelineToken = db
         .prepare("SELECT * FROM pipeline_tokens WHERE address = ?")
         .get(token);
+      if (pipelineToken) sourcesChecked.push("Buzz Pipeline");
     } catch {}
 
-    // 2) Run program-level shield scan
+    // ─── 2) Live DexScreener fetch (always, for fresh market data) ───
+    let dexData = null;
+    let pair = null;
+    try {
+      const dexRes = await fetch(
+        `https://api.dexscreener.com/latest/dex/tokens/${token}`,
+        { signal: AbortSignal.timeout(8000) },
+      );
+      if (dexRes.ok) {
+        const dexJson = await dexRes.json();
+        const pairs = dexJson.pairs || [];
+        // Pick highest-liquidity pair
+        pair = pairs.sort(
+          (a, b) =>
+            (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0),
+        )[0];
+        if (pair) {
+          dexData = {
+            price_usd: parseFloat(pair.priceUsd) || 0,
+            market_cap: pair.marketCap || pair.fdv || 0,
+            fdv: pair.fdv || 0,
+            liquidity_usd: pair.liquidity?.usd || 0,
+            volume_24h: pair.volume?.h24 || 0,
+            volume_6h: pair.volume?.h6 || 0,
+            txns_24h:
+              (pair.txns?.h24?.buys || 0) + (pair.txns?.h24?.sells || 0),
+            price_change_24h: pair.priceChange?.h24 || 0,
+            pair_created: pair.pairCreatedAt || null,
+            dex: pair.dexId || null,
+            pair_address: pair.pairAddress || null,
+            base_token: pair.baseToken || {},
+          };
+          sourcesChecked.push("DexScreener");
+        }
+      }
+    } catch {}
+
+    // ─── 3) Shield scan: drain patterns + program risk ───
     let programData = null;
     let patternMatches = [];
     try {
       programData = scoreProgramRisk(db, token, chain);
       patternMatches = matchDrainPatterns(db, token);
+      sourcesChecked.push("BuzzShield Patterns");
     } catch {}
 
+    // ─── 4) Blacklist check ───
+    let blacklisted = false;
+    try {
+      const bl = db
+        .prepare(
+          "SELECT COUNT(*) as c FROM intel_blacklist_wallets WHERE address = ?",
+        )
+        .get(token);
+      blacklisted = bl && bl.c > 0;
+      sourcesChecked.push("Intel Blacklist");
+    } catch {}
+
+    // ─── 5) Derive market data ───
     const score = pipelineToken?.score ?? null;
-    const riskScore = programData?.risk_score ?? null;
+    const md = dexData || {};
+    const ageDays = pair?.pairCreatedAt
+      ? Math.floor(
+          (Date.now() - new Date(pair.pairCreatedAt).getTime()) /
+            86400000,
+        )
+      : null;
 
-    // 3) Derive risk_level + flags
+    const market_data = {
+      price_usd: md.price_usd || null,
+      market_cap: md.market_cap || null,
+      fdv: md.fdv || null,
+      liquidity_usd: md.liquidity_usd || null,
+      volume_24h: md.volume_24h || null,
+      holders: null, // requires Helius (Phase 2)
+      age_days: ageDays,
+      txns_24h: md.txns_24h || null,
+      dex: md.dex || null,
+    };
+
+    // ─── 6) Apply 11 scoring rules ───
+    const fdvGap =
+      md.market_cap && md.fdv && md.fdv > 0
+        ? Math.round((1 - md.market_cap / md.fdv) * 100)
+        : null;
+    const vlRatio =
+      md.volume_24h && md.liquidity_usd && md.liquidity_usd > 0
+        ? Math.round((md.volume_24h / md.liquidity_usd) * 100) / 100
+        : null;
+    const isStablecoin = /^(usdc|usdt|dai|busd|eurc|fdusd|tusd|pyusd)$/i.test(
+      pair?.baseToken?.symbol || pipelineToken?.ticker || "",
+    );
+
+    function rule(name, status, impact, detail) {
+      return { rule: name, status, impact, detail };
+    }
+
+    const rules_applied = [
+      rule(
+        "GHOST_VOLUME",
+        md.txns_24h !== null && md.txns_24h < 50 && md.volume_24h > 1000000
+          ? "FLAG"
+          : "PASS",
+        md.txns_24h !== null && md.txns_24h < 50 && md.volume_24h > 1000000
+          ? -25
+          : 0,
+        md.txns_24h !== null && md.txns_24h < 50 && md.volume_24h > 1000000
+          ? `${md.txns_24h} txns with $${Math.round(md.volume_24h).toLocaleString()} volume — wash trading signature`
+          : md.txns_24h
+            ? `${md.txns_24h} transactions in 24h — normal activity`
+            : "No transaction data available",
+      ),
+      rule(
+        "FDV_GAP",
+        fdvGap === null
+          ? "UNKNOWN"
+          : fdvGap > 75
+            ? "FLAG"
+            : fdvGap > 50
+              ? "WARN"
+              : "PASS",
+        fdvGap === null
+          ? 0
+          : fdvGap > 90
+            ? -20
+            : fdvGap > 75
+              ? -15
+              : fdvGap > 50
+                ? -10
+                : fdvGap > 30
+                  ? -5
+                  : 0,
+        fdvGap !== null
+          ? `${fdvGap}% gap between circulating and fully diluted`
+          : "FDV data not available",
+      ),
+      rule(
+        "CTO_FLAG",
+        pipelineToken?.notes?.includes("CTO") ? "FLAG" : "PASS",
+        pipelineToken?.notes?.includes("CTO") ? -10 : 0,
+        pipelineToken?.notes?.includes("CTO")
+          ? "Community takeover detected — investigate before proceeding"
+          : "No CTO flag detected",
+      ),
+      rule(
+        "VOLUME_LIQUIDITY_RATIO",
+        vlRatio === null
+          ? "UNKNOWN"
+          : vlRatio > 100
+            ? "FLAG"
+            : vlRatio > 20
+              ? "WARN"
+              : "PASS",
+        vlRatio === null
+          ? 0
+          : vlRatio > 100
+            ? -25
+            : vlRatio > 20
+              ? -15
+              : 0,
+        vlRatio !== null
+          ? `V/L ratio: ${vlRatio}x${vlRatio > 20 ? " — suspicious" : " — within normal range"}`
+          : "Ratio not computable",
+      ),
+      rule(
+        "SECURITY_PENALTY",
+        programData?.risk_score >= 70
+          ? "FLAG"
+          : programData?.risk_score >= 40
+            ? "WARN"
+            : "PASS",
+        programData?.risk_score >= 70
+          ? -30
+          : programData?.risk_score >= 40
+            ? -15
+            : 0,
+        programData
+          ? `Program risk score: ${programData.risk_score || 0}`
+          : "No security audit data available",
+      ),
+      rule(
+        "LIQUIDITY_CROSSREF",
+        md.liquidity_usd !== null && md.liquidity_usd < 10000
+          ? "FLAG"
+          : "PASS",
+        md.liquidity_usd !== null && md.liquidity_usd < 10000 ? -20 : 0,
+        md.liquidity_usd !== null
+          ? `Liquidity: $${Math.round(md.liquidity_usd).toLocaleString()}`
+          : "Liquidity data not available",
+      ),
+      rule(
+        "AGE_BONUS",
+        ageDays !== null && ageDays > 90
+          ? "PASS"
+          : ageDays !== null && ageDays > 30
+            ? "PASS"
+            : "WARN",
+        ageDays !== null
+          ? ageDays > 365
+            ? 12
+            : ageDays > 180
+              ? 8
+              : ageDays > 90
+                ? 5
+                : ageDays > 30
+                  ? 2
+                  : 0
+          : 0,
+        ageDays !== null
+          ? `Token age: ${ageDays} days`
+          : "Age data not available",
+      ),
+      rule(
+        "VOLUME_THRESHOLD",
+        md.volume_24h !== null && md.volume_24h < 100
+          ? "FLAG"
+          : md.volume_24h !== null && md.volume_24h < 10000
+            ? "WARN"
+            : "PASS",
+        md.volume_24h !== null && md.volume_24h < 100 ? -50 : 0,
+        md.volume_24h !== null
+          ? `24h volume: $${Math.round(md.volume_24h).toLocaleString()}`
+          : "Volume data not available",
+      ),
+      rule(
+        "STABLECOIN_EXCLUSION",
+        isStablecoin ? "FLAG" : "PASS",
+        isStablecoin ? -100 : 0,
+        isStablecoin
+          ? "Known stablecoin — excluded from scoring"
+          : "Not a stablecoin",
+      ),
+      rule(
+        "CONTRADICTORY_AUDIT",
+        pipelineToken?.notes?.includes("contradiction") ? "FLAG" : "PASS",
+        pipelineToken?.notes?.includes("contradiction") ? -15 : 0,
+        pipelineToken?.notes?.includes("contradiction")
+          ? "Conflicting audit scores detected — manual review required"
+          : "No conflicting audit data",
+      ),
+      rule(
+        "BLACKLIST_WALLET_MATCH",
+        blacklisted ? "FLAG" : "PASS",
+        blacklisted ? -100 : 0,
+        blacklisted
+          ? "Deployer address found in intel blacklist"
+          : "Deployer not in blacklist",
+      ),
+    ];
+
+    // ─── 7) Compute effective score if not in pipeline ───
+    let effectiveScore = score;
+    if (effectiveScore === null && dexData) {
+      // Start at 50, apply rule impacts
+      effectiveScore = 50;
+      for (const r of rules_applied) {
+        effectiveScore += r.impact;
+      }
+      effectiveScore = Math.max(0, Math.min(100, effectiveScore));
+    }
+
+    // ─── 8) Derive risk_level from effective score + patterns ───
     let risk_level = "UNKNOWN";
-    const flags = [];
-    if (patternMatches.length > 0) {
+    if (blacklisted || isStablecoin) {
       risk_level = "DANGER";
-      flags.push(
-        ...patternMatches.map((m) => `drain_pattern:${m.pattern_id || m.name}`),
-      );
-    } else if (riskScore !== null && riskScore >= 70) {
+    } else if (patternMatches.length > 0) {
       risk_level = "DANGER";
-      flags.push("program_risk_high");
-    } else if (riskScore !== null && riskScore >= 40) {
-      risk_level = "CAUTION";
-      flags.push("program_risk_medium");
-    } else if (score !== null && score >= 70) {
-      risk_level = "SAFE";
-    } else if (score !== null && score >= 40) {
-      risk_level = "CAUTION";
-    } else if (score !== null) {
-      risk_level = "DANGER";
-      flags.push("pipeline_score_low");
-    }
-    if (programData) {
-      if (!programData.verified) flags.push("unverified_source");
-      if (!programData.immutable) flags.push("upgradeable");
-      try {
-        const extraFlags = programData.flags
-          ? JSON.parse(programData.flags)
-          : [];
-        flags.push(...extraFlags);
-      } catch {}
+    } else if (effectiveScore !== null) {
+      risk_level =
+        effectiveScore >= 70
+          ? "SAFE"
+          : effectiveScore >= 40
+            ? "CAUTION"
+            : "DANGER";
     }
 
-    // 4) Summary string for dApp UIs
+    // ─── 9) Build threat_matrix (6 hexagons for dApp) ───
+    const threat_matrix = {
+      ghost_volume: {
+        status: rules_applied[0].status,
+        detail: rules_applied[0].detail,
+        value: md.txns_24h ? `${md.txns_24h} txns` : null,
+      },
+      fdv_gap: {
+        status: rules_applied[1].status,
+        detail: rules_applied[1].detail,
+        value: fdvGap !== null ? `${fdvGap}%` : null,
+      },
+      liquidity_health: {
+        status: rules_applied[5].status,
+        detail: rules_applied[5].detail,
+        value: md.liquidity_usd
+          ? `$${Math.round(md.liquidity_usd).toLocaleString()}`
+          : null,
+      },
+      deployer_risk: {
+        status: blacklisted ? "FLAG" : "PASS",
+        detail: blacklisted
+          ? "Deployer on intel blacklist"
+          : "Clean wallet history",
+      },
+      audit_status: {
+        status: rules_applied[9].status,
+        detail: rules_applied[9].detail,
+      },
+      drain_patterns: {
+        status: patternMatches.length > 0 ? "FLAG" : "PASS",
+        detail: `${patternMatches.length}/23 patterns matched`,
+      },
+    };
+
+    // ─── 10) Build rich flags array ───
+    const flags = [];
+    for (const r of rules_applied) {
+      if (r.status === "FLAG" || r.status === "WARN") {
+        flags.push({
+          type: r.rule,
+          severity: r.status === "FLAG" ? "high" : "medium",
+          description: r.detail,
+        });
+      }
+    }
+    if (patternMatches.length > 0) {
+      for (const m of patternMatches) {
+        flags.push({
+          type: "DRAIN_PATTERN",
+          severity: "critical",
+          description: `Matched: ${m.pattern_id || m.name}`,
+        });
+      }
+    }
+
+    // ─── 11) Build summary ───
+    const passCount = rules_applied.filter(
+      (r) => r.status === "PASS",
+    ).length;
+    const flagCount = rules_applied.filter(
+      (r) => r.status === "FLAG" || r.status === "WARN",
+    ).length;
+
     const summary =
       risk_level === "SAFE"
-        ? `Token passed BuzzShield scan: score ${score}/100, no drain patterns matched.`
+        ? `Token passed BuzzShield scan: score ${effectiveScore}/100, ${passCount} of 11 rules passed. No drain patterns detected. Low risk.`
         : risk_level === "CAUTION"
-          ? `Use caution: ${flags[0] || "medium risk"}. Full report recommended.`
+          ? `Token shows moderate risk: score ${effectiveScore}/100. ${flagCount} rule(s) flagged${flags[0] ? " including " + flags[0].type : ""}. ${passCount} of 11 rules passed. Recommended: enhanced monitoring.`
           : risk_level === "DANGER"
-            ? `Do not interact: ${flags[0] || "high risk"}. ${patternMatches.length} drain pattern(s) matched.`
-            : `No data yet. Submit for full audit.`;
+            ? `High risk detected: score ${effectiveScore}/100. ${flagCount} rule(s) flagged. ${patternMatches.length} drain pattern(s) matched. Do not interact without manual review.`
+            : `Insufficient data for definitive assessment. ${dexData ? "DexScreener data retrieved" : "No DEX pairs found"} — submit for full audit.`;
 
     const scanId = `shield_public_${crypto.randomUUID()}`;
 
-    // 5) Persist scan for audit trail
+    // ─── 12) Persist scan ───
     try {
       recordScan(db, {
         scan_id: scanId,
@@ -403,9 +702,9 @@ router.get(
         target: token,
         chain,
         verdict: risk_level,
-        program_score: riskScore,
+        program_score: programData?.risk_score || null,
         pattern_matches: patternMatches,
-        explanation: `Public API scan — ${flags.join(", ") || "clean"}`,
+        explanation: `Public scan — score ${effectiveScore}, ${passCount}/${rules_applied.length} rules pass, ${patternMatches.length} patterns`,
         scan_duration_ms: Date.now() - startMs,
         paid: false,
         created_at: new Date().toISOString(),
@@ -414,17 +713,29 @@ router.get(
       console.warn("[shield:public/scan] recordScan failed:", err.message);
     }
 
-    // 6) Response — stable contract for Noah dApp
+    // ─── 13) Enriched response ───
     res.json({
       token,
       chain,
-      score,
+      score: effectiveScore,
       risk_level,
-      flags,
-      summary,
-      full_audit_url: `https://buzzbd.ai/score?token=${encodeURIComponent(token)}&chain=${chain}`,
       scan_id: scanId,
-      scanned_at: new Date().toISOString(),
+
+      rules_applied,
+
+      threat_matrix,
+
+      market_data,
+
+      flags,
+
+      summary,
+
+      sources_checked: sourcesChecked,
+      full_audit_url: `https://buzzbd.ai/score?token=${encodeURIComponent(token)}&chain=${chain}`,
+      scan_timestamp: new Date().toISOString(),
+      scan_duration_ms: Date.now() - startMs,
+      engine_version: "v9.3",
       provider: "Buzz Shield",
       tier: "public",
       rate_limit: {
