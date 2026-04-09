@@ -1264,8 +1264,23 @@ async function start() {
           sim_consensus REAL,
           sim_ev REAL,
           screening_class TEXT,
+          counterfactual_summary TEXT,
+          normalized TEXT,
+          receipt_path TEXT,
           created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )`);
+        // Idempotent column adds for existing DBs (Apr 9 2026 — Aldo demo schema)
+        for (const col of [
+          "counterfactual_summary TEXT",
+          "normalized TEXT",
+          "receipt_path TEXT",
+        ]) {
+          try {
+            db.exec(`ALTER TABLE wallet_guard_receipts ADD COLUMN ${col}`);
+          } catch {
+            /* column already exists — ignore */
+          }
+        }
         app.use("/api/v1/guard", require("./routes/guard-routes"));
         console.log("[v9.2] ✓ Wallet Guard routes + receipt table initialized");
       } catch (e) {

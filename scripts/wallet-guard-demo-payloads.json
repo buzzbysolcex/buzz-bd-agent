@@ -1,0 +1,73 @@
+{
+  "_note": "Real pipeline-data demo payloads for Aldo Wallet Guard session Apr 9 17:00 UTC. Each payload hits POST /api/v1/guard/evaluate with GUARD_DEMO_MODE=1. Aldo's AION endpoint returns decision + receipt + counterfactual_summary + normalized + receipt_path.",
+  "_generated": "2026-04-09T06:35:00Z",
+  "_schema": "Evaluate Request (frozen Apr 5 2026 with Aldo)",
+
+  "allow_case": {
+    "_label": "ALLOW — self-transfer (benign, identity match)",
+    "_expected_decision": "ALLOW",
+    "_expected_reason_code": "SELF_TRANSFER",
+    "action": "transfer",
+    "target": "bc1qsja6knydqxj0nxf05466zhu8qqedu8umxeagze",
+    "chain": "bitcoin",
+    "buzz_score": 100,
+    "sim_consensus": 1.0,
+    "context": {
+      "kind": "self_transfer",
+      "amount_sats": 10000,
+      "note": "Self-transfer to Ionic Nova native SegWit — identity match, constitutional allow",
+      "screening_class": "BD_SWEET_SPOT"
+    }
+  },
+
+  "warn_case": {
+    "_label": "WARN — VELO (BSC, audit contradiction, Token Sniffer 0/100 vs DEXTscore 99)",
+    "_expected_decision": "WARN",
+    "_expected_reason_code": "AUDIT_CONTRADICTION",
+    "_pipeline_notes": "Pancakeswap | aixbt-momentum | dual_gate_PASS(fund=47.5/65 mkt=22.0/35) | Token Sniffer 0/100 vs DEXTscore 99 — contradictory-audit-hold triggered",
+    "action": "outreach",
+    "target": "0xf486ad071f3bEE968384D2e39e2D8aF0fCf6fd46",
+    "chain": "bsc",
+    "buzz_score": 95,
+    "sim_consensus": 0.68,
+    "context": {
+      "kind": "bd_outreach",
+      "token_ticker": "VELO",
+      "token_name": "Velodrome V2",
+      "dex": "Pancakeswap",
+      "token_sniffer_score": 0,
+      "dextscore": 99,
+      "audit_contradiction": true,
+      "dual_gate_fund": 47.5,
+      "dual_gate_mkt": 22.0,
+      "screening_class": "POTENTIAL",
+      "note": "Contradictory audit scores — should WARN and require manual investigation before BD Phase 5"
+    }
+  },
+
+  "block_case": {
+    "_label": "BLOCK — BANANAS31 (BSC, 99% FDV gap + Token Sniffer 0/100 + BD PAUSED)",
+    "_expected_decision": "BLOCK",
+    "_expected_reason_code": "INSTITUTIONAL_VALUE_TRANSFER_BLOCKED",
+    "_pipeline_notes": "Pancakeswap | bsc-scan | dual_gate_PASS | DexTools circ MCap $1.37M (not $137M). FDV gap 99%. Token Sniffer 0/100. BD PAUSED.",
+    "action": "escrow",
+    "target": "0x3d4f0513E8a29669B960f9dBcA61861548A9A760",
+    "chain": "bsc",
+    "buzz_score": 95,
+    "sim_consensus": 0.12,
+    "context": {
+      "kind": "value_transfer",
+      "token_ticker": "BANANAS31",
+      "token_name": "Banana For Scale",
+      "dex": "Pancakeswap",
+      "amount_usd": 25000,
+      "fdv_gap_pct": 99,
+      "circ_mcap_usd": 1370000,
+      "reported_mcap_usd": 137000000,
+      "token_sniffer_score": 0,
+      "bd_status": "PAUSED",
+      "screening_class": "TOO_RISKY",
+      "note": "99% FDV gap, 100x supply misrepresentation, hostile audit score. Constitutional block required."
+    }
+  }
+}
