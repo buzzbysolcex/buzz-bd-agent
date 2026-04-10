@@ -95,6 +95,7 @@ const FLAGS = {
   FW_BUZZSHIELD: false, // Flying Whale buzzshield-scan (pending proposal approval)
   PULSE_MARKETPLACE_HEALTH: true, // 6-hourly marketplace endpoint health check
   AUTODREAM_MARKETPLACE: true, // Phase 14: nightly marketplace verification
+  SHIELD_ENRICHED_RESPONSE: true, // Enriched public scan response — 7 new fields, premium gate
   // BuzzShield V3 — research-driven layers (arXiv:2604.08407, CCS 2026)
   BUZZSHIELD_DRIFT_DETECTOR: false, // AC-1.b conditional delivery detection (behavioral drift)
   BUZZSHIELD_TYPOSQUAT: false, // AC-1.a package typosquat scanner (Levenshtein)
