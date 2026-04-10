@@ -88,6 +88,13 @@ const FLAGS = {
   BUZZSHIELD_DEFENDER: false, // @stackone/defender prompt injection defense — hold until ONNX memory test
   BUZZSHIELD_OSV: true, // OSV.dev supply chain vulnerability scanning — flipped Apr 10 per Ogie
   BUZZSHIELD_SBOM: true, // CycloneDX SBOM generation — flipped Apr 10 after OSV confirmed 0 critical/high
+  // Marketplace Expansion (Apr 10 2026)
+  MARKETPLACE_MOLTLAUNCH: true, // BuzzShield on MoltLaunch
+  BANKR_X402_SHIELD: true, // BuzzShield x402 $0.10/scan (Service #9 on Bankr)
+  ACP_BUZZSHIELD: true, // BuzzShield on ACP Protocol (Agent #17681)
+  FW_BUZZSHIELD: false, // Flying Whale buzzshield-scan (pending proposal approval)
+  PULSE_MARKETPLACE_HEALTH: true, // 6-hourly marketplace endpoint health check
+  AUTODREAM_MARKETPLACE: true, // Phase 14: nightly marketplace verification
 };
 
 function feature(name) {
