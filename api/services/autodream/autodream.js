@@ -969,6 +969,28 @@ async function runDreamCycle(trigger = "scheduled") {
     }
   }
 
+  // Phase 12: BuzzShield v2 — nightly OSV dependency scan
+  let osvScanResult = { skipped: true };
+  if (feature("BUZZSHIELD_OSV")) {
+    try {
+      const { scanDependencies } = require("../shield/buzzshield-v2");
+      osvScanResult = await scanDependencies();
+    } catch (e) {
+      osvScanResult = { error: e.message };
+    }
+  }
+
+  // Phase 13: BuzzShield v2 — SBOM snapshot
+  let sbomResult = { skipped: true };
+  if (feature("BUZZSHIELD_SBOM")) {
+    try {
+      const { generateSBOM } = require("../shield/buzzshield-v2");
+      sbomResult = generateSBOM();
+    } catch (e) {
+      sbomResult = { error: e.message };
+    }
+  }
+
   const duration_ms = Date.now() - dreamStart;
 
   // Log to dream_log table
@@ -1008,6 +1030,8 @@ async function runDreamCycle(trigger = "scheduled") {
         optimization,
         wikiLintResult,
         wikiIngestResult,
+        osvScanResult,
+        sbomResult,
       }),
     );
 

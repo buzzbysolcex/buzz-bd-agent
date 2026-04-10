@@ -16,6 +16,10 @@ const {
   getShieldStats,
 } = require("../services/shield/shield-service");
 const {
+  getShieldV2Status,
+  scanDependencies,
+} = require("../services/shield/buzzshield-v2");
+const {
   verifyPriceIntegrity,
   getSupportedSymbols,
 } = require("../services/shield/pyth-oracle-verify");
@@ -355,8 +359,7 @@ router.get(
         const pairs = dexJson.pairs || [];
         // Pick highest-liquidity pair
         pair = pairs.sort(
-          (a, b) =>
-            (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0),
+          (a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0),
         )[0];
         if (pair) {
           dexData = {
@@ -405,8 +408,7 @@ router.get(
     const md = dexData || {};
     const ageDays = pair?.pairCreatedAt
       ? Math.floor(
-          (Date.now() - new Date(pair.pairCreatedAt).getTime()) /
-            86400000,
+          (Date.now() - new Date(pair.pairCreatedAt).getTime()) / 86400000,
         )
       : null;
 
@@ -495,13 +497,7 @@ router.get(
             : vlRatio > 20
               ? "WARN"
               : "PASS",
-        vlRatio === null
-          ? 0
-          : vlRatio > 100
-            ? -25
-            : vlRatio > 20
-              ? -15
-              : 0,
+        vlRatio === null ? 0 : vlRatio > 100 ? -25 : vlRatio > 20 ? -15 : 0,
         vlRatio !== null
           ? `V/L ratio: ${vlRatio}x${vlRatio > 20 ? " — suspicious" : " — within normal range"}`
           : "Ratio not computable",
@@ -524,9 +520,7 @@ router.get(
       ),
       rule(
         "LIQUIDITY_CROSSREF",
-        md.liquidity_usd !== null && md.liquidity_usd < 10000
-          ? "FLAG"
-          : "PASS",
+        md.liquidity_usd !== null && md.liquidity_usd < 10000 ? "FLAG" : "PASS",
         md.liquidity_usd !== null && md.liquidity_usd < 10000 ? -20 : 0,
         md.liquidity_usd !== null
           ? `Liquidity: $${Math.round(md.liquidity_usd).toLocaleString()}`
@@ -675,9 +669,7 @@ router.get(
     }
 
     // ─── 11) Build summary ───
-    const passCount = rules_applied.filter(
-      (r) => r.status === "PASS",
-    ).length;
+    const passCount = rules_applied.filter((r) => r.status === "PASS").length;
     const flagCount = rules_applied.filter(
       (r) => r.status === "FLAG" || r.status === "WARN",
     ).length;
@@ -731,11 +723,14 @@ router.get(
 
       summary,
 
+      // BuzzShield v2.0 Intelligence Layer
+      shield_v2: getShieldV2Status(),
+
       sources_checked: sourcesChecked,
       full_audit_url: `https://buzzbd.ai/score?token=${encodeURIComponent(token)}&chain=${chain}`,
       scan_timestamp: new Date().toISOString(),
       scan_duration_ms: Date.now() - startMs,
-      engine_version: "v9.3",
+      engine_version: getShieldV2Status().engine_version,
       provider: "Buzz Shield",
       tier: "public",
       rate_limit: {
@@ -746,6 +741,17 @@ router.get(
     });
   },
 );
+
+// GET /shield/scan-dependencies — OSV.dev supply chain scan (admin only)
+router.get("/scan-dependencies", apiKeyAuth, async (req, res) => {
+  const result = await scanDependencies();
+  res.json(result);
+});
+
+// GET /shield/v2/status — BuzzShield v2 layer status (public)
+router.get("/v2/status", shieldEnabled, (req, res) => {
+  res.json(getShieldV2Status());
+});
 
 // GET /shield/info — product page data (public, no auth)
 router.get("/info", shieldEnabled, (req, res) => {
