@@ -838,4 +838,88 @@ router.get("/info", shieldEnabled, (req, res) => {
   });
 });
 
+// ────────────────────────────────────────────────────────────────────────
+// x402-gated BuzzShield Scan — Service #9 on Bankr ($0.10/scan USDC Base)
+// GET /api/v1/shield/scan?token={address}&chain=solana
+// No rate limit (paid). Full V2 response.
+// Feature flag: BANKR_X402_SHIELD
+// ────────────────────────────────────────────────────────────────────────
+if (feature("BANKR_X402_SHIELD")) {
+  const { x402Paywall } = require("../middleware/x402-paywall");
+  const shieldPaywall = x402Paywall({
+    price: "100000", // $0.10 in USDC (6 decimals)
+    resource: "/api/v1/shield/scan",
+    description: "BuzzShield V2 Full Security Scan — 11 rules, 23 drain patterns, threat matrix",
+  });
+
+  router.get("/scan", shieldPaywall, async (req, res) => {
+    const { token, chain = "solana" } = req.query;
+    if (!token) {
+      return res.status(400).json({ error: "token parameter required" });
+    }
+    try {
+      // Reuse the same scan logic as public/scan but without rate limit
+      const axios = require("axios");
+      const dexUrl = `https://api.dexscreener.com/latest/dex/tokens/${token}`;
+      const dexResp = await axios.get(dexUrl, { timeout: 8000 });
+      const pairs = (dexResp.data?.pairs || []).filter(
+        (p) => !chain || p.chainId === chain
+      );
+      const pair = pairs[0];
+      if (!pair) {
+        return res.json({
+          token,
+          chain,
+          score: 0,
+          risk_level: "UNKNOWN",
+          summary: "Token not found on DexScreener",
+          x402_paid: true,
+        });
+      }
+
+      const db = getDB();
+      const programRisk = scoreProgramRisk(pair.pairAddress || token);
+      const drainPatterns = matchDrainPatterns(pair);
+      const verdict = generateVerdict(programRisk, drainPatterns);
+
+      // Record scan
+      try {
+        recordScan(db, {
+          scan_type: "x402_full",
+          target: token,
+          chain,
+          verdict: verdict.risk_level,
+          program_score: programRisk.score,
+        });
+      } catch (_) {}
+
+      res.json({
+        token,
+        chain,
+        score: programRisk.score,
+        risk_level: verdict.risk_level,
+        verdict: verdict.verdict,
+        program_risk: programRisk,
+        drain_patterns: drainPatterns,
+        market_data: {
+          price: pair.priceUsd,
+          volume_24h: pair.volume?.h24,
+          liquidity: pair.liquidity?.usd,
+          fdv: pair.fdv,
+          pair_address: pair.pairAddress,
+          dex: pair.dexId,
+        },
+        shield_v2: getShieldV2Status(),
+        engine_version: "v9.3-shield-v2",
+        x402_paid: true,
+        scanned_at: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.error("[shield:x402/scan] Error:", err.message);
+      res.status(500).json({ error: "Scan failed", detail: err.message });
+    }
+  });
+  console.log("[INIT] BuzzShield x402 endpoint wired (Service #9, $0.10/scan)");
+}
+
 module.exports = router;
