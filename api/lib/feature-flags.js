@@ -105,6 +105,11 @@ const FLAGS = {
   SCORING_TEAM_TRANSPARENCY: false, // Rule 13: deployer identity, ERC-8004 attestation, public team
   SCORING_INSIDER_CONCENTRATION: false, // Rule 14: top 10 holder distribution >80% flag
   SCORING_VESTING_RISK: false, // Rule 15: upcoming cliff unlocks within 30 days
+  // Deep Research Services (Apr 10 2026)
+  SERVICE_LISTING_READINESS: false, // #38: Exchange listing readiness assessment ($0.25/report)
+  SERVICE_AGENT_IDENTITY: false, // #39: ERC-8004 agent identity verification ($0.10/check)
+  SERVICE_MCP_SECURITY: false, // #40: MCP security scan against 49-attack taxonomy ($0.15/scan)
+  SERVICE_EXCHANGE_COMPLIANCE: false, // #41: HSaaS exchange compliance pre-screen ($500)
 };
 
 function feature(name) {
