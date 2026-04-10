@@ -1050,9 +1050,18 @@ async function start() {
         } = require("./services/shield/drain-patterns-seed");
         createShieldTables(getDB());
         const seeded = seedDrainPatterns(getDB());
+        // BuzzShield v2.0 tables (shield_detections, shield_vulnerabilities, shield_sbom)
+        try {
+          const {
+            createShieldV2Tables,
+          } = require("./services/shield/buzzshield-v2");
+          createShieldV2Tables(getDB());
+        } catch (e) {
+          console.warn("[SHIELD-V2] Table init (non-fatal):", e.message);
+        }
         app.use("/api/v1/shield", require("./routes/shield-routes"));
         console.log(
-          `[SHIELD] ✓ Buzz Shield initialized (${seeded} drain patterns, 5 tables, 6 endpoints)`,
+          `[SHIELD] ✓ Buzz Shield initialized (${seeded} drain patterns, 8 tables, 6 endpoints, v2 layers wired)`,
         );
       } catch (e) {
         console.error("[SHIELD] Init error (non-fatal):", e.message);
