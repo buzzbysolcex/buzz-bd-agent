@@ -1,7 +1,7 @@
 /**
  * Service Catalog — 34 Buzz BD Agent Services
  * 5 categories: scoring, execution, automation, orchestration, marketplace
- * Wired into PULSE and autoDream
+ * Wired into PULSE and autoDream (Phase 14: marketplace health)
  */
 
 const SERVICES = [
@@ -318,7 +318,8 @@ const SERVICES = [
     status: "pending",
     featureFlag: "FW_BUZZSHIELD",
     priceTiers: { sats: 1000 },
-    description: "buzzshield-scan skill on AIBTC marketplace (1000 sats/query, 70/30)",
+    description:
+      "buzzshield-scan skill on AIBTC marketplace (1000 sats/query, 70/30)",
   },
 ];
 
