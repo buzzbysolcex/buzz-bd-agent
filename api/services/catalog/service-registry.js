@@ -1,5 +1,5 @@
 /**
- * Service Catalog — 34 Buzz BD Agent Services
+ * Service Catalog — 37 Buzz BD Agent Services
  * 5 categories: scoring, execution, automation, orchestration, marketplace
  * Wired into PULSE and autoDream (Phase 14: marketplace health)
  */
@@ -320,6 +320,37 @@ const SERVICES = [
     priceTiers: { sats: 1000 },
     description:
       "buzzshield-scan skill on AIBTC marketplace (1000 sats/query, 70/30)",
+  },
+  // BuzzShield V3 — research-driven layers (CCS 2026)
+  {
+    id: 35,
+    name: "Shield Drift Detector",
+    category: "scoring",
+    status: "planned",
+    featureFlag: "BUZZSHIELD_DRIFT_DETECTOR",
+    priceTiers: { t2: 2500 },
+    description:
+      "AC-1.b conditional delivery detection — behavioral drift monitoring for LLM router warm-up evasion",
+  },
+  {
+    id: 36,
+    name: "Shield Typosquat Scanner",
+    category: "scoring",
+    status: "planned",
+    featureFlag: "BUZZSHIELD_TYPOSQUAT",
+    priceTiers: { t1: 1000 },
+    description:
+      "AC-1.a package typosquat scanner — Levenshtein distance check against canonical package names",
+  },
+  {
+    id: 37,
+    name: "Shield Integrity Binding",
+    category: "scoring",
+    status: "planned",
+    featureFlag: "BUZZSHIELD_INTEGRITY_BINDING",
+    priceTiers: { t2: 2500 },
+    description:
+      "On-chain response integrity binding — SHA-256 hash of every scan result stored via ScoreStorage",
   },
 ];
 
