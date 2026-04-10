@@ -1,6 +1,6 @@
 /**
- * Service Catalog — 37 Buzz BD Agent Services
- * 5 categories: scoring, execution, automation, orchestration, marketplace
+ * Service Catalog — 41 Buzz BD Agent Services
+ * 6 categories: scoring, execution, automation, orchestration, marketplace, intelligence
  * Wired into PULSE and autoDream (Phase 14: marketplace health)
  */
 
@@ -351,6 +351,47 @@ const SERVICES = [
     priceTiers: { t2: 2500 },
     description:
       "On-chain response integrity binding — SHA-256 hash of every scan result stored via ScoreStorage",
+  },
+  // Deep Research Services (Apr 10 2026 — Phase 1 + Phase 2)
+  {
+    id: 38,
+    name: "Listing Readiness Assessment",
+    category: "intelligence",
+    status: "planned",
+    featureFlag: "SERVICE_LISTING_READINESS",
+    priceTiers: { x402: 2500 },
+    description:
+      "Exchange listing readiness report — scores token against 7 exchange criteria, identifies gaps, recommends path (wiki: listing-readiness-checklist)",
+  },
+  {
+    id: 39,
+    name: "Agent Identity Verification",
+    category: "scoring",
+    status: "planned",
+    featureFlag: "SERVICE_AGENT_IDENTITY",
+    priceTiers: { x402: 1000 },
+    description:
+      "Check ERC-8004 registration, verified deployer, multisig, timelock (wiki: onchain-agent-identity)",
+  },
+  {
+    id: 40,
+    name: "MCP Security Scan",
+    category: "scoring",
+    status: "planned",
+    featureFlag: "SERVICE_MCP_SECURITY",
+    priceTiers: { x402: 1500 },
+    description:
+      "Assess MCP server configuration against MCP-DPT 49-attack taxonomy, 6 architectural layers (wiki: mcp-dpt-paper)",
+  },
+  {
+    id: 41,
+    name: "Exchange Compliance Pre-Screen",
+    category: "intelligence",
+    status: "planned",
+    featureFlag: "SERVICE_EXCHANGE_COMPLIANCE",
+    priceTiers: { hsaas: 50000 },
+    description:
+      "HSaaS $500 pre-screen against Binance/Coinbase/OKX requirements with gap analysis (wiki: listing-scoring-alignment)",
   },
 ];
 
