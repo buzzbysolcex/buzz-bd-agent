@@ -100,6 +100,11 @@ const FLAGS = {
   BUZZSHIELD_DRIFT_DETECTOR: false, // AC-1.b conditional delivery detection (behavioral drift)
   BUZZSHIELD_TYPOSQUAT: false, // AC-1.a package typosquat scanner (Levenshtein)
   BUZZSHIELD_INTEGRITY_BINDING: false, // Response integrity binding (on-chain hash)
+  // Scoring Engine v3 — listing research gap analysis (Apr 10 2026)
+  SCORING_SECURITIES_FLAG: false, // Rule 12: ROI promises, pre-utility token sales (Coinbase #1 reject)
+  SCORING_TEAM_TRANSPARENCY: false, // Rule 13: deployer identity, ERC-8004 attestation, public team
+  SCORING_INSIDER_CONCENTRATION: false, // Rule 14: top 10 holder distribution >80% flag
+  SCORING_VESTING_RISK: false, // Rule 15: upcoming cliff unlocks within 30 days
 };
 
 function feature(name) {

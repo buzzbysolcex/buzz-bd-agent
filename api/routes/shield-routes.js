@@ -605,6 +605,36 @@ router.get(
       ),
     ];
 
+    // ─── 6b) V3 scoring rules (feature-gated, from listing research gap analysis) ───
+    if (feature("SCORING_SECURITIES_FLAG")) {
+      // Rule 12: Check token description for investment language / ROI promises
+      const descLower = (pair?.baseToken?.name || "").toLowerCase() + " " + (pipelineToken?.notes || "").toLowerCase();
+      const hasSecuritiesLanguage = /invest|roi|guaranteed|return|profit|dividend|yield.*token/i.test(descLower);
+      rules_applied.push(rule("SECURITIES_FLAG", hasSecuritiesLanguage ? "FLAG" : "PASS", hasSecuritiesLanguage ? -20 : 0,
+        hasSecuritiesLanguage ? "Investment language detected — securities classification risk" : "No securities language detected",
+        "CRITICAL", "contract"));
+    }
+    if (feature("SCORING_TEAM_TRANSPARENCY")) {
+      // Rule 13: Check deployer identity attestation
+      const hasIdentity = pipelineToken?.deployer && pipelineToken?.deployer !== "unknown";
+      rules_applied.push(rule("TEAM_TRANSPARENCY", hasIdentity ? "PASS" : "WARN", hasIdentity ? 5 : -10,
+        hasIdentity ? `Deployer identified: ${pipelineToken.deployer.substring(0, 10)}...` : "Deployer identity unknown — exchanges auto-reject anonymous teams",
+        "HIGH", "social"));
+    }
+    if (feature("SCORING_INSIDER_CONCENTRATION")) {
+      // Rule 14: Check top holder concentration (requires Helius/Nansen data — placeholder)
+      const concentrated = pipelineToken?.top10_pct && pipelineToken.top10_pct > 80;
+      rules_applied.push(rule("INSIDER_CONCENTRATION", concentrated ? "FLAG" : "PASS", concentrated ? -20 : 0,
+        concentrated ? `Top 10 holders control ${pipelineToken.top10_pct}% — dump risk` : "Holder concentration within normal range or data unavailable",
+        "HIGH", "market"));
+    }
+    if (feature("SCORING_VESTING_RISK")) {
+      // Rule 15: Check for upcoming cliff unlocks (requires token unlock calendar — placeholder)
+      rules_applied.push(rule("VESTING_RISK", "PASS", 0,
+        "Vesting schedule data not yet available — unlock calendar integration pending",
+        "MEDIUM", "market"));
+    }
+
     // ─── 7) Compute effective score if not in pipeline ───
     let effectiveScore = score;
     if (effectiveScore === null && dexData) {
