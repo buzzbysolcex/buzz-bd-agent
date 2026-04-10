@@ -246,7 +246,7 @@ router.get("/oracle/symbols", shieldEnabled, (req, res) => {
 // Feature flag: SHIELD_PUBLIC_API
 // ────────────────────────────────────────────────────────────────────────
 const PUBLIC_SCAN_WINDOW_MS = 60 * 60 * 1000;
-const PUBLIC_SCAN_LIMIT = 10;
+const PUBLIC_SCAN_LIMIT = 30;
 const publicScanStore = new Map();
 setInterval(
   () => {
@@ -278,10 +278,13 @@ function publicScanRateLimit(req, res, next) {
     Math.ceil((data.windowStart + PUBLIC_SCAN_WINDOW_MS) / 1000),
   );
   if (data.count > PUBLIC_SCAN_LIMIT) {
+    const retryMs = data.windowStart + PUBLIC_SCAN_WINDOW_MS - now;
+    const retryMin = Math.ceil(retryMs / 60000);
     return res.status(429).json({
       error: "rate_limited",
-      message: `Public scan rate limit: ${PUBLIC_SCAN_LIMIT} requests/hour. Upgrade to Pro for 100/day.`,
-      retry_after_ms: data.windowStart + PUBLIC_SCAN_WINDOW_MS - now,
+      message: `Rate limit reached (${PUBLIC_SCAN_LIMIT}/hr). Try again in ${retryMin} minute${retryMin !== 1 ? "s" : ""}. Upgrade to Pro for unlimited scans.`,
+      retry_after_ms: retryMs,
+      retry_after_minutes: retryMin,
       upgrade: "https://buzzbd.ai/shield#pro",
     });
   }
