@@ -85,9 +85,9 @@ const FLAGS = {
   SHIELD_MEMPOOL: false,
   SHIELD_INPUT_VERIFICATION: false,
   // BuzzShield v2.0 — multi-layered defense (Apr 10 2026)
-  BUZZSHIELD_DEFENDER: false, // @stackone/defender prompt injection defense
-  BUZZSHIELD_OSV: false, // OSV.dev supply chain vulnerability scanning
-  BUZZSHIELD_SBOM: false, // CycloneDX SBOM generation
+  BUZZSHIELD_DEFENDER: false, // @stackone/defender prompt injection defense — hold until ONNX memory test
+  BUZZSHIELD_OSV: true, // OSV.dev supply chain vulnerability scanning — flipped Apr 10 per Ogie
+  BUZZSHIELD_SBOM: false, // CycloneDX SBOM generation — flip after OSV confirms clean
 };
 
 function feature(name) {
