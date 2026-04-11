@@ -110,6 +110,11 @@ const FLAGS = {
   SERVICE_AGENT_IDENTITY: false, // #39: ERC-8004 agent identity verification ($0.10/check)
   SERVICE_MCP_SECURITY: false, // #40: MCP security scan against 49-attack taxonomy ($0.15/scan)
   SERVICE_EXCHANGE_COMPLIANCE: false, // #41: HSaaS exchange compliance pre-screen ($500)
+  // Operation Ethereum Immune System (Apr 11 2026)
+  BUZZSHIELD_AUDIT_ENGINE: false, // Autonomous smart contract security auditing via ETHSkills
+  BUZZSHIELD_ETHSKILLS_SYNC: false, // Auto-sync ETHSkills updates weekly via PULSE
+  BUZZSHIELD_SPEEDRUN_CHALLENGES: false, // SpeedRunETH challenge solver + auditor
+  BUZZSHIELD_CHECKLIST_API: false, // Public pre-deploy security checklist API
 };
 
 function feature(name) {
