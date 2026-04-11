@@ -368,17 +368,24 @@ function ingestRawMessage(intakeChatId, telegramMessageId, messageDate, text) {
 
 /**
  * Poll the intake channel via Telegram Bot API getUpdates.
- * Fetches all messages since last_message_id, ingests each via ingestRawMessage().
+ * NOTE: Deprecated for MCP-plugin setups. The MCP plugin consumes getUpdates
+ * (destructive read), so this function can't compete. Use the HTTP endpoint
+ * POST /api/v1/intel/telegram/ingest instead (Option D: MCP relay).
+ * Kept as fallback for non-MCP deployments or dedicated bot setups.
  * Feature-gated: TELEGRAM_CHANNEL_INTEL
  */
 async function pollIntakeChannel(intakeChatId) {
-  if (!feature("TELEGRAM_CHANNEL_INTEL")) return { skipped: true, reason: "flag_off" };
+  if (!feature("TELEGRAM_CHANNEL_INTEL"))
+    return { skipped: true, reason: "flag_off" };
   // Use MCP plugin bot token (@buzz_claude_code_bot) — has channel access + privacy off
   // Falls back to container TELEGRAM_BOT_TOKEN if MCP token not found
   let botToken = process.env.TELEGRAM_BOT_TOKEN;
   try {
     const fs = require("fs");
-    const mcpEnv = fs.readFileSync("/home/claude-code/.claude/channels/telegram/.env", "utf8");
+    const mcpEnv = fs.readFileSync(
+      "/home/claude-code/.claude/channels/telegram/.env",
+      "utf8",
+    );
     const match = mcpEnv.match(/TELEGRAM_BOT_TOKEN=(.+)/);
     if (match) botToken = match[1].trim();
   } catch (_) {}
@@ -386,9 +393,12 @@ async function pollIntakeChannel(intakeChatId) {
 
   const chatId = String(intakeChatId || "-1003638619023");
   const channel = db()
-    .prepare("SELECT id, last_message_id FROM intel_telegram_channels WHERE intake_chat_id = ? AND status = 'active'")
+    .prepare(
+      "SELECT id, last_message_id FROM intel_telegram_channels WHERE intake_chat_id = ? AND status = 'active'",
+    )
     .get(chatId);
-  if (!channel) return { skipped: true, reason: "channel_not_registered", chat_id: chatId };
+  if (!channel)
+    return { skipped: true, reason: "channel_not_registered", chat_id: chatId };
 
   // Use getUpdates with offset to get new messages
   // For channel messages forwarded to a group, we use getUpdates on the bot
@@ -396,11 +406,15 @@ async function pollIntakeChannel(intakeChatId) {
   let messages = [];
   try {
     const axios = require("axios");
-    const resp = await axios.get(`https://api.telegram.org/bot${botToken}/getUpdates`, {
-      params: { offset, limit: 100, timeout: 5 },
-      timeout: 15000,
-    });
-    if (!resp.data?.ok) return { error: "telegram_api_error", detail: resp.data };
+    const resp = await axios.get(
+      `https://api.telegram.org/bot${botToken}/getUpdates`,
+      {
+        params: { offset, limit: 100, timeout: 5 },
+        timeout: 15000,
+      },
+    );
+    if (!resp.data?.ok)
+      return { error: "telegram_api_error", detail: resp.data };
     // Filter for messages from our intake channel
     const updates = resp.data.result || [];
     messages = updates
@@ -415,15 +429,26 @@ async function pollIntakeChannel(intakeChatId) {
 
   if (messages.length === 0) {
     // Update polled time even if no new messages
-    db().prepare("UPDATE intel_telegram_channels SET last_polled_at = datetime('now'), updated_at = datetime('now') WHERE id = ?").run(channel.id);
+    db()
+      .prepare(
+        "UPDATE intel_telegram_channels SET last_polled_at = datetime('now'), updated_at = datetime('now') WHERE id = ?",
+      )
+      .run(channel.id);
     return { polled: true, new_messages: 0, chat_id: chatId };
   }
 
-  let ingested = 0, walletsTotal = 0, duplicates = 0;
+  let ingested = 0,
+    walletsTotal = 0,
+    duplicates = 0;
   for (const msg of messages) {
     const text = msg.text || msg.caption || "";
     if (!text || text.length < 10) continue;
-    const result = ingestRawMessage(chatId, msg.message_id, msg.date ? new Date(msg.date * 1000).toISOString() : null, text);
+    const result = ingestRawMessage(
+      chatId,
+      msg.message_id,
+      msg.date ? new Date(msg.date * 1000).toISOString() : null,
+      text,
+    );
     if (result.ok && !result.duplicate) {
       ingested++;
       walletsTotal += result.wallets_added || 0;
@@ -432,8 +457,17 @@ async function pollIntakeChannel(intakeChatId) {
     }
   }
 
-  console.log(`[INTEL] Polled intake channel: ${messages.length} messages, ${ingested} ingested, ${walletsTotal} wallets, ${duplicates} duplicates`);
-  return { polled: true, new_messages: messages.length, ingested, wallets_extracted: walletsTotal, duplicates, chat_id: chatId };
+  console.log(
+    `[INTEL] Polled intake channel: ${messages.length} messages, ${ingested} ingested, ${walletsTotal} wallets, ${duplicates} duplicates`,
+  );
+  return {
+    polled: true,
+    new_messages: messages.length,
+    ingested,
+    wallets_extracted: walletsTotal,
+    duplicates,
+    chat_id: chatId,
+  };
 }
 
 /**
@@ -441,7 +475,11 @@ async function pollIntakeChannel(intakeChatId) {
  * Closes the loop: wallet intel → ground truth → hill-climber optimization.
  */
 function syncBlacklistToGroundTruth() {
-  const wallets = db().prepare("SELECT wallet_address, chain, reason FROM intel_blacklist_wallets").all();
+  const wallets = db()
+    .prepare(
+      "SELECT wallet_address, chain, reason FROM intel_blacklist_wallets",
+    )
+    .all();
   let added = 0;
   const insert = db().prepare(`
     INSERT OR IGNORE INTO scoring_ground_truth
@@ -449,7 +487,12 @@ function syncBlacklistToGroundTruth() {
     VALUES (?, ?, ?, 'dead', ?, 0)
   `);
   for (const w of wallets) {
-    const result = insert.run(w.wallet_address, w.chain || "evm", `blacklisted:${w.reason?.slice(0, 50) || "intel"}`, "intel_blacklist_wallets");
+    const result = insert.run(
+      w.wallet_address,
+      w.chain || "evm",
+      `blacklisted:${w.reason?.slice(0, 50) || "intel"}`,
+      "intel_blacklist_wallets",
+    );
     if (result.changes > 0) added++;
   }
   return { synced: added, total_blacklisted: wallets.length };
