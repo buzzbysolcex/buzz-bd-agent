@@ -373,7 +373,15 @@ function ingestRawMessage(intakeChatId, telegramMessageId, messageDate, text) {
  */
 async function pollIntakeChannel(intakeChatId) {
   if (!feature("TELEGRAM_CHANNEL_INTEL")) return { skipped: true, reason: "flag_off" };
-  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  // Use MCP plugin bot token (@buzz_claude_code_bot) — has channel access + privacy off
+  // Falls back to container TELEGRAM_BOT_TOKEN if MCP token not found
+  let botToken = process.env.TELEGRAM_BOT_TOKEN;
+  try {
+    const fs = require("fs");
+    const mcpEnv = fs.readFileSync("/home/claude-code/.claude/channels/telegram/.env", "utf8");
+    const match = mcpEnv.match(/TELEGRAM_BOT_TOKEN=(.+)/);
+    if (match) botToken = match[1].trim();
+  } catch (_) {}
   if (!botToken) return { skipped: true, reason: "no_bot_token" };
 
   const chatId = String(intakeChatId || "-1003638619023");
