@@ -443,7 +443,9 @@ router.get(
     function rule(name, status, impact, detail, severity, category) {
       const r = { rule: name, status, impact, detail };
       if (feature("SHIELD_ENRICHED_RESPONSE")) {
-        r.severity = severity || (status === "FLAG" ? "HIGH" : status === "WARN" ? "MEDIUM" : "LOW");
+        r.severity =
+          severity ||
+          (status === "FLAG" ? "HIGH" : status === "WARN" ? "MEDIUM" : "LOW");
         r.category = category || "market";
       }
       return r;
@@ -463,7 +465,8 @@ router.get(
           : md.txns_24h
             ? `${md.txns_24h} transactions in 24h — normal activity`
             : "No transaction data available",
-        "HIGH", "volume",
+        "HIGH",
+        "volume",
       ),
       rule(
         "FDV_GAP",
@@ -488,7 +491,8 @@ router.get(
         fdvGap !== null
           ? `${fdvGap}% gap between circulating and fully diluted`
           : "FDV data not available",
-        "HIGH", "market",
+        "HIGH",
+        "market",
       ),
       rule(
         "CTO_FLAG",
@@ -497,7 +501,8 @@ router.get(
         pipelineToken?.notes?.includes("CTO")
           ? "Community takeover detected — investigate before proceeding"
           : "No CTO flag detected",
-        "MEDIUM", "social",
+        "MEDIUM",
+        "social",
       ),
       rule(
         "VOLUME_LIQUIDITY_RATIO",
@@ -512,7 +517,8 @@ router.get(
         vlRatio !== null
           ? `V/L ratio: ${vlRatio}x${vlRatio > 20 ? " — suspicious" : " — within normal range"}`
           : "Ratio not computable",
-        "HIGH", "liquidity",
+        "HIGH",
+        "liquidity",
       ),
       rule(
         "SECURITY_PENALTY",
@@ -529,7 +535,8 @@ router.get(
         programData
           ? `Program risk score: ${programData.risk_score || 0}`
           : "No security audit data available",
-        "CRITICAL", "contract",
+        "CRITICAL",
+        "contract",
       ),
       rule(
         "LIQUIDITY_CROSSREF",
@@ -538,7 +545,8 @@ router.get(
         md.liquidity_usd !== null
           ? `Liquidity: $${Math.round(md.liquidity_usd).toLocaleString()}`
           : "Liquidity data not available",
-        "HIGH", "liquidity",
+        "HIGH",
+        "liquidity",
       ),
       rule(
         "AGE_BONUS",
@@ -561,7 +569,8 @@ router.get(
         ageDays !== null
           ? `Token age: ${ageDays} days`
           : "Age data not available",
-        "LOW", "market",
+        "LOW",
+        "market",
       ),
       rule(
         "VOLUME_THRESHOLD",
@@ -574,7 +583,8 @@ router.get(
         md.volume_24h !== null
           ? `24h volume: $${Math.round(md.volume_24h).toLocaleString()}`
           : "Volume data not available",
-        "CRITICAL", "volume",
+        "CRITICAL",
+        "volume",
       ),
       rule(
         "STABLECOIN_EXCLUSION",
@@ -583,7 +593,8 @@ router.get(
         isStablecoin
           ? "Known stablecoin — excluded from scoring"
           : "Not a stablecoin",
-        "LOW", "market",
+        "LOW",
+        "market",
       ),
       rule(
         "CONTRADICTORY_AUDIT",
@@ -592,7 +603,8 @@ router.get(
         pipelineToken?.notes?.includes("contradiction")
           ? "Conflicting audit scores detected — manual review required"
           : "No conflicting audit data",
-        "HIGH", "contract",
+        "HIGH",
+        "contract",
       ),
       rule(
         "BLACKLIST_WALLET_MATCH",
@@ -601,38 +613,81 @@ router.get(
         blacklisted
           ? "Deployer address found in intel blacklist"
           : "Deployer not in blacklist",
-        "CRITICAL", "contract",
+        "CRITICAL",
+        "contract",
       ),
     ];
 
     // ─── 6b) V3 scoring rules (feature-gated, from listing research gap analysis) ───
     if (feature("SCORING_SECURITIES_FLAG")) {
       // Rule 12: Check token description for investment language / ROI promises
-      const descLower = (pair?.baseToken?.name || "").toLowerCase() + " " + (pipelineToken?.notes || "").toLowerCase();
-      const hasSecuritiesLanguage = /invest|roi|guaranteed|return|profit|dividend|yield.*token/i.test(descLower);
-      rules_applied.push(rule("SECURITIES_FLAG", hasSecuritiesLanguage ? "FLAG" : "PASS", hasSecuritiesLanguage ? -20 : 0,
-        hasSecuritiesLanguage ? "Investment language detected — securities classification risk" : "No securities language detected",
-        "CRITICAL", "contract"));
+      const descLower =
+        (pair?.baseToken?.name || "").toLowerCase() +
+        " " +
+        (pipelineToken?.notes || "").toLowerCase();
+      const hasSecuritiesLanguage =
+        /invest|roi|guaranteed|return|profit|dividend|yield.*token/i.test(
+          descLower,
+        );
+      rules_applied.push(
+        rule(
+          "SECURITIES_FLAG",
+          hasSecuritiesLanguage ? "FLAG" : "PASS",
+          hasSecuritiesLanguage ? -20 : 0,
+          hasSecuritiesLanguage
+            ? "Investment language detected — securities classification risk"
+            : "No securities language detected",
+          "CRITICAL",
+          "contract",
+        ),
+      );
     }
     if (feature("SCORING_TEAM_TRANSPARENCY")) {
       // Rule 13: Check deployer identity attestation
-      const hasIdentity = pipelineToken?.deployer && pipelineToken?.deployer !== "unknown";
-      rules_applied.push(rule("TEAM_TRANSPARENCY", hasIdentity ? "PASS" : "WARN", hasIdentity ? 5 : -10,
-        hasIdentity ? `Deployer identified: ${pipelineToken.deployer.substring(0, 10)}...` : "Deployer identity unknown — exchanges auto-reject anonymous teams",
-        "HIGH", "social"));
+      const hasIdentity =
+        pipelineToken?.deployer && pipelineToken?.deployer !== "unknown";
+      rules_applied.push(
+        rule(
+          "TEAM_TRANSPARENCY",
+          hasIdentity ? "PASS" : "WARN",
+          hasIdentity ? 5 : -10,
+          hasIdentity
+            ? `Deployer identified: ${pipelineToken.deployer.substring(0, 10)}...`
+            : "Deployer identity unknown — exchanges auto-reject anonymous teams",
+          "HIGH",
+          "social",
+        ),
+      );
     }
     if (feature("SCORING_INSIDER_CONCENTRATION")) {
       // Rule 14: Check top holder concentration (requires Helius/Nansen data — placeholder)
-      const concentrated = pipelineToken?.top10_pct && pipelineToken.top10_pct > 80;
-      rules_applied.push(rule("INSIDER_CONCENTRATION", concentrated ? "FLAG" : "PASS", concentrated ? -20 : 0,
-        concentrated ? `Top 10 holders control ${pipelineToken.top10_pct}% — dump risk` : "Holder concentration within normal range or data unavailable",
-        "HIGH", "market"));
+      const concentrated =
+        pipelineToken?.top10_pct && pipelineToken.top10_pct > 80;
+      rules_applied.push(
+        rule(
+          "INSIDER_CONCENTRATION",
+          concentrated ? "FLAG" : "PASS",
+          concentrated ? -20 : 0,
+          concentrated
+            ? `Top 10 holders control ${pipelineToken.top10_pct}% — dump risk`
+            : "Holder concentration within normal range or data unavailable",
+          "HIGH",
+          "market",
+        ),
+      );
     }
     if (feature("SCORING_VESTING_RISK")) {
       // Rule 15: Check for upcoming cliff unlocks (requires token unlock calendar — placeholder)
-      rules_applied.push(rule("VESTING_RISK", "PASS", 0,
-        "Vesting schedule data not yet available — unlock calendar integration pending",
-        "MEDIUM", "market"));
+      rules_applied.push(
+        rule(
+          "VESTING_RISK",
+          "PASS",
+          0,
+          "Vesting schedule data not yet available — unlock calendar integration pending",
+          "MEDIUM",
+          "market",
+        ),
+      );
     }
 
     // ─── 7) Compute effective score if not in pipeline ───
@@ -665,31 +720,119 @@ router.get(
     // Always return arrays (fixes Noah AI frontend col.items.map crash)
     const threat_matrix = {
       drain_patterns: [
-        { pattern: "address_poisoning", detected: false, severity: "HIGH", description: "Similar-looking addresses in recent transactions" },
-        { pattern: "approval_drain", detected: false, severity: "CRITICAL", description: "Unlimited token approval exploit" },
-        { pattern: "flash_loan", detected: false, severity: "HIGH", description: "Flash loan attack pattern" },
-        { pattern: "reentrancy", detected: false, severity: "CRITICAL", description: "Reentrancy vulnerability pattern" },
-        { pattern: "oracle_manipulation", detected: false, severity: "HIGH", description: "Price oracle manipulation" },
-        ...patternMatches.map(m => ({ pattern: m.pattern_id || m.name, detected: true, severity: "CRITICAL", description: `Matched: ${m.pattern_id || m.name}` })),
+        {
+          pattern: "address_poisoning",
+          detected: false,
+          severity: "HIGH",
+          description: "Similar-looking addresses in recent transactions",
+        },
+        {
+          pattern: "approval_drain",
+          detected: false,
+          severity: "CRITICAL",
+          description: "Unlimited token approval exploit",
+        },
+        {
+          pattern: "flash_loan",
+          detected: false,
+          severity: "HIGH",
+          description: "Flash loan attack pattern",
+        },
+        {
+          pattern: "reentrancy",
+          detected: false,
+          severity: "CRITICAL",
+          description: "Reentrancy vulnerability pattern",
+        },
+        {
+          pattern: "oracle_manipulation",
+          detected: false,
+          severity: "HIGH",
+          description: "Price oracle manipulation",
+        },
+        ...patternMatches.map((m) => ({
+          pattern: m.pattern_id || m.name,
+          detected: true,
+          severity: "CRITICAL",
+          description: `Matched: ${m.pattern_id || m.name}`,
+        })),
       ],
       contract_risks: [
-        { risk: "unverified_source", detected: !programData || programData.risk_score >= 40, severity: "MEDIUM", description: "Contract source code not verified or high risk score" },
-        { risk: "blacklisted_deployer", detected: blacklisted, severity: "CRITICAL", description: blacklisted ? "Deployer on intel blacklist" : "Deployer not blacklisted" },
-        { risk: "contradictory_audit", detected: !!pipelineToken?.notes?.includes("contradiction"), severity: "HIGH", description: rules_applied[9]?.detail || "No audit data" },
+        {
+          risk: "unverified_source",
+          detected: !programData || programData.risk_score >= 40,
+          severity: "MEDIUM",
+          description: "Contract source code not verified or high risk score",
+        },
+        {
+          risk: "blacklisted_deployer",
+          detected: blacklisted,
+          severity: "CRITICAL",
+          description: blacklisted
+            ? "Deployer on intel blacklist"
+            : "Deployer not blacklisted",
+        },
+        {
+          risk: "contradictory_audit",
+          detected: !!pipelineToken?.notes?.includes("contradiction"),
+          severity: "HIGH",
+          description: rules_applied[9]?.detail || "No audit data",
+        },
       ],
       social_flags: [
-        { flag: "community_takeover", detected: !!pipelineToken?.notes?.includes("CTO"), severity: "MEDIUM", description: "Community takeover event" },
-        { flag: "low_transaction_count", detected: md.txns_24h !== null && md.txns_24h < 50, severity: "LOW", description: `${md.txns_24h || 0} transactions in 24h` },
-        { flag: "new_token", detected: ageDays !== null && ageDays < 7, severity: "LOW", description: ageDays !== null ? `Token is ${ageDays} days old` : "Age unknown" },
+        {
+          flag: "community_takeover",
+          detected: !!pipelineToken?.notes?.includes("CTO"),
+          severity: "MEDIUM",
+          description: "Community takeover event",
+        },
+        {
+          flag: "low_transaction_count",
+          detected: md.txns_24h !== null && md.txns_24h < 50,
+          severity: "LOW",
+          description: `${md.txns_24h || 0} transactions in 24h`,
+        },
+        {
+          flag: "new_token",
+          detected: ageDays !== null && ageDays < 7,
+          severity: "LOW",
+          description:
+            ageDays !== null ? `Token is ${ageDays} days old` : "Age unknown",
+        },
       ],
       // Legacy hexagon format for backward compat
       _hexagons: {
-        ghost_volume: { status: rules_applied[0].status, detail: rules_applied[0].detail, value: md.txns_24h ? `${md.txns_24h} txns` : null },
-        fdv_gap: { status: rules_applied[1].status, detail: rules_applied[1].detail, value: fdvGap !== null ? `${fdvGap}%` : null },
-        liquidity_health: { status: rules_applied[5].status, detail: rules_applied[5].detail, value: md.liquidity_usd ? `$${Math.round(md.liquidity_usd).toLocaleString()}` : null },
-        deployer_risk: { status: blacklisted ? "FLAG" : "PASS", detail: blacklisted ? "Deployer on intel blacklist" : "Clean wallet history" },
-        audit_status: { status: rules_applied[9].status, detail: rules_applied[9].detail },
-        drain_patterns: { status: patternMatches.length > 0 ? "FLAG" : "PASS", detail: `${patternMatches.length}/23 patterns matched` },
+        ghost_volume: {
+          status: rules_applied[0].status,
+          detail: rules_applied[0].detail,
+          value: md.txns_24h ? `${md.txns_24h} txns` : null,
+        },
+        fdv_gap: {
+          status: rules_applied[1].status,
+          detail: rules_applied[1].detail,
+          value: fdvGap !== null ? `${fdvGap}%` : null,
+        },
+        liquidity_health: {
+          status: rules_applied[5].status,
+          detail: rules_applied[5].detail,
+          value: md.liquidity_usd
+            ? `$${Math.round(md.liquidity_usd).toLocaleString()}`
+            : null,
+        },
+        deployer_risk: {
+          status: blacklisted ? "FLAG" : "PASS",
+          detail: blacklisted
+            ? "Deployer on intel blacklist"
+            : "Clean wallet history",
+        },
+        audit_status: {
+          status: rules_applied[9].status,
+          detail: rules_applied[9].detail,
+        },
+        drain_patterns: {
+          status: patternMatches.length > 0 ? "FLAG" : "PASS",
+          detail: `${patternMatches.length}/23 patterns matched`,
+        },
       },
     };
 
@@ -780,12 +923,42 @@ router.get(
     if (feature("SHIELD_ENRICHED_RESPONSE")) {
       // 1. Defense layers status
       responseObj.defense_layers = {
-        layer_0: { name: "Drain Pattern Detection", status: "active", patterns: 23, rules: 11 },
-        layer_1: { name: "Prompt Injection Defense", status: feature("BUZZSHIELD_DEFENDER") ? "active" : "staging", engine: "@stackone/defender", model: "MiniLM-L6-v2", f1: 0.9079 },
-        layer_2: { name: "Supply Chain Scanning", status: feature("BUZZSHIELD_OSV") ? "active" : "inactive", source: "OSV.dev", format: "CycloneDX 1.5" },
-        layer_3: { name: "Drift Detector", status: feature("BUZZSHIELD_DRIFT_DETECTOR") ? "active" : "planned", description: "Behavioral anomaly detection for LLM router responses" },
-        layer_4: { name: "Typosquat Scanner", status: feature("BUZZSHIELD_TYPOSQUAT") ? "active" : "planned", description: "Levenshtein distance check on package installs" },
-        layer_5: { name: "Integrity Binding", status: feature("BUZZSHIELD_INTEGRITY_BINDING") ? "active" : "planned", description: "On-chain hash of every scan result" },
+        layer_0: {
+          name: "Drain Pattern Detection",
+          status: "active",
+          patterns: 23,
+          rules: 11,
+        },
+        layer_1: {
+          name: "Prompt Injection Defense",
+          status: feature("BUZZSHIELD_DEFENDER") ? "active" : "staging",
+          engine: "@stackone/defender",
+          model: "MiniLM-L6-v2",
+          f1: 0.9079,
+        },
+        layer_2: {
+          name: "Supply Chain Scanning",
+          status: feature("BUZZSHIELD_OSV") ? "active" : "inactive",
+          source: "OSV.dev",
+          format: "CycloneDX 1.5",
+        },
+        layer_3: {
+          name: "Drift Detector",
+          status: feature("BUZZSHIELD_DRIFT_DETECTOR") ? "active" : "planned",
+          description: "Behavioral anomaly detection for LLM router responses",
+        },
+        layer_4: {
+          name: "Typosquat Scanner",
+          status: feature("BUZZSHIELD_TYPOSQUAT") ? "active" : "planned",
+          description: "Levenshtein distance check on package installs",
+        },
+        layer_5: {
+          name: "Integrity Binding",
+          status: feature("BUZZSHIELD_INTEGRITY_BINDING")
+            ? "active"
+            : "planned",
+          description: "On-chain hash of every scan result",
+        },
       };
 
       // 2. Token metadata
@@ -805,13 +978,22 @@ router.get(
       // 3. Scan stats (live data)
       let totalScanned = 671;
       try {
-        const countRow = db.prepare("SELECT COUNT(*) as c FROM pipeline_tokens").get();
+        const countRow = db
+          .prepare("SELECT COUNT(*) as c FROM pipeline_tokens")
+          .get();
         if (countRow) totalScanned = countRow.c;
       } catch {}
       let uptimeHours = 0;
       try {
-        const tickRow = db.prepare("SELECT value FROM pulse_state WHERE key = 'engine_started_at'").get();
-        if (tickRow) uptimeHours = Math.round((Date.now() - new Date(tickRow.value).getTime()) / 3600000);
+        const tickRow = db
+          .prepare(
+            "SELECT value FROM pulse_state WHERE key = 'engine_started_at'",
+          )
+          .get();
+        if (tickRow)
+          uptimeHours = Math.round(
+            (Date.now() - new Date(tickRow.value).getTime()) / 3600000,
+          );
       } catch {}
       responseObj.scan_stats = {
         total_tokens_scanned: totalScanned,
@@ -837,11 +1019,20 @@ router.get(
         tier: "free",
         rate_limit: `${PUBLIC_SCAN_LIMIT}/hr`,
         upgrade_url: "https://buzzbd.ai/shield#pro",
-        pro_extras: ["deployer_history", "drain_pattern_detail", "historical_scores", "webhook_alerts"],
+        pro_extras: [
+          "deployer_history",
+          "drain_pattern_detail",
+          "historical_scores",
+          "webhook_alerts",
+        ],
       };
     } else {
       responseObj.tier = "public";
-      responseObj.rate_limit = { limit: PUBLIC_SCAN_LIMIT, window: "1h", upgrade: "https://buzzbd.ai/shield#pro" };
+      responseObj.rate_limit = {
+        limit: PUBLIC_SCAN_LIMIT,
+        window: "1h",
+        upgrade: "https://buzzbd.ai/shield#pro",
+      };
     }
 
     res.json(responseObj);
@@ -1028,6 +1219,67 @@ if (feature("BANKR_X402_SHIELD")) {
     }
   });
   console.log("[INIT] BuzzShield x402 endpoint wired (Service #9, $0.10/scan)");
+}
+
+// ─── AUDIT ENGINE ENDPOINTS ─────────────────────────────
+
+if (feature("BUZZSHIELD_AUDIT_ENGINE")) {
+  const auditEngine = require("../services/shield/shield-audit-engine");
+  auditEngine.createAuditTables();
+
+  // POST /api/v1/shield/audit — run full audit on contract source
+  router.post("/audit", apiKeyAuth, async (req, res) => {
+    try {
+      const { contract_address, chain, contract_type, source_code, github_url } = req.body;
+      if (!contract_address || !source_code) {
+        return res.status(400).json({ error: "contract_address and source_code required" });
+      }
+      const result = auditEngine.runAudit(contract_address, chain, contract_type, source_code, github_url);
+      res.json(result);
+    } catch (err) {
+      console.error("[shield:audit] Error:", err.message);
+      res.status(500).json({ error: "Audit failed", detail: err.message });
+    }
+  });
+
+  // GET /api/v1/shield/audit/stats — audit engine statistics
+  router.get("/audit/stats", (req, res) => {
+    res.json(auditEngine.getAuditStats());
+  });
+
+  // GET /api/v1/shield/audit/recent — recent audit reports
+  router.get("/audit/recent", (req, res) => {
+    const limit = Math.min(parseInt(req.query.limit) || 10, 50);
+    res.json(auditEngine.getRecentAudits(limit));
+  });
+
+  console.log("[INIT] BuzzShield Audit Engine wired (10 domains, 500+ checks)");
+}
+
+// ─── PRE-DEPLOY CHECKLIST API ───────────────────────────
+
+if (feature("BUZZSHIELD_CHECKLIST_API") || feature("BUZZSHIELD_AUDIT_ENGINE")) {
+  const { getChecklist, PRE_DEPLOY_CHECKLISTS } = require("../services/shield/shield-audit-engine");
+
+  // GET /api/v1/shield/checklist — pre-deploy security checklist (FREE)
+  router.get("/checklist", (req, res) => {
+    const contractType = req.query.contract_type || req.query.type || "erc20";
+    res.json(getChecklist(contractType));
+  });
+
+  // GET /api/v1/shield/checklist/types — list available checklist types
+  router.get("/checklist/types", (req, res) => {
+    res.json({
+      available_types: Object.keys(PRE_DEPLOY_CHECKLISTS).map((t) => ({
+        type: t,
+        name: PRE_DEPLOY_CHECKLISTS[t].name,
+        items: PRE_DEPLOY_CHECKLISTS[t].items.length,
+      })),
+      source: "ETHSkills by Austin Griffith + BuzzShield research",
+    });
+  });
+
+  console.log("[INIT] BuzzShield Pre-Deploy Checklist API wired (4 contract types)");
 }
 
 module.exports = router;
