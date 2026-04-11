@@ -889,12 +889,15 @@ async function runDreamCycle(trigger = "scheduled") {
   const signalAngles = generateSignalAngles();
   const shieldNightly = shieldNightlyAnalysis();
 
-  // Phase 8: Intel sync (Telegram channel intel)
+  // Phase 8: Intel sync (Telegram channel intel — poll + ingest + ground truth sync)
   let intelSync = { skipped: true };
   if (feature("TELEGRAM_CHANNEL_INTEL")) {
     try {
-      const { getBlacklistStats } = require("../intel/telegram-channel");
-      intelSync = getBlacklistStats();
+      const { pollIntakeChannel, syncBlacklistToGroundTruth, getBlacklistStats } = require("../intel/telegram-channel");
+      const pollResult = await pollIntakeChannel("-1003638619023");
+      const groundTruthSync = syncBlacklistToGroundTruth();
+      const stats = getBlacklistStats();
+      intelSync = { poll: pollResult, ground_truth_sync: groundTruthSync, stats };
     } catch (e) {
       intelSync = { error: e.message };
     }
@@ -998,31 +1001,56 @@ async function runDreamCycle(trigger = "scheduled") {
       const fs = require("fs");
       const path = require("path");
       const MARKETPLACE_DIR = "/data/marketplace";
-      const files = fs.readdirSync(MARKETPLACE_DIR).filter((f) => f.endsWith(".json") && !f.startsWith("health-report"));
+      const files = fs
+        .readdirSync(MARKETPLACE_DIR)
+        .filter((f) => f.endsWith(".json") && !f.startsWith("health-report"));
       const results = [];
       for (const file of files) {
-        const config = JSON.parse(fs.readFileSync(path.join(MARKETPLACE_DIR, file), "utf8"));
-        const entry = { marketplace: config.marketplace, feature_flag: config.feature_flag, flag_active: feature(config.feature_flag) };
+        const config = JSON.parse(
+          fs.readFileSync(path.join(MARKETPLACE_DIR, file), "utf8"),
+        );
+        const entry = {
+          marketplace: config.marketplace,
+          feature_flag: config.feature_flag,
+          flag_active: feature(config.feature_flag),
+        };
         if (config.health_check_url) {
           try {
             const ctrl = new AbortController();
             const t = setTimeout(() => ctrl.abort(), 15000);
-            const res = await fetch(config.health_check_url, { signal: ctrl.signal });
+            const res = await fetch(config.health_check_url, {
+              signal: ctrl.signal,
+            });
             clearTimeout(t);
-            entry.endpoint_status = res.status === 200 ? "UP" : `DOWN (${res.status})`;
+            entry.endpoint_status =
+              res.status === 200 ? "UP" : `DOWN (${res.status})`;
             if (res.status === 404) {
               entry.alert = "REGISTRATION MAY BE DELETED — 404 returned";
             }
-          } catch (e) { entry.endpoint_status = `UNREACHABLE: ${e.message}`; }
+          } catch (e) {
+            entry.endpoint_status = `UNREACHABLE: ${e.message}`;
+          }
         }
         results.push(entry);
       }
       // Store nightly report
-      const reportPath = path.join(MARKETPLACE_DIR, `health-report-${new Date().toISOString().split("T")[0]}.json`);
-      fs.writeFileSync(reportPath, JSON.stringify({ timestamp: new Date().toISOString(), total: files.length, results }, null, 2));
+      const reportPath = path.join(
+        MARKETPLACE_DIR,
+        `health-report-${new Date().toISOString().split("T")[0]}.json`,
+      );
+      fs.writeFileSync(
+        reportPath,
+        JSON.stringify(
+          { timestamp: new Date().toISOString(), total: files.length, results },
+          null,
+          2,
+        ),
+      );
       const upCount = results.filter((r) => r.endpoint_status === "UP").length;
       marketplaceResult = { total: files.length, up: upCount, results };
-      console.log(`[AUTODREAM] Phase 14: ${upCount}/${files.length} marketplaces UP`);
+      console.log(
+        `[AUTODREAM] Phase 14: ${upCount}/${files.length} marketplaces UP`,
+      );
     } catch (e) {
       marketplaceResult = { error: e.message };
     }

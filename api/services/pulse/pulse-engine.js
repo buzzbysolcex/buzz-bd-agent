@@ -269,11 +269,24 @@ function decideAction(ctx) {
   }
 
   // Priority 8: Marketplace health check (every 360 ticks ~6 hours, offset by 180)
-  if (feature("PULSE_MARKETPLACE_HEALTH") && ctx.tick > 0 && ctx.tick % 360 === 180) {
+  if (
+    feature("PULSE_MARKETPLACE_HEALTH") &&
+    ctx.tick > 0 &&
+    ctx.tick % 360 === 180
+  ) {
     return {
       type: "ACT",
       reason: `Marketplace health check (tick ${ctx.tick}, every 360 ticks ~6hr)`,
       action: "marketplace-health-check",
+    };
+  }
+
+  // Priority 9: Telegram intel intake poll (every 360 ticks ~6 hours, offset by 90)
+  if (feature("TELEGRAM_CHANNEL_INTEL") && ctx.tick > 0 && ctx.tick % 360 === 90) {
+    return {
+      type: "ACT",
+      reason: `Telegram intel intake poll (tick ${ctx.tick}, every 360 ticks ~6hr)`,
+      action: "telegram-intel-poll",
     };
   }
 
@@ -469,42 +482,83 @@ async function executeAction(action) {
           return { triggered: "streak-emergency-file", error: e.message };
         }
 
+      case "telegram-intel-poll": {
+        try {
+          const { pollIntakeChannel, syncBlacklistToGroundTruth } = require("../intel/telegram-channel");
+          const pollResult = await pollIntakeChannel("-1003638619023");
+          const syncResult = syncBlacklistToGroundTruth();
+          setState("intel_last_poll", new Date().toISOString());
+          if (pollResult.ingested > 0) {
+            mailbox.send("pulse-engine", "war-room-reporter", "INFO", {
+              type: "INTEL_INGESTED", messages: pollResult.ingested, wallets: pollResult.wallets_extracted,
+              message: `Telegram intel: ${pollResult.ingested} new messages, ${pollResult.wallets_extracted} wallets extracted`,
+            });
+          }
+          return { triggered: "telegram-intel-poll", poll: pollResult, ground_truth_sync: syncResult };
+        } catch (e) {
+          return { triggered: "telegram-intel-poll", error: e.message };
+        }
+      }
+
       case "marketplace-health-check": {
         const fs = require("fs");
         const path = require("path");
         const MARKETPLACE_DIR = "/data/marketplace";
         try {
-          const files = fs.readdirSync(MARKETPLACE_DIR).filter((f) => f.endsWith(".json") && !f.startsWith("health-report"));
+          const files = fs
+            .readdirSync(MARKETPLACE_DIR)
+            .filter(
+              (f) => f.endsWith(".json") && !f.startsWith("health-report"),
+            );
           const results = [];
           for (const file of files) {
-            const config = JSON.parse(fs.readFileSync(path.join(MARKETPLACE_DIR, file), "utf8"));
-            if (!config.health_check_url) { results.push({ marketplace: config.marketplace, status: "SKIP" }); continue; }
+            const config = JSON.parse(
+              fs.readFileSync(path.join(MARKETPLACE_DIR, file), "utf8"),
+            );
+            if (!config.health_check_url) {
+              results.push({ marketplace: config.marketplace, status: "SKIP" });
+              continue;
+            }
             try {
               const ctrl = new AbortController();
               const t = setTimeout(() => ctrl.abort(), 10000);
-              const res = await fetch(config.health_check_url, { signal: ctrl.signal });
+              const res = await fetch(config.health_check_url, {
+                signal: ctrl.signal,
+              });
               clearTimeout(t);
               const ok = res.status === 200;
-              results.push({ marketplace: config.marketplace, status: ok ? "UP" : `DOWN (${res.status})` });
+              results.push({
+                marketplace: config.marketplace,
+                status: ok ? "UP" : `DOWN (${res.status})`,
+              });
               if (!ok) {
                 const today = new Date().toISOString().split("T")[0];
                 const lastAlert = getState(`mkt_alert_${config.marketplace}`);
                 if (lastAlert !== today) {
                   setState(`mkt_alert_${config.marketplace}`, today);
                   mailbox.send("pulse-engine", "war-room-reporter", "ALERT", {
-                    type: "MARKETPLACE_DOWN", marketplace: config.marketplace, http_status: res.status,
+                    type: "MARKETPLACE_DOWN",
+                    marketplace: config.marketplace,
+                    http_status: res.status,
                     message: `Marketplace ${config.marketplace} health check FAILED (HTTP ${res.status})`,
                   });
                 }
               }
             } catch (e) {
-              results.push({ marketplace: config.marketplace, status: `ERROR: ${e.message}` });
+              results.push({
+                marketplace: config.marketplace,
+                status: `ERROR: ${e.message}`,
+              });
             }
           }
           setState("marketplace_last_check", new Date().toISOString());
           setState("marketplace_status_json", JSON.stringify(results));
           const upCount = results.filter((r) => r.status === "UP").length;
-          return { triggered: "marketplace-health-check", total: files.length, up: upCount };
+          return {
+            triggered: "marketplace-health-check",
+            total: files.length,
+            up: upCount,
+          };
         } catch (e) {
           return { triggered: "marketplace-health-check", error: e.message };
         }
