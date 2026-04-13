@@ -111,10 +111,23 @@ const FLAGS = {
   SERVICE_MCP_SECURITY: false, // #40: MCP security scan against 49-attack taxonomy ($0.15/scan)
   SERVICE_EXCHANGE_COMPLIANCE: false, // #41: HSaaS exchange compliance pre-screen ($500)
   // Operation Ethereum Immune System (Apr 11 2026)
-  BUZZSHIELD_AUDIT_ENGINE: false, // Autonomous smart contract security auditing via ETHSkills
-  BUZZSHIELD_ETHSKILLS_SYNC: false, // Auto-sync ETHSkills updates weekly via PULSE
+  BUZZSHIELD_AUDIT_ENGINE: true, // Autonomous smart contract security auditing via ETHSkills — flipped Apr 12 per Ogie directive
+  BUZZSHIELD_ETHSKILLS_SYNC: true, // Auto-sync ETHSkills updates weekly via PULSE — flipped Apr 13
   BUZZSHIELD_SPEEDRUN_CHALLENGES: false, // SpeedRunETH challenge solver + auditor
   BUZZSHIELD_CHECKLIST_API: true, // Public pre-deploy security checklist API — flipped Apr 11 after smoke test
+  // Chrome DevTools MCP — browser automation via CDP (Apr 12 2026)
+  CHROME_DEVTOOLS_MCP: false, // Master toggle for Chrome DevTools MCP integration
+  CHROME_DEVTOOLS_BD_SCREENING: false, // BD Phase 2: automated website verification via Lighthouse + screenshots
+  CHROME_DEVTOOLS_SHIELD_VERIFY: false, // BuzzShield: visual contract deployer page verification
+  // Stacks SIP-010 scanning (Apr 13 2026) — addresses publisher feedback on #439
+  STACKS_SIP010_SCANNING: true, // Scan Stacks fungible tokens via Hiro API + DexScreener
+  // Scoring Rules 16-18 — Audit-integrated scoring (Apr 13 2026)
+  SCORING_AUDIT_PENALTY: true, // Rule 16: -3/-8/-15 for medium/high/critical audit findings — flipped Apr 13 after smoke test
+  SCORING_AUDIT_BONUS: true, // Rule 17: +5 clean audit, +3 score >= 80 — flipped Apr 13 after smoke test
+  SCORING_VULN_MATCH: true, // Rule 18: -10 for known vulnerability match — flipped Apr 13 after smoke test
+  // TimesFM Predictive Intelligence — Phase 0 data collection (Apr 13 2026)
+  TOKEN_TIMESERIES: true, // Snapshot cron: every 4h for tokens score >= 50
+  TIMESFM_FORECAST: false, // TimesFM model service — DEFER to post-May 11
 };
 
 function feature(name) {
