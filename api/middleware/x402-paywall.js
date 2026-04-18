@@ -15,6 +15,39 @@ const USDC_BASE = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // USDC on Base 
 const ADMIN_KEY = process.env.BUZZ_API_ADMIN_KEY;
 const BASE_URL = process.env.BUZZ_PUBLIC_URL || 'https://api.buzzbd.ai';
 
+let _getDB;
+function db() {
+  if (!_getDB) _getDB = require('../db').getDB;
+  try { return _getDB(); } catch { return null; }
+}
+
+function recordPayment({ service_name, amount_usd, tx_hash, payer_address }) {
+  const handle = db();
+  if (!handle) return;
+  try {
+    handle.prepare(
+      `INSERT INTO x402_payments (service, service_name, amount_usd, tx_hash, payer_address)
+       VALUES (?, ?, ?, ?, ?)`
+    ).run(service_name, service_name, amount_usd, tx_hash, payer_address);
+  } catch (err) {
+    console.warn(`[x402] recordPayment failed: ${err.message}`);
+  }
+}
+
+function parsePaymentHeader(raw) {
+  if (!raw) return { payer_address: null, tx_hash: null };
+  try {
+    const decoded = Buffer.from(raw, 'base64').toString('utf8');
+    const payload = JSON.parse(decoded);
+    return {
+      payer_address: payload?.payload?.signer || payload?.payer || payload?.from || null,
+      tx_hash: payload?.tx_hash || payload?.transactionHash || null,
+    };
+  } catch {
+    return { payer_address: null, tx_hash: null };
+  }
+}
+
 /**
  * Create x402 paywall middleware for a specific endpoint
  * @param {Object} options
@@ -45,6 +78,13 @@ function x402Paywall(options = {}) {
       // TODO: Verify payment proof via Coinbase CDP facilitator
       // https://api.cdp.coinbase.com/platform/v2/x402/facilitator
       console.log(`[x402] Payment received for ${resource}: ${paymentHeader.substring(0, 30)}...`);
+      const { payer_address, tx_hash } = parsePaymentHeader(paymentHeader);
+      recordPayment({
+        service_name: resource,
+        amount_usd: Number(price) / 1_000_000,
+        tx_hash,
+        payer_address,
+      });
       return next();
     }
 
