@@ -566,28 +566,17 @@ function generateSignalAngles() {
       insert.run(today, d.beat, d.headline, d.hook, d.data_points);
     }
 
-    // Mailbox to war-room-reporter for morning review
-    mailbox.send("autodream", "war-room-reporter", "SIGNAL_ANGLES", {
-      type: "AUTODREAM_SIGNAL_ANGLES",
-      date: today,
-      count: drafts.length,
-      drafts: drafts.map((d) => ({
-        beat: d.beat,
-        headline: d.headline,
-        hook: d.hook,
-      })),
-      pipeline_snapshot: {
-        fresh_scores: pipelineData.fresh_scores.length,
-        aria_new_24h: pipelineData.aria_new,
-        flagged_24h: pipelineData.flagged.length,
-      },
-    });
-
     // ── D1 (Apr 8, 2026): write draft JSON files for direct filer ──
     // Each draft becomes a self-contained payload that
     // scripts/signal-file-direct.js can read, BIP-322 sign, and POST
     // to https://aibtc.news/api/signals without depending on Claude
     // Code being awake.
+    //
+    // Ordering note (2026-04-18 dual-path-readiness fix, incident #4):
+    // disk-write runs BEFORE mailbox.send so draft files land even if
+    // the mailbox notification fails. Prior order swallowed a throw from
+    // mailbox.send at the outer try/catch, skipping this block entirely
+    // for 9 days of silent Phase 6 failures.
     let diskWritten = 0;
     let diskError = null;
     try {
@@ -619,12 +608,42 @@ function generateSignalAngles() {
       diskError = e.message;
     }
 
+    // Mailbox to war-room-reporter for morning review.
+    // msg_type must be one of ALERT/REQUEST/RESPONSE/EVENT per agent_mailbox
+    // CHECK constraint; the semantic subtype lives in payload.type.
+    // Wrapped in inner try/catch: notification failure must NEVER block
+    // the work above (disk-write + DB insert already committed).
+    let mailboxError = null;
+    try {
+      mailbox.send("autodream", "war-room-reporter", "EVENT", {
+        type: "AUTODREAM_SIGNAL_ANGLES",
+        date: today,
+        count: drafts.length,
+        drafts: drafts.map((d) => ({
+          beat: d.beat,
+          headline: d.headline,
+          hook: d.hook,
+        })),
+        pipeline_snapshot: {
+          fresh_scores: pipelineData.fresh_scores.length,
+          aria_new_24h: pipelineData.aria_new,
+          flagged_24h: pipelineData.flagged.length,
+        },
+      });
+    } catch (e) {
+      mailboxError = e.message;
+      console.warn(
+        `[autoDream Phase 6] mailbox.send warning — drafts still written. ${e.message}`,
+      );
+    }
+
     return {
       drafted: drafts.length,
       beats: targetBeats,
       last_beat_avoided: lastBeatUsed,
       disk_written: diskWritten,
       disk_error: diskError,
+      mailbox_error: mailboxError,
     };
   } catch (err) {
     return { error: err.message };
