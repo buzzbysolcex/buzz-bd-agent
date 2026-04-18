@@ -79,7 +79,8 @@ function gatherContext() {
   const readyTasks = db()
     .prepare(
       `
-    SELECT COUNT(*) as cnt FROM buzz_tasks WHERE status = 'READY'
+    SELECT COUNT(*) as cnt FROM buzz_tasks
+    WHERE status = 'READY' AND expires_at > datetime('now')
   `,
     )
     .get();

@@ -38,11 +38,72 @@ function createCron(agent, name, schedule, payload = {}, opts = {}) {
   return { id: result.lastInsertRowid, name, agent };
 }
 
+/* TODO(minimal-parser): supports only `*​/N * * * *` and `0 *​/N * * *`.
+   Migrate to cron-parser dep when Day-0 + Phase 1 backlog GREEN.
+   Track: /data/buzz/persistent/directives/backlog-cron-parser-migration.md
+   Rationale: avoid new dep during foundation day; only 2 patterns in live use. */
+function parseScheduleMostRecent(schedule, now) {
+  // Returns the most-recent UTC Date the schedule should have fired at or before `now`.
+  // Throws on unsupported patterns (LOUD — caller logs + skips).
+  const everyNMin = schedule.match(/^\*\/(\d+) \* \* \* \*$/);
+  if (everyNMin) {
+    const n = parseInt(everyNMin[1], 10);
+    if (!Number.isInteger(n) || n <= 0 || n > 59)
+      throw new Error(`unsupported minute interval: ${schedule}`);
+    return new Date(Date.UTC(
+      now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
+      now.getUTCHours(), Math.floor(now.getUTCMinutes() / n) * n, 0, 0
+    ));
+  }
+  const everyNHour = schedule.match(/^0 \*\/(\d+) \* \* \*$/);
+  if (everyNHour) {
+    const n = parseInt(everyNHour[1], 10);
+    if (!Number.isInteger(n) || n <= 0 || n > 23)
+      throw new Error(`unsupported hour interval: ${schedule}`);
+    return new Date(Date.UTC(
+      now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
+      Math.floor(now.getUTCHours() / n) * n, 0, 0, 0
+    ));
+  }
+  throw new Error(`unknown_cron_pattern: ${schedule}`);
+}
+
+function sqliteUtcToDate(s) {
+  if (!s) return null;
+  return new Date(s.replace(' ', 'T') + 'Z');
+}
+
 function getDueCrons() {
   const db = getDB();
-  return db.prepare(
+  const all = db.prepare(
     `SELECT * FROM dynamic_crons WHERE active = 1 AND (expires_at IS NULL OR expires_at > datetime('now')) AND (max_runs IS NULL OR run_count < max_runs)`
   ).all();
+  const now = new Date();
+  const due = [];
+  for (const cron of all) {
+    let mostRecent;
+    try {
+      mostRecent = parseScheduleMostRecent(cron.schedule, now);
+    } catch (e) {
+      try {
+        db.prepare(
+          `INSERT INTO observation_log (tick, timestamp, decision, reason, action)
+           VALUES (-1, ?, 'ACT', ?, 'unknown_cron_pattern')`
+        ).run(
+          now.toISOString(),
+          `cronId=${cron.id} name=${cron.name} schedule='${cron.schedule}' err=${e.message}`
+        );
+      } catch (logErr) {
+        console.error('[dynamic-cron] unknown_cron_pattern AND log failed:',
+          cron.id, cron.schedule, e.message, logErr.message);
+      }
+      console.error(`[dynamic-cron] unknown_cron_pattern cronId=${cron.id} schedule='${cron.schedule}' — skipping`);
+      continue;
+    }
+    const lastRun = sqliteUtcToDate(cron.last_run);
+    if (!lastRun || lastRun < mostRecent) due.push(cron);
+  }
+  return due;
 }
 
 function recordRun(cronId) {
