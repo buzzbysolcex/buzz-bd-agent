@@ -155,21 +155,34 @@ async function fileSignalDirect({
 
     const signalId = data.signal?.id || data.id || `direct_${ts}`;
 
-    // Record locally and emit event (uses existing signal-tracker)
-    recordSignalFiled({
-      signal_id: signalId,
-      beat_slug,
-      headline,
-      pacific_date: new Date().toISOString().split("T")[0],
-    });
+    // Record locally and emit event (uses existing signal-tracker).
+    // Wrapped because CLI subprocess invocations don't call initDB();
+    // the HTTPS POST already succeeded, so local bookkeeping is non-fatal.
+    try {
+      recordSignalFiled({
+        signal_id: signalId,
+        beat_slug,
+        headline,
+        pacific_date: new Date().toISOString().split("T")[0],
+      });
+    } catch (e) {
+      console.warn(
+        `[aibtc-direct-filer] recordSignalFiled skipped (non-fatal): ${e.message}`,
+      );
+    }
 
-    // Emit emergency filer event distinct from quality filings
-    emit("aibtc-direct-filer", "signal.filed.emergency", {
-      signal_id: signalId,
-      beat: beat_slug,
-      headline,
-      filed_via: "container-direct-http",
-    });
+    try {
+      emit("aibtc-direct-filer", "signal.filed.emergency", {
+        signal_id: signalId,
+        beat: beat_slug,
+        headline,
+        filed_via: "container-direct-http",
+      });
+    } catch (e) {
+      console.warn(
+        `[aibtc-direct-filer] event emit skipped (non-fatal): ${e.message}`,
+      );
+    }
 
     return {
       success: true,
