@@ -478,6 +478,19 @@ function registerAllJobs() {
     }
   });
 
+  // Canonical daily-report — 21:00 UTC daily. Aggregates 10 tables,
+  // writes autonomous_loop_outputs + claim_audit, dual-routes to
+  // Telegram + Discord. Phase 1b Wave 1 Commit 3 per Ogie msg 3897.
+  register("daily-report-21utc", "0 21 * * *", async () => {
+    try {
+      const { runDailyReport } = require("../crons/daily-report-21utc");
+      const res = await runDailyReport();
+      return `daily-report: ok=${res.ok} tg=${res.telegramSent} dc=${res.discordSent} output=${res.output_id} claim=${res.claim_audit_id} sources=${res.sources}/${res.sources_with_errors}err`;
+    } catch (err) {
+      return `daily-report: error — ${err.message}`;
+    }
+  });
+
   register("twitter-content", "0 2 * * *", async () => {
     await triggerBrain(
       "Buzz: draft twitter content. Check today's creative output schedule. Post drafts to War Room.",
