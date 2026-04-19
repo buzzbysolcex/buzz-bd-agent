@@ -4,6 +4,29 @@
  * All new features start as false, flip to true after testing
  */
 
+// Source /data/.env.pashov at boot so PASHOV_* flags land in process.env
+// BEFORE the FLAGS object is evaluated below. File is root-owned 600 and
+// lives on the persistent volume so creds survive image rebuild.
+(() => {
+  try {
+    const fs = require("fs");
+    const path = "/data/.env.pashov";
+    if (!fs.existsSync(path)) return;
+    const content = fs.readFileSync(path, "utf-8");
+    for (const line of content.split("\n")) {
+      const t = line.trim();
+      if (!t || t.startsWith("#")) continue;
+      const eq = t.indexOf("=");
+      if (eq < 0) continue;
+      const k = t.slice(0, eq).trim();
+      const v = t.slice(eq + 1).trim();
+      if (process.env[k] == null) process.env[k] = v;
+    }
+  } catch {
+    /* non-fatal */
+  }
+})();
+
 const FLAGS = {
   MIROFISH_REALTIME: true,
   MONTECARLO: true,
@@ -128,6 +151,54 @@ const FLAGS = {
   // TimesFM Predictive Intelligence — Phase 0 data collection (Apr 13 2026)
   TOKEN_TIMESERIES: true, // Snapshot cron: every 4h for tokens score >= 50
   TIMESFM_FORECAST: false, // TimesFM model service — DEFER to post-May 11
+  // AIXBT Intel Source #34 — @aixbt_agent narrative signals (Apr 14 2026)
+  AIXBT_INTEL: true, // Master switch: GSD browser scrape + PULSE 7c + autoDream Phase 17
+  AIXBT_SCORING: false, // Scoring modifier: BULLISH +3..+7, BEARISH -5..-10 — flip after 1 week validation
+  // Mining Intelligence Engine v2.0 — mempool.space pool scoring (Apr 14 2026)
+  MINING_INTEL: true, // Master switch: collector + routes + PULSE 6c
+  MINING_SNAPSHOTS: true, // Network-level data collection
+  MINING_POOLS: true, // Pool-level scoring (100-point health scores)
+  MINING_SIGNALS: true, // Signal generation — flipped Apr 17 per Ogie (4 snapshots + 42 daily trend rows confirmed, Kai meeting 16:00 Jeddah)
+  // Skill.BTC — Bitcoin knowledge wiki for AI agents (Apr 16 2026)
+  // Flipped true Apr 16 per Ogie after scaffold + 5 seed pages deployed.
+  // Phase 2 expansion Apr 17-20. Revenue Phase 5: 50 sats/query via x402, post-May 11.
+  SKILL_BTC: process.env.SKILL_BTC !== "false",
+  // OBLITERATUS Patterns v9.3.2 (Apr 16 2026)
+  // Cashtag monitor — PULSE 8a polls @BuzzBySolCex mentions every 3 min,
+  // auto-replies to $TICKER mentions with scan card. Flipped true Apr 16
+  // 2026 after smoke test (20 mentions fetched, 0 cashtag matches — safe).
+  X_CASHTAG_SIGNAL: process.env.X_CASHTAG_SIGNAL !== "false",
+  AGENTCASH_ENABLED: process.env.AGENTCASH_ENABLED === "true" || false,
+  PRE_SCREEN_ANALYSIS: process.env.PRE_SCREEN_ANALYSIS === "true" || false,
+  ANTI_OUROBOROS: process.env.ANTI_OUROBOROS === "true" || false,
+  // Signal Factory telemetry — flipped true Apr 16 per Ogie (zero-risk passive logging)
+  SIGNAL_PERFORMANCE_LOG: process.env.SIGNAL_PERFORMANCE_LOG !== "false",
+  // Pipeline stage names — flipped true Apr 16 per Ogie (cosmetic War Room readability)
+  PIPELINE_STAGE_NAMES: process.env.PIPELINE_STAGE_NAMES !== "false",
+  // Tweet Image Cards — BuzzShield visual layer (Apr 16 2026)
+  // Flipped true Apr 16 after V2 design approved (big-rating right panel).
+  // Graceful fallback: if image pipeline fails, tweet sends as text-only.
+  TWEET_IMAGE_CARDS: process.env.TWEET_IMAGE_CARDS !== "false",
+  // ZachXBT Investigations intel — Intel Source #37 (Apr 17 2026)
+  // Registered to feed intel_telegram_entries + intel_blacklist_wallets
+  // from the Telegram channel Investigations by ZachXBT (-1001963527562).
+  // Pipeline already live (PULSE priority telegram-intel-poll + parser v2
+  // handles truncated addresses + expanded classifier).
+  ZACHXBT_INTEL: process.env.ZACHXBT_INTEL !== "false",
+  // Pashov integration (V4 Portal — Apr 16 2026)
+  // Flags sourced from /data/.env.pashov via the IIFE at top of this file.
+  // Master switch; audit engine endpoints gated on this.
+  PASHOV_ENABLED: process.env.PASHOV_ENABLED === "true",
+  PASHOV_AUTO_ON_HOT_TOKEN: process.env.PASHOV_AUTO_ON_HOT_TOKEN === "true",
+  PASHOV_XRAY_ON_PIPELINE: process.env.PASHOV_XRAY_ON_PIPELINE === "true",
+  PASHOV_SCORING_ENABLED: process.env.PASHOV_SCORING_ENABLED === "true",
+  // BuzzShield V4 Portal endpoints (Phase 1 — blocks Kite AI May 6)
+  BUZZSHIELD_V4_AUDIT_API: process.env.BUZZSHIELD_V4_AUDIT_API !== "false",
+  // Discord OPS + INTEL Dashboard (Phase 1b Wave 1 — Apr 19 2026)
+  // Default FALSE. Flip requires explicit Ogie War Room authorization per
+  // buzz-trust-governance-feature-flags.md (Trust Level 0). When true,
+  // api/lib/discord-notify.send() actually posts; when false it no-ops.
+  DISCORD_OPS_DASHBOARD: false,
 };
 
 function feature(name) {
