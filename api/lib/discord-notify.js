@@ -18,16 +18,21 @@
 const fs = require("fs");
 const { feature } = require("./feature-flags");
 
-const DEFAULT_CHANNEL_CONFIG_PATHS = [
-  "/data/buzz/persistent/config/discord-channels.json",
-  "/data/buzz/persistent/directives/discord-channels.json",
-];
-
+// Channel config path resolution per Ogie msg 3917 refinement to Option A1.
+// Env override (when set) stays EXCLUSIVE — preserves Commit 1 test pattern
+// that points env var at a nonexistent path and expects reason:"no_config"
+// without fallback. When env is unset, cascade is container-first (production
+// cold-start case), host-last (smoke + dev on host).
 function channelConfigPaths() {
   if (process.env.DISCORD_CHANNEL_CONFIG_PATH) {
     return [process.env.DISCORD_CHANNEL_CONFIG_PATH];
   }
-  return DEFAULT_CHANNEL_CONFIG_PATHS;
+  return [
+    "/data/config/discord-channels.json", // canonical container
+    "/data/directives/discord-channels.json", // current container (pre-SSH-fix)
+    "/data/buzz/persistent/config/discord-channels.json", // canonical host
+    "/data/buzz/persistent/directives/discord-channels.json", // current host
+  ];
 }
 
 const DISCORD_API = "https://discord.com/api/v10";
