@@ -346,7 +346,7 @@ app.get("/agent", (req, res) => {
     },
     infrastructure: {
       server: "Hetzner CX43",
-      llm: "Claude Opus 4.6 (Pro Max, $0/day)",
+      llm: "Claude Opus 4.7 (Pro Max, $0/day)",
       uptime: "24/7",
       ci_cd: "GitHub Actions",
     },
@@ -354,6 +354,21 @@ app.get("/agent", (req, res) => {
 });
 
 app.use("/api/v1/health", healthRoutes);
+// Root /health alias for uptime monitors (no auth)
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    version: "v9.3.1",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    buzzshield: {
+      osv: feature("BUZZSHIELD_OSV"),
+      sbom: feature("BUZZSHIELD_SBOM"),
+      checklists: feature("BUZZSHIELD_CHECKLIST_API"),
+      audit_engine: feature("BUZZSHIELD_AUDIT_ENGINE"),
+    },
+  });
+});
 app.use("/api/v1/simulation-report", simulationReportRoutes);
 
 // x402 Premium (paywall handles auth — admin key bypasses, x402 payment required for others)
@@ -440,6 +455,15 @@ app.use("/api/v1/audit", require("./routes/audit-request"));
 // (The shield router handles per-route auth internally; admin-only routes
 // still require apiKeyAuth via middleware on those specific handlers.)
 // Note: the SHIELD_ENGINE init block later in bootstrap still seeds tables.
+//
+// V4 Portal audit routes mount FIRST at the more specific /shield/audit path
+// so tierGate() middleware runs before the generic shield-routes catchall.
+// Must stay above the /api/v1 apiKeyAuth catchall so free-tier calls land.
+try {
+  app.use("/api/v1/shield/audit", require("./routes/shield-audit-routes"));
+} catch (e) {
+  console.error("[SHIELD-V4] audit mount failed (non-fatal):", e.message);
+}
 if (feature("SHIELD_ENGINE")) {
   try {
     app.use("/api/v1/shield", require("./routes/shield-routes"));
@@ -459,6 +483,12 @@ app.use("/api/v1", apiKeyAuth, require("./routes/score"));
 // New (Day 11 — completing 64/64)
 app.use("/api/v1/scoring", apiKeyAuth, scoringRoutes);
 app.use("/api/v1/intel", apiKeyAuth, intelRoutes);
+app.use("/api/v1/intel/aixbt", apiKeyAuth, require("./routes/aixbt"));
+app.use(
+  "/api/v1/mining",
+  apiKeyAuth,
+  require("./services/mining-intel/mining-routes"),
+);
 app.use("/api/v1/twitter", apiKeyAuth, twitterRoutes);
 app.use("/api/v1/wallets", apiKeyAuth, walletRoutes);
 app.use("/api/v1/webhooks", apiKeyAuth, webhookRoutes);
@@ -809,6 +839,41 @@ async function start() {
         subscribe("sentinel-agent", EVENT_TYPES.TOKEN_SCORED);
         subscribe("pulse-engine", EVENT_TYPES.SIGNAL_FILED);
         console.log("[v9.0] ✓ Event bus initialized + 6 default subscriptions");
+      }
+
+      // Mining Intelligence Engine v2.0 — auto-init tables on startup
+      if (feature("MINING_INTEL")) {
+        const {
+          initMiningTables,
+        } = require("./services/mining-intel/mining-intel");
+        initMiningTables();
+        console.log("[MINING-INTEL] Mining Intelligence Service initialized");
+      }
+
+      // Discord OPS + INTEL dashboard — Phase 1b Wave 1 (Apr 19 2026).
+      // Pollers always start; every Discord send is a no-op when
+      // DISCORD_OPS_DASHBOARD is false. Local DB writes proceed regardless
+      // so the dispatcher + intel tables stay populated during dry-run.
+      // Known debt: dispatcher last_error has no surfacing path today —
+      // resolve in Phase 1b.2 via #sentinel-health wire (per Ogie msg 3905).
+      try {
+        const dispatcher = require("./services/discord/discord-ops-dispatcher");
+        const intelIngest = require("./services/intel/discord-intel-ingest");
+        const aii = require("./services/autodream/intel-ingest");
+        const { getDB } = require("./db");
+        aii.initIntelIngestTable(getDB());
+        dispatcher.initDispatcherState(getDB());
+        intelIngest.initIntelState(getDB());
+        dispatcher.start();
+        intelIngest.start();
+        console.log(
+          "[DISCORD] ✓ OPS dispatcher (60s poll) + INTEL ingest (5min poll) started; feature flag DISCORD_OPS_DASHBOARD gates actual posts",
+        );
+      } catch (e) {
+        console.error(
+          "[DISCORD] ⚠️ Phase 1b init error (non-fatal):",
+          e.message,
+        );
       }
 
       // AIBTC Signal Tracker — lifecycle tracking + event emission
