@@ -3,53 +3,69 @@
  * v9.0 | Event-driven agent coordination
  */
 
-const { getDB } = require('../../db');
+const { getDB } = require("../../db");
 
 const EVENT_TYPES = {
-  TOKEN_SCORED: 'token.scored',
-  TOKEN_HOT: 'token.hot',
-  TOKEN_WATCH: 'token.watch',
-  ARIA_DISCOVERY: 'aria.discovery',
-  SIGNAL_FILED: 'signal.filed',
-  SIGNAL_APPROVED: 'signal.approved',
-  SIGNAL_REJECTED: 'signal.rejected',
-  SIMULATION_COMPLETE: 'sim.complete',
-  MONTECARLO_COMPLETE: 'mc.complete',
-  BD_OUTREACH_SENT: 'bd.outreach.sent',
-  BD_RESPONSE: 'bd.response',
-  DEPLOY_COMPLETE: 'deploy.complete',
-  STREAK_WARNING: 'streak.warning',
-  PULSE_ACT: 'pulse.act',
-  PULSE_SLEEP: 'pulse.sleep',
-  AUTODREAM_TRIGGER: 'autodream.trigger',
-  AUTODREAM_COMPLETE: 'autodream.complete',
-  STREAK_EMERGENCY: 'streak.emergency',
-  OUTREACH_QUEUED: 'outreach.queued',
-  OUTREACH_SENT: 'outreach.sent',
-  OUTREACH_VETOED: 'outreach.vetoed',
-  OUTREACH_REPLY: 'outreach.reply',
-  TRUST_LEVEL_CHANGE: 'trust.level.change',
-  GUARD_ALLOW: 'guard.allow',
-  GUARD_WARN: 'guard.warn',
-  GUARD_BLOCK: 'guard.block',
-  MOLTBOOK_COMMENT_NEW: 'moltbook.comment.new',
-  MOLTBOOK_REPLY_SENT: 'moltbook.reply.sent',
-  MOLTBOOK_AGENT_FOUND: 'moltbook.agent.found',
-  MOLTBOOK_SERVICE_PROMOTED: 'moltbook.service.promoted',
+  TOKEN_SCORED: "token.scored",
+  TOKEN_HOT: "token.hot",
+  TOKEN_WATCH: "token.watch",
+  ARIA_DISCOVERY: "aria.discovery",
+  SIGNAL_FILED: "signal.filed",
+  SIGNAL_APPROVED: "signal.approved",
+  SIGNAL_REJECTED: "signal.rejected",
+  SIMULATION_COMPLETE: "sim.complete",
+  MONTECARLO_COMPLETE: "mc.complete",
+  BD_OUTREACH_SENT: "bd.outreach.sent",
+  BD_RESPONSE: "bd.response",
+  DEPLOY_COMPLETE: "deploy.complete",
+  STREAK_WARNING: "streak.warning",
+  PULSE_ACT: "pulse.act",
+  PULSE_SLEEP: "pulse.sleep",
+  AUTODREAM_TRIGGER: "autodream.trigger",
+  AUTODREAM_COMPLETE: "autodream.complete",
+  STREAK_EMERGENCY: "streak.emergency",
+  OUTREACH_QUEUED: "outreach.queued",
+  OUTREACH_SENT: "outreach.sent",
+  OUTREACH_VETOED: "outreach.vetoed",
+  OUTREACH_REPLY: "outreach.reply",
+  TRUST_LEVEL_CHANGE: "trust.level.change",
+  GUARD_ALLOW: "guard.allow",
+  GUARD_WARN: "guard.warn",
+  GUARD_BLOCK: "guard.block",
+  MOLTBOOK_COMMENT_NEW: "moltbook.comment.new",
+  MOLTBOOK_REPLY_SENT: "moltbook.reply.sent",
+  MOLTBOOK_AGENT_FOUND: "moltbook.agent.found",
+  MOLTBOOK_SERVICE_PROMOTED: "moltbook.service.promoted",
   // Shield events (Phase 2)
-  SHIELD_SCAN_COMPLETE: 'shield.scan_complete',
-  SHIELD_DANGER: 'shield.danger_detected',
-  SHIELD_WARNING: 'shield.warning_detected',
-  SHIELD_DEGRADED: 'shield.degraded',
-  SHIELD_PATTERN_ADDED: 'shield.pattern_added',
-  SHIELD_DAILY_REPORT: 'shield.daily_report',
+  SHIELD_SCAN_COMPLETE: "shield.scan_complete",
+  SHIELD_DANGER: "shield.danger_detected",
+  SHIELD_WARNING: "shield.warning_detected",
+  SHIELD_DEGRADED: "shield.degraded",
+  SHIELD_PATTERN_ADDED: "shield.pattern_added",
+  SHIELD_DAILY_REPORT: "shield.daily_report",
   // Intel events
-  INTEL_TELEGRAM_NEW: 'intel.telegram.new',
-  INTEL_BLACKLIST_MATCH: 'intel.blacklist.match',
+  INTEL_TELEGRAM_NEW: "intel.telegram.new",
+  INTEL_BLACKLIST_MATCH: "intel.blacklist.match",
   // autoDream evolution
-  AUTODREAM_EXPERIMENT_KEEP: 'autodream.experiment.keep',
-  AUTODREAM_EXPERIMENT_DISCARD: 'autodream.experiment.discard',
-  AUTODREAM_OVERNIGHT_COMPLETE: 'autodream.overnight.complete'
+  AUTODREAM_EXPERIMENT_KEEP: "autodream.experiment.keep",
+  AUTODREAM_EXPERIMENT_DISCARD: "autodream.experiment.discard",
+  AUTODREAM_OVERNIGHT_COMPLETE: "autodream.overnight.complete",
+  // v9 autonomy / kill-switch governance (Phase 1b Wave 1, Apr 19 2026)
+  // Payload schema: { switch_name: 'master'|'mining_intel'|'mining_signals'
+  //                   |'zachxbt_intel'|'x_cashtag_signal'|'aixbt_scoring'
+  //                   |'telegram_channel_intel'|'tweet_image_cards'|<other>,
+  //                   action: 'trip'|'reset'|'auto_trip'|'manual_trip',
+  //                   triggered_by: 'user'|'budget_cap'|'health_red'|
+  //                                 'streak_break'|'event_bus_subscriber',
+  //                   context: { reason, ref_table, ref_id, value_at_trip } }
+  KILL_SWITCH_ACT: "kill_switch.act",
+  // Emitted when a feature flag is flipped (manual or automated). Payload:
+  // { flag_name, old_value, new_value, changed_by, directive_source }
+  FEATURE_FLAG_FLIP: "feature_flag.flip",
+  // Emitted by discord-intel-ingest when a triaged item warrants action
+  // (pipeline or blacklist hit). Payload:
+  // { source, hit_type, hit_record_id, triaged_message_url, intel_ingest_id }
+  INTEL_ACTION_REQUIRED: "intel.action_required",
 };
 
 function initEventBus() {
@@ -79,39 +95,47 @@ function initEventBus() {
 
 function subscribe(agent, eventType, filter = {}) {
   const db = getDB();
-  const existing = db.prepare(
-    `SELECT id FROM event_subscriptions WHERE agent = ? AND event_type = ? AND active = 1`
-  ).get(agent, eventType);
+  const existing = db
+    .prepare(
+      `SELECT id FROM event_subscriptions WHERE agent = ? AND event_type = ? AND active = 1`,
+    )
+    .get(agent, eventType);
   if (existing) return { id: existing.id, already_subscribed: true };
 
-  const result = db.prepare(
-    `INSERT INTO event_subscriptions (agent, event_type, filter) VALUES (?, ?, ?)`
-  ).run(agent, eventType, JSON.stringify(filter));
+  const result = db
+    .prepare(
+      `INSERT INTO event_subscriptions (agent, event_type, filter) VALUES (?, ?, ?)`,
+    )
+    .run(agent, eventType, JSON.stringify(filter));
   return { id: result.lastInsertRowid, subscribed: true };
 }
 
 function emit(source, eventType, payload = {}) {
   const db = getDB();
   // Log event
-  db.prepare(`INSERT INTO event_log (event_type, payload, source) VALUES (?, ?, ?)`).run(
-    eventType, JSON.stringify(payload), source
-  );
+  db.prepare(
+    `INSERT INTO event_log (event_type, payload, source) VALUES (?, ?, ?)`,
+  ).run(eventType, JSON.stringify(payload), source);
 
   // Find matching subscriptions and deliver via mailbox
-  const subs = db.prepare(
-    `SELECT * FROM event_subscriptions WHERE event_type = ? AND active = 1`
-  ).all(eventType);
+  const subs = db
+    .prepare(
+      `SELECT * FROM event_subscriptions WHERE event_type = ? AND active = 1`,
+    )
+    .all(eventType);
 
   let delivered = 0;
   let mailboxSend;
   try {
-    mailboxSend = require('../mailbox/mailbox').send;
-  } catch { return { logged: true, delivered: 0, error: 'mailbox not available' }; }
+    mailboxSend = require("../mailbox/mailbox").send;
+  } catch {
+    return { logged: true, delivered: 0, error: "mailbox not available" };
+  }
 
   for (const sub of subs) {
-    mailboxSend(source, sub.agent, 'EVENT', { eventType, ...payload });
+    mailboxSend(source, sub.agent, "EVENT", { eventType, ...payload });
     db.prepare(
-      `UPDATE event_subscriptions SET last_triggered = datetime('now'), trigger_count = trigger_count + 1 WHERE id = ?`
+      `UPDATE event_subscriptions SET last_triggered = datetime('now'), trigger_count = trigger_count + 1 WHERE id = ?`,
     ).run(sub.id);
     delivered++;
   }
@@ -130,10 +154,20 @@ function getEventLog(type, limit = 20) {
   const db = getDB();
   let sql = `SELECT * FROM event_log`;
   const params = [];
-  if (type) { sql += ` WHERE event_type = ?`; params.push(type); }
+  if (type) {
+    sql += ` WHERE event_type = ?`;
+    params.push(type);
+  }
   sql += ` ORDER BY created_at DESC LIMIT ?`;
   params.push(limit);
   return db.prepare(sql).all(...params);
 }
 
-module.exports = { initEventBus, subscribe, emit, getSubscriptions, getEventLog, EVENT_TYPES };
+module.exports = {
+  initEventBus,
+  subscribe,
+  emit,
+  getSubscriptions,
+  getEventLog,
+  EVENT_TYPES,
+};
