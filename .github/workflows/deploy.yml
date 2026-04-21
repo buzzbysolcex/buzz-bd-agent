@@ -4,9 +4,9 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - '**.md'
-      - '.gitignore'
-      - 'LICENSE'
+      - "**.md"
+      - ".gitignore"
+      - "LICENSE"
 
 env:
   REGISTRY: docker.io
@@ -72,13 +72,7 @@ jobs:
             echo ">>> Pulling ${IMAGE}"
             docker pull "${IMAGE}"
 
-            echo ">>> Update docker-compose to use latest tag + fix ENV flags"
             cd /data/buzz
-            sed -i 's|buzzbd/buzz-bd-agent:v[0-9.]*|buzzbd/buzz-bd-agent:latest|g' docker-compose.yml
-            sed -i 's|ATV_ENABLED=true|ATV_ENABLED=false|g' docker-compose.yml
-            sed -i 's|BANKR_SIGNALS_ENABLED=true|BANKR_SIGNALS_ENABLED=false|g' docker-compose.yml
-            sed -i 's|COST_PARSER_ENABLED=true|COST_PARSER_ENABLED=false|g' docker-compose.yml
-            sed -i 's|NANSEN_X402_ENABLED=true|NANSEN_X402_ENABLED=false|g' docker-compose.yml
 
             echo ">>> Stopping old container"
             docker compose down --timeout 30 || true
@@ -118,7 +112,6 @@ jobs:
             TABLES=$(echo "$HEALTH" | python3 -c "import sys,json; print(json.load(sys.stdin)['checks']['database']['tables'])" 2>/dev/null || echo "?")
             AGENTS=$(curl -s http://localhost:3000/api/v1/agents | python3 -c "import sys,json; d=json.load(sys.stdin); print(sum(1 for a in d['agents'] if a['status']=='active'))" 2>/dev/null || echo "?")
             echo "Stats: ${ENDPOINTS} endpoints, ${TABLES} tables, ${AGENTS} agents"
-
 
       - name: Post-deploy — directive reload via Telegram
         if: success()
