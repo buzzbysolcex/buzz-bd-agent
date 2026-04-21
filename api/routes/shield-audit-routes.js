@@ -23,6 +23,30 @@ const path = require("path");
 const { feature } = require("../lib/feature-flags");
 const { getDB } = require("../db");
 const { tierGate } = require("../middleware/tier-gate");
+const { x402Paywall } = require("../middleware/x402-paywall");
+
+// Paid-tier paywall — applied only when the POST body declares tier="paid"
+// AND the caller is not already admin-authed. $0.50 per deep audit matches
+// the pashov runtime + Claude token cost profile. Discoverable via
+// `awal x402 details` for wallet-enabled agents.
+const shieldPaidPaywall = x402Paywall({
+  price: "500000", // $0.50 USDC
+  resource: "/api/v1/shield/audit/full",
+  description:
+    "BuzzShield V4 paid-tier deep audit via Pashov Audit Group solidity-auditor v2 + x-ray v1. EVM contracts all chains. ~5-10 min. Full findings JSON + markdown report.",
+});
+
+function shieldPaidGate(req, res, next) {
+  const tier = (req.body && req.body.tier) || "free";
+  if (tier !== "paid") return next();
+  return shieldPaidPaywall(req, res, () => {
+    // Paywall accepted (admin bypass, localhost bypass, or valid X-PAYMENT).
+    // Elevate tier for the downstream auth check so the handler stops
+    // rejecting with 401 tier_insufficient. Admin stays admin.
+    if (!req.tier || req.tier === "free") req.tier = "pro";
+    next();
+  });
+}
 
 // Container-side queue paths. These mount from the host at
 // /data/buzz/persistent/pashov-queue (see docker-compose.yml buzz-data volume
@@ -234,7 +258,7 @@ router.get("/:audit_id", tierGate("free"), (req, res) => {
 // Free tier: V3 scan only, returns synchronously (~2s).
 // Paid tier: V3 + pashov full run (~5-10 min), returns audit_id immediately
 // and frontend subscribes to /:audit_id/stream for progress.
-router.post("/full", tierGate("free"), async (req, res) => {
+router.post("/full", tierGate("free"), shieldPaidGate, async (req, res) => {
   if (!feature("BUZZSHIELD_V4_AUDIT_API")) return notEnabled(res);
   const { address, chain_id, tier = "free" } = req.body || {};
 
