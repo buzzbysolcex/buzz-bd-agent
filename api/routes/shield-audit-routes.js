@@ -26,9 +26,9 @@ const { tierGate } = require("../middleware/tier-gate");
 
 // Container-side queue paths. These mount from the host at
 // /data/buzz/persistent/pashov-queue (see docker-compose.yml buzz-data volume
-// binding /data). The shim at /usr/local/bin/buzz-audit-evm writes to inbox;
-// the host-side pashov-runner.py daemon drops results into outbox.
-const PASHOV_SHIM = "/usr/local/bin/buzz-audit-evm";
+// binding /data). The shim at /data/pashov-queue/bin/buzz-audit-evm writes
+// to inbox; the host-side pashov-runner.py daemon drops results into outbox.
+const PASHOV_SHIM = "/data/pashov-queue/bin/buzz-audit-evm";
 const PASHOV_OUTBOX = "/data/pashov-queue/outbox";
 const PASHOV_AUDIT_SSE_TIMEOUT_MS = 15 * 60 * 1000; // 15 min
 const PASHOV_AUDIT_SSE_POLL_MS = 2000;
