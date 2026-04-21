@@ -25,7 +25,11 @@
 
 const crypto = require("crypto");
 
-const CHANNEL_KEYS_WAVE_1 = ["intel.zachxbt"];
+const CHANNEL_KEYS_WAVE_1 = [
+  "intel.zachxbt",
+  "intel.lookonchain",
+  "intel.defi-alerts",
+];
 const DISCORD_API = "https://discord.com/api/v10";
 const USER_AGENT =
   "Buzz-BD-Agent (https://buzzbd.ai, discord-intel-ingest/1.0)";
@@ -225,8 +229,10 @@ function sha256Hex(s) {
 
 // ---------- Main ingest flow ----------
 
-async function ingestMessage(msg, deps) {
+async function ingestMessage(msg, deps, channelKey = "intel.zachxbt") {
   const { db, discord, autodream, eventBus } = deps;
+  const channelSlug = channelKey.replace(/^intel\./, "");
+  const sourceTag = `discord-intel-${channelSlug}`;
 
   const entities = extractEntities(msg.content || "");
   const hits = crossRef(db, entities);
@@ -244,9 +250,9 @@ async function ingestMessage(msg, deps) {
          VALUES ('discord_intel_ingest', ?, ?, ?, ?, ?)`,
       )
       .run(
-        `intel-zachxbt msg ${msg.id}`,
+        `intel-${channelSlug} msg ${msg.id}`,
         JSON.stringify({ entities, hits }),
-        `discord-channel:intel-zachxbt;discord-msg:${msg.id}`,
+        `discord-channel:intel-${channelSlug};discord-msg:${msg.id}`,
         triagedStatus,
         `hash=${sha256Hex(msg.content || "").slice(0, 16)} url=${entities.urls[0] || ""}`,
       );
@@ -262,7 +268,7 @@ async function ingestMessage(msg, deps) {
   try {
     const res = autodream.intelIngest(
       {
-        source: "discord-intel-zachxbt",
+        source: sourceTag,
         source_ref_id: msg.id,
         raw_payload: msg.content || "",
         extracted_entities: entities,
@@ -310,7 +316,7 @@ async function ingestMessage(msg, deps) {
   if (hasHits && eventBus && typeof eventBus.emit === "function") {
     try {
       eventBus.emit("discord-intel-ingest", "intel.action_required", {
-        source: "discord-intel-zachxbt",
+        source: sourceTag,
         hit_type: hits.blacklist_wallets.length
           ? "blacklist_wallet"
           : "pipeline_token",
@@ -385,7 +391,7 @@ async function pollChannel(channelKey, deps) {
       lastId = msg.id;
       continue;
     }
-    const res = await ingestMessage(msg, deps);
+    const res = await ingestMessage(msg, deps, channelKey);
     processed++;
     hitDelta += res.hits_count > 0 ? 1 : 0;
     lastId = msg.id;
