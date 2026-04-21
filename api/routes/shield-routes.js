@@ -1148,6 +1148,8 @@ if (feature("BANKR_X402_SHIELD")) {
     resource: "/api/v1/shield/scan",
     description:
       "BuzzShield V2 Full Security Scan — 11 rules, 23 drain patterns, threat matrix",
+    category: "crypto-intelligence",
+    tags: ["security-audit", "threat-detection", "drain-patterns", "shield"],
   });
 
   router.get("/scan", shieldPaywall, async (req, res) => {
@@ -1230,11 +1232,25 @@ if (feature("BUZZSHIELD_AUDIT_ENGINE")) {
   // POST /api/v1/shield/audit — run full audit on contract source
   router.post("/audit", apiKeyAuth, async (req, res) => {
     try {
-      const { contract_address, chain, contract_type, source_code, github_url } = req.body;
+      const {
+        contract_address,
+        chain,
+        contract_type,
+        source_code,
+        github_url,
+      } = req.body;
       if (!contract_address || !source_code) {
-        return res.status(400).json({ error: "contract_address and source_code required" });
+        return res
+          .status(400)
+          .json({ error: "contract_address and source_code required" });
       }
-      const result = auditEngine.runAudit(contract_address, chain, contract_type, source_code, github_url);
+      const result = auditEngine.runAudit(
+        contract_address,
+        chain,
+        contract_type,
+        source_code,
+        github_url,
+      );
       res.json(result);
     } catch (err) {
       console.error("[shield:audit] Error:", err.message);
@@ -1259,7 +1275,10 @@ if (feature("BUZZSHIELD_AUDIT_ENGINE")) {
 // ─── PRE-DEPLOY CHECKLIST API ───────────────────────────
 
 if (feature("BUZZSHIELD_CHECKLIST_API") || feature("BUZZSHIELD_AUDIT_ENGINE")) {
-  const { getChecklist, PRE_DEPLOY_CHECKLISTS } = require("../services/shield/shield-audit-engine");
+  const {
+    getChecklist,
+    PRE_DEPLOY_CHECKLISTS,
+  } = require("../services/shield/shield-audit-engine");
 
   // GET /api/v1/shield/checklist — pre-deploy security checklist (FREE)
   router.get("/checklist", (req, res) => {
@@ -1279,7 +1298,9 @@ if (feature("BUZZSHIELD_CHECKLIST_API") || feature("BUZZSHIELD_AUDIT_ENGINE")) {
     });
   });
 
-  console.log("[INIT] BuzzShield Pre-Deploy Checklist API wired (4 contract types)");
+  console.log(
+    "[INIT] BuzzShield Pre-Deploy Checklist API wired (4 contract types)",
+  );
 }
 
 module.exports = router;

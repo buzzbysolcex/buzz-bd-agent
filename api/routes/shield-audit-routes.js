@@ -32,8 +32,34 @@ const { x402Paywall } = require("../middleware/x402-paywall");
 const shieldPaidPaywall = x402Paywall({
   price: "500000", // $0.50 USDC
   resource: "/api/v1/shield/audit/full",
+  method: "POST",
   description:
     "BuzzShield V4 paid-tier deep audit via Pashov Audit Group solidity-auditor v2 + x-ray v1. EVM contracts all chains. ~5-10 min. Full findings JSON + markdown report.",
+  category: "crypto-intelligence",
+  tags: ["security-audit", "deep-audit", "evm", "pashov", "paid"],
+});
+
+// GET probe handler — Bazaar + 402index crawlers discover with GET, shield
+// audit requires POST. Always trigger the paywall so a GET lands on 402
+// (including the bazaar extensions) rather than 404. If a caller somehow
+// gets past the paywall via GET (admin key, localhost), tell them to POST.
+router.get("/full", (req, res) => {
+  return shieldPaidPaywall(req, res, () => {
+    res.status(405).json({
+      error: "method_not_allowed",
+      message:
+        "Paid audits require POST with body.tier='paid', body.address, body.chain.",
+      usage: {
+        method: "POST",
+        contentType: "application/json",
+        body: {
+          tier: "paid",
+          address: "0x...",
+          chain: "base",
+        },
+      },
+    });
+  });
 });
 
 function shieldPaidGate(req, res, next) {

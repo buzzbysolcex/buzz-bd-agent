@@ -11,44 +11,60 @@
  * Buzz BD Agent | 402 Index Registration
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { getDB } = require('../db');
-const { x402Paywall } = require('../middleware/x402-paywall');
+const { getDB } = require("../db");
+const { x402Paywall } = require("../middleware/x402-paywall");
 
 // ─── GET /premium/pipeline — Hot token pipeline ─────────
-router.get('/pipeline',
+router.get(
+  "/pipeline",
   x402Paywall({
-    price: '10000', // $0.01
-    resource: '/api/v1/premium/pipeline',
-    description: 'Real-time hot token pipeline with scores, contracts, and chain data. 100-point composite scoring.',
+    price: "10000", // $0.01
+    resource: "/api/v1/premium/pipeline",
+    description:
+      "Real-time hot token pipeline with scores, contracts, and chain data. 100-point composite scoring.",
+    category: "crypto-intelligence",
+    tags: ["token-scoring", "pipeline", "multi-chain", "crypto-intelligence"],
   }),
   (req, res) => {
     try {
       const db = getDB();
-      const tokens = db.prepare(
-        `SELECT address, ticker, name, chain, score, stage, source, updated_at
-         FROM pipeline_tokens WHERE score >= 85 ORDER BY score DESC`
-      ).all();
+      const tokens = db
+        .prepare(
+          `SELECT address, ticker, name, chain, score, stage, source, updated_at
+         FROM pipeline_tokens WHERE score >= 85 ORDER BY score DESC`,
+        )
+        .all();
       res.json({
         success: true,
         count: tokens.length,
         pipeline: tokens,
-        scoring_dimensions: ['safety(25)', 'wallet(25)', 'social(15)', 'scorer(15)', 'technical(20)'],
-        provider: 'Buzz BD Agent | SolCex Exchange',
+        scoring_dimensions: [
+          "safety(25)",
+          "wallet(25)",
+          "social(15)",
+          "scorer(15)",
+          "technical(20)",
+        ],
+        provider: "Buzz BD Agent | SolCex Exchange",
       });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
-  }
+  },
 );
 
 // ─── GET /premium/score/:address — Token score ──────────
-router.get('/score/:address',
+router.get(
+  "/score/:address",
   x402Paywall({
-    price: '10000', // $0.01
-    resource: '/api/v1/premium/score',
-    description: 'Individual token intelligence score with triple verification across 5 dimensions.',
+    price: "10000", // $0.01
+    resource: "/api/v1/premium/score",
+    description:
+      "Individual token intelligence score with triple verification across 5 dimensions.",
+    category: "crypto-intelligence",
+    tags: ["token-scoring", "verification", "crypto-intelligence"],
   }),
   (req, res) => {
     try {
@@ -56,12 +72,21 @@ router.get('/score/:address',
       const address = req.params.address;
 
       let token = null;
-      try { token = db.prepare('SELECT * FROM pipeline_tokens WHERE address = ?').get(address); } catch {}
+      try {
+        token = db
+          .prepare("SELECT * FROM pipeline_tokens WHERE address = ?")
+          .get(address);
+      } catch {}
 
       let scores = null;
-      try { scores = db.prepare('SELECT * FROM token_scores WHERE address = ?').get(address); } catch {}
+      try {
+        scores = db
+          .prepare("SELECT * FROM token_scores WHERE address = ?")
+          .get(address);
+      } catch {}
 
-      if (!token) return res.status(404).json({ error: 'Token not found in pipeline' });
+      if (!token)
+        return res.status(404).json({ error: "Token not found in pipeline" });
 
       res.json({
         success: true,
@@ -70,27 +95,35 @@ router.get('/score/:address',
         chain: token.chain,
         score: token.score,
         stage: token.stage,
-        score_breakdown: token.score_breakdown ? JSON.parse(token.score_breakdown) : null,
-        token_scores: scores ? {
-          total: scores.total_score || scores.score,
-          safety: scores.safety_score,
-          wallet: scores.wallet_score,
-          social: scores.social_score,
-        } : null,
-        provider: 'Buzz BD Agent | SolCex Exchange',
+        score_breakdown: token.score_breakdown
+          ? JSON.parse(token.score_breakdown)
+          : null,
+        token_scores: scores
+          ? {
+              total: scores.total_score || scores.score,
+              safety: scores.safety_score,
+              wallet: scores.wallet_score,
+              social: scores.social_score,
+            }
+          : null,
+        provider: "Buzz BD Agent | SolCex Exchange",
       });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
-  }
+  },
 );
 
 // ─── GET /premium/sim/:address — Simulation result ──────
-router.get('/sim/:address',
+router.get(
+  "/sim/:address",
   x402Paywall({
-    price: '50000', // $0.05
-    resource: '/api/v1/premium/sim',
-    description: '20-agent MiroFish simulation with adversarial bull/bear debate. LIST or REJECT verdict.',
+    price: "50000", // $0.05
+    resource: "/api/v1/premium/sim",
+    description:
+      "20-agent MiroFish simulation with adversarial bull/bear debate. LIST or REJECT verdict.",
+    category: "crypto-intelligence",
+    tags: ["simulation", "adversarial", "mirofish", "list-reject"],
   }),
   (req, res) => {
     try {
@@ -99,16 +132,46 @@ router.get('/sim/:address',
 
       // Check simulation_results first, then listing_simulations
       let sim = null;
-      try { sim = db.prepare('SELECT * FROM simulation_results WHERE token_address = ? ORDER BY created_at DESC LIMIT 1').get(address); } catch {}
-      if (!sim) try { sim = db.prepare('SELECT * FROM listing_simulations WHERE token_address = ? ORDER BY id DESC LIMIT 1').get(address); } catch {}
+      try {
+        sim = db
+          .prepare(
+            "SELECT * FROM simulation_results WHERE token_address = ? ORDER BY created_at DESC LIMIT 1",
+          )
+          .get(address);
+      } catch {}
+      if (!sim)
+        try {
+          sim = db
+            .prepare(
+              "SELECT * FROM listing_simulations WHERE token_address = ? ORDER BY id DESC LIMIT 1",
+            )
+            .get(address);
+        } catch {}
 
-      if (!sim) return res.status(404).json({ error: 'No simulation found for this token. Run POST /api/v1/simulate-listing first.' });
+      if (!sim)
+        return res.status(404).json({
+          error:
+            "No simulation found for this token. Run POST /api/v1/simulate-listing first.",
+        });
 
       // Parse JSON fields
-      let verdicts = null, metrics = null, consensus = null;
-      try { verdicts = JSON.parse(sim.verdicts_json || sim.raw_verdicts || '[]'); } catch {}
-      try { metrics = JSON.parse(sim.metrics_json || '{}'); } catch {}
-      try { consensus = typeof sim.consensus === 'string' && sim.consensus.startsWith('{') ? JSON.parse(sim.consensus) : sim.consensus; } catch { consensus = sim.consensus; }
+      let verdicts = null,
+        metrics = null,
+        consensus = null;
+      try {
+        verdicts = JSON.parse(sim.verdicts_json || sim.raw_verdicts || "[]");
+      } catch {}
+      try {
+        metrics = JSON.parse(sim.metrics_json || "{}");
+      } catch {}
+      try {
+        consensus =
+          typeof sim.consensus === "string" && sim.consensus.startsWith("{")
+            ? JSON.parse(sim.consensus)
+            : sim.consensus;
+      } catch {
+        consensus = sim.consensus;
+      }
 
       res.json({
         success: true,
@@ -124,22 +187,24 @@ router.get('/sim/:address',
         metrics,
         duration_ms: sim.duration_ms,
         created_at: sim.created_at || sim.simulated_at,
-        provider: 'Buzz BD Agent | SolCex Exchange',
+        provider: "Buzz BD Agent | SolCex Exchange",
       });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
-  }
+  },
 );
 
 // ─── GET /premium/mining — BTC mining pool intelligence ──
 router.get(
-  '/mining',
+  "/mining",
   x402Paywall({
-    price: '10000', // $0.01
-    resource: '/api/v1/premium/mining',
+    price: "10000", // $0.01
+    resource: "/api/v1/premium/mining",
     description:
-      'BTC mining pool intelligence — 14 pools with share velocity, pool_health score, fee efficiency, empty-block rate. Refreshes every PULSE 6c tick.',
+      "BTC mining pool intelligence — 14 pools with share velocity, pool_health score, fee efficiency, empty-block rate. Refreshes every PULSE 6c tick.",
+    category: "crypto-intelligence",
+    tags: ["mining-intel", "btc-mining", "btc", "pool", "pulse"],
   }),
   (req, res) => {
     try {
@@ -153,12 +218,12 @@ router.get(
                   mining_sentiment_index, mining_sentiment_label,
                   hashrate_change_24h, blocks_since_retarget, next_retarget_change
              FROM mining_snapshots
-            ORDER BY id DESC LIMIT 1`
+            ORDER BY id DESC LIMIT 1`,
         )
         .get();
 
       const latestPoolTs = db
-        .prepare('SELECT MAX(timestamp) AS ts FROM mining_pools')
+        .prepare("SELECT MAX(timestamp) AS ts FROM mining_pools")
         .get();
 
       const pools = latestPoolTs?.ts
@@ -174,15 +239,14 @@ router.get(
                       timestamp AS snapshot_timestamp
                  FROM mining_pools
                 WHERE timestamp = ?
-                ORDER BY pool_health_score DESC, block_share_1w DESC`
+                ORDER BY pool_health_score DESC, block_share_1w DESC`,
             )
             .all(latestPoolTs.ts)
         : [];
 
       // Pool concentration: HHI on 1w shares (×10000 scale, ×100 for Herfindahl-normalized 0–1)
       const shares = pools.map((p) => p.block_share_1w || 0);
-      const hhi =
-        shares.reduce((acc, s) => acc + (s * 100) ** 2, 0); // shares are fractions 0–1; ×100 gives percentage points
+      const hhi = shares.reduce((acc, s) => acc + (s * 100) ** 2, 0); // shares are fractions 0–1; ×100 gives percentage points
 
       res.json({
         success: true,
@@ -191,17 +255,19 @@ router.get(
         pools_count: pools.length,
         pools,
         scoring_notes: {
-          pool_tier: 'APEX >= 85, STRONG 55–80, STABLE 40–50',
-          share_velocity: '(share_24h - share_1w) — positive = pool gaining share this window',
-          fee_efficiency: 'avg_fee_per_block normalized to network median',
-          empty_block_rate: 'fraction of blocks with 1–2 tx (lower = healthier)',
+          pool_tier: "APEX >= 85, STRONG 55–80, STABLE 40–50",
+          share_velocity:
+            "(share_24h - share_1w) — positive = pool gaining share this window",
+          fee_efficiency: "avg_fee_per_block normalized to network median",
+          empty_block_rate:
+            "fraction of blocks with 1–2 tx (lower = healthier)",
         },
-        provider: 'Buzz BD Agent | SolCex Exchange',
+        provider: "Buzz BD Agent | SolCex Exchange",
       });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
-  }
+  },
 );
 
 module.exports = router;
