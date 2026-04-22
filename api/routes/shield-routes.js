@@ -1227,11 +1227,31 @@ if (feature("BANKR_X402_SHIELD")) {
 
 if (feature("BUZZSHIELD_AUDIT_ENGINE")) {
   const auditEngine = require("../services/shield/shield-audit-engine");
-  auditEngine.createAuditTables();
+  // Defer createAuditTables() until first request — at module-import time
+  // (which is `app.use("/api/v1/shield", require("./routes/shield-routes"))`
+  // in server.js line ~469), initDB() has not yet run, and the direct
+  // call throws "Database not initialized." The throw was silently
+  // caught by the mount try/catch, preventing the ENTIRE shield router
+  // from registering, which caused all /shield/* paths (including
+  // /shield/scan, /shield/info, /shield/stats) to fall through to the
+  // /api/v1 apiKeyAuth catchall and return 401 for external clients.
+  // (Localhost bypassed via auth.js req.ip check, which is why it looked
+  // healthy from docker exec but broken from Caddy.) Per Ogie msg 4366 #4.
+  let _auditTablesCreated = false;
+  function ensureAuditTables() {
+    if (_auditTablesCreated) return;
+    try {
+      auditEngine.createAuditTables();
+      _auditTablesCreated = true;
+    } catch (e) {
+      console.error("[shield-routes] createAuditTables deferred:", e.message);
+    }
+  }
 
   // POST /api/v1/shield/audit — run full audit on contract source
   router.post("/audit", apiKeyAuth, async (req, res) => {
     try {
+      ensureAuditTables();
       const {
         contract_address,
         chain,
@@ -1260,11 +1280,13 @@ if (feature("BUZZSHIELD_AUDIT_ENGINE")) {
 
   // GET /api/v1/shield/audit/stats — audit engine statistics
   router.get("/audit/stats", (req, res) => {
+    ensureAuditTables();
     res.json(auditEngine.getAuditStats());
   });
 
   // GET /api/v1/shield/audit/recent — recent audit reports
   router.get("/audit/recent", (req, res) => {
+    ensureAuditTables();
     const limit = Math.min(parseInt(req.query.limit) || 10, 50);
     res.json(auditEngine.getRecentAudits(limit));
   });
