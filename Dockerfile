@@ -70,9 +70,9 @@ COPY memory/ /opt/buzz-memory-repo/
 COPY bake/cron/ /opt/buzz-cron/
 
 # ══════════════════════════════════════════════════
-# BAKE: Twitter Bot v3.0 config & data
+# Twitter Bot removed 2026-04-22 — dead code, entrypoint killed it on
+# every boot. Opus Brain handles all tweets via War Room approval.
 # ══════════════════════════════════════════════════
-COPY bake/twitter-bot/ /opt/buzz-twitter-bot/
 
 # Config reference
 COPY bake/config/ /opt/buzz-config/
