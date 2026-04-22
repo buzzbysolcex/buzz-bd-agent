@@ -39,14 +39,14 @@ log() {
 }
 
 if [ -z "$SIGNAL_NUM" ]; then
-    echo "Usage: $0 <1|2|3|4>" >&2
+    echo "Usage: $0 <1|2|3|4|5>" >&2
     exit 1
 fi
 
 case "$SIGNAL_NUM" in
-    1|2|3|4) ;;
+    1|2|3|4|5) ;;
     *)
-        echo "ERROR: signal number must be 1-4 (got: $SIGNAL_NUM)" >&2
+        echo "ERROR: signal number must be 1-5 (got: $SIGNAL_NUM)" >&2
         exit 1
         ;;
 esac
