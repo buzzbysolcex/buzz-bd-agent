@@ -42,8 +42,7 @@ const memoryRoutes = require("./routes/memory");
 const operatorRoutes = require("./routes/operator");
 const contactRoutes = require("./routes/contacts");
 
-// v7.5.0: Bags.fm routes + Simulate Listing
-const bagsRoutes = require("./routes/bags");
+// v7.5.0: Simulate Listing (Bags.fm removed 2026-04-22 — dead service, Almanax HIGH)
 const simulateRoutes = require("./routes/simulate");
 
 // v7.5.2: Nansen CLI + X Layer x402
@@ -421,7 +420,6 @@ app.get("/api/v1/info", (req, res) => {
         memory: 3,
         operator: 2,
         contacts: 6,
-        bags: 4,
         simulate: 2,
         simulate_listing: 1,
         financial_datasets: 5,
@@ -500,8 +498,7 @@ app.use("/api/v1/memory", apiKeyAuth, memoryRoutes);
 app.use("/api/v1/operator", apiKeyAuth, operatorRoutes);
 app.use("/api/v1/contacts", apiKeyAuth, contactRoutes);
 
-// v7.5.0: Bags.fm + Simulate Listing (simulation GATED by verification)
-app.use("/api/v1/bags", apiKeyAuth, bagsRoutes);
+// v7.5.0: Simulate Listing (simulation GATED by verification; Bags.fm removed)
 app.use(
   "/api/v1/simulate",
   apiKeyAuth,
@@ -1496,7 +1493,7 @@ async function start() {
       console.log(`[Buzz API] ✓ Health: http://0.0.0.0:${PORT}/api/v1/health`);
       console.log(`[Buzz API] ✓ Info:   http://0.0.0.0:${PORT}/api/v1/info`);
       console.log(
-        `[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts, strategy, skills, memory, operator, contacts, bags, simulate, ws, nansen, xlayer, personas, backtest, listing-report, listing-proposal, coingecko, simulation-report`,
+        `[Buzz API] ✓ Routes: health, agents, pipeline, costs, crons, score-token, scoring, intel, twitter, wallets, webhooks, receipts, strategy, skills, memory, operator, contacts, simulate, ws, nansen, xlayer, personas, backtest, listing-report, listing-proposal, coingecko, simulation-report`,
       );
 
       // v7.6.0: Start WebSocket services (non-blocking, with delay for DB init)

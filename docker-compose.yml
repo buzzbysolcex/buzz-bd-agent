@@ -27,10 +27,7 @@ services:
       - HYPERBROWSER_API_KEY=${HYPERBROWSER_API_KEY}
       - CMC_API_KEY=${CMC_API_KEY}
       - AGENTPROOF_API_KEY=${AGENTPROOF_API_KEY}
-      # ─── Bags.fm ───
-      - BAGS_API_KEY=REDACTED_BAGS_API_KEY
-      - BAGS_AGENT_TOKEN=REDACTED_BAGS_AGENT_TOKEN
-      - BAGS_AGENT_WALLET=REDACTED_BAGS_AGENT_WALLET
+      # ─── Bags.fm removed 2026-04-22 — dead service (Almanax HIGH) ───
       # ─── Twitter/X API ───
       - X_API_KEY=${X_API_KEY}
       - X_API_SECRET=${X_API_SECRET}
