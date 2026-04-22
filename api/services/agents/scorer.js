@@ -2,7 +2,7 @@
  * Scorer Sub-Agent — L4 Score & Route
  * Weight: 0.20
  * Model: bankr/gpt-5-nano (OpenClaw) | Direct computation (REST API)
- * 
+ *
  * 100-point composite scoring (11 factors) using data from all other agents
  * Routes result: HOT (85+) → LIST | QUALIFIED (70+) → WATCH | WATCH (50+) → TRACK | SKIP (<50) → DROP
  */
@@ -10,37 +10,49 @@
 // 11 scoring factors with max points
 const SCORING_FACTORS = {
   // Market factors (30 pts max)
-  market_cap:       { max: 10, category: 'market' },
-  liquidity:        { max: 10, category: 'market' },
-  volume:           { max: 10, category: 'market' },
-  
+  market_cap: { max: 10, category: "market" },
+  liquidity: { max: 10, category: "market" },
+  volume: { max: 10, category: "market" },
+
   // Safety factors (30 pts max)
-  contract_safety:  { max: 15, category: 'safety' },
-  holder_dist:      { max: 15, category: 'safety' },
-  
+  contract_safety: { max: 15, category: "safety" },
+  holder_dist: { max: 15, category: "safety" },
+
   // Team/Social factors (20 pts max)
-  team_identity:    { max: 10, category: 'social' },
-  social_presence:  { max: 10, category: 'social' },
-  
+  team_identity: { max: 10, category: "social" },
+  social_presence: { max: 10, category: "social" },
+
   // Quality factors (20 pts max)
-  token_age:        { max: 5,  category: 'quality' },
-  deployer_history: { max: 5,  category: 'quality' },
-  web_footprint:    { max: 5,  category: 'quality' },
-  momentum:         { max: 5,  category: 'quality' }
+  token_age: { max: 5, category: "quality" },
+  deployer_history: { max: 5, category: "quality" },
+  web_footprint: { max: 5, category: "quality" },
+  momentum: { max: 5, category: "quality" },
 };
 
-const MAX_SCORE = Object.values(SCORING_FACTORS).reduce((sum, f) => sum + f.max, 0); // 100
+const MAX_SCORE = Object.values(SCORING_FACTORS).reduce(
+  (sum, f) => sum + f.max,
+  0,
+); // 100
 
-async function runScorerAgent({ 
-  address, chain, requestId,
-  scannerData, safetyData, walletData, socialData,
-  safetyScore, walletScore, socialScore
+async function runScorerAgent({
+  address,
+  chain,
+  requestId,
+  scannerData,
+  safetyData,
+  walletData,
+  socialData,
+  safetyScore,
+  walletScore,
+  socialScore,
 }) {
   const start = Date.now();
-  console.log(`[${requestId}] 📊 scorer-agent: Computing 11-factor score for ${address}`);
+  console.log(
+    `[${requestId}] 📊 scorer-agent: Computing 11-factor score for ${address}`,
+  );
 
   const scores = {};
-    const factors = [];
+  const factors = [];
   const details = {};
 
   try {
@@ -143,17 +155,19 @@ async function runScorerAgent({
     // ═══════════════════════════════════════════════
 
     // Factor 6: Team Identity (0-10 pts) — from social-agent ATV check
-    const atvVerified = socialData?.factors?.find(f => f.name === 'atv_verified');
-    const atvFound = socialData?.factors?.find(f => f.name === 'atv_found');
+    const atvVerified = socialData?.factors?.find(
+      (f) => f.name === "atv_verified",
+    );
+    const atvFound = socialData?.factors?.find((f) => f.name === "atv_found");
     if (atvVerified) {
       scores.team_identity = 10;
-      details.team_identity = 'Team identity verified via ATV';
+      details.team_identity = "Team identity verified via ATV";
     } else if (atvFound) {
       scores.team_identity = 5;
-      details.team_identity = 'Identity record exists, unverified';
+      details.team_identity = "Identity record exists, unverified";
     } else {
       scores.team_identity = 0;
-      details.team_identity = 'No identity verification';
+      details.team_identity = "No identity verification";
     }
 
     // Factor 7: Social Presence (0-10 pts) — from social-agent
@@ -178,7 +192,8 @@ async function runScorerAgent({
     // Factor 8: Token Age (0-5 pts)
     const pairCreated = scannerData?.pair_created_at;
     if (pairCreated) {
-      const ageDays = (Date.now() - new Date(pairCreated).getTime()) / (1000 * 60 * 60 * 24);
+      const ageDays =
+        (Date.now() - new Date(pairCreated).getTime()) / (1000 * 60 * 60 * 24);
       if (ageDays >= 30) {
         scores.token_age = 5;
         details.token_age = `${Math.round(ageDays)}d old — survivor`;
@@ -194,45 +209,57 @@ async function runScorerAgent({
       }
     } else {
       scores.token_age = 0;
-      details.token_age = 'No pair creation date';
+      details.token_age = "No pair creation date";
     }
 
     // Factor 9: Deployer History (0-5 pts) — from wallet-agent
-    const deployerEstablished = walletData?.factors?.find(f => f.name === 'established_deployer');
-    const deployerNew = walletData?.factors?.find(f => f.name === 'brand_new_deployer' || f.name === 'new_deployer');
-    const serialDeployer = walletData?.factors?.find(f => f.name === 'serial_deployer');
-    
+    const deployerEstablished = walletData?.factors?.find(
+      (f) => f.name === "established_deployer",
+    );
+    const deployerNew = walletData?.factors?.find(
+      (f) => f.name === "brand_new_deployer" || f.name === "new_deployer",
+    );
+    const serialDeployer = walletData?.factors?.find(
+      (f) => f.name === "serial_deployer",
+    );
+
     if (serialDeployer) {
       scores.deployer_history = 0;
-      details.deployer_history = 'Serial deployer detected';
+      details.deployer_history = "Serial deployer detected";
     } else if (deployerEstablished) {
       scores.deployer_history = 5;
-      details.deployer_history = 'Established deployer wallet';
+      details.deployer_history = "Established deployer wallet";
     } else if (deployerNew) {
       scores.deployer_history = 1;
-      details.deployer_history = 'New deployer wallet';
+      details.deployer_history = "New deployer wallet";
     } else {
       scores.deployer_history = 2;
-      details.deployer_history = 'Deployer history unknown';
+      details.deployer_history = "Deployer history unknown";
     }
 
     // Factor 10: Web Footprint (0-5 pts) — from social-agent
-    const strongWeb = socialData?.factors?.find(f => f.name === 'strong_web_presence');
-    const officialSite = socialData?.factors?.find(f => f.name === 'official_site');
-    const scamMentions = socialData?.factors?.find(f => f.name === 'scam_mentions');
-    
+    const strongWeb = socialData?.factors?.find(
+      (f) => f.name === "strong_web_presence",
+    );
+    const officialSite = socialData?.factors?.find(
+      (f) => f.name === "official_site",
+    );
+    const scamMentions = socialData?.factors?.find(
+      (f) => f.name === "scam_mentions",
+    );
+
     if (scamMentions) {
       scores.web_footprint = 0;
-      details.web_footprint = 'Scam/rug mentions found';
+      details.web_footprint = "Scam/rug mentions found";
     } else if (strongWeb && officialSite) {
       scores.web_footprint = 5;
-      details.web_footprint = 'Strong web presence with official site';
+      details.web_footprint = "Strong web presence with official site";
     } else if (strongWeb || officialSite) {
       scores.web_footprint = 3;
-      details.web_footprint = 'Moderate web presence';
+      details.web_footprint = "Moderate web presence";
     } else {
       scores.web_footprint = 1;
-      details.web_footprint = 'Minimal web footprint';
+      details.web_footprint = "Minimal web footprint";
     }
 
     // Factor 11: Momentum (0-5 pts) — price + volume trends
@@ -240,12 +267,13 @@ async function runScorerAgent({
     const priceChange1h = scannerData?.price_change_1h || 0;
     const txnBuys = scannerData?.txns_24h_buys || 0;
     const txnSells = scannerData?.txns_24h_sells || 0;
-    const buyRatio = (txnBuys + txnSells) > 0 ? txnBuys / (txnBuys + txnSells) : 0.5;
+    const buyRatio =
+      txnBuys + txnSells > 0 ? txnBuys / (txnBuys + txnSells) : 0.5;
 
     // Enhance with CMC 7d/30d data if available
     const priceChange7d = scannerData?.cmc?.price_change_7d || null;
     const priceChange30d = scannerData?.cmc?.price_change_30d || null;
-    let momentumDetail = '';
+    let momentumDetail = "";
 
     if (priceChange24h > 20 && buyRatio > 0.6) {
       scores.momentum = 5;
@@ -263,10 +291,10 @@ async function runScorerAgent({
 
     // CMC longer-term trend bonus/penalty
     if (priceChange7d !== null) {
-      momentumDetail += ` | 7d: ${priceChange7d > 0 ? '+' : ''}${priceChange7d.toFixed(1)}%`;
+      momentumDetail += ` | 7d: ${priceChange7d > 0 ? "+" : ""}${priceChange7d.toFixed(1)}%`;
     }
     if (priceChange30d !== null) {
-      momentumDetail += ` | 30d: ${priceChange30d > 0 ? '+' : ''}${priceChange30d.toFixed(1)}%`;
+      momentumDetail += ` | 30d: ${priceChange30d > 0 ? "+" : ""}${priceChange30d.toFixed(1)}%`;
     }
     details.momentum = momentumDetail;
 
@@ -276,77 +304,55 @@ async function runScorerAgent({
     // ═══════════════════════════════════════════════
     let cmcBonus = 0;
     const cmcInfo = scannerData?.cmc || null;
-    
+
     if (cmcInfo) {
       // CMC listing is itself a quality signal
       if (cmcInfo.cmc_rank && cmcInfo.cmc_rank < 1000) {
         cmcBonus += 3;
-        factors.push({ name: 'cmc_top_1000', score: 3, max: 3, category: 'quality', 
-          detail: `CMC Rank #${cmcInfo.cmc_rank}` });
+        factors.push({
+          name: "cmc_top_1000",
+          score: 3,
+          max: 3,
+          category: "quality",
+          detail: `CMC Rank #${cmcInfo.cmc_rank}`,
+        });
       } else if (cmcInfo.cmc_rank && cmcInfo.cmc_rank < 5000) {
         cmcBonus += 1;
-        factors.push({ name: 'cmc_listed', score: 1, max: 3, category: 'quality', 
-          detail: `CMC Rank #${cmcInfo.cmc_rank}` });
+        factors.push({
+          name: "cmc_listed",
+          score: 1,
+          max: 3,
+          category: "quality",
+          detail: `CMC Rank #${cmcInfo.cmc_rank}`,
+        });
       }
 
       // Supply transparency
       if (cmcInfo.circulating_supply && cmcInfo.total_supply) {
-        const circPct = (cmcInfo.circulating_supply / cmcInfo.total_supply) * 100;
+        const circPct =
+          (cmcInfo.circulating_supply / cmcInfo.total_supply) * 100;
         if (circPct > 50) {
           cmcBonus += 1;
-          factors.push({ name: 'healthy_supply', score: 1, max: 1, category: 'quality',
-            detail: `${circPct.toFixed(0)}% circulating` });
+          factors.push({
+            name: "healthy_supply",
+            score: 1,
+            max: 1,
+            category: "quality",
+            detail: `${circPct.toFixed(0)}% circulating`,
+          });
         }
       }
 
       // CMC tags give context
       if (cmcInfo.tags && cmcInfo.tags.length > 0) {
-        factors.push({ name: 'cmc_tags', score: 0, max: 0, category: 'info',
-          detail: `Tags: ${cmcInfo.tags.slice(0, 5).join(', ')}` });
+        factors.push({
+          name: "cmc_tags",
+          score: 0,
+          max: 0,
+          category: "info",
+          detail: `Tags: ${cmcInfo.tags.slice(0, 5).join(", ")}`,
+        });
       }
-    }
-
-    // ═══════════════════════════════════════════════
-    // BAGS.FM QUALITY SIGNALS (v7.5.0 — ADDITIVE)
-    // Cross-reference bags_tokens table by mint address
-    // ═══════════════════════════════════════════════
-    let bagsBonus = 0;
-    try {
-      const bagsDb = require('/opt/buzz-api/db').getDB();
-      const bagsRow = bagsDb.prepare('SELECT * FROM bags_tokens WHERE token_mint = ?').get(address);
-      if (bagsRow) {
-        bagsBonus += 5; // On Bags.fm platform (not Pump.fun)
-        factors.push({ name: 'bags_platform', score: 5, max: 5, category: 'quality',
-          detail: 'Listed on Bags.fm — creator earns 1% royalties (incentivized to grow)' });
-
-        if (bagsRow.lifetime_fees_sol > 50) {
-          bagsBonus += 12;
-          factors.push({ name: 'bags_fees_high', score: 12, max: 12, category: 'quality',
-            detail: `${bagsRow.lifetime_fees_sol} SOL lifetime fees — proven revenue generator` });
-        } else if (bagsRow.lifetime_fees_sol > 10) {
-          bagsBonus += 8;
-          factors.push({ name: 'bags_fees_moderate', score: 8, max: 12, category: 'quality',
-            detail: `${bagsRow.lifetime_fees_sol} SOL lifetime fees — active trading` });
-        }
-
-        if (bagsRow.twitter) {
-          bagsBonus += 3;
-          factors.push({ name: 'bags_twitter', score: 3, max: 3, category: 'social',
-            detail: 'Bags.fm token has linked Twitter' });
-        }
-        if (bagsRow.website) {
-          bagsBonus += 2;
-          factors.push({ name: 'bags_website', score: 2, max: 2, category: 'social',
-            detail: 'Bags.fm token has linked website' });
-        }
-        if (bagsRow.status === 'PRE_GRAD') {
-          bagsBonus += 2;
-          factors.push({ name: 'bags_pre_grad', score: 2, max: 2, category: 'quality',
-            detail: 'Pre-graduation on Bags.fm — early stage opportunity' });
-        }
-      }
-    } catch (e) {
-      // bags_tokens table may not exist yet — graceful fallback
     }
 
     // ═══════════════════════════════════════════════
@@ -354,26 +360,36 @@ async function runScorerAgent({
     // ═══════════════════════════════════════════════
 
     const baseScore = Object.values(scores).reduce((sum, s) => sum + s, 0);
-    const totalScore = Math.min(100, baseScore + cmcBonus + bagsBonus); // Cap at 100 even with bonus
-    
+    const totalScore = Math.min(100, baseScore + cmcBonus); // Cap at 100 even with bonus
+
     // Build factors array for response
     const factorsArray = Object.entries(scores).map(([name, score]) => ({
       name,
       score,
       max: SCORING_FACTORS[name]?.max || 0,
-      category: SCORING_FACTORS[name]?.category || 'other',
-      detail: details[name] || ''
+      category: SCORING_FACTORS[name]?.category || "other",
+      detail: details[name] || "",
     }));
 
     // Category subtotals
     const categories = {
-      market: factorsArray.filter(f => f.category === 'market').reduce((s, f) => s + f.score, 0),
-      safety: factorsArray.filter(f => f.category === 'safety').reduce((s, f) => s + f.score, 0),
-      social: factorsArray.filter(f => f.category === 'social').reduce((s, f) => s + f.score, 0),
-      quality: factorsArray.filter(f => f.category === 'quality').reduce((s, f) => s + f.score, 0)
+      market: factorsArray
+        .filter((f) => f.category === "market")
+        .reduce((s, f) => s + f.score, 0),
+      safety: factorsArray
+        .filter((f) => f.category === "safety")
+        .reduce((s, f) => s + f.score, 0),
+      social: factorsArray
+        .filter((f) => f.category === "social")
+        .reduce((s, f) => s + f.score, 0),
+      quality: factorsArray
+        .filter((f) => f.category === "quality")
+        .reduce((s, f) => s + f.score, 0),
     };
 
-    console.log(`[${requestId}] 📊 Scorer: ${totalScore}/${MAX_SCORE} | Market:${categories.market}/30 Safety:${categories.safety}/30 Social:${categories.social}/20 Quality:${categories.quality}/20`);
+    console.log(
+      `[${requestId}] 📊 Scorer: ${totalScore}/${MAX_SCORE} | Market:${categories.market}/30 Safety:${categories.safety}/30 Social:${categories.social}/20 Quality:${categories.quality}/20`,
+    );
 
     // ═══════════════════════════════════════════════
     // MAJOR CEX EXCLUSION (v7.5.0)
@@ -382,21 +398,28 @@ async function runScorerAgent({
     // ═══════════════════════════════════════════════
     let bdTarget = true;
     try {
-      const cexDb = require('/opt/buzz-api/db').getDB();
-      const okxRow = cexDb.prepare('SELECT instrument_id FROM okx_instruments WHERE base_ccy = ? LIMIT 1').get(
-        (scannerData?.symbol || '').toUpperCase()
-      );
+      const cexDb = require("/opt/buzz-api/db").getDB();
+      const okxRow = cexDb
+        .prepare(
+          "SELECT instrument_id FROM okx_instruments WHERE base_ccy = ? LIMIT 1",
+        )
+        .get((scannerData?.symbol || "").toUpperCase());
       if (okxRow && mc > 100000000) {
         bdTarget = false;
-        factors.push({ name: 'major_cex_listed', score: 0, max: 0, category: 'info',
-          detail: `Already on OKX (${okxRow.instrument_id}) with $${formatNumber(mc)} mcap — not a BD target` });
+        factors.push({
+          name: "major_cex_listed",
+          score: 0,
+          max: 0,
+          category: "info",
+          detail: `Already on OKX (${okxRow.instrument_id}) with $${formatNumber(mc)} mcap — not a BD target`,
+        });
       }
     } catch (e) {
       // okx_instruments table may not exist yet
     }
 
     return {
-      status: 'completed',
+      status: "completed",
       score: totalScore,
       bd_target: bdTarget,
       duration_ms: Date.now() - start,
@@ -406,17 +429,16 @@ async function runScorerAgent({
         bd_target: bdTarget,
         categories,
         factors: [...factorsArray, ...factors],
-        factor_count: factorsArray.length + factors.length
-      }
+        factor_count: factorsArray.length + factors.length,
+      },
     };
-
   } catch (err) {
     console.error(`[${requestId}] ❌ scorer-agent failed:`, err.message);
     return {
-      status: 'error',
+      status: "error",
       score: 0,
       duration_ms: Date.now() - start,
-      data: { error: err.message }
+      data: { error: err.message },
     };
   }
 }

@@ -13,16 +13,22 @@
  * Buzz BD Agent v7.4.1 | Sprint Day 26
  */
 
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
-const OAuth = require('/opt/buzz-api/node_modules/oauth-1.0a/oauth-1.0a.js');
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
+const OAuth = require("/opt/buzz-api/node_modules/oauth-1.0a/oauth-1.0a.js");
 
 // ─── Config ─────────────────────────────────────────
-const TWITTER_BRAIN_ENABLED = process.env.TWITTER_BRAIN_ENABLED === 'true';
-const MAX_REPLIES_DAY = parseInt(process.env.TWITTER_BRAIN_MAX_REPLIES || '12', 10);
-const SPENDING_CAP = parseInt(process.env.TWITTER_BRAIN_SPENDING_CAP || '100', 10);
-const TWEET_AUTO = process.env.TWEET_AUTO === 'true';
+const TWITTER_BRAIN_ENABLED = process.env.TWITTER_BRAIN_ENABLED === "true";
+const MAX_REPLIES_DAY = parseInt(
+  process.env.TWITTER_BRAIN_MAX_REPLIES || "12",
+  10,
+);
+const SPENDING_CAP = parseInt(
+  process.env.TWITTER_BRAIN_SPENDING_CAP || "100",
+  10,
+);
+const TWEET_AUTO = process.env.TWEET_AUTO === "true";
 const RATE_LIMIT_DELAY_MS = 30000; // 30s between replies
 const DEPLOY_CAP_DAY = 3;
 // ======================================================================
@@ -34,29 +40,41 @@ function progressBar(score, max) {
   max = max || 10;
   const filled = Math.round((score / max) * 5);
   const empty = 5 - filled;
-  return '\u2588'.repeat(Math.max(0, filled)) + '\u2591'.repeat(Math.max(0, empty));
+  return (
+    "\u2588".repeat(Math.max(0, filled)) + "\u2591".repeat(Math.max(0, empty))
+  );
 }
 
 function getVerdict(score) {
-  if (score >= 85) return { e: '\ud83d\udd25', l: 'HOT', a: 'Strong listing prospect' };
-  if (score >= 70) return { e: '\u2705', l: 'QUALIFIED', a: 'Worth monitoring' };
-  if (score >= 50) return { e: '\ud83d\udc40', l: 'WATCHLIST', a: 'Monitor 48h' };
-  if (score >= 30) return { e: '\u26a0\ufe0f', l: 'HIGH RISK', a: 'Caution' };
-  return { e: '\ud83d\udd34', l: 'DANGER', a: 'Avoid' };
+  if (score >= 85)
+    return { e: "\ud83d\udd25", l: "HOT", a: "Strong listing prospect" };
+  if (score >= 70)
+    return { e: "\u2705", l: "QUALIFIED", a: "Worth monitoring" };
+  if (score >= 50)
+    return { e: "\ud83d\udc40", l: "WATCHLIST", a: "Monitor 48h" };
+  if (score >= 30) return { e: "\u26a0\ufe0f", l: "HIGH RISK", a: "Caution" };
+  return { e: "\ud83d\udd34", l: "DANGER", a: "Avoid" };
 }
 
 function letterGrade(s) {
-  if (s >= 90) return 'A+'; if (s >= 85) return 'A'; if (s >= 80) return 'A-';
-  if (s >= 75) return 'B+'; if (s >= 70) return 'B'; if (s >= 65) return 'B-';
-  if (s >= 60) return 'C+'; if (s >= 55) return 'C'; if (s >= 50) return 'C-';
-  if (s >= 40) return 'D'; return 'F';
+  if (s >= 90) return "A+";
+  if (s >= 85) return "A";
+  if (s >= 80) return "A-";
+  if (s >= 75) return "B+";
+  if (s >= 70) return "B";
+  if (s >= 65) return "B-";
+  if (s >= 60) return "C+";
+  if (s >= 55) return "C";
+  if (s >= 50) return "C-";
+  if (s >= 40) return "D";
+  return "F";
 }
 
 function fmtNum(n) {
-  if (n == null) return 'N/A';
-  if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
-  if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
-  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+  if (n == null) return "N/A";
+  if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
+  if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + "K";
   return String(n);
 }
 
@@ -64,59 +82,88 @@ function formatScanResponse(d, symbol, chain, score) {
   const v = getVerdict(score);
   const grade = letterGrade(score);
   const f = d.factors || {};
-  const s = (val) => val || 'N/A';
+  const s = (val) => val || "N/A";
   const lines = [];
 
-  lines.push('\ud83d\udc1d BUZZ INTEL \u2014 $' + symbol + ' (' + chain + ')');
-  lines.push('\u2501'.repeat(26));
-  lines.push(v.e + ' ' + score + '/100 (' + grade + ') \u2014 ' + v.l);
-  lines.push('Score ' + progressBar(score, 100) + ' ' + score + 'pts');
-  lines.push('');
-  lines.push('\ud83d\udcca LAYER 1 \u2014 MARKET');
-  lines.push('MCap: ' + s(d.mcap) + ' | FDV: ' + s(d.fdv));
-  lines.push('Liq: ' + s(d.liq) + ' | Vol 24h: ' + s(d.vol));
-  lines.push('Price: ' + s(d.price));
-  if (d.holders) lines.push('Holders: ' + s(d.holders));
-  lines.push('');
-  lines.push('\ud83d\udee1\ufe0f LAYER 2 \u2014 SAFETY');
-  lines.push('Mint: ' + s(d.mint) + ' | Freeze: ' + s(d.freeze));
-  lines.push('LP: ' + s(d.lp_lock) + ' | Contract: ' + s(d.contract_status));
-  if (d.rugcheck != null) lines.push('RugCheck: ' + d.rugcheck + '/100 ' + progressBar(100 - d.rugcheck, 100));
-  lines.push('Verdict: ' + s(d.safety_verdict));
-  lines.push('');
-  lines.push('\ud83e\udde0 LAYER 3 \u2014 INTELLIGENCE');
-  if (f.marketScore != null) lines.push('Market:  ' + f.marketScore + '/25 ' + progressBar(f.marketScore, 25));
-  if (f.safetyScore != null) lines.push('Safety:  ' + f.safetyScore + '/30 ' + progressBar(f.safetyScore, 30));
-  if (f.socialScore != null) lines.push('Social:  ' + f.socialScore + '/25 ' + progressBar(f.socialScore, 25));
-  if (f.onchainScore != null) lines.push('OnChain: ' + f.onchainScore + '/20 ' + progressBar(f.onchainScore, 20));
-  lines.push('');
-  lines.push('\ud83c\udf10 LAYER 4 \u2014 SOCIAL');
+  lines.push("\ud83d\udc1d BUZZ INTEL \u2014 $" + symbol + " (" + chain + ")");
+  lines.push("\u2501".repeat(26));
+  lines.push(v.e + " " + score + "/100 (" + grade + ") \u2014 " + v.l);
+  lines.push("Score " + progressBar(score, 100) + " " + score + "pts");
+  lines.push("");
+  lines.push("\ud83d\udcca LAYER 1 \u2014 MARKET");
+  lines.push("MCap: " + s(d.mcap) + " | FDV: " + s(d.fdv));
+  lines.push("Liq: " + s(d.liq) + " | Vol 24h: " + s(d.vol));
+  lines.push("Price: " + s(d.price));
+  if (d.holders) lines.push("Holders: " + s(d.holders));
+  lines.push("");
+  lines.push("\ud83d\udee1\ufe0f LAYER 2 \u2014 SAFETY");
+  lines.push("Mint: " + s(d.mint) + " | Freeze: " + s(d.freeze));
+  lines.push("LP: " + s(d.lp_lock) + " | Contract: " + s(d.contract_status));
+  if (d.rugcheck != null)
+    lines.push(
+      "RugCheck: " + d.rugcheck + "/100 " + progressBar(100 - d.rugcheck, 100),
+    );
+  lines.push("Verdict: " + s(d.safety_verdict));
+  lines.push("");
+  lines.push("\ud83e\udde0 LAYER 3 \u2014 INTELLIGENCE");
+  if (f.marketScore != null)
+    lines.push(
+      "Market:  " + f.marketScore + "/25 " + progressBar(f.marketScore, 25),
+    );
+  if (f.safetyScore != null)
+    lines.push(
+      "Safety:  " + f.safetyScore + "/30 " + progressBar(f.safetyScore, 30),
+    );
+  if (f.socialScore != null)
+    lines.push(
+      "Social:  " + f.socialScore + "/25 " + progressBar(f.socialScore, 25),
+    );
+  if (f.onchainScore != null)
+    lines.push(
+      "OnChain: " + f.onchainScore + "/20 " + progressBar(f.onchainScore, 20),
+    );
+  lines.push("");
+  lines.push("\ud83c\udf10 LAYER 4 \u2014 SOCIAL");
   if (d.whale_summary) lines.push(d.whale_summary);
-  if (d.concentration) lines.push('Top 10: ' + d.concentration + '% concentration');
-  if (d.bsr) lines.push('Buy/Sell: ' + d.bsr);
-  lines.push('');
-  lines.push('\ud83c\udfaf LAYER 5 \u2014 VERDICT');
-  lines.push(v.e + ' ' + v.l + ': ' + v.a);
+  if (d.concentration)
+    lines.push("Top 10: " + d.concentration + "% concentration");
+  if (d.bsr) lines.push("Buy/Sell: " + d.bsr);
+  lines.push("");
+  lines.push("\ud83c\udfaf LAYER 5 \u2014 VERDICT");
+  lines.push(v.e + " " + v.l + ": " + v.a);
   if (d.degen_signal) {
-    lines.push('\ud83c\udfb0 Degen: ' + s(d.degen_signal) + ' (' + s(d.degen_conf) + ')');
-    lines.push('\ud83d\udc33 Whale: ' + s(d.whale_signal) + ' (' + s(d.whale_conf) + ')');
-    lines.push('\ud83c\udfe6 Inst: ' + s(d.inst_signal) + ' (' + s(d.inst_conf) + ')');
-    lines.push('\ud83d\udc65 Community: ' + s(d.comm_signal) + ' (' + s(d.comm_conf) + ')');
-    lines.push(s(d.bullish) + '/4 personas bullish');
+    lines.push(
+      "\ud83c\udfb0 Degen: " + s(d.degen_signal) + " (" + s(d.degen_conf) + ")",
+    );
+    lines.push(
+      "\ud83d\udc33 Whale: " + s(d.whale_signal) + " (" + s(d.whale_conf) + ")",
+    );
+    lines.push(
+      "\ud83c\udfe6 Inst: " + s(d.inst_signal) + " (" + s(d.inst_conf) + ")",
+    );
+    lines.push(
+      "\ud83d\udc65 Community: " +
+        s(d.comm_signal) +
+        " (" +
+        s(d.comm_conf) +
+        ")",
+    );
+    lines.push(s(d.bullish) + "/4 personas bullish");
   }
-  lines.push('');
-  lines.push('\u2501'.repeat(26));
+  lines.push("");
+  lines.push("\u2501".repeat(26));
   if (score >= 70) {
-    lines.push('\ud83c\udfe6 Want $' + symbol + ' listed on @SolCex_Exchange?');
-    lines.push('DM @HidayahAnka1 to connect');
+    lines.push("\ud83c\udfe6 Want $" + symbol + " listed on @SolCex_Exchange?");
+    lines.push("DM @HidayahAnka1 to connect");
   } else {
-    lines.push('\ud83d\udc40 Monitoring $' + symbol + '. Score needs 70+ for listing.');
+    lines.push(
+      "\ud83d\udc40 Monitoring $" + symbol + ". Score needs 70+ for listing.",
+    );
   }
-  lines.push('');
-  lines.push('Powered by @BuzzBySolCex | #SolCex #' + chain);
-  return lines.join('\n');
+  lines.push("");
+  lines.push("Powered by @BuzzBySolCex | #SolCex #" + chain);
+  return lines.join("\n");
 }
-
 
 // X API credentials
 const X_API_BEARER = process.env.X_API_BEARER_TOKEN;
@@ -127,22 +174,22 @@ const X_ACCESS_SECRET = process.env.X_ACCESS_SECRET;
 
 // Bankr Partner Deploy API
 const BANKR_PARTNER_KEY = process.env.BANKR_PARTNER_KEY;
-const BANKR_DEPLOY_URL = 'https://api.bankr.bot/token-launches/deploy';
+const BANKR_DEPLOY_URL = "https://api.bankr.bot/token-launches/deploy";
 
 // Telegram notification for deploys
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
-const { sendTelegram } = require('../lib/telegram-notify');
+const { sendTelegram } = require("../lib/telegram-notify");
 
 // OAuth 1.0a instance for X API v2 write endpoints
 const oauth = OAuth({
-  consumer: { key: X_API_KEY || '', secret: X_API_SECRET || '' },
-  signature_method: 'HMAC-SHA1',
+  consumer: { key: X_API_KEY || "", secret: X_API_SECRET || "" },
+  signature_method: "HMAC-SHA1",
   hash_function(baseString, key) {
-    return crypto.createHmac('sha1', key).update(baseString).digest('base64');
+    return crypto.createHmac("sha1", key).update(baseString).digest("base64");
   },
 });
-const oauthToken = { key: X_ACCESS_TOKEN || '', secret: X_ACCESS_SECRET || '' };
+const oauthToken = { key: X_ACCESS_TOKEN || "", secret: X_ACCESS_SECRET || "" };
 
 /**
  * Generate OAuth 1.0a Authorization header for X API v2 write requests
@@ -156,19 +203,20 @@ function getOAuthHeader(url, method) {
 const SERPER_API_KEY = process.env.SERPER_API_KEY;
 
 // Data dirs
-const TWITTER_DATA_DIR = process.env.TWITTER_DATA_DIR || '/data/workspace/twitter-bot';
+const TWITTER_DATA_DIR =
+  process.env.TWITTER_DATA_DIR || "/data/workspace/twitter-bot";
 
 // ─── Persistent replied-tweet dedup (survives restarts) ─────────────
-const REPLIED_FILE = '/data/workspace/twitter-replied.json';
+const REPLIED_FILE = "/data/workspace/twitter-replied.json";
 
 function loadRepliedSet() {
   try {
     if (fs.existsSync(REPLIED_FILE)) {
-      const arr = JSON.parse(fs.readFileSync(REPLIED_FILE, 'utf8'));
+      const arr = JSON.parse(fs.readFileSync(REPLIED_FILE, "utf8"));
       return new Set(Array.isArray(arr) ? arr : []);
     }
   } catch (e) {
-    console.error('[DEDUP] Error loading replied set:', e.message);
+    console.error("[DEDUP] Error loading replied set:", e.message);
   }
   return new Set();
 }
@@ -179,7 +227,7 @@ function saveRepliedSet(set) {
     const arr = [...set].slice(-10000); // keep last 10k
     fs.writeFileSync(REPLIED_FILE, JSON.stringify(arr));
   } catch (e) {
-    console.error('[DEDUP] Error saving replied set:', e.message);
+    console.error("[DEDUP] Error saving replied set:", e.message);
   }
 }
 
@@ -196,8 +244,10 @@ function hasReplied(tweetId) {
   return set.has(String(tweetId));
 }
 
-const PIPELINE_DIR = process.env.PIPELINE_DIR || '/data/workspace/memory/pipeline';
-const RECEIPTS_DIR = process.env.RECEIPTS_DIR || '/data/workspace/memory/receipts';
+const PIPELINE_DIR =
+  process.env.PIPELINE_DIR || "/data/workspace/memory/pipeline";
+const RECEIPTS_DIR =
+  process.env.RECEIPTS_DIR || "/data/workspace/memory/receipts";
 
 // ─── Branded Footer ─────────────────────────────────
 const BUZZ_FOOTER = `\n\n🐝 Buzz BD Agent\nBuilt on OpenClaw · Hosted on Agentic.hosting\nLearning architecture inspired by @NousResearch Hermes\n@SolCex_Exchange`;
@@ -206,13 +256,27 @@ const BUZZ_FOOTER = `\n\n🐝 Buzz BD Agent\nBuilt on OpenClaw · Hosted on Agen
 // DEPLOY via Bankr Partner API: AUTONOMOUS (no Ogie approval needed)
 // transfer_tokens: REQUIRES Ogie Telegram approval
 // buy_token(execute=true): REQUIRES Ogie Telegram approval
-const R013_AUTONOMOUS_OPS = ['bankr_deploy'];
-const R013_APPROVAL_REQUIRED = ['transfer_tokens', 'buy_token_execute'];
+const R013_AUTONOMOUS_OPS = ["bankr_deploy"];
+const R013_APPROVAL_REQUIRED = ["transfer_tokens", "buy_token_execute"];
 
 // ─── Twitter TOS Compliance ─────────────────────────
-const BANNED_FINANCIAL = ['guaranteed returns', 'moon', '100x', 'will pump', 'buy now', 'not financial advice', 'dyor'];
-const BANNED_ENGAGEMENT = ['retweet', 'like this', 'follow for follow', 'tag friends'];
-const DEPLOY_RISK_DISCLAIMER = 'This deploys a real smart contract on Base. Trading involves risk.';
+const BANNED_FINANCIAL = [
+  "guaranteed returns",
+  "moon",
+  "100x",
+  "will pump",
+  "buy now",
+  "not financial advice",
+  "dyor",
+];
+const BANNED_ENGAGEMENT = [
+  "retweet",
+  "like this",
+  "follow for follow",
+  "tag friends",
+];
+const DEPLOY_RISK_DISCLAIMER =
+  "This deploys a real smart contract on Base. Trading involves risk.";
 
 // Track posted texts for uniqueness (in-memory, reset on restart — file-based dedup via seen-tweets)
 const _postedTexts = new Set();
@@ -223,46 +287,61 @@ const _postedTexts = new Set();
  */
 function validateTweetCompliance(text, tweetId, username) {
   // RULE 1: Never @mention more than 2 accounts per tweet
-  const mentions = (text.match(/@\w+/g) || []);
-  const uniqueMentions = new Set(mentions.map(m => m.toLowerCase()));
+  const mentions = text.match(/@\w+/g) || [];
+  const uniqueMentions = new Set(mentions.map((m) => m.toLowerCase()));
   if (uniqueMentions.size > 3) {
-    return { valid: false, reason: `R1: Too many @mentions (${uniqueMentions.size} > 3)` };
+    return {
+      valid: false,
+      reason: `R1: Too many @mentions (${uniqueMentions.size} > 3)`,
+    };
   }
 
   // RULE 6: Banned financial language
   const lower = text.toLowerCase();
   for (const phrase of BANNED_FINANCIAL) {
     if (lower.includes(phrase.toLowerCase())) {
-      return { valid: false, reason: `R6: Banned financial language: "${phrase}"` };
+      return {
+        valid: false,
+        reason: `R6: Banned financial language: "${phrase}"`,
+      };
     }
   }
 
   // RULE 9: No engagement farming language
   for (const phrase of BANNED_ENGAGEMENT) {
     if (lower.includes(phrase.toLowerCase())) {
-      return { valid: false, reason: `R9: Engagement farming language: "${phrase}"` };
+      return {
+        valid: false,
+        reason: `R9: Engagement farming language: "${phrase}"`,
+      };
     }
   }
 
   // RULE 11: Scores presented as "AI analysis" never "investment advice"
-  if (lower.includes('investment advice')) {
-    return { valid: false, reason: 'R11: Contains "investment advice" — must use "AI analysis"' };
+  if (lower.includes("investment advice")) {
+    return {
+      valid: false,
+      reason: 'R11: Contains "investment advice" — must use "AI analysis"',
+    };
   }
 
   // RULE 2: Never post identical text — check in-memory set
   const textHash = simpleHash(text);
   if (_postedTexts.has(textHash)) {
-    return { valid: false, reason: 'R2: Duplicate text detected' };
+    return { valid: false, reason: "R2: Duplicate text detected" };
   }
 
   // RULE 7: Never reply to same tweet ID twice
   if (tweetId) {
-    const repliedFile = path.join(TWITTER_DATA_DIR, 'replied-tweets.json');
+    const repliedFile = path.join(TWITTER_DATA_DIR, "replied-tweets.json");
     try {
       if (fs.existsSync(repliedFile)) {
-        const replied = JSON.parse(fs.readFileSync(repliedFile, 'utf8'));
+        const replied = JSON.parse(fs.readFileSync(repliedFile, "utf8"));
         if (replied.includes(tweetId)) {
-          return { valid: false, reason: `R7: Already replied to tweet ${tweetId}` };
+          return {
+            valid: false,
+            reason: `R7: Already replied to tweet ${tweetId}`,
+          };
         }
       }
     } catch {}
@@ -270,19 +349,26 @@ function validateTweetCompliance(text, tweetId, username) {
 
   // RULE 8: Never reply to same username more than once per 24h
   if (username) {
-    const userFile = path.join(TWITTER_DATA_DIR, 'replied-users-24h.json');
+    const userFile = path.join(TWITTER_DATA_DIR, "replied-users-24h.json");
     try {
       if (fs.existsSync(userFile)) {
-        const data = JSON.parse(fs.readFileSync(userFile, 'utf8'));
+        const data = JSON.parse(fs.readFileSync(userFile, "utf8"));
         const today = new Date().toISOString().slice(0, 10);
-        if (data.date === today && data.users && data.users.includes(username.toLowerCase())) {
-          return { valid: false, reason: `R8: Already replied to @${username} today` };
+        if (
+          data.date === today &&
+          data.users &&
+          data.users.includes(username.toLowerCase())
+        ) {
+          return {
+            valid: false,
+            reason: `R8: Already replied to @${username} today`,
+          };
         }
       }
     } catch {}
   }
 
-  return { valid: true, reason: 'ok' };
+  return { valid: true, reason: "ok" };
 }
 
 /**
@@ -295,10 +381,11 @@ function recordPostedTweet(text, tweetId, username) {
 
   // Track replied tweet IDs (Rule 7)
   if (tweetId) {
-    const repliedFile = path.join(TWITTER_DATA_DIR, 'replied-tweets.json');
+    const repliedFile = path.join(TWITTER_DATA_DIR, "replied-tweets.json");
     let replied = [];
     try {
-      if (fs.existsSync(repliedFile)) replied = JSON.parse(fs.readFileSync(repliedFile, 'utf8'));
+      if (fs.existsSync(repliedFile))
+        replied = JSON.parse(fs.readFileSync(repliedFile, "utf8"));
     } catch {}
     replied.push(tweetId);
     if (replied.length > 5000) replied = replied.slice(-5000);
@@ -307,12 +394,12 @@ function recordPostedTweet(text, tweetId, username) {
 
   // Track replied usernames per day (Rule 8)
   if (username) {
-    const userFile = path.join(TWITTER_DATA_DIR, 'replied-users-24h.json');
+    const userFile = path.join(TWITTER_DATA_DIR, "replied-users-24h.json");
     const today = new Date().toISOString().slice(0, 10);
     let data = { date: today, users: [] };
     try {
       if (fs.existsSync(userFile)) {
-        data = JSON.parse(fs.readFileSync(userFile, 'utf8'));
+        data = JSON.parse(fs.readFileSync(userFile, "utf8"));
         if (data.date !== today) data = { date: today, users: [] };
       }
     } catch {}
@@ -321,13 +408,10 @@ function recordPostedTweet(text, tweetId, username) {
   }
 }
 
-// ─── BD Keywords (Section 3 — SCAN layer, v7.5.0 site:x.com prefix) ───
+// ─── BD Keywords (Section 3 — SCAN layer, site:x.com prefix) ───
 const SCAN_KEYWORDS = [
-  // Bags.fm launches (highest BD value)
+  // Token launches
   'site:x.com "just launched" contract solana',
-  'site:x.com "new token" launched bags.fm',
-  'site:x.com @BagsApp launched token',
-  'site:x.com "just graduated" bags token',
   // General BD opportunities
   'site:x.com "looking for exchange" listing crypto',
   'site:x.com "CEX listing" token solana',
@@ -336,7 +420,7 @@ const SCAN_KEYWORDS = [
   'site:x.com "looking for CEX" crypto project',
   'site:x.com "list our token" exchange',
   // Multi-chain coverage
-  'site:x.com "new solana token" pump OR bags',
+  'site:x.com "new solana token" pump',
   'site:x.com "launched on base" token contract',
 ];
 
@@ -349,7 +433,8 @@ const CONTRACT_PATTERNS = [
 ];
 
 // DexScreener link pattern
-const DEXSCREENER_PATTERN = /dexscreener\.com\/(\w+)\/(0x[a-fA-F0-9]{40}|[1-9A-HJ-NP-Za-km-z]{32,44})/gi;
+const DEXSCREENER_PATTERN =
+  /dexscreener\.com\/(\w+)\/(0x[a-fA-F0-9]{40}|[1-9A-HJ-NP-Za-km-z]{32,44})/gi;
 const COINGECKO_PATTERN = /coingecko\.com\/(?:en\/)?coins?\/([\w-]+)/gi;
 
 // ─── Filter Rules (L1-L10) ─────────────────────────
@@ -362,7 +447,7 @@ const MAX_ACCOUNT_AGE_MONTHS = 6;
  */
 async function runTwitterBrainScan({ requestId, db } = {}) {
   if (!TWITTER_BRAIN_ENABLED) {
-    return { status: 'disabled', message: 'TWITTER_BRAIN_ENABLED is not true' };
+    return { status: "disabled", message: "TWITTER_BRAIN_ENABLED is not true" };
   }
 
   const scanStart = Date.now();
@@ -387,7 +472,9 @@ async function runTwitterBrainScan({ requestId, db } = {}) {
     results.keywordsScanned = SCAN_KEYWORDS.length;
     results.rawResults = allTweets.length;
 
-    console.log(`[${scanId}] 🧠 Raw tweets: ${allTweets.length} (Serper + X API fallback)`);
+    console.log(
+      `[${scanId}] 🧠 Raw tweets: ${allTweets.length} (Serper + X API fallback)`,
+    );
 
     // ─── Step 2: Filter (L1-L10 rules) ───
     const filtered = filterTweets(allTweets, scanId);
@@ -396,7 +483,9 @@ async function runTwitterBrainScan({ requestId, db } = {}) {
 
     // ─── Step 3: Extract contracts ───
     const withContracts = extractContracts(filtered);
-    results.contractsFound = withContracts.filter(t => t.contractAddress).length;
+    results.contractsFound = withContracts.filter(
+      (t) => t.contractAddress,
+    ).length;
     console.log(`[${scanId}] 🧠 Contracts found: ${results.contractsFound}`);
 
     // ─── Step 4: Route to pipeline (if contract found) ───
@@ -415,7 +504,7 @@ async function runTwitterBrainScan({ requestId, db } = {}) {
 
     results.completedAt = new Date().toISOString();
     results.durationMs = Date.now() - scanStart;
-    results.status = 'completed';
+    results.status = "completed";
 
     // ─── Step 7: JVR receipt ───
     saveJVRReceipt(results, scanId);
@@ -423,10 +512,11 @@ async function runTwitterBrainScan({ requestId, db } = {}) {
     // ─── Save scan history ───
     saveScanHistory(results);
 
-    console.log(`[${scanId}] 🧠 Twitter Brain scan complete: ${results.tokensRouted} routed, ${results.replyQueueSize} queued, ${results.durationMs}ms`);
-
+    console.log(
+      `[${scanId}] 🧠 Twitter Brain scan complete: ${results.tokensRouted} routed, ${results.replyQueueSize} queued, ${results.durationMs}ms`,
+    );
   } catch (err) {
-    results.status = 'error';
+    results.status = "error";
     results.error = err.message;
     results.errors.push(err.message);
     console.error(`[${scanId}] 🧠 Twitter Brain error: ${err.message}`);
@@ -444,44 +534,48 @@ async function runTwitterBrainScan({ requestId, db } = {}) {
  * Replaces non-working Grok x_search with real Google site:x.com queries
  */
 async function serperTwitterSearch(keyword, scanId) {
-  const response = await fetch('https://google.serper.dev/search', {
-    method: 'POST',
+  const response = await fetch("https://google.serper.dev/search", {
+    method: "POST",
     headers: {
-      'X-API-Key': SERPER_API_KEY,
-      'Content-Type': 'application/json'
+      "X-API-Key": SERPER_API_KEY,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      q: keyword.startsWith('site:') ? keyword : `site:x.com "${keyword}"`,
+      q: keyword.startsWith("site:") ? keyword : `site:x.com "${keyword}"`,
       num: 10,
-      tbs: 'qdr:d' // last 24 hours
+      tbs: "qdr:d", // last 24 hours
     }),
     signal: AbortSignal.timeout(15000),
   });
 
   if (!response.ok) {
-    console.log(`[${scanId}] ⚠️ Serper failed for "${keyword}": ${response.status}`);
+    console.log(
+      `[${scanId}] ⚠️ Serper failed for "${keyword}": ${response.status}`,
+    );
     return [];
   }
 
   const data = await response.json();
 
   // Parse Google results for Twitter/X posts
-  return (data.organic || []).map(result => {
-    const handle = extractHandleFromUrl(result.link);
-    const urlMatch = result.link?.match(/\/status\/(\d+)/);
-    return {
-      url: result.link,
-      title: result.title,
-      text: result.snippet || result.title || '',
-      tweet_id: urlMatch ? urlMatch[1] : null,
-      username: handle ? handle.replace('@', '') : null,
-      display_name: handle ? handle.replace('@', '') : null,
-      handle,
-      contracts: extractContractsFromText(result.snippet || ''),
-      source: 'serper',
-      keyword,
-    };
-  }).filter(r => r.handle); // Must have a handle
+  return (data.organic || [])
+    .map((result) => {
+      const handle = extractHandleFromUrl(result.link);
+      const urlMatch = result.link?.match(/\/status\/(\d+)/);
+      return {
+        url: result.link,
+        title: result.title,
+        text: result.snippet || result.title || "",
+        tweet_id: urlMatch ? urlMatch[1] : null,
+        username: handle ? handle.replace("@", "") : null,
+        display_name: handle ? handle.replace("@", "") : null,
+        handle,
+        contracts: extractContractsFromText(result.snippet || ""),
+        source: "serper",
+        keyword,
+      };
+    })
+    .filter((r) => r.handle); // Must have a handle
 }
 
 function extractHandleFromUrl(url) {
@@ -521,20 +615,22 @@ async function xApiSearch(keyword, scanId) {
     `https://api.x.com/2/tweets/search/recent?query=${query}&max_results=10&tweet.fields=author_id,created_at,public_metrics&expansions=author_id&user.fields=public_metrics,username`,
     {
       headers: {
-        'Authorization': `Bearer ${X_API_BEARER}`
+        Authorization: `Bearer ${X_API_BEARER}`,
       },
       signal: AbortSignal.timeout(15000),
-    }
+    },
   );
 
   if (!response.ok) {
-    console.log(`[${scanId}] ⚠️ X API search failed for "${keyword}": ${response.status}`);
+    console.log(
+      `[${scanId}] ⚠️ X API search failed for "${keyword}": ${response.status}`,
+    );
     return [];
   }
 
   const data = await response.json();
 
-  return (data.data || []).map(tweet => ({
+  return (data.data || []).map((tweet) => ({
     url: `https://x.com/i/status/${tweet.id}`,
     tweet_id: tweet.id,
     text: tweet.text,
@@ -544,14 +640,14 @@ async function xApiSearch(keyword, scanId) {
     handle: findHandle(data.includes?.users, tweet.author_id),
     followers_count: findFollowers(data.includes?.users, tweet.author_id),
     contracts: extractContractsFromText(tweet.text),
-    source: 'x_api',
+    source: "x_api",
     keyword,
   }));
 }
 
 function findUsername(users, authorId) {
   if (!users || !authorId) return null;
-  const user = users.find(u => u.id === authorId);
+  const user = users.find((u) => u.id === authorId);
   return user?.username || null;
 }
 
@@ -562,7 +658,7 @@ function findHandle(users, authorId) {
 
 function findFollowers(users, authorId) {
   if (!users || !authorId) return null;
-  const user = users.find(u => u.id === authorId);
+  const user = users.find((u) => u.id === authorId);
   return user?.public_metrics?.followers_count || null;
 }
 
@@ -575,7 +671,9 @@ function findFollowers(users, authorId) {
  */
 async function twitterBrainCombinedSearch(keywords, scanId) {
   if (!SERPER_API_KEY) {
-    console.log(`[${scanId}] ⚠️ SERPER_API_KEY not set — Twitter Brain scan cannot run`);
+    console.log(
+      `[${scanId}] ⚠️ SERPER_API_KEY not set — Twitter Brain scan cannot run`,
+    );
     return [];
   }
 
@@ -588,18 +686,22 @@ async function twitterBrainCombinedSearch(keywords, scanId) {
 
       // Tier 2: X API fallback if Serper returns nothing
       if (results.length === 0 && X_API_BEARER) {
-        console.log(`[${scanId}] 🔄 Serper empty for "${keyword}" — trying X API v2`);
+        console.log(
+          `[${scanId}] 🔄 Serper empty for "${keyword}" — trying X API v2`,
+        );
         results = await xApiSearch(keyword, scanId);
       }
 
       allResults.push(...results);
     } catch (err) {
-      console.log(`[${scanId}] ⚠️ Search error for "${keyword}": ${err.message}`);
+      console.log(
+        `[${scanId}] ⚠️ Search error for "${keyword}": ${err.message}`,
+      );
     }
   }
 
   // Dedup by URL
-  const unique = [...new Map(allResults.map(r => [r.url, r])).values()];
+  const unique = [...new Map(allResults.map((r) => [r.url, r])).values()];
   return unique;
 }
 
@@ -613,24 +715,25 @@ async function twitterBrainCombinedSearch(keywords, scanId) {
 function filterTweets(tweets, scanId) {
   const seen = loadSeenTweets();
 
-  return tweets.filter(tweet => {
+  return tweets.filter((tweet) => {
     // L1: Must have contract address OR DexScreener/CoinGecko link
-    const hasContract = hasContractOrLink(tweet.text || '');
+    const hasContract = hasContractOrLink(tweet.text || "");
 
     // L2: Must be from account with 500+ followers
-    const followersOk = !tweet.followers_count || tweet.followers_count >= MIN_FOLLOWERS;
+    const followersOk =
+      !tweet.followers_count || tweet.followers_count >= MIN_FOLLOWERS;
 
     // L3: Must NOT be a reply chain (find original project accounts)
-    const isOriginal = !tweet.text?.startsWith('@') && !tweet.in_reply_to;
+    const isOriginal = !tweet.text?.startsWith("@") && !tweet.in_reply_to;
 
     // L4: Must NOT be already in pipeline (dedup)
     const isNew = !seen.has(tweet.tweet_id);
 
     // L5: Not a known bot/spam pattern
-    const notSpam = !isSpamPattern(tweet.text || '');
+    const notSpam = !isSpamPattern(tweet.text || "");
 
     // For initial scan, require either contract or qualifying project signal
-    const qualifies = hasContract || hasProjectSignal(tweet.text || '');
+    const qualifies = hasContract || hasProjectSignal(tweet.text || "");
 
     if (isNew && followersOk && isOriginal && notSpam && qualifies) {
       seen.add(tweet.tweet_id);
@@ -664,13 +767,21 @@ function hasContractOrLink(text) {
  */
 function hasProjectSignal(text) {
   const signals = [
-    'CEX listing', 'exchange listing', 'listing partner',
-    'deploy token', 'launch token', 'token launch',
-    'mcap', 'market cap', 'liquidity',
-    'dexscreener', 'coingecko', 'coinmarketcap',
+    "CEX listing",
+    "exchange listing",
+    "listing partner",
+    "deploy token",
+    "launch token",
+    "token launch",
+    "mcap",
+    "market cap",
+    "liquidity",
+    "dexscreener",
+    "coingecko",
+    "coinmarketcap",
   ];
   const lower = text.toLowerCase();
-  return signals.some(s => lower.includes(s.toLowerCase()));
+  return signals.some((s) => lower.includes(s.toLowerCase()));
 }
 
 /**
@@ -678,12 +789,16 @@ function hasProjectSignal(text) {
  */
 function isSpamPattern(text) {
   const spamSignals = [
-    'guaranteed returns', '100x guaranteed', 'send ETH to',
-    'free airdrop claim', 'connect wallet to claim',
-    'DM for signals', 'join telegram for',
+    "guaranteed returns",
+    "100x guaranteed",
+    "send ETH to",
+    "free airdrop claim",
+    "connect wallet to claim",
+    "DM for signals",
+    "join telegram for",
   ];
   const lower = text.toLowerCase();
-  return spamSignals.some(s => lower.includes(s.toLowerCase()));
+  return spamSignals.some((s) => lower.includes(s.toLowerCase()));
 }
 
 // ═════════════════════════════════════════════════════
@@ -694,8 +809,8 @@ function isSpamPattern(text) {
  * Extract contract addresses from filtered tweets
  */
 function extractContracts(tweets) {
-  return tweets.map(tweet => {
-    const text = tweet.text || '';
+  return tweets.map((tweet) => {
+    const text = tweet.text || "";
     let contractAddress = null;
     let chain = null;
 
@@ -713,7 +828,7 @@ function extractContracts(tweets) {
       if (evmMatch) {
         contractAddress = evmMatch[1];
         // Default to base for EVM if no chain context
-        chain = detectChainFromText(text) || 'base';
+        chain = detectChainFromText(text) || "base";
       }
     }
 
@@ -722,7 +837,7 @@ function extractContracts(tweets) {
       const solMatch = text.match(/\b([1-9A-HJ-NP-Za-km-z]{32,44})\b/);
       if (solMatch && solMatch[1].length >= 32) {
         contractAddress = solMatch[1];
-        chain = 'solana';
+        chain = "solana";
       }
     }
 
@@ -735,10 +850,10 @@ function extractContracts(tweets) {
  */
 function detectChainFromText(text) {
   const lower = text.toLowerCase();
-  if (lower.includes('solana') || lower.includes('$sol')) return 'solana';
-  if (lower.includes('base')) return 'base';
-  if (lower.includes('bsc') || lower.includes('binance')) return 'bsc';
-  if (lower.includes('ethereum') || lower.includes('$eth')) return 'ethereum';
+  if (lower.includes("solana") || lower.includes("$sol")) return "solana";
+  if (lower.includes("base")) return "base";
+  if (lower.includes("bsc") || lower.includes("binance")) return "bsc";
+  if (lower.includes("ethereum") || lower.includes("$eth")) return "ethereum";
   return null;
 }
 
@@ -759,7 +874,7 @@ async function routeToPipeline(tweets, scanId, db) {
       // Verify via DexScreener before routing
       const dsRes = await fetch(
         `https://api.dexscreener.com/latest/dex/tokens/${tweet.contractAddress}`,
-        { signal: AbortSignal.timeout(10000) }
+        { signal: AbortSignal.timeout(10000) },
       );
 
       if (!dsRes.ok) continue;
@@ -767,13 +882,19 @@ async function routeToPipeline(tweets, scanId, db) {
       const pairs = dsData.pairs || [];
 
       if (pairs.length === 0) {
-        console.log(`[${scanId}] ⏩ No pairs for ${tweet.contractAddress} — skipping`);
+        console.log(
+          `[${scanId}] ⏩ No pairs for ${tweet.contractAddress} — skipping`,
+        );
         continue;
       }
 
-      const primaryPair = pairs.reduce((best, p) =>
-        (parseFloat(p.liquidity?.usd || 0) > parseFloat(best.liquidity?.usd || 0)) ? p : best,
-        pairs[0]
+      const primaryPair = pairs.reduce(
+        (best, p) =>
+          parseFloat(p.liquidity?.usd || 0) >
+          parseFloat(best.liquidity?.usd || 0)
+            ? p
+            : best,
+        pairs[0],
       );
 
       const liquidity = parseFloat(primaryPair.liquidity?.usd || 0);
@@ -781,13 +902,15 @@ async function routeToPipeline(tweets, scanId, db) {
 
       // Filter: liquidity > $10K and volume > $5K
       if (liquidity < 10000 || volume24h < 5000) {
-        console.log(`[${scanId}] ⏩ Low liq/vol for ${tweet.contractAddress}: $${liquidity}/$${volume24h}`);
+        console.log(
+          `[${scanId}] ⏩ Low liq/vol for ${tweet.contractAddress}: $${liquidity}/$${volume24h}`,
+        );
         continue;
       }
 
       const tokenData = {
         address: tweet.contractAddress,
-        chain: tweet.chain || primaryPair.chainId || 'unknown',
+        chain: tweet.chain || primaryPair.chainId || "unknown",
         symbol: primaryPair.baseToken?.symbol || null,
         name: primaryPair.baseToken?.name || null,
         liquidity,
@@ -807,11 +930,13 @@ async function routeToPipeline(tweets, scanId, db) {
       // Insert into DB if available
       if (db) {
         try {
-          db.prepare(`
+          db.prepare(
+            `
             INSERT OR IGNORE INTO pipeline_tokens
             (address, chain, ticker, name, stage, score, source, notes, created_at, updated_at)
             VALUES (?, ?, ?, ?, 'discovered', NULL, ?, ?, ?, ?)
-          `).run(
+          `,
+          ).run(
             tokenData.address,
             tokenData.chain,
             tokenData.symbol,
@@ -819,7 +944,7 @@ async function routeToPipeline(tweets, scanId, db) {
             tokenData.source,
             `Twitter: @${tweet.username} | Liq: $${liquidity.toFixed(0)} | Vol24h: $${volume24h.toFixed(0)}`,
             tokenData.discoveredAt,
-            tokenData.discoveredAt
+            tokenData.discoveredAt,
           );
         } catch (dbErr) {
           // Ignore duplicate inserts
@@ -827,10 +952,13 @@ async function routeToPipeline(tweets, scanId, db) {
       }
 
       routed.push(tokenData);
-      console.log(`[${scanId}] ✅ Routed: ${tokenData.symbol || tokenData.address} (${tokenData.chain}) — Liq $${liquidity.toFixed(0)}`);
-
+      console.log(
+        `[${scanId}] ✅ Routed: ${tokenData.symbol || tokenData.address} (${tokenData.chain}) — Liq $${liquidity.toFixed(0)}`,
+      );
     } catch (err) {
-      console.log(`[${scanId}] ⚠️ Route error for ${tweet.contractAddress}: ${err.message}`);
+      console.log(
+        `[${scanId}] ⚠️ Route error for ${tweet.contractAddress}: ${err.message}`,
+      );
     }
   }
 
@@ -850,7 +978,9 @@ function generateReplyQueue(tweets, scanId) {
   const dailyCount = getDailyReplyCount();
 
   if (dailyCount >= MAX_REPLIES_DAY) {
-    console.log(`[${scanId}] 🧠 Reply cap reached: ${dailyCount}/${MAX_REPLIES_DAY}`);
+    console.log(
+      `[${scanId}] 🧠 Reply cap reached: ${dailyCount}/${MAX_REPLIES_DAY}`,
+    );
     return queue;
   }
 
@@ -858,7 +988,12 @@ function generateReplyQueue(tweets, scanId) {
 
   // Prioritize tweets with contracts and higher follower counts
   const prioritized = tweets
-    .filter(t => t.contractAddress && t.username && !hasReplied(t.tweet_id || extractTweetIdFromUrl(t.url)))
+    .filter(
+      (t) =>
+        t.contractAddress &&
+        t.username &&
+        !hasReplied(t.tweet_id || extractTweetIdFromUrl(t.url)),
+    )
     .sort((a, b) => (b.followers_count || 0) - (a.followers_count || 0))
     .slice(0, remaining);
 
@@ -875,7 +1010,7 @@ function generateReplyQueue(tweets, scanId) {
         contractAddress: tweet.contractAddress,
         chain: tweet.chain,
         createdAt: new Date().toISOString(),
-        status: 'queued',
+        status: "queued",
       });
     }
   }
@@ -898,21 +1033,25 @@ function buildOutreachReply(tweet) {
     ...tweet.scanData,
     symbol: tweet.scanData?.symbol || tweet.symbol || null,
     mcap: tweet.scanData?.mcap || (tweet.mcap ? formatUsd(tweet.mcap) : null),
-    liq: tweet.scanData?.liq || (tweet.liquidity ? formatUsd(tweet.liquidity) : null),
-    vol: tweet.scanData?.vol || (tweet.volume24h ? formatUsd(tweet.volume24h) : null),
+    liq:
+      tweet.scanData?.liq ||
+      (tweet.liquidity ? formatUsd(tweet.liquidity) : null),
+    vol:
+      tweet.scanData?.vol ||
+      (tweet.volume24h ? formatUsd(tweet.volume24h) : null),
     price: tweet.scanData?.price || tweet.priceUsd || null,
     holders: tweet.scanData?.holders || tweet.holders || null,
   };
   const score = d.score || 0;
-  const symbol = d.symbol || tweet.contractAddress?.slice(0, 8) || '???';
-  const chain = (tweet.chain || 'unknown').charAt(0).toUpperCase() + (tweet.chain || 'unknown').slice(1);
+  const symbol = d.symbol || tweet.contractAddress?.slice(0, 8) || "???";
+  const chain =
+    (tweet.chain || "unknown").charAt(0).toUpperCase() +
+    (tweet.chain || "unknown").slice(1);
 
   // Use Premium 5-layer format for scores >= 50
   if (score >= MIN_SCORE_TO_POST) {
     return formatScanResponse(d, symbol, chain, score);
   }
-
-
 
   // Below minimum score — short outreach
   return `🐝 BUZZ SCAN \u2014 ${symbol} (${chain})\nScore: ${score}/100\n\nInteresting project. We're reviewing for potential listing.\nDM @HidayahAnka1 to connect.${BUZZ_FOOTER}`;
@@ -930,7 +1069,7 @@ function formatUsd(val) {
  * TEMPLATE 1 — SCAN HOT (score 85+)
  */
 function buildHotReply(d, symbol, chain) {
-  const s = (v) => v || 'N/A';
+  const s = (v) => v || "N/A";
   return `🐝 BUZZ DEEP SCAN \u2014 ${symbol} (${chain})
 \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
 🛡️ SAFETY FIRST
@@ -974,7 +1113,7 @@ DM @HidayahAnka1${BUZZ_FOOTER}`;
  * TEMPLATE 2 — SCAN QUALIFIED (score 70-84)
  */
 function buildQualifiedReply(d, symbol, chain) {
-  const s = (v) => v || 'N/A';
+  const s = (v) => v || "N/A";
   return `🐝 BUZZ SCAN \u2014 ${symbol} (${chain})
 \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
 Score: ${s(d.score)}/100 | ✅ QUALIFIED
@@ -993,9 +1132,9 @@ DM @HidayahAnka1 to fast-track.${BUZZ_FOOTER}`;
  */
 function buildListReply(tweet) {
   const d = tweet.scanData || {};
-  const s = (v) => v || 'N/A';
-  const handle = tweet.username || tweet.handle || '???';
-  const symbol = d.symbol || '???';
+  const s = (v) => v || "N/A";
+  const handle = tweet.username || tweet.handle || "???";
+  const symbol = d.symbol || "???";
   return `🐝 @${handle} \u2014 Thanks for connecting!
 
 SolCex Listing Process:
@@ -1015,7 +1154,7 @@ Verified agent (ERC-8004 #25045 | AgentProof #1718)${BUZZ_FOOTER}`;
  * TEMPLATE 4 — DEPLOY offer reply (fully autonomous, cap 3/day)
  */
 function buildDeployReply(tweet) {
-  const handle = tweet.username || tweet.handle || '???';
+  const handle = tweet.username || tweet.handle || "???";
   return `🐝 @${handle} \u2014 Launch your token on Base?
 
 Deploy via Buzz + @bankrbot:
@@ -1044,10 +1183,14 @@ ${DEPLOY_RISK_DISCLAIMER}${BUZZ_FOOTER}`;
  * Rate limited: 30s between replies
  */
 async function executeReplyQueue(queue, scanId) {
-  console.log(`[TB-REPLY] executeReplyQueue called — queue: ${queue.length}, TWEET_AUTO: ${TWEET_AUTO}, hasOAuth: ${!!(X_API_KEY && X_API_SECRET && X_ACCESS_TOKEN && X_ACCESS_SECRET)}`);
+  console.log(
+    `[TB-REPLY] executeReplyQueue called — queue: ${queue.length}, TWEET_AUTO: ${TWEET_AUTO}, hasOAuth: ${!!(X_API_KEY && X_API_SECRET && X_ACCESS_TOKEN && X_ACCESS_SECRET)}`,
+  );
 
   if (!X_API_KEY || !X_API_SECRET || !X_ACCESS_TOKEN || !X_ACCESS_SECRET) {
-    console.log(`[${scanId}] ⚠️ OAuth 1.0a credentials missing (X_API_KEY/X_API_SECRET/X_ACCESS_TOKEN/X_ACCESS_SECRET) — skipping reply execution`);
+    console.log(
+      `[${scanId}] ⚠️ OAuth 1.0a credentials missing (X_API_KEY/X_API_SECRET/X_ACCESS_TOKEN/X_ACCESS_SECRET) — skipping reply execution`,
+    );
     return 0;
   }
 
@@ -1055,7 +1198,9 @@ async function executeReplyQueue(queue, scanId) {
 
   for (const item of queue) {
     try {
-      console.log(`[TB-REPLY] Attempting reply to @${item.username} — tweetId: ${item.tweetId || 'none'}, url: ${item.tweetUrl || 'none'}`);
+      console.log(
+        `[TB-REPLY] Attempting reply to @${item.username} — tweetId: ${item.tweetId || "none"}, url: ${item.tweetUrl || "none"}`,
+      );
       // Try to extract tweet ID from URL if not set
       const tweetId = item.tweetId || extractTweetIdFromUrl(item.tweetUrl);
       let result;
@@ -1063,36 +1208,47 @@ async function executeReplyQueue(queue, scanId) {
       if (tweetId) {
         // Check dedup one more time right before posting
         if (hasReplied(tweetId)) {
-          console.log(`[${scanId}] ⚠️ DEDUP: Already replied to tweet ${tweetId} — skipping`);
-          item.status = 'dedup_skipped';
+          console.log(
+            `[${scanId}] ⚠️ DEDUP: Already replied to tweet ${tweetId} — skipping`,
+          );
+          item.status = "dedup_skipped";
           continue;
         }
         // Record BEFORE posting to prevent race conditions
         markAsReplied(tweetId);
         // Post as reply
-        result = await postReply(tweetId, item.replyText, scanId, item.username);
+        result = await postReply(
+          tweetId,
+          item.replyText,
+          scanId,
+          item.username,
+        );
       } else {
         // No tweet ID — post as standalone tweet mentioning the handle
-        console.log(`[${scanId}] ⚠️ No tweet ID for @${item.username} — posting standalone mention`);
+        console.log(
+          `[${scanId}] ⚠️ No tweet ID for @${item.username} — posting standalone mention`,
+        );
         // Mark username-based dedup for standalone mentions
-        markAsReplied('standalone_' + item.username);
+        markAsReplied("standalone_" + item.username);
         result = await postTweet(item.replyText, scanId);
       }
 
       if (result.success) {
-        item.status = 'sent';
+        item.status = "sent";
         item.sentAt = new Date().toISOString();
         item.responseTweetId = result.tweetId;
-        item.method = tweetId ? 'reply' : 'standalone';
+        item.method = tweetId ? "reply" : "standalone";
         sent++;
         incrementDailyReplyCount();
 
         // JVR receipt per reply
         saveReplyReceipt(item, scanId);
 
-        console.log(`[${scanId}] ✅ ${tweetId ? 'Reply' : 'Standalone'} sent to @${item.username} (${tweetId ? 'tweet ' + tweetId : 'mention'})`);
+        console.log(
+          `[${scanId}] ✅ ${tweetId ? "Reply" : "Standalone"} sent to @${item.username} (${tweetId ? "tweet " + tweetId : "mention"})`,
+        );
       } else {
-        item.status = 'failed';
+        item.status = "failed";
         item.error = result.error;
         // On failure, remove from dedup so it can be retried next cycle
         if (tweetId) {
@@ -1100,7 +1256,9 @@ async function executeReplyQueue(queue, scanId) {
           repliedSet.delete(String(tweetId));
           saveRepliedSet(repliedSet);
         }
-        console.log(`[${scanId}] ❌ Reply failed for @${item.username}: ${result.error}`);
+        console.log(
+          `[${scanId}] ❌ Reply failed for @${item.username}: ${result.error}`,
+        );
       }
 
       // Rate limit: 30s between replies (X TOS compliance)
@@ -1108,10 +1266,15 @@ async function executeReplyQueue(queue, scanId) {
         await sleep(RATE_LIMIT_DELAY_MS);
       }
     } catch (err) {
-      item.status = 'error';
+      item.status = "error";
       item.error = err.message;
-      console.log(`[${scanId}] ❌ Reply error for @${item.username}: ${err.message}`);
-      console.log(`[TB-REPLY] ❌ Reply failed for @${item.username}:`, err.message);
+      console.log(
+        `[${scanId}] ❌ Reply error for @${item.username}: ${err.message}`,
+      );
+      console.log(
+        `[TB-REPLY] ❌ Reply failed for @${item.username}:`,
+        err.message,
+      );
     }
   }
 
@@ -1129,21 +1292,23 @@ async function postReply(inReplyToId, text, scanId, username) {
     return { success: false, error: `TOS blocked: ${compliance.reason}` };
   }
 
-  const url = 'https://api.x.com/2/tweets';
+  const url = "https://api.x.com/2/tweets";
   const body = JSON.stringify({
     text,
     reply: { in_reply_to_tweet_id: inReplyToId },
   });
 
-  console.log(`[${scanId}] 📤 postReply attempt — replying to tweet ${inReplyToId}, text: "${text.slice(0, 80)}..."`);
+  console.log(
+    `[${scanId}] 📤 postReply attempt — replying to tweet ${inReplyToId}, text: "${text.slice(0, 80)}..."`,
+  );
 
   try {
-    const authHeader = getOAuthHeader(url, 'POST');
+    const authHeader = getOAuthHeader(url, "POST");
     const res = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
         ...authHeader,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body,
       signal: AbortSignal.timeout(15000),
@@ -1151,12 +1316,16 @@ async function postReply(inReplyToId, text, scanId, username) {
 
     if (!res.ok) {
       const errBody = await res.text();
-      console.log(`[${scanId}] ❌ postReply FAILED — X API ${res.status}: ${errBody}`);
+      console.log(
+        `[${scanId}] ❌ postReply FAILED — X API ${res.status}: ${errBody}`,
+      );
       return { success: false, error: `X API ${res.status}: ${errBody}` };
     }
 
     const data = await res.json();
-    console.log(`[${scanId}] ✅ postReply SUCCESS — new tweet ID: ${data.data?.id}`);
+    console.log(
+      `[${scanId}] ✅ postReply SUCCESS — new tweet ID: ${data.data?.id}`,
+    );
     recordPostedTweet(text, inReplyToId, username);
     return {
       success: true,
@@ -1173,8 +1342,14 @@ async function postReply(inReplyToId, text, scanId, username) {
  */
 async function postTweet(text, scanId) {
   if (!X_API_KEY || !X_API_SECRET || !X_ACCESS_TOKEN || !X_ACCESS_SECRET) {
-    console.log(`[${scanId || 'TWEET'}] ⚠️ postTweet SKIPPED — OAuth 1.0a credentials missing`);
-    return { success: false, error: 'OAuth 1.0a credentials not set (X_API_KEY/X_API_SECRET/X_ACCESS_TOKEN/X_ACCESS_SECRET)' };
+    console.log(
+      `[${scanId || "TWEET"}] ⚠️ postTweet SKIPPED — OAuth 1.0a credentials missing`,
+    );
+    return {
+      success: false,
+      error:
+        "OAuth 1.0a credentials not set (X_API_KEY/X_API_SECRET/X_ACCESS_TOKEN/X_ACCESS_SECRET)",
+    };
   }
 
   // TOS compliance check before posting
@@ -1184,18 +1359,20 @@ async function postTweet(text, scanId) {
     return { success: false, error: `TOS blocked: ${compliance.reason}` };
   }
 
-  const url = 'https://api.x.com/2/tweets';
+  const url = "https://api.x.com/2/tweets";
   const body = JSON.stringify({ text });
 
-  console.log(`[${scanId || 'TWEET'}] 📤 postTweet attempt — text: "${text.slice(0, 80)}..."`);
+  console.log(
+    `[${scanId || "TWEET"}] 📤 postTweet attempt — text: "${text.slice(0, 80)}..."`,
+  );
 
   try {
-    const authHeader = getOAuthHeader(url, 'POST');
+    const authHeader = getOAuthHeader(url, "POST");
     const res = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
         ...authHeader,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body,
       signal: AbortSignal.timeout(15000),
@@ -1203,16 +1380,20 @@ async function postTweet(text, scanId) {
 
     if (!res.ok) {
       const errBody = await res.text();
-      console.log(`[${scanId || 'TWEET'}] ❌ postTweet FAILED — X API ${res.status}: ${errBody}`);
+      console.log(
+        `[${scanId || "TWEET"}] ❌ postTweet FAILED — X API ${res.status}: ${errBody}`,
+      );
       return { success: false, error: `X API ${res.status}: ${errBody}` };
     }
 
     const data = await res.json();
-    console.log(`[${scanId || 'TWEET'}] ✅ postTweet SUCCESS — new tweet ID: ${data.data?.id}`);
+    console.log(
+      `[${scanId || "TWEET"}] ✅ postTweet SUCCESS — new tweet ID: ${data.data?.id}`,
+    );
     recordPostedTweet(text, null, null);
     return { success: true, tweetId: data.data?.id };
   } catch (err) {
-    console.log(`[${scanId || 'TWEET'}] ❌ postTweet ERROR — ${err.message}`);
+    console.log(`[${scanId || "TWEET"}] ❌ postTweet ERROR — ${err.message}`);
     return { success: false, error: err.message };
   }
 }
@@ -1231,9 +1412,9 @@ async function postScanSummary(results, scanId) {
   if (tokensRouted === 0) return null; // Don't tweet empty scans
 
   const time = new Date().toISOString().slice(11, 16);
-  const chains = 'SOL/Base/BSC';
-  const topSymbol = results.topSymbol || 'N/A';
-  const topScore = results.topScore || 'N/A';
+  const chains = "SOL/Base/BSC";
+  const topSymbol = results.topSymbol || "N/A";
+  const topScore = results.topScore || "N/A";
 
   const v = getVerdict(topScore || 0);
   const grade = letterGrade(topScore || 0);
@@ -1272,8 +1453,8 @@ async function postPipelineUpdate(stats, scanId) {
 
   const date = new Date().toISOString().slice(0, 10);
   const total = (stats.hot || 0) + (stats.qualified || 0) + (stats.watch || 0);
-  const topSymbol = stats.topSymbol || 'N/A';
-  const topScore = stats.topScore || 'N/A';
+  const topSymbol = stats.topSymbol || "N/A";
+  const topScore = stats.topScore || "N/A";
 
   const text = `🐝 BUZZ PIPELINE \u2014 ${date}
 
@@ -1296,36 +1477,49 @@ Top signal: ${topSymbol} (${topScore}/100)
  * R013: AUTONOMOUS — no Ogie approval needed
  * Cap: 3 deploys/day
  */
-async function bankrDeploy({ tokenName, tokenSymbol, description, twitterHandle, scanId }) {
+async function bankrDeploy({
+  tokenName,
+  tokenSymbol,
+  description,
+  twitterHandle,
+  scanId,
+}) {
   const id = scanId || `DEPLOY-${Date.now()}`;
 
   // Check daily deploy cap
   const deployCount = getDailyDeployCount();
   if (deployCount >= DEPLOY_CAP_DAY) {
-    console.log(`[${id}] ⚠️ Deploy cap reached: ${deployCount}/${DEPLOY_CAP_DAY}`);
-    return { success: false, error: `Daily deploy cap reached (${DEPLOY_CAP_DAY}/day)` };
+    console.log(
+      `[${id}] ⚠️ Deploy cap reached: ${deployCount}/${DEPLOY_CAP_DAY}`,
+    );
+    return {
+      success: false,
+      error: `Daily deploy cap reached (${DEPLOY_CAP_DAY}/day)`,
+    };
   }
 
   if (!BANKR_PARTNER_KEY) {
     console.log(`[${id}] ⚠️ BANKR_PARTNER_KEY not set — cannot deploy`);
-    return { success: false, error: 'BANKR_PARTNER_KEY not configured' };
+    return { success: false, error: "BANKR_PARTNER_KEY not configured" };
   }
 
-  console.log(`[${id}] 🚀 Bankr deploy: ${tokenName} (${tokenSymbol}) for @${twitterHandle}`);
+  console.log(
+    `[${id}] 🚀 Bankr deploy: ${tokenName} (${tokenSymbol}) for @${twitterHandle}`,
+  );
 
   try {
     const res = await fetch(BANKR_DEPLOY_URL, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'X-Partner-Key': BANKR_PARTNER_KEY,
-        'Content-Type': 'application/json',
+        "X-Partner-Key": BANKR_PARTNER_KEY,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         tokenName,
         tokenSymbol,
         description,
         feeRecipient: {
-          type: 'x',
+          type: "x",
           value: twitterHandle,
         },
       }),
@@ -1339,23 +1533,28 @@ async function bankrDeploy({ tokenName, tokenSymbol, description, twitterHandle,
     }
 
     const data = await res.json();
-    console.log(`[${id}] ✅ Bankr deploy SUCCESS — token: ${data.tokenAddress}, pool: ${data.poolId}, tx: ${data.txHash}`);
+    console.log(
+      `[${id}] ✅ Bankr deploy SUCCESS — token: ${data.tokenAddress}, pool: ${data.poolId}, tx: ${data.txHash}`,
+    );
 
     // Increment deploy counter
     incrementDailyDeployCount();
 
     // Save JVR deploy receipt
-    const receipt = saveDeployReceipt({
-      tokenName,
-      tokenSymbol,
-      description,
-      twitterHandle,
-      tokenAddress: data.tokenAddress,
-      poolId: data.poolId,
-      txHash: data.txHash,
-      chain: data.chain || 'base',
-      feeDistribution: data.feeDistribution,
-    }, id);
+    const receipt = saveDeployReceipt(
+      {
+        tokenName,
+        tokenSymbol,
+        description,
+        twitterHandle,
+        tokenAddress: data.tokenAddress,
+        poolId: data.poolId,
+        txHash: data.txHash,
+        chain: data.chain || "base",
+        feeDistribution: data.feeDistribution,
+      },
+      id,
+    );
 
     // Notify Ogie via Telegram
     await notifyDeployTelegram(receipt);
@@ -1373,7 +1572,7 @@ async function bankrDeploy({ tokenName, tokenSymbol, description, twitterHandle,
       tokenAddress: data.tokenAddress,
       poolId: data.poolId,
       txHash: data.txHash,
-      chain: data.chain || 'base',
+      chain: data.chain || "base",
       feeDistribution: data.feeDistribution,
       replyText,
       receiptId: receipt.id,
@@ -1387,7 +1586,12 @@ async function bankrDeploy({ tokenName, tokenSymbol, description, twitterHandle,
 /**
  * Build deploy success reply tweet
  */
-function buildDeploySuccessReply({ handle, tokenName, tokenSymbol, tokenAddress }) {
+function buildDeploySuccessReply({
+  handle,
+  tokenName,
+  tokenSymbol,
+  tokenAddress,
+}) {
   return `🐝 @${handle} \u2014 Token deployed! 🎉
 
 ${tokenName} (${tokenSymbol}) is LIVE on Base
@@ -1407,7 +1611,9 @@ ${DEPLOY_RISK_DISCLAIMER}${BUZZ_FOOTER}`;
  */
 async function notifyDeployTelegram(receipt) {
   if (!TELEGRAM_BOT_TOKEN) {
-    console.log(`[DEPLOY] ⚠️ Telegram not configured — skipping deploy notification`);
+    console.log(
+      `[DEPLOY] ⚠️ Telegram not configured — skipping deploy notification`,
+    );
     return;
   }
 
@@ -1415,11 +1621,16 @@ async function notifyDeployTelegram(receipt) {
 
   try {
     // Deploy notifications are SENSITIVE (transfer/buy approvals) → Ogie DM only
-    const result = await sendTelegram(msg, { sensitive: true, parseMode: 'HTML' });
+    const result = await sendTelegram(msg, {
+      sensitive: true,
+      parseMode: "HTML",
+    });
     if (result.dm.sent) {
       console.log(`[DEPLOY] ✅ Telegram notification sent for ${receipt.id}`);
     } else {
-      console.log(`[DEPLOY] ⚠️ Telegram DM failed: ${result.dm.error || result.dm.reason}`);
+      console.log(
+        `[DEPLOY] ⚠️ Telegram DM failed: ${result.dm.error || result.dm.reason}`,
+      );
     }
   } catch (err) {
     console.log(`[DEPLOY] ⚠️ Telegram notification failed: ${err.message}`);
@@ -1434,9 +1645,9 @@ function r013CheckAutonomy(operation) {
     return { autonomous: true, requiresApproval: false };
   }
   if (R013_APPROVAL_REQUIRED.includes(operation)) {
-    return { autonomous: false, requiresApproval: true, channel: 'telegram' };
+    return { autonomous: false, requiresApproval: true, channel: "telegram" };
   }
-  return { autonomous: false, requiresApproval: true, channel: 'telegram' };
+  return { autonomous: false, requiresApproval: true, channel: "telegram" };
 }
 
 // ═════════════════════════════════════════════════════
@@ -1454,70 +1665,76 @@ function saveToPipelineDir(tokenData) {
   const filename = `tb-${tokenData.chain}-${tokenData.symbol || tokenData.address.slice(0, 8)}-${Date.now()}.json`;
   fs.writeFileSync(
     path.join(PIPELINE_DIR, filename),
-    JSON.stringify(tokenData, null, 2)
+    JSON.stringify(tokenData, null, 2),
   );
 }
 
 function saveJVRReceipt(results, scanId) {
   ensureDir(RECEIPTS_DIR);
-  const date = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-  const receiptId = `BZZ-TWITTER-${date}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+  const date = new Date().toISOString().slice(2, 10).replace(/-/g, "");
+  const receiptId = `BZZ-TWITTER-${date}-${Math.floor(Math.random() * 1000)
+    .toString()
+    .padStart(3, "0")}`;
   const receipt = {
     id: receiptId,
-    type: 'twitter-brain-scan',
+    type: "twitter-brain-scan",
     scanId,
     ...results,
     createdAt: new Date().toISOString(),
   };
   fs.writeFileSync(
     path.join(RECEIPTS_DIR, `${receiptId}.json`),
-    JSON.stringify(receipt, null, 2)
+    JSON.stringify(receipt, null, 2),
   );
 }
 
 function saveReplyReceipt(replyItem, scanId) {
   ensureDir(RECEIPTS_DIR);
-  const date = new Date().toISOString().slice(2, 10).replace(/-/g, '');
-  const receiptId = `BZZ-TWITTER-REPLY-${date}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+  const date = new Date().toISOString().slice(2, 10).replace(/-/g, "");
+  const receiptId = `BZZ-TWITTER-REPLY-${date}-${Math.floor(
+    Math.random() * 1000,
+  )
+    .toString()
+    .padStart(3, "0")}`;
   const receipt = {
     id: receiptId,
-    type: 'twitter-brain-reply',
+    type: "twitter-brain-reply",
     scanId,
     ...replyItem,
     createdAt: new Date().toISOString(),
   };
   fs.writeFileSync(
     path.join(RECEIPTS_DIR, `${receiptId}.json`),
-    JSON.stringify(receipt, null, 2)
+    JSON.stringify(receipt, null, 2),
   );
 }
 
 function saveDeployReceipt(deployData, scanId) {
   ensureDir(RECEIPTS_DIR);
-  const date = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+  const date = new Date().toISOString().slice(2, 10).replace(/-/g, "");
   const n = getDailyDeployCount();
-  const receiptId = `BZZ-DEPLOY-${date}-${n.toString().padStart(3, '0')}`;
+  const receiptId = `BZZ-DEPLOY-${date}-${n.toString().padStart(3, "0")}`;
   const receipt = {
     id: receiptId,
-    type: 'bankr-deploy',
+    type: "bankr-deploy",
     scanId,
     ...deployData,
     createdAt: new Date().toISOString(),
   };
   fs.writeFileSync(
     path.join(RECEIPTS_DIR, `${receiptId}.json`),
-    JSON.stringify(receipt, null, 2)
+    JSON.stringify(receipt, null, 2),
   );
   return receipt;
 }
 
 function saveScanHistory(results) {
   ensureDir(TWITTER_DATA_DIR);
-  const historyFile = path.join(TWITTER_DATA_DIR, 'scan-history.json');
+  const historyFile = path.join(TWITTER_DATA_DIR, "scan-history.json");
   let history = [];
   try {
     if (fs.existsSync(historyFile)) {
-      history = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
+      history = JSON.parse(fs.readFileSync(historyFile, "utf8"));
     }
   } catch {}
 
@@ -1540,10 +1757,10 @@ function saveScanHistory(results) {
 
 function loadSeenTweets() {
   ensureDir(TWITTER_DATA_DIR);
-  const seenFile = path.join(TWITTER_DATA_DIR, 'seen-tweets.json');
+  const seenFile = path.join(TWITTER_DATA_DIR, "seen-tweets.json");
   try {
     if (fs.existsSync(seenFile)) {
-      const data = JSON.parse(fs.readFileSync(seenFile, 'utf8'));
+      const data = JSON.parse(fs.readFileSync(seenFile, "utf8"));
       return new Set(data);
     }
   } catch {}
@@ -1552,17 +1769,17 @@ function loadSeenTweets() {
 
 function saveSeenTweets(seen) {
   ensureDir(TWITTER_DATA_DIR);
-  const seenFile = path.join(TWITTER_DATA_DIR, 'seen-tweets.json');
+  const seenFile = path.join(TWITTER_DATA_DIR, "seen-tweets.json");
   // Keep last 10K tweet IDs
   const arr = [...seen].slice(-10000);
   fs.writeFileSync(seenFile, JSON.stringify(arr));
 }
 
 function getDailyReplyCount() {
-  const countFile = path.join(TWITTER_DATA_DIR, 'daily-count.json');
+  const countFile = path.join(TWITTER_DATA_DIR, "daily-count.json");
   try {
     if (fs.existsSync(countFile)) {
-      const data = JSON.parse(fs.readFileSync(countFile, 'utf8'));
+      const data = JSON.parse(fs.readFileSync(countFile, "utf8"));
       const today = new Date().toISOString().slice(0, 10);
       if (data.date === today) return data.count;
     }
@@ -1572,12 +1789,12 @@ function getDailyReplyCount() {
 
 function incrementDailyReplyCount() {
   ensureDir(TWITTER_DATA_DIR);
-  const countFile = path.join(TWITTER_DATA_DIR, 'daily-count.json');
+  const countFile = path.join(TWITTER_DATA_DIR, "daily-count.json");
   const today = new Date().toISOString().slice(0, 10);
   let count = 0;
   try {
     if (fs.existsSync(countFile)) {
-      const data = JSON.parse(fs.readFileSync(countFile, 'utf8'));
+      const data = JSON.parse(fs.readFileSync(countFile, "utf8"));
       if (data.date === today) count = data.count;
     }
   } catch {}
@@ -1587,10 +1804,10 @@ function incrementDailyReplyCount() {
 
 function getDailyDeployCount() {
   ensureDir(TWITTER_DATA_DIR);
-  const countFile = path.join(TWITTER_DATA_DIR, 'daily-deploy-count.json');
+  const countFile = path.join(TWITTER_DATA_DIR, "daily-deploy-count.json");
   try {
     if (fs.existsSync(countFile)) {
-      const data = JSON.parse(fs.readFileSync(countFile, 'utf8'));
+      const data = JSON.parse(fs.readFileSync(countFile, "utf8"));
       const today = new Date().toISOString().slice(0, 10);
       if (data.date === today) return data.count;
     }
@@ -1600,12 +1817,12 @@ function getDailyDeployCount() {
 
 function incrementDailyDeployCount() {
   ensureDir(TWITTER_DATA_DIR);
-  const countFile = path.join(TWITTER_DATA_DIR, 'daily-deploy-count.json');
+  const countFile = path.join(TWITTER_DATA_DIR, "daily-deploy-count.json");
   const today = new Date().toISOString().slice(0, 10);
   let count = 0;
   try {
     if (fs.existsSync(countFile)) {
-      const data = JSON.parse(fs.readFileSync(countFile, 'utf8'));
+      const data = JSON.parse(fs.readFileSync(countFile, "utf8"));
       if (data.date === today) count = data.count;
     }
   } catch {}
@@ -1628,14 +1845,14 @@ function deduplicateTweets(tweets) {
 function simpleHash(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash = (hash << 5) - hash + str.charCodeAt(i);
     hash |= 0;
   }
   return Math.abs(hash);
 }
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 module.exports = {

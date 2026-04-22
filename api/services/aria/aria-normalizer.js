@@ -11,13 +11,13 @@
 function emptyToken(address, chain) {
   return {
     address: address || null,
-    chain: chain || 'solana',
+    chain: chain || "solana",
     symbol: null,
     name: null,
     discovery: {
       source: null,
       discovered_at: new Date().toISOString(),
-      discovery_type: null
+      discovery_type: null,
     },
     market: {
       price_usd: null,
@@ -30,7 +30,7 @@ function emptyToken(address, chain) {
       pair_age_days: null,
       exchange_count: null,
       exchanges: [],
-      source: null
+      source: null,
     },
     safety: {
       token_sniffer: null,
@@ -40,7 +40,7 @@ function emptyToken(address, chain) {
       dextscore: null,
       rugcheck: null,
       contract_verified: null,
-      source: null
+      source: null,
     },
     social: {
       twitter_handle: null,
@@ -49,21 +49,21 @@ function emptyToken(address, chain) {
       discord_members: null,
       website: null,
       github: null,
-      source: null
+      source: null,
     },
     team: {
       doxxed: null,
       founder: null,
       dev: null,
       email: null,
-      source: null
+      source: null,
     },
     technical: {
       github_stars: null,
       github_last_commit: null,
       contract_verified: null,
       has_documentation: null,
-      source: null
+      source: null,
     },
     classification: {
       bd_class: null,
@@ -74,12 +74,12 @@ function emptyToken(address, chain) {
       social_score: null,
       market_score: null,
       dual_gate: null,
-      outreach_ready: false
+      outreach_ready: false,
     },
     metadata: {
       enriched_at: null,
-      enrichment_sources: []
-    }
+      enrichment_sources: [],
+    },
   };
 }
 
@@ -89,23 +89,25 @@ function emptyToken(address, chain) {
 function fromDexScreener(pair, discoveryType) {
   const token = emptyToken(
     pair.baseToken?.address || pair.tokenAddress || null,
-    mapChainId(pair.chainId)
+    mapChainId(pair.chainId),
   );
 
   token.symbol = pair.baseToken?.symbol || null;
   token.name = pair.baseToken?.name || null;
-  token.discovery.source = 'dexscreener';
-  token.discovery.discovery_type = discoveryType || 'trending';
+  token.discovery.source = "dexscreener";
+  token.discovery.discovery_type = discoveryType || "trending";
 
   if (pair.priceUsd) token.market.price_usd = parseFloat(pair.priceUsd);
   if (pair.marketCap) token.market.mcap_circulating = pair.marketCap;
   if (pair.fdv) token.market.mcap_fdv = pair.fdv;
   if (pair.marketCap && pair.fdv && pair.fdv > 0) {
-    token.market.fdv_gap = parseFloat(((pair.fdv - pair.marketCap) / pair.fdv * 100).toFixed(2));
+    token.market.fdv_gap = parseFloat(
+      (((pair.fdv - pair.marketCap) / pair.fdv) * 100).toFixed(2),
+    );
   }
   if (pair.volume?.h24) token.market.volume_24h = pair.volume.h24;
   if (pair.liquidity?.usd) token.market.liquidity_usd = pair.liquidity.usd;
-  token.market.source = 'dexscreener';
+  token.market.source = "dexscreener";
 
   // Pair age
   if (pair.pairCreatedAt) {
@@ -116,7 +118,8 @@ function fromDexScreener(pair, discoveryType) {
   // Social from info
   if (pair.info?.socials) {
     for (const s of pair.info.socials) {
-      if (s.type === 'twitter') token.social.twitter_handle = s.url?.split('/').pop() || null;
+      if (s.type === "twitter")
+        token.social.twitter_handle = s.url?.split("/").pop() || null;
     }
   }
   if (pair.info?.websites?.[0]?.url) {
@@ -130,19 +133,19 @@ function fromDexScreener(pair, discoveryType) {
  * Normalize a Jupiter recent token into unified schema
  */
 function fromJupiter(jup) {
-  const token = emptyToken(jup.address || jup.mint || null, 'solana');
+  const token = emptyToken(jup.address || jup.mint || null, "solana");
 
   token.symbol = jup.symbol || null;
   token.name = jup.name || null;
-  token.discovery.source = 'jupiter';
-  token.discovery.discovery_type = 'new_listing';
+  token.discovery.source = "jupiter";
+  token.discovery.discovery_type = "new_listing";
 
   if (jup.price) token.market.price_usd = parseFloat(jup.price);
   if (jup.marketCap) token.market.mcap_circulating = jup.marketCap;
   if (jup.fdv) token.market.mcap_fdv = jup.fdv;
   if (jup.volume24h) token.market.volume_24h = jup.volume24h;
   if (jup.liquidity) token.market.liquidity_usd = jup.liquidity;
-  token.market.source = 'jupiter';
+  token.market.source = "jupiter";
 
   return token;
 }
@@ -154,18 +157,24 @@ function fromCoinGecko(coin) {
   const item = coin.item || coin;
   const token = emptyToken(
     item.platforms?.solana || item.id || null,
-    item.platforms?.solana ? 'solana' : 'unknown'
+    item.platforms?.solana ? "solana" : "unknown",
   );
 
   token.symbol = item.symbol || null;
   token.name = item.name || null;
-  token.discovery.source = 'coingecko';
-  token.discovery.discovery_type = 'trending';
+  token.discovery.source = "coingecko";
+  token.discovery.discovery_type = "trending";
 
   if (item.data?.price) token.market.price_usd = parseFloat(item.data.price);
-  if (item.data?.market_cap) token.market.mcap_circulating = parseFloat(String(item.data.market_cap).replace(/[,$]/g, ''));
-  if (item.data?.total_volume) token.market.volume_24h = parseFloat(String(item.data.total_volume).replace(/[,$]/g, ''));
-  token.market.source = 'coingecko';
+  if (item.data?.market_cap)
+    token.market.mcap_circulating = parseFloat(
+      String(item.data.market_cap).replace(/[,$]/g, ""),
+    );
+  if (item.data?.total_volume)
+    token.market.volume_24h = parseFloat(
+      String(item.data.total_volume).replace(/[,$]/g, ""),
+    );
+  token.market.source = "coingecko";
 
   return token;
 }
@@ -174,16 +183,16 @@ function fromCoinGecko(coin) {
  * Map chain IDs from various sources to canonical names
  */
 function mapChainId(chainId) {
-  if (!chainId) return 'unknown';
+  if (!chainId) return "unknown";
   const map = {
-    solana: 'solana',
-    ethereum: 'ethereum',
-    bsc: 'bsc',
-    base: 'base',
-    arbitrum: 'arbitrum',
-    polygon: 'polygon',
-    avalanche: 'avalanche',
-    optimism: 'optimism'
+    solana: "solana",
+    ethereum: "ethereum",
+    bsc: "bsc",
+    base: "base",
+    arbitrum: "arbitrum",
+    polygon: "polygon",
+    avalanche: "avalanche",
+    optimism: "optimism",
   };
   return map[chainId.toLowerCase()] || chainId.toLowerCase();
 }
@@ -203,38 +212,23 @@ function deduplicateTokens(tokens) {
   return Array.from(seen.values());
 }
 
-// ─── Normalizer: Bags.fm ─────────────────────────────
-function fromBagsFm(row) {
-  const token = emptyToken(row.token_mint, 'solana');
-  token.symbol = row.symbol || '';
-  token.name = row.name || '';
-  token.discovery.source = 'bags_fm';
-  token.discovery.discovery_type = row.status || 'graduated';
-  token.discovery.discovered_at = row.scanned_at || new Date().toISOString();
-  if (row.twitter) token.social.twitter_handle = row.twitter;
-  if (row.website) token.social.website = row.website;
-  token.social.source = 'bags_fm';
-  token.metadata.bags_fm = { status: row.status, bags_score: row.bags_score || 0 };
-  return token;
-}
-
 // ─── Normalizer: Colosseum Copilot ───────────────────
 function fromColosseum(project) {
-  const addr = project.token_address || project.contract_address || '';
-  const chain = project.chain || 'solana';
+  const addr = project.token_address || project.contract_address || "";
+  const chain = project.chain || "solana";
   const token = emptyToken(addr, chain);
-  token.symbol = project.token_symbol || project.ticker || '';
-  token.name = project.name || project.project_name || '';
-  token.discovery.source = 'colosseum';
-  token.discovery.discovery_type = 'hackathon';
+  token.symbol = project.token_symbol || project.ticker || "";
+  token.name = project.name || project.project_name || "";
+  token.discovery.source = "colosseum";
+  token.discovery.discovery_type = "hackathon";
   if (project.website) token.social.website = project.website;
   if (project.twitter) token.social.twitter_handle = project.twitter;
   if (project.github) token.technical.github_url = project.github;
-  token.social.source = 'colosseum';
+  token.social.source = "colosseum";
   token.metadata.colosseum = {
     hackathon: project.hackathon || null,
     result: project.result || null,
-    slug: project.slug || null
+    slug: project.slug || null,
   };
   return token;
 }
@@ -244,8 +238,7 @@ module.exports = {
   fromDexScreener,
   fromJupiter,
   fromCoinGecko,
-  fromBagsFm,
   fromColosseum,
   mapChainId,
-  deduplicateTokens
+  deduplicateTokens,
 };
