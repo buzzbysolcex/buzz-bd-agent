@@ -265,6 +265,8 @@ router.get("/:audit_id", tierGate("free"), (req, res) => {
   }
   try {
     const db = getDB();
+    // Self-heal: if SSE dropped before DB sync, reconcile from outbox before read.
+    commitPashovOutbox(db, audit_id);
     const row = db
       .prepare("SELECT * FROM pashov_audits WHERE audit_id = ?")
       .get(audit_id);
