@@ -34,6 +34,39 @@ function safeCount(db, sql, params = []) {
   }
 }
 
+function riskLevel(score) {
+  if (score == null) return "unknown";
+  if (score >= 70) return "low";
+  if (score >= 40) return "medium";
+  return "high";
+}
+
+function loadLeaderboard(db) {
+  try {
+    const rows = db
+      .prepare(
+        `SELECT address, chain, ticker, name, score, updated_at
+         FROM pipeline_tokens
+         WHERE score IS NOT NULL
+         ORDER BY score DESC, updated_at DESC
+         LIMIT 50`,
+      )
+      .all();
+    return rows.map((r, i) => ({
+      rank: i + 1,
+      token_name: r.name || "",
+      token_symbol: r.ticker || "",
+      chain: r.chain,
+      score: r.score,
+      risk_level: riskLevel(r.score),
+      scored_at: r.updated_at,
+      contract_address: r.address,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 function computeStats() {
   let db;
   try {
@@ -99,6 +132,8 @@ function computeStats() {
   } catch {
     stats.wiki_pages = 146;
   }
+
+  stats.leaderboard = loadLeaderboard(db);
 
   db.close();
   return stats;
