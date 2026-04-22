@@ -35,10 +35,10 @@ function safeCount(db, sql, params = []) {
 }
 
 function riskLevel(score) {
-  if (score == null) return "unknown";
-  if (score >= 70) return "low";
-  if (score >= 40) return "medium";
-  return "high";
+  if (score == null) return "UNKNOWN";
+  if (score >= 70) return "SAFE";
+  if (score >= 40) return "CAUTION";
+  return "DANGER";
 }
 
 function loadLeaderboard(db) {
