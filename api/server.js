@@ -476,20 +476,32 @@ if (feature("SHIELD_ENGINE")) {
 // When ON:  serves /api/v1/shield/public/checklist + /v5-threat-model publicly.
 if (process.env.RDT_THREAT_MODEL === "true") {
   try {
-    app.use(
-      "/api/v1/shield/public",
-      require("./routes/shield-public-rdt"),
-    );
+    app.use("/api/v1/shield/public", require("./routes/shield-public-rdt"));
     console.log(
       "[SHIELD-V5] RDT_THREAT_MODEL=true — public checklist mounted at /api/v1/shield/public",
     );
   } catch (e) {
-    console.error("[SHIELD-V5] public RDT mount failed (non-fatal):", e.message);
+    console.error(
+      "[SHIELD-V5] public RDT mount failed (non-fatal):",
+      e.message,
+    );
   }
 } else {
   console.log(
     "[SHIELD-V5] RDT_THREAT_MODEL gated OFF — public checklist endpoint NOT mounted",
   );
+}
+
+// ─── Public landing-page + shield summary endpoints (no auth, CORS open)
+// Added 2026-04-22 per Ogie directive msg 4403 (buzzbd.ai stats wiring) + msg 4404 (shield summary)
+try {
+  app.use("/api/v1/public", require("./routes/public-stats"));
+  app.use("/api/v1/shield/public", require("./routes/shield-public-summary"));
+  console.log(
+    "[PUBLIC] /api/v1/public/stats + /api/v1/shield/public/summary mounted",
+  );
+} catch (e) {
+  console.error("[PUBLIC] mount failed (non-fatal):", e.message);
 }
 
 // ─── Authenticated Routes ────────────────────────────
