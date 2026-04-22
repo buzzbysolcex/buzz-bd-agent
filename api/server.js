@@ -470,6 +470,28 @@ if (feature("SHIELD_ENGINE")) {
   }
 }
 
+// ─── BuzzShield V5 — Public RDT + AISC Checklist (Cerebral Valley Apr 27)
+// Feature-flag gated via process.env.RDT_THREAT_MODEL === 'true'.
+// When OFF: do not mount — 404s are the correct behavior.
+// When ON:  serves /api/v1/shield/public/checklist + /v5-threat-model publicly.
+if (process.env.RDT_THREAT_MODEL === "true") {
+  try {
+    app.use(
+      "/api/v1/shield/public",
+      require("./routes/shield-public-rdt"),
+    );
+    console.log(
+      "[SHIELD-V5] RDT_THREAT_MODEL=true — public checklist mounted at /api/v1/shield/public",
+    );
+  } catch (e) {
+    console.error("[SHIELD-V5] public RDT mount failed (non-fatal):", e.message);
+  }
+} else {
+  console.log(
+    "[SHIELD-V5] RDT_THREAT_MODEL gated OFF — public checklist endpoint NOT mounted",
+  );
+}
+
 // ─── Authenticated Routes ────────────────────────────
 // Existing (Day 9)
 app.use("/api/v1/agents", apiKeyAuth, agentRoutes);
