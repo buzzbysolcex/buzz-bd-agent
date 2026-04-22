@@ -34,6 +34,19 @@ const path = require("path");
 
 const checklist = require("../services/shield/rdt-checklist");
 
+// Pre-deploy contract checklists (erc20, vault, amm, lending) — reused from the
+// authenticated /api/v1/shield/checklist endpoint so Noah's SPA can hit a single
+// base path for both smart-contract and RDT checklists.
+let preDeployChecklists = null;
+let getPreDeployChecklist = null;
+try {
+  const audit = require("../services/shield/shield-audit-engine");
+  preDeployChecklists = audit.PRE_DEPLOY_CHECKLISTS || null;
+  getPreDeployChecklist = audit.getChecklist || null;
+} catch (_) {
+  /* non-fatal — just means /checklist?type=erc20 will 400 */
+}
+
 const router = express.Router();
 
 // Candidate locations for the V5 markdown doc.
@@ -82,12 +95,32 @@ router.use((req, res, next) => {
 // ─── GET /checklist ────────────────────────────────────────────────
 router.get("/checklist", (req, res) => {
   const type = (req.query.type || "rdt").toString().toLowerCase();
+
+  // Delegate non-RDT types (erc20, vault, amm, lending) to the shared
+  // shield-audit-engine pre-deploy checklists so Noah's SPA can use this
+  // single base path for every checklist surface.
   if (type !== "rdt") {
+    if (
+      preDeployChecklists &&
+      getPreDeployChecklist &&
+      Object.prototype.hasOwnProperty.call(preDeployChecklists, type)
+    ) {
+      try {
+        return res.status(200).json(getPreDeployChecklist(type));
+      } catch (e) {
+        return res.status(500).json({
+          error: "checklist_load_failed",
+          message: e && e.message ? e.message : "unknown",
+        });
+      }
+    }
+    const supported = ["rdt"].concat(
+      preDeployChecklists ? Object.keys(preDeployChecklists) : [],
+    );
     return res.status(400).json({
       error: "unsupported_type",
-      message:
-        "Only type=rdt is supported in V5 v1.0 (RDT + AISC unified checklist).",
-      supported_types: ["rdt"],
+      message: `Unknown type '${type}'.`,
+      supported_types: supported,
     });
   }
 
