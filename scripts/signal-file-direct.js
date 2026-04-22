@@ -168,15 +168,35 @@ async function main() {
     logLine(
       `FILE_OK ${draftPath} signal_id=${result.signal_id} status=${result.status}`,
     );
-    await tgSend(
-      `✅ DIRECT FILE #${draftIdx}: [${draft.beat_slug}] ${draft.headline} | id=${result.signal_id}`,
-    );
+    // Dual-route: War Room + #signal-stream. Falls back to TG-only tgSend if
+    // dual-route module fails to load (e.g., old image without the module).
+    try {
+      const { postDual } = require("../api/lib/dual-route");
+      await postDual(
+        "signal_filed",
+        `✅ DIRECT FILE #${draftIdx}: [${draft.beat_slug}] ${draft.headline} | id=${result.signal_id}`,
+        { reason: "signal-file-direct-ok" },
+      );
+    } catch (_) {
+      await tgSend(
+        `✅ DIRECT FILE #${draftIdx}: [${draft.beat_slug}] ${draft.headline} | id=${result.signal_id}`,
+      );
+    }
     process.exit(0);
   } else {
     logLine(`FILE_FAIL ${draftPath} :: ${result.error}`);
-    await tgSend(
-      `❌ DIRECT FILE FAILED #${draftIdx}: [${draft.beat_slug}] ${result.error}`,
-    );
+    try {
+      const { postDual } = require("../api/lib/dual-route");
+      await postDual(
+        "signal_filed",
+        `❌ DIRECT FILE FAILED #${draftIdx}: [${draft.beat_slug}] ${result.error}`,
+        { reason: "signal-file-direct-fail" },
+      );
+    } catch (_) {
+      await tgSend(
+        `❌ DIRECT FILE FAILED #${draftIdx}: [${draft.beat_slug}] ${result.error}`,
+      );
+    }
     process.exit(1);
   }
 }

@@ -478,6 +478,73 @@ function registerAllJobs() {
     }
   });
 
+  // Morning brief at 05:00 UTC (08:00 JED — actual Ogie morning).
+  // Per Ogie War Room msg 4351 Step 3. The existing morning-briefing at
+  // 00:00 UTC fires at 03:00 JED (Ogie asleep) — this cron fills the gap.
+  // Posts a live summary pulled from DB directly (no autonomous_loop_outputs
+  // dependency) to both War Room and #morning-brief via dual-route.
+  register("morning-brief-0500utc", "0 5 * * *", async () => {
+    try {
+      const { getDB } = require("../db");
+      const { postDual } = require("../lib/dual-route");
+      const db = getDB();
+
+      // Streak state — last filed signal from signal_audit
+      const lastSignal = db
+        .prepare(
+          `SELECT signal_id, beat_slug, filed_at FROM signal_audit
+           WHERE action = 'filed' ORDER BY id DESC LIMIT 1`,
+        )
+        .get();
+
+      // Today's signals count
+      const todaySignals = db
+        .prepare(
+          `SELECT COUNT(*) as c FROM signal_audit
+           WHERE filed_at >= date('now') AND action = 'filed'`,
+        )
+        .get()?.c || 0;
+
+      // Overnight intel ingest (last 12h)
+      const intelCount = db
+        .prepare(
+          `SELECT COUNT(*) as c FROM autodream_intel_ingest
+           WHERE ingested_at >= datetime('now','-12 hours')`,
+        )
+        .get()?.c || 0;
+
+      // Discord dispatcher state
+      const disp = db
+        .prepare(
+          `SELECT total_posts, last_error FROM discord_dispatcher_state
+           WHERE dispatcher_name = 'discord-ops-dispatcher'`,
+        )
+        .get();
+
+      // Hackathon countdowns
+      const now = new Date();
+      const daysUntil = (iso) =>
+        Math.max(
+          0,
+          Math.ceil((new Date(iso) - now) / (24 * 60 * 60 * 1000)),
+        );
+
+      const content = `☀️ MORNING BRIEF — ${now.toISOString().slice(0, 10)} (08:00 JED)
+• Streak: last filed ${lastSignal?.filed_at || "none"} (${lastSignal?.beat_slug || "?"}, id=${lastSignal?.signal_id?.slice(0, 8) || "?"}…); filed-today=${todaySignals}
+• Intel ingest (12h): ${intelCount} entries
+• Discord dispatcher: total_posts=${disp?.total_posts || 0}${disp?.last_error ? ` ERR=${disp.last_error.slice(0, 60)}` : ""}
+• Hackathons: Cerebral Valley ${daysUntil("2026-04-27")}d · Kite ${daysUntil("2026-05-06")}d · Frontier ${daysUntil("2026-05-11")}d
+• API health: ${lastSignal ? "routine" : "no filing yet today — streak watch"}`;
+
+      const res = await postDual("morning_brief", content, {
+        reason: "morning-brief-0500utc-cron",
+      });
+      return `brief: tg=${res.tg.sent ? "ok" : res.tg.reason || "fail"} dc=${res.discord.sent ? "ok" : res.discord.reason || "fail"}`;
+    } catch (err) {
+      return `morning-brief-0500utc: error — ${err.message}`;
+    }
+  });
+
   // Canonical daily-report — 21:00 UTC daily. Aggregates 10 tables,
   // writes autonomous_loop_outputs + claim_audit, dual-routes to
   // Telegram + Discord. Phase 1b Wave 1 Commit 3 per Ogie msg 3897.
