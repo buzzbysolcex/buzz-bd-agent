@@ -356,16 +356,16 @@ function consolidateRevenue() {
 // across the 6 canonical beats, with beat rotation to avoid
 // filing the same beat twice in a row.
 // Gated by AUTODREAM_SIGNAL_ANGLES (default true).
-// AIBTC canonical beats — agent-skills + agent-economy lead per D3
-// strategic pivot (Apr 8, 2026). The previous list ("markets",
-// "narrative", "governance") was wrong — those are not AIBTC beats.
+// AIBTC active beats — post-beat-consolidation (Apr 2026). The API
+// returns 410 Gone for any other beat. Old list (agent-skills,
+// agent-economy, agent-trading, infrastructure, security, deal-flow)
+// retired Apr 2026; left in place until Apr 22 streak-rescue revealed
+// Phase 6 was still writing disk drafts on retired beats every morning,
+// causing filer-fail loops. Per Ogie msg 4345 Part 3 fix.
 const CANONICAL_BEATS = [
-  "agent-skills", // PRIMARY editor target
-  "agent-economy", // PRIMARY editor target
-  "agent-trading",
-  "infrastructure",
-  "security",
-  "deal-flow",
+  "aibtc-network",
+  "bitcoin-macro",
+  "quantum",
 ];
 
 function generateSignalAngles() {
@@ -481,55 +481,28 @@ function generateSignalAngles() {
       ? [...CANONICAL_BEATS.filter((b) => b !== lastBeatUsed), lastBeatUsed]
       : CANONICAL_BEATS;
 
-    // Draft 4 angles — one per top-4 rotated beats
+    // Draft up to 3 angles — one per active beat (rotated to avoid repeat).
     const drafts = [];
-    const targetBeats = rotatedBeats.slice(0, 4);
+    const targetBeats = rotatedBeats.slice(0, CANONICAL_BEATS.length);
 
     for (const beat of targetBeats) {
       let headline, hook;
       switch (beat) {
-        case "agent-skills":
-          headline = `Agent skills velocity — net new merged skills and test coverage delta`;
-          hook = `Which agent-skill repos shipped in the last 24h, and how the rubric judged them.`;
+        case "aibtc-network":
+          headline = `AIBTC Network research angle — aibtcdev/agent-news activity and correspondent-pool signals`;
+          hook = `Research prompt for morning rewrite: scan aibtcdev/agent-news last 24h for merged PRs, new issues, governance threads; identify measurable correspondent activity (filings, inclusions, payouts). Sources must include at least one aibtcdev GitHub URL or /api/signals/counts endpoint.`;
           break;
-        case "agent-economy":
-          headline = `Editor seat economics — sats earned vs. operating cost over the last cycle`;
-          hook = `Break-even math at the current sBTC/USD price and operating-cost thresholds.`;
+        case "bitcoin-macro":
+          headline = `Bitcoin macro observation — measurable on-chain event in the last 24h`;
+          hook = `Research prompt for morning rewrite: check difficulty/hashrate/pool-share shifts, Strategy treasury changes, sBTC peg flows. Prefer a concrete numeric delta (e.g., +N BTC, -M%, rank swap) and cite mempool.space / blockchain.info / official press release as sources.`;
           break;
-        case "agent-trading":
-          headline = `Agent trading desk — observed flows and on-chain footprints`;
-          hook = `Trades and positions attributable to agents, not humans, in the last window.`;
-          break;
-        case "infrastructure":
-          headline = `PULSE tick baseline + autoDream consolidation report`;
-          hook = `Operational transparency — how many records moved through the pipeline in the last cycle.`;
-          break;
-        case "security":
-          headline =
-            pipelineData.flagged.length > 0
-              ? `${pipelineData.flagged.length} new DANGER/WARNING verdicts in 24h`
-              : `Shield pattern sweep — no new threats in 24h`;
-          hook =
-            pipelineData.flagged.length > 0
-              ? `Targets: ${pipelineData.flagged
-                  .slice(0, 2)
-                  .map((f) => f.target)
-                  .join(", ")}`
-              : `Clean window. Document the baseline for future comparison.`;
-          break;
-        case "deal-flow":
-          headline =
-            pipelineData.fresh_scores.length > 0
-              ? `${pipelineData.fresh_scores.length} tokens scored ≥60 in 24h · top: ${pipelineData.fresh_scores[0]?.symbol || "n/a"}`
-              : `Pipeline quiet — 0 high-signal tokens in 24h`;
-          hook =
-            pipelineData.fresh_scores.length > 0
-              ? `Lead: ${pipelineData.fresh_scores[0]?.symbol} @ ${pipelineData.fresh_scores[0]?.score}`
-              : `Quiet markets are a signal too — document what's missing.`;
+        case "quantum":
+          headline = `Quantum-threat research angle — cryptographic-hardness observations relevant to Bitcoin`;
+          hook = `Research prompt for morning rewrite: scan for post-quantum milestones (NIST finalist updates, BIP-related discussions, academic PQ-to-Bitcoin papers). Sources must include at least one NIST/IETF/peer-reviewed URL.`;
           break;
         default:
-          headline = `${beat} — daily observation draft`;
-          hook = `Auto-generated placeholder. Claude Code rewrites during the day.`;
+          headline = `${beat} — daily research prompt`;
+          hook = `Auto-generated research prompt. Claude Code must rewrite with real sources before filing.`;
       }
 
       // Karpathy Wiki research hook — pulls compiled synthesis/concept pages
@@ -577,7 +550,15 @@ function generateSignalAngles() {
     // the mailbox notification fails. Prior order swallowed a throw from
     // mailbox.send at the outer try/catch, skipping this block entirely
     // for 9 days of silent Phase 6 failures.
+    // Per Ogie msg 4345 Part 3 (Apr 22 streak-rescue fix): only write
+    // draft files that CAN file. Empty sources / oversize headline /
+    // undersize body would reject at aibtc.news API with HTTP 400.
+    // Skipping the disk-write lets morning-signals-v2.sh fall back to
+    // the legacy path (or for Claude Code to hand-craft in the morning)
+    // instead of burning a filing attempt on a broken draft.
     let diskWritten = 0;
+    let diskSkipped = 0;
+    const diskSkipReasons = [];
     let diskError = null;
     try {
       const draftDir = "/data/buzz-api/signal-drafts";
@@ -588,11 +569,31 @@ function generateSignalAngles() {
       drafts.forEach((d, idx) => {
         const filename = `${today}-${d.beat}-${idx + 1}.json`;
         const fpath = path.join(draftDir, filename);
+        const body = d.hook || "";
+        const sources = []; // Phase 6 has no source-fetching step
+        const skipChecks = [];
+        if (!CANONICAL_BEATS.includes(d.beat)) {
+          skipChecks.push(`beat ${d.beat} not in active list`);
+        }
+        if (sources.length < 1) {
+          skipChecks.push("sources[] empty — unfilable");
+        }
+        if (d.headline.length > 120 || d.headline.length < 10) {
+          skipChecks.push(`headline ${d.headline.length} chars out of 10-120 range`);
+        }
+        if (body.length < 600 || body.length > 1000) {
+          skipChecks.push(`body ${body.length} chars out of 600-1000 range`);
+        }
+        if (skipChecks.length > 0) {
+          diskSkipped++;
+          diskSkipReasons.push(`${filename}: ${skipChecks.join("; ")}`);
+          return;
+        }
         const payload = {
           beat_slug: d.beat,
           headline: d.headline,
-          body: d.hook || "",
-          sources: [],
+          body,
+          sources,
           tags: [d.beat],
           disclosure:
             "Draft generated by autoDream Phase 6 (Claude Opus 4.7 via Pro Max) at 02:00 UTC. Direct filing via bip322-js.",
@@ -642,6 +643,8 @@ function generateSignalAngles() {
       beats: targetBeats,
       last_beat_avoided: lastBeatUsed,
       disk_written: diskWritten,
+      disk_skipped: diskSkipped,
+      disk_skip_reasons: diskSkipReasons,
       disk_error: diskError,
       mailbox_error: mailboxError,
     };
