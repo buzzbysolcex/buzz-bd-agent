@@ -489,29 +489,34 @@ function registerAllJobs() {
       const { postDual } = require("../lib/dual-route");
       const db = getDB();
 
-      // Streak state — last filed signal from signal_audit
+      // Streak state — last filed signal from aibtc_signals_filed
+      // (the direct-filer writes here via signal-tracker; signal_audit is
+      // the legacy pre-direct-filer table and goes stale after direct-file
+      // cutover — see Ogie msg 4510 Part 7 Day 22)
       const lastSignal = db
         .prepare(
-          `SELECT signal_id, beat_slug, filed_at FROM signal_audit
-           WHERE action = 'filed' ORDER BY id DESC LIMIT 1`,
+          `SELECT signal_id, beat_slug, filed_at FROM aibtc_signals_filed
+           ORDER BY id DESC LIMIT 1`,
         )
         .get();
 
-      // Today's signals count
-      const todaySignals = db
-        .prepare(
-          `SELECT COUNT(*) as c FROM signal_audit
-           WHERE filed_at >= date('now') AND action = 'filed'`,
-        )
-        .get()?.c || 0;
+      // Today's signals count (UTC calendar day, matches aibtc.news daily cap)
+      const todaySignals =
+        db
+          .prepare(
+            `SELECT COUNT(*) as c FROM aibtc_signals_filed
+           WHERE filed_at >= date('now')`,
+          )
+          .get()?.c || 0;
 
       // Overnight intel ingest (last 12h)
-      const intelCount = db
-        .prepare(
-          `SELECT COUNT(*) as c FROM autodream_intel_ingest
+      const intelCount =
+        db
+          .prepare(
+            `SELECT COUNT(*) as c FROM autodream_intel_ingest
            WHERE ingested_at >= datetime('now','-12 hours')`,
-        )
-        .get()?.c || 0;
+          )
+          .get()?.c || 0;
 
       // Discord dispatcher state
       const disp = db
@@ -524,10 +529,7 @@ function registerAllJobs() {
       // Hackathon countdowns
       const now = new Date();
       const daysUntil = (iso) =>
-        Math.max(
-          0,
-          Math.ceil((new Date(iso) - now) / (24 * 60 * 60 * 1000)),
-        );
+        Math.max(0, Math.ceil((new Date(iso) - now) / (24 * 60 * 60 * 1000)));
 
       const content = `☀️ MORNING BRIEF — ${now.toISOString().slice(0, 10)} (08:00 JED)
 • Streak: last filed ${lastSignal?.filed_at || "none"} (${lastSignal?.beat_slug || "?"}, id=${lastSignal?.signal_id?.slice(0, 8) || "?"}…); filed-today=${todaySignals}
