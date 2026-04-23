@@ -152,6 +152,36 @@ const X402_DISCOVERY = {
       network: "base",
       payTo: BUZZ_WALLET,
     },
+    {
+      url: "https://api.buzzbd.ai/api/v1/premium/mining",
+      method: "GET",
+      description:
+        "Bitcoin mining intelligence — pool concentration, hashrate distribution, PoX cycle status, and difficulty projections. Data from mempool.space + Hiro APIs + 14-pool live scope.",
+      price: "0.01",
+      asset: "USDC",
+      network: "base",
+      payTo: BUZZ_WALLET,
+    },
+    {
+      url: "https://api.buzzbd.ai/api/v1/shield/scan",
+      method: "POST",
+      description:
+        "BuzzShield V5 scan — 47 crypto-native rules across secrets, wallets, agents, contracts, and infrastructure. Returns drain-pattern matches + severity ranking.",
+      price: "0.01",
+      asset: "USDC",
+      network: "base",
+      payTo: BUZZ_WALLET,
+    },
+    {
+      url: "https://api.buzzbd.ai/api/v1/shield/audit/full",
+      method: "POST",
+      description:
+        "Full V5 contract audit via Pashov engine — 40-item checklist across 5 domains (Loop Injection / Overthinking / Expert Routing / Spectral Instability / AI Supply Chain). Average runtime ~280s.",
+      price: "0.50",
+      asset: "USDC",
+      network: "base",
+      payTo: BUZZ_WALLET,
+    },
   ],
 };
 
