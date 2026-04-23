@@ -25,13 +25,14 @@
 #   Slot 1 (06:02 UTC): bitcoin-macro  — beat BM cap (fills fast)
 #   Slot 2 (07:03 UTC): bitcoin-macro  — second BM before 09:55 cap
 #   Slot 3 (08:02 UTC): quantum        — Zen Rocket editor, lots of room
-#   Slot 4 (09:03 UTC): bitcoin-macro OR correction
-#   Slot 5 (10:03 UTC): quantum OR correction
+#   Slot 4 (09:03 UTC): bitcoin-macro OR correction (BM/quantum only)
+#   Slot 5 (10:03 UTC): quantum OR correction (BM/quantum only)
 #
 # If slot 4/5 has no fresh BM/quantum draft, falls back to a same-day
-# correction draft (filename pattern ${TODAY}-correction-*.json). Active
-# until Elegant Orb (aibtc-network editor) resumes approvals; revert to
-# 2BM+2Q+1AN when Elegant Orb active (monitor via /api/signals?beat=
+# correction draft (filename pattern ${TODAY}-correction-*.json). Per
+# msg 4620: correction drafts targeting aibtc-network are SKIPPED
+# (Elegant Orb dark — corrections on that beat rot unapproved). Revert
+# to 2BM+2Q+1AN when Elegant Orb active (monitor via /api/signals?beat=
 # aibtc-network&status=approved).
 #
 # Usage: morning-signals-v2.sh <1|2|3|4|5>
@@ -78,11 +79,24 @@ DRAFT_FILE="$(ls "$DRAFT_DIR"/${TODAY}-*-${SIGNAL_NUM}.json 2>/dev/null | head -
 if [ -z "$DRAFT_FILE" ] && [ "$SIGNAL_NUM" -ge 4 ]; then
     for cand in "$DRAFT_DIR"/${TODAY}-correction-*.json; do
         [ -f "$cand" ] || continue
-        # Skip drafts already marked filed=true
-        if python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if not d.get('filed') else 1)" "$cand" 2>/dev/null; then
+        # Skip drafts already marked filed=true OR targeting aibtc-network
+        # (Elegant Orb dark per msg 4620 — BM/quantum corrections only)
+        if python3 -c "
+import json, sys
+d = json.load(open(sys.argv[1]))
+if d.get('filed'):
+    sys.exit(1)
+beat = (d.get('beat') or d.get('beatSlug') or '').lower()
+if beat == 'aibtc-network':
+    sys.exit(2)
+sys.exit(0)
+" "$cand" 2>/dev/null; then
             DRAFT_FILE="$cand"
             log "correction_fallback_draft=$DRAFT_FILE"
             break
+        else
+            rc=$?
+            [ "$rc" = "2" ] && log "skip_aibtc-network_correction=$cand (msg 4620)"
         fi
     done
 fi

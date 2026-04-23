@@ -3,10 +3,11 @@
 #
 # Contract:
 #   1. Pull last 24h of aibtc.news signals
-#   2. Filter to active-editor beats: bitcoin-macro, quantum, aibtc-network
-#      (Apr 23 2026 pivot per Ogie msg 4558 — Elegant Orb DARK 5+ days,
-#       so BM + quantum drive correction yield; aibtc-network retained
-#       in case Elegant Orb resumes approvals)
+#   2. Filter to active-editor beats: bitcoin-macro, quantum
+#      (Apr 23 2026 pivot per Ogie msg 4558 + correction rule update msg 4620
+#       — Elegant Orb DARK 5+ days, so aibtc-network corrections rot
+#       unapproved. DROPPED from filter entirely. Flip back when the
+#       daily Elegant Orb revert monitor fires.)
 #   3. For signals that reference github.com/{owner}/{repo}/(issues|pull)/NNN
 #      across aibtcdev repos (agent-news, x402-sponsor-relay, skills,
 #      landing-page) enrich with the real issue/PR title + state from the
@@ -55,13 +56,14 @@ log "fetched=$SIGNAL_COUNT signals from aibtc.news"
 # --- 2. Filter to last-24h + active beats + extract issue references ------
 # Candidate rule:
 #   - signal createdAt >= SINCE
-#   - beatSlug in ACTIVE_BEATS (bitcoin-macro, quantum, aibtc-network)
+#   - beatSlug in ACTIVE_BEATS (bitcoin-macro, quantum) — aibtc-network
+#     excluded per msg 4620 while Elegant Orb is dark
 #   - content or headline references github.com/{owner}/{repo}/(issues|pull)/NNN
 #     OR bare #NNN (back-compat, defaults to aibtcdev/agent-news)
 #   - NOT self (btcAddress != Buzz's)
 #   - NOT already a correction
 BUZZ_BTC="bc1qsja6knydqxj0nxf05466zhu8qqedu8umxeagze"
-ACTIVE_BEATS="bitcoin-macro,quantum,aibtc-network"
+ACTIVE_BEATS="bitcoin-macro,quantum"
 
 CANDS_FILE="$TMPDIR/candidates.json"
 SINCE="$SINCE" BUZZ_BTC="$BUZZ_BTC" ACTIVE_BEATS="$ACTIVE_BEATS" RAW_FILE="$RAW_FILE" OUT_CANDS="$CANDS_FILE" python3 <<'PY' 2>/dev/null
@@ -196,7 +198,7 @@ if [ -f /home/claude-code/.claude/channels/telegram/.env ]; then
 import json, os, sys
 cands = json.load(open(os.environ['ENRICH_FILE']))
 if not cands:
-    print("CORRECTION-HUNTER (daily) — 0 candidates in last 24h (BM+quantum+aibtc-network)")
+    print("CORRECTION-HUNTER (daily) — 0 candidates in last 24h (BM+quantum)")
     sys.exit(0)
 # Group by beatSlug for at-a-glance triage
 from collections import Counter
