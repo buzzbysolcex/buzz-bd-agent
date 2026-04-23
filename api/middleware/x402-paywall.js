@@ -118,6 +118,83 @@ function parsePaymentHeader(raw) {
 }
 
 /**
+ * Strict header validation — returns {ok, reason} so the paywall can distinguish
+ * "missing" (bare 402), "malformed" (400 to fail fast at the client), and
+ * "parseable" (continue to CDP verify).
+ */
+function validatePaymentHeader(raw) {
+  if (!raw) return { ok: false, reason: "missing" };
+  if (typeof raw !== "string") return { ok: false, reason: "not_string" };
+  const trimmed = raw.trim();
+  if (!trimmed) return { ok: false, reason: "empty" };
+  // Guard the base64 decode and JSON parse separately so we can give the
+  // caller a precise error. Extremely large headers get rejected up front.
+  if (trimmed.length > 16 * 1024) return { ok: false, reason: "oversize" };
+  let decoded;
+  try {
+    decoded = Buffer.from(trimmed, "base64").toString("utf8");
+  } catch {
+    return { ok: false, reason: "base64_decode_failed" };
+  }
+  if (!decoded || decoded.length === 0)
+    return { ok: false, reason: "empty_after_decode" };
+  let payload;
+  try {
+    payload = JSON.parse(decoded);
+  } catch {
+    return { ok: false, reason: "json_parse_failed" };
+  }
+  if (!payload || typeof payload !== "object")
+    return { ok: false, reason: "payload_not_object" };
+  // x402 v2 payloads carry either a signer (payload.payload.signer) or a
+  // payer / from. A header with none of those three is not a usable proof.
+  const payer =
+    payload?.payload?.signer || payload?.payer || payload?.from || null;
+  if (!payer) return { ok: false, reason: "no_payer_address" };
+  return {
+    ok: true,
+    payload,
+    payer_address: payer,
+    tx_hash: payload?.tx_hash || payload?.transactionHash || null,
+  };
+}
+
+/**
+ * Per-wallet rate limit. Counts rows in x402_payments for `payer_address`
+ * created in the last `windowMinutes` minutes. Returns
+ * {allowed, current_count, limit, reset_seconds}. If the DB handle is
+ * unavailable, fails OPEN (allow) so a DB blip doesn't block paying users —
+ * this matches the fail-open posture of CDP facilitator network errors.
+ */
+function checkWalletRateLimit(payer_address, limit, windowMinutes = 60) {
+  if (!payer_address || !limit || limit <= 0) {
+    return { allowed: true, current_count: 0, limit, reset_seconds: 0 };
+  }
+  const handle = db();
+  if (!handle)
+    return { allowed: true, current_count: 0, limit, reset_seconds: 0 };
+  try {
+    const row = handle
+      .prepare(
+        `SELECT COUNT(*) as c FROM x402_payments
+         WHERE payer_address = ?
+         AND created_at >= datetime('now', ?)`,
+      )
+      .get(payer_address, `-${windowMinutes} minutes`);
+    const current = row?.c || 0;
+    return {
+      allowed: current < limit,
+      current_count: current,
+      limit,
+      reset_seconds: windowMinutes * 60,
+    };
+  } catch (err) {
+    console.warn(`[x402] rate-limit lookup failed: ${err.message}`);
+    return { allowed: true, current_count: 0, limit, reset_seconds: 0 };
+  }
+}
+
+/**
  * Sign a CDP API JWT (ES256) for the given request. Returns null if creds
  * unavailable. Using the SHA256-ECDSA primitive from node:crypto so this has
  * no new npm dependency.
@@ -229,6 +306,7 @@ async function verifyWithCDPFacilitator(paymentHeader, paymentRequirements) {
  * @param {string} [options.category] - Bazaar discovery taxonomy (default "crypto-intelligence")
  * @param {string[]} [options.tags] - Bazaar discovery tags
  * @param {string} [options.method] - HTTP verb advertised in the 402 resource block (default "GET")
+ * @param {number} [options.rateLimitPerWallet] - Max paid requests per wallet per hour (default 100, set 0 to disable)
  */
 function x402Paywall(options = {}) {
   const {
@@ -238,6 +316,7 @@ function x402Paywall(options = {}) {
     category = "crypto-intelligence",
     tags = [],
     method = "GET",
+    rateLimitPerWallet = 100,
   } = options;
 
   return async (req, res, next) => {
@@ -278,6 +357,36 @@ function x402Paywall(options = {}) {
       req.headers["x-payment"] ||
       req.headers["x-402-payment"];
     if (paymentHeader) {
+      // Step 3a: strict parse. Malformed header → 400 (client error) not
+      // 500 (server error) or 402 (masking a broken client as "pay again").
+      const parsed = validatePaymentHeader(paymentHeader);
+      if (!parsed.ok) {
+        return res.status(400).json({
+          error: "malformed_payment_header",
+          reason: parsed.reason,
+          hint: "X-402-Payment must be base64-encoded JSON with payload.signer | payer | from",
+        });
+      }
+
+      // Step 3b: per-wallet rate limit. Looks up count in x402_payments
+      // for this payer_address in the last hour.
+      const rl = checkWalletRateLimit(parsed.payer_address, rateLimitPerWallet);
+      if (!rl.allowed) {
+        return res
+          .status(429)
+          .set("Retry-After", String(rl.reset_seconds))
+          .set("X-RateLimit-Limit", String(rl.limit))
+          .set("X-RateLimit-Remaining", "0")
+          .set("X-RateLimit-Window", "3600")
+          .json({
+            error: "rate_limited",
+            message: `Per-wallet cap reached: ${rl.current_count}/${rl.limit} requests in the last 60 minutes.`,
+            wallet: parsed.payer_address,
+            retry_after_seconds: rl.reset_seconds,
+          });
+      }
+
+      // Step 3c: CDP facilitator verification.
       const verification = await verifyWithCDPFacilitator(paymentHeader, [
         paymentRequirements,
       ]);
@@ -298,12 +407,11 @@ function x402Paywall(options = {}) {
       console.log(
         `[x402] Payment accepted (${verification.verified ? "cdp-verified" : "permissive"}) for ${resource}`,
       );
-      const { payer_address, tx_hash } = parsePaymentHeader(paymentHeader);
       recordPayment({
         service_name: resource,
         amount_usd: Number(price) / 1_000_000,
-        tx_hash,
-        payer_address,
+        tx_hash: parsed.tx_hash,
+        payer_address: parsed.payer_address,
         verified: verification.verified,
       });
       return next();
@@ -352,6 +460,9 @@ module.exports = {
   x402Paywall,
   verifyWithCDPFacilitator,
   signCDPJwt,
+  parsePaymentHeader,
+  validatePaymentHeader,
+  checkWalletRateLimit,
   CDP_FACILITATOR_URL,
   CDP_VERIFY_ENABLED,
 };
