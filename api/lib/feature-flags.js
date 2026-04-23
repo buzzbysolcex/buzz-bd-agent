@@ -198,7 +198,12 @@ const FLAGS = {
   // Default FALSE. Flip requires explicit Ogie War Room authorization per
   // buzz-trust-governance-feature-flags.md (Trust Level 0). When true,
   // api/lib/discord-notify.send() actually posts; when false it no-ops.
-  DISCORD_OPS_DASHBOARD: false,
+  // Flipped 2026-04-23 per Ogie msg 4519 Day 22 Discord diagnostic —
+  // DB set this flag to true on 2026-04-21 14:47:53 (stage-4-retry-post-
+  // phase-3-deploy) but the hardcoded default kept runtime silent. Aligns
+  // the source default with the already-approved DB state so dual-route
+  // Discord path actually posts.
+  DISCORD_OPS_DASHBOARD: true,
 };
 
 function feature(name) {
