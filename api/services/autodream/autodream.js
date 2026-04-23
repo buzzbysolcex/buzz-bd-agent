@@ -352,20 +352,34 @@ function consolidateRevenue() {
 }
 
 // ── PHASE 6: SIGNAL ANGLE PRE-GENERATOR (GAP-1) ─────────────
-// Generates 4 AIBTC signal angle drafts for morning filing
-// across the 6 canonical beats, with beat rotation to avoid
-// filing the same beat twice in a row.
+// Generates 5 AIBTC signal angle drafts for morning filing, one
+// per cron slot (06:02/07:03/08:02/09:03/10:03 UTC). The mix
+// weights the active-editor beats and skips dark-editor beats.
 // Gated by AUTODREAM_SIGNAL_ANGLES (default true).
+//
 // AIBTC active beats — post-beat-consolidation (Apr 2026). The API
 // returns 410 Gone for any other beat. Old list (agent-skills,
 // agent-economy, agent-trading, infrastructure, security, deal-flow)
 // retired Apr 2026; left in place until Apr 22 streak-rescue revealed
 // Phase 6 was still writing disk drafts on retired beats every morning,
 // causing filer-fail loops. Per Ogie msg 4345 Part 3 fix.
-const CANONICAL_BEATS = [
-  "aibtc-network",
-  "bitcoin-macro",
-  "quantum",
+const CANONICAL_BEATS = ["aibtc-network", "bitcoin-macro", "quantum"];
+
+// ── SLOT-TO-BEAT MIX (Apr 23 2026 pivot per Ogie msg 4558) ──
+// Elegant Orb (aibtc-network editor) DARK 5+ days per #629 DRI review.
+// Signals to aibtc-network rot unapproved. Weight 3 BM + 2 quantum
+// while BM editor (Ivory Coda) + quantum editor (Zen Rocket) are
+// actively clearing queue. Restore aibtc-network slot when Elegant
+// Orb approvals resume (see correction-hunter Elegant Orb monitor).
+//
+// Index is the slot number used in filename suffix ${today}-${beat}-${slot}.json
+// matching morning-signals-v2.sh pattern ${TODAY}-*-${SIGNAL_NUM}.json.
+const SLOT_BEATS = [
+  "bitcoin-macro", // Slot 1 (06:02) — beat BM cap (fills fast, ~09:55 UTC)
+  "bitcoin-macro", // Slot 2 (07:03) — second BM before cap
+  "quantum", // Slot 3 (08:02) — Zen Rocket editor, fills slower
+  "bitcoin-macro", // Slot 4 (09:03) — third BM, correction fallback
+  "quantum", // Slot 5 (10:03) — second quantum, correction fallback
 ];
 
 function generateSignalAngles() {
@@ -397,13 +411,13 @@ function generateSignalAngles() {
 
     const today = new Date().toISOString().split("T")[0];
 
-    // Skip if already drafted today
+    // Skip if already drafted today (5 slots per the SLOT_BEATS pivot mix)
     const existing = db()
       .prepare(
         `SELECT COUNT(*) as c FROM signal_angles_drafted WHERE draft_date = ?`,
       )
       .get(today);
-    if (existing && existing.c >= 4) {
+    if (existing && existing.c >= SLOT_BEATS.length) {
       return {
         skipped: true,
         reason: "already drafted today",
@@ -461,45 +475,45 @@ function generateSignalAngles() {
       /* skip */
     }
 
-    // Beat rotation: find yesterday's last beat and avoid repeating it first
-    let lastBeatUsed = null;
-    try {
-      const row = db()
-        .prepare(
-          `
-        SELECT beat FROM signal_angles_drafted
-        WHERE draft_date < ? ORDER BY draft_date DESC, id DESC LIMIT 1
-      `,
-        )
-        .get(today);
-      lastBeatUsed = row?.beat || null;
-    } catch (e) {
-      /* first run */
-    }
+    // Slot-to-beat mapping (SLOT_BEATS const) drives the mix directly.
+    // Each slot generates one draft; beat repeats across slots are expected
+    // (3 BM + 2 quantum) and the slot number becomes the filename suffix.
+    // Per-slot BM angle rotation keeps BM#1/#2/#3 from collapsing to the
+    // same prompt (would trip duplicate-content reject at aibtc.news).
+    const BM_ANGLES = [
+      "difficulty/hashrate/pool-share shift with concrete numeric delta",
+      "mempool congestion + fee-market state change (sat/vB floors, queue depth)",
+      "sBTC peg flows, Strategy treasury changes, Stacks-BTC cost curve",
+    ];
+    const QUANTUM_ANGLES = [
+      "NIST PQC milestone, BIP-360 draft update, or Shor/Grover academic result",
+      "ECDSA exposure counter on live Stacks blocks, sBTC quantum-risk pairing",
+    ];
+    let bmIdx = 0;
+    let qIdx = 0;
 
-    const rotatedBeats = lastBeatUsed
-      ? [...CANONICAL_BEATS.filter((b) => b !== lastBeatUsed), lastBeatUsed]
-      : CANONICAL_BEATS;
-
-    // Draft up to 3 angles — one per active beat (rotated to avoid repeat).
     const drafts = [];
-    const targetBeats = rotatedBeats.slice(0, CANONICAL_BEATS.length);
-
-    for (const beat of targetBeats) {
+    SLOT_BEATS.forEach((beat, slotIdx) => {
       let headline, hook;
       switch (beat) {
         case "aibtc-network":
           headline = `AIBTC Network research angle — aibtcdev/agent-news activity and correspondent-pool signals`;
           hook = `Research prompt for morning rewrite: scan aibtcdev/agent-news last 24h for merged PRs, new issues, governance threads; identify measurable correspondent activity (filings, inclusions, payouts). Sources must include at least one aibtcdev GitHub URL or /api/signals/counts endpoint.`;
           break;
-        case "bitcoin-macro":
-          headline = `Bitcoin macro observation — measurable on-chain event in the last 24h`;
-          hook = `Research prompt for morning rewrite: check difficulty/hashrate/pool-share shifts, Strategy treasury changes, sBTC peg flows. Prefer a concrete numeric delta (e.g., +N BTC, -M%, rank swap) and cite mempool.space / blockchain.info / official press release as sources.`;
+        case "bitcoin-macro": {
+          const angle = BM_ANGLES[bmIdx % BM_ANGLES.length];
+          bmIdx++;
+          headline = `Bitcoin macro — slot ${slotIdx + 1} angle: ${angle.slice(0, 60)}`;
+          hook = `Research prompt for morning rewrite (slot ${slotIdx + 1}, angle: ${angle}): prefer concrete numeric deltas over narrative. Sources must include mempool.space, blockchain.info, blockstream.info, or primary chain-data APIs. File BEFORE 06:00 UTC — BM cap fills fast (~09:55 UTC observed Apr 20). Active editor: Ivory Coda.`;
           break;
-        case "quantum":
-          headline = `Quantum-threat research angle — cryptographic-hardness observations relevant to Bitcoin`;
-          hook = `Research prompt for morning rewrite: scan for post-quantum milestones (NIST finalist updates, BIP-related discussions, academic PQ-to-Bitcoin papers). Sources must include at least one NIST/IETF/peer-reviewed URL.`;
+        }
+        case "quantum": {
+          const angle = QUANTUM_ANGLES[qIdx % QUANTUM_ANGLES.length];
+          qIdx++;
+          headline = `Quantum-threat research angle — slot ${slotIdx + 1}: ${angle.slice(0, 60)}`;
+          hook = `Research prompt for morning rewrite (slot ${slotIdx + 1}, angle: ${angle}): cite at least one NIST/IETF/arxiv/eprint.iacr.org/bitcoin-bips URL. Leverage BuzzShield V5 threat model (40 items, 5 domains) for domain depth. Active editor: Zen Rocket.`;
           break;
+        }
         default:
           headline = `${beat} — daily research prompt`;
           hook = `Auto-generated research prompt. Claude Code must rewrite with real sources before filing.`;
@@ -515,10 +529,12 @@ function generateSignalAngles() {
       } catch {}
 
       drafts.push({
+        slot: slotIdx + 1,
         beat,
         headline,
         hook,
         data_points: JSON.stringify({
+          slot: slotIdx + 1,
           fresh_score_count: pipelineData.fresh_scores.length,
           aria_new_24h: pipelineData.aria_new,
           flagged_count: pipelineData.flagged.length,
@@ -528,7 +544,7 @@ function generateSignalAngles() {
             : null,
         }),
       });
-    }
+    });
 
     // Persist drafts
     const insert = db().prepare(`
@@ -566,8 +582,9 @@ function generateSignalAngles() {
         fs.mkdirSync(draftDir, { recursive: true });
       }
       const generatedAt = new Date().toISOString();
-      drafts.forEach((d, idx) => {
-        const filename = `${today}-${d.beat}-${idx + 1}.json`;
+      drafts.forEach((d) => {
+        const slot = d.slot;
+        const filename = `${today}-${d.beat}-${slot}.json`;
         const fpath = path.join(draftDir, filename);
         const body = d.hook || "";
         const sources = []; // Phase 6 has no source-fetching step
@@ -579,7 +596,9 @@ function generateSignalAngles() {
           skipChecks.push("sources[] empty — unfilable");
         }
         if (d.headline.length > 120 || d.headline.length < 10) {
-          skipChecks.push(`headline ${d.headline.length} chars out of 10-120 range`);
+          skipChecks.push(
+            `headline ${d.headline.length} chars out of 10-120 range`,
+          );
         }
         if (body.length < 600 || body.length > 1000) {
           skipChecks.push(`body ${body.length} chars out of 600-1000 range`);
@@ -599,7 +618,7 @@ function generateSignalAngles() {
             "Draft generated by autoDream Phase 6 (Claude Opus 4.7 via Pro Max) at 02:00 UTC. Direct filing via bip322-js.",
           generated_at: generatedAt,
           filed: false,
-          draft_index: idx + 1,
+          draft_index: slot,
           data_points: JSON.parse(d.data_points || "{}"),
         };
         fs.writeFileSync(fpath, JSON.stringify(payload, null, 2));

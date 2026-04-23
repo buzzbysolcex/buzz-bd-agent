@@ -3,11 +3,17 @@
 #
 # Contract:
 #   1. Pull last 24h of aibtc.news signals
-#   2. For signals that reference github.com/aibtcdev/agent-news issues
-#      (either via direct URL or #NNN), enrich with the real issue title
-#      from the GitHub REST API
-#   3. Emit candidates JSON with signal snippet + referenced issues side-by-side
-#   4. Post digest to War Room so a Buzz session can pick up draft work
+#   2. Filter to active-editor beats: bitcoin-macro, quantum, aibtc-network
+#      (Apr 23 2026 pivot per Ogie msg 4558 — Elegant Orb DARK 5+ days,
+#       so BM + quantum drive correction yield; aibtc-network retained
+#       in case Elegant Orb resumes approvals)
+#   3. For signals that reference github.com/{owner}/{repo}/(issues|pull)/NNN
+#      across aibtcdev repos (agent-news, x402-sponsor-relay, skills,
+#      landing-page) enrich with the real issue/PR title + state from the
+#      GitHub REST API. Bare #NNN still defaults to agent-news for
+#      back-compat.
+#   4. Emit candidates JSON with signal snippet + referenced issues side-by-side
+#   5. Post digest to War Room so a Buzz session can pick up draft work
 #
 # This script does NOT write correction drafts autonomously — the LLM-grade
 # fact-checking happens in a Buzz session that ingests the candidates JSON.
@@ -46,20 +52,28 @@ fi
 
 log "fetched=$SIGNAL_COUNT signals from aibtc.news"
 
-# --- 2. Filter to last-24h + extract issue references ---------------------
+# --- 2. Filter to last-24h + active beats + extract issue references ------
 # Candidate rule:
 #   - signal createdAt >= SINCE
-#   - content or headline references #NNN or aibtcdev/agent-news/issues/NNN
+#   - beatSlug in ACTIVE_BEATS (bitcoin-macro, quantum, aibtc-network)
+#   - content or headline references github.com/{owner}/{repo}/(issues|pull)/NNN
+#     OR bare #NNN (back-compat, defaults to aibtcdev/agent-news)
 #   - NOT self (btcAddress != Buzz's)
+#   - NOT already a correction
 BUZZ_BTC="bc1qsja6knydqxj0nxf05466zhu8qqedu8umxeagze"
+ACTIVE_BEATS="bitcoin-macro,quantum,aibtc-network"
 
 CANDS_FILE="$TMPDIR/candidates.json"
-SINCE="$SINCE" BUZZ_BTC="$BUZZ_BTC" RAW_FILE="$RAW_FILE" OUT_CANDS="$CANDS_FILE" python3 <<'PY' 2>/dev/null
+SINCE="$SINCE" BUZZ_BTC="$BUZZ_BTC" ACTIVE_BEATS="$ACTIVE_BEATS" RAW_FILE="$RAW_FILE" OUT_CANDS="$CANDS_FILE" python3 <<'PY' 2>/dev/null
 import json, os, re, sys
 raw = json.load(open(os.environ['RAW_FILE']))
 since = os.environ.get('SINCE')
 buzz = os.environ.get('BUZZ_BTC')
-issue_re = re.compile(r'(?:aibtcdev/agent-news/(?:issues|pull)/(\d+))|(?:#(\d{2,4})\b)')
+active_beats = set((os.environ.get('ACTIVE_BEATS') or '').split(','))
+# URL-qualified: capture owner/repo/number → ground-truth fetch from correct repo
+url_re = re.compile(r'github\.com/([\w.-]+)/([\w.-]+)/(?:issues|pull)/(\d+)')
+# Bare #NNN → default to aibtcdev/agent-news (historical convention)
+bare_re = re.compile(r'#(\d{2,4})\b')
 out = []
 for s in raw.get('signals', []):
     created = s.get('timestamp') or s.get('createdAt') or s.get('publishedAt') or ''
@@ -67,16 +81,34 @@ for s in raw.get('signals', []):
         continue
     if s.get('btcAddress') == buzz:
         continue
-    # Skip signals that are themselves corrections — don't correct a correction
     if s.get('correction_of'):
         continue
+    if active_beats and s.get('beatSlug') not in active_beats:
+        continue
     text = (s.get('headline','') or '') + "\n" + (s.get('content','') or '')
-    issues = set()
-    for m in issue_re.finditer(text):
-        num = m.group(1) or m.group(2)
-        if num:
-            issues.add(int(num))
-    if not issues:
+    refs = {}  # key "owner/repo#num" → {owner, repo, number}
+    for m in url_re.finditer(text):
+        owner, repo, num = m.group(1), m.group(2), int(m.group(3))
+        key = f"{owner}/{repo}#{num}"
+        refs[key] = {'owner': owner, 'repo': repo, 'number': num}
+    for m in bare_re.finditer(text):
+        num = int(m.group(1))
+        key = f"aibtcdev/agent-news#{num}"
+        refs.setdefault(key, {'owner': 'aibtcdev', 'repo': 'agent-news', 'number': num})
+    # For BM/quantum, GH-issue references are rare — signals cite mempool.space,
+    # api.hiro.so, arxiv.org, nist.gov, BIP drafts. Surface those as manual
+    # fact-check candidates (numeric/factual claims to verify against live source).
+    source_urls = []
+    beat = s.get('beatSlug') or ''
+    if beat in ('bitcoin-macro', 'quantum') and not refs:
+        raw_sources = s.get('sources') or []
+        for src in raw_sources:
+            u = (src.get('url') if isinstance(src, dict) else str(src)) or ''
+            if any(host in u for host in ('mempool.space','api.hiro.so','arxiv.org','eprint.iacr.org','nist.gov','github.com/bitcoin/bips','blockchain.info','blockstream.info')):
+                source_urls.append({'url': u, 'title': (src.get('title') if isinstance(src, dict) else '')[:150]})
+        if not source_urls:
+            continue
+    elif not refs:
         continue
     out.append({
         'id': s.get('id'),
@@ -87,7 +119,8 @@ for s in raw.get('signals', []):
         'headline': s.get('headline',''),
         'content_snippet': (s.get('content','') or '')[:600],
         'timestamp': created,
-        'referenced_issues': sorted(issues),
+        'referenced_issues': sorted(refs.values(), key=lambda r: (r['owner'], r['repo'], r['number'])),
+        'primary_source_urls': source_urls,
     })
 json.dump(out, open(os.environ['OUT_CANDS'],'w'))
 PY
@@ -112,10 +145,12 @@ cands = json.load(open(os.environ['CANDS_FILE']))
 auth = os.environ.get('GH_AUTH','')
 
 cache = {}
-def fetch_issue(num):
-    if num in cache:
-        return cache[num]
-    url = f"https://api.github.com/repos/aibtcdev/agent-news/issues/{num}"
+def fetch_issue(ref):
+    owner, repo, num = ref['owner'], ref['repo'], ref['number']
+    key = f"{owner}/{repo}#{num}"
+    if key in cache:
+        return cache[key]
+    url = f"https://api.github.com/repos/{owner}/{repo}/issues/{num}"
     req = urllib.request.Request(url, headers={'Accept':'application/vnd.github+json'})
     if auth:
         k,v = auth.split(': ',1)
@@ -124,25 +159,29 @@ def fetch_issue(num):
         with urllib.request.urlopen(req, timeout=10) as r:
             d = json.loads(r.read())
             out = {
+                'owner': owner,
+                'repo': repo,
                 'number': d.get('number'),
                 'title': d.get('title'),
                 'state': d.get('state'),
                 'user': (d.get('user') or {}).get('login'),
                 'created_at': d.get('created_at'),
+                'merged_at': d.get('pull_request', {}).get('merged_at') if d.get('pull_request') else None,
                 'labels': [l.get('name') for l in d.get('labels',[])],
                 'url': d.get('html_url'),
+                'is_pr': 'pull_request' in d,
             }
-            cache[num] = out
+            cache[key] = out
             return out
     except urllib.error.HTTPError as e:
-        cache[num] = {'number': num, 'error': f'http_{e.code}'}
-        return cache[num]
+        cache[key] = {'owner': owner, 'repo': repo, 'number': num, 'error': f'http_{e.code}'}
+        return cache[key]
     except Exception as e:
-        cache[num] = {'number': num, 'error': str(e)[:100]}
-        return cache[num]
+        cache[key] = {'owner': owner, 'repo': repo, 'number': num, 'error': str(e)[:100]}
+        return cache[key]
 
 for c in cands:
-    c['issues_ground_truth'] = [fetch_issue(n) for n in c.get('referenced_issues', [])]
+    c['issues_ground_truth'] = [fetch_issue(r) for r in c.get('referenced_issues', [])]
 json.dump(cands, open(os.environ['ENRICH_FILE'],'w'), indent=2)
 PY
 
@@ -157,20 +196,27 @@ if [ -f /home/claude-code/.claude/channels/telegram/.env ]; then
 import json, os, sys
 cands = json.load(open(os.environ['ENRICH_FILE']))
 if not cands:
-    print("CORRECTION-HUNTER (daily) — 0 candidates in last 24h")
+    print("CORRECTION-HUNTER (daily) — 0 candidates in last 24h (BM+quantum+aibtc-network)")
     sys.exit(0)
-lines = [f"CORRECTION-HUNTER (daily) — {len(cands)} candidates"]
+# Group by beatSlug for at-a-glance triage
+from collections import Counter
+beat_counts = Counter(c.get('beatSlug','?') for c in cands)
+beat_summary = ', '.join(f"{b}={n}" for b,n in beat_counts.most_common())
+lines = [f"CORRECTION-HUNTER (daily) — {len(cands)} candidates ({beat_summary})"]
 for c in cands[:8]:
-    issues = ', '.join(f"#{i}" for i in c.get('referenced_issues',[]))
+    refs = c.get('referenced_issues',[])
+    ref_str = ', '.join(f"{r['owner']}/{r['repo']}#{r['number']}" for r in refs[:4])
     lines.append(f"\n• {c.get('author')} ({c.get('beatSlug')})")
     lines.append(f"  {c.get('headline','')[:100]}")
-    lines.append(f"  refs: {issues}")
+    lines.append(f"  refs: {ref_str}")
     for g in c.get('issues_ground_truth',[])[:3]:
+        label = f"{g.get('owner','?')}/{g.get('repo','?')}#{g.get('number')}"
         if g.get('error'):
-            lines.append(f"    #{g.get('number')}: {g.get('error')}")
+            lines.append(f"    {label}: {g.get('error')}")
         else:
-            lines.append(f"    #{g.get('number')} ({g.get('state')}): {(g.get('title') or '')[:80]}")
-lines.append(f"\nFull JSON: /data/buzz/persistent/buzz-api/correction-candidates/")
+            kind = 'PR' if g.get('is_pr') else 'issue'
+            lines.append(f"    {label} {kind} ({g.get('state')}): {(g.get('title') or '')[:80]}")
+lines.append(f"\nFull JSON: /data/buzz/persistent/reports/correction-candidates/")
 print("\n".join(lines))
 PY
 )

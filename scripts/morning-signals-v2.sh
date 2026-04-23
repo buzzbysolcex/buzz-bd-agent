@@ -18,7 +18,23 @@
 # Fires daily — duplicate + cooldown checks inside signal-preflight.js
 # prevent misfires.
 #
-# Usage: morning-signals-v2.sh <1|2|3|4>
+# ── SLOT MIX (per Ogie msg 4558 — Apr 23 2026 beat pivot) ──────
+# Cron fires 5 slots per UTC-day (cap is 6/UTC-day, 1 reserved for
+# intraday correction filing):
+#
+#   Slot 1 (06:02 UTC): bitcoin-macro  — beat BM cap (fills fast)
+#   Slot 2 (07:03 UTC): bitcoin-macro  — second BM before 09:55 cap
+#   Slot 3 (08:02 UTC): quantum        — Zen Rocket editor, lots of room
+#   Slot 4 (09:03 UTC): bitcoin-macro OR correction
+#   Slot 5 (10:03 UTC): quantum OR correction
+#
+# If slot 4/5 has no fresh BM/quantum draft, falls back to a same-day
+# correction draft (filename pattern ${TODAY}-correction-*.json). Active
+# until Elegant Orb (aibtc-network editor) resumes approvals; revert to
+# 2BM+2Q+1AN when Elegant Orb active (monitor via /api/signals?beat=
+# aibtc-network&status=approved).
+#
+# Usage: morning-signals-v2.sh <1|2|3|4|5>
 
 set -uo pipefail
 
@@ -55,6 +71,21 @@ log "wake"
 
 # find the matching draft for today
 DRAFT_FILE="$(ls "$DRAFT_DIR"/${TODAY}-*-${SIGNAL_NUM}.json 2>/dev/null | head -n1)"
+
+# Slots 4+5 correction fallback (per beat pivot msg 4558): if no fresh
+# slot draft exists, look for any same-day correction draft that hasn't
+# been filed yet. Signal-preflight.js dedup prevents double-filing.
+if [ -z "$DRAFT_FILE" ] && [ "$SIGNAL_NUM" -ge 4 ]; then
+    for cand in "$DRAFT_DIR"/${TODAY}-correction-*.json; do
+        [ -f "$cand" ] || continue
+        # Skip drafts already marked filed=true
+        if python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if not d.get('filed') else 1)" "$cand" 2>/dev/null; then
+            DRAFT_FILE="$cand"
+            log "correction_fallback_draft=$DRAFT_FILE"
+            break
+        fi
+    done
+fi
 
 if [ -z "$DRAFT_FILE" ] || [ ! -f "$DRAFT_FILE" ]; then
     log "no_draft_found pattern=${DRAFT_DIR}/${TODAY}-*-${SIGNAL_NUM}.json"
