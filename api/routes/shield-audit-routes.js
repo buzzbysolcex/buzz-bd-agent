@@ -397,6 +397,78 @@ router.post("/full", tierGate("free"), shieldPaidGate, async (req, res) => {
       attribution: PASHOV_ATTRIBUTION,
     });
   }
+
+  // ── Input-validation preflight (Apr 23 2026 — Ogie msg 4561 "100% on
+  // valid contracts" directive). Rejects malformed inputs at HTTP layer so
+  // they never create a row that later gets marked status='failed'.
+  //
+  // 1. Duplicate guard: same address+chain submitted in last 5 min.
+  //    Covers the Apr 22 15:44:20/15:45:32 twin-submit pattern where the
+  //    daemon processed the second request but both DB rows got marked
+  //    failed at 15:51:40 via SSE timeout cascade.
+  try {
+    const dup = db
+      .prepare(
+        `SELECT audit_id, status FROM pashov_audits
+         WHERE contract_address = ? AND chain_id = ?
+           AND created_at > datetime('now','-5 minutes')
+           AND status IN ('pending','running')
+         ORDER BY created_at DESC LIMIT 1`,
+      )
+      .get(address, Number(chain_id));
+    if (dup) {
+      return res.status(409).json({
+        error: "duplicate_audit_in_flight",
+        message: `An audit for this contract+chain was submitted <5 min ago and is still ${dup.status}. Poll /api/v1/shield/audit/${dup.audit_id} instead of re-queuing.`,
+        existing_audit_id: dup.audit_id,
+        existing_status: dup.status,
+        attribution: PASHOV_ATTRIBUTION,
+      });
+    }
+  } catch (e) {
+    // Dedup lookup failure is non-fatal — proceed with insert.
+  }
+
+  // 2. Source-verification preflight via Sourcify v2 (no API key required,
+  //    supports all major EVM chains). A contract with unverified source
+  //    cannot be audited — the shim's buzz-audit-evm returns
+  //    `error: "source_unverified"` and marks status='failed'. Reject at
+  //    HTTP layer instead of burning a FAILED row. Fails OPEN on Sourcify
+  //    5xx/timeout so a degraded verifier never blocks paid audits.
+  //
+  //    v2 API shape (https://sourcify.dev/server/v2/contract/{chain}/{addr}):
+  //    - verified:   {"match":"match","runtimeMatch":"match",...}
+  //    - unverified: {"match":null,"creationMatch":null,"runtimeMatch":null}
+  //    The deprecated /check-by-addresses endpoint returned false positives
+  //    for WETH and USDT during preflight dev (Apr 23 2026), so the v2 path
+  //    is load-bearing — do not revert to the old endpoint.
+  try {
+    const axios = require("axios");
+    const chkUrl = `https://sourcify.dev/server/v2/contract/${Number(chain_id)}/${encodeURIComponent(address)}`;
+    const chk = await axios.get(chkUrl, { timeout: 8000 });
+    const data = chk.data || {};
+    const verified =
+      data.match === "match" ||
+      data.runtimeMatch === "match" ||
+      data.creationMatch === "match";
+    if (!verified) {
+      return res.status(400).json({
+        error: "contract_source_unverified",
+        message: `Contract source is not verified for chain ${chain_id} (Sourcify v2: match=${data.match ?? "null"}). Pashov deep audit reads verified source. Publish source on the chain's block explorer (Etherscan/Basescan/BSCscan/etc.) or Sourcify before requesting a paid audit.`,
+        sourcify_match: data.match ?? null,
+        attribution: PASHOV_ATTRIBUTION,
+      });
+    }
+  } catch (e) {
+    // Sourcify unavailable — fail open. Log and proceed; if the contract
+    // really is unverified the shim will still return source_unverified
+    // and the row will be status='failed' (degraded but not worse than
+    // pre-preflight behavior).
+    console.warn(
+      `[pashov-preflight] sourcify v2 check failed for ${address}@${chain_id}: ${e.message}`,
+    );
+  }
+
   try {
     db.prepare(
       `INSERT INTO pashov_audits
