@@ -243,6 +243,11 @@ app.get("/robots.txt", (req, res) => {
   res.sendFile(path.join(__dirname, "static", "robots.txt"));
 });
 
+// favicon.ico — satisfies AgentCash FAVICON_MISSING warning + browser tabs.
+app.get("/favicon.ico", (req, res) =>
+  res.sendFile(path.join(__dirname, "static", "favicon.ico")),
+);
+
 // Root — JSON pointing to docs, OpenAPI spec, x402 discovery, health.
 app.get("/", (req, res) =>
   res.json({

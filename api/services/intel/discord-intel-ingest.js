@@ -230,12 +230,18 @@ function sha256Hex(s) {
 // ---------- Main ingest flow ----------
 
 async function ingestMessage(msg, deps, channelKey = "intel.zachxbt") {
+  const { feature } = require("../../lib/feature-flags");
   const { db, discord, autodream, eventBus } = deps;
   const channelSlug = channelKey.replace(/^intel\./, "");
   const sourceTag = `discord-intel-${channelSlug}`;
 
-  const entities = extractEntities(msg.content || "");
-  const hits = crossRef(db, entities);
+  const extractOn = feature("DISCORD_INTEL_EXTRACT");
+  const entities = extractOn
+    ? extractEntities(msg.content || "")
+    : { urls: [], wallets: { eth: [], solana: [], bitcoin: [] }, mentions: [], tickers: [] };
+  const hits = extractOn
+    ? crossRef(db, entities)
+    : { pipeline_tokens: [], blacklist_wallets: [] };
   const hasHits =
     hits.pipeline_tokens.length + hits.blacklist_wallets.length > 0;
   const triagedStatus = hasHits ? "needs_action" : "triaged";
@@ -402,6 +408,10 @@ async function pollChannel(channelKey, deps) {
 }
 
 async function pollOnce(deps = {}) {
+  const { feature } = require("../../lib/feature-flags");
+  if (!feature("DISCORD_INTEL_INGEST")) {
+    return { skipped: true, reason: "DISCORD_INTEL_INGEST_off" };
+  }
   const db = deps.db || require("../../db").getDB();
   const discord = deps.discord || require("../../lib/discord-notify");
   const autodream = deps.autodream || require("../autodream/autodream");

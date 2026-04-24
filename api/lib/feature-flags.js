@@ -204,6 +204,13 @@ const FLAGS = {
   // the source default with the already-approved DB state so dual-route
   // Discord path actually posts.
   DISCORD_OPS_DASHBOARD: true,
+
+  // Kill switches for Discord intel pipeline. Defaulted true so the current
+  // behavior (ingesting from the 3 Discord intel inboxes + entity extraction)
+  // is unchanged — flip either to false to stop poll or stop extraction
+  // without touching code. Added Apr 24 per Ogie msg 4735 / 4740 Option B.
+  DISCORD_INTEL_INGEST: true,
+  DISCORD_INTEL_EXTRACT: true,
 };
 
 function feature(name) {
