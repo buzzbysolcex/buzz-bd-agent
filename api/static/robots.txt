@@ -1,0 +1,110 @@
+# api.buzzbd.ai — AI crawlers welcome
+# Buzz BD Agent · SolCex Exchange
+# Primary docs: https://buzzbd.ai  ·  OpenAPI: /openapi.json  ·  x402: /.well-known/x402
+
+User-agent: *
+Allow: /openapi.json
+Allow: /.well-known/x402
+Allow: /.well-known/x402.json
+Allow: /.well-known/ai-plugin.json
+Allow: /api/v1/info
+Allow: /api/v1/health
+Allow: /health
+Allow: /agent
+
+# OpenAI (ChatGPT training + search + on-demand fetch)
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+# Anthropic (Claude training + citations + web + search)
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: claude-web
+Allow: /
+
+# Perplexity (index + on-demand citations)
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+# Google (Gemini training + Vertex)
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Google-CloudVertexBot
+Allow: /
+
+# Microsoft (Bing + Copilot)
+User-agent: Bingbot
+Allow: /
+
+# Apple (Siri + AI training)
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# xAI (Grok search)
+User-agent: xAI-Bot
+Allow: /
+
+# Meta (AI training + fetch + social preview)
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: Meta-ExternalFetcher
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+# Cohere
+User-agent: cohere-ai
+Allow: /
+
+# DuckDuckGo AI
+User-agent: DuckAssistBot
+Allow: /
+
+# Amazon (Alexa + search AI)
+User-agent: Amazonbot
+Allow: /
+
+# ByteDance / TikTok AI
+User-agent: Bytespider
+Allow: /
+
+# Allen Institute
+User-agent: AI2Bot
+Allow: /
+
+User-agent: AI2Bot-Dolma
+Allow: /
+
+# You.com
+User-agent: YouBot
+Allow: /
+
+# Huawei PetalSearch (EU/Asia)
+User-agent: PetalBot
+Allow: /
+
+# Common Crawl (feeds many AI labs)
+User-agent: CCBot
+Allow: /

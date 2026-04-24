@@ -237,6 +237,27 @@ app.get("/openapi.json", (req, res) =>
   res.sendFile(path.join(__dirname, "static", "openapi.json")),
 );
 
+// robots.txt — allow AI crawlers (GPTBot, ClaudeBot, PerplexityBot, etc.) for GEO
+app.get("/robots.txt", (req, res) => {
+  res.type("text/plain");
+  res.sendFile(path.join(__dirname, "static", "robots.txt"));
+});
+
+// Root — JSON pointing to docs, OpenAPI spec, x402 discovery, health.
+app.get("/", (req, res) =>
+  res.json({
+    name: "Buzz BD Agent API",
+    version: "9.5.0",
+    docs: "https://buzzbd.ai",
+    openapi: "https://api.buzzbd.ai/openapi.json",
+    x402_discovery: "https://api.buzzbd.ai/.well-known/x402",
+    ai_plugin: "https://api.buzzbd.ai/.well-known/ai-plugin.json",
+    agent: "https://api.buzzbd.ai/agent",
+    health: "https://api.buzzbd.ai/health",
+    robots: "https://api.buzzbd.ai/robots.txt",
+  }),
+);
+
 // OpenAI/MCP plugin manifest
 app.get("/.well-known/ai-plugin.json", (req, res) =>
   res.json({
