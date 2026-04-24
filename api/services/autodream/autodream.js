@@ -659,8 +659,7 @@ function generateSignalAngles() {
 
     return {
       drafted: drafts.length,
-      beats: targetBeats,
-      last_beat_avoided: lastBeatUsed,
+      beats: SLOT_BEATS,
       disk_written: diskWritten,
       disk_skipped: diskSkipped,
       disk_skip_reasons: diskSkipReasons,
