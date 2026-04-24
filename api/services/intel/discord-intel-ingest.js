@@ -29,6 +29,7 @@ const CHANNEL_KEYS_WAVE_1 = [
   "intel.zachxbt",
   "intel.lookonchain",
   "intel.defi-alerts",
+  "intel.aixbt",
 ];
 const DISCORD_API = "https://discord.com/api/v10";
 const USER_AGENT =
@@ -238,7 +239,12 @@ async function ingestMessage(msg, deps, channelKey = "intel.zachxbt") {
   const extractOn = feature("DISCORD_INTEL_EXTRACT");
   const entities = extractOn
     ? extractEntities(msg.content || "")
-    : { urls: [], wallets: { eth: [], solana: [], bitcoin: [] }, mentions: [], tickers: [] };
+    : {
+        urls: [],
+        wallets: { eth: [], solana: [], bitcoin: [] },
+        mentions: [],
+        tickers: [],
+      };
   const hits = extractOn
     ? crossRef(db, entities)
     : { pipeline_tokens: [], blacklist_wallets: [] };
