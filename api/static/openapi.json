@@ -1,0 +1,188 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Buzz BD Agent API — SolCex Exchange",
+    "description": "Autonomous BD intelligence and security scanning for crypto tokens. Token scoring, pipeline analytics, mining intel, Monte Carlo simulations, and BuzzShield security audits. All premium endpoints accept x402 micropayments via USDC on Base.",
+    "version": "9.5.0",
+    "contact": {
+      "name": "Buzz BD Agent",
+      "url": "https://buzzbd.ai",
+      "email": "buzzbysolcex@gmail.com"
+    },
+    "x-guidance": "Use /premium/score for individual token risk scoring (pass token contract address + chain). Use /premium/pipeline for full pipeline analytics across all tracked tokens. Use /shield/scan for quick security checks and /shield/audit/full for comprehensive smart contract audits. All endpoints return JSON. Payment is handled automatically via x402 — your agent's wallet pays per-request in USDC on Base network."
+  },
+  "servers": [
+    {
+      "url": "https://api.buzzbd.ai",
+      "description": "Production"
+    }
+  ],
+  "paths": {
+    "/premium/pipeline": {
+      "get": {
+        "operationId": "getPipelineStats",
+        "summary": "Full token pipeline analytics — scored tokens, HOT classifications, BD readiness breakdown",
+        "description": "Returns comprehensive pipeline statistics including total tokens scored, classification distribution, scoring rules active, and BD Sweet Spot candidates.",
+        "x-payment-info": {
+          "price": "0.01",
+          "currency": "USDC",
+          "network": "base",
+          "description": "Pipeline analytics snapshot"
+        },
+        "responses": {
+          "200": { "description": "Pipeline statistics JSON" },
+          "402": { "description": "Payment required — x402 challenge returned" }
+        }
+      }
+    },
+    "/premium/score": {
+      "post": {
+        "operationId": "scoreToken",
+        "summary": "Score an individual token — risk metrics, liquidity analysis, BD readiness",
+        "description": "Submit a token contract address and chain for comprehensive scoring. Returns risk score, liquidity depth, holder distribution, social signals, and BD classification (HOT/WARM/COLD).",
+        "x-payment-info": {
+          "price": "0.01",
+          "currency": "USDC",
+          "network": "base",
+          "description": "Individual token scoring"
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["contractAddress", "chain"],
+                "properties": {
+                  "contractAddress": {
+                    "type": "string",
+                    "description": "Token contract address"
+                  },
+                  "chain": {
+                    "type": "string",
+                    "description": "Blockchain (solana, ethereum, base, bsc)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Token score JSON with risk metrics" },
+          "402": { "description": "Payment required — x402 challenge returned" }
+        }
+      }
+    },
+    "/premium/sim": {
+      "post": {
+        "operationId": "runSimulation",
+        "summary": "Monte Carlo simulation — multi-agent consensus on token trajectory",
+        "description": "Run a MiroFish-style Monte Carlo simulation with 20 synthetic agents evaluating a token's price trajectory, risk factors, and consensus outlook.",
+        "x-payment-info": {
+          "price": "0.01",
+          "currency": "USDC",
+          "network": "base",
+          "description": "Monte Carlo simulation run"
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["contractAddress", "chain"],
+                "properties": {
+                  "contractAddress": { "type": "string" },
+                  "chain": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Simulation results with agent consensus" },
+          "402": { "description": "Payment required" }
+        }
+      }
+    },
+    "/premium/mining": {
+      "get": {
+        "operationId": "getMiningIntel",
+        "summary": "PULSE mining intelligence — pool health scores, hashrate distribution, fee analysis",
+        "description": "Returns current mining landscape: pool health rankings, hashrate distribution across top 14 pools, difficulty projections, fee floor analysis, and AntPool/Foundry comparative metrics.",
+        "x-payment-info": {
+          "price": "0.01",
+          "currency": "USDC",
+          "network": "base",
+          "description": "Mining intel snapshot"
+        },
+        "responses": {
+          "200": { "description": "Mining intelligence JSON" },
+          "402": { "description": "Payment required" }
+        }
+      }
+    },
+    "/shield/scan": {
+      "post": {
+        "operationId": "shieldScan",
+        "summary": "BuzzShield quick scan — contract security check with risk flags",
+        "description": "Quick security scan of a smart contract. Returns risk flags, known vulnerability matches, audit status, and threat classification.",
+        "x-payment-info": {
+          "price": "0.01",
+          "currency": "USDC",
+          "network": "base",
+          "description": "Quick security scan"
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["contractAddress", "chain"],
+                "properties": {
+                  "contractAddress": { "type": "string" },
+                  "chain": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Security scan results" },
+          "402": { "description": "Payment required" }
+        }
+      }
+    },
+    "/shield/audit/full": {
+      "post": {
+        "operationId": "shieldFullAudit",
+        "summary": "BuzzShield full audit — comprehensive 265-item security audit with ETHSkills integration",
+        "description": "Full smart contract security audit using the 265-item ETHSkills checklist. Includes Pashov-grade vulnerability detection, supply chain analysis, reentrancy checks, access control review, and threat model assessment.",
+        "x-payment-info": {
+          "price": "0.50",
+          "currency": "USDC",
+          "network": "base",
+          "description": "Comprehensive security audit"
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["contractAddress", "chain"],
+                "properties": {
+                  "contractAddress": { "type": "string" },
+                  "chain": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Full audit report with 265-item checklist results"
+          },
+          "402": { "description": "Payment required" }
+        }
+      }
+    }
+  }
+}

@@ -229,6 +229,13 @@ app.use(rateLimit);
 
 // ─── Public Routes (no auth) ─────────────────────────
 app.get("/.well-known/x402.json", (req, res) => res.json(X402_DISCOVERY));
+// AgentCash / 402index scanners may query /.well-known/x402 without extension.
+app.get("/.well-known/x402", (req, res) => res.json(X402_DISCOVERY));
+
+// OpenAPI 3.0 spec at root path for AgentCash.dev discovery + tool indexing.
+app.get("/openapi.json", (req, res) =>
+  res.sendFile(path.join(__dirname, "static", "openapi.json")),
+);
 
 // OpenAI/MCP plugin manifest
 app.get("/.well-known/ai-plugin.json", (req, res) =>
