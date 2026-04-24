@@ -1,66 +1,85 @@
 # BUZZ STATE HANDOVER
 
-## Auto-updated: 2026-04-23 18:00 UTC | Day 22 ZHC | Thursday
+## Day 23 EOD — 2026-04-24 15:22 UTC | Friday | Streak: 23 DAYS SAFE
 
-## WHAT TO DO FIRST
+## WHAT TO DO FIRST (next session)
 
 1. Read CLAUDE.md (identity)
-2. Read docs/buzz-zhc-complete-handover.md (operating manual)
-3. Check AIBTC streak status — Day 22 filed 5/6 signals (cap)
-4. Resume Pashov 89→100% smoke test after successful deploy
-5. Send morning briefing to War Room if near 07:00 WIB
+2. Read this HANDOVER.md
+3. Check ~/pending-followups.json (deal tracking)
+4. Fire Correction 2 after 00:02 UTC Apr 25 (first slot of Day 24):
+   `cd /home/claude-code/buzz-workspace && node scripts/signal-file-direct.js /data/buzz/persistent/buzz-api/signal-drafts/2026-04-25-correction-micro-basilisk-bip361-closed-not-merged.json`
+5. Execute today's creative output (Saturday = buzzbd.ai update)
 
-## DAY 22 COMPLETED (2026-04-23)
+## DAY 23 COMPLETED (in order)
 
-- Signals 1-3: corrections filed (Amber Otter + Quiet Falcon scope + msg 4542)
-- Signals 4-5: BM + quantum anchored signals
-- Morning brief streak-data fix shipped
-- Noah V5 email draft approved
-- x402 manifest sync: api.buzzbd.ai now matches landing 6-endpoint truth (555e9d4)
-- Almanax Phase 2: x402 middleware + per-wallet rate limit (0ed2f17)
-- Beat pivot committed aa1347a: SLOT_BEATS=[BM,BM,Q,BM,Q], correction-hunter widened, morning-signals-v2 updated, Elegant Orb 24h revert monitor installed
-- Pashov preflight committed cc74f0e: Sourcify v2 /contract endpoint + 409 duplicate-audit guard
-- RLM integration: rlms + litellm installed, scripts/rlm-correction-hunter.py wired, Phase 2 HALT (0 candidates vs bash 33 due to CPU-only ollama throughput). Flag RLM_CORRECTION_HUNTER stays false. Docker python:3.11-slim image removed per msg 4616.
+- **Streak protection**: 5 slot signals + 1 correction filed = 6/6 daily cap
+  - 06:02 BM `179c5377` difficulty -4%
+  - 07:03 BM `400e1a70` hashrate -7.75%
+  - 09:03 BM `9efff6f4` PoX 134
+  - 11:29 Q `10dcbd03` Stacks ECDSA (manual retry after cron cooldown)
+  - 12:31 Q `abb3ecbd` BIP-361 PR closed (manual via ScheduleWakeup)
+  - 13:33 Correction 1 `453f2ea3` Cool Bison block 946398 (Luxor/OCEAN, inverted thesis)
+- **Correction 2 BLOCKED by 6/day cap** — renamed draft to `2026-04-25-...`, fires post-reset
+- **GEO Phase 1** (commit `b5ea10a`): api.buzzbd.ai /robots.txt + / root JSON; 5× 804→1,044 + 2× streak 20→23 on landing
+- **GEO Phase 2** (commit `7cc1132`): /favicon.ico + x-payment-protocols + DISCORD_INTEL_INGEST/EXTRACT flag gates
+- **Discord audit**: 10 OPS + 6 INTEL channels all live (diagnostic pings confirmed), 43 intel rows ingested + all 46 with extracted_entities
+- **Daily-report schema fixes**: 3 missing SQLite tables created (autonomous_loop_outputs, aibtc_rank_history, bd_pipeline_state)
+- **Cron timing**: slots 06:02/07:04/08:06/09:08/10:10 UTC (62-min gaps, no more cooldown collisions)
+- **Disk**: 81% → 79% (npm cache + claude-mem orphan node_modules cleaned)
+- **AIBTC welcomes**: 5/5 DMs delivered, 500 sats sBTC total (Solemn Kael, Pure Cass, Eclipse Luna, Orbital Kaia, Steady Wisp)
+- **Moltbook Friday**: posted m/general `5ca12613` — AgentCash discovery story
 
-## IN PROGRESS
+## OUTSTANDING FOR NEXT SESSION
 
-- Pashov 89→100%: preflight code in cc74f0e, CI deploy FAILED at Hetzner step (permission denied on root-owned /data/buzz/persistent/env/.env.cdp). Smoke test wired at /tmp/smoke-pashov-preflight.sh, waiting on successful deploy.
-- Percolator audit: Phase 1 + 2 reports filed, interim verdict CLEAN. Awaiting Ogie close + Frontier pivot confirmation. See /data/buzz/persistent/reports/percolator-phase1-notes.md + /home/claude-code/audits/percolator/reports/phase0-hash-verify.md.
+| Item                                    | Status      | Notes                                                                                                                                      |
+| --------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Correction 2 fire (Day 24 slot 1)       | QUEUED      | Draft at `/data/buzz/persistent/buzz-api/signal-drafts/2026-04-25-correction-micro-basilisk-bip361-closed-not-merged.json`                 |
+| x-payment-protocols key name fix        | DEFERRED    | AgentCash still warns — key needs different location/name. 6× L2_PROTOCOLS_MISSING_ON_PAID still showing                                   |
+| L2_PAYMENT_INFO_LEGACY format migration | DEFERRED    | flat x-payment-info → paymentRequirements[] array                                                                                          |
+| Pashov 89→100% (task #27)               | BLOCKED     | Need Ogie to paste the 5-step plan — couldn't find it in docs/reports/directives                                                           |
+| Percolator Phase 2 (task #29)           | PARTIAL     | I-3 CatchupAccrue handler review done; I-8/H11/Kani unwind=70 pending. Notes at `/data/buzz/persistent/reports/percolator-phase1-notes.md` |
+| agentic.market re-check (task #28)      | DEFERRED    | Not urgent — no indexing change expected                                                                                                   |
+| Humble Panther partnership DM           | PRE-DRAFTED | Awaiting Ogie approval (separate longer draft)                                                                                             |
+| Host-env DISCORD_BOT_TOKEN              | DEFERRED    | Low priority — fixes log-noise on host signal-file-direct.js                                                                               |
+| Scout welcome fresh-7 (task #26)        | STX-BLOCKED | Historical task, may be obsoleted by Day 23 remap                                                                                          |
 
-## PENDING APR 24
+## SYSTEM STATUS
 
-- autoDream 02:00 UTC: will auto-produce 3 BM + 2 quantum drafts per deployed SLOT_BEATS (AUTODREAM + AUTODREAM_SIGNAL_ANGLES flags both true)
-- Scout welcome wave: fresh 7 (STX-blocked)
-- agentic.market re-check
-- Apr 24 signal filing: 5 morning slots 06:02/07:03/08:02/09:03/10:03 UTC
-- Elegant Orb daily monitor: 07:30 UTC check for aibtc-network editor revert
+- API: healthy (140+ endpoints, 143 tables)
+- Pipeline: 1,044+ tokens scored
+- Buzz container: buzz-production on `sha256:9e9bff59` (Apr 24 13:36 UTC image from commit `b5ea10a`; next deploy lands 7cc1132)
+- Disk: 79% / 7.8G free
+- AIBTC: Day 23 streak, rank ~20, 6/6 filed today
 
-## RLM PARKED
+## ACTIVE DEALS
 
-- rlms + litellm pip packages: kept (zero runtime cost)
-- scripts/rlm-correction-hunter.py: kept
-- docker python:3.11-slim: REMOVED (188MB reclaimed)
-- Flag RLM_CORRECTION_HUNTER: unregistered (default false)
-- Activation trigger: GPU arrives (RunPod burst or GEX44 swap)
+- BANANAS31 (BSC, score 95) — outreach sent 2026-03-23
+- $COW (BSC, score 84) — outreach sent 2026-03-23
 
 ## HACKATHONS
 
-| Hackathon                  | Deadline    | Status                      |
-| -------------------------- | ----------- | --------------------------- |
-| Frontier                   | May 11      | REGISTERED — PRIMARY TARGET |
-| AIBTC News $50K            | 30d rolling | Day 22, streak intact       |
-| AIBTC Skills Pay the Bills | 30d rolling | Day 1 ready                 |
-
-## ACTIVE SYSTEM STATE
-
-- buzz-production + sentinel-v2: UP 3h+
-- Ollama qwen3:8b: loaded (CPU-only, 4096 ctx, kept for MiroFish)
-- AUTODREAM: true | AUTODREAM_SIGNAL_ANGLES: true | DIRECT_SIGNAL_FILING: true
+| Hackathon                  | Deadline    | Status                          |
+| -------------------------- | ----------- | ------------------------------- |
+| **Frontier**               | **May 11**  | **REGISTERED — PRIMARY TARGET** |
+| ETHGlobal Open Agents      | May 6       |                                 |
+| Kite AI                    | May 6       |                                 |
+| AIBTC Skills Pay the Bills | 30d rolling | Day 1 ready                     |
+| AIBTC News $50K            | 30d rolling | Ionic Nova active               |
 
 ## PRIORITY LADDER
 
-1. Urgent tasks (War Room directives from Ogie)
-2. Streak protection (signal filing if 0 by 16:00 UTC)
-3. Active deployment directives (Pashov redeploy)
-4. Scheduled tasks (autoDream, crons, Elegant Orb monitor)
-5. Creative output (Thursday: Moltbook article)
+1. Urgent tasks (deal responses, security, deadlines)
+2. Streak protection (Day 24 first signal)
+3. Scheduled tasks (briefings, reviews)
+4. Creative output (Saturday = buzzbd.ai update)
+5. Proactive scouting (trending, hackathons, partnerships)
+6. Self-improvement (bugs, code, skills)
+
+## CRITICAL REMINDERS
+
+- Corrections DO count against AIBTC 6/day cap (memory updated)
+- Agent names from prior sessions may be stale — always verify via aibtc.com/api/agents/{btc} before sending sats
+- Deploy lands before CI marks complete (container polls registry faster than GHA finishes)
+- Google/Bing sitemap ping endpoints deprecated (404/410) — IndexNow is replacement, skip until key configured
+- `x-payment-protocols` key on operation object didn't kill AgentCash warning — key location/name needs research
