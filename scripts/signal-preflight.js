@@ -25,6 +25,10 @@ const SQLITE_PATH =
 const COOLDOWN_MIN = 60;
 const DUP_OVERLAP = 0.6;
 const RECENT_LIMIT = 30;
+// AIBTC API caps — server returns 400 if exceeded.
+const HEADLINE_MAX = 120;
+const SOURCE_TITLE_MAX = 200;
+const DAILY_CAP = 6;
 
 function fail(reason) {
   console.log(`PREFLIGHT_FAIL: ${reason}`);
@@ -54,6 +58,23 @@ try {
 
 if (!draft.beat_slug || !draft.headline) {
   fail("draft missing beat_slug or headline");
+}
+
+// AIBTC server-side caps — fail fast before BIP-322 + network round-trip.
+if (draft.headline.length > HEADLINE_MAX) {
+  fail(
+    `headline ${draft.headline.length}c exceeds AIBTC ${HEADLINE_MAX}c cap`,
+  );
+}
+if (Array.isArray(draft.sources)) {
+  for (let i = 0; i < draft.sources.length; i++) {
+    const s = draft.sources[i];
+    if (s && typeof s.title === "string" && s.title.length > SOURCE_TITLE_MAX) {
+      fail(
+        `source[${i}].title ${s.title.length}c exceeds AIBTC ${SOURCE_TITLE_MAX}c cap`,
+      );
+    }
+  }
 }
 
 // ── 1. wallet creds ────────────────────────────────────────

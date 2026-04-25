@@ -26,6 +26,10 @@ const { emit } = require("../events/event-bus");
 
 const AIBTC_API = "https://aibtc.news/api/signals";
 
+// AIBTC server-side caps — fail fast before BIP-322 + network round-trip.
+const HEADLINE_MAX = 120;
+const SOURCE_TITLE_MAX = 200;
+
 /**
  * Lazy-load WIF + address from env (set by server.js startup or .env.aibtc)
  */
@@ -97,6 +101,28 @@ async function fileSignalDirect({
 
   if (!beat_slug || !headline) {
     return { success: false, error: "beat_slug and headline required" };
+  }
+
+  if (headline.length > HEADLINE_MAX) {
+    return {
+      success: false,
+      error: `headline ${headline.length}c exceeds AIBTC ${HEADLINE_MAX}c cap`,
+    };
+  }
+  if (Array.isArray(sources)) {
+    for (let i = 0; i < sources.length; i++) {
+      const s = sources[i];
+      if (
+        s &&
+        typeof s.title === "string" &&
+        s.title.length > SOURCE_TITLE_MAX
+      ) {
+        return {
+          success: false,
+          error: `sources[${i}].title ${s.title.length}c exceeds AIBTC ${SOURCE_TITLE_MAX}c cap`,
+        };
+      }
+    }
   }
 
   const creds = getWalletCreds();
