@@ -167,7 +167,7 @@ async function fileSignalDirect({
         "X-BTC-Timestamp": String(ts),
       },
       body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(20000),
+      signal: AbortSignal.timeout(180000),
     });
 
     const data = await res.json();
