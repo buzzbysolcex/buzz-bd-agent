@@ -587,14 +587,17 @@ function generateSignalAngles() {
         const filename = `${today}-${d.beat}-${slot}.json`;
         const fpath = path.join(draftDir, filename);
         const body = d.hook || "";
-        const sources = []; // Phase 6 has no source-fetching step
+        const sources = []; // Phase 6 has no source-fetching step — populated at fire time
         const skipChecks = [];
         if (!CANONICAL_BEATS.includes(d.beat)) {
           skipChecks.push(`beat ${d.beat} not in active list`);
         }
-        if (sources.length < 1) {
-          skipChecks.push("sources[] empty — unfilable");
-        }
+        // F1 fix Apr 25 (Ogie msg 4787): sources≥1 check removed.
+        // Phase 6 never fetches sources by design; the check was rejecting
+        // 100% of Phase 6 drafts since the Apr 22 hardening. Morning chain
+        // (morning-signals-v2.sh + Claude Code emergency hand-craft)
+        // populates real sources before fire. Empty sources is a stub
+        // signal, not a broken one.
         if (d.headline.length > 120 || d.headline.length < 10) {
           skipChecks.push(
             `headline ${d.headline.length} chars out of 10-120 range`,
