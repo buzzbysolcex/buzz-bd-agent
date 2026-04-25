@@ -382,7 +382,108 @@ const SLOT_BEATS = [
   "quantum", // Slot 5 (10:03) — second quantum, correction fallback
 ];
 
-function generateSignalAngles() {
+// F2 fix Apr 25 (Ogie msg 4795): per-beat fallback source fetcher. Phase 6
+// formerly wrote drafts with sources=[] which AIBTC API rejects with HTTP 400
+// "Invalid sources". F1 removed the local sources≥1 guard; F2 actually fills
+// sources before disk-write so the local guard can be restored.
+//
+// Each title is hard-capped at 150c (memory: source.title ≤200c server-side,
+// keep ≤150c). Network failures return [] — caller decides via the restored
+// sources≥1 guard whether the draft is fileable or should be skipped.
+async function fetchFallbackSources(beat) {
+  const TIMEOUT_MS = 5000;
+  const cap = (s) => String(s || "").slice(0, 150);
+  try {
+    if (beat === "bitcoin-macro") {
+      const [diff, pools] = await Promise.allSettled([
+        fetch("https://mempool.space/api/v1/difficulty-adjustment", {
+          signal: AbortSignal.timeout(TIMEOUT_MS),
+        }).then((r) => (r.ok ? r.json() : null)),
+        fetch("https://mempool.space/api/v1/mining/pools/24h", {
+          signal: AbortSignal.timeout(TIMEOUT_MS),
+        }).then((r) => (r.ok ? r.json() : null)),
+      ]);
+      const sources = [];
+      if (diff.status === "fulfilled" && diff.value) {
+        const d = diff.value;
+        const pp = Number(d.progressPercent || 0).toFixed(1);
+        const dc = Number(d.difficultyChange || 0).toFixed(2);
+        sources.push({
+          url: "https://mempool.space/api/v1/difficulty-adjustment",
+          title: cap(
+            `mempool.space difficulty-adjustment — progressPercent=${pp}%, difficultyChange=${dc}%, remainingBlocks=${d.remainingBlocks}`,
+          ),
+        });
+      }
+      if (pools.status === "fulfilled" && pools.value) {
+        const p = pools.value;
+        const top3 = (p.pools || [])
+          .slice(0, 3)
+          .map((x) => `${x.name} ${x.blockCount}`)
+          .join(", ");
+        sources.push({
+          url: "https://mempool.space/api/v1/mining/pools/24h",
+          title: cap(`mempool.space mining pools 24h — top: ${top3}`),
+        });
+      }
+      return sources;
+    }
+    if (beat === "quantum") {
+      const r = await fetch(
+        "https://api.github.com/repos/bitcoin/bips/commits?per_page=1",
+        {
+          headers: { "User-Agent": "buzz-autodream" },
+          signal: AbortSignal.timeout(TIMEOUT_MS),
+        },
+      );
+      if (!r.ok) return [];
+      const commits = await r.json();
+      if (!Array.isArray(commits) || commits.length === 0) return [];
+      const c = commits[0];
+      const sha = (c.sha || "").slice(0, 7);
+      const msg = (c.commit?.message || "").split("\n")[0];
+      const date = (c.commit?.author?.date || "").split("T")[0];
+      return [
+        {
+          url: "https://github.com/bitcoin/bips/commits/master",
+          title: cap(
+            `bitcoin/bips master HEAD ${sha} on ${date}: ${msg}`,
+          ),
+        },
+      ];
+    }
+    if (beat === "aibtc-network") {
+      const r = await fetch(
+        "https://api.github.com/repos/aibtcdev/skills/commits?per_page=1",
+        {
+          headers: { "User-Agent": "buzz-autodream" },
+          signal: AbortSignal.timeout(TIMEOUT_MS),
+        },
+      );
+      if (!r.ok) return [];
+      const commits = await r.json();
+      if (!Array.isArray(commits) || commits.length === 0) return [];
+      const c = commits[0];
+      const sha = (c.sha || "").slice(0, 7);
+      const msg = (c.commit?.message || "").split("\n")[0];
+      const date = (c.commit?.author?.date || "").split("T")[0];
+      return [
+        {
+          url: "https://github.com/aibtcdev/skills/commits/main",
+          title: cap(`aibtcdev/skills main HEAD ${sha} on ${date}: ${msg}`),
+        },
+      ];
+    }
+    return [];
+  } catch (e) {
+    console.warn(
+      `[autoDream Phase 6] fetchFallbackSources(${beat}) failed: ${e.message}`,
+    );
+    return [];
+  }
+}
+
+async function generateSignalAngles() {
   if (!feature("AUTODREAM_SIGNAL_ANGLES")) {
     return { skipped: true, reason: "AUTODREAM_SIGNAL_ANGLES=false" };
   }
@@ -576,6 +677,16 @@ function generateSignalAngles() {
     let diskSkipped = 0;
     const diskSkipReasons = [];
     let diskError = null;
+    // F2 fix Apr 25 (Ogie msg 4795): pre-fetch fallback sources for each
+    // unique beat in parallel, then reuse per-slot. Network failures fall
+    // through to sources=[] which the restored guard below catches.
+    const uniqueBeats = [...new Set(drafts.map((d) => d.beat))];
+    const sourceMap = {};
+    await Promise.all(
+      uniqueBeats.map(async (b) => {
+        sourceMap[b] = await fetchFallbackSources(b);
+      }),
+    );
     try {
       const draftDir = "/data/buzz-api/signal-drafts";
       if (!fs.existsSync(draftDir)) {
@@ -587,17 +698,19 @@ function generateSignalAngles() {
         const filename = `${today}-${d.beat}-${slot}.json`;
         const fpath = path.join(draftDir, filename);
         const body = d.hook || "";
-        const sources = []; // Phase 6 has no source-fetching step — populated at fire time
+        const sources = sourceMap[d.beat] || [];
         const skipChecks = [];
         if (!CANONICAL_BEATS.includes(d.beat)) {
           skipChecks.push(`beat ${d.beat} not in active list`);
         }
-        // F1 fix Apr 25 (Ogie msg 4787): sources≥1 check removed.
-        // Phase 6 never fetches sources by design; the check was rejecting
-        // 100% of Phase 6 drafts since the Apr 22 hardening. Morning chain
-        // (morning-signals-v2.sh + Claude Code emergency hand-craft)
-        // populates real sources before fire. Empty sources is a stub
-        // signal, not a broken one.
+        // F2 fix Apr 25 (Ogie msg 4795): restored sources≥1 guard now that
+        // fetchFallbackSources populates 1-2 URLs per beat above. Empty
+        // means the per-beat fetch failed (network / API down) — better to
+        // skip and let morning-signals-v2.sh fallback than to disk-write a
+        // draft that will 400 at AIBTC API.
+        if (sources.length < 1) {
+          skipChecks.push(`fallback-source fetch returned 0 (${d.beat} API down?)`);
+        }
         if (d.headline.length > 120 || d.headline.length < 10) {
           skipChecks.push(
             `headline ${d.headline.length} chars out of 10-120 range`,
@@ -929,7 +1042,7 @@ async function runDreamCycle(trigger = "scheduled") {
   const staleData = identifyStaleData();
   const consolidation = consolidateMemory(staleData);
   const revenue = consolidateRevenue();
-  const signalAngles = generateSignalAngles();
+  const signalAngles = await generateSignalAngles();
   const shieldNightly = shieldNightlyAnalysis();
 
   // Phase 8: Intel sync (Telegram channel intel — poll + ingest + ground truth sync)
