@@ -18,15 +18,19 @@
 # Fires daily — duplicate + cooldown checks inside signal-preflight.js
 # prevent misfires.
 #
-# ── SLOT MIX (per Ogie msg 4558 — Apr 23 2026 beat pivot) ──────
-# Cron fires 5 slots per UTC-day (cap is 6/UTC-day, 1 reserved for
-# intraday correction filing):
+# ── SLOT MIX (per Ogie msg 4844 — Apr 25 2026 inclusion-timing pivot) ──
+# Brief inclusions cluster sharply by beat (subagent recon):
+#   bitcoin-macro: 05-10 UTC
+#   quantum:       00-05 UTC
+#   aibtc-network: 00-02 UTC (Elegant Orb dark — omitted)
+# We were filing 06-10 UTC across all beats. Quantum slots missed every
+# window. New mix front-loads quantum, then bitcoin-macro:
 #
-#   Slot 1 (06:02 UTC): bitcoin-macro  — beat BM cap (fills fast)
-#   Slot 2 (07:03 UTC): bitcoin-macro  — second BM before 09:55 cap
-#   Slot 3 (08:02 UTC): quantum        — Zen Rocket editor, lots of room
-#   Slot 4 (09:03 UTC): bitcoin-macro OR correction (BM/quantum only)
-#   Slot 5 (10:03 UTC): quantum OR correction (BM/quantum only)
+#   Slot 1 (00:02 UTC): quantum        — quantum window opens
+#   Slot 2 (01:04 UTC): quantum        — second quantum
+#   Slot 3 (04:02 UTC): bitcoin-macro  — BM window opens
+#   Slot 4 (05:04 UTC): bitcoin-macro  — second BM
+#   Slot 5 (06:06 UTC): bitcoin-macro OR correction (BM/quantum only)
 #
 # If slot 4/5 has no fresh BM/quantum draft, falls back to a same-day
 # correction draft (filename pattern ${TODAY}-correction-*.json). Per

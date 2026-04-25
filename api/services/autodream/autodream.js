@@ -365,21 +365,23 @@ function consolidateRevenue() {
 // causing filer-fail loops. Per Ogie msg 4345 Part 3 fix.
 const CANONICAL_BEATS = ["aibtc-network", "bitcoin-macro", "quantum"];
 
-// ── SLOT-TO-BEAT MIX (Apr 23 2026 pivot per Ogie msg 4558) ──
-// Elegant Orb (aibtc-network editor) DARK 5+ days per #629 DRI review.
-// Signals to aibtc-network rot unapproved. Weight 3 BM + 2 quantum
-// while BM editor (Ivory Coda) + quantum editor (Zen Rocket) are
-// actively clearing queue. Restore aibtc-network slot when Elegant
-// Orb approvals resume (see correction-hunter Elegant Orb monitor).
+// ── SLOT-TO-BEAT MIX (Apr 25 2026 inclusion-timing pivot per Ogie msg 4844) ──
+// Subagent recon found brief inclusions cluster sharply by beat:
+//   • bitcoin-macro: 05-10 UTC inclusion window
+//   • quantum: 00-05 UTC inclusion window
+//   • aibtc-network: 00-02 UTC (Elegant Orb dark — slot omitted)
+// We were filing 06-10 UTC across all beats — quantum signals all missed
+// their window. New mix: quantum first (00-01 UTC), then BM (04-06 UTC).
+// Cron schedule moved correspondingly. 60-min cooldown spacing preserved.
 //
 // Index is the slot number used in filename suffix ${today}-${beat}-${slot}.json
 // matching morning-signals-v2.sh pattern ${TODAY}-*-${SIGNAL_NUM}.json.
 const SLOT_BEATS = [
-  "bitcoin-macro", // Slot 1 (06:02) — beat BM cap (fills fast, ~09:55 UTC)
-  "bitcoin-macro", // Slot 2 (07:03) — second BM before cap
-  "quantum", // Slot 3 (08:02) — Zen Rocket editor, fills slower
-  "bitcoin-macro", // Slot 4 (09:03) — third BM, correction fallback
-  "quantum", // Slot 5 (10:03) — second quantum, correction fallback
+  "quantum", // Slot 1 (00:02 UTC) — quantum inclusion window opens
+  "quantum", // Slot 2 (01:04 UTC) — second quantum mid-window
+  "bitcoin-macro", // Slot 3 (04:02 UTC) — BM window opens
+  "bitcoin-macro", // Slot 4 (05:04 UTC) — second BM mid-window
+  "bitcoin-macro", // Slot 5 (06:06 UTC) — third BM, end-of-window + correction fallback
 ];
 
 // F2 fix Apr 25 (Ogie msg 4795): per-beat fallback source fetcher. Phase 6
@@ -446,9 +448,7 @@ async function fetchFallbackSources(beat) {
       return [
         {
           url: "https://github.com/bitcoin/bips/commits/master",
-          title: cap(
-            `bitcoin/bips master HEAD ${sha} on ${date}: ${msg}`,
-          ),
+          title: cap(`bitcoin/bips master HEAD ${sha} on ${date}: ${msg}`),
         },
       ];
     }
@@ -709,7 +709,9 @@ async function generateSignalAngles() {
         // skip and let morning-signals-v2.sh fallback than to disk-write a
         // draft that will 400 at AIBTC API.
         if (sources.length < 1) {
-          skipChecks.push(`fallback-source fetch returned 0 (${d.beat} API down?)`);
+          skipChecks.push(
+            `fallback-source fetch returned 0 (${d.beat} API down?)`,
+          );
         }
         if (d.headline.length > 120 || d.headline.length < 10) {
           skipChecks.push(
