@@ -47,8 +47,17 @@ then
 fi
 
 # ── (2) Send Telegram nudge (Path B — wakes Claude Code) ────────────────
+# keepalive is SILENT (msg 4934, Ogie): mailbox row still queued, but no WR
+# post. Named events still wake; on the next named-event wake I drain the
+# accumulated keepalive rows and check Telegram + stall flags. Only post to
+# WR if I find something to flag.
 # Prayer reminders are forwarded as-is (Ogie reads them; Buzz keeps working).
 # Other events are framed "⏰ SCHEDULE: <type>".
+if [[ "$EVENT_TYPE" == "keepalive" ]]; then
+    echo "[$TS] schedule-trigger OK event_type=$EVENT_TYPE tg=skipped (silent keepalive per msg 4934)" >>"$LOG"
+    exit 0
+fi
+
 if [[ "$EVENT_TYPE" == "prayer_reminder" ]]; then
     TG_TEXT="$MESSAGE"
 else
