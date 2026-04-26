@@ -107,6 +107,12 @@ fi
 
 if [ -z "$DRAFT_FILE" ] || [ ! -f "$DRAFT_FILE" ]; then
     log "no_draft_found pattern=${DRAFT_DIR}/${TODAY}-*-${SIGNAL_NUM}.json"
+    # Wake Claude Code via Telegram nudge — Phase 6 chain failed for this slot,
+    # hand-craft is the safety net. Without this nudge the slot would silently
+    # fall back to legacy and produce nothing autonomously (msg 4938 FIX 2).
+    if [ -x "$SCRIPT_DIR/schedule-trigger.sh" ]; then
+        "$SCRIPT_DIR/schedule-trigger.sh" "morning_signal_fallback" "Slot $SIGNAL_NUM ($TODAY) — Phase 6 left no fileable draft. Hand-craft expected. Pattern checked: ${DRAFT_DIR}/${TODAY}-*-${SIGNAL_NUM}.json" >>"$LOG" 2>&1 || log "schedule-trigger_failed"
+    fi
     if [ -x "$FALLBACK" ]; then
         log "falling_back_to_legacy_script"
         "$FALLBACK" "$SIGNAL_NUM" || log "fallback_exit=$?"
