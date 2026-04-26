@@ -1,5 +1,5 @@
 /**
- * BuzzShield V4 Tier Gate — subscription-based rate limiting + auth.
+ * BuzzShield V5 Tier Gate — subscription-based rate limiting + auth.
  *
  * 4 tiers (matches buzzbd.ai subscription model):
  *   free       — no auth, 10/hour/IP

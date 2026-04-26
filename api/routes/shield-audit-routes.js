@@ -1,5 +1,5 @@
 /**
- * BuzzShield V4 Portal — Audit API endpoints (Phase 1, Apr 16 2026)
+ * BuzzShield V5 Portal — Audit API endpoints (Phase 1, Apr 16 2026)
  *
  * Mounted at /api/v1/shield/audit (server.js) BEFORE the /api/v1 apiKeyAuth
  * catchall so free-tier endpoints are reachable without an API key.
@@ -34,7 +34,7 @@ const shieldPaidPaywall = x402Paywall({
   resource: "/api/v1/shield/audit/full",
   method: "POST",
   description:
-    "BuzzShield V4 paid-tier deep audit via Pashov Audit Group solidity-auditor v2 + x-ray v1. EVM contracts all chains. ~5-10 min. Full findings JSON + markdown report.",
+    "BuzzShield V5 paid-tier deep audit via Pashov Audit Group solidity-auditor v2 + x-ray v1. EVM contracts all chains. ~5-10 min. Full findings JSON + markdown report.",
   category: "crypto-intelligence",
   tags: ["security-audit", "deep-audit", "evm", "pashov", "paid"],
 });
@@ -154,7 +154,7 @@ function commitPashovOutbox(db, audit_id) {
 function notEnabled(res) {
   return res.status(503).json({
     error: "portal_disabled",
-    message: "BuzzShield V4 audit portal is not active",
+    message: "BuzzShield V5 audit portal is not active",
     flag: "BUZZSHIELD_V4_AUDIT_API",
   });
 }
@@ -689,5 +689,5 @@ router.get("/:audit_id/stream", tierGate("free"), (req, res) => {
   }, PASHOV_AUDIT_SSE_POLL_MS);
 });
 
-console.log("[INIT] BuzzShield V4 Portal audit routes wired (Phase 1)");
+console.log("[INIT] BuzzShield V5 Portal audit routes wired (Phase 1)");
 module.exports = router;
