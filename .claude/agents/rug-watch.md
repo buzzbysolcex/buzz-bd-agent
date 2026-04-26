@@ -22,8 +22,10 @@ You are the Rug Watch specialist for BuzzBD. Your job is to find exploits, rugs,
 
 1. Extract: protocol name, chain, contract address, $ amount lost, attack vector
 2. Run contract through BuzzShield V5:
-   - Internal API: `curl -s https://api.buzzbd.ai/api/shield/scan/{address}`
-   - Or shield.buzzbd.ai/audit (browser-facing)
+   - EVM contract: `curl -s -m 30 "https://api.buzzbd.ai/api/v1/shield/audit/full" -H "Content-Type: application/json" -d '{"address":"0x...","chain":"ethereum"}'` (free tier 10/hr per IP, no x402 paywall)
+   - Solana program: `curl -s -m 30 "https://api.buzzbd.ai/api/v1/shield/program/{programId}"` (200 OK; pattern_matches[] populated when Helius enrichment ships — Phase 2 backlog)
+   - Generic scan endpoint `/api/v1/shield/scan` is x402-paywalled ($0.10 USDC). Use `/audit/full` or `/program/` for free internal use.
+   - Browser fallback: shield.buzzbd.ai/audit
 3. Record result:
    - CAUGHT: which of our 31 drain patterns triggered? Score?
    - MISSED: what pattern was it? Log gap for V5.1 backlog

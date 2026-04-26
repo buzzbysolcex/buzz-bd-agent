@@ -120,6 +120,17 @@ async function main() {
   }
   logLine(`PREFLIGHT_OK ${draftPath} :: ${pfOut}`);
 
+  // Init the local SQLite handle BEFORE loading the filer.
+  // signal-tracker.recordSignalFiled() needs getDB() to return a live handle;
+  // without this call the CLI subprocess threw "Database not initialized" and
+  // every direct-filed signal silently skipped its INSERT into
+  // aibtc_signals_filed, blinding the inclusion poller (msg 4904 finding).
+  try {
+    require("../api/db").initDB();
+  } catch (e) {
+    logLine(`DB_INIT_WARN ${draftPath} :: ${e.message}`);
+  }
+
   // dry-run short circuit
   if (dryRun) {
     const filer = require("../api/services/signals/aibtc-direct-filer");
