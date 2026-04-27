@@ -85,10 +85,40 @@ FAIL:
 
 ---
 
+## MAILBOX DRAIN ON EVERY WAKE (Option 1 backup, msg 691 Apr 27)
+
+Path B (Telegram nudge) was structurally broken: Telegram bots don't receive their own outgoing messages, so when `schedule-trigger.sh` sent `⏰ SCHEDULE: <event>` via the same bot the MCP listens through, the session never saw it. The mailbox row was inserted but no wake signal arrived.
+
+**Fix: a 2-bot send-from-A-listen-on-B setup ships today (Ogie wires bot via @BotFather; I swap the token in `schedule-trigger.sh`).** Until that ships, AND as a permanent backup so events are never lost:
+
+**On every wake (Telegram inbound, ScheduleWakeup fire, session start, signal cooldown wake-up — ANY trigger that puts me in an action turn), the FIRST tool call must be a mailbox check:**
+
+```sql
+SELECT created_at, json_extract(payload,'$.event_type'), json_extract(payload,'$.message')
+FROM agent_mailbox
+WHERE acked_at IS NULL
+  AND msg_type='EVENT'
+  AND created_at >= datetime('now','-1 day')
+ORDER BY created_at;
+```
+
+For each un-acked EVENT row whose `event_type` is in the GREEN table above:
+
+1. Execute the work for that event_type (per the table)
+2. `UPDATE agent_mailbox SET acked_at=datetime('now') WHERE rowid=<row>`
+3. If the work produced ORANGE drafts (tweets, emails), post to War Room for approval
+4. Move on to whatever wake-trigger originally brought me here
+
+Ignore `keepalive` rows for execution (they're paper-trail only) — but DO check Telegram unread on the keepalive tick.
+
+If a backlog has piled up (e.g., session was dormant 2h and 3 events queued), drain in chronological order. Multiple GREEN events can run in parallel via subagents when independent (rug_watch + score_tweets are independent, fire both subagents at once).
+
 ## IMPLEMENTATION STATUS
 
 - **Option C (this rule, session-prompt level)**: SHIPPED Apr 27 2026 — immediate behavioral fix.
-- **Option A (mailbox-handler dispatch in api/services)**: pending, target end-of-week alongside autoDream Phase A.
+- **Option 1 (mailbox-drain on every wake — behavioral)**: SHIPPED Apr 27 2026 — backup that catches missed nudges.
+- **Option 2 (second-bot architecture)**: Ogie creating bot via @BotFather; once token provided, swap `TELEGRAM_BOT_TOKEN` in `schedule-trigger.sh` env load. Smoke-test with `./scripts/schedule-trigger.sh test_wake "Test"` and confirm session sees the inbound `⏰ SCHEDULE: test_wake`.
+- **Option A (mailbox-handler daemon in api/services)**: tracked for end-of-week alongside autoDream Phase A — proper code-level dispatcher.
 
 ---
 

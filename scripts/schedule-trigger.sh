@@ -13,7 +13,10 @@
 #   payload (JSON) | created_at | acked_at | expires_at
 #   No `status` column — proposed scripts referencing one would fail.
 #
-# Telegram creds: /home/claude-code/.claude/channels/telegram/.env
+# Telegram creds: /home/claude-code/.claude/channels/telegram/cron-bot.env
+# Two-bot fix (msg 691, Apr 27 2026): SENDER = buzz_cron_bot, LISTENER = buzz_claude_code_bot.
+# A bot does not receive update events on its own outgoing messages, so when sender = listener
+# the schedule nudge never woke the session. Splitting the roles solves it.
 
 set -euo pipefail
 
@@ -22,7 +25,7 @@ MESSAGE="${2:?message required}"
 WORKSPACE="/home/claude-code/buzz-workspace"
 DB="/data/buzz/persistent/buzz-api/buzz.db"
 LOG="$WORKSPACE/logs/schedule-triggers.log"
-TG_ENV="/home/claude-code/.claude/channels/telegram/.env"
+TG_ENV="/home/claude-code/.claude/channels/telegram/cron-bot.env"
 
 mkdir -p "$(dirname "$LOG")"
 TS="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
