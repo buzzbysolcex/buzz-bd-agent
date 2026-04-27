@@ -113,6 +113,83 @@ function sendWR(text) {
   });
 }
 
+// ── GoPlus Security cross-verify (msg 5066) ─────────────────────────────
+// Token Sniffer's web is Cloudflare-blocked from this host (403). GoPlus
+// is the canonical second-source: free HTTP API, EVM chains supported,
+// returns honeypot/proxy/mint/blacklist flags + holder concentration.
+// Solana not on this endpoint shape — skip cross-verify (safer to skip
+// the candidate than tweet without a check).
+const GOPLUS_CHAIN_ID = {
+  ethereum: "1",
+  bsc: "56",
+  polygon: "137",
+  arbitrum: "42161",
+  optimism: "10",
+  base: "8453",
+  avalanche: "43114",
+};
+async function goPlusCheck(chain, address) {
+  const cid = GOPLUS_CHAIN_ID[chain];
+  if (!cid) return { skipped: true, reason: `chain=${chain} not in GoPlus EVM list` };
+  const url = `https://api.gopluslabs.io/api/v1/token_security/${cid}?contract_addresses=${address}`;
+  try {
+    const body = await new Promise((resolve, reject) => {
+      const req = https.get(url, { headers: { "User-Agent": "buzz-daemon/1.0" } }, (res) => {
+        let data = "";
+        res.on("data", (c) => (data += c));
+        res.on("end", () => resolve(data));
+      });
+      req.on("error", reject);
+      req.setTimeout(10_000, () => {
+        req.destroy();
+        reject(new Error("goplus timeout"));
+      });
+    });
+    const j = JSON.parse(body);
+    const r = j.result || {};
+    const k = Object.keys(r)[0];
+    if (!k) return { error: "goplus_no_result" };
+    const t = r[k];
+    const flagMap = {
+      is_honeypot: "HONEYPOT",
+      hidden_owner: "HIDDEN_OWNER",
+      can_take_back_ownership: "CAN_TAKE_BACK_OWNERSHIP",
+      owner_change_balance: "OWNER_CAN_CHANGE_BALANCE",
+      is_proxy: "PROXY",
+      is_mintable: "MINTABLE",
+      selfdestruct: "SELFDESTRUCT",
+      cannot_buy: "CANNOT_BUY",
+      cannot_sell_all: "CANNOT_SELL_ALL",
+      transfer_pausable: "TRANSFER_PAUSABLE",
+      is_blacklisted: "BLACKLISTED",
+    };
+    const flags = [];
+    for (const [k2, name] of Object.entries(flagMap)) {
+      if (t[k2] === "1") flags.push(name);
+    }
+    if (t.is_open_source === "0") flags.push("NOT_OPEN_SOURCE");
+    if (t.is_in_dex === "0") flags.push("NOT_IN_DEX");
+    const buyTax = parseFloat(t.buy_tax || 0);
+    const sellTax = parseFloat(t.sell_tax || 0);
+    if (sellTax > 0.1) flags.push(`SELL_TAX_${(sellTax * 100).toFixed(1)}PCT`);
+    if (buyTax > 0.1) flags.push(`BUY_TAX_${(buyTax * 100).toFixed(1)}PCT`);
+    const holders = t.holders || [];
+    const top10pct =
+      holders.slice(0, 10).reduce((s, h) => s + parseFloat(h.percent || 0), 0) *
+      100;
+    return {
+      flags,
+      buy_tax_pct: buyTax * 100,
+      sell_tax_pct: sellTax * 100,
+      holder_count: parseInt(t.holder_count || 0),
+      open_source: t.is_open_source === "1",
+      top10_pct: top10pct,
+    };
+  } catch (e) {
+    return { error: e.message };
+  }
+}
+
 // ── handlers (Phase 1 stubs) ────────────────────────────────────────────
 // Each returns a one-line WR notice OR null for silent.
 const handlers = {
@@ -126,8 +203,7 @@ const handlers = {
     const today = new Date().toISOString().slice(0, 10);
     const now = Math.floor(Date.now() / 1000);
     const cutoff = now - 86400; // 24h ago
-    const reportPath =
-      "/data/buzz/persistent/reports/daily-rug-watch.json";
+    const reportPath = "/data/buzz/persistent/reports/daily-rug-watch.json";
 
     let recent = [];
     let totalChecked = 0;
@@ -152,9 +228,7 @@ const handlers = {
       const all = JSON.parse(json);
       totalChecked = all.length;
       recent = all
-        .filter(
-          (h) => typeof h.date === "number" && h.date >= cutoff,
-        )
+        .filter((h) => typeof h.date === "number" && h.date >= cutoff)
         .sort((a, b) => b.date - a.date);
     } catch (e) {
       sourceErr = e.message;
@@ -307,8 +381,7 @@ const handlers = {
         });
         const dx = JSON.parse(dxResp);
         const pair = (dx.pairs || []).find(
-          (p) =>
-            p.info && p.info.socials && p.info.socials.length > 0,
+          (p) => p.info && p.info.socials && p.info.socials.length > 0,
         );
         if (pair) {
           const t = pair.info.socials.find(
@@ -327,6 +400,41 @@ const handlers = {
         continue; // no handle, skip
       }
 
+      // GoPlus pre-tweet cross-verify (msg 5066). For EVM chains we MUST
+      // pass cross-verify before tweeting. Solana is skipped (no endpoint
+      // here) — that's a known gap to wire later.
+      const gp = await goPlusCheck(c.chain, c.address);
+      if (gp.error) {
+        log(`score_tweets ${c.ticker} GoPlus err: ${gp.error} — skipping`);
+        skipTickers.add(tickerKey);
+        continue;
+      }
+      if (gp.skipped) {
+        // Solana case — no GoPlus EVM result. Skip rather than tweet uncrossed.
+        log(`score_tweets ${c.ticker} GoPlus skipped: ${gp.reason} — candidate dropped`);
+        skipTickers.add(tickerKey);
+        continue;
+      }
+      if (gp.flags.length > 0) {
+        log(`score_tweets ${c.ticker} GoPlus FLAGGED: ${gp.flags.join(",")} — skipping`);
+        skipTickers.add(tickerKey);
+        continue;
+      }
+
+      // Concentration penalty (top-10 holders) — Rule 25 derivative.
+      let appliedScore = c.score;
+      let concentrationNote = "";
+      if (gp.top10_pct > 80) {
+        appliedScore = Math.max(40, c.score - 25);
+        concentrationNote = `top-10 ${gp.top10_pct.toFixed(0)}% (-25)`;
+      } else if (gp.top10_pct > 70) {
+        appliedScore = Math.max(50, c.score - 15);
+        concentrationNote = `top-10 ${gp.top10_pct.toFixed(0)}% (-15)`;
+      } else if (gp.top10_pct > 50) {
+        appliedScore = Math.max(55, c.score - 8);
+        concentrationNote = `top-10 ${gp.top10_pct.toFixed(0)}% (-8)`;
+      }
+
       // Render tweet — short addresses (4+4)
       const addrShort = `${c.address.slice(0, c.chain === "solana" ? 4 : 6)}...${c.address.slice(-4)}`;
       const chainLabel =
@@ -334,23 +442,22 @@ const handlers = {
           c.chain
         ] || c.chain;
       let tweet;
-      if (c.score >= 70) {
+      if (appliedScore >= 70) {
         tweet =
-          `🐝 BUZZ SCORE: ${c.ticker} — ${c.score}/100\n` +
-          `📋 Contract: ${addrShort} (${chainLabel})\n\n` +
-          `36 sources, dual-gate verified, on-chain immutable.\n` +
-          `1000-agent swarm. Honest scoring v8.3.\n\n` +
-          `${twitter} — your token passed honest calibration.\n` +
-          `Free scan: shield.buzzbd.ai/audit\n\n` +
-          `#TokenAudit #HonestScoring`;
+          `🐝 BUZZ SCORE: ${c.ticker} — ${appliedScore}/100\n` +
+          `📋 ${addrShort} (${chainLabel})\n\n` +
+          `GoPlus: 0 red flags. ${(gp.holder_count / 1000).toFixed(0)}K holders. ${gp.buy_tax_pct.toFixed(0)}/${gp.sell_tax_pct.toFixed(0)} tax.\n\n` +
+          (concentrationNote
+            ? `Caveat: ${concentrationNote.split(" (")[0]}.\n\n`
+            : "") +
+          `${twitter}\nshield.buzzbd.ai/audit\n\n` +
+          `#HonestScoring`;
       } else {
         tweet =
-          `🐝 BUZZ SCORE: ${c.ticker} — ${c.score}/100\n` +
-          `📋 Contract: ${addrShort} (${chainLabel})\n\n` +
-          `Watch zone. Not a fail, not a pass.\n` +
-          `Honest scoring v8.3, 36 sources, on-chain.\n\n` +
-          `${twitter} — full report on request.\n` +
-          `Free scan: shield.buzzbd.ai/audit\n\n` +
+          `🐝 BUZZ SCORE: ${c.ticker} — ${appliedScore}/100\n` +
+          `📋 ${addrShort} (${chainLabel})\n\n` +
+          `Watch zone. GoPlus 0 red flags but ${concentrationNote || "moderate fundamentals"}.\n\n` +
+          `${twitter} — full report on request.\nshield.buzzbd.ai/audit\n\n` +
           `#HonestScoring`;
       }
 
@@ -359,13 +466,20 @@ const handlers = {
       const md = `---
 posted_status: pending_approval
 token: ${c.ticker}
-score: ${c.score}
+score_pipeline: ${c.score}
+score_published: ${appliedScore}
 chain: ${c.chain}
 address: ${c.address}
 twitter_handle: "${twitter}"
-template: ${c.score >= 70 ? "HIGH_SCORE" : "WATCH_SCORE"}
+template: ${appliedScore >= 70 ? "HIGH_SCORE" : "WATCH_SCORE"}
 draft_date: ${today}
-drafter: schedule-daemon score_tweets handler (Phase 2 P2)
+drafter: schedule-daemon score_tweets handler (Phase 2 P2 + GoPlus cross-verify)
+goplus_flags: []
+goplus_holder_count: ${gp.holder_count}
+goplus_top10_pct: ${gp.top10_pct.toFixed(2)}
+goplus_buy_tax_pct: ${gp.buy_tax_pct}
+goplus_sell_tax_pct: ${gp.sell_tax_pct}
+concentration_penalty: "${concentrationNote || "none"}"
 ---
 
 ${tweet}
@@ -377,9 +491,7 @@ shield_audit_url: https://shield.buzzbd.ai/audit
       try {
         fs.writeFileSync(draftPath, md);
         drafted++;
-        lines.push(
-          `${c.ticker} ${c.score}/100 ${twitter} → ${c.ticker}.md`,
-        );
+        lines.push(`${c.ticker} ${c.score}/100 ${twitter} → ${c.ticker}.md`);
       } catch (e) {
         log(`score_tweets write ${c.ticker}: ${e.message}`);
       }
