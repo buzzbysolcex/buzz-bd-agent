@@ -33,6 +33,18 @@ const fs = require("fs");
 const https = require("https");
 const path = require("path");
 const Database = require("better-sqlite3");
+// Email template module (renderTemplate) lives in the api/ tree. Not all
+// daemons run with NODE_PATH set to api/node_modules — but the email-templates
+// module itself has no third-party deps, just plain JS, so requiring by
+// absolute path works regardless.
+let renderTemplate;
+try {
+  ({ renderTemplate } = require(
+    "/home/claude-code/buzz-workspace/api/services/outreach/email-templates",
+  ));
+} catch (e) {
+  renderTemplate = null; // gracefully degrade — handler will note this
+}
 
 const DB_PATH = "/data/buzz/persistent/buzz-api/buzz.db";
 const ENV_PATH = "/home/claude-code/.claude/channels/telegram/cron-bot.env";
@@ -130,15 +142,20 @@ const GOPLUS_CHAIN_ID = {
 };
 async function goPlusCheck(chain, address) {
   const cid = GOPLUS_CHAIN_ID[chain];
-  if (!cid) return { skipped: true, reason: `chain=${chain} not in GoPlus EVM list` };
+  if (!cid)
+    return { skipped: true, reason: `chain=${chain} not in GoPlus EVM list` };
   const url = `https://api.gopluslabs.io/api/v1/token_security/${cid}?contract_addresses=${address}`;
   try {
     const body = await new Promise((resolve, reject) => {
-      const req = https.get(url, { headers: { "User-Agent": "buzz-daemon/1.0" } }, (res) => {
-        let data = "";
-        res.on("data", (c) => (data += c));
-        res.on("end", () => resolve(data));
-      });
+      const req = https.get(
+        url,
+        { headers: { "User-Agent": "buzz-daemon/1.0" } },
+        (res) => {
+          let data = "";
+          res.on("data", (c) => (data += c));
+          res.on("end", () => resolve(data));
+        },
+      );
       req.on("error", reject);
       req.setTimeout(10_000, () => {
         req.destroy();
@@ -411,12 +428,16 @@ const handlers = {
       }
       if (gp.skipped) {
         // Solana case — no GoPlus EVM result. Skip rather than tweet uncrossed.
-        log(`score_tweets ${c.ticker} GoPlus skipped: ${gp.reason} — candidate dropped`);
+        log(
+          `score_tweets ${c.ticker} GoPlus skipped: ${gp.reason} — candidate dropped`,
+        );
         skipTickers.add(tickerKey);
         continue;
       }
       if (gp.flags.length > 0) {
-        log(`score_tweets ${c.ticker} GoPlus FLAGGED: ${gp.flags.join(",")} — skipping`);
+        log(
+          `score_tweets ${c.ticker} GoPlus FLAGGED: ${gp.flags.join(",")} — skipping`,
+        );
         skipTickers.add(tickerKey);
         continue;
       }
@@ -461,7 +482,7 @@ const handlers = {
           `#HonestScoring`;
       }
 
-      // Save draft
+      // Save tweet draft
       const draftPath = `${draftDir}/${today}-${c.ticker}.md`;
       const md = `---
 posted_status: pending_approval
@@ -488,17 +509,122 @@ ${tweet}
 contract_address_full: ${c.address}
 shield_audit_url: https://shield.buzzbd.ai/audit
 `;
+      // Gmail outreach scaffold (msg 5077): for tokens scoring 70+, also draft
+      // an email via api/services/outreach/email-templates.js. Phase 2.5 adds
+      // live website-to-email contact discovery + Gmail OAuth send + 48h/7d
+      // follow-up crons. Tonight: render the draft, save it, surface in WR.
+      let emailDraftPath = null;
+      let emailSubject = null;
+      let emailBody = null;
+      if (appliedScore >= 70 && renderTemplate) {
+        const dexscreenerUrl = `https://dexscreener.com/${c.chain}/${c.address}`;
+        const rendered = renderTemplate("initial_outreach", {
+          tokenName: c.ticker,
+          chain: chainLabel,
+          contractAddress: c.address,
+          dexscreenerUrl,
+          score: appliedScore,
+          // mcap/volume/liquidity/liqRatio not yet pulled in handler — Phase 2.5.
+          mcap: "N/A",
+          volume: "N/A",
+          liquidity: "N/A",
+          liqRatio: "N/A",
+        });
+        if (rendered) {
+          // Append Ogie msg 5077 required lines: $500 (vs $1.5K) pilot + tagline.
+          const ogieAppendix = `
+
+---
+P.S. Pilot Swarm Audit available at $500 (normally $1,500) — full 1,000-agent
+adversarial simulation, every score dimension broken down, on-chain proof on
+Base mainnet.
+
+You're not paying for agents. You're paying for resolution.
+
+Free instant scan: https://shield.buzzbd.ai/audit
+`;
+          emailSubject = rendered.subject;
+          emailBody = rendered.body + ogieAppendix;
+          const outreachDir =
+            "/data/buzz/persistent/reports/outreach-drafts";
+          fs.mkdirSync(outreachDir, { recursive: true });
+          emailDraftPath = `${outreachDir}/${today}-${c.ticker}.md`;
+          const emailMd = `---
+posted_status: pending_approval
+token: ${c.ticker}
+score: ${appliedScore}
+chain: ${c.chain}
+address: ${c.address}
+to: NEEDS_MANUAL_LOOKUP
+cc:
+  - dino@solcex.cc
+  - ogie.solcexexchange@gmail.com
+twitter_handle: "${twitter}"
+draft_date: ${today}
+drafter: schedule-daemon score_tweets handler (Phase 2 + Gmail outreach scaffold)
+gmail_send_status: not_sent
+followup_crons_status: not_created
+phase_2_5_pending:
+  - live_website_email_lookup
+  - gmail_oauth_send
+  - 48h_followup_cron
+  - 7d_breakup_cron
+  - pilot_audit_pipeline_update
+---
+
+# Subject
+
+${emailSubject}
+
+# Body
+
+${emailBody}
+`;
+          try {
+            fs.writeFileSync(emailDraftPath, emailMd);
+            log(
+              `score_tweets ${c.ticker} email draft saved → ${emailDraftPath}`,
+            );
+          } catch (e) {
+            log(`score_tweets ${c.ticker} email draft write err: ${e.message}`);
+            emailDraftPath = null;
+          }
+        }
+      }
       try {
         fs.writeFileSync(draftPath, md);
         drafted++;
-        lines.push(`${c.ticker} ${c.score}/100 ${twitter} → ${c.ticker}.md`);
+        const emailSuffix = emailDraftPath
+          ? ` + email draft (To: NEEDS_LOOKUP, CC dino+ogie)`
+          : "";
+        lines.push(
+          `${c.ticker} ${appliedScore}/100 ${twitter} → ${c.ticker}.md${emailSuffix}`,
+        );
+        // Per-candidate WR post for ≥70 (msg 5077 format) so Ogie sees both
+        // tweet text + email draft inline. Telegram cap = 4096 chars; if
+        // email body is huge, truncate body in the WR post (full text in file).
+        if (appliedScore >= 70 && emailDraftPath) {
+          const bodyForWR =
+            emailBody.length > 1500
+              ? emailBody.slice(0, 1500) + "\n…(full text in draft file)"
+              : emailBody;
+          const wrPost =
+            `🐝 SCORE TWEET + EMAIL DRAFT — ${c.ticker} ${appliedScore}/100\n\n` +
+            `TWEET (ORANGE — awaiting GO):\n${tweet}\n\n` +
+            `EMAIL (ORANGE — awaiting GO):\nTo: NEEDS_MANUAL_LOOKUP\n` +
+            `CC: dino@solcex.cc, ogie.solcexexchange@gmail.com\n` +
+            `Subject: ${emailSubject}\n\n${bodyForWR}\n\n` +
+            `Files:\n- ${draftPath}\n- ${emailDraftPath}\n\n` +
+            `Reply "GO both" / "GO tweet" / "GO email" / "NO".`;
+          await sendWR(wrPost);
+        }
       } catch (e) {
         log(`score_tweets write ${c.ticker}: ${e.message}`);
       }
     }
 
     if (drafted === 0)
-      return `score_tweets — 0 fresh drafts (all candidates already tweeted today or no Twitter handle on DexScreener).`;
+      return `score_tweets — 0 fresh drafts (all candidates already tweeted today, or no Twitter handle, or GoPlus blocked).`;
     return `score_tweets — ${drafted} draft(s) → ORANGE: ${lines.join(" | ")}`;
   },
   async pilot_outreach() {
