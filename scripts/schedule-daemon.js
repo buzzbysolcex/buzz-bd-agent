@@ -141,7 +141,82 @@ const handlers = {
     return "evening_checkin — checking Telegram, reporting progress, processing pending approvals.";
   },
   async day_close() {
-    return "executing day_close — updating revenue-execution-tracker.json, checking stall rules, generating EOD summary.";
+    // Phase 2 P2 real handler: query today's actuals, update tracker, post EOD.
+    const today = new Date().toISOString().slice(0, 10);
+    const trackerPath =
+      "/data/buzz/persistent/reports/revenue-execution-tracker.json";
+
+    // Today's filed signals from DB
+    let sigCount = 0;
+    let avgQs = null;
+    try {
+      const sigs = db
+        .prepare(
+          `SELECT signal_id FROM aibtc_signals_filed WHERE pacific_date = ?`,
+        )
+        .all(today);
+      sigCount = sigs.length;
+      // qs lives in the AIBTC API, not the local DB. Read from tracker if set.
+      const t = JSON.parse(fs.readFileSync(trackerPath, "utf8"));
+      const qsVals = (t.aibtc?.signals_filed_today_detail || [])
+        .map((s) => s.qs)
+        .filter((q) => typeof q === "number");
+      if (qsVals.length)
+        avgQs = +(qsVals.reduce((a, b) => a + b, 0) / qsVals.length).toFixed(1);
+    } catch (e) {
+      log(`day_close DB/tracker read err: ${e.message}`);
+    }
+
+    // Today's drafted score tweets
+    let tweetDrafts = 0;
+    try {
+      const dir = "/data/buzz/persistent/reports/score-tweet-drafts";
+      tweetDrafts = fs
+        .readdirSync(dir)
+        .filter((f) => f.startsWith(today) && f.endsWith(".md")).length;
+    } catch {}
+
+    // Stall flag check + tracker update — IDEMPOTENT per UTC day.
+    // last_close_date guard prevents double-increment if day_close fires twice.
+    let stallNote = "";
+    try {
+      const t = JSON.parse(fs.readFileSync(trackerPath, "utf8"));
+      const ss = t.stream_streaks || {};
+      if (ss.last_close_date === today) {
+        // already closed today — return current state read-only
+        stallNote = `HSaaS streak ${ss.hsaas_consecutive_action_days || 0}d | SolCex ${ss.solcex_days_since_last_action || 0}d inactive (already closed today)`;
+      } else {
+        // first close of the day — compute and persist
+        const hsaasActed =
+          (t.hsaas?.rug_watch_completed_today ?? false) || tweetDrafts >= 1;
+        const solcexActed = (t.solcex?.bd_outreach_sent_today ?? 0) >= 1;
+        const newHsaasStreak = hsaasActed
+          ? (ss.hsaas_consecutive_action_days || 0) + 1
+          : 0;
+        const newHsaasZero = hsaasActed ? 0 : (ss.hsaas_days_at_zero || 0) + 1;
+        const newSolcexStreak = solcexActed
+          ? (ss.solcex_consecutive_action_days || 0) + 1
+          : 0;
+        const newSolcexInactive = solcexActed
+          ? 0
+          : (ss.solcex_days_since_last_action || 0) + 1;
+        t.stream_streaks = {
+          ...ss,
+          hsaas_consecutive_action_days: newHsaasStreak,
+          hsaas_days_at_zero: newHsaasZero,
+          solcex_consecutive_action_days: newSolcexStreak,
+          solcex_days_since_last_action: newSolcexInactive,
+          last_close_date: today,
+        };
+        stallNote = `HSaaS ${hsaasActed ? "✅" : "⚠️"} streak ${newHsaasStreak}d | SolCex ${solcexActed ? "✅" : "🔴"} ${newSolcexInactive}d inactive`;
+        fs.writeFileSync(trackerPath, JSON.stringify(t, null, 2));
+      }
+    } catch (e) {
+      log(`day_close stall-flag err: ${e.message}`);
+      stallNote = "stall-flag update FAILED";
+    }
+
+    return `EOD ${today} — signals ${sigCount}/6${avgQs !== null ? ` (avg qs ${avgQs})` : ""}, score-tweet drafts ${tweetDrafts}. ${stallNote}.`;
   },
   async night_work() {
     return null; // silent GREEN
