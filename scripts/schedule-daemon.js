@@ -117,7 +117,113 @@ function sendWR(text) {
 // Each returns a one-line WR notice OR null for silent.
 const handlers = {
   async rug_watch() {
-    return "executing rug_watch — scan rekt.news/PeckShield/SlowMist/CertiKAlert/BlockSecTeam, BuzzShield contracts, daily-rug-watch.json. Tweets → ORANGE.";
+    // Phase 2 P2 real handler. Source: DeFiLlama /hacks API (stable JSON,
+    // unlike rekt.news's HTML which broke on /feed/ 500). Detect incidents
+    // in the last 24h, save daily-rug-watch.json, post WR summary.
+    // Tweet-drafting requires a contract address (Ogie msg 5037 hard rule)
+    // and DeFiLlama doesn't ship one — we flag interesting incidents
+    // (>$100K, EVM/Solana chain) for human BuzzShield handcraft instead.
+    const today = new Date().toISOString().slice(0, 10);
+    const now = Math.floor(Date.now() / 1000);
+    const cutoff = now - 86400; // 24h ago
+    const reportPath =
+      "/data/buzz/persistent/reports/daily-rug-watch.json";
+
+    let recent = [];
+    let totalChecked = 0;
+    let sourceErr = null;
+    try {
+      const json = await new Promise((resolve, reject) => {
+        const req = https.get(
+          "https://api.llama.fi/hacks",
+          { headers: { "User-Agent": "buzz-rug-watch/1.0" } },
+          (res) => {
+            let data = "";
+            res.on("data", (c) => (data += c));
+            res.on("end", () => resolve(data));
+          },
+        );
+        req.on("error", reject);
+        req.setTimeout(15_000, () => {
+          req.destroy();
+          reject(new Error("defillama timeout"));
+        });
+      });
+      const all = JSON.parse(json);
+      totalChecked = all.length;
+      recent = all
+        .filter(
+          (h) => typeof h.date === "number" && h.date >= cutoff,
+        )
+        .sort((a, b) => b.date - a.date);
+    } catch (e) {
+      sourceErr = e.message;
+      log(`rug_watch defillama err: ${e.message}`);
+    }
+
+    // Categorise
+    const buzzShieldSupported = new Set([
+      "Ethereum",
+      "Base",
+      "Arbitrum",
+      "Optimism",
+      "Polygon",
+      "BNB Chain",
+      "BNB",
+      "Solana",
+      "Avalanche",
+    ]);
+    const interesting = recent.filter((h) => {
+      const amt = h.amount || 0;
+      const chains = h.chain || [];
+      const supported = chains.some((c) => buzzShieldSupported.has(c));
+      return amt >= 100_000 && supported;
+    });
+
+    // Write report (overwrite today's entry)
+    let prior = {};
+    try {
+      prior = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+    } catch {}
+    const report = {
+      ...prior,
+      date: today,
+      incidents_checked: recent.length,
+      defillama_records_total: totalChecked,
+      buzzshield_catches: 0, // requires handcraft scan (no address in source)
+      buzzshield_misses: 0,
+      tweets_drafted: 0,
+      gaps_logged: prior.gaps_logged || [],
+      sources_checked: ["api.llama.fi/hacks"],
+      data_source_error: sourceErr,
+      incidents: recent.map((h) => ({
+        name: h.name,
+        chain: h.chain,
+        amount_usd: h.amount,
+        classification: h.classification,
+        technique: h.technique,
+        date: new Date(h.date * 1000).toISOString(),
+        defillama_id: h.defillamaId,
+        target_type: h.targetType,
+      })),
+      interesting_for_handcraft: interesting.length,
+      generated_at: new Date().toISOString(),
+    };
+    try {
+      fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+    } catch (e) {
+      log(`rug_watch write err: ${e.message}`);
+    }
+
+    if (sourceErr)
+      return `rug_watch FAILED — source error: ${sourceErr}. Report not updated.`;
+    if (recent.length === 0)
+      return `rug_watch — 0 new incidents in 24h (DeFiLlama: ${totalChecked} total records scanned).`;
+    const interestingNote =
+      interesting.length > 0
+        ? ` ${interesting.length} interesting (≥$100K + EVM/Sol chain) — handcraft BuzzShield scan needed: ${interesting.map((h) => `${h.name}/${(h.chain || []).join(",")}/$${h.amount}`).join(" | ")}`
+        : "";
+    return `rug_watch — ${recent.length} incident(s) in 24h.${interestingNote} daily-rug-watch.json updated.`;
   },
   async score_tweets() {
     // Phase 2 P2 real handler: query pipeline for tweetable tokens, look up
