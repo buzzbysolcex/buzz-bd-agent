@@ -120,7 +120,168 @@ const handlers = {
     return "executing rug_watch — scan rekt.news/PeckShield/SlowMist/CertiKAlert/BlockSecTeam, BuzzShield contracts, daily-rug-watch.json. Tweets → ORANGE.";
   },
   async score_tweets() {
-    return "executing score_tweets — query pipeline (1-3 tokens, score ≥50, fresh), draft per tweet-on-score.md v2.1 (📋 Contract: line). Drafts → ORANGE.";
+    // Phase 2 P2 real handler: query pipeline for tweetable tokens, look up
+    // Twitter handle via DexScreener, draft tweet per tweet-on-score.md v2.1
+    // (with 📋 Contract line — Ogie's hard rule msg 5037), save to disk,
+    // return WR summary. Operator approves before fire.
+    const today = new Date().toISOString().slice(0, 10);
+    const draftDir = "/data/buzz/persistent/reports/score-tweet-drafts";
+    fs.mkdirSync(draftDir, { recursive: true });
+
+    // Skip tickers already drafted today (avoid duplicates).
+    const existingDrafts = fs
+      .readdirSync(draftDir)
+      .filter((f) => f.startsWith(today) && f.endsWith(".md"));
+    const skipTickers = new Set();
+    for (const f of existingDrafts) {
+      const m = f.match(/^\d{4}-\d{2}-\d{2}-([A-Za-z0-9_]+)\.md$/);
+      if (m) skipTickers.add(m[1].toUpperCase());
+    }
+    // Always skip today's already-tweeted tickers.
+    ["SCALLOP", "PIPPIN", "HIVE", "BANANAS31", "VELO"].forEach((t) =>
+      skipTickers.add(t),
+    );
+
+    // Pull candidates: score≥50, recent, has address. Filter quality at SQL
+    // layer — exclude pump.fun shells, ghost-volume tokens, calibration-flagged
+    // tickers, and anything explicitly rejected. The earlier subagent caught
+    // these by reasoning; we replicate the rules deterministically.
+    let candidates;
+    try {
+      candidates = db
+        .prepare(
+          `SELECT ticker, chain, address, score, score_breakdown, notes
+           FROM pipeline_tokens
+           WHERE score >= 50
+             AND updated_at >= date('now','-7 days')
+             AND ticker IS NOT NULL
+             AND address IS NOT NULL
+             AND address NOT LIKE '%pump'
+             AND COALESCE(notes,'') NOT LIKE '%pump.fun%'
+             AND COALESCE(notes,'') NOT LIKE '%pumpswap%'
+             AND COALESCE(notes,'') NOT LIKE '%REJECTED%'
+             AND COALESCE(notes,'') NOT LIKE '%phantom%'
+             AND COALESCE(notes,'') NOT LIKE '%ghost%volume%'
+             AND COALESCE(notes,'') NOT LIKE '%not_confirmed_from_dexscreener%'
+             AND COALESCE(notes,'') NOT LIKE '%TOO BIG%'
+             AND COALESCE(notes,'') NOT LIKE '%Monitor only%'
+             AND COALESCE(score_breakdown,'') NOT LIKE '%pumpfun_penalty%'
+             AND COALESCE(score_breakdown,'') NOT LIKE '%too_big%'
+           ORDER BY score DESC, updated_at DESC
+           LIMIT 30`,
+        )
+        .all();
+    } catch (e) {
+      log(`score_tweets pipeline query err: ${e.message}`);
+      return `score_tweets FAILED — DB query error: ${e.message}`;
+    }
+
+    let drafted = 0;
+    const lines = [];
+    for (const c of candidates) {
+      if (drafted >= 3) break;
+      const tickerKey = c.ticker.toUpperCase();
+      if (skipTickers.has(tickerKey)) continue;
+
+      // DexScreener handle lookup
+      let twitter = null;
+      try {
+        const url = `https://api.dexscreener.com/latest/dex/tokens/${c.address}`;
+        const dxResp = await new Promise((resolve, reject) => {
+          const req = https.get(url, (res) => {
+            let data = "";
+            res.on("data", (c) => (data += c));
+            res.on("end", () => resolve(data));
+          });
+          req.on("error", reject);
+          req.setTimeout(10_000, () => {
+            req.destroy();
+            reject(new Error("dx timeout"));
+          });
+        });
+        const dx = JSON.parse(dxResp);
+        const pair = (dx.pairs || []).find(
+          (p) =>
+            p.info && p.info.socials && p.info.socials.length > 0,
+        );
+        if (pair) {
+          const t = pair.info.socials.find(
+            (s) => (s.type || "").toLowerCase() === "twitter",
+          );
+          if (t && t.url) {
+            const m = t.url.match(/(?:twitter\.com|x\.com)\/([A-Za-z0-9_]+)/);
+            if (m) twitter = `@${m[1]}`;
+          }
+        }
+      } catch (e) {
+        log(`score_tweets DX lookup ${c.ticker}: ${e.message}`);
+      }
+      if (!twitter) {
+        skipTickers.add(tickerKey);
+        continue; // no handle, skip
+      }
+
+      // Render tweet — short addresses (4+4)
+      const addrShort = `${c.address.slice(0, c.chain === "solana" ? 4 : 6)}...${c.address.slice(-4)}`;
+      const chainLabel =
+        { solana: "Solana", bsc: "BSC", ethereum: "Ethereum", base: "Base" }[
+          c.chain
+        ] || c.chain;
+      let tweet;
+      if (c.score >= 70) {
+        tweet =
+          `🐝 BUZZ SCORE: ${c.ticker} — ${c.score}/100\n` +
+          `📋 Contract: ${addrShort} (${chainLabel})\n\n` +
+          `36 sources, dual-gate verified, on-chain immutable.\n` +
+          `1000-agent swarm. Honest scoring v8.3.\n\n` +
+          `${twitter} — your token passed honest calibration.\n` +
+          `Free scan: shield.buzzbd.ai/audit\n\n` +
+          `#TokenAudit #HonestScoring`;
+      } else {
+        tweet =
+          `🐝 BUZZ SCORE: ${c.ticker} — ${c.score}/100\n` +
+          `📋 Contract: ${addrShort} (${chainLabel})\n\n` +
+          `Watch zone. Not a fail, not a pass.\n` +
+          `Honest scoring v8.3, 36 sources, on-chain.\n\n` +
+          `${twitter} — full report on request.\n` +
+          `Free scan: shield.buzzbd.ai/audit\n\n` +
+          `#HonestScoring`;
+      }
+
+      // Save draft
+      const draftPath = `${draftDir}/${today}-${c.ticker}.md`;
+      const md = `---
+posted_status: pending_approval
+token: ${c.ticker}
+score: ${c.score}
+chain: ${c.chain}
+address: ${c.address}
+twitter_handle: "${twitter}"
+template: ${c.score >= 70 ? "HIGH_SCORE" : "WATCH_SCORE"}
+draft_date: ${today}
+drafter: schedule-daemon score_tweets handler (Phase 2 P2)
+---
+
+${tweet}
+
+---
+contract_address_full: ${c.address}
+shield_audit_url: https://shield.buzzbd.ai/audit
+`;
+      try {
+        fs.writeFileSync(draftPath, md);
+        drafted++;
+        lines.push(
+          `${c.ticker} ${c.score}/100 ${twitter} → ${c.ticker}.md`,
+        );
+      } catch (e) {
+        log(`score_tweets write ${c.ticker}: ${e.message}`);
+      }
+    }
+
+    if (drafted === 0)
+      return `score_tweets — 0 fresh drafts (all candidates already tweeted today or no Twitter handle on DexScreener).`;
+    return `score_tweets — ${drafted} draft(s) → ORANGE: ${lines.join(" | ")}`;
   },
   async pilot_outreach() {
     return "executing pilot_outreach — query pipeline for 2-3 prospects (score 50-69), verify activity, draft outreach. Drafts → ORANGE.";
