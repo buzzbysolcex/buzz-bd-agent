@@ -1,0 +1,19 @@
+[Unit]
+Description=Buzz Schedule Daemon — mailbox poller + event dispatcher (Option A, Apr 27 2026)
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=claude
+WorkingDirectory=/home/claude-code/buzz-workspace
+ExecStart=/usr/local/bin/node /home/claude-code/buzz-workspace/scripts/schedule-daemon.js
+Environment=NODE_PATH=/home/claude-code/buzz-workspace/api/node_modules
+Environment=NODE_ENV=production
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/claude-code/buzz-workspace/logs/schedule-daemon.log
+StandardError=append:/home/claude-code/buzz-workspace/logs/schedule-daemon-error.log
+
+[Install]
+WantedBy=multi-user.target
