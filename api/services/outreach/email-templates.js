@@ -6,7 +6,8 @@
 
 const TEMPLATES = {
   initial_outreach: {
-    subject: '${tokenName} scored ${score}/100 - autonomous listing intelligence report',
+    subject:
+      "${tokenName} scored ${score}/100 - autonomous listing intelligence report",
     body: `Hi \${tokenName} team,
 
 Ogie here, BD Lead at SolCex Exchange.
@@ -15,6 +16,7 @@ Our autonomous scoring engine evaluated \${tokenName} across 31 intelligence sou
 
   Token: \${tokenName} (\${chain})
   Contract: \${contractAddress}
+  DexScreener: \${dexscreenerUrl}
   Buzz Score: \${score}/100
   Market Cap: \${mcap}
   24h Volume: \${volume}
@@ -38,11 +40,11 @@ Either way, your score is already live and verifiable:
   Report: buzzbd.ai/scores
   On-chain: ScoreStorage on Base (immutable)
 
-Worth a quick chat? Reply here or Telegram: @Ogie2`
+Worth a quick chat? Reply here or Telegram: @Ogie2`,
   },
 
   followup_48h: {
-    subject: 'Re: ${tokenName} scored ${score}/100 - following up',
+    subject: "Re: ${tokenName} scored ${score}/100 - following up",
     body: `Hi \${tokenName} team,
 
 Quick follow-up on \${tokenName}'s scoring report.
@@ -51,11 +53,11 @@ Your metrics are still tracking strong at \${score}/100 - that puts \${tokenName
 
 If a full listing isn't the right timing, we also offer standalone audit reports - our 1,000-agent swarm simulation catches failure modes that 50-agent runs miss. Reports start at $500 for a Quick Scan.
 
-Either way, happy to chat. Reply here or Telegram: @Ogie2`
+Either way, happy to chat. Reply here or Telegram: @Ogie2`,
   },
 
   breakup_7d: {
-    subject: 'Re: ${tokenName} - your score stays live',
+    subject: "Re: ${tokenName} - your score stays live",
     body: `Hi \${tokenName} team,
 
 Last note from me. \${tokenName} remains in our pipeline at \${score}/100.
@@ -64,11 +66,11 @@ Your score, simulation history, and on-chain record are persistent - they don't 
 
 Free instant score anytime: buzzbd.ai/score
 
-Best of luck with the build.`
+Best of luck with the build.`,
   },
 
   hsaas_audit_pitch: {
-    subject: '${tokenName} - 1,000-agent swarm audit available',
+    subject: "${tokenName} - 1,000-agent swarm audit available",
     body: `Hi \${tokenName} team,
 
 Thanks for engaging with us on \${tokenName}'s score.
@@ -83,8 +85,8 @@ What you get: every score dimension broken down, adversarial debate results (bul
 
 "11 tokens passed every other audit. Our calibration caught them all."
 
-Interested? Reply here or buzzbd.ai/score for a free instant score.`
-  }
+Interested? Reply here or buzzbd.ai/score for a free instant score.`,
+  },
 };
 
 // Fill template with token data
@@ -96,9 +98,9 @@ function renderTemplate(templateName, data) {
   let body = template.body;
 
   for (const [key, value] of Object.entries(data)) {
-    const placeholder = '${' + key + '}';
-    subject = subject.split(placeholder).join(value || 'N/A');
-    body = body.split(placeholder).join(value || 'N/A');
+    const placeholder = "${" + key + "}";
+    subject = subject.split(placeholder).join(value || "N/A");
+    body = body.split(placeholder).join(value || "N/A");
   }
 
   return { subject, body };
