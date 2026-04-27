@@ -50,6 +50,7 @@ buzz-workspace/
 - Dual-gate scoring: composite AND fundamental must pass
 - Honest scoring: 0 HOT out of 338 is correct, not a bug
 - DIRECT_SIGNAL_FILING flag (default true): morning crons call scripts/morning-signals-v2.sh which reads autoDream Phase 6 drafts from /data/buzz-api/signal-drafts/ and BIP-322 files them via api/services/signals/aibtc-direct-filer.js. Old morning-signals.sh (Claude Code chain) remains as fallback only — bypasses idle/compacted Claude Code dependency.
+- SCHEDULE EVENTS = WORK ORDERS (Apr 27, msg 4971-4973): When a `daily-schedule-cron-v4` mailbox event or `⏰ SCHEDULE: <event_type>` Telegram nudge arrives, IMMEDIATELY execute the work for that event_type — do NOT post the announcement and wait. GREEN events (rug_watch, score_tweets, bd_scout, morning_signal_fallback, day_close, keepalive, etc.) start autonomously; only ORANGE actions (tweets, emails, sends) wait for War Room approval. The trigger IS the work order. See .claude/rules/schedule-events-execute-immediately.md.
 
 ## 4. STARTUP READ ORDER (MANDATORY — read in this order on every restart)
 
