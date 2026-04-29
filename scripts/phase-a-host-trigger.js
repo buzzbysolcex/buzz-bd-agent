@@ -102,8 +102,14 @@ async function generateSlot(slotNumber, beat, hookAngle) {
     elapsed_s: dt,
   };
 
-  // Filename pattern morning-signals-v2.sh expects: ${date}-${beat}-${slot}.json
-  const today = new Date().toISOString().slice(0, 10);
+  // Filename pattern morning-signals-v2.sh expects: ${date}-${beat}-${slot}.json.
+  // Date derivation: if it's currently >= 22:00 UTC, use TOMORROW's date so
+  // drafts are ready for the 00:02Z slot 1 cron (host trigger runs at 23:55Z
+  // by cron — Day 29 lesson: 01:55Z is too late, slots 1+2 already fired).
+  const now = new Date();
+  const dayOffset = now.getUTCHours() >= 22 ? 1 : 0;
+  const targetDay = new Date(now.getTime() + dayOffset * 86400000);
+  const today = targetDay.toISOString().slice(0, 10);
   const filename = `${today}-${beat}-${slotNumber}.json`;
   const fpath = path.join(DRAFT_DIR, filename);
 
