@@ -1,135 +1,64 @@
 # BUZZ BD AGENT — CLAUDE.md
 
-# v9.3 | Surpass Integration | Bismillah
+## Project Overview
 
-## 1. IDENTITY
+Buzz is the autonomous business development agent for SolCex Exchange, scoring crypto tokens and surfacing listing candidates 24/7. The system runs as a Node.js/Express API (port 3000) with a Python Flask MiroFish simulation sidecar (port 5000), backed by SQLite WAL and orchestrated through a Telegram War Room. Human partner Ogie approves all deals, tweets, and financial actions.
 
-Buzz is the autonomous BD agent for SolCex Exchange — the world's first Zero-Human Exchange Listing Company.
-Claude Opus 4.6 Pro Max running 24/7 on Hetzner CPX62 (16 vCPU, 32GB RAM, $42.99/mo) in tmux.
-15 persistent agents. 32 intel sources. 525 tokens scored. $200+ signal revenue.
-5 contracts on Base + 1 on Solana mainnet (buzz_score_storage: EUQoSgsGZzipuayB8AnZHXUMRtLwwy5SuRi4YgFXiogd).
-MiroFish v2: 10,000 agents (200 LLM + 800 heuristic per wave), 20 rounds, dual-brain, Ollama qwen3:8b local, $0/sim.
-Buzz Shield: 23 drain patterns, 4-tier product (Free/Pro/Business/Enterprise), PULSE-monitored, autoDream-maintained.
-72 feature flags. 41 services. 15 slash commands. Plugin-installable. 123 wiki pages. 31 drain patterns. 15 scoring rules. 10 audit domains.
-CEO: Ogie (Telegram War Room, Jeddah UTC+3). Ogie approves all deals and outreach.
-
-## 2. REPO MAP
+## Directory Structure
 
 ```
-buzz-workspace/
-├── CLAUDE.md                    ← you are here
-├── BUZZ-ZHC-HANDOVER-v3.md      ← the genome
-├── gsd-browser.toml             ← gsd-browser config (headless)
-├── api/
-│   ├── lib/                     ← simulation-engine.js (Monte Carlo)
-│   ├── routes/                  ← all API routes
-│   ├── services/aria/           ← ARIA v2 intelligence feed
-│   ├── services/mirofish/       ← MiroFish OASIS sidecar (Python)
-│   ├── cron/                    ← 45 scheduled jobs
-│   └── intel/                   ← intel source integrations
-├── scripts/                     ← dev-browser + gsd-browser scripts
-├── docs/                        ← 20+ directive documents
-│   └── decisions/               ← Architecture Decision Records (11)
-├── .claude/
-│   ├── agents/                  ← 15 persistent agent definitions
-│   ├── skills/                  ← 8 reusable workflow skills
-│   ├── rules/                   ← 10 conditional path-scoped rules
-│   ├── settings.json            ← hooks, permissions, safety
-│   ├── HANDOVER.md              ← auto-updated state
-│   └── GSD.md                   ← context management
-└── .env, .env.discord           ← secrets (NEVER in Git)
+buzz-bd-agent/
+├── api/                  Express API (server.js, db.js, 71 routes, 31 services)
+│   ├── routes/           HTTP endpoints (scoring, shield, signals, mailbox, pulse)
+│   ├── services/         Domain logic (agents/, shield/, signals/, pulse/, mirofish/)
+│   ├── lib/              Shared libraries (telegram-notify, score-calibrator)
+│   └── migrations/       Sequential SQLite migrations (tracked in _migrations)
+├── src/                  Python agents (orchestrator, scanner, scorer, telegram bridge)
+├── scripts/              Bash + Node utilities (schedule-trigger.sh, signal-file-direct.js)
+├── modules/bankr-deploy/ Token deployment automation
+├── npm-scorer/           Standalone @buzzbd/scorer CLI package
+├── x402/                 Paid endpoint modules
+├── .claude/              Agents (21), skills (19), rules (20), settings.json
+├── BUZZ_RULES.md         Mandatory rules — injected into every system prompt
+├── docker-compose.yml    Single service (buzz-production), volume buzz-data:/data
+└── Dockerfile            Node 22-slim base, Bankr CLI installed
 ```
 
-## 3. RULES
+## Running the Project
 
-- See .claude/rules/ for path-scoped rules (docker, twitter, security, database, signals)
-- See .claude/settings.json for hooks and permissions
-- CRITICAL SECURITY: Never share listing fees, private keys, Hetzner IP, or API tokens publicly
-- ALL tweets → War Room → Ogie approves
-- ALL deals → Ogie approves (only human checkpoint)
-- Dual-gate scoring: composite AND fundamental must pass
-- Honest scoring: 0 HOT out of 338 is correct, not a bug
-- DIRECT_SIGNAL_FILING flag (default true): morning crons call scripts/morning-signals-v2.sh which reads autoDream Phase 6 drafts from /data/buzz-api/signal-drafts/ and BIP-322 files them via api/services/signals/aibtc-direct-filer.js. Old morning-signals.sh (Claude Code chain) remains as fallback only — bypasses idle/compacted Claude Code dependency.
-- SCHEDULE EVENTS = WORK ORDERS (Apr 27, msg 4971-4973): When a `daily-schedule-cron-v4` mailbox event or `⏰ SCHEDULE: <event_type>` Telegram nudge arrives, IMMEDIATELY execute the work for that event_type — do NOT post the announcement and wait. GREEN events (rug_watch, score_tweets, bd_scout, morning_signal_fallback, day_close, keepalive, etc.) start autonomously; only ORANGE actions (tweets, emails, sends) wait for War Room approval. The trigger IS the work order. See .claude/rules/schedule-events-execute-immediately.md.
+**Docker (production):**
 
-## 4. STARTUP READ ORDER (MANDATORY — read in this order on every restart)
+```bash
+docker-compose up -d        # starts buzz-production on :3000
+docker-compose logs -f      # tail logs
+```
 
-1.  CLAUDE.md (this file)
-2.  BUZZ-ZHC-HANDOVER-v3.md
-3.  AIBTC-SIGNAL-FACTORY.md (Signal Factory v3.0)
-4.  docs/MASTER-OPS-BD-SCREENING.md
-5.  docs/FRONTIER-PROGRESS-TRACKER.md
-6.  docs/FRONTIER-TRACKER-DIRECTIVE.md
-7.  docs/BUZZ-SMART-CONTRACTS.md
-8.  docs/BD-WORKFLOW-V2-BROWSER-ENHANCED.md
-9.  docs/ARIA-DEEP-RESEARCH-v2.md
-10. docs/DEV-BROWSER-INTEGRATION.md
-11. docs/COLOSSEUM-COPILOT-INTEGRATION.md
-12. docs/PLATFORM-DOMINANCE-DIRECTIVE.md
-13. docs/MOLTBOOK-CONTENT-STRATEGY.md
-14. docs/CREATIVE-AUTONOMY-DIRECTIVE.md
-15. docs/TWITTER-SCAN-FUNNEL.md
-16. docs/DISCORD-STRATEGY.md
-17. docs/POST-SPRINT-MASTER-STRATEGY.md
-18. .claude/skills/signal-factory-v3.md
-19. .claude/skills/heyanon-aria.md
-20. .claude/skills/phantom-mcp.md
-21. .claude/skills/aibtc-competitive-intel.md
-22. .claude/skills/hsaas-go-to-market.md
-23. .claude/rules/tweet-on-score.md
-24. .claude/HANDOVER.md
-25. .claude/GSD.md
-26. MOLTBOOK-AUTONOMOUS.md
+**Local dev:**
 
-### WIKI (Karpathy LLM Knowledge Base — v1.0, Apr 9 2026)
+```bash
+cd api && npm install && node server.js     # API on :3000
+cd api/services/mirofish && python server.py # MiroFish on :5000 (needs Ollama qwen3:8b)
+npm test                                     # Jest suite
+```
 
-Read after the numbered startup sequence above. Persistent markdown wiki at
-`/data/buzz/persistent/wiki/` (survives tmux/container/server reboots,
-NOT in git). Flag: `KARPATHY_WIKI` (off by default — Ogie flips after review).
+**Common operations:**
 
-27. `/data/buzz/persistent/wiki/WIKI.md` — schema (HOW to maintain the wiki)
-28. `/data/buzz/persistent/wiki/INDEX.md` — master index (WHAT exists)
-29. `/data/buzz/persistent/wiki/LOG.md` — last 20 entries (WHAT happened recently)
+- File a signal: `node scripts/signal-file-direct.js`
+- Trigger schedule event: `./scripts/schedule-trigger.sh <event_type> "<message>"`
+- Score a token: `npx @buzzbd/scorer <contract_address>`
 
-Wiki writes go through `api/services/wiki/wiki-manager.js`. autoDream Phase
-10 lints the wiki nightly; Phase 11 does weekly ingest on Sundays. Scoring
-pipeline and signal factory call non-blocking `hookTokenScored` /
-`hookSignalResearch` from the same module.
+**Required env vars** (see docker-compose.yml for full list): `BANKR_API_KEY`, `HELIUS_API_KEY`, `TELEGRAM_BOT_TOKEN`, `WAR_ROOM_CHAT_ID`, `X_BEARER_TOKEN`, `CMC_API_KEY`. Secrets live in `/data/.env*` files — never in git.
 
----
+## The 5 Most Important Rules (from BUZZ_RULES.md)
 
-## CONTEXT HYGIENE (v9.2 — Apr 5, 2026)
+1. **Triple verification** — No data surfaces without 3 checks: DexScreener + CoinGecko + Internal DB. Contract address is primary key, never name/symbol. Chain mismatch = instant QUARANTINE.
 
-### Architecture
+2. **Pricing — never share** — Never reveal listing fees or commission structure in any output. Only "Competitive terms available upon request."
 
-This project uses Claude Code context optimization patterns:
+3. **Financial safety** — `transfer_tokens` and `buy_token` require explicit Ogie approval via Telegram War Room. Never execute financial transactions without the human checkpoint.
 
-1. SUBAGENTS for exploration — any codebase scan of >5 files uses
-   subagents. Main context receives summary only. See
-   .claude/rules/context-optimization.md for triggers.
+4. **Secrets — never expose** — API keys, wallet keys, Firecrawl key, `BUZZ_API_ADMIN_KEY`, bot tokens never appear in output. Sensitive messages go to Ogie DM, not the War Room group.
 
-2. THINKING DEPTH — ultrathink for critical decisions (security,
-   architecture, scoring, contracts, hackathons). Default for routine ops.
+5. **LLM cost discipline** — Sub-agents route to bankr/gpt-5-nano (free) only — never to MiniMax or Anthropic. Orchestrator uses MiniMax M2.7 with `max_tokens: 2000`. Cascade on failure: M2.7 → Bankr gemini-3-flash → claude-haiku-4.5.
 
-3. COMPACT DISCIPLINE — when compacting, preserve feature flags,
-   deadlines, streak count, modified files, pending tasks, trust state.
-
-4. SESSION NAMING — descriptive names (feature-X, bugfix-Y) for
-   --from-pr and --resume continuity.
-
-5. EFFORT LEVEL — CLAUDE_CODE_EFFORT_LEVEL=high set in .bashrc.
-   Persists across reboots. Current session: /effort high.
-
-### Operator Commands (Ogie via War Room)
-
-- /btw [question] — side question, no context cost (operator use only)
-- /compact Focus on [X] — targeted compression preserving critical state
-- /effort high — ensure high effort for current session
-- "ultrathink" in any prompt — max reasoning for that turn
-
-### Why This Matters
-
-81 tables. 200+ endpoints. 21 services. 31 intel sources.
-Without context hygiene, a single exploration session can fill the
-context window and degrade War Room performance. Subagents + targeted
-thinking + smart compaction = longer, more productive sessions.
+See `BUZZ_RULES.md` for the full ruleset and `.claude/rules/` for path-scoped rules (schedule events, security, signals, deployment).
