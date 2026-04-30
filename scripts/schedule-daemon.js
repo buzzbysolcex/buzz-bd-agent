@@ -39,9 +39,9 @@ const Database = require("better-sqlite3");
 // absolute path works regardless.
 let renderTemplate;
 try {
-  ({ renderTemplate } = require(
-    "/home/claude-code/buzz-workspace/api/services/outreach/email-templates",
-  ));
+  ({
+    renderTemplate,
+  } = require("/home/claude-code/buzz-workspace/api/services/outreach/email-templates"));
 } catch (e) {
   renderTemplate = null; // gracefully degrade — handler will note this
 }
@@ -125,12 +125,11 @@ function sendWR(text) {
   });
 }
 
-// ── GoPlus Security cross-verify (msg 5066) ─────────────────────────────
+// ── GoPlus Security cross-verify (msg 5066, msg 5336) ───────────────────
 // Token Sniffer's web is Cloudflare-blocked from this host (403). GoPlus
-// is the canonical second-source: free HTTP API, EVM chains supported,
-// returns honeypot/proxy/mint/blacklist flags + holder concentration.
-// Solana not on this endpoint shape — skip cross-verify (safer to skip
-// the candidate than tweet without a check).
+// is the canonical second-source: free HTTP API, EVM + Solana supported.
+// Solana endpoint shape differs from EVM (different fields). RugCheck
+// fallback for Solana when GoPlus returns null result.
 const GOPLUS_CHAIN_ID = {
   ethereum: "1",
   bsc: "56",
@@ -140,29 +139,134 @@ const GOPLUS_CHAIN_ID = {
   base: "8453",
   avalanche: "43114",
 };
+function httpGetJson(url, timeoutMs = 10_000) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(
+      url,
+      { headers: { "User-Agent": "buzz-daemon/1.0" } },
+      (res) => {
+        let data = "";
+        res.on("data", (c) => (data += c));
+        res.on("end", () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            reject(new Error(`parse: ${e.message}`));
+          }
+        });
+      },
+    );
+    req.on("error", reject);
+    req.setTimeout(timeoutMs, () => {
+      req.destroy();
+      reject(new Error("timeout"));
+    });
+  });
+}
+async function goPlusCheckSolana(address) {
+  const url = `https://api.gopluslabs.io/api/v1/solana/token_security?contract_addresses=${address}`;
+  const j = await httpGetJson(url);
+  const r = j.result || {};
+  const k = Object.keys(r)[0];
+  if (!k) return null; // signal caller to try RugCheck fallback
+  const t = r[k];
+  const flags = [];
+  // Solana flag mapping — different from EVM. Status "1" = ON (risky for most).
+  if (t.mintable && t.mintable.status === "1") flags.push("MINTABLE");
+  if (t.freezable && t.freezable.status === "1") flags.push("FREEZABLE");
+  if (t.closable && t.closable.status === "1") flags.push("CLOSABLE");
+  if (t.non_transferable === "1") flags.push("NON_TRANSFERABLE");
+  if (t.default_account_state === "1") flags.push("FROZEN_BY_DEFAULT");
+  if (t.metadata_mutable && t.metadata_mutable.status === "1")
+    flags.push("METADATA_MUTABLE");
+  if (
+    t.balance_mutable_authority &&
+    t.balance_mutable_authority.status === "1"
+  )
+    flags.push("BALANCE_MUTABLE");
+  if (Array.isArray(t.transfer_hook) && t.transfer_hook.length > 0)
+    flags.push("TRANSFER_HOOK");
+  // Transfer fee detection
+  const tf = t.transfer_fee || {};
+  const tfPct = parseFloat(tf.current_fee_rate || tf.maximum_fee_rate || 0);
+  if (tfPct > 0.1) flags.push(`TRANSFER_FEE_${(tfPct * 100).toFixed(1)}PCT`);
+  // Holders
+  const holders = t.holders || [];
+  const top10pct =
+    holders.slice(0, 10).reduce((s, h) => s + parseFloat(h.percent || 0), 0) *
+    100;
+  return {
+    source: "goplus-solana",
+    flags,
+    buy_tax_pct: 0, // Solana has transfer_fee, not buy/sell tax
+    sell_tax_pct: 0,
+    transfer_fee_pct: tfPct * 100,
+    holder_count: parseInt(t.holder_count || 0),
+    open_source: true, // Solana programs verifiable on-chain
+    top10_pct: top10pct,
+    trusted_token: t.trusted_token === 1,
+  };
+}
+async function rugCheckSolana(address) {
+  const url = `https://api.rugcheck.xyz/v1/tokens/${address}/report/summary`;
+  const j = await httpGetJson(url);
+  if (!j || j.code === "PAGE_NOT_FOUND") return { error: "rugcheck_not_found" };
+  const flags = [];
+  const risks = j.risks || [];
+  for (const r of risks) {
+    const lvl = (r.level || "").toLowerCase();
+    if (lvl === "danger" || lvl === "warn" || lvl === "high")
+      flags.push((r.name || "RISK").toUpperCase().replace(/\s+/g, "_"));
+  }
+  // RugCheck score: lower = safer (1 = clean), higher = risky
+  const score = parseInt(j.score_normalised || j.score || 0);
+  if (score >= 50) flags.push(`RUGCHECK_SCORE_${score}`);
+  const lp = parseFloat(j.lpLockedPct || 0);
+  return {
+    source: "rugcheck",
+    flags,
+    buy_tax_pct: 0,
+    sell_tax_pct: 0,
+    holder_count: 0, // not in summary
+    open_source: true,
+    top10_pct: 0,
+    rugcheck_score: score,
+    lp_locked_pct: lp,
+  };
+}
 async function goPlusCheck(chain, address) {
+  // Solana path: GoPlus Solana endpoint, RugCheck fallback if null
+  if (chain === "solana") {
+    try {
+      const sol = await goPlusCheckSolana(address);
+      if (sol) return sol;
+      // GoPlus Solana returned null — try RugCheck
+      try {
+        const rc = await rugCheckSolana(address);
+        if (rc.error) return { error: `goplus_null+rugcheck:${rc.error}` };
+        return rc;
+      } catch (e) {
+        return { error: `goplus_null+rugcheck:${e.message}` };
+      }
+    } catch (e) {
+      // GoPlus Solana errored — try RugCheck
+      try {
+        const rc = await rugCheckSolana(address);
+        if (rc.error)
+          return { error: `goplus_err:${e.message}+rugcheck:${rc.error}` };
+        return rc;
+      } catch (e2) {
+        return { error: `goplus:${e.message}+rugcheck:${e2.message}` };
+      }
+    }
+  }
+  // EVM path
   const cid = GOPLUS_CHAIN_ID[chain];
   if (!cid)
-    return { skipped: true, reason: `chain=${chain} not in GoPlus EVM list` };
+    return { skipped: true, reason: `chain=${chain} not supported (EVM/Solana only)` };
   const url = `https://api.gopluslabs.io/api/v1/token_security/${cid}?contract_addresses=${address}`;
   try {
-    const body = await new Promise((resolve, reject) => {
-      const req = https.get(
-        url,
-        { headers: { "User-Agent": "buzz-daemon/1.0" } },
-        (res) => {
-          let data = "";
-          res.on("data", (c) => (data += c));
-          res.on("end", () => resolve(data));
-        },
-      );
-      req.on("error", reject);
-      req.setTimeout(10_000, () => {
-        req.destroy();
-        reject(new Error("goplus timeout"));
-      });
-    });
-    const j = JSON.parse(body);
+    const j = await httpGetJson(url);
     const r = j.result || {};
     const k = Object.keys(r)[0];
     if (!k) return { error: "goplus_no_result" };
@@ -195,6 +299,7 @@ async function goPlusCheck(chain, address) {
       holders.slice(0, 10).reduce((s, h) => s + parseFloat(h.percent || 0), 0) *
       100;
     return {
+      source: "goplus-evm",
       flags,
       buy_tax_pct: buyTax * 100,
       sell_tax_pct: sellTax * 100,
@@ -462,12 +567,31 @@ const handlers = {
         { solana: "Solana", bsc: "BSC", ethereum: "Ethereum", base: "Base" }[
           c.chain
         ] || c.chain;
+      // Source label for cross-verify in tweet (msg 5336 — Solana support)
+      const verifyLabel =
+        gp.source === "rugcheck"
+          ? "RugCheck"
+          : gp.source === "goplus-solana"
+            ? "GoPlus (Solana)"
+            : "GoPlus";
+      // Metric line varies by source: EVM has tax, Solana has transfer_fee,
+      // RugCheck has score+lp_locked.
+      let metricsLine;
+      if (gp.source === "rugcheck") {
+        metricsLine = `${verifyLabel}: 0 risks. RugCheck score ${gp.rugcheck_score}/100. LP locked ${gp.lp_locked_pct.toFixed(0)}%.`;
+      } else if (gp.source === "goplus-solana") {
+        const tFee = gp.transfer_fee_pct || 0;
+        metricsLine = `${verifyLabel}: 0 red flags. ${(gp.holder_count / 1000).toFixed(0)}K holders. ${tFee > 0 ? `${tFee.toFixed(0)}% transfer fee.` : "0% transfer fee."}`;
+      } else {
+        metricsLine = `${verifyLabel}: 0 red flags. ${(gp.holder_count / 1000).toFixed(0)}K holders. ${gp.buy_tax_pct.toFixed(0)}/${gp.sell_tax_pct.toFixed(0)} tax.`;
+      }
+
       let tweet;
       if (appliedScore >= 70) {
         tweet =
           `🐝 BUZZ SCORE: ${c.ticker} — ${appliedScore}/100\n` +
           `📋 ${addrShort} (${chainLabel})\n\n` +
-          `GoPlus: 0 red flags. ${(gp.holder_count / 1000).toFixed(0)}K holders. ${gp.buy_tax_pct.toFixed(0)}/${gp.sell_tax_pct.toFixed(0)} tax.\n\n` +
+          `${metricsLine}\n\n` +
           (concentrationNote
             ? `Caveat: ${concentrationNote.split(" (")[0]}.\n\n`
             : "") +
@@ -477,7 +601,7 @@ const handlers = {
         tweet =
           `🐝 BUZZ SCORE: ${c.ticker} — ${appliedScore}/100\n` +
           `📋 ${addrShort} (${chainLabel})\n\n` +
-          `Watch zone. GoPlus 0 red flags but ${concentrationNote || "moderate fundamentals"}.\n\n` +
+          `Watch zone. ${verifyLabel} 0 red flags but ${concentrationNote || "moderate fundamentals"}.\n\n` +
           `${twitter} — full report on request.\nshield.buzzbd.ai/audit\n\n` +
           `#HonestScoring`;
       }
@@ -545,8 +669,7 @@ Free instant scan: https://shield.buzzbd.ai/audit
 `;
           emailSubject = rendered.subject;
           emailBody = rendered.body + ogieAppendix;
-          const outreachDir =
-            "/data/buzz/persistent/reports/outreach-drafts";
+          const outreachDir = "/data/buzz/persistent/reports/outreach-drafts";
           fs.mkdirSync(outreachDir, { recursive: true });
           emailDraftPath = `${outreachDir}/${today}-${c.ticker}.md`;
           const emailMd = `---
