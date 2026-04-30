@@ -176,7 +176,10 @@ async function goPlusCheckSolana(address) {
   if (t.freezable && t.freezable.status === "1") flags.push("FREEZABLE");
   if (t.closable && t.closable.status === "1") flags.push("CLOSABLE");
   if (t.non_transferable === "1") flags.push("NON_TRANSFERABLE");
-  if (t.default_account_state === "1") flags.push("FROZEN_BY_DEFAULT");
+  // SPL Token default_account_state: "0"=Uninitialized, "1"=Initialized (normal),
+  // "2"=Frozen. Only "2" is the danger flag — verified Apr 30 against WSOL/LOL
+  // both reporting "1" (safe). Inverting earlier logic.
+  if (t.default_account_state === "2") flags.push("FROZEN_BY_DEFAULT");
   if (t.metadata_mutable && t.metadata_mutable.status === "1")
     flags.push("METADATA_MUTABLE");
   if (
