@@ -32,6 +32,27 @@ const LOG_PATH = "/data/buzz/persistent/buzz-api/signal-filing.log";
 const TG_BOT = "8488299788:AAGKSW8EcXMg3H4za6zYs-Ed4imypi8cLZc";
 const TG_CHAT = "-1003701758077";
 
+// Apr 30 2026 (Ogie msg 5285 → 5387): initDB() so every CLI-filed signal
+// writes to aibtc_signals_filed. From host, default DB_DIR /data/buzz-api
+// EACCES-fails on mkdir; the container bind-mount maps /data → host
+// /data/buzz/persistent. Override BUZZ_DB_DIR to the canonical host path
+// before loading api/db.js so initDB() opens the same DB the container does.
+if (!process.env.BUZZ_DB_DIR) {
+  process.env.BUZZ_DB_DIR = "/data/buzz/persistent/buzz-api";
+}
+try {
+  const { initDB } = require("../api/db");
+  initDB();
+  // Signal tracker table is created on demand inside recordSignalFiled,
+  // but explicitly initializing keeps logs clean.
+  try {
+    const { initSignalTracker } = require("../api/services/signals/signal-tracker");
+    if (typeof initSignalTracker === "function") initSignalTracker();
+  } catch {}
+} catch (e) {
+  console.warn(`[signal-file-direct] initDB skipped (non-fatal): ${e.message}`);
+}
+
 // ── arg parsing ────────────────────────────────────────────
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
