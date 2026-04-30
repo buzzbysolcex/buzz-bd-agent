@@ -340,6 +340,67 @@ router.post("/full", tierGate("free"), shieldPaidGate, async (req, res) => {
       const axios = require("axios");
       const scanUrl = `http://localhost:3000/api/v1/shield/public/scan?token=${encodeURIComponent(address)}&chain=${encodeURIComponent(chainSlug)}`;
       const scan = await axios.get(scanUrl, { timeout: 20000 });
+
+      // ── BuzzShield V5 upgrade (Ogie msg 5361-5363, Apr 30) ──
+      // Compose individual pattern findings into chains, search the
+      // 21-exploit post-mortem corpus for analogous historical incidents.
+      // Synthesize a findings[] array from scan.data fields the chain
+      // detector + RAG search both expect (pattern_id, category, description,
+      // chain). Failure here is non-fatal — still return the V3 scan.
+      let v5 = null;
+      try {
+        const { detectExploitChains } = require("../services/shield/exploit-chain");
+        const { searchSimilarExploits } = require("../services/shield/writeup-rag");
+        const findings = [];
+        // pattern_matches → findings (V3 shape: { pattern_id, severity, … })
+        for (const pm of scan.data?.pattern_matches || []) {
+          findings.push({
+            pattern_id: pm.pattern_id || pm.id || "",
+            category: pm.category || pm.pattern_type || "",
+            description: pm.description || pm.title || "",
+            chain: chainSlug,
+          });
+        }
+        // flags → findings (V3 shape: each flag is a reason string)
+        for (const flag of scan.data?.flags || []) {
+          findings.push({
+            pattern_id: typeof flag === "string" ? flag.toLowerCase().replace(/\s+/g, "_") : "",
+            category: "flag",
+            description: typeof flag === "string" ? flag : (flag.description || ""),
+            chain: chainSlug,
+          });
+        }
+        const auditResults = { findings };
+        const exploit_chains = detectExploitChains(auditResults);
+        const similar_exploits = searchSimilarExploits(findings);
+
+        v5 = {};
+        if (exploit_chains.length > 0) {
+          v5.exploit_chains = exploit_chains;
+          v5.chain_risk = exploit_chains.some((c) => c.verdict === "HIGH_CONFIDENCE")
+            ? "CRITICAL"
+            : "WARNING";
+          // Score penalty: 20 per HIGH_CONFIDENCE chain
+          const chainPenalty = exploit_chains.filter((c) => c.verdict === "HIGH_CONFIDENCE").length * 20;
+          if (chainPenalty > 0 && typeof scan.data?.score === "number") {
+            v5.score_pre_chain_penalty = scan.data.score;
+            v5.score = Math.max(0, scan.data.score - chainPenalty);
+            v5.chain_penalty_applied = chainPenalty;
+          }
+        }
+        if (similar_exploits.length > 0) {
+          v5.similar_exploits = similar_exploits;
+          const totalLost = similar_exploits.reduce((sum, e) => {
+            const n = parseFloat(String(e.amount_lost || "").replace(/[^0-9.]/g, "")) || 0;
+            return sum + n;
+          }, 0);
+          v5.historical_warning = `This contract shares patterns with ${similar_exploits.length} past exploit(s) totaling $${totalLost.toLocaleString()} in losses.`;
+        }
+        if (Object.keys(v5).length === 0) v5 = null;
+      } catch (v5err) {
+        console.warn("[shield-v5] non-fatal:", v5err.message);
+      }
+
       // Map V3 risk_level → pashov_audits verdict CHECK constraint
       const riskRaw = (scan.data?.risk_level || "UNKNOWN").toUpperCase();
       const verdictMap = {
@@ -350,7 +411,9 @@ router.post("/full", tierGate("free"), shieldPaidGate, async (req, res) => {
         SAFE: "CLEAN",
         CLEAN: "CLEAN",
       };
-      const verdict = verdictMap[riskRaw] || "INCONCLUSIVE";
+      let verdict = verdictMap[riskRaw] || "INCONCLUSIVE";
+      // V5 escalation: a HIGH_CONFIDENCE exploit chain promotes verdict to CRITICAL
+      if (v5 && v5.chain_risk === "CRITICAL") verdict = "CRITICAL";
       // skill_used CHECK constraint only allows x-ray/solidity-auditor/both —
       // label free tier as 'x-ray' (lightweight scan, semantic match) with
       // mode='free-tier-v3' for disambiguation at read time.
@@ -377,6 +440,7 @@ router.post("/full", tierGate("free"), shieldPaidGate, async (req, res) => {
         tier: "free",
         status: "complete",
         v3_result: scan.data,
+        v5: v5 || undefined,
         attribution: PASHOV_ATTRIBUTION,
         stream_url: null,
         result_url: `/api/v1/shield/audit/${audit_id}`,
