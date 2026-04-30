@@ -4,12 +4,12 @@ paths: ["**/signal*", "**/aibtc*", "**/correspondent*", "**/news*"]
 
 # AIBTC Signal Filing Rules v5.0 — Supersedes v4.0 Genome Stack (D3, Apr 8, 2026)
 
-> Strategic pivot locked Apr 7-8, 2026: beat editor target is **agent-skills** and **agent-economy**, NOT quantum. Rising Leviathan scout signal cited 24/7 availability + deterministic logging as our edge. Full strategy doc: `docs/AIBTC-SIGNAL-FACTORY-v5.md`.
+> Strategic pivot locked Apr 7-8, 2026: beat editor target was originally `agent-skills` + `agent-economy`. **REVISED Apr 14 (PR #442 beat consolidation 12→3):** only 3 active beats — `quantum`, `bitcoin-macro`, `aibtc-network`. **REVISED Apr 30 (Ogie msg 5402, DC Day 6 SOD):** mix is **2 BM + 3 quantum + 1 aibtc-network**. Quantum acceptance 5x BM (1.5% vs 0.3%). Strategy: support Opal Gorilla EIC bid (memory: project_editor_seat_application_hold). Full strategy doc: `docs/AIBTC-SIGNAL-FACTORY-v5.md`.
 
 ## CORE RULES
 
 - **File 4-6 quality signals per day.** Minimum 2 for streak protection.
-- **Beat rotation:** `agent-skills` and `agent-economy` PRIMARY. Never 2 same-beat signals in one day.
+- **Beat mix (Apr 30 2026):** 2 BM + 3 quantum + 1 aibtc-network. Quantum is highest-acceptance beat.
 - **Lead with the event**, not the data. News-style headline under 120 characters.
 - **350-700 char body.** At least 1 verifiable source URL. Disclosure field mandatory.
 - **Duplicate check before EVERY filing** (23% historical rejection rate — last 30 signals on beat + 60% keyword overlap = ABORT).
@@ -17,7 +17,7 @@ paths: ["**/signal*", "**/aibtc*", "**/correspondent*", "**/news*"]
 - **Direct filing at 06:02/07:03/08:02/09:03 UTC** via `signal-file-direct.js` (D1). No Claude Code dependency.
 - **SolCex-internal data** (pipeline stats, scorer metrics, our own revenue) → Moltbook / Twitter, **NOT** AIBTC beats.
 - **Phantom / ghost verification** BEFORE citing any token data (PIPPIN lesson — 0 DEX pairs = phantom).
-- **Corrections:** 2 per month on lower-ranked agent factual errors (targeted at agent-skills and agent-economy beats).
+- **Corrections:** 2 per month on lower-ranked agent factual errors (targeted at quantum + bitcoin-macro beats).
 - **Weekly Monday review:** inclusion rate, beat performance, rank delta, streak, sBTC earnings delta.
 
 ## CADENCE
@@ -38,34 +38,19 @@ Window 3 — 18:00-20:00 UTC (evening batch, War Room drafts)
 
 **AIBTC cooldown:** 60 minutes minimum between filings. Windows are spaced to clear.
 
-## BEAT ROTATION
+## BEAT ROTATION (Apr 30 2026 — DC Day 6 SOD revision)
 
-**PRIMARY (file daily):**
+**3 ACTIVE BEATS** (filing endpoint enforces; all others return HTTP 410):
 
-- `agent-skills` — BFF Skills competition, skills registry, new skill launches, MCP tool benchmarks
-- `agent-economy` — x402 flows, payment infrastructure, marketplace activity, revenue data
+- `quantum` — 3 signals/day. Quantum computing impacts on Bitcoin: arxiv papers, NIST PQC, Google/IBM milestones, ECDLP attack ladders, Bitcoin BIPs/proposals related to PQ migration. **Highest acceptance rate (~1.5%, 5x BM).**
+- `bitcoin-macro` — 2 signals/day. Mining Intel divergence, LunarCrush social shifts, ETF flows, regulation, on-chain macro. **Acceptance ~0.3%; must be radically different from mempool.space template spam (80% of BM filings are dupes — see `aibtc-bm-3source-standard.md`).**
+- `aibtc-network` — 1 signal/day. Network activity: agent count, signals/day, beat editor announcements, x402 protocol developments, new agent launches, brief inclusions. Broadest fit; claim required before first filing (403 otherwise).
 
-**SECONDARY (file 2-3× per week):**
+**Total: 6 signals/day distributed 3+2+1.**
 
-- `agent-trading` — token scoring, DEX data, algorithmic trading signals
-- `infrastructure` — MCP updates, server architecture, deployment patterns
-- `security` — BuzzShield patterns, supply chain attacks, audit data
+**ROTATION RULE:** Stick to the 3+2+1 distribution. Day's first 3 quantum, next 2 BM, last 1 aibtc-network — or interleave to use cooldowns optimally. Never duplicate a previously-filed angle (60% keyword overlap = abort).
 
-**TERTIARY (file when relevant):**
-
-- `deal-flow` — partnership signals, commercial activity
-- `governance` — DAO proposals, protocol governance updates
-- `bitcoin-macro` — only when we have unique BTC data (MiroFish sims, on-chain)
-
-**AVOID (for now):**
-
-- `quantum` — competition too strong (Elegant Orb 2,610 check-ins; Frosty Narwhal won editor seat Apr 7), not our domain
-- `agent-social` — low strategic value for editor positioning
-- `distribution` — not our strength
-- `onboarding` — not our strength
-
-**ROTATION RULE:** Never file 2 signals on the same beat in one day.
-**EXCEPTION:** Breaking news + analysis angle (two distinct angles on same beat) is acceptable.
+**EXCEPTION:** If a quantum slot has nothing fresh (no new arxiv, no PQC update), pivot to extra aibtc-network rather than file thin quantum. Streak > beat-mix purity.
 
 ## QUALITY FRAMEWORK
 
@@ -194,10 +179,11 @@ Max 2 posts per day on Moltbook.
 
 ## REVENUE
 
-- **30,000 sats per brief inclusion** (APPROVED ≠ INCLUDED; inclusion is the payout event)
+- **10,000 sats per brief inclusion** — correspondent rate, effective Apr 30 2026 (Ogie msg 5402). APPROVED ≠ INCLUDED; inclusion is the payout event.
 - Approved signals that don't reach the daily brief earn 0
-- Editor payout (when we win a beat editor seat): 175,000 sats/day per quantum reference rate
+- Editor payout (when we win a beat editor seat): 175,000 sats/day — DIFFERENT from correspondent rate; do not conflate
 - Target: ≥40% of filed signals reach brief (historical baseline)
+- Day 28 inclusions = 2 × 10K = 20K sats (corrected math)
 
 ## SUMMARY
 

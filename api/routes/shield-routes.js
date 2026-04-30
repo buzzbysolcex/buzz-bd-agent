@@ -1035,6 +1035,79 @@ router.get(
       };
     }
 
+    // ─── 15) BuzzShield V5 envelope (Ogie msg 5410, Apr 30 2026) ───
+    // Wires the same exploit-chain + writeup-RAG logic as /audit/full so
+    // the public scanner UI can render V5 cards. Failure is non-fatal —
+    // the V3 scan response still ships intact.
+    try {
+      const {
+        detectExploitChains,
+      } = require("../services/shield/exploit-chain");
+      const {
+        searchSimilarExploits,
+      } = require("../services/shield/writeup-rag");
+
+      const findings = [];
+      for (const m of patternMatches || []) {
+        findings.push({
+          pattern_id: m.pattern_id || m.name || "",
+          category: m.category || m.pattern_type || "",
+          description: m.description || `Matched: ${m.pattern_id || m.name}`,
+          chain,
+        });
+      }
+      for (const f of flags || []) {
+        findings.push({
+          pattern_id: typeof f === "string"
+            ? f.toLowerCase().replace(/\s+/g, "_")
+            : (f.type || "").toLowerCase(),
+          category: "flag",
+          description: typeof f === "string" ? f : f.description || "",
+          chain,
+        });
+      }
+
+      const exploit_chains = detectExploitChains({ findings });
+      const similar_exploits = searchSimilarExploits(findings);
+
+      const v5 = {};
+      if (exploit_chains.length > 0) {
+        v5.exploit_chains = exploit_chains;
+        v5.chain_risk = exploit_chains.some(
+          (c) => c.verdict === "HIGH_CONFIDENCE",
+        )
+          ? "CRITICAL"
+          : "WARNING";
+        const chainPenalty =
+          exploit_chains.filter((c) => c.verdict === "HIGH_CONFIDENCE")
+            .length * 20;
+        if (chainPenalty > 0 && typeof responseObj.score === "number") {
+          v5.score_pre_chain_penalty = responseObj.score;
+          v5.score = Math.max(0, responseObj.score - chainPenalty);
+          v5.chain_penalty_applied = chainPenalty;
+        }
+      }
+      if (similar_exploits.length > 0) {
+        v5.similar_exploits = similar_exploits;
+        const totalLost = similar_exploits.reduce((sum, e) => {
+          const n =
+            parseFloat(String(e.amount_lost || "").replace(/[^0-9.]/g, "")) ||
+            0;
+          return sum + n;
+        }, 0);
+        v5.historical_warning = `This contract shares patterns with ${similar_exploits.length} past exploit(s) totaling $${totalLost.toLocaleString()} in losses.`;
+      }
+      if (Object.keys(v5).length > 0) {
+        responseObj.v5 = v5;
+        // V5 escalation: HIGH_CONFIDENCE chain promotes risk_level to DANGER
+        if (v5.chain_risk === "CRITICAL" && responseObj.risk_level === "SAFE") {
+          responseObj.risk_level = "DANGER";
+        }
+      }
+    } catch (v5err) {
+      console.warn("[shield:public/scan v5] non-fatal:", v5err.message);
+    }
+
     res.json(responseObj);
   },
 );

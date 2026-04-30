@@ -144,13 +144,22 @@ async function fileSignalDirect({
     return { success: false, error: "BIP-322 signing failed: " + e.message };
   }
 
+  // Apr 30 2026 (Ogie msg 5402, DC Day 6 SOD): AIBTC scoring computes
+  // beatRelevance from tags[0]. If tags[0] !== beat_slug, beatRelevance=0
+  // silently, sinking qs. Force tags[0] = beat_slug here so every CLI-filed
+  // and API-filed signal is correctly attributed to its beat.
+  const inputTags = Array.isArray(tags)
+    ? tags.filter((t) => t !== beat_slug)
+    : [];
+  const finalTags = [beat_slug, ...inputTags];
+
   const payload = {
     btc_address: creds.address,
     beat_slug,
     headline,
     body: body || "",
     sources: sources || [],
-    tags: tags || [],
+    tags: finalTags,
     disclosure:
       disclosure ||
       "Container-side filer (Buzz BD Agent / Ionic Nova). Direct HTTPS via bip322-js.",
