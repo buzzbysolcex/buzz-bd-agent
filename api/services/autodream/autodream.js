@@ -483,6 +483,52 @@ async function fetchFallbackSources(beat) {
   }
 }
 
+// May 1 fix (Ogie msg 5431): quantum hooks were static — same angle every
+// night produced duplicate signals (Phase A duplicate problem). Pull
+// FRESH bitcoin/bips PRs at draft generation time so each slot's hook
+// references a different PR. Different PR # = different angle = no dedup
+// collision at aibtc.news.
+async function fetchRecentQuantumPRs(slotsNeeded = 2) {
+  const TIMEOUT_MS = 8000;
+  const cap = (s) => String(s || "").slice(0, 200);
+  try {
+    // Updated in last 24h, sorted descending. PR list is /pulls; for
+    // recently-updated we add ?state=all&sort=updated&direction=desc.
+    const r = await fetch(
+      "https://api.github.com/repos/bitcoin/bips/pulls?state=all&sort=updated&direction=desc&per_page=20",
+      {
+        headers: {
+          "User-Agent": "buzz-autodream",
+          Accept: "application/vnd.github+json",
+        },
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      },
+    );
+    if (!r.ok) return [];
+    const prs = await r.json();
+    if (!Array.isArray(prs)) return [];
+    const cutoffMs = Date.now() - 24 * 60 * 60 * 1000;
+    const fresh = prs.filter((pr) => {
+      const t = Date.parse(pr.updated_at || pr.created_at || "");
+      return Number.isFinite(t) && t >= cutoffMs;
+    });
+    // Take the freshest N — distinct PR numbers guarantee distinct angles.
+    return fresh.slice(0, slotsNeeded).map((pr) => ({
+      number: pr.number,
+      title: cap(pr.title || ""),
+      url: pr.html_url,
+      state: pr.state,
+      merged: !!pr.merged_at,
+      updated_at: pr.updated_at,
+    }));
+  } catch (e) {
+    console.warn(
+      `[autoDream quantum] fetchRecentQuantumPRs failed: ${e.message}`,
+    );
+    return [];
+  }
+}
+
 // 2B fix Apr 25 (Ogie msg 4844): per-beat "For agents:" actionable line.
 // New EIC Quality Rubric (issue #644) awards a 10-pt agentUtility dimension
 // for an explicit "For agents:" closer. Currently 0/10 on every signal we
@@ -604,7 +650,16 @@ async function generateSignalAngles() {
       "mempool congestion + fee-market state change (sat/vB floors, queue depth)",
       "sBTC peg flows, Strategy treasury changes, Stacks-BTC cost curve",
     ];
-    const QUANTUM_ANGLES = [
+    // May 1 (Ogie msg 5431): pre-fetch live bitcoin/bips PRs so quantum
+    // slots get distinct PR numbers as their angle. Static QUANTUM_ANGLES
+    // produced duplicate signals when both quantum slots fired the same
+    // angle two nights in a row. Need 1 PR per quantum slot.
+    const quantumSlotCount = SLOT_BEATS.filter((b) => b === "quantum").length;
+    const quantumPRs = await fetchRecentQuantumPRs(quantumSlotCount);
+    // Static fallback only used if GitHub fetch returned 0 PRs — and the
+    // angles below are still the rule of last resort. Both quantum slots
+    // will share an angle iff zero fresh PRs in 24h, which is rare.
+    const QUANTUM_FALLBACK_ANGLES = [
       "NIST PQC milestone, BIP-360 draft update, or Shor/Grover academic result",
       "ECDSA exposure counter on live Stacks blocks, sBTC quantum-risk pairing",
     ];
@@ -612,7 +667,8 @@ async function generateSignalAngles() {
     let qIdx = 0;
 
     const drafts = [];
-    SLOT_BEATS.forEach((beat, slotIdx) => {
+    for (let slotIdx = 0; slotIdx < SLOT_BEATS.length; slotIdx++) {
+      const beat = SLOT_BEATS[slotIdx];
       let headline, hook;
       switch (beat) {
         case "aibtc-network":
@@ -627,10 +683,24 @@ async function generateSignalAngles() {
           break;
         }
         case "quantum": {
-          const angle = QUANTUM_ANGLES[qIdx % QUANTUM_ANGLES.length];
+          const pr = quantumPRs[qIdx];
           qIdx++;
-          headline = `Quantum-threat research angle — slot ${slotIdx + 1}: ${angle.slice(0, 60)}`;
-          hook = `Research prompt for morning rewrite (slot ${slotIdx + 1}, angle: ${angle}): cite at least one NIST/IETF/arxiv/eprint.iacr.org/bitcoin-bips URL. Leverage BuzzShield V5 threat model (40 items, 5 domains) for domain depth. Active editor: Zen Rocket.`;
+          if (pr) {
+            // Live PR drives the angle — distinct PR number = distinct hook.
+            const stateTag = pr.merged ? "merged" : pr.state;
+            const angle = `bitcoin/bips PR #${pr.number} (${stateTag}, updated ${pr.updated_at?.slice(0, 10)}): ${pr.title}`;
+            headline = `Quantum/PQ — bitcoin/bips PR #${pr.number}: ${pr.title.slice(0, 70)}`;
+            hook = `Research prompt for morning rewrite (slot ${slotIdx + 1}, angle: ${angle}): pull live diff and discussion from ${pr.url}. Cite the PR URL plus at least one NIST/IETF/arxiv/eprint.iacr.org corroborating source. Frame quantum/PQ implication of the change. Leverage BuzzShield V5 threat model (40 items, 5 domains) for domain depth. Active editor: Zen Rocket.`;
+          } else {
+            // No fresh PRs in 24h — fall back to the static angle pool, but
+            // include a stamp so consecutive nightly fallbacks at least
+            // differ by date in the headline.
+            const angle =
+              QUANTUM_FALLBACK_ANGLES[qIdx % QUANTUM_FALLBACK_ANGLES.length];
+            const stamp = today;
+            headline = `Quantum-threat research angle (${stamp}) — slot ${slotIdx + 1}: ${angle.slice(0, 60)}`;
+            hook = `Research prompt for morning rewrite (slot ${slotIdx + 1}, angle: ${angle}, fallback path because zero bitcoin/bips PRs updated in last 24h): cite at least one NIST/IETF/arxiv/eprint.iacr.org/bitcoin-bips URL. Leverage BuzzShield V5 threat model (40 items, 5 domains) for domain depth. Active editor: Zen Rocket.`;
+          }
           break;
         }
         default:
@@ -647,23 +717,32 @@ async function generateSignalAngles() {
         wiki_research = hookSignalResearch(beat);
       } catch {}
 
+      const dataPoints = {
+        slot: slotIdx + 1,
+        fresh_score_count: pipelineData.fresh_scores.length,
+        aria_new_24h: pipelineData.aria_new,
+        flagged_count: pipelineData.flagged.length,
+        wiki_research_chars: wiki_research ? wiki_research.length : 0,
+        wiki_research_preview: wiki_research
+          ? wiki_research.slice(0, 400)
+          : null,
+      };
+      // Stamp the live PR into data_points so the morning rewriter can
+      // pick it up without re-fetching.
+      if (beat === "quantum") {
+        const pr = quantumPRs[qIdx - 1] || null;
+        dataPoints.quantum_pr = pr;
+        dataPoints.quantum_pr_count_fetched = quantumPRs.length;
+      }
+
       drafts.push({
         slot: slotIdx + 1,
         beat,
         headline,
         hook,
-        data_points: JSON.stringify({
-          slot: slotIdx + 1,
-          fresh_score_count: pipelineData.fresh_scores.length,
-          aria_new_24h: pipelineData.aria_new,
-          flagged_count: pipelineData.flagged.length,
-          wiki_research_chars: wiki_research ? wiki_research.length : 0,
-          wiki_research_preview: wiki_research
-            ? wiki_research.slice(0, 400)
-            : null,
-        }),
+        data_points: JSON.stringify(dataPoints),
       });
-    });
+    }
 
     // Persist drafts
     const insert = db().prepare(`
