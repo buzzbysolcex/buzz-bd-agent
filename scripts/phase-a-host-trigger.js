@@ -40,15 +40,146 @@ const SLOT_BEATS = [
   "bitcoin-macro",
 ];
 
-const BM_ANGLES = [
-  "difficulty/hashrate/pool-share shift with concrete numeric delta",
-  "mempool congestion + fee-market state change (sat/vB floors, queue depth)",
-  "sBTC peg flows, Strategy treasury changes, Stacks-BTC cost curve",
+// Static fallback labels — used only if the live fetch returns nothing.
+// Live data anchors take precedence (see fetchLiveAnchors below).
+const BM_FALLBACK_ANGLES = [
+  "fee market: sat/vB tiers vs mempool depth",
+  "pool concentration: top-3 share vs hashrate decline",
+  "difficulty/hashrate: retarget % vs miner sentiment",
 ];
-const QUANTUM_ANGLES = [
+const QUANTUM_FALLBACK_ANGLES = [
   "NIST PQC milestone, BIP-360 draft update, or Shor/Grover academic result",
   "ECDSA exposure counter on live Stacks blocks, sBTC quantum-risk pairing",
 ];
+
+// May 1 fix (Ogie msg 5478): the ORIGINAL static angles produced
+// duplicate signals two nights running (verified May 1 04:02Z + 05:04Z
+// PREFLIGHT_FAIL with 100% overlap on "Block 947200 -3.30% Difficulty
+// Drop at 79% Epoch"). qwen3 sees the same hook → produces same
+// headline. Fix: stamp today's specific live data points into the
+// hook so qwen3 has different anchors each night.
+const FETCH_TIMEOUT_MS = 8000;
+
+async function fetchRecentQuantumPRs(slotsNeeded = 2) {
+  const cap = (s) => String(s || "").slice(0, 200);
+  try {
+    const r = await fetch(
+      "https://api.github.com/repos/bitcoin/bips/pulls?state=all&sort=updated&direction=desc&per_page=20",
+      {
+        headers: { "User-Agent": "buzz-phase-a", Accept: "application/vnd.github+json" },
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      },
+    );
+    if (!r.ok) return [];
+    const prs = await r.json();
+    if (!Array.isArray(prs)) return [];
+    const cutoffMs = Date.now() - 24 * 60 * 60 * 1000;
+    return prs
+      .filter((pr) => {
+        const t = Date.parse(pr.updated_at || pr.created_at || "");
+        return Number.isFinite(t) && t >= cutoffMs;
+      })
+      .slice(0, slotsNeeded)
+      .map((pr) => ({
+        number: pr.number,
+        title: cap(pr.title || ""),
+        url: pr.html_url,
+        state: pr.state,
+        merged: !!pr.merged_at,
+        updated_at: pr.updated_at,
+      }));
+  } catch (e) {
+    return [];
+  }
+}
+
+async function fetchRecentBMData() {
+  try {
+    const [diff, fees, mempool, blocks, pools] = await Promise.allSettled([
+      fetch("https://mempool.space/api/v1/difficulty-adjustment", {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      }).then((r) => (r.ok ? r.json() : null)),
+      fetch("https://mempool.space/api/v1/fees/recommended", {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      }).then((r) => (r.ok ? r.json() : null)),
+      fetch("https://mempool.space/api/mempool", {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      }).then((r) => (r.ok ? r.json() : null)),
+      fetch("https://mempool.space/api/v1/blocks", {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      }).then((r) => (r.ok ? r.json() : null)),
+      fetch("https://mempool.space/api/v1/mining/pools/24h", {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      }).then((r) => (r.ok ? r.json() : null)),
+    ]);
+    const out = {};
+    if (diff.status === "fulfilled" && diff.value) {
+      const d = diff.value;
+      out.difficulty = {
+        progressPercent: Number(d.progressPercent || 0).toFixed(2),
+        difficultyChange: Number(d.difficultyChange || 0).toFixed(2),
+        remainingBlocks: d.remainingBlocks,
+      };
+    }
+    if (fees.status === "fulfilled" && fees.value) {
+      out.fees = {
+        fastest: fees.value.fastestFee,
+        halfHour: fees.value.halfHourFee,
+        hour: fees.value.hourFee,
+        economy: fees.value.economyFee,
+        minimum: fees.value.minimumFee,
+      };
+    }
+    if (mempool.status === "fulfilled" && mempool.value) {
+      out.mempool = {
+        unconfirmed: mempool.value.count,
+        vsize_mb: Number(((mempool.value.vsize || 0) / 1_000_000).toFixed(1)),
+      };
+    }
+    if (blocks.status === "fulfilled" && Array.isArray(blocks.value)) {
+      out.tip_height = blocks.value[0]?.height;
+    }
+    if (pools.status === "fulfilled" && pools.value) {
+      const p = pools.value.pools || [];
+      const total = p.reduce((s, x) => s + (x.blockCount || 0), 0) || 1;
+      out.pools_24h = {
+        total_blocks: total,
+        top: p.slice(0, 3).map((x) => ({
+          name: x.name,
+          blocks: x.blockCount,
+          pct: Number(((100 * x.blockCount) / total).toFixed(1)),
+        })),
+      };
+    }
+    return out;
+  } catch (e) {
+    return null;
+  }
+}
+
+function buildLiveBmHook(bmLive, subAngle, slot) {
+  if (!bmLive) return null;
+  if (subAngle === 0 && bmLive.fees) {
+    const f = bmLive.fees;
+    return `slot ${slot} angle: fee market — fees ${f.fastest}/${f.halfHour}/${f.hour}/${f.economy}/${f.minimum} sat/vB; mempool ${bmLive.mempool?.unconfirmed ?? "?"} txs / ${bmLive.mempool?.vsize_mb ?? "?"} MB; tip block #${bmLive.tip_height ?? "?"}. Cross-layer: fee tier vs demand-side queue depth or vs LN flows.`;
+  }
+  if (subAngle === 1 && bmLive.pools_24h) {
+    const t = bmLive.pools_24h.top || [];
+    const t1 = t[0], t2 = t[1], t3 = t[2];
+    return `slot ${slot} angle: pool concentration — ${bmLive.pools_24h.total_blocks} blocks 24h: ${t1?.name} ${t1?.blocks}(${t1?.pct}%), ${t2?.name} ${t2?.blocks}(${t2?.pct}%), ${t3?.name} ${t3?.blocks}(${t3?.pct}%). Cross-layer: pool concentration vs hashrate change vs sentiment index.`;
+  }
+  if (bmLive.difficulty) {
+    const d = bmLive.difficulty;
+    return `slot ${slot} angle: difficulty/hashrate — next retarget ${d.difficultyChange}% in ${d.remainingBlocks} blocks (${d.progressPercent}% epoch); tip block #${bmLive.tip_height ?? "?"}. Cross-layer: difficulty change vs hashprice vs miner sentiment.`;
+  }
+  return null;
+}
+
+function buildLiveQuantumHook(pr, slot) {
+  if (!pr) return null;
+  const stateTag = pr.merged ? "merged" : pr.state;
+  return `slot ${slot} angle: bitcoin/bips PR #${pr.number} (${stateTag}, updated ${(pr.updated_at || "").slice(0, 10)}): ${pr.title}. Pull live discussion + diff from ${pr.url}; frame quantum/PQ implication of the change. Cite PR URL plus at least one NIST/IETF/arxiv/eprint.iacr.org corroborating source.`;
+}
 
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
@@ -147,6 +278,19 @@ async function generateSlot(slotNumber, beat, hookAngle) {
 
 async function main() {
   log(`phase-a-host-trigger starting | dryRun=${dryRun} onlySlot=${onlySlot}`);
+
+  // May 1 fix (msg 5478): pre-fetch live anchors so each slot's hook
+  // is anchored to today's specific data point (PR #, fee tier, pool
+  // share, difficulty %). Fallback to static angles only if fetch fails.
+  const quantumSlotCount = SLOT_BEATS.filter((b) => b === "quantum").length;
+  const [quantumPRs, bmLive] = await Promise.all([
+    fetchRecentQuantumPRs(quantumSlotCount),
+    fetchRecentBMData(),
+  ]);
+  log(
+    `live anchors: ${quantumPRs.length} quantum PRs (#${quantumPRs.map((p) => p.number).join(",#") || "none"}), bm=${bmLive ? "ok" : "null"} (${bmLive?.fees ? "fees" : ""}${bmLive?.pools_24h ? "/pools" : ""}${bmLive?.difficulty ? "/diff" : ""})`,
+  );
+
   const results = [];
   let bmIdx = 0;
   let qIdx = 0;
@@ -156,10 +300,19 @@ async function main() {
     if (onlySlot !== null && slot !== onlySlot) continue;
     const beat = SLOT_BEATS[i];
     let angle;
-    if (beat === "bitcoin-macro") angle = BM_ANGLES[bmIdx++ % BM_ANGLES.length];
-    else if (beat === "quantum")
-      angle = QUANTUM_ANGLES[qIdx++ % QUANTUM_ANGLES.length];
-    else angle = "general research prompt";
+    if (beat === "bitcoin-macro") {
+      const subAngle = bmIdx % 3; // rotate fee/pool/difficulty sub-angles
+      const liveHook = buildLiveBmHook(bmLive, subAngle, slot);
+      angle = liveHook || BM_FALLBACK_ANGLES[subAngle % BM_FALLBACK_ANGLES.length];
+      bmIdx++;
+    } else if (beat === "quantum") {
+      const pr = quantumPRs[qIdx];
+      const liveHook = buildLiveQuantumHook(pr, slot);
+      angle = liveHook || QUANTUM_FALLBACK_ANGLES[qIdx % QUANTUM_FALLBACK_ANGLES.length];
+      qIdx++;
+    } else {
+      angle = "general research prompt";
+    }
     try {
       const r = await generateSlot(slot, beat, angle);
       results.push(r);
