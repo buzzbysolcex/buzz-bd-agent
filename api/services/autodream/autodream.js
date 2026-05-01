@@ -529,6 +529,92 @@ async function fetchRecentQuantumPRs(slotsNeeded = 2) {
   }
 }
 
+// May 1 fix #2 (Ogie msg 5450): BM hooks were also static — same
+// "difficulty/hashrate/pool-share" angles every night produced 100%
+// dedup collisions (verified May 1 04:02Z + 05:04Z: BM-3 + BM-4 both
+// rejected as 100% overlap with prior "Block 947200 Locks -3.30% Difficulty
+// Drop at 79% Epoch — sBTC Carry Desks Lose May 2 Cost Floor"). Same
+// fix pattern as quantum: pull FRESH mempool.space data at draft
+// generation time, stamp today's specific block height + difficulty
+// percent + top-pool block count into the hook. Each night's data is
+// different = each night's angle is different.
+async function fetchRecentBMData() {
+  const TIMEOUT_MS = 8000;
+  const cap = (s) => String(s || "").slice(0, 200);
+  try {
+    const [diff, fees, mempool, blocks, pools] = await Promise.allSettled([
+      fetch("https://mempool.space/api/v1/difficulty-adjustment", {
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      }).then((r) => (r.ok ? r.json() : null)),
+      fetch("https://mempool.space/api/v1/fees/recommended", {
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      }).then((r) => (r.ok ? r.json() : null)),
+      fetch("https://mempool.space/api/mempool", {
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      }).then((r) => (r.ok ? r.json() : null)),
+      fetch("https://mempool.space/api/v1/blocks", {
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      }).then((r) => (r.ok ? r.json() : null)),
+      fetch("https://mempool.space/api/v1/mining/pools/24h", {
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      }).then((r) => (r.ok ? r.json() : null)),
+    ]);
+    const out = {};
+    if (diff.status === "fulfilled" && diff.value) {
+      const d = diff.value;
+      out.difficulty = {
+        progressPercent: Number(d.progressPercent || 0).toFixed(2),
+        difficultyChange: Number(d.difficultyChange || 0).toFixed(2),
+        remainingBlocks: d.remainingBlocks,
+        previousRetarget: Number(d.previousRetarget || 0).toFixed(2),
+        nextRetargetHeight: d.nextRetargetHeight,
+      };
+    }
+    if (fees.status === "fulfilled" && fees.value) {
+      out.fees = {
+        fastest: fees.value.fastestFee,
+        halfHour: fees.value.halfHourFee,
+        hour: fees.value.hourFee,
+        economy: fees.value.economyFee,
+        minimum: fees.value.minimumFee,
+      };
+    }
+    if (mempool.status === "fulfilled" && mempool.value) {
+      out.mempool = {
+        unconfirmed: mempool.value.count,
+        vsize_mb: Number(((mempool.value.vsize || 0) / 1_000_000).toFixed(1)),
+        total_fee_sat: mempool.value.total_fee,
+      };
+    }
+    if (blocks.status === "fulfilled" && Array.isArray(blocks.value)) {
+      out.tip_height = blocks.value[0]?.height;
+      out.recent_blocks = blocks.value.slice(0, 3).map((b) => ({
+        height: b.height,
+        pool: b.extras?.pool?.name,
+        tx_count: b.tx_count,
+        total_fees_sat: b.extras?.totalFees,
+      }));
+    }
+    if (pools.status === "fulfilled" && pools.value) {
+      const p = pools.value.pools || [];
+      const total = p.reduce((s, x) => s + (x.blockCount || 0), 0) || 1;
+      out.pools_24h = {
+        total_blocks: total,
+        top: p.slice(0, 5).map((x) => ({
+          name: x.name,
+          blocks: x.blockCount,
+          pct: Number(((100 * x.blockCount) / total).toFixed(1)),
+        })),
+      };
+    }
+    out.fetched_at = new Date().toISOString();
+    return out;
+  } catch (e) {
+    console.warn(`[autoDream BM] fetchRecentBMData failed: ${e.message}`);
+    return null;
+  }
+}
+
 // 2B fix Apr 25 (Ogie msg 4844): per-beat "For agents:" actionable line.
 // New EIC Quality Rubric (issue #644) awards a 10-pt agentUtility dimension
 // for an explicit "For agents:" closer. Currently 0/10 on every signal we
@@ -656,6 +742,13 @@ async function generateSignalAngles() {
     // angle two nights in a row. Need 1 PR per quantum slot.
     const quantumSlotCount = SLOT_BEATS.filter((b) => b === "quantum").length;
     const quantumPRs = await fetchRecentQuantumPRs(quantumSlotCount);
+
+    // May 1 (Ogie msg 5450): pre-fetch live mempool.space numbers so BM
+    // slots stamp today's tip height + difficulty progress + fee tier +
+    // top-pool block count into their hooks. Static angles dedupe at
+    // 100% overlap when next night's draft retains the same Block ####
+    // and difficulty drop figure (verified May 1 04:02 + 05:04 fail).
+    const bmLive = await fetchRecentBMData();
     // Static fallback only used if GitHub fetch returned 0 PRs — and the
     // angles below are still the rule of last resort. Both quantum slots
     // will share an angle iff zero fresh PRs in 24h, which is rare.
@@ -676,10 +769,37 @@ async function generateSignalAngles() {
           hook = `Research prompt for morning rewrite: scan aibtcdev/agent-news last 24h for merged PRs, new issues, governance threads; identify measurable correspondent activity (filings, inclusions, payouts). Sources must include at least one aibtcdev GitHub URL or /api/signals/counts endpoint.`;
           break;
         case "bitcoin-macro": {
-          const angle = BM_ANGLES[bmIdx % BM_ANGLES.length];
+          // May 1 fix: each BM slot gets a *different angle* anchored to
+          // a *different live data point* from tonight's mempool fetch.
+          // Slot 0 → fee market. Slot 1 → pool concentration. Slot 2 →
+          // difficulty/hashrate. Stamp today's specific numbers (tip
+          // height, top-pool block count, fee tier) so two nights in a
+          // row never collide at the dedup check.
+          const subAngle = bmIdx % 3; // rotate fee / pool / difficulty
           bmIdx++;
-          headline = `Bitcoin macro — slot ${slotIdx + 1} angle: ${angle.slice(0, 60)}`;
-          hook = `Research prompt for morning rewrite (slot ${slotIdx + 1}, angle: ${angle}): prefer concrete numeric deltas over narrative. Sources must include mempool.space, blockchain.info, blockstream.info, or primary chain-data APIs. File BEFORE 06:00 UTC — BM cap fills fast (~09:55 UTC observed Apr 20). Active editor: Ivory Coda.`;
+          let headlineStamp = `slot ${slotIdx + 1}`;
+          let dataStamp = "";
+          if (bmLive) {
+            if (subAngle === 0 && bmLive.fees) {
+              const f = bmLive.fees;
+              headlineStamp = `Fee tier ${f.fastest}/${f.halfHour}/${f.hour}/${f.economy}/${f.minimum} sat/vB on ${bmLive.tip_height ?? "?"}`;
+              dataStamp = `live fees ${f.fastest}/${f.halfHour}/${f.hour}/${f.economy}/${f.minimum} sat/vB; mempool ${bmLive.mempool?.unconfirmed ?? "?"} txs / ${bmLive.mempool?.vsize_mb ?? "?"} MB; tip #${bmLive.tip_height ?? "?"}`;
+            } else if (subAngle === 1 && bmLive.pools_24h) {
+              const top = bmLive.pools_24h.top || [];
+              const t1 = top[0];
+              const t2 = top[1];
+              const t3 = top[2];
+              headlineStamp = `${t1?.name ?? "top"} ${t1?.pct ?? "?"}% over ${bmLive.pools_24h.total_blocks} blocks 24h`;
+              dataStamp = `live pools 24h ${bmLive.pools_24h.total_blocks} blks; ${t1?.name} ${t1?.blocks}(${t1?.pct}%), ${t2?.name} ${t2?.blocks}(${t2?.pct}%), ${t3?.name} ${t3?.blocks}(${t3?.pct}%)`;
+            } else if (bmLive.difficulty) {
+              const d = bmLive.difficulty;
+              headlineStamp = `Difficulty ${d.difficultyChange}% retarget at ${d.progressPercent}% epoch, tip #${bmLive.tip_height ?? "?"}`;
+              dataStamp = `live difficulty change ${d.difficultyChange}% in ${d.remainingBlocks} blks (${d.progressPercent}%); prev retarget ${d.previousRetarget}%; tip #${bmLive.tip_height ?? "?"}`;
+            }
+          }
+          const subAngleLabel = ["fee market", "pool concentration", "difficulty/hashrate"][subAngle];
+          headline = `Bitcoin macro — ${subAngleLabel} — ${headlineStamp}`;
+          hook = `Research prompt for morning rewrite (slot ${slotIdx + 1}, sub-angle: ${subAngleLabel}): rewrite around ${dataStamp || "live mempool.space data"}; cross-layer required (mining + social, fees + flows, or pool concentration + sentiment) per BM differentiation rule. Sources must include mempool.space and at least one of Mining Intel #34 / LunarCrush #37. File BEFORE 06:00 UTC — BM cap fills fast (~09:55 UTC observed Apr 20). Active editor: Ivory Coda.`;
           break;
         }
         case "quantum": {
@@ -733,6 +853,13 @@ async function generateSignalAngles() {
         const pr = quantumPRs[qIdx - 1] || null;
         dataPoints.quantum_pr = pr;
         dataPoints.quantum_pr_count_fetched = quantumPRs.length;
+      }
+      // May 1 (msg 5450): stamp tonight's mempool.space snapshot into
+      // BM data_points so the morning rewriter has the same numbers
+      // referenced in the hook without a second fetch.
+      if (beat === "bitcoin-macro" && bmLive) {
+        dataPoints.bm_live = bmLive;
+        dataPoints.bm_sub_angle = ["fee market", "pool concentration", "difficulty/hashrate"][(bmIdx - 1) % 3];
       }
 
       drafts.push({
