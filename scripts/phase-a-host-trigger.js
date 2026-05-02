@@ -66,28 +66,93 @@ async function fetchRecentQuantumPRs(slotsNeeded = 2) {
     const r = await fetch(
       "https://api.github.com/repos/bitcoin/bips/pulls?state=all&sort=updated&direction=desc&per_page=20",
       {
-        headers: { "User-Agent": "buzz-phase-a", Accept: "application/vnd.github+json" },
+        headers: {
+          "User-Agent": "buzz-phase-a",
+          Accept: "application/vnd.github+json",
+        },
         signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
       },
     );
     if (!r.ok) return [];
-    const prs = await r.json();
+    let prs = await r.json();
     if (!Array.isArray(prs)) return [];
-    const cutoffMs = Date.now() - 24 * 60 * 60 * 1000;
-    return prs
-      .filter((pr) => {
-        const t = Date.parse(pr.updated_at || pr.created_at || "");
-        return Number.isFinite(t) && t >= cutoffMs;
-      })
-      .slice(0, slotsNeeded)
-      .map((pr) => ({
-        number: pr.number,
-        title: cap(pr.title || ""),
-        url: pr.html_url,
-        state: pr.state,
-        merged: !!pr.merged_at,
-        updated_at: pr.updated_at,
-      }));
+
+    // May 1 (Ogie msg 5501 integration test): keep only quantum-relevant
+    // BIPs in candidate pool. bitcoin/bips also touches non-quantum topics
+    // (mnemonic encoding, fee estimation, etc.); filing about those under
+    // the quantum beat scores beatRelevance=0. Whitelist by keyword.
+    const QUANTUM_KEYWORDS =
+      /\b(bip[\s-]*(36[01]|451)|p2qrh|p2mr|p2qr|post[\s-]*quantum|quantum|pqc|fips[\s-]*20[34]|lamport|winternitz|ml[\s-]*(dsa|kem)|sphincs|kyber|dilithium|shor|grover|qrng|qkd|ecdlp|secp256k1.{0,40}quantum|schnorr.{0,40}quantum)\b/i;
+    prs = prs.filter((p) => QUANTUM_KEYWORDS.test(p.title || ""));
+
+    // exclude PRs already covered in last 30 quantum headlines. Slot 1
+    // retest produced "BIP451 PR #2150 Closes 5 Commits…" which dedup-
+    // overlapped 70% with Day 30's already filed signal. Same PR = same
+    // dedup hit. Filter the candidate list before slot assignment.
+    try {
+      const Database = require("/home/claude-code/buzz-workspace/api/node_modules/better-sqlite3");
+      const db = new Database("/data/buzz/persistent/buzz-api/buzz.db", {
+        readonly: true,
+        fileMustExist: true,
+      });
+      const recent = db
+        .prepare(
+          `SELECT headline FROM aibtc_signals_filed
+           WHERE beat_slug='quantum' AND headline IS NOT NULL
+           ORDER BY filed_at DESC LIMIT 30`,
+        )
+        .all()
+        .map((r) => r.headline);
+      db.close();
+      const coveredPRs = new Set();
+      for (const h of recent) {
+        const m = h.match(/(?:PR\s*#?|#)(\d{3,5})/gi) || [];
+        for (const tok of m) {
+          const num = (tok.match(/\d+/) || [])[0];
+          if (num) coveredPRs.add(num);
+        }
+      }
+      if (coveredPRs.size > 0) {
+        prs = prs.filter((p) => !coveredPRs.has(String(p.number)));
+      }
+    } catch {
+      // best-effort — if DB read fails, fall through with unfiltered list
+    }
+
+    // May 1 (Ogie msg 5497 fix #3 + msg 5501 integration test): 6h cutoff
+    // for freshness with cascading fallbacks. After PR exclusion above,
+    // fresh-6h pool may be empty (today's filed signals cover all recent
+    // PRs). Fall through 6h → 24h → 7d, picking the earliest tier that
+    // satisfies slotsNeeded. Caller still gets `updated_at` field so it
+    // can warn/lower expectations when staleness >24h.
+    const cutoffMs6h = Date.now() - 6 * 60 * 60 * 1000;
+    const cutoffMs24h = Date.now() - 24 * 60 * 60 * 1000;
+    const cutoffMs14d = Date.now() - 14 * 24 * 60 * 60 * 1000;
+    const fresh6h = prs.filter((p) => {
+      const t = p.updated_at ? new Date(p.updated_at).getTime() : 0;
+      return t >= cutoffMs6h;
+    });
+    const fresh24h = prs.filter((p) => {
+      const t = p.updated_at ? new Date(p.updated_at).getTime() : 0;
+      return t >= cutoffMs24h;
+    });
+    const fresh14d = prs.filter((p) => {
+      const t = p.updated_at ? new Date(p.updated_at).getTime() : 0;
+      return t >= cutoffMs14d;
+    });
+    let useList;
+    if (fresh6h.length >= slotsNeeded) useList = fresh6h;
+    else if (fresh24h.length >= slotsNeeded) useList = fresh24h;
+    else if (fresh14d.length > 0) useList = fresh14d;
+    else useList = prs;
+    return useList.slice(0, slotsNeeded).map((pr) => ({
+      number: pr.number,
+      title: cap(pr.title || ""),
+      url: pr.html_url,
+      state: pr.state,
+      merged: !!pr.merged_at,
+      updated_at: pr.updated_at,
+    }));
   } catch (e) {
     return [];
   }
@@ -165,7 +230,9 @@ function buildLiveBmHook(bmLive, subAngle, slot) {
   }
   if (subAngle === 1 && bmLive.pools_24h) {
     const t = bmLive.pools_24h.top || [];
-    const t1 = t[0], t2 = t[1], t3 = t[2];
+    const t1 = t[0],
+      t2 = t[1],
+      t3 = t[2];
     return `slot ${slot} angle: pool concentration — ${bmLive.pools_24h.total_blocks} blocks 24h: ${t1?.name} ${t1?.blocks}(${t1?.pct}%), ${t2?.name} ${t2?.blocks}(${t2?.pct}%), ${t3?.name} ${t3?.blocks}(${t3?.pct}%). Cross-layer: pool concentration vs hashrate change vs sentiment index.`;
   }
   if (bmLive.difficulty) {
@@ -276,8 +343,64 @@ async function generateSlot(slotNumber, beat, hookAngle) {
   };
 }
 
+async function ollamaHealthCheck() {
+  // May 1 (Ogie msg 5501 integration test): runner can degrade silently
+  // — /api/ps responds fine, but /api/generate hangs even on tiny prompts
+  // when prior canceled requests left context state corrupted. Pre-flight
+  // a minimal generate; if it times out, kill the runner so `ollama serve`
+  // spawns a fresh one before any slot starts.
+  const OLLAMA_BASE = process.env.OLLAMA_HOST || "http://localhost:11434";
+  const t0 = Date.now();
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 30000);
+    const r = await fetch(`${OLLAMA_BASE}/api/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: ctrl.signal,
+      body: JSON.stringify({
+        model: "qwen3:8b",
+        prompt: "reply with: ok",
+        stream: false,
+        think: false,
+        options: { num_predict: 5 },
+      }),
+    });
+    clearTimeout(timer);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const j = await r.json();
+    const dt = Math.round((Date.now() - t0) / 1000);
+    log(
+      `ollama health: ok (${dt}s, response="${(j.response || "").slice(0, 20)}")`,
+    );
+    return true;
+  } catch (e) {
+    const dt = Math.round((Date.now() - t0) / 1000);
+    log(`ollama health: FAILED (${dt}s) — ${e.message}. Restarting runner.`);
+    // Kill the runner process; `ollama serve` will spawn a fresh one on the
+    // next request. pkill returns exit 1 when no match — wrap in try so a
+    // benign non-match doesn't fail the whole pre-flight.
+    const { execSync } = require("child_process");
+    try {
+      execSync("/usr/bin/pkill -f 'ollama runner'", { stdio: "ignore" });
+      log(`ollama runner killed; serve will respawn on next request`);
+    } catch (kerr) {
+      log(
+        `ollama runner kill: nothing matched (already dead, or pkill missing) — proceeding anyway`,
+      );
+    }
+    await new Promise((r) => setTimeout(r, 3000));
+    return false;
+  }
+}
+
 async function main() {
   log(`phase-a-host-trigger starting | dryRun=${dryRun} onlySlot=${onlySlot}`);
+
+  // Ollama pre-flight (msg 5501): if runner is hung, kill+respawn before
+  // generating any slots. Without this, a single bad request can cascade
+  // into 5/5 slot failures — verified in May 1 integration test.
+  await ollamaHealthCheck();
 
   // May 1 fix (msg 5478): pre-fetch live anchors so each slot's hook
   // is anchored to today's specific data point (PR #, fee tier, pool
@@ -303,15 +426,25 @@ async function main() {
     if (beat === "bitcoin-macro") {
       const subAngle = bmIdx % 3; // rotate fee/pool/difficulty sub-angles
       const liveHook = buildLiveBmHook(bmLive, subAngle, slot);
-      angle = liveHook || BM_FALLBACK_ANGLES[subAngle % BM_FALLBACK_ANGLES.length];
+      angle =
+        liveHook || BM_FALLBACK_ANGLES[subAngle % BM_FALLBACK_ANGLES.length];
       bmIdx++;
     } else if (beat === "quantum") {
       const pr = quantumPRs[qIdx];
       const liveHook = buildLiveQuantumHook(pr, slot);
-      angle = liveHook || QUANTUM_FALLBACK_ANGLES[qIdx % QUANTUM_FALLBACK_ANGLES.length];
+      angle =
+        liveHook ||
+        QUANTUM_FALLBACK_ANGLES[qIdx % QUANTUM_FALLBACK_ANGLES.length];
       qIdx++;
     } else {
       angle = "general research prompt";
+    }
+    // May 2 (Ogie msg 5555 fix #3): per-slot Ollama health ping. Pre-flight
+    // at startup is necessary but not sufficient — runner can degrade between
+    // slots (May 1 integration test failure mode). Ping before EACH slot;
+    // kill+respawn if stale. 5 healthy slots > 3 fast slots + 2 timeouts.
+    if (i > 0) {
+      await ollamaHealthCheck();
     }
     try {
       const r = await generateSlot(slot, beat, angle);

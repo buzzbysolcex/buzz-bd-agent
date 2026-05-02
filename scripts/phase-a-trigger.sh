@@ -20,8 +20,11 @@ mkdir -p "$(dirname "$LOG")" 2>/dev/null || true
 START=$(date -u +%s)
 echo "[$(date -u -Iseconds)] phase-a-trigger START" >> "$LOG"
 
-# Run with generous timeout (5 slots × ~7 min budget = 35 min ceiling)
-OUT=$(timeout 2700 node "$WORKSPACE/scripts/phase-a-host-trigger.js" 2>&1)
+# Run with generous timeout. May 2 2026 (Ogie msg 5555 forensics): qwen3:8b
+# on CPX62 needs 13-17 min/slot, so 5 slots ≈ 70-85 min. Old 2700s (45m)
+# killed Phase A right after slot 3 on May 2, dropping slots 4+5. Bumped to
+# 5400s (90m) — ~5 min headroom over worst-case sequential run.
+OUT=$(timeout 5400 node "$WORKSPACE/scripts/phase-a-host-trigger.js" 2>&1)
 RC=$?
 END=$(date -u +%s)
 DURATION=$((END - START))

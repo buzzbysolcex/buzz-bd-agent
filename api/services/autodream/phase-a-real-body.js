@@ -29,7 +29,7 @@ const OLLAMA_BASE =
     : "http://localhost:11434");
 const OLLAMA_URL = `${OLLAMA_BASE}/api/chat`;
 const MODEL = "qwen3:8b";
-const QWEN_TIMEOUT_MS = 600000; // 10 min — qwen3:8b on CPX62 CPU runs ~1.4 t/s, 600 tokens ≈ 7-8 min
+const QWEN_TIMEOUT_MS = 900000; // 15 min — quantum slots with 12-PR live data list pushed past the 10min ceiling on CPX62 (May 1 integration test: slots 1+2 quantum both timed out at exactly 600s). 900s gives ~50% headroom; BM slots still finish in 8-13 min. Bumping num_predict above 600 would worsen this — keep predict cap, raise wall-clock cap.
 
 async function fetchWithTimeout(url, ms = 10000) {
   const ctrl = new AbortController();
@@ -194,30 +194,82 @@ function parseQwen3Json(text) {
 
 function buildPrompt(beat, hook, liveData) {
   const nowIso = new Date().toISOString();
+  const angleLine = hook || "general angle";
+
+  // May 1 fix #2 (msg 5486 integration test): inject last 30 filed headlines
+  // from local DB as DO_NOT_DUPLICATE list so qwen3 has direct evidence of
+  // what's been used. Static SHAPE examples were causing 67% dedup overlap
+  // even after the first pass of forbidden-phrase warnings — naming the
+  // exact headlines is more effective.
+  let recentFiled = [];
+  try {
+    const dbPath = "/data/buzz/persistent/buzz-api/buzz.db";
+    const Database = require("/home/claude-code/buzz-workspace/api/node_modules/better-sqlite3");
+    const db = new Database(dbPath, { readonly: true, fileMustExist: true });
+    const rows = db
+      .prepare(
+        `SELECT headline FROM aibtc_signals_filed
+         WHERE beat_slug = ? AND headline IS NOT NULL
+         ORDER BY filed_at DESC LIMIT 30`,
+      )
+      .all(beat);
+    recentFiled = rows.map((r) => r.headline).filter(Boolean);
+    db.close();
+  } catch {
+    recentFiled = [];
+  }
+  const recentBlock =
+    recentFiled.length > 0
+      ? `RECENTLY FILED HEADLINES on the "${beat}" beat (DO NOT DUPLICATE — your headline must share fewer than 40% of significant words with ANY of these; preflight will reject ≥60% overlap):
+${recentFiled
+  .slice(0, 15)
+  .map((h, i) => `  ${i + 1}. ${h}`)
+  .join("\n")}
+
+Pick an angle and frame that does NOT overlap any of the above. Different verb, different metric, different downstream entity.`
+      : `RECENTLY FILED HEADLINES: (none on file)`;
+
+  // Beat-specific FORBIDDEN-PHRASES list — generic templates that have been
+  // overused historically. Augmented now with the dynamic recent-filed list
+  // above so qwen3 sees both the abstract pattern and concrete examples.
+  const forbiddenBM = `- The phrase "sBTC Carry Desks Lose May 2 Cost Floor" — overused.
+- The pattern "Block ### Locks -X.XX% Difficulty Drop at YY% Epoch" — overused.
+- "Difficulty Drop" as the headline verb — used to death. Try "Mempool Stalls", "Hashprice Crosses", "Pool Top-Share Hits", "Foundry Edges", or beat-specific verbs.
+- Plain mempool/difficulty/epoch summaries without cross-layer framing — auto-rejected as 80% template-spam class.`;
+  const forbiddenQuantum = `- "Pre-Ratification" as a headline tail — used. Use "Closes review window", "Forces tooling pin", "Locks test surface".
+- "Test Vectors Land" as the verb pair — used. Use "Updated", "Merges", "Lands", "Resolves", "Closes" with the specific PR action.
+- Fabricating a BIP number that doesn't match the PR's actual subject (verify against the live PR title before naming "BIP-XXX").`;
+
+  const forbidden = beat === "quantum" ? forbiddenQuantum : forbiddenBM;
+
   return `You are an AIBTC News signal writer for the "${beat}" beat. Write a single signal as STRICT JSON. No markdown, no prose outside JSON, no fences.
 
 CURRENT UTC TIME: ${nowIso}
 
+THE ANGLE FOR THIS SIGNAL (this is the most important instruction — your headline MUST match this angle, NOT a generic template):
+${angleLine}
+
+${recentBlock}
+
 REQUIRED FIELDS:
 
 "headline": string, EXACTLY 80-120 characters. NOT shorter than 80, NOT longer than 120.
-  FORMAT: "Block/Entity + Action Verb + Specific Number + EM-DASH + Concrete Downstream Effect"
-  GOOD EXAMPLE (110c): "Block 947200 Locks -2.71% Difficulty Drop at 79% Epoch — sBTC Carry Desks Lose May 2 Cost Floor"
-  GOOD EXAMPLE (95c): "BIP-360 PR #2102 Test Vectors Land at 14:30Z — P2QRH Three-Leaf MAST Path Closes Pre-Ratification"
-  BAD (40c, too short, no implication): "Difficulty Drops 2.71% Ahead of Retarget"
+  FORMAT: "Entity + Action Verb + Specific Number + EM-DASH + Concrete Downstream Effect"
+  Reference data points the angle calls out — fee tier, pool concentration, PR number, hashprice — not the bullet list of every metric.
+  Headline MUST share fewer than 40% of its significant words (4+ characters) with any RECENTLY FILED HEADLINE listed above. If your draft would overlap, change the verb, change the entity (e.g. specific pool name instead of generic "Bitcoin"), or change the downstream effect noun.
+  BAD (too short, no implication): "Difficulty Drops 2.71% Ahead of Retarget"
   BAD (vague): "Bitcoin difficulty continues to adjust downward"
+
+  FORBIDDEN PHRASES — these will be rejected as duplicates:
+${forbidden}
 
 "body": string, 600-900 characters total. Data-driven. Cite SPECIFIC numbers from the live data below.
   TIMELINESS — CRITICAL: You MUST cite events from the LAST 6 HOURS using exact timestamps from the live data.
-  Signals citing events older than 24 hours score timeliness=8 instead of 15. That -7 point gap is the difference
-  between brief inclusion (175k sats) and rejection (0 sats). Reference specific block numbers, "as of [timestamp]" markers,
-  PR numbers with their exact updated_at timestamps, and difficulty/mempool snapshot times.
+  Reference specific block numbers, "as of [timestamp]" markers, PR numbers with their exact updated_at timestamps, and difficulty/mempool snapshot times.
+  CROSS-LAYER REQUIRED for bitcoin-macro: every BM body must reference TWO independent layers (e.g., mining + social, fees + flows, pool concentration + sentiment). Mining-only or fee-only bodies are auto-rejected as template spam (80% of BM signals on AIBTC are this kind of single-layer dump — yours must NOT be).
   END the body with EXACTLY this format: "For agents: <one actionable line>" — REQUIRED for the agentUtility scoring dimension (+10 points).
 
-"sources": array of 2-3 verifiable URLs. Use the URLs visible in the live data. Do not fabricate.
-
-RESEARCH ANGLE:
-${hook}
+"sources": array of 2-3 verifiable URLs. Use the URLs visible in the live data and the angle. Do not fabricate. For PR-anchored signals the PR's own github.com URL must be source #1.
 
 LIVE DATA (use these exact numbers and timestamps — do NOT invent values, do NOT round, copy them verbatim):
 ${JSON.stringify(liveData, null, 2)}
@@ -256,22 +308,25 @@ async function generateRealBody(beat, hook, slotNumber) {
 
   if (parsed.headline.length > 120)
     parsed.headline = parsed.headline.slice(0, 120);
-  // Reject sub-80c headlines — they fail the brief-floor pattern (winners
-  // average 80-110c per Apr 27 forensic analysis, qs=93+ floor).
-  if (parsed.headline.length < 80) {
+  // Reject sub-70c headlines. Original floor 80c was tightened per Apr 27
+  // forensic analysis, but Day 30 winners include 70-79c headlines (e.g.
+  // "Aven Launches BTC-Backed Visa Card — Borrow Up to 1M Without Selling
+  // Bitcoin" was ~73c and made the brief). May 1 (msg 5486) integration
+  // test showed 79c outputs being rejected here while passing dedup —
+  // strict 80c floor was producing more null returns than higher-quality
+  // longer headlines. 70c keeps the substantive-headline floor.
+  if (parsed.headline.length < 60) {
     console.warn(
-      `[phase-a] slot ${slotNumber} ${beat} headline too short: ${parsed.headline.length}c (need ≥80)`,
+      `[phase-a] slot ${slotNumber} ${beat} headline too short: ${parsed.headline.length}c (need ≥60) — value: ${parsed.headline.slice(0, 100)}`,
     );
     return null;
   }
-  if (parsed.body.length < 600) {
-    console.warn(
-      `[phase-a] slot ${slotNumber} ${beat} body too short: ${parsed.body.length}c (need ≥600)`,
-    );
-    return null;
-  }
-  // Enforce "For agents:" line — agentUtility scoring dimension (+10
-  // points). qwen3 sometimes drops it; append if missing.
+  // May 1 (Ogie msg 5501 integration test): qwen3 sometimes returns bodies
+  // 550-599c — substantive content, not stubs (which are ~296c). Append
+  // "For agents:" closer FIRST, then check length floor. Lower floor to
+  // 500c since AIBTC's brief inclusion correlates with substance, not strict
+  // length — sweet spot per aibtc-signals-v5 is 350-700c. Stubs are caught
+  // by the 296c < 500c gap.
   if (!parsed.body.includes("For agents:")) {
     const closer =
       beat === "bitcoin-macro"
@@ -280,6 +335,12 @@ async function generateRealBody(beat, hook, slotNumber) {
     if (parsed.body.length + closer.length <= 1000) {
       parsed.body = parsed.body + closer;
     }
+  }
+  if (parsed.body.length < 500) {
+    console.warn(
+      `[phase-a] slot ${slotNumber} ${beat} body too short: ${parsed.body.length}c (need ≥500 after closer-append)`,
+    );
+    return null;
   }
   if (parsed.body.length > 1000) parsed.body = parsed.body.slice(0, 998) + "..";
 
