@@ -182,10 +182,7 @@ async function goPlusCheckSolana(address) {
   if (t.default_account_state === "2") flags.push("FROZEN_BY_DEFAULT");
   if (t.metadata_mutable && t.metadata_mutable.status === "1")
     flags.push("METADATA_MUTABLE");
-  if (
-    t.balance_mutable_authority &&
-    t.balance_mutable_authority.status === "1"
-  )
+  if (t.balance_mutable_authority && t.balance_mutable_authority.status === "1")
     flags.push("BALANCE_MUTABLE");
   if (Array.isArray(t.transfer_hook) && t.transfer_hook.length > 0)
     flags.push("TRANSFER_HOOK");
@@ -266,7 +263,10 @@ async function goPlusCheck(chain, address) {
   // EVM path
   const cid = GOPLUS_CHAIN_ID[chain];
   if (!cid)
-    return { skipped: true, reason: `chain=${chain} not supported (EVM/Solana only)` };
+    return {
+      skipped: true,
+      reason: `chain=${chain} not supported (EVM/Solana only)`,
+    };
   const url = `https://api.gopluslabs.io/api/v1/token_security/${cid}?contract_addresses=${address}`;
   try {
     const j = await httpGetJson(url);
@@ -360,6 +360,39 @@ const handlers = {
       log(`rug_watch defillama err: ${e.message}`);
     }
 
+    // May 2 2026 (Ogie msg 5598-5601): augment with rekt.news article list
+    // via Scrapling StealthyFetcher. rekt.news ships exploit writeups before
+    // DeFiLlama's /hacks DB updates (often 24-48h faster). Articles join the
+    // report under `rekt_articles[]`; new-since-yesterday is the watch
+    // signal for handcraft BuzzShield scan.
+    let rektArticles = [];
+    let rektErr = null;
+    try {
+      const { execSync } = require("child_process");
+      const rektOut = execSync(
+        "python3 /home/claude-code/buzz-workspace/scripts/scrapling-rekt.py",
+        { timeout: 90_000, encoding: "utf-8" },
+      );
+      const parsed = JSON.parse(rektOut);
+      rektArticles = (parsed.results || []).filter(
+        (r) => r && r.title && r.url,
+      );
+    } catch (e) {
+      rektErr = e.message;
+      log(`rug_watch rekt.news scrape err: ${e.message}`);
+    }
+    // Identify NEW rekt articles (not seen in yesterday's report). Load prior
+    // here so we don't depend on the later `prior` block — keeps this fix
+    // self-contained.
+    let priorReport = {};
+    try {
+      priorReport = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+    } catch {}
+    const priorRektUrls = new Set(
+      (priorReport.rekt_articles || []).map((a) => a.url),
+    );
+    const newRekt = rektArticles.filter((a) => !priorRektUrls.has(a.url));
+
     // Categorise
     const buzzShieldSupported = new Set([
       "Ethereum",
@@ -393,8 +426,11 @@ const handlers = {
       buzzshield_misses: 0,
       tweets_drafted: 0,
       gaps_logged: prior.gaps_logged || [],
-      sources_checked: ["api.llama.fi/hacks"],
+      sources_checked: ["api.llama.fi/hacks", "rekt.news (Scrapling)"],
       data_source_error: sourceErr,
+      rekt_data_error: rektErr,
+      rekt_articles: rektArticles,
+      rekt_new_today: newRekt,
       incidents: recent.map((h) => ({
         name: h.name,
         chain: h.chain,
@@ -416,13 +452,24 @@ const handlers = {
 
     if (sourceErr)
       return `rug_watch FAILED — source error: ${sourceErr}. Report not updated.`;
+    const rektNote =
+      newRekt.length > 0
+        ? ` rekt.news: ${newRekt.length} NEW article(s) since yesterday — ${newRekt
+            .slice(0, 3)
+            .map((r) => r.title)
+            .join(" | ")}.`
+        : rektArticles.length > 0
+          ? ` rekt.news: ${rektArticles.length} articles total, 0 new since yesterday.`
+          : rektErr
+            ? ` rekt.news scrape: FAILED (${rektErr}).`
+            : "";
     if (recent.length === 0)
-      return `rug_watch — 0 new incidents in 24h (DeFiLlama: ${totalChecked} total records scanned).`;
+      return `rug_watch — 0 new DeFiLlama incidents in 24h (${totalChecked} records scanned).${rektNote}`;
     const interestingNote =
       interesting.length > 0
         ? ` ${interesting.length} interesting (≥$100K + EVM/Sol chain) — handcraft BuzzShield scan needed: ${interesting.map((h) => `${h.name}/${(h.chain || []).join(",")}/$${h.amount}`).join(" | ")}`
         : "";
-    return `rug_watch — ${recent.length} incident(s) in 24h.${interestingNote} daily-rug-watch.json updated.`;
+    return `rug_watch — ${recent.length} incident(s) in 24h.${interestingNote}${rektNote} daily-rug-watch.json updated.`;
   },
   async score_tweets() {
     // Phase 2 P2 real handler: query pipeline for tweetable tokens, look up

@@ -104,6 +104,16 @@ async function fetchQuantumLiveData() {
   return out;
 }
 
+// May 2 (msg 5589): aibtc-network live data is supplied by the caller via
+// the `hook` argument (which already embeds repo/PR# from
+// fetchRecentAibtcdevPRs in the trigger). The qwen3 prompt re-uses the hook
+// directly — no extra live-data dump is required for this beat. Returning
+// empty {} is a deliberate signal to the prompt that all the structured
+// data lives in the angle line above.
+async function fetchAibtcNetworkLiveData() {
+  return {};
+}
+
 async function callQwen3(prompt) {
   // Use streaming. Ollama Gin server returns 500 at exactly 5min for
   // non-streamed requests; qwen3:8b on CPX62 CPU runs ~1.4 t/s so a
@@ -239,8 +249,31 @@ Pick an angle and frame that does NOT overlap any of the above. Different verb, 
   const forbiddenQuantum = `- "Pre-Ratification" as a headline tail — used. Use "Closes review window", "Forces tooling pin", "Locks test surface".
 - "Test Vectors Land" as the verb pair — used. Use "Updated", "Merges", "Lands", "Resolves", "Closes" with the specific PR action.
 - Fabricating a BIP number that doesn't match the PR's actual subject (verify against the live PR title before naming "BIP-XXX").`;
+  const forbiddenAibtcNetwork = `- Generic "AIBTC Network" headline starts — name the SPECIFIC repo + PR/Issue # in the headline (e.g. "agent-news PR #708 ...", "aibtc-mcp-server Issue #438 ...").
+- Self-referential framing about Buzz / our own filings — meta-editorial reject. Frame around the protocol, repo, or correspondent network at large.
+- Vague "improves performance" verbs — quantify the change (sat-cost saved, latency ms, blocks affected, callers impacted).`;
 
-  const forbidden = beat === "quantum" ? forbiddenQuantum : forbiddenBM;
+  const forbidden =
+    beat === "quantum"
+      ? forbiddenQuantum
+      : beat === "aibtc-network"
+        ? forbiddenAibtcNetwork
+        : forbiddenBM;
+
+  // May 2 (msg 5589): beat-specific shape requirement. aibtc-network's
+  // dominant winning template (78% of last-5-day inclusions) is
+  // "{repo} {PR/Issue#} {Action Verb} {Concrete Subject} — {Concrete
+  // Number/Effect}" — distinctly different from BM/quantum templates.
+  const beatShape =
+    beat === "aibtc-network"
+      ? `BEAT-SPECIFIC HEADLINE SHAPE for "aibtc-network":
+"{repo-short-name} {PR or Issue}#{NUMBER} {Action Verb} {Concrete Subject} — {Concrete Number / Sat Cost / Latency / Caller Count}"
+GOOD examples (these PASSED into recent briefs):
+  - "agent-news PR #658 Lands Server-Side Pagination in /api/signals — Total Count Replaces Client-Side Estimate"
+  - "aibtc-mcp-server Issue #485 Proposes Conversion Audit — Rounding Errors Cost 125K sats/Month at 50 DAU"
+  - "PR #482 Ships UnisatIndexer Over Dead Hiro API — 6 BTC Operations Restored, 3 Protocols Fixed"
+The body MUST cite the github URL of the PR/Issue, then describe the AGENT-NETWORK impact (which protocol path closes/opens, sat-cost implication, downstream callers, cohort affected).`
+      : "";
 
   return `You are an AIBTC News signal writer for the "${beat}" beat. Write a single signal as STRICT JSON. No markdown, no prose outside JSON, no fences.
 
@@ -250,6 +283,8 @@ THE ANGLE FOR THIS SIGNAL (this is the most important instruction — your headl
 ${angleLine}
 
 ${recentBlock}
+
+${beatShape}
 
 REQUIRED FIELDS:
 
@@ -267,6 +302,7 @@ ${forbidden}
   TIMELINESS — CRITICAL: You MUST cite events from the LAST 6 HOURS using exact timestamps from the live data.
   Reference specific block numbers, "as of [timestamp]" markers, PR numbers with their exact updated_at timestamps, and difficulty/mempool snapshot times.
   CROSS-LAYER REQUIRED for bitcoin-macro: every BM body must reference TWO independent layers (e.g., mining + social, fees + flows, pool concentration + sentiment). Mining-only or fee-only bodies are auto-rejected as template spam (80% of BM signals on AIBTC are this kind of single-layer dump — yours must NOT be).
+  AIBTC-NETWORK BODY: cite the PR/Issue URL, summarize the change in 2-3 sentences with concrete numbers (commits added, lines changed, sat costs saved, callers impacted, deployment window), then describe the AGENT-NETWORK downstream effect (which cohort gains/loses, what protocol path opens/closes).
   END the body with EXACTLY this format: "For agents: <one actionable line>" — REQUIRED for the agentUtility scoring dimension (+10 points).
 
 "sources": array of 2-3 verifiable URLs. Use the URLs visible in the live data and the angle. Do not fabricate. For PR-anchored signals the PR's own github.com URL must be source #1.
@@ -282,6 +318,7 @@ async function generateRealBody(beat, hook, slotNumber) {
   let liveData = {};
   if (beat === "bitcoin-macro") liveData = await fetchBmLiveData();
   else if (beat === "quantum") liveData = await fetchQuantumLiveData();
+  else if (beat === "aibtc-network") liveData = await fetchAibtcNetworkLiveData();
   else return null;
 
   const prompt = buildPrompt(beat, hook, liveData);
@@ -356,6 +393,7 @@ module.exports = {
   generateRealBody,
   fetchBmLiveData,
   fetchQuantumLiveData,
+  fetchAibtcNetworkLiveData,
   parseQwen3Json,
   callQwen3,
 };

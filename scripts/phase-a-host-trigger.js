@@ -32,12 +32,18 @@ const LOG_PATH = "/data/buzz/persistent/buzz-api/phase-a.log";
 // SLOT_BEATS mirrors api/services/autodream/autodream.js — keep in sync if
 // the canonical sequence changes. v4.0 mix (Apr 25 inclusion-timing pivot):
 // 2 quantum + 3 BM, slots 1-5.
+// May 2 2026 (Ogie msg 5587-5589): beat mix shifted from 2Q+3BM to 1Q+1BM+4Net
+// based on aibtc-network beat analysis (qs=95 verified, timeliness=15 ceiling
+// vs BM/quantum's timeliness=8 cap). 6 slots / 6/day cap. Order: aibtc-network
+// first to use morning PR-merge freshness; quantum + BM mid-run; remaining
+// 3 aibtc-network slots use brief-stat + governance + correction angles.
 const SLOT_BEATS = [
+  "aibtc-network",
   "quantum",
-  "quantum",
   "bitcoin-macro",
-  "bitcoin-macro",
-  "bitcoin-macro",
+  "aibtc-network",
+  "aibtc-network",
+  "aibtc-network",
 ];
 
 // Static fallback labels — used only if the live fetch returns nothing.
@@ -50,6 +56,12 @@ const BM_FALLBACK_ANGLES = [
 const QUANTUM_FALLBACK_ANGLES = [
   "NIST PQC milestone, BIP-360 draft update, or Shor/Grover academic result",
   "ECDSA exposure counter on live Stacks blocks, sBTC quantum-risk pairing",
+];
+const AIBTC_NETWORK_FALLBACK_ANGLES = [
+  "aibtcdev/agent-news recent PR explainer (server-side change with concrete number/effect)",
+  "aibtcdev/aibtc-mcp-server recent PR/Issue (RPC binding, Lightning rail, x402 surface)",
+  "aibtcdev/skills recent PR (capability merge, fix, or audit sweep)",
+  "yesterday's brief inclusion stats — per-beat acceptance rates from /api/brief",
 ];
 
 // May 1 fix (Ogie msg 5478): the ORIGINAL static angles produced
@@ -248,6 +260,177 @@ function buildLiveQuantumHook(pr, slot) {
   return `slot ${slot} angle: bitcoin/bips PR #${pr.number} (${stateTag}, updated ${(pr.updated_at || "").slice(0, 10)}): ${pr.title}. Pull live discussion + diff from ${pr.url}; frame quantum/PQ implication of the change. Cite PR URL plus at least one NIST/IETF/arxiv/eprint.iacr.org corroborating source.`;
 }
 
+// May 2 2026 (Ogie msg 5589): fetch recently-merged + open PRs/Issues across
+// aibtcdev/* + BitflowFinance/bff-skills repos. aibtc-network beat scored
+// qs=95 with timeliness=15 today — 78% of last-5-day inclusions on this beat
+// referenced a specific aibtcdev PR# or Issue#. Returns up to N anchors;
+// caller picks N for slot count.
+const AIBTCDEV_REPOS = [
+  "aibtcdev/agent-news",
+  "aibtcdev/aibtc-mcp-server",
+  "aibtcdev/skills",
+  "aibtcdev/agent-runtime",
+  "aibtcdev/x402-api",
+  "aibtcdev/x402-sponsor-relay",
+  "BitflowFinance/bff-skills",
+];
+
+async function fetchRecentAibtcdevPRs(slotsNeeded = 4) {
+  const cap = (s) => String(s || "").slice(0, 200);
+  const cutoffMs6h = Date.now() - 6 * 60 * 60 * 1000;
+  const cutoffMs24h = Date.now() - 24 * 60 * 60 * 1000;
+  const cutoffMs7d = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+  // Fetch closed (merged) + open PRs across all repos in parallel
+  const fetches = AIBTCDEV_REPOS.flatMap((repo) => [
+    fetch(
+      `https://api.github.com/repos/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=8`,
+      {
+        headers: {
+          "User-Agent": "buzz-phase-a",
+          Accept: "application/vnd.github+json",
+        },
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      },
+    )
+      .then((r) => (r.ok ? r.json() : []))
+      .then((arr) => (Array.isArray(arr) ? arr.map((p) => ({ ...p, _repo: repo })) : []))
+      .catch(() => []),
+    fetch(
+      `https://api.github.com/repos/${repo}/issues?state=open&sort=updated&direction=desc&per_page=5`,
+      {
+        headers: {
+          "User-Agent": "buzz-phase-a",
+          Accept: "application/vnd.github+json",
+        },
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      },
+    )
+      .then((r) => (r.ok ? r.json() : []))
+      .then((arr) =>
+        Array.isArray(arr)
+          ? arr
+              .filter((i) => !i.pull_request)
+              .map((i) => ({ ...i, _repo: repo, _is_issue: true }))
+          : [],
+      )
+      .catch(() => []),
+  ]);
+  const results = await Promise.all(fetches);
+  let candidates = results.flat();
+
+  // Exclude items already covered in last 30 aibtc-network headlines
+  try {
+    const Database = require("/home/claude-code/buzz-workspace/api/node_modules/better-sqlite3");
+    const db = new Database("/data/buzz/persistent/buzz-api/buzz.db", {
+      readonly: true,
+      fileMustExist: true,
+    });
+    const recent = db
+      .prepare(
+        `SELECT headline FROM aibtc_signals_filed
+         WHERE beat_slug='aibtc-network' AND headline IS NOT NULL
+         ORDER BY filed_at DESC LIMIT 30`,
+      )
+      .all()
+      .map((r) => r.headline);
+    db.close();
+    const coveredNumbers = new Set();
+    for (const h of recent) {
+      const m = h.match(/(?:PR\s*#?|Issue\s*#?|#)(\d{2,5})/gi) || [];
+      for (const tok of m) {
+        const num = (tok.match(/\d+/) || [])[0];
+        if (num) coveredNumbers.add(num);
+      }
+    }
+    if (coveredNumbers.size > 0) {
+      candidates = candidates.filter((c) => !coveredNumbers.has(String(c.number)));
+    }
+  } catch {
+    // best-effort
+  }
+
+  // Cascading freshness — prefer 6h, fall through to 24h, then 7d
+  const filterFresh = (cutoff) =>
+    candidates.filter((c) => {
+      const t = c.updated_at ? new Date(c.updated_at).getTime() : 0;
+      return t >= cutoff;
+    });
+  const fresh6h = filterFresh(cutoffMs6h);
+  const fresh24h = filterFresh(cutoffMs24h);
+  const fresh7d = filterFresh(cutoffMs7d);
+
+  let useList;
+  if (fresh6h.length >= slotsNeeded) useList = fresh6h;
+  else if (fresh24h.length >= slotsNeeded) useList = fresh24h;
+  else if (fresh7d.length > 0) useList = fresh7d;
+  else useList = candidates;
+
+  return useList
+    .sort(
+      (a, b) =>
+        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+    )
+    .slice(0, slotsNeeded)
+    .map((p) => ({
+      number: p.number,
+      title: cap(p.title || ""),
+      url: p.html_url,
+      state: p.state,
+      merged: !!p.merged_at,
+      updated_at: p.updated_at,
+      repo: p._repo,
+      kind: p._is_issue ? "issue" : "pr",
+    }));
+}
+
+// Pull yesterday's brief stats — usable as a network-meta anchor (slot-6
+// today scored qs=95 with this exact pattern). Returns total inclusions,
+// per-beat counts, compile timestamp.
+async function fetchYesterdayBriefStats() {
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+  try {
+    const r = await fetch(`https://aibtc.news/api/brief/${yesterday}`, {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+    if (!r.ok) return null;
+    const d = await r.json();
+    const incl = d.included_signals || [];
+    const byBeat = {};
+    for (const s of incl) {
+      const b = s.beat_slug || "?";
+      byBeat[b] = (byBeat[b] || 0) + 1;
+    }
+    return {
+      date: yesterday,
+      compiledAt: d.compiledAt || d.compiled_at,
+      total_included: incl.length,
+      by_beat: byBeat,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function buildLiveAibtcNetworkHook(prOrIssue, briefStats, slotIdx, slot) {
+  // Mix anchors: PRs/issues for first 2-3 slots; brief-stat for last slot
+  // when available. slotIdx is the network-slot index (0,1,2,3) within
+  // the aibtc-network slot count.
+  if (slotIdx === 3 && briefStats) {
+    return `slot ${slot} angle: AIBTC network meta — yesterday's brief (${briefStats.date}) compiled ${briefStats.compiledAt}, locked ${briefStats.total_included} inclusions distributed ${JSON.stringify(briefStats.by_beat)}. Frame: per-beat acceptance rates, cap saturation, daily compile timing — connects to all correspondent agents' filing strategy. Cite /api/brief/${briefStats.date} as primary source.`;
+  }
+  if (prOrIssue) {
+    const stateTag = prOrIssue.merged
+      ? "merged"
+      : prOrIssue.state || (prOrIssue.kind === "issue" ? "open" : "open");
+    const kindLabel = prOrIssue.kind === "issue" ? "Issue" : "PR";
+    return `slot ${slot} angle: ${prOrIssue.repo} ${kindLabel} #${prOrIssue.number} (${stateTag}, updated ${(prOrIssue.updated_at || "").slice(0, 10)}): ${prOrIssue.title}. Read the diff/discussion at ${prOrIssue.url}; frame the AGENT-network impact (e.g., what protocol path closes/opens, sat-cost implication, downstream callers affected, cohort impact). Headline pattern: "${prOrIssue.repo.split("/")[1]} ${kindLabel} #${prOrIssue.number} {Action Verb} {Concrete Subject} — {Concrete Number/Effect on Agents}". Cite the PR/Issue URL as source #1.`;
+  }
+  return null;
+}
+
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const slotArg = args.indexOf("--slot");
@@ -405,18 +588,25 @@ async function main() {
   // May 1 fix (msg 5478): pre-fetch live anchors so each slot's hook
   // is anchored to today's specific data point (PR #, fee tier, pool
   // share, difficulty %). Fallback to static angles only if fetch fails.
+  // May 2 (msg 5589): added aibtc-network anchors — aibtcdev/* PRs + brief stats.
   const quantumSlotCount = SLOT_BEATS.filter((b) => b === "quantum").length;
-  const [quantumPRs, bmLive] = await Promise.all([
+  const networkSlotCount = SLOT_BEATS.filter(
+    (b) => b === "aibtc-network",
+  ).length;
+  const [quantumPRs, bmLive, networkAnchors, briefStats] = await Promise.all([
     fetchRecentQuantumPRs(quantumSlotCount),
     fetchRecentBMData(),
+    fetchRecentAibtcdevPRs(networkSlotCount),
+    fetchYesterdayBriefStats(),
   ]);
   log(
-    `live anchors: ${quantumPRs.length} quantum PRs (#${quantumPRs.map((p) => p.number).join(",#") || "none"}), bm=${bmLive ? "ok" : "null"} (${bmLive?.fees ? "fees" : ""}${bmLive?.pools_24h ? "/pools" : ""}${bmLive?.difficulty ? "/diff" : ""})`,
+    `live anchors: ${quantumPRs.length} quantum PRs (#${quantumPRs.map((p) => p.number).join(",#") || "none"}), bm=${bmLive ? "ok" : "null"} (${bmLive?.fees ? "fees" : ""}${bmLive?.pools_24h ? "/pools" : ""}${bmLive?.difficulty ? "/diff" : ""}), network=${networkAnchors.length} anchors (${networkAnchors.map((a) => `${a.repo.split("/")[1]}#${a.number}`).join(", ") || "none"}), brief=${briefStats ? briefStats.date : "null"}`,
   );
 
   const results = [];
   let bmIdx = 0;
   let qIdx = 0;
+  let netIdx = 0;
 
   for (let i = 0; i < SLOT_BEATS.length; i++) {
     const slot = i + 1;
@@ -436,6 +626,20 @@ async function main() {
         liveHook ||
         QUANTUM_FALLBACK_ANGLES[qIdx % QUANTUM_FALLBACK_ANGLES.length];
       qIdx++;
+    } else if (beat === "aibtc-network") {
+      const anchor = networkAnchors[netIdx];
+      const liveHook = buildLiveAibtcNetworkHook(
+        anchor,
+        briefStats,
+        netIdx,
+        slot,
+      );
+      angle =
+        liveHook ||
+        AIBTC_NETWORK_FALLBACK_ANGLES[
+          netIdx % AIBTC_NETWORK_FALLBACK_ANGLES.length
+        ];
+      netIdx++;
     } else {
       angle = "general research prompt";
     }
