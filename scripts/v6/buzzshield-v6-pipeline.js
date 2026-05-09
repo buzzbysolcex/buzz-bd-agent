@@ -644,6 +644,12 @@ async function runPipeline(options) {
               forward_mutability: f.forward_mutability || null,
               reverse_visibility: f.reverse_visibility || null,
               reverse_mutability: f.reverse_mutability || null,
+              // #125: forward Phase 12 invariant_multi_mutator breakdown so
+              // Skeptic HE-20 can decide on user/admin/setter mix.
+              mutator_breakdown: f.mutator_breakdown || null,
+              // #126: forward Phase 5 expensive_before_cheap classification so
+              // Skeptic HE-21 can pre-filter view_only/revert_only cheap paths.
+              cheap_path_classification: f.cheap_path_classification || null,
             });
           }
         };

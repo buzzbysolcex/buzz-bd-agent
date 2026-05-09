@@ -173,6 +173,38 @@ const HARD_EXCLUSION_RULES = [
       typeof f.reverse_mutability === "string" &&
       /^(view|pure)$/i.test(f.reverse_mutability),
   },
+  {
+    // HE-20 (#125, May 9 2026 — Symbiotic regression): Phase 12 emits
+    // invariant_multi_mutator HIGH when 3+ functions touch the same invariant
+    // (e.g. Vault collateralization). FP class: in Symbiotic / Sky / Spark, the
+    // canonical Vault design is user-fund-flow (deposit/claim/withdraw) +
+    // admin setter (setLimit/setWhitelist/setOperator). When ALL admin-gated
+    // mutators are setter-shape AND there's at least 1 user path, the cross-
+    // mutation is by-design (config + flow), not a logic flaw.
+    id: "HE-20",
+    desc: "Phase 12 invariant_multi_mutator with by-design admin-setter + user-flow split (Vault pattern)",
+    test: (f) =>
+      f.kind === "invariant_multi_mutator" &&
+      f.mutator_breakdown &&
+      f.mutator_breakdown.all_admin_are_setters === true &&
+      f.mutator_breakdown.user_facing_count >= 1 &&
+      f.mutator_breakdown.admin_setter_count >= 1,
+  },
+  {
+    // HE-21 (#126, May 9 2026 — Symbiotic regression): Phase 5 emits
+    // expensive_before_cheap MED when an expensive op (sstore, ext call, loop)
+    // precedes a cheap one. FP class: 10 Symbiotic Slasher/Delegator MEDs
+    // where the cheap path is a pure require/revert with no transfer or sstore
+    // — gas-optimization candidate, not exploit primitive. Auto-REJECT MED
+    // Pattern C when cheap path classification is view_only or revert_only.
+    id: "HE-21",
+    desc: "Phase 5 expensive_before_cheap MED with cheap path that is view_only / revert_only (no fund-flow, no state-write)",
+    test: (f) =>
+      f.kind === "expensive_before_cheap" &&
+      f.severity === "MEDIUM" &&
+      typeof f.cheap_path_classification === "string" &&
+      /^(view_only|revert_only)$/.test(f.cheap_path_classification),
+  },
 ];
 
 function applyHardExclusions(finding) {

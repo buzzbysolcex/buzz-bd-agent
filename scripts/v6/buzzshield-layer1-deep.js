@@ -1243,6 +1243,31 @@ function runPhase5(ctx) {
       const expensiveBeforeCheap = expensiveAt.filter(
         (p) => p < firstCheap,
       ).length;
+      // #126 (May 9 2026 — Symbiotic regression): classify the cheap path so
+      // Skeptic HE-21 can auto-REJECT MED Pattern C when the cheap path
+      // can't move funds or write state (gas-opt only, no exploit primitive).
+      // 10 Symbiotic Slasher/Delegator MED ACCEPTs all hit this class.
+      const cheapPathBody = body.slice(firstCheap);
+      let cheap_path_classification = "view_only";
+      if (
+        /\brevert\s*\(|\brequire\s*\([^)]*\)\s*;\s*\}\s*$/.test(
+          cheapPathBody.slice(0, 200),
+        )
+      ) {
+        cheap_path_classification = "revert_only";
+      } else if (
+        /\.transfer\s*\(|\.transferFrom\s*\(|safeTransfer|\.call\s*\{[^}]*value\b/.test(
+          cheapPathBody,
+        )
+      ) {
+        cheap_path_classification = "transfer";
+      } else if (
+        /\b\w+\s*=\s*[^=]|\b\w+\[[^\]]+\]\s*=\s*[^=]/.test(cheapPathBody)
+      ) {
+        cheap_path_classification = "sstore";
+      } else if (/\.transfer\s*\(|\.call\s*\(/.test(cheapPathBody)) {
+        cheap_path_classification = "external_call";
+      }
       findings.push({
         kind: "expensive_before_cheap",
         function: `${fn.name} @ ${path.basename(fn.file)}:${fn.line}`,
@@ -1252,6 +1277,8 @@ function runPhase5(ctx) {
         pattern: "C",
         ground_truth_ref:
           "CometBFT DISC-001 — tryAddVote runs verify before address check (~100x)",
+        // #126: structured field for HE-21 (forward via pipeline collect()).
+        cheap_path_classification,
       });
     }
   }
@@ -1755,6 +1782,13 @@ function runPhase12(ctx) {
           name: fn.name,
           file: path.basename(fn.file),
           line: fn.line,
+          // #125 (May 9 2026 — Symbiotic regression): enrich each mutator with
+          // visibility + modifiers so Skeptic HE-20 can decide whether the
+          // multi-mutator finding is genuine (mixed user + admin paths) or
+          // an expected Vault-style design (e.g. collateralization touched
+          // by deposit/claim/withdraw + admin setX/updateY).
+          visibility: fn.visibility || null,
+          modifiers: fn.modifiers || [],
         });
       }
     }
@@ -1762,6 +1796,33 @@ function runPhase12(ctx) {
   // Flag any invariant touched by 3+ functions but with no visible reentrancy guard or invariant test
   for (const [inv, fns] of Object.entries(invariantMap)) {
     if (fns.length >= 3) {
+      // #125: aggregate mutator breakdown so Skeptic can reason without re-walking.
+      // Admin-gated detected by common modifier names; setter-shape detected by
+      // function-name prefix (set/update/config). When ALL admin paths are
+      // setter-shape AND user paths handle the actual fund-flow, the invariant
+      // cross-mutation is by-design (Symbiotic Vault, Sky lockstake, Spark).
+      const ADMIN_MODS =
+        /^(?:onlyOwner|onlyAdmin|onlyGovernor|onlyGovernance|onlyRole|requiresAuth|restricted|onlyGov|onlyController|onlyManager|nonpayable_admin)$/i;
+      const SETTER_RE = /^(?:set|update|config|configure|change)[A-Z]/;
+      let admin_count = 0;
+      let admin_setter_count = 0;
+      let user_count = 0;
+      for (const m of fns) {
+        const isAdmin = (m.modifiers || []).some((mod) => ADMIN_MODS.test(mod));
+        if (isAdmin) {
+          admin_count++;
+          if (SETTER_RE.test(m.name)) admin_setter_count++;
+        } else {
+          user_count++;
+        }
+      }
+      const mutator_breakdown = {
+        user_facing_count: user_count,
+        admin_gated_count: admin_count,
+        admin_setter_count,
+        all_admin_are_setters:
+          admin_count > 0 && admin_setter_count === admin_count,
+      };
       findings.push({
         kind: "invariant_multi_mutator",
         invariant: inv,
@@ -1771,6 +1832,8 @@ function runPhase12(ctx) {
           inv === "collateralization" || inv === "fee_accounting"
             ? "HIGH"
             : "MEDIUM",
+        // #125: structured fields for HE-20 (forward via pipeline collect()).
+        mutator_breakdown,
       });
     }
   }
