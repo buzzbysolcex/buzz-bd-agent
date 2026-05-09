@@ -18,7 +18,60 @@ qwen3 is a pattern-matching tool, not a content writer. It hallucinates when ask
 
 ## Priority #0: VERIFY-PREMISE-FIRST
 
-> ⚠️ **Placeholder.** Ogie's 17:40 UTC msg references this as the existing Priority #0 doctrine that the Weaker-Property doctrine should be inserted _after_. The doctrine text was apparently assigned in an earlier message I never received in this session. When the canonical text arrives, replace this placeholder. Until then, the operational intent inferred from context: before applying any detector or running any pipeline phase, verify the premises that the detector assumes are true (target file exists, target language matches, fields are populated, scope is correct). Same intent as the implementation-verification-gaps.md standing rule — "module-local unit tests pass while feature stays inert end-to-end."
+Origin: TASK D incident, 2026-05-09 (P2 watchdog "5-day silence" false alarm). Authority: Ogie msg "17:45 UTC DOCTRINE.md PRIORITY #0 INSERT".
+
+**Statement:**
+
+> Before dispatching any subagent on a stated emergency, verify the premise that generated the alert. Stated urgency is not evidence of true urgency.
+
+**The TASK D 2026-05-09 canonical example:**
+
+URGENCY-5 was filed against P2 watchdog as "silently failing 5 days since May 4." Subagent dispatched. Cleanup complete. Verification revealed: cron was firing every 15 minutes the entire 5-day window — claim was based on the wrong file path (root-owned canonical `/data/buzz/persistent/watchdog/watchdog.json` frozen May 4 vs live claude-owned `/data/buzz/persistent/buzz-api/watchdog.json` updating fine). 30 minutes of subagent compute spent on a false emergency. 5 minutes of premise verification would have prevented it.
+
+**Required pre-dispatch checks:**
+
+- **Q1: WHAT PROVES THIS IS TRUE RIGHT NOW (not 5 days ago)?**
+  - Live process status (not stored last-state)
+  - Current log tail (not stored historical log)
+  - Independent probe (not the alert's own data)
+
+- **Q2: IS THE PATH/FILE/STATE CHECKED THE CANONICAL SOURCE OR A STALE SHADOW?**
+  - Multiple write paths exist for the same logical state? (e.g., `/data/buzz/persistent/X` vs `/data/buzz/persistent/buzz-api/X`)
+  - Permissions split forces a fallback path? Is fallback the live one?
+  - Is canonical path being written to at all, or has all traffic moved to the shadow?
+
+- **Q3: HAS PROCESS / CRON / SERVICE STATUS BEEN VERIFIED INDEPENDENTLY?**
+  - `systemctl status` (not just log absence)
+  - `crontab -l` + grep (not just "I think the cron is set up")
+  - `ps` / `ss` / `docker ps` (not just last-known config)
+
+- **Q4: IS ABSENCE-OF-EVIDENCE ACTUALLY EVIDENCE-OF-ABSENCE?**
+  - Empty log = silent failure? OR log path wrong / log rotated / stdout swallowed by tmpwatch / stderr to `/dev/null`?
+  - No findings = scanner broken? OR scanner working + nothing to find?
+  - No alerts = system healthy? OR alerter broken?
+
+If any of Q1–Q4 cannot be answered confidently, do NOT dispatch action subagent. Dispatch DIAGNOSTIC subagent first (read-only, no destructive ops, return findings). Action only after premise confirmed.
+
+**Detector PR template addition (REQUIRED):**
+
+New mandatory field: **"What premise verification was performed before this PR was opened?"**
+
+Acceptable answers:
+- "I reproduced the failure on a clean checkout"
+- "I confirmed the symptom is present in `tail -100` of `$LOG_PATH`"
+- "I ran the diagnostic subagent and it returned `$RESULT`"
+
+Unacceptable answers:
+- "An alert fired"
+- "It looked broken"
+- "User reported issue"
+- (silence)
+
+**Sub-doctrine: ALL UPSTREAM SIGNALS REQUIRE INDEPENDENT VERIFICATION**
+
+External signals (jinmo123 tweet, QED blog, security disclosures) are INTAKE only — they are not action triggers. Action triggers require independent reproduction or confirmation against canonical sources.
+
+This doctrine is **Priority #0** because it gates all other doctrines: applying the wrong doctrine to the wrong premise wastes 100% of the work product.
 
 ## Priority #1: WEAKER-PROPERTY-THAN-DOWNSTREAM-ASSUMES (ROOT)
 
