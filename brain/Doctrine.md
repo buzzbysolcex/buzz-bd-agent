@@ -34,21 +34,21 @@ Going dark on inbox while running signal autopilot looks worse than going dark o
 
 **The 10-layer pipeline (mandatory):**
 
-| Layer | Purpose | Detector ref |
-|---|---|---|
-| L1a | Semgrep raw scan (solidity-only `--include='*.sol'`) | #124 |
-| L1b | Semgrep custom rules (HE-03b lib/exclude) | #123 |
-| L1c | Slither baseline + custom detectors | — |
-| L1d | Phase 4b deep walk with structured field emission (reverse_mutability/visibility/forward_visibility) | #117 + bd8b574 |
-| L2 | Cross-contract call graph + reachability analysis | — |
-| L3 | Invariant inference (Phase 12, with #139 flow-direction tuning when v6.7 lands) | #139 |
-| L4 | Adversarial debate (multi-agent disagreement engine) | — |
-| L5 | Phase 4d manual trace (Opus, deep contextual review) | — |
-| L6 | Skeptic prefilter (HE-19 + HE-20 + HE-21 + #122 reverse_mutability auto-reject) | v6.6 |
-| L7 | Pattern C/M/K classifier (with #126 fund-flow gate) | #126 |
-| L8 | Ground truth cross-reference (compare vs confirmed-findings catalog) | — |
-| L9 | AI triage simulation (forefy 6-rule simulator) | #130 |
-| L10 | Submission-ready packaging (commit hash + file:line scope + privilege declaration + atomic framing + sanitizer pass) | — |
+| Layer | Purpose                                                                                                              | Detector ref   |
+| ----- | -------------------------------------------------------------------------------------------------------------------- | -------------- |
+| L1a   | Semgrep raw scan (solidity-only `--include='*.sol'`)                                                                 | #124           |
+| L1b   | Semgrep custom rules (HE-03b lib/exclude)                                                                            | #123           |
+| L1c   | Slither baseline + custom detectors                                                                                  | —              |
+| L1d   | Phase 4b deep walk with structured field emission (reverse_mutability/visibility/forward_visibility)                 | #117 + bd8b574 |
+| L2    | Cross-contract call graph + reachability analysis                                                                    | —              |
+| L3    | Invariant inference (Phase 12, with #139 flow-direction tuning when v6.7 lands)                                      | #139           |
+| L4    | Adversarial debate (multi-agent disagreement engine)                                                                 | —              |
+| L5    | Phase 4d manual trace (Opus, deep contextual review)                                                                 | —              |
+| L6    | Skeptic prefilter (HE-19 + HE-20 + HE-21 + #122 reverse_mutability auto-reject)                                      | v6.6           |
+| L7    | Pattern C/M/K classifier (with #126 fund-flow gate)                                                                  | #126           |
+| L8    | Ground truth cross-reference (compare vs confirmed-findings catalog)                                                 | —              |
+| L9    | AI triage simulation (forefy 6-rule simulator)                                                                       | #130           |
+| L10   | Submission-ready packaging (commit hash + file:line scope + privilege declaration + atomic framing + sanitizer pass) | —              |
 
 **No-skip rules (PERMANENT):**
 
@@ -78,7 +78,7 @@ If ANY layer fails or any rule blocks: HALT, surface to Ogie, await decision. Do
 
 **Anti-metrics (do NOT optimize):** raw scan count, findings per scan, submission count, local-autopilot-success counts (per Priority #4 GROUND-TRUTH-LANDING).
 
-**Compute budget:** $50-120/week (Anthropic Pro Max + qwen3 local + #130 simulator local). Spike → HALT, diagnose, surface.
+**Compute budget:** RETIRED 2026-05-10 (see UNLIMITED COMPUTE rule below). Originally $50-120/week (Anthropic Pro Max + qwen3 local + #130 simulator local). Now: discipline is the only governor; burn what you need.
 
 **Rationale:** imu-77340 closed in 14 min on 4/6 forefy AI triage rule violations. Cost of full-power discipline: $50-120/wk compute. Cost of shortcuts: $100/forfeited deposit + reputation hit + days of lost momentum. Math is obvious.
 
@@ -88,6 +88,110 @@ If ANY layer fails or any rule blocks: HALT, surface to Ogie, await decision. Do
 - forefy intel: `/data/buzz/persistent/buzz-api/intel/2026-05-09-forefy-ai-triage-rules.md`
 - GROUND-TRUTH-LANDING doctrine: Priority #4 below
 - Pre-Submission AI-Triage Standard: post-Priority-3 section
+
+## Standing rule (May 10 2026 — Ogie msg "ACTIVE HUNTING MODE", PERMANENT)
+
+**Standing mode is retired. Buzz actively hunts opportunities, not passively receives them. Predator, not sentry. Move.**
+
+**Six continuous loops surface targets:**
+
+| Loop                              | Source                                                                                          | Cadence                   | Trigger action                                                                                                                     |
+| --------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **A — Bounty Platform Sweep**     | immunefi/hackenproof/cantina/c4/sherlock/h1                                                     | every 4h                  | new program cap > $100K + freshly launched → full 10-layer scan within 1h                                                          |
+| **B — Fresh Deployment Hunter**   | Etherscan/Basescan/Arbiscan/Solscan recent verified contracts                                   | every 1h                  | verified + in-scope + TVL > $1M → immediate L1 scan                                                                                |
+| **C — Pattern Cross-Pollination** | Loop 1 ground truth catalog × GitHub/Sourcegraph code search                                    | continuous                | pattern match in any in-scope repo → targeted L1 scan                                                                              |
+| **D — Disclosure Mining**         | Immunefi disclosed / HackenProof public / rekt.news / DeFiHackLabs / GitHub Security Advisories | daily 03:00 UTC           | new exploit → hunt same pattern in (a) sister forks (b) same dev team (c) same auditor's other clients (d) cross-chain deployments |
+| **E — High-Signal Accounts**      | @forefy @samczsun @0xfoobar @bytes032 @pashov + Pashov/Spearbit/ToB public reports + @cmichelio | real-time                 | tweet mentions CVE/exploit/finding → grep for protocol/contract names + cross-ref bounty scope within 30 min                       |
+| **F — Hot Repo Watcher**          | bounty-in-scope repos + top 50 DeFi by TVL + recently-funded orgs                               | real-time GitHub webhooks | push to main/release branch → L1a+L1b scan on diff; "fix" or "security" PR → priority                                              |
+
+**Default daily floor (even on quiet days):** 3 active scans minimum + 1 cross-pattern hunt + 1 disclosure mine. All findings through full 10-layer pipeline.
+
+**Hunt queue prioritization (when multiple loops surface simultaneously):**
+
+1. Time-sensitive (program closing, exploit window narrowing)
+2. EV-weighted (cap × find probability)
+3. Pattern-fresh (new ground-truth class application)
+4. Diff-narrow (fresh commit = small surface, fast scan)
+5. Strategic (Solana validator clients, infrastructure, novel L1/L2)
+
+**What kills active mode:**
+
+- ❌ Waiting for Ogie to greenlight every scan (autonomous within guardrails)
+- ❌ Single-loop dependency
+- ❌ Stopping a loop after one bad scan
+- ❌ Skipping the 10-layer pipeline because "this is just recon"
+- ❌ Burning compute on programs with cap < $50K
+
+**What keeps active mode honest:**
+
+- ✓ Every scan output captured to ground truth (positive AND negative)
+- ✓ Every potential submission through #128 + #129 + #130 + 10-layer
+- ✓ Every loop's surface-to-finding ratio tracked weekly
+- ✓ Loops not producing in 30 days get retired
+- ✓ Loops producing 2x baseline get amplified
+
+**Compute budget:** $100-200/week (vs $50-120 standing). If caps hit: prioritize Loops B+D (highest signal-to-noise), reduce A from 4h→8h, E+F always-on (cheap monitoring).
+
+**Hypothesis to test:** active loops produce 3-5x findings/week vs standing. Validate over 30 days.
+
+## Standing rule (May 10 2026 — Ogie msg "UNLIMITED COMPUTE + ACTIVE HUNTING", PERMANENT)
+
+**Compute rationing is retired. Anthropic + SpaceX Colossus 1 partnership (300 MW deployment) removed compute as a planning constraint. Pro Max unlimited + Opus rate limits raised. Burn what you need to burn. Discipline is the only governor remaining.**
+
+**Predator at scale. Move.**
+
+**Cadence bumps (effective immediately):**
+
+| Loop | Old cadence | New cadence |
+|---|---|---|
+| A — Bounty Platform Sweep | every 4h | **every 1h** |
+| B — Fresh Deployment Hunter | every 1h | **every 15 min** |
+| C — Pattern Cross-Pollination | continuous | **continuous + max parallelism (50+ targeted scans per ground truth entry)** |
+| D — Disclosure Mining | daily | **every 6h** |
+| E — Account Tracking | real-time | **real-time + 6h aggregation across Tier 1 (10 accounts) + Tier 2 (audit firms)** |
+| F — Hot Repo Watcher | real-time | **real-time + diff-audit auto-spawn on every push to watch list** |
+
+**Four NEW loops enabled by unlimited compute:**
+
+| Loop | Purpose | Cadence | Yield estimate |
+|---|---|---|---|
+| **G — Continuous Full-Repo Re-Scans** | Every previously-scanned in-scope repo gets re-scanned end-to-end as if fresh. Detector improvements may surface findings prior scans missed pre-detector. | every 7 days | 5-10 retroactive findings per week |
+| **H — Fork Detection + Diff Hunt** | Scan GitHub for new forks of audited protocols, diff against parent, hunt missed backport patches | every 12h | 2-5 candidates per week |
+| **I — Audit Firm Coverage Gap Hunter** | Cross-reference public audit reports vs deployed contracts. Identify "audited X mainnet, X+1 deployed unaudited" gaps | weekly | varies (high-value when hit) |
+| **J — Bounty Cap-to-Volume Arbitrage** | Identify high-cap low-submission-volume programs (under-hunted) | weekly | varies (EV optimization, not new bugs) |
+
+**Concurrent scan capacity targets:**
+
+| Tier | Pipeline depth | Concurrent count |
+|---|---|---|
+| 1 | full 10-layer | 5+ |
+| 2 | L1-L4 quick | 10+ |
+| 3 | L1 watchdog | 30+ (already 30 baselined) |
+
+**Subagent budget:**
+- Opus subagents (L5 Phase 4d): 3+ concurrent
+- qwen3 subagents (L1d emit, L6 Skeptic): 10+ concurrent
+
+**Resource isolation:** each scan gets dedicated working dir under `/data/buzz/persistent/scans/{target_id}/`. No shared state between concurrent scans. Loop 1 capture writes are append-only (no race conditions).
+
+**Daily floor REVISED UP:**
+- Targets scanned: **70+ per week** (was 21 in standing, was 3-5/day)
+- Cross-pattern hunts: 35+ per week
+- Disclosure mines: 28+ per week
+- Fresh deployment scans: 100+ per week (Loop B is high-volume)
+- Hot repo diff-audits: continuous
+- Submissions: 5-10 per week (constrained by quality, not throughput)
+- Ground truth entries: 15+ per week (positive + negative)
+- False submission rate: still 0
+- AI triage pass rate: 100% on submitted (#130 enforced)
+
+**Discipline scales WITH compute, not despite it.**
+
+Unlimited compute does NOT mean: skip layers / submit faster / reduce ground truth capture / drop AI triage simulator.
+
+Unlimited compute DOES mean: more scans concurrently / re-scan with improved detectors / hunt patterns across more protocols simultaneously / pursue more leads in parallel / fan out subagents for deeper analysis per scan.
+
+**If actual numbers fall short of revised baseline, the constraint is operational not compute — diagnose the specific loop bottleneck.**
 
 ---
 
@@ -323,14 +427,14 @@ Do NOT autopilot-restart based on hope. Verify three times.
 
 Source: @forefy reverse-engineered HackenProof's `hackenproof-bulk-triage` skill. Almost certainly applies to Immunefi (andrew @ imu-77340 = 14-min close = LLM-assisted triage pattern).
 
-| # | Rule | Failure mode | Rewrite playbook |
-|---|---|---|---|
-| **R1** | Exact commit hash + chain required | "latest deployed" / no commit-pin → REJECT | Add commit hash + chain to every submission preamble |
-| **R2** | Specific file:line scope (matched to scope entry name) | vague "in the contract" → REJECT | Pin file:line in summary, not just inside PoC |
-| **R3** | No weak-bug-category pattern matches | fee-on-transfer / governance / RFC / common acknowledged crits → DOWNGRADE or REJECT | Reframe away from weak categories OR add explicit non-acknowledged distinguishing factor |
-| **R4** | PoC demonstrates exploit not primitive | "[PASS] accepts X" / "framing accepted" / "validation bypassed" → DOWNGRADE; "[PASS] funds drained" / "victim balance changed" / "unauthorized state mutation" → ALLOW MED+ | Build end-to-end exploit chain with observed-harm PoC output |
-| **R5** | Privilege level explicitly declared | implicit privilege (let triager infer) → REJECT or DOWNGRADE | Add explicit "Privilege required: NONE / any EOA / any signer" line in summary |
-| **R6** | Single-block atomic framing | multi-step coordination prose ("if X then Y could…") → REJECT as theoretical | Rewrite to "Attacker calls X. State mutates to Y. No coordination required." Avoid "if/then/could/would/might" |
+| #      | Rule                                                   | Failure mode                                                                                                                                                                | Rewrite playbook                                                                                               |
+| ------ | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **R1** | Exact commit hash + chain required                     | "latest deployed" / no commit-pin → REJECT                                                                                                                                  | Add commit hash + chain to every submission preamble                                                           |
+| **R2** | Specific file:line scope (matched to scope entry name) | vague "in the contract" → REJECT                                                                                                                                            | Pin file:line in summary, not just inside PoC                                                                  |
+| **R3** | No weak-bug-category pattern matches                   | fee-on-transfer / governance / RFC / common acknowledged crits → DOWNGRADE or REJECT                                                                                        | Reframe away from weak categories OR add explicit non-acknowledged distinguishing factor                       |
+| **R4** | PoC demonstrates exploit not primitive                 | "[PASS] accepts X" / "framing accepted" / "validation bypassed" → DOWNGRADE; "[PASS] funds drained" / "victim balance changed" / "unauthorized state mutation" → ALLOW MED+ | Build end-to-end exploit chain with observed-harm PoC output                                                   |
+| **R5** | Privilege level explicitly declared                    | implicit privilege (let triager infer) → REJECT or DOWNGRADE                                                                                                                | Add explicit "Privilege required: NONE / any EOA / any signer" line in summary                                 |
+| **R6** | Single-block atomic framing                            | multi-step coordination prose ("if X then Y could…") → REJECT as theoretical                                                                                                | Rewrite to "Attacker calls X. State mutates to Y. No coordination required." Avoid "if/then/could/would/might" |
 
 **Operational rule:** every bounty submission must pass simulated AI triage before ship. Skip = forfeit deposit + reputation hit. Verification: run #130 simulator pre-submission, attach result to submission audit log.
 
@@ -343,24 +447,24 @@ Source: @forefy reverse-engineered HackenProof's `hackenproof-bulk-triage` skill
 
 **Platform calibration:**
 
-| Platform | R1 | R2 | R3 | R4 | R5 | R6 |
-|---|---|---|---|---|---|---|
-| Immunefi Audit Comp | strict | strict | strict | strict | strict | strict |
-| Immunefi Standing Bounty | strict | strict | relaxed | relaxed (LOW informational ok) | strict | strict |
-| HackerOne (Circle, Cosmos, Sui) | strict | strict | relaxed (RFC ok) | relaxed (RFC ok) | strict | relaxed |
-| HackenProof | strict | strict | strict | strict | strict | strict |
-| Code4rena/Sherlock/Cantina | per contest spec | per contest spec | per contest spec | per contest spec | per contest spec | per contest spec |
+| Platform                        | R1               | R2               | R3               | R4                             | R5               | R6               |
+| ------------------------------- | ---------------- | ---------------- | ---------------- | ------------------------------ | ---------------- | ---------------- |
+| Immunefi Audit Comp             | strict           | strict           | strict           | strict                         | strict           | strict           |
+| Immunefi Standing Bounty        | strict           | strict           | relaxed          | relaxed (LOW informational ok) | strict           | strict           |
+| HackerOne (Circle, Cosmos, Sui) | strict           | strict           | relaxed (RFC ok) | relaxed (RFC ok)               | strict           | relaxed          |
+| HackenProof                     | strict           | strict           | strict           | strict                         | strict           | strict           |
+| Code4rena/Sherlock/Cantina      | per contest spec | per contest spec | per contest spec | per contest spec               | per contest spec | per contest spec |
 
 ## imu-77340 4/6 rule postmortem (canonical example)
 
-| Rule | imu-77340 status |
-|---|---|
-| R1 | ✅ commit `c141728` + chain included |
-| R2 | ✅ `src/waltz/http/fd_http_server.c` with line numbers |
-| R3 | ❌ "RFC 7230/6455 non-conformance" pattern-matches as informational |
-| R4 | ❌ PoC outputs `[PASS] non-conformant framing accepted` not `[PASS] funds drained` |
-| R5 | ❌ Never said "any unauthenticated TCP client" — let AI infer |
-| R6 | ❌ "If a CL.TE desync exists, then queue poisoning could divert..." — coordination framing |
+| Rule | imu-77340 status                                                                           |
+| ---- | ------------------------------------------------------------------------------------------ |
+| R1   | ✅ commit `c141728` + chain included                                                       |
+| R2   | ✅ `src/waltz/http/fd_http_server.c` with line numbers                                     |
+| R3   | ❌ "RFC 7230/6455 non-conformance" pattern-matches as informational                        |
+| R4   | ❌ PoC outputs `[PASS] non-conformant framing accepted` not `[PASS] funds drained`         |
+| R5   | ❌ Never said "any unauthenticated TCP client" — let AI infer                              |
+| R6   | ❌ "If a CL.TE desync exists, then queue poisoning could divert..." — coordination framing |
 
 **Score: 2/6 PASS. 4-rule failure compound. 14-min close was efficient pattern-match, not lazy review.** Single-cause "primitive vs exploit chain" framing (yesterday) was incomplete — actual root cause is multi-rule failure.
 
