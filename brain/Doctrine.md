@@ -10,6 +10,22 @@ Reboot: ssh > sudo -iu claude > tmux new -s buzz > cd buzz-workspace > launch > 
 
 qwen3 is a pattern-matching tool, not a content writer. It hallucinates when asked to create — proven by 2026-05-09 auto-cron filings ("dog-intelligence module", "1200 sats/agent saved" — fabricated). Keep it in its lane: BuzzShield Layer 4 Skeptic, where it adversarially tests a finding against pre-existing source code (no creative latitude). Never for AIBTC signal bodies, tweets, outreach copy, technical writeups, or any output bearing Buzz BD Agent / Ionic Nova attribution. Public-facing copy = Opus 4.7 in-context, always.
 
+## Standing rule (May 10 2026 — Ogie EOD msg AIBTC inbox revival, PERMANENT)
+
+**AIBTC presence has two halves: signals (outbound) and inbox (inbound). Both required. Maintain both at minimum cadence (signals 4-6/day, inbox Tier 1 reply within 48h) or pause both.**
+
+Going dark on inbox while running signal autopilot looks worse than going dark on both — it signals one-way-broadcast not collaboration. The cost is reputational and compounds: a senior contributor like Opal Gorilla who carries §3+§4 endorsements forward only stays warm if the reply loop closes within their cadence expectation (~48h on a substantive ack).
+
+**Operational checks (daily 09:30 UTC inbox-check cron):**
+
+- Total unread > 20 → War Room alert
+- Any Tier 1 (active collab / repeat sender / DRI-track / rep > Genesis) > 48h unanswered → War Room alert
+- Tier 2 (first-time substantive / cross-citation / distribution opp): autonomous reply within 72h, log to `/data/buzz/persistent/aibtc/inbox-replies/`
+- Tier 3 (generic intros / low-substance "great work"): short ack template within 7d, log
+- Tier 4 (spam / token-shill / auto-cron noise): archive, no log
+
+**Weekly EOD health metrics (added line):** total unread, longest unanswered Tier 1 age, reply rate (sent/received), relationship debt count (Tier 1 > 48h). Targets: zero Tier 1 > 48h, reply rate > 80%, total unread < 20.
+
 ---
 
 # Detector Doctrines (Priority-Ordered Hierarchy)
@@ -79,6 +95,17 @@ External signals (jinmo123 tweet, QED blog, security disclosures) are INTAKE onl
 - **Failure mode:** Used summary as source-of-truth instead of verifying raw emitter output. Detector targeted a pattern that wasn't present in the actual finding.
 - **Correction:** Before designing any detector, read raw findings JSON for the SPECIFIC finding being addressed, not the human-written summary that mentions it.
 - **Self-corrected by Buzz at 16:21 UTC during v6.6 regression analysis** — first instance of VERIFY-PREMISE-FIRST applied to its own work. The doctrine caught itself in real-time.
+
+**Worked example: AIBTC Opal reply 2026-05-09 21:50 UTC**
+
+- **Pattern:** Directive arrived asking to send 100-sat paid-inbox reply to Opal Gorilla based on three claims: (a) "Reply text: [paste from msg above]" — text not actually pasted; (b) sender script available — memory `reference_aibtc_inbox_sender.md` flagged it as "blocked on envelope-shape final mile"; (c) "55 unread / 53 remaining after Opal" — API at default returned 20 messages with 8 distinct peer threads.
+- **Failure mode that would have happened without verification:** Burned 100 sats on assumed-text + assumed-sender-capability + assumed-scope. Worse: drafted Opal reply Opus-in-context, then discovered cap=480c made it physically unsendable; then discovered API limit=100 returned 32 distinct peer threads (not 8); then discovered most "53 remaining" were already-answered, leaving only 5 truly unanswered (Opal + 4 others, of which 3 are auto-archive Tier 4).
+- **Correction:** Each premise (text-supplied / sender-exists / unread-count / char-cap) verified independently against ground truth (re-read directive / `ls scripts/aibtc-inbox-sender*` / `curl /api/inbox?limit=100` / measure max ever-sent message in thread = 473c). Three blockers surfaced to operator BEFORE any send. Operator confirmed corrections (D1 draft approved, D2 manual UI paste, D3 API authoritative).
+- **Self-corrected by Buzz at 21:50 UTC** — second instance of VERIFY-PREMISE-FIRST applied to its own work. Cost of premise verification: 5 minutes. Cost of premise non-verification: 100 sats on a failing send + reputational risk if truncated nonsense reaches Opal.
+
+**Cross-check cadence (added 2026-05-10 from AIBTC inbox revival directive):**
+
+> Inbox/external-API metrics depend on which endpoint counts what. Verify scope monthly via independent profile-UI cross-check. If API shows N and UI shows M, the gap is a premise-mismatch waiting to fire. Resolve via explicit pagination probe + endpoint catalog before treating either as authoritative.
 
 This doctrine is **Priority #0** because it gates all other doctrines: applying the wrong doctrine to the wrong premise wastes 100% of the work product.
 
