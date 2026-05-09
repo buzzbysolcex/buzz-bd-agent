@@ -2,6 +2,61 @@
 
 Pivot May 2. **State as of 2026-05-09 15:10 UTC (post Firedancer ship):** 12 disclosure attempts (10 submitted via channels, 1 Firedancer SHIPPED on Immunefi as Chief). Submission state: 4 HackerOne dup-closed, 2 HackerOne pending triage, 2 Drift emails no-reply (Day 6), 1 CometBFT closed (channel dead), **1 Immunefi Chief Finding pending review**, 0 payouts.
 
+## dYdX Cantina Recon Plan (May 9 2026 — post QED writeup)
+
+> Authority: Ogie msg "17:00 UTC dYdX QED WRITEUP DECODED" (items N + O).
+> Strategic context: dYdX explicitly partnered with Cantina post-QED to fund higher payouts on the SAME bug class. Market is tilted to whoever moves fastest with QED-style methodology on the same target. Position Buzz as "Solana-experience-applied-to-Cosmos" (dYdX bridges both ecosystems).
+
+**Public posture:** DO NOT claim parity with QED. Let the work speak.
+
+### Theme 1 — Cross-module canonicalization mismatches (HIGH PRIORITY)
+
+- Targets: `x/clob`, `x/subaccounts`, `x/sending`, `x/perpetuals`, `x/affiliates`
+- Pattern: any string comparison on user-controlled identifiers
+- Look for: ticker, asset name, subaccount ID, address forms (bech32 vs hex), currency pair, denom strings
+- Method: `rg "==|EqualFold|Equal\(" --type go` + intersect with user-input parameters
+- Sub-pattern: also check JSON tag canonicalization (snake_case vs camelCase)
+- Depends on: detector #137 spec (gap filed); recon can use manual Phase 4d in absence of detector
+
+### Theme 2 — No-overwrite-guard on Set (HIGH PRIORITY)
+
+- Targets: every keeper module's KVStore writes
+- Method: `rg "Set\(" --type go -A 2 -B 5` in `dydxprotocol/v4-chain`
+- Filter: prior 5 lines should contain `.Has(` or `exists` check
+- Flag: any `Set` without preceding `Has` check on same key
+- Heuristic upgrade: unconditional flag when store name matches `/(ID|Map|Registry|Mapping|Index)$/`
+- Depends on: detector #138 spec (gap filed); recon can use manual Phase 4d
+
+### Theme 3 — Hook-bypass (MEDIUM PRIORITY)
+
+- Targets: `AfterX` / `BeforeX` / `On*` hooks across modules
+- Method: trace which msg-handlers fire which hooks
+- Look for: Create-fires-hook + Update-doesn't-fire-hook (or vice versa)
+
+### Hypothesis Queue (H1–H6, recon to verify)
+
+| ID | Hypothesis | Module | Method | Status |
+|---|---|---|---|---|
+| H1 | `x/listing.UpdateMarketParam` may have similar dup check pattern (reachable post-creation) | x/listing | grep duplicate-check sites; verify case-folding | queued |
+| H2 | x/clob CLOB pair registration may have analogous case-sensitivity in pair ID creation | x/clob | trace `MsgCreateClobPair` → store.Set path | queued |
+| H3 | x/sending memo field comparisons (if any) for IBC may have similar issues | x/sending | grep memo equality checks | queued |
+| H4 | x/affiliates referrer code registration likely has similar uniqueness assumption | x/affiliates | trace `MsgRegisterAffiliate` → store.Set path | queued |
+| H5 | x/marketmap UpdateMarket vs CreateMarket may have asymmetric validation | x/marketmap | diff Create vs Update validation surface | queued |
+| H6 | Subaccount ID comparison anywhere user-controlled string used as key | x/subaccounts | grep subaccount-ID equality checks | queued |
+
+**Stop rule:** stop at first 1-2 confirmed real bugs to avoid boil-the-ocean. Each hypothesis gets ≤ 2h of effort; if not reproducible in localnet within that budget, mark theoretical and defer.
+
+**Honest verdict matrix (mandatory):** mirror Firedancer discipline. Reproduce on localnet (dYdX docker-compose). PoC must demonstrate state divergence empirically. Full Phase 4d trace before submission. NO false submissions to Cantina.
+
+**Cross-references:**
+- Intel digest: `/data/buzz/persistent/buzz-api/intel/external-writeups/2026-05-09-qed-dydx-oracle-hijack.md`
+- Doctrines: `brain/Doctrine.md` Canonicalization-Consistency + No-Overwrite-Guard
+- Detector gaps: `/data/buzz/persistent/buzz-api/ground-truth/implementation-verification-gaps.md` #137 + #138
+
+ETA Theme 1+2 manual sweep: 3-4 hours focused work (next session, not today — pending Ogie greenlight + #129 Cosmos Go coverage spec resolution).
+
+---
+
 ## Submitted Reports
 
 - **2026-05-09 — Immunefi #77340 — Firedancer V1 Audit Comp — MED Chief — pending review**
