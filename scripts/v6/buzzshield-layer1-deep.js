@@ -97,6 +97,7 @@ const C_TEST_FILE_RE =
 function discoverFiles(target, opts = {}) {
   const out = {
     solidity: [],
+    vyper: [], // #148 (2026-05-10): Curve forks + Yearn V3 + Fei + Lyra + Saddle
     rust: [],
     go: [],
     typescript: [],
@@ -126,6 +127,7 @@ function discoverFiles(target, opts = {}) {
       if (C_TEST_FILE_RE.test(e.name)) continue;
       const lower = e.name.toLowerCase();
       if (lower.endsWith(".sol")) out.solidity.push(full);
+      else if (lower.endsWith(".vy") || lower.endsWith(".vyi")) (out.vyper ||= []).push(full); // #148: Vyper coverage gap fix 2026-05-10
       else if (lower.endsWith(".rs")) out.rust.push(full);
       else if (lower.endsWith(".go")) out.go.push(full);
       else if (lower.endsWith(".ts")) out.typescript.push(full);
@@ -2125,7 +2127,7 @@ async function main() {
   console.log(`  Commit:    ${commitHash.slice(0, 12)}`);
   console.log(`  Language:  ${language}`);
   console.log(
-    `  Files:     ${totalFiles} (Sol=${files.solidity.length} Rs=${files.rust.length} Go=${files.go.length} TS=${files.typescript.length})`,
+    `  Files:     ${totalFiles} (Sol=${files.solidity.length} Vy=${(files.vyper||[]).length} Rs=${files.rust.length} Go=${files.go.length} TS=${files.typescript.length})`,
   );
   console.log("");
 

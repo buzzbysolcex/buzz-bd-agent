@@ -417,6 +417,36 @@ Do NOT autopilot-restart based on hope. Verify three times.
 
 **Sub-doctrine to #0:** Class L Calibration Gap second entry — local-vs-network landing gap. See `/data/buzz/persistent/buzz-api/ground-truth/2026-05-10-aibtc-local-vs-network-landing-gap.md`.
 
+**Worked example #5 (2026-05-10): Buzz session scope honesty**
+
+- **Pattern:** ACTIVE HUNTING MODE directive arrived asking for "all 6 loops infrastructure operational + manual sweeps + dYdX kickoff + 4 detector builds, surface within 4h." Buzz applied VERIFY-PREMISE-FIRST to its own scope estimate, identified that 6 loop infrastructures × 60-90min each + 3 detector builds × 60-90min + concurrent Opal/dYdX/MMR work ≠ achievable in 4h. Surfaced honest delivery list (2 loops + 4-6 hand-surfaced targets + 3 detectors queued) + 4 clean decision questions + recommended priority order.
+- **Failure mode that would have happened without scope verification:** force-shipped half-built loop infrastructures, half-tested detectors, no #129 verifier wiring, partial sender script. Result: rework cycle next session + operator distrust on ETA estimates + unmonitored cron processes producing ground-truth-unverified output.
+- **Correction:** explicitly ranked deliverables by ROI, named what would NOT ship in the window, requested operator sign-off before consuming the next 4h block.
+- **Self-corrected by Buzz at 22:35 UTC** — fifth instance of VERIFY-PREMISE-FIRST applied to its own work. Operator validated: "This is the discipline working."
+
+**Worked example #6 (2026-05-10): #148 Vyper coverage gap**
+
+- **Pattern:** Intel mining surfaced forefy/.context multi-language agent toolkit. Cross-checked our L1 walker file collection: only `.sol` extension handled. All Vyper protocols (Curve forks, Yearn V3, Fei, Lyra, Saddle) have been INVISIBLE to BuzzShield since v1. Smoke-test of L1d against `CurveFinance/curve-stablecoin` confirmed: pre-fix `Files: 1 (Sol=0)`, post-fix `Files: 126 (Sol=0 Vy=125)`.
+- **Failure mode:** since v1 launch we've assumed our coverage matched our scan target list. We never measured language-coverage explicitly, so the gap was unfalsifiable.
+- **Correction:** added `.vy`/`.vyi` to walker, smoke-tested against curve-stablecoin (125 files now collected), filed #148 ship + queued Loop G retroactive sweep with Vyper enabled.
+- **Self-corrected by Buzz at 22:50 UTC.** Same blind-spot class as AIBTC phantom streak — what we don't measure, we can't see.
+
+**Coverage Gap Quarterly Review rule (added 2026-05-10):**
+
+> Coverage gaps are unfalsifiable until surfaced. Quarterly review: what languages, chains, protocol types, or finding classes does our pipeline NOT cover? File coverage gaps as P0 detectors. Blind spots compound — every day we don't see Vyper findings is a day someone else does.
+
+Concrete check-list:
+- File extensions in walker — does every modern smart-contract language ship to a layer? (currently: `.sol` ✓ + `.vy`/`.vyi` ✓ as of #148 + `.rs` ✓ + `.go` ✓ + `.ts/.js` ✓ + `.py` ✓ + `.c/.h` ✓ + `.cc/.cpp` ✓; MISSING: `.move` Sui/Aptos, `.cairo` Starknet, `.fc` TON, `.fe` Fe — file as P0 if any of these surface in a target)
+- Chain coverage — Etherscan-class API for every supported chain? (#149 DVN scan + Loop B fresh-deploys exposes any chain gap)
+- Protocol type coverage — do we have detectors for L1 consensus / DVN / oracle / MMR / canonicalization / no-overwrite / etc.? (running roster — every new ground truth entry adds one)
+- Finding class coverage — Pattern A/B/C/D/E/F/G/H/I/J/K/L/M tagged + every new pattern catches a name + detector slot
+
+**Compute watchdog threshold (added 2026-05-10):**
+
+> Per UNLIMITED COMPUTE doctrine, compute is NOT a planning constraint. But UNEXPECTED spikes indicate bugs (runaway loops, infinite recursion, broken throttling, leak in Opus subagent fan-out). Watchdog rule: **alert if daily burn exceeds 3× rolling 7-day median**. Surface to War Room. Never auto-throttle without operator decision (per VERIFY-PREMISE-FIRST — diagnose first).
+
+Wired into 09:30 UTC inbox-check cron log (qwen3 minutes + Opus token estimate). First report tomorrow.
+
 ---
 
 # Pre-Submission AI-Triage Standard (formerly "Pre-Submission PoC Standard", expanded 2026-05-10 from forefy intel)
