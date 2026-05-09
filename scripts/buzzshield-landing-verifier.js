@@ -294,6 +294,7 @@ async function logFailure(actionType, ctx, result) {
 }
 
 async function alertWarRoom(actionType, ctx, result) {
+  if (process.env.LANDING_VERIFIER_SUPPRESS_ALERTS === "1") return;
   if (!fs.existsSync(TG_ENV_PATH)) return;
   const env = parseEnv(fs.readFileSync(TG_ENV_PATH, "utf8"));
   const token = env.TELEGRAM_BOT_TOKEN;
