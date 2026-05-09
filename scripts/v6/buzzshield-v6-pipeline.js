@@ -638,6 +638,12 @@ async function runPipeline(options) {
               kind: f.kind,
               ground_truth_ref: f.ground_truth_ref,
               source: "layer1-deep",
+              // #122: forward structured visibility/mutability fields so
+              // Skeptic HE-19 can pre-filter view/pure reverse functions.
+              forward_visibility: f.forward_visibility || null,
+              forward_mutability: f.forward_mutability || null,
+              reverse_visibility: f.reverse_visibility || null,
+              reverse_mutability: f.reverse_mutability || null,
             });
           }
         };

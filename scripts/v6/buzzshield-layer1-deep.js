@@ -1011,6 +1011,12 @@ function analyse4b(ctx) {
               asymmetry: "access_guard",
               severity: "HIGH",
               pattern: "A",
+              // Structured fields for downstream Skeptic HE-19 (#122) — auto-REJECT
+              // when reverse function is view/pure (no state to guard).
+              forward_visibility: f.visibility || null,
+              forward_mutability: f.mutability || null,
+              reverse_visibility: r.visibility || null,
+              reverse_mutability: r.mutability || null,
             });
           }
         }
