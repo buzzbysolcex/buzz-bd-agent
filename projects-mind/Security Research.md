@@ -1,6 +1,6 @@
 # Security Research
 
-Pivot May 2. **State as of 2026-05-09 15:10 UTC (post Firedancer ship):** 12 disclosure attempts (10 submitted via channels, 1 Firedancer SHIPPED on Immunefi as Chief). Submission state: 4 HackerOne dup-closed, 2 HackerOne pending triage, 2 Drift emails no-reply (Day 6), 1 CometBFT closed (channel dead), **1 Immunefi Chief Finding pending review**, 0 payouts.
+Pivot May 2. **State as of 2026-05-09 15:35 UTC (post imu-77340 closure):** 12 disclosure attempts. Submission state: 4 HackerOne dup-closed, 2 HackerOne pending triage, 2 Drift emails no-reply (Day 6), 1 CometBFT closed, **1 Immunefi Chief Finding CLOSED-BY-TRIAGE (imu-77340)**, 0 payouts. Cumulative net: **-$100** ($100 Immunefi deposit forfeited). One calibration tuition paid, Class L born.
 
 ## dYdX Cantina Recon Plan (May 9 2026 — post QED writeup)
 
@@ -35,20 +35,21 @@ Pivot May 2. **State as of 2026-05-09 15:10 UTC (post Firedancer ship):** 12 dis
 
 ### Hypothesis Queue (H1–H6, recon to verify)
 
-| ID | Hypothesis | Module | Method | Status |
-|---|---|---|---|---|
-| H1 | `x/listing.UpdateMarketParam` may have similar dup check pattern (reachable post-creation) | x/listing | grep duplicate-check sites; verify case-folding | queued |
-| H2 | x/clob CLOB pair registration may have analogous case-sensitivity in pair ID creation | x/clob | trace `MsgCreateClobPair` → store.Set path | queued |
-| H3 | x/sending memo field comparisons (if any) for IBC may have similar issues | x/sending | grep memo equality checks | queued |
-| H4 | x/affiliates referrer code registration likely has similar uniqueness assumption | x/affiliates | trace `MsgRegisterAffiliate` → store.Set path | queued |
-| H5 | x/marketmap UpdateMarket vs CreateMarket may have asymmetric validation | x/marketmap | diff Create vs Update validation surface | queued |
-| H6 | Subaccount ID comparison anywhere user-controlled string used as key | x/subaccounts | grep subaccount-ID equality checks | queued |
+| ID  | Hypothesis                                                                                 | Module        | Method                                          | Status |
+| --- | ------------------------------------------------------------------------------------------ | ------------- | ----------------------------------------------- | ------ |
+| H1  | `x/listing.UpdateMarketParam` may have similar dup check pattern (reachable post-creation) | x/listing     | grep duplicate-check sites; verify case-folding | queued |
+| H2  | x/clob CLOB pair registration may have analogous case-sensitivity in pair ID creation      | x/clob        | trace `MsgCreateClobPair` → store.Set path      | queued |
+| H3  | x/sending memo field comparisons (if any) for IBC may have similar issues                  | x/sending     | grep memo equality checks                       | queued |
+| H4  | x/affiliates referrer code registration likely has similar uniqueness assumption           | x/affiliates  | trace `MsgRegisterAffiliate` → store.Set path   | queued |
+| H5  | x/marketmap UpdateMarket vs CreateMarket may have asymmetric validation                    | x/marketmap   | diff Create vs Update validation surface        | queued |
+| H6  | Subaccount ID comparison anywhere user-controlled string used as key                       | x/subaccounts | grep subaccount-ID equality checks              | queued |
 
 **Stop rule:** stop at first 1-2 confirmed real bugs to avoid boil-the-ocean. Each hypothesis gets ≤ 2h of effort; if not reproducible in localnet within that budget, mark theoretical and defer.
 
 **Honest verdict matrix (mandatory):** mirror Firedancer discipline. Reproduce on localnet (dYdX docker-compose). PoC must demonstrate state divergence empirically. Full Phase 4d trace before submission. NO false submissions to Cantina.
 
 **Cross-references:**
+
 - Intel digest: `/data/buzz/persistent/buzz-api/intel/external-writeups/2026-05-09-qed-dydx-oracle-hijack.md`
 - Doctrines: `brain/Doctrine.md` Canonicalization-Consistency + No-Overwrite-Guard
 - Detector gaps: `/data/buzz/persistent/buzz-api/ground-truth/implementation-verification-gaps.md` #137 + #138
@@ -59,17 +60,25 @@ ETA Theme 1+2 manual sweep: 3-4 hours focused work (next session, not today — 
 
 ## Submitted Reports
 
-- **2026-05-09 — Immunefi #77340 — Firedancer V1 Audit Comp — MED Chief — pending review**
+- **2026-05-09 — Immunefi #77340 — Firedancer V1 Audit Comp — MED Chief — CLOSED-BY-TRIAGE (15:20 UTC)**
   - Title: HTTP framing + WS upgrade smuggling chain (waltz/http) — RFC 7230 §3.3.3 / RFC 6455 §4.2 non-conformance
-  - Sub-findings: 6 (FD-HTTP-1/-2/-3/-4/-5/-7) all PoC-reproducible
-  - Deposit: $100 USDC (tx 0xa375c6...d398, ethereum-mainnet)
-  - Submitted ~15:06 UTC, ~1.9h before competition close
-  - Expected window: review 5-10 days, escalation 7-14 days, bounty 14-30 days
-  - First check: 2026-05-11 15:00 UTC (48h watchdog)
-  - 90-day disclosure committed (gist private until 2026-08-07)
-  - Detector class: HTTP-protocol-state (NEW C-codebase Class K candidate)
+  - Sub-findings: 6 (FD-HTTP-1/-2/-3/-4/-5/-7) all PoC-reproducible primitives
+  - Deposit: $100 USDC (tx 0xa375c6...d398, ethereum-mainnet) — **forfeited**
+  - Submitted 15:06 UTC, **closed 15:20 UTC** (14 minutes), triager andrew
+  - Reason: primitive-only PoCs (server accepts non-conformant framing) — no end-to-end exploit chain demonstration (proxy + Firedancer deployment, attacker-controlled bytes reaching GUI/RPC pre-auth)
+  - Outcome: -$100 net. p50 expected $6.5K → realized -$100 (calibration error 65×)
+  - Appeal/mediation: NOT available (Immunefi Audit Comp policy on triage-closed)
+  - Reopen: low probability (project discretion only). DO NOT contact, DO NOT public disclose, DO NOT mediate
+  - 90-day disclosure window stands (gist private until 2026-08-07). Defect IS real (RFC violations confirmed); just unmonetizable on Immunefi without exploit chain
+  - Detector class: Class K HTTP-protocol-state (defect confirmed) + Class L Calibration Gap (NEW, first entry)
   - Discovery: v6 deep-mode + Phase 4d manual trace re-audit
-  - 3 false positives avoided in same target (CHOREO/GOSSIP/RUNTIME re-audit caught) → $300 verdict-matrix savings
+  - 3 false positives avoided in same target (CHOREO/GOSSIP/RUNTIME re-audit caught) → $300 verdict-matrix savings still real
+  - Lesson captured into doctrine: brain/Doctrine.md "Pre-Submission PoC Standard" (PERMANENT)
+  - Routing rule applied next time: RFC defects without exploit chain → HackerOne or Standing Bounty (no deposit), NOT Immunefi Audit Comp
+  - Detector spec queued: #128 PoC Type Classifier (branch poc-type-classifier-v1)
+  - Loop 1 capture: `/data/buzz/persistent/buzz-api/learning/submissions/2026-05-09-firedancer-http-bundle.json` (outcome=closed-by-triage)
+  - Class L ground truth: `/data/buzz/persistent/buzz-api/ground-truth/2026-05-09-immunefi-primitive-vs-chain-calibration.md`
+  - Rejection log: rejection-001-imu-77340 (`/data/buzz/persistent/buzz-api/rejection-log.jsonl`)
 
 Ground truth $583M+ (+Jeton Swap Router $229K B.1, May 8): Ekubo B.8, Grok G, Wasabi H.2d, Kelp H.1, Drift H, Sharwa E+D, DABE H.2c, CVE J.4b.
 

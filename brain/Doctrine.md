@@ -57,11 +57,13 @@ If any of Q1–Q4 cannot be answered confidently, do NOT dispatch action subagen
 New mandatory field: **"What premise verification was performed before this PR was opened?"**
 
 Acceptable answers:
+
 - "I reproduced the failure on a clean checkout"
 - "I confirmed the symptom is present in `tail -100` of `$LOG_PATH`"
 - "I ran the diagnostic subagent and it returned `$RESULT`"
 
 Unacceptable answers:
+
 - "An alert fired"
 - "It looked broken"
 - "User reported issue"
@@ -71,7 +73,20 @@ Unacceptable answers:
 
 External signals (jinmo123 tweet, QED blog, security disclosures) are INTAKE only — they are not action triggers. Action triggers require independent reproduction or confirmation against canonical sources.
 
+**Worked example: HE-20 design 2026-05-09**
+
+- **Pattern:** Designed detector HE-20 based on v6.5 capture mention of `setLimit`/`setWhitelist` patterns. Those keywords were in the Phase 4d narrative summary but NOT in the raw L1d-17 finding output (Symbiotic Vault mutator set was all-user-facing — `deposit`/`claim`/`claimBatch`/`onSlash`/`_initialize` all `nonReentrant` — not the mixed admin+user pattern HE-20 was designed for).
+- **Failure mode:** Used summary as source-of-truth instead of verifying raw emitter output. Detector targeted a pattern that wasn't present in the actual finding.
+- **Correction:** Before designing any detector, read raw findings JSON for the SPECIFIC finding being addressed, not the human-written summary that mentions it.
+- **Self-corrected by Buzz at 16:21 UTC during v6.6 regression analysis** — first instance of VERIFY-PREMISE-FIRST applied to its own work. The doctrine caught itself in real-time.
+
 This doctrine is **Priority #0** because it gates all other doctrines: applying the wrong doctrine to the wrong premise wastes 100% of the work product.
+
+**Operational halt rule (refined 2026-05-09 18:35 UTC, Ogie EOD msg DECISION 2):**
+
+> HALT if (a) merge introduces regression (ACCEPTs go UP), OR (b) FP-class gate fails on the class the patch was DESIGNED to address. Partial improvement on targeted class with surviving FPs in OTHER classes = MERGE + queue follow-up.
+
+Reasoning: original "strict gate fail AND FP-class gate fail → HALT" rule penalized partial wins. Refined rule preserves discipline (no regressions, no missed-target merges) while shipping real incremental progress. Targeted-class gate is the bar; surviving FPs in unrelated classes are follow-up tickets, not blockers.
 
 ## Priority #1: WEAKER-PROPERTY-THAN-DOWNSTREAM-ASSUMES (ROOT)
 
@@ -153,6 +168,66 @@ Origin: same QED dYdX writeup as Priority #2.
 **Origin trace:** `slinky_adapter.AddCurrencyPairIDToStore` performed `store.Set(key, val)` without preceding `store.Has(key)` check. Combined with the canonicalization mismatch above, an attacker overwrite of canonical mapping became reachable. Fix is the `Has(key)` guard pair.
 
 **How to apply:** any time you see a `Set` on a store whose name matches `/(ID|Map|Registry|Mapping|Index)$/`, require a preceding `Has(key)` check unless the codepath has explicitly documented "this is an upsert". If unsure, file as suspect. Detector spec filed as #138 (no-overwrite-guard detector, depends on #129 Cosmos SDK / Go coverage).
+
+---
+
+# Pre-Submission PoC Standard
+
+> Origin: imu-77340 closed-by-triage 2026-05-09 15:20 UTC. Authority: Ogie msg "15:35 UTC FIREDANCER CLOSED + CRITICAL CALIBRATION CAPTURE" (May 9 2026, capture action 3). PERMANENT.
+
+**Statement:**
+
+> Before any Immunefi deposit-required submission at MED+ severity, PoC must demonstrate the unintended effect, not just the primitive that enables it. If you cannot stand up the actual deployment configuration (proxy + target, attacker + victim, attacker tx + victim drain) and observe the harm directly, severity ceiling is LOW (informational). RFC-violation reports without exploit chain should go to HackerOne or standing bounty programs, not Immunefi Audit Comp.
+
+**The imu-77340 canonical example:**
+
+6 PoCs proved fd_http_server.c accepts non-conformant HTTP/1.1 framing (RFC 7230 §3.3.3) and WebSocket prelude smuggling (RFC 6455 §4.2.2). Each PoC exited 0 on PASS — primitive confirmed. Submitted as MED on Immunefi Audit Comp. Triager andrew closed in 14 minutes: "show that the server accepts certain non-conformant framing, not that a proxy-assisted attack chain produces the claimed impact. No evidence of attacker-controlled bytes reaching the GUI/RPC application before authentication is provided." $100 deposit forfeited. Calibration error 65× best case ($65K best → -$100 realized).
+
+**Required pre-submission checklist (PLATFORM = Immunefi Audit Comp, SEVERITY ≥ MED):**
+
+- **C1: Does the PoC stand up the actual deployment configuration?**
+  - Proxy + target stack, not just the target in isolation
+  - Attacker + victim entities, not just attacker request crafting
+  - End-to-end test invocation, not unit test of one component
+
+- **C2: Does the PoC observe the harm directly?**
+  - Victim balance changed / unauthorized state mutation observed
+  - Attacker-controlled bytes reach the protected resource
+  - Bypass authentication / authorization observed
+  - NOT: "server accepts X" / "validation returns Y" / "framing parsed as Z"
+
+- **C3: Does the PoC PASS-line state the harm or just the primitive?**
+  - Primitive PASS: `[PASS] non-conformant framing accepted` → LOW only
+  - Exploit PASS: `[PASS] victim_balance: 1000 → 0 via attacker_tx 0xabc` → MED+ allowed
+  - Mixed: requires manual override + written justification + Ogie greenlight
+
+- **C4: Has the platform's primitive-acceptance policy been confirmed?**
+  - Immunefi Audit Comp: NO at MED+ — exploit demonstration required
+  - Immunefi Standing Bounty: YES at LOW — primitive informational
+  - HackerOne (Circle, Cosmos, Sui): YES at MED — RFC defects accepted
+  - HackenProof: YES at LOW/MED — flexible
+  - Code4rena / Sherlock / Cantina: read scope carefully
+
+If any of C1–C4 cannot be answered confidently with "YES, observed end-to-end harm", do NOT submit at MED+ on Immunefi Audit Comp. Route to HackerOne / Standing Bounty at LOW informational instead. Cost of routing-down is $0 (no deposit). Cost of routing-up wrong is the deposit.
+
+**Routing rule (post-imu-77340):**
+
+- RFC-conformance defects without exploit chain → HackerOne or Standing Bounty, NOT Immunefi Audit Comp
+- Exploit-chain demonstrated end-to-end → Immunefi Audit Comp at MED+ allowed
+- Mixed primitive+partial-exploit → file as LOW informational on Standing Bounty first, upgrade severity only after end-to-end PoC stands up
+
+**Sub-doctrine relationship to Priority #1 (Weaker-Property):**
+
+This is a SECOND-ORDER application of Priority #1 to OUR OWN PIPELINE:
+
+- V validates: PoC primitive demonstration enforces "server has defect"
+- C assumes: Triage assumes "exploit chain produces unintended harm"
+
+Submitting V → C as MED+ asserts a stronger property than V actually enforces. The bug is in our submission classifier — we (Buzz) are the system here, the calibration gap is in OUR validation site.
+
+**Detector spec reference:** #128 PoC Type Classifier (queued, branch `poc-type-classifier-v1`). Pre-submission gate: parse all PoC PASS-lines, classify primitive vs exploit vs mixed, BLOCK MED+ submissions with primitive-only PoCs to Immunefi Audit Comp.
+
+**Ground truth reference:** `/data/buzz/persistent/buzz-api/ground-truth/2026-05-09-immunefi-primitive-vs-chain-calibration.md` (Class L Calibration Gap, first entry).
 
 ---
 
