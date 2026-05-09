@@ -1,6 +1,49 @@
 # AIBTC Signals
 
-Ionic Nova. Streak Day 2 of restart. 402 fixed. Relay unstuck. Beat mix: 2 BM + 2 quantum + 1 aibtc-network. Cap 6/day. Cooldown 60min. Revenue ~239,500 sats.
+Ionic Nova. **AUTOPILOT HALTED 2026-05-10** (GROUND-TRUTH-LANDING doctrine). Cap 6/day. Cooldown 60min. Revenue ~239,500 sats (pre-halt; no new earnings since at minimum 2026-04-30).
+
+## 2026-05-10 Halt — Ground-Truth Inactivity Discovered
+
+Quote from this morning's P1 EIC verification status report:
+
+> "Ionic Nova has been EFFECTIVELY INACTIVE since 2026-04-30 — 9 days. The 6/day signal autopilot has NOT been firing (or has been firing but not landing — same outcome from the network's perspective)."
+
+Ground truth: `/api/agents/{btc}` returned `lastActiveAt: 2026-05-03T11:25:01Z`, no outbound message in inbox since `2026-04-30T20:26Z`. Local script success logs claimed daily filings; signals did not land on the network.
+
+**HALT executed 2026-05-10 22:10 UTC:**
+- 6 morning-signals-v2.sh cron slots commented out (backup at `/home/claude-code/crontab.pre-halt-2026-05-10.bak`)
+- phase-a-trigger.sh cron commented out
+- Halt-guard added to morning-signals-v2.sh script (defense in depth — aborts even if cron re-enables)
+- Authority: Ogie msg "P1 DECISION CONFIRMED: HALT + STRUCTURAL FIX" (May 10 2026)
+
+**Restart conditions (ALL three required):**
+
+1. **P2 aibtc-inbox-sender-v1 verified working** — Opal reply landed, paymentTxid confirmed via post-send `/api/inbox` check
+2. **#129 landing verifier built + tested** on at least 2 independent action types
+3. **EIC payout structure confirmed live OR unambiguously dead** — whoabuddy DM, #818 follow-up thread, or direct ledger check
+
+**Restart sequence (canonical, applies to ANY halted autopilot):**
+
+1. Run forced manual filing (one quantum signal, hand-crafted, Opus drafted)
+2. Verifier confirms landed within 60s → green light next attempt
+3. Verifier confirms NOT landed → diagnose, fix, repeat from step 1
+4. Only after **3 consecutive verified-landed signals** → re-enable cron
+
+Do NOT autopilot-restart based on hope. Verify three times.
+
+## Retroactive Correction — 2026-05-09 EOD report was WRONG
+
+> 2026-05-09 EOD reported "AIBTC day 7 streak protected." Discovered 2026-05-10 morning that streak was actually broken since 2026-04-30 (9-day server-side inactivity vs local-log claim of daily filing). Streak metric retired pending GROUND-TRUTH-LANDING verifier (#129) implementation.
+
+**Cost:** 9 days of qwen3 compute on signal drafts that never landed + 1 wrong EOD report + ~9 days of false-confidence in revenue projection + operator trust hit (operator caught it, not the agent — wrong direction).
+
+**Ground truth file:** `/data/buzz/persistent/buzz-api/ground-truth/2026-05-10-aibtc-local-vs-network-landing-gap.md` (Class L Calibration Gap second entry).
+
+**Doctrine:** brain/Doctrine.md Priority #4 GROUND-TRUTH-LANDING (filed concurrently).
+
+---
+
+
 
 ## Inbox Sender Script (queued — Ogie EOD msg "AIBTC inbox revival" Action 3, May 10 2026)
 
@@ -8,6 +51,7 @@ Ionic Nova. Streak Day 2 of restart. 402 fixed. Relay unstuck. Beat mix: 2 BM + 
 **Status:** SPEC FILED, build pending. Trigger: when 5+ pending UI-paste sends accumulate (Ogie-cycles-waste threshold).
 
 **Spec:**
+
 - Envelope shape per @stacks require-path (memory `reference_aibtc_inbox_sender.md`: prior attempt blocked at envelope-shape final mile, 2026-04 era — likely solvable now with current x402 v2 sBTC client experience)
 - payTo field extracted from the 402 challenge response (per-recipient, not constant)
 - 100-sat sBTC payment per send (fixed protocol fee)
@@ -17,6 +61,7 @@ Ionic Nova. Streak Day 2 of restart. 402 fixed. Relay unstuck. Beat mix: 2 BM + 
 - Confirm receipt by polling `/api/inbox/{peer_addr}` post-send for the new message, log `paymentTxid` from API response.
 
 **Dependencies:**
+
 - x402 v2 sBTC client already shipped (post-rewrite) — likely the unblocker for the envelope-shape gap
 - Wallet unlock at session start (memory `reference_aibtc_wallet.md`) — already in routine
 - 100 sats per send budget — minimal, not gated
@@ -26,8 +71,6 @@ Ionic Nova. Streak Day 2 of restart. 402 fixed. Relay unstuck. Beat mix: 2 BM + 
 **Doctrine link:** brain/Doctrine.md "AIBTC presence has two halves" standing rule. Going dark on inbox while running signal autopilot signals one-way-broadcast not collaboration. Sender script closes the loop autonomously vs forcing every reply through Ogie's UI paste.
 
 ---
-
-
 
 ## ⚠️ POST-FRONTIER REVIEW ITEM (May 9 2026 — Ogie msg 6484, decision 3)
 

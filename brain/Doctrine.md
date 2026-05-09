@@ -26,6 +26,69 @@ Going dark on inbox while running signal autopilot looks worse than going dark o
 
 **Weekly EOD health metrics (added line):** total unread, longest unanswered Tier 1 age, reply rate (sent/received), relationship debt count (Tier 1 > 48h). Targets: zero Tier 1 > 48h, reply rate > 80%, total unread < 20.
 
+## Standing rule (May 10 2026 — Ogie msg "FULL POWER HUNTING MODE", PERMANENT)
+
+**Every target audit runs all 10 pipeline layers, no exceptions. Speedrunner mode is permanently retired for audit work. Every finding ≥ MED severity runs through #128 PoC type classifier + #130 AI triage simulator before any submission. Every autopilot loop has #129 GROUND-TRUTH-LANDING verifier wired.**
+
+**Hunt deep. Ship clean. No shortcuts.**
+
+**The 10-layer pipeline (mandatory):**
+
+| Layer | Purpose | Detector ref |
+|---|---|---|
+| L1a | Semgrep raw scan (solidity-only `--include='*.sol'`) | #124 |
+| L1b | Semgrep custom rules (HE-03b lib/exclude) | #123 |
+| L1c | Slither baseline + custom detectors | — |
+| L1d | Phase 4b deep walk with structured field emission (reverse_mutability/visibility/forward_visibility) | #117 + bd8b574 |
+| L2 | Cross-contract call graph + reachability analysis | — |
+| L3 | Invariant inference (Phase 12, with #139 flow-direction tuning when v6.7 lands) | #139 |
+| L4 | Adversarial debate (multi-agent disagreement engine) | — |
+| L5 | Phase 4d manual trace (Opus, deep contextual review) | — |
+| L6 | Skeptic prefilter (HE-19 + HE-20 + HE-21 + #122 reverse_mutability auto-reject) | v6.6 |
+| L7 | Pattern C/M/K classifier (with #126 fund-flow gate) | #126 |
+| L8 | Ground truth cross-reference (compare vs confirmed-findings catalog) | — |
+| L9 | AI triage simulation (forefy 6-rule simulator) | #130 |
+| L10 | Submission-ready packaging (commit hash + file:line scope + privilege declaration + atomic framing + sanitizer pass) | — |
+
+**No-skip rules (PERMANENT):**
+
+- ❌ Skip Layer 4 (adversarial debate) — keeps single-LLM blind spots in check
+- ❌ Skip Layer 5 (Phase 4d manual trace) — Opus contextual review catches what static analysis misses
+- ❌ Skip Layer 9 (#130 AI triage simulation) — would have saved $100 yesterday
+- ❌ Skip Layer 10 (submission-ready packaging) — sanitizer + framing rules are non-negotiable
+- ❌ Submit without #129 landing verifier wiring confirmed
+- ❌ Submit without #130 AI triage PASS
+
+If ANY layer fails or any rule blocks: HALT, surface to Ogie, await decision. Do NOT force-merge or force-submit.
+
+**Hunt cadence (24/7):**
+
+- L1 watchdog every 15 min: 30 baselined repos auto-monitored, new commits trigger L1 scan, L1 hit → escalate to full pipeline auto-spawn
+- L2 daily 06:00 UTC: 3 targets per day from Top Targets queue (#522 priority order), each gets full 10-layer treatment, output = ground truth entry + Loop 1 capture regardless of finding count
+- L3 weekly Sunday 00:00 UTC: 1 hot target gets EXTENDED scan (historical commit walk last 30 days, dependency drift, audit firm coverage gap)
+- L4 intel enrichment always running: DefiHackLabs + ClaraHacks + Pashov + bug bounty disclosure feeds + @forefy + similar high-signal accounts → every new pattern → ground truth entry + detector candidate proposal
+
+**Honest metric targets:**
+
+- Ground truth catalog growth: 5+ new confirmed-real entries per week
+- False-submission rate: 0
+- AI-triage pass rate (#130 simulator): 100% on submitted
+- Submission velocity: 2-3 per week, ALL having passed full 10-layer + #130
+- Confirmed payout rate: 30%+ of submissions paid within 60 days
+
+**Anti-metrics (do NOT optimize):** raw scan count, findings per scan, submission count, local-autopilot-success counts (per Priority #4 GROUND-TRUTH-LANDING).
+
+**Compute budget:** $50-120/week (Anthropic Pro Max + qwen3 local + #130 simulator local). Spike → HALT, diagnose, surface.
+
+**Rationale:** imu-77340 closed in 14 min on 4/6 forefy AI triage rule violations. Cost of full-power discipline: $50-120/wk compute. Cost of shortcuts: $100/forfeited deposit + reputation hit + days of lost momentum. Math is obvious.
+
+**Cross-references:**
+
+- imu-77340 ground truth: `/data/buzz/persistent/buzz-api/ground-truth/2026-05-09-immunefi-primitive-vs-chain-calibration.md` (4/6 rule postmortem)
+- forefy intel: `/data/buzz/persistent/buzz-api/intel/2026-05-09-forefy-ai-triage-rules.md`
+- GROUND-TRUTH-LANDING doctrine: Priority #4 below
+- Pre-Submission AI-Triage Standard: post-Priority-3 section
+
 ---
 
 # Detector Doctrines (Priority-Ordered Hierarchy)
@@ -102,6 +165,19 @@ External signals (jinmo123 tweet, QED blog, security disclosures) are INTAKE onl
 - **Failure mode that would have happened without verification:** Burned 100 sats on assumed-text + assumed-sender-capability + assumed-scope. Worse: drafted Opal reply Opus-in-context, then discovered cap=480c made it physically unsendable; then discovered API limit=100 returned 32 distinct peer threads (not 8); then discovered most "53 remaining" were already-answered, leaving only 5 truly unanswered (Opal + 4 others, of which 3 are auto-archive Tier 4).
 - **Correction:** Each premise (text-supplied / sender-exists / unread-count / char-cap) verified independently against ground truth (re-read directive / `ls scripts/aibtc-inbox-sender*` / `curl /api/inbox?limit=100` / measure max ever-sent message in thread = 473c). Three blockers surfaced to operator BEFORE any send. Operator confirmed corrections (D1 draft approved, D2 manual UI paste, D3 API authoritative).
 - **Self-corrected by Buzz at 21:50 UTC** — second instance of VERIFY-PREMISE-FIRST applied to its own work. Cost of premise verification: 5 minutes. Cost of premise non-verification: 100 sats on a failing send + reputational risk if truncated nonsense reaches Opal.
+
+**Worked example #4: AIBTC autopilot streak hallucination 2026-05-10**
+
+- **Pattern:** AIBTC autopilot reported "Day 7 streak protected (6/6 cap)" on 2026-05-09 EOD based on local script success logs. Ground-truth query of `/api/agents/{address}` showed `lastActiveAt: 2026-05-03T11:25:01Z` and no outbound message since `2026-04-30T20:26Z`. The "streak" was a local-log artifact; signals were not landing on the network for 9 days.
+- **Failure mode:** Local script return-code success treated as proof of network landing. No server-side confirmation step. EOD report aggregated local logs into "streak protected" claim with zero ground-truth verification. 9 days of qwen3 compute spent on signals that never landed + false-confidence streak metric + 1 wrong EOD report.
+- **Correction:** /api/agents/{btc} ground-truth query at P1 EIC verification surfaced the gap. Cron disabled + script halt-guard added + #129 landing-verifier filed as restart prerequisite. Streak metric retired pending verifier ship.
+- **Self-corrected by Buzz at 22:05 UTC** during P1 EIC verification — third instance of VERIFY-PREMISE-FIRST. Cost of non-verification: 9 days of compute + EOD-report integrity hit.
+
+**Rule (codified):**
+
+> For any autonomous outbound action (signal filing, message sending, contract submission, payment, on-chain tx, etc.), success = server-side ground-truth confirmation of landed state, NOT local script return code. Build a verification step into every autopilot loop. No autopilot fires without the verifier wired.
+
+**Pattern name: GROUND-TRUTH-LANDING.** Filed as Priority #4 in Doctrine hierarchy (see below). Detector: #129 landing-verifier (queued, branch landing-verifier-v1).
 
 **Cross-check cadence (added 2026-05-10 from AIBTC inbox revival directive):**
 
@@ -196,11 +272,99 @@ Origin: same QED dYdX writeup as Priority #2.
 
 **How to apply:** any time you see a `Set` on a store whose name matches `/(ID|Map|Registry|Mapping|Index)$/`, require a preceding `Has(key)` check unless the codepath has explicitly documented "this is an upsert". If unsure, file as suspect. Detector spec filed as #138 (no-overwrite-guard detector, depends on #129 Cosmos SDK / Go coverage).
 
+## Priority #4: GROUND-TRUTH-LANDING
+
+Origin: AIBTC autopilot streak hallucination 2026-05-10 (P1 EIC verification). Authority: Ogie msg "P1 DECISION CONFIRMED: HALT + STRUCTURAL FIX" (May 10 2026). PERMANENT.
+
+**Statement:**
+
+> For any autonomous outbound action (signal filing, message sending, contract submission, payment, on-chain tx), success = server-side ground-truth confirmation of landed state, NOT local script return code. Build a verification step into every autopilot loop. No autopilot fires without the verifier wired.
+
+**Specialization of #0 (VERIFY-PREMISE-FIRST):** the local script's success-claim is the premise; the server-side landed-state is the ground truth. Without verification, the local-claim is treated as truth and downstream metrics (streak, EOD reports, revenue projections) compound the false positive.
+
+**The 2026-05-10 canonical example:**
+
+morning-signals-v2.sh ran 6 slots × N days, each slot returned exit 0 → local autopilot logged "filed" → daily aggregator counted 6/6 toward streak → EOD report claimed "Day 7 streak protected." Ground-truth `/api/agents/{btc}` query showed `lastActiveAt: 2026-05-03`, no outbound message since `2026-04-30`. Nine days of compute spent, zero signals landed, false confidence in streak metric, retroactive correction needed on EOD report.
+
+**How to apply:**
+
+For every autopilot action, register a paired verifier:
+
+| Action type         | Verifier check                                                                |
+| ------------------- | ----------------------------------------------------------------------------- |
+| AIBTC signal filing | `GET /api/signals?address={addr}&since={ts}` confirms `signal_id` in response |
+| AIBTC inbox send    | `GET /api/inbox/{recipient_addr}` confirms `msg_id` in latest list            |
+| Immunefi submission | `GET /api/reports/{report_id}` confirms `status != "Closed-Spam"`             |
+| On-chain tx         | Etherscan/Hiro/Solana RPC confirms tx in N blocks                             |
+| HTTP POST endpoint  | confirm the resource at the returned URL is reachable + content-matches       |
+
+Generic interface: `register_post_action_verifier(action_type, verifier_fn, timeout_seconds)`. On verifier fail → ALERT War Room + log to `landing-failures/`. On verifier timeout → HALT autopilot + ALERT + await operator decision. Never report success on local-script-success alone.
+
+**Restart sequence (when restoring an autopilot post-halt):**
+
+1. Run forced manual filing (one signal/send/tx, hand-crafted, Opus drafted)
+2. Verifier confirms landed within timeout → green light next attempt
+3. Verifier confirms NOT landed → diagnose, fix, repeat from step 1
+4. Only after 3 consecutive verified-landed actions → re-enable autopilot
+
+Do NOT autopilot-restart based on hope. Verify three times.
+
+**Detector reference:** #129 landing-verifier (queued, branch landing-verifier-v1). Required to ship before AIBTC autopilot restart, Opal sender production-ready, or Immunefi auto-followup.
+
+**Sub-doctrine to #0:** Class L Calibration Gap second entry — local-vs-network landing gap. See `/data/buzz/persistent/buzz-api/ground-truth/2026-05-10-aibtc-local-vs-network-landing-gap.md`.
+
 ---
 
-# Pre-Submission PoC Standard
+# Pre-Submission AI-Triage Standard (formerly "Pre-Submission PoC Standard", expanded 2026-05-10 from forefy intel)
 
-> Origin: imu-77340 closed-by-triage 2026-05-09 15:20 UTC. Authority: Ogie msg "15:35 UTC FIREDANCER CLOSED + CRITICAL CALIBRATION CAPTURE" (May 9 2026, capture action 3). PERMANENT.
+> Origin: imu-77340 closed-by-triage 2026-05-09 15:20 UTC. Authority: Ogie msg "15:35 UTC FIREDANCER CLOSED + CRITICAL CALIBRATION CAPTURE" (May 9 2026, capture action 3). EXPANSION authority: Ogie msg "CRITICAL INTEL: AI TRIAGE RULES LEAKED" (May 10 2026, post-forefy intel ingest). PERMANENT.
+
+## The 6 forefy AI-Triage Rules (every submission must pass ALL)
+
+Source: @forefy reverse-engineered HackenProof's `hackenproof-bulk-triage` skill. Almost certainly applies to Immunefi (andrew @ imu-77340 = 14-min close = LLM-assisted triage pattern).
+
+| # | Rule | Failure mode | Rewrite playbook |
+|---|---|---|---|
+| **R1** | Exact commit hash + chain required | "latest deployed" / no commit-pin → REJECT | Add commit hash + chain to every submission preamble |
+| **R2** | Specific file:line scope (matched to scope entry name) | vague "in the contract" → REJECT | Pin file:line in summary, not just inside PoC |
+| **R3** | No weak-bug-category pattern matches | fee-on-transfer / governance / RFC / common acknowledged crits → DOWNGRADE or REJECT | Reframe away from weak categories OR add explicit non-acknowledged distinguishing factor |
+| **R4** | PoC demonstrates exploit not primitive | "[PASS] accepts X" / "framing accepted" / "validation bypassed" → DOWNGRADE; "[PASS] funds drained" / "victim balance changed" / "unauthorized state mutation" → ALLOW MED+ | Build end-to-end exploit chain with observed-harm PoC output |
+| **R5** | Privilege level explicitly declared | implicit privilege (let triager infer) → REJECT or DOWNGRADE | Add explicit "Privilege required: NONE / any EOA / any signer" line in summary |
+| **R6** | Single-block atomic framing | multi-step coordination prose ("if X then Y could…") → REJECT as theoretical | Rewrite to "Attacker calls X. State mutates to Y. No coordination required." Avoid "if/then/could/would/might" |
+
+**Operational rule:** every bounty submission must pass simulated AI triage before ship. Skip = forfeit deposit + reputation hit. Verification: run #130 simulator pre-submission, attach result to submission audit log.
+
+**Pre-submission gate (PLATFORM = Immunefi Audit Comp / HackenProof, SEVERITY ≥ MED):**
+
+- Run #130 ai-triage-simulator-v1 on draft markdown
+- ALL 6 rules must PASS or BLOCK
+- Any rule fails → rewrite per playbook, re-run, repeat until ALL PASS
+- Override flag: Ogie can force-submit on documented exception (logged to audit trail)
+
+**Platform calibration:**
+
+| Platform | R1 | R2 | R3 | R4 | R5 | R6 |
+|---|---|---|---|---|---|---|
+| Immunefi Audit Comp | strict | strict | strict | strict | strict | strict |
+| Immunefi Standing Bounty | strict | strict | relaxed | relaxed (LOW informational ok) | strict | strict |
+| HackerOne (Circle, Cosmos, Sui) | strict | strict | relaxed (RFC ok) | relaxed (RFC ok) | strict | relaxed |
+| HackenProof | strict | strict | strict | strict | strict | strict |
+| Code4rena/Sherlock/Cantina | per contest spec | per contest spec | per contest spec | per contest spec | per contest spec | per contest spec |
+
+## imu-77340 4/6 rule postmortem (canonical example)
+
+| Rule | imu-77340 status |
+|---|---|
+| R1 | ✅ commit `c141728` + chain included |
+| R2 | ✅ `src/waltz/http/fd_http_server.c` with line numbers |
+| R3 | ❌ "RFC 7230/6455 non-conformance" pattern-matches as informational |
+| R4 | ❌ PoC outputs `[PASS] non-conformant framing accepted` not `[PASS] funds drained` |
+| R5 | ❌ Never said "any unauthenticated TCP client" — let AI infer |
+| R6 | ❌ "If a CL.TE desync exists, then queue poisoning could divert..." — coordination framing |
+
+**Score: 2/6 PASS. 4-rule failure compound. 14-min close was efficient pattern-match, not lazy review.** Single-cause "primitive vs exploit chain" framing (yesterday) was incomplete — actual root cause is multi-rule failure.
+
+## Original C1-C4 Pre-Submission PoC Checklist (now subsumed under R4)
 
 **Statement:**
 
