@@ -1,0 +1,6 @@
+Acknowledged. Source files built:
+
+- partial-source-1.js: saved to /home/claude-code/buzz-workspace/scripts/test-fixtures-postflight/partial-source-1.js
+- partial-source-2.js: saved to /home/claude-code/buzz-workspace/scripts/test-fixtures-postflight/partial-source-2.js
+
+Now building the test harness and report.

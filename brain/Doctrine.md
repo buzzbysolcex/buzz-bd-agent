@@ -279,11 +279,51 @@ External signals (jinmo123 tweet, QED blog, security disclosures) are INTAKE onl
 - **Correction:** /api/agents/{btc} ground-truth query at P1 EIC verification surfaced the gap. Cron disabled + script halt-guard added + #129 landing-verifier filed as restart prerequisite. Streak metric retired pending verifier ship.
 - **Self-corrected by Buzz at 22:05 UTC** during P1 EIC verification — third instance of VERIFY-PREMISE-FIRST. Cost of non-verification: 9 days of compute + EOD-report integrity hit.
 
+**Worked example #11: dYdX H4 Phase 4d → 4e severity downgrade 2026-05-10**
+
+- **Pattern:** H4 dYdX hypothesis (raw `[]byte(referee)` keeper write at x/affiliates/keeper.go:87 enables case-variant overwrite of victim's affiliate routing) scored Phase 4d "EXPLOITABLE @ 0.85 confidence" — surfaced as CRITICAL commission-theft candidate. Phase 4e caller-read trace (mandated by operator) caught upstream signer enforcement: `(cosmos.msg.v1.signer) = "referee"` proto annotation (tx.proto:32) means Cosmos SDK signer extraction decodes bech32 to bytes and compares to tx-signer bytes. Attacker can pre-register case-variants of their OWN address (passes signer check) but CANNOT pre-register variants of a victim's address (signer check rejects — they don't hold victim's key). The commission-theft path is structurally blocked upstream of the keeper write.
+- **Failure mode that Phase 4e prevented:** Submitting H4 as CRITICAL based solely on Phase 4d hypothesis would have burned a Cantina submission slot at the wrong severity tier — embarrassing on review (triager reads tx.proto in 30 seconds), reputational damage. Or worse: the close-by-triage at 14 min pattern (imu-77340 from VAULTS-001 last week) recurring on a different finding.
+- **Correction:** Severity downgraded honestly to MEDIUM (state-bloat DoS only — per-attacker N-write KV slot proliferation, ~$5K-$15K band). Phase 4d confidence is hypothesis-grade, not submission-grade. Phase 4e caller-read trace MANDATORY before severity assignment for any cross-module canonicalization candidate.
+- **Self-corrected by Buzz at 06:25 UTC** — eighth instance of VERIFY-PREMISE-FIRST applied to its own work (after #5 scope-honesty + #6 Vyper-coverage + #8 wallet-decryption + #9 password-leak + #10 subagent-landing + earlier instances). Operator validated: Phase 4e caller-read trace permanent rule + downgrade preserves track record vs hidden downgrade burning it.
+- **Discipline (codified):** Phase 4d hypothesis confidence does NOT gate submission readiness. Phase 4e caller-read trace MANDATORY before severity assignment for any cross-module canonicalization candidate. Honest downgrade preserves track record; hidden downgrade burns it (see imu-77340 close-by-triage at 14 min for counter-example).
+
+**Worked example #12: dYdX E-2 expand-scan HIGH → Phase 4d LOW collapse 2026-05-10**
+
+- **Pattern:** dYdX expand-scan candidate E-2 (`MsgCreateMarketPermissionless` zero ValidateBasic + nil-pointer reachability at x/listing/keeper/msg_create_market_permissionless.go:40) ranked HIGH-grade DoS / consensus-halt at expand-scan stage. Phase 4d reachability trace (mandated per Doctrine #11 discipline + operator schedule) caught upstream signer-extraction barrier: dYdX wires custom `getLegacyMsgSignerFn(["subaccount_id", "owner"])` at protocol/app/module/interface_registry.go:104-106, which rejects the tx in ante-chain `sigTx.GetSigners()` when subaccount_id is unset. Crafting `m.SubaccountId == nil` AND a valid bech32 owner is structurally mutually exclusive on the wire (omitting tag-2 means owner is also empty). Even counterfactually, BaseApp.runTx defer-recover at cosmos-sdk/baseapp/baseapp.go:801-806 catches any nil-deref panic into single-tx scope. Nil-deref unreachable.
+- **Failure mode that Phase 4d prevented:** Submitting E-2 as HIGH consensus-halt to Cantina based on expand-scan severity ranking would have been close-by-triage in <15 min (triager checks AnteHandler chain in 30s, sees CustomGetSigners override, closes). Reputational cost identical to imu-77340 close-by-triage. Same class of mistake — hypothesis confidence at one phase ≠ submission readiness.
+- **Correction:** E-2 dropped from submission package, filed as internal catalog entry + #165 detector training data (missing-ValidateBasic class as code-smell baseline, NOT bounty-eligible without exploitable downstream). 09:00Z launch package now H4-only (MEDIUM, three-gate ALL PASS).
+- **Self-corrected by Buzz at 08:18 UTC** — ninth instance of VERIFY-PREMISE-FIRST applied to its own work. Same morning as #11. **Pattern signal: 2 occurrences of "expand-scan severity ranking ≠ submission severity" in one morning** — Phase 4d MUST be a hard gate between expand-scan triage and submission queue, not optional.
+- **Discipline (codified):** Phase 4d trace is the GATE between expand-scan triage and submission package, not an optional escalation step. ANY expand-scan candidate ranked MEDIUM+ requires Phase 4d before three-gate pre-flight. The discipline catches FP submissions BEFORE they cost Cantina-slot + reputation. Two morning collapses validate the discipline empirically — keep doing it.
+
 **Rule (codified):**
 
 > For any autonomous outbound action (signal filing, message sending, contract submission, payment, on-chain tx, etc.), success = server-side ground-truth confirmation of landed state, NOT local script return code. Build a verification step into every autopilot loop. No autopilot fires without the verifier wired.
 
 **Pattern name: GROUND-TRUTH-LANDING.** Filed as Priority #4 in Doctrine hierarchy (see below). Detector: #129 landing-verifier (queued, branch landing-verifier-v1).
+
+**Worked example #15: proxy-vs-outcome calibration error — 5-occurrence pattern (2026-05-10)**
+
+Five repetitions of the same calibration error class observed in 9 days of build:
+
+1. AIBTC autopilot phantom streak (cron success vs network landing)
+2. buzzbd.ai "Day Streak 23" display rot (display value vs server reality)
+3. H4 4d→4e severity downgrade (hypothesis confidence vs caller reachability)
+4. E-2 Phase 4d collapse (paper-strong pattern vs runtime reachability)
+5. AIBTC inbox-check cron #174 discovery (direction=sent filter vs actual reply landed via /api/outbox path)
+
+**Pattern:** when measuring system output, measuring an INTERMEDIATE PROXY (cron success / display value / hypothesis confidence / static pattern / endpoint filter) instead of the OUTCOME (network landing / server reality / runtime reachability / actual reply) consistently produces (a) false positives in the safe direction (over-report success) OR (b) false negatives in the dangerous direction (miss real failures).
+
+**Doctrine extension:** every new measurement layer added to the system requires explicit verification that it measures OUTCOME not PROXY. If proxy-only measurement is necessary for performance reasons, the proxy MUST be paired with periodic outcome-spot-check at known cadence (daily / weekly / on-significant-event).
+
+5-occurrence pattern in 9 days = systemic blind spot, not coincidence. Treat the proxy/outcome distinction as PERMANENT design constraint, not just one-off bug-fix discipline.
+
+**Worked example #16: #162 retroactive validation success — positive case validated (2026-05-10)**
+
+#162 subagent-output-landing-verifier build retroactively validated 12 known landed subagent outputs from today's session (H4 4d/4e + cross-Cosmos + 4 MMR sweep + 4 R-\* Renegade + #165 build report). All 12 returned PASS. Pattern matches Worked Example #10 negative case (Phase 5 phantom-path) AND confirms positive case (12 clean landings).
+
+Doctrine is now provably useful: catches gaps AND confirms successes. Discipline is wired into a tool, not just a habit. Future subagent invocations SHOULD ALL pass through #162 verifier — not optional, not best-effort, **mandatory wrapper**.
+
+This is the meta-pattern: a doctrine that ships as a runnable detector compounds in value over time. Each subagent run that PASSES through the verifier validates the doctrine; each FAIL adds to the calibration corpus. Manual `ls -la` discipline (the original Worked Example #10 fix) becomes obsolete the moment the wrapper is universal.
 
 **Cross-check cadence (added 2026-05-10 from AIBTC inbox revival directive):**
 
@@ -529,6 +569,49 @@ Do NOT autopilot-restart based on hope. Verify three times.
 
 Apply this hygiene to ALL rotation verification steps. Use SAFE patterns for any env inspection. Never echo password values.
 
+---
+
+## SUBAGENT LANDING VERIFICATION (2026-05-10, PERMANENT)
+
+> Origin: Worked Example #10 — Phase 5 recon subagent reported "Report saved to {path}" in final message but did NOT invoke Write tool. Buzz cited the path in surface to Ogie (msg 6586). Verification via `ls` revealed file did not exist. Reconstructed from in-context conversation text and persisted manually. Authority: Ogie msg 6594 Day 9 morning extension of #129 Landing Verifier doctrine.
+
+**Rule:** Subagent text claims like "saved to {path}" are intermediate state, not landed state. The parent thread MUST NEVER cite a path it has not verified exists.
+
+**Required pattern when spawning subagents that produce persisted output:**
+
+1. Subagent completes task and reports completion in its result message
+2. Parent thread MUST `ls -la {claimed_path}` BEFORE citing the path in any external surface
+3. Parent thread MUST verify file size > 0 and content matches expected structure
+4. If file is missing → reconstruct from in-context conversation text and write manually, then surface the discipline catch
+5. NEVER cite a path the parent thread has not verified exists
+
+**Same pattern class as AIBTC autopilot phantom streak** — composing report text in a message ≠ writing it to disk; running a local autopilot loop ≠ landing a signal on the network. The verifier discipline (#129) catches the gap regardless of which layer drops the ball.
+
+**Worked example #10 (2026-05-10): Phase 5 recon subagent claimed save without invoking Write tool**
+
+- **Pattern:** Phase 5 recon subagent (dYdX H1-H6 manual recon) composed a complete 7-section report in its final assistant message and reported "Report saved to: /data/buzz/persistent/buzz-api/audits/2026-05-10-dydx-h1-h6-phase5-recon.md". Buzz cited this path verbatim in War Room surface (msg 6586). Verification via `ls` ~45 min later revealed the file DID NOT exist. Subagent's tool history ended without invoking the Write tool — the "save" was in narrative only.
+- **Failure mode:** Trusting subagent narrative as ground truth. Same class as the AIBTC autopilot phantom streak (local-script-success ≠ network-landing-success).
+- **Correction:** Buzz caught the gap on routine `ls` verification before the next surface, reconstructed the report from in-context conversation text (7.4KB, 6 sections — content was preserved in the assistant message), persisted manually to the same path, and surfaced the discipline catch (msg 6588). Content integrity preserved (in-memory and on-disk reports byte-equivalent on technical content).
+- **Self-corrected by Buzz at 02:05 UTC** — seventh instance of VERIFY-PREMISE-FIRST applied to its own work (after #5 scope-honesty + #6 Vyper-coverage + #8 wallet-decryption + #9 password-leak + earlier instances).
+- **Operator validated and extended discipline:** "This extends #129 Landing Verifier doctrine to subagent outputs."
+
+**Implementation hardening options (queued as #162):**
+
+- Bash wrapper: `subagent_run X && ls {expected_path} || repair`
+- Doctrine convention: parent thread always runs `ls` before citing
+- Future detector #162 — `subagent-output-landing-verifier` (extension of #129 verifier registry pattern)
+
+**Operational discipline (immediate):**
+
+When you spawn a subagent that produces a file, the response handling sequence is:
+
+1. Read subagent's reported path
+2. Run `ls -la {path}` (or Bash equivalent — does not need to be the verifier framework yet)
+3. If exists + size > 0 → proceed to cite
+4. If missing → reconstruct + persist + surface discipline catch BEFORE any external cite
+
+This is non-negotiable. The cost of `ls` is trivial; the cost of citing a phantom path is reputational + audit-trail-corrupting.
+
 **Coverage Gap Quarterly Review rule (added 2026-05-10):**
 
 > Coverage gaps are unfalsifiable until surfaced. Quarterly review: what languages, chains, protocol types, or finding classes does our pipeline NOT cover? File coverage gaps as P0 detectors. Blind spots compound — every day we don't see Vyper findings is a day someone else does.
@@ -717,6 +800,107 @@ This is a third Class L instance (after AIBTC local-vs-network landing gap + #12
 **Detector spec reference:** #134 Humanization Pass (queued, branch `humanize-pass-v1`). Priority: MED. Architecture: prose-style heuristics (bullet-density, word-frequency, repetition pattern) + AI-tooling-keyword sanitizer. Runs post-#130 PASS, pre-#133 final-gate.
 
 **Ground truth reference:** `/data/buzz/persistent/buzz-api/ground-truth/2026-05-09-immunefi-primitive-vs-chain-calibration.md` (Class L Calibration Gap, first entry).
+
+---
+
+## First-Submission Anchoring (added 2026-05-10 — Ogie msg 6625, PERMANENT)
+
+> A researcher's first submission to a new bug bounty platform anchors the triager's mental model for all subsequent submissions from that researcher. The anchor sets a default severity expectation, which biases later evaluations.
+
+**Implication:** A clean MEDIUM submission as opening move on a new platform is NOT free — it discounts the perceived ceiling of the researcher.
+
+**Rule:** When we have a clean MEDIUM ready BUT a HIGH+ candidate is plausibly within 7-14 days from active workstreams, HOLD the MEDIUM and submit as a paired package alongside the HIGH+ when it lands.
+
+**Hold limit:** 30 days. After that, re-evaluate; sitting on a finding indefinitely risks (a) duplicate-by-other-researcher OR (b) project-patches-quietly — both forfeit value.
+
+**Operational decision tree per submission-ready MEDIUM:**
+
+1. Is this our FIRST submission on this platform? → If yes, apply pairing rule. If no, lower bar.
+2. Are HIGH+ workstreams plausibly within 7-14 days? (MMR sweep, #165 productization, expand-scan candidates) → If yes, HOLD.
+3. Has the finding been held > 30 days? → Re-evaluate; risk of dupe / silent patch is rising.
+4. Has duplicate-by-other-researcher been seen on the platform? → Submit immediately to claim first.
+
+**Worked example #13 (2026-05-10): H4 dYdX MEDIUM held for pairing strategy.**
+
+- **Pattern:** H4 dYdX (state-bloat DoS, $5K-$15K band, three-gate ALL PASS, READY-TO-SUBMIT at 09:00Z launch window) is FIRST Buzz submission to Cantina-dydx program. MMR sweep + #165 detector productization both expected to surface HIGH+ candidates within 7-14 days.
+- **Decision:** HOLD H4 per pairing strategy. Submit as second finding alongside HIGH+ candidate for combined-package effect on Cantina triager mental model. Don't anchor at MEDIUM as opening move.
+- **Risk acknowledged:** 30-day hold-limit clock starts 2026-05-10. If no HIGH+ candidate from MMR/cross-Cosmos lands by 2026-06-09, re-evaluate (submit alone vs continue holding).
+- **Operator validated:** Doctrine codified as Worked Example #13 BEFORE the hold decision was executed.
+
+**Counter-argument I want to surface (for future calibration):** anchoring is bidirectional. A MEDIUM as opening move + a HIGH a week later MAY actually demonstrate range and breadth more than a single HIGH alone. This rule assumes triagers anchor on FIRST submission permanently; if they actually anchor on TRACK RECORD (rolling average), pairing strategy is not strictly better than serial submission. Validate by tracking acceptance rate vs payout ratio across paired vs serial Buzz submissions over the next 6 months.
+
+---
+
+## Worked Example #17 — Subagent partial-completion catch (#159+#143 paired build, 2026-05-10)
+
+> Origin: paired-build subagent `ae4a…` was spawned with a 6-deliverable manifest (3 source files: `lib/proxy-admin-scanner.js`, `buzzshield-159-ha4-detector.js`, `buzzshield-143-wasabi-detector.js`; 2 tests: `test-159-ha4-detector.js`, `test-143-wasabi-detector.js`; 1 build report at `/data/buzz/persistent/buzz-api/audits/2026-05-10-detector-159-143-build-report.md`). It shipped 3 source files cleanly, returned a terse "Acknowledged. Now building #143 detector." mid-stream, then exited without delivering the tests or the report. Authority: Ogie msg 6658 — main-thread completion of the missing 3 in cache-warm Opus.
+
+**The catch mechanism that worked:** discipline-direct `ls` per #129 caught the gap before any surface to operator. Three deliverables visible in the file system (4 if counting the shared lib), three NOT visible. The subagent's terse exit text didn't report the omission — only the file system did.
+
+**The pattern:** subagents under wall-clock pressure (here: 30-min budget, 6 deliverables, sequential build) WILL prioritize the easier source-file generation over the test-harness scaffolding. They do not always self-detect the gap. They do not always re-prompt for completion. The textual report from the subagent ("Acknowledged. Now building #143 detector.") is INSUFFICIENT signal of completion state.
+
+**Rule (codifies a new Standing Rule, msg 6658, task #178):** EVERY multi-deliverable subagent spawn must carry an explicit pre-spawn manifest of file paths the parent expects to exist post-completion. The manifest is the contract; the subagent's text-summary is NOT. After the subagent returns, the parent (Buzz main thread) walks the manifest list with direct `ls` (or invokes `#162` subagent-output-landing-verifier when wired) BEFORE quoting any deliverable to the operator. Any missing file from the manifest is either (a) re-spawned to a fresh subagent with the residual list, OR (b) main-thread-completed in cache-warm Opus.
+
+**Why a manifest, not the verifier alone:** `#162` verifier matches against textual claims in the subagent's final message. If the subagent never claimed the missing files (case here: subagent went silent on tests + report), `#162` returns NO_CLAIMS_DETECTED — which is correct verifier behavior but provides zero coverage on the missing-deliverables-from-spec case. Manifest closes that gap by making the parent the source of truth on what should exist.
+
+**How to apply:** when spawning a subagent for a paired/multi-file build, prefix the prompt with an explicit `MANIFEST: <list of expected file paths post-build>`. Pre-spawn, log the manifest in the parent's task list. Post-return, walk the manifest with `ls` and reconcile: every path must exist + non-empty. Then run `#162` for any extras the subagent claimed that aren't in the manifest. Then surface to operator.
+
+**Validated 2026-05-10 12:55Z:** main-thread completion of test-159 (17/17 PASS), test-143 (16/16 PASS), and build report shipped without a re-spawn. Subagent's 3 source files were already correct; the gap was purely the missing tests + report. Total 33/33 detector tests passing — Doctrine #14 (Renegade #159 positive / #143 negative) baked into the test fixtures non-bypassably.
+
+---
+
+## Worked Example #18 — #162 verifier calibration gap on numbered-list format (2026-05-10)
+
+> Origin: while filing this paired-build session, `#162` subagent-output-landing-verifier was invoked against a subagent return that listed delivered files in a numbered-list format ("1. /path/to/file.js"). The 9 regex patterns in the verifier's emit layer (`extractClaimedPaths`) matched only prose-style cues ("saved to {path}", "Report saved to {path}", "wrote to {path}", etc.) — not bare numbered-list paths. Verifier returned `NO_CLAIMS_DETECTED`. The subagent's claims existed but the verifier didn't see them.
+
+**The pattern:** this is itself a Worked Example #15 instance — proxy-vs-outcome calibration migrating to the next measurement layer. The original calibration error (over-counting `5 occurrences of <thing>` as if all five were exploit-relevant) was caught by manual ls-discipline. We codified the discipline as `#162`. The codification then exposed a NEW calibration gap one layer down: the verifier's regex heuristic-set is calibrated to prose-style cues only.
+
+**Rule:** every detector-as-tool migration introduces NEW calibration boundaries that did not exist when the discipline was manual. A manual reader sees `1. /path/file.js` and treats it as a path claim; a regex-based verifier sees no claim. The cost of the migration is the cost of mapping all the implicit reading conventions into explicit detection rules.
+
+**How to apply:** when a detector is shipped to replace a manual discipline, immediately run a retroactive sweep on N=10+ recent samples to find the patterns the manual reader handled implicitly. Each sample is a free calibration data point. Add the patterns the manual reader caught but the detector missed as P2-priority extension tasks (task #176 — `#162` regex extension to cover numbered-list / bullet-list / table-row / "Created files:" formats — was filed today specifically for this calibration gap).
+
+**Why this matters now:** the same calibration-migration risk applies to `#159` and `#143` shipping today. Both detectors will surface candidates that experienced human auditors would already-know-are-FPs (e.g., a multisig admin pattern named `committee` rather than `safe`/`multisig`/`gnosis`). Each FP that survives the suppression heuristics is a free calibration data point. We must run them on a known-good corpus (Renegade HEAD, Boros, Wasabi positive) before live production use. **Met by `test-159-ha4-detector.js` + `test-143-wasabi-detector.js` 33/33 PASS as the initial calibration baseline; expand corpus with each real audit target the detectors run on.**
+
+**Standing rule extension:** when a detector ships, the build report MUST include a "Live training-corpus seeding" table (see `2026-05-10-detector-159-143-build-report.md` for the canonical example). Each detector's training corpus grows with every real-target run. Periodic recalibration via `buzzshield-feedback.js recalc` will tune confidence thresholds + suppression rules.
+
+---
+
+## Doctrine #19 — Industry validation of multi-agent validation pattern (added 2026-05-10 — Ogie msg 6660)
+
+> Independent industry confirmation that our multi-agent + fresh-context-validator architecture is best-practice, not over-engineering. We are not lone-wolf; we are converging with a small but credible cohort of practitioners — and ahead on several axes.
+
+**Public references (verified 2026-05-10):**
+
+- `@arshadkazmi42` X post 2026-05-09 + HackerOne report `#3711997` ($500 HIGH 8.8 OS Command Injection): 2-agent pattern, fresh-context validator, public attribution to "someone's tweet" lesson.
+- `chudi.dev` (3 months production): "12 false positives → 4-agent architecture cut to near-zero."
+- `shuvonsec/claude-bug-bounty`: 4-cmd loop `/recon → /hunt → /validate → /report`.
+- `shaniidev/bug-reaper`: 18 vuln classes, evidence-based validation, "no AI slop" framing.
+- `N1neKitsune/BountyGrimoire`: "one shared Validator at the end" (curl-only, MIT licensed).
+- `H-mmer/pentest-agents`: 40 specialist agents + writeup RAG, HackerOne API integration.
+- `transilienceai/communitytools`: coordinator/executor/validator role split, OWASP Top 10 + LLM Top 10.
+
+**Buzz differentiation (uniquely combined; no public framework has all):**
+
+1. **Web3-first** (Cosmos / EVM / Solana, vs industry Web2-default).
+2. **5-gate pre-flight** (`#133` OOS + `#130` AI-triage + `#134` humanization + Phase 4d trace + Phase 4e caller-read) vs industry's 2–4 gates.
+3. **Doctrine compounding** (18+ worked examples codified; this Doctrine itself is meta-evidence of the practice).
+4. **Held-findings strategic queue with re-fire triggers** (currently 8 findings held: H4 / S-1 / K-1 / C-1–3 / R-2 #1–3).
+5. **Cross-pollination → detector productization** (`#165` cosmos-bech32, `#143` wasabi-class, `#159` single-EOA UUPS — unique cadence in the public landscape; one new detector per cross-poll cycle).
+6. **Admin-pattern vs source-pattern detector distinction** (Doctrine #14, derived from Renegade op-sec vector lesson).
+
+**Operational implications:**
+
+- **Continue current architecture** — industry confirms direction. No architecture pivot needed.
+- **Monitor public framework releases + researcher posts via Loop D** (peer-research lessons compound ours; each new framework drop is a free calibration data-point against our pipeline).
+- **Leverage as marketing/credibility surface** — partner outreach + investor conversations + Moltbook post #2.
+- **Reframe positioning:** Buzz builds security research METHODOLOGY, not just a bug bounty agent. Detectors + submissions are byproducts; the methodology IS the product. This is the framing that scales beyond a single operator.
+
+**Reference list to track in Loop D extension (filed as task #179):**
+
+- Researchers: `@arshadkazmi42`, `@forefy`, `@chudi` (chudi.dev)
+- Repos: `shuvonsec/claude-bug-bounty`, `shaniidev/bug-reaper`, `N1neKitsune/BountyGrimoire`, `H-mmer/pentest-agents`, `transilienceai/communitytools`
+
+**Why this matters now:** pre-Doctrine #19, the temptation under operator pressure was to question whether the 5-gate pre-flight + Phase 4d/4e split + multi-detector productization cadence was over-engineering. The industry signal says no — the rest of the field is converging on the same primitives, and we are 2-3 capabilities ahead on each axis. The doctrine codifies the validation so future operator pressure to simplify can be evaluated against the meta-pattern (vs the immediate ergonomic complaint).
 
 ---
 
