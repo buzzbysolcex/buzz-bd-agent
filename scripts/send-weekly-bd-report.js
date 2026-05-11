@@ -3,6 +3,7 @@
  * Weekly BD Report — gather live pipeline data + send to Telegram
  * Run on server: node scripts/send-weekly-bd-report.js
  * Or: docker exec buzz-production node /app/scripts/send-weekly-bd-report.js
+ * Week 12 update: 2026-05-11
  */
 
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID || "950395553";
