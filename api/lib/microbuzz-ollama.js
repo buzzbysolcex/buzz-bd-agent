@@ -6,8 +6,8 @@
  * No caching between agents. Temperature 0.7 for diversity.
  */
 
-const OLLAMA_URL = 'http://localhost:11434';
-const MODEL = 'qwen3:14b';
+const OLLAMA_URL = "http://localhost:11434";
+const MODEL = "qwen3:14b";
 const TEMPERATURE = 0.7;
 const TIMEOUT_MS = 120000; // 2 min per agent (generous for CPU inference)
 
@@ -18,17 +18,17 @@ const TIMEOUT_MS = 120000; // 2 min per agent (generous for CPU inference)
 async function checkOllamaHealth() {
   try {
     const resp = await fetch(`${OLLAMA_URL}/api/tags`, {
-      signal: AbortSignal.timeout(5000)
+      signal: AbortSignal.timeout(5000),
     });
     if (!resp.ok) return { healthy: false, error: `HTTP ${resp.status}` };
     const data = await resp.json();
-    const models = (data.models || []).map(m => m.name);
-    const hasModel = models.some(m => m.includes('qwen3'));
+    const models = (data.models || []).map((m) => m.name);
+    const hasModel = models.some((m) => m.includes("qwen3"));
     return {
       healthy: true,
       models,
       has_qwen3: hasModel,
-      ready: hasModel
+      ready: hasModel,
     };
   } catch (e) {
     return { healthy: false, error: e.message };
@@ -47,32 +47,37 @@ async function queryAgent(agentProfile, userPrompt) {
     const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
     const resp = await fetch(`${OLLAMA_URL}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: MODEL,
         messages: [
-          { role: 'system', content: agentProfile.system_prompt },
-          { role: 'user', content: userPrompt }
+          { role: "system", content: agentProfile.system_prompt },
+          { role: "user", content: userPrompt },
         ],
         stream: false,
         think: false, // qwen3 thinking mode OFF — direct JSON output
         options: {
           temperature: TEMPERATURE,
-          num_predict: 200
-        }
+          num_predict: 200,
+        },
       }),
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     clearTimeout(timeout);
 
     if (!resp.ok) {
-      return { success: false, error: `Ollama HTTP ${resp.status}`, direction: 'NOTHING', amount: 0 };
+      return {
+        success: false,
+        error: `Ollama HTTP ${resp.status}`,
+        direction: "NOTHING",
+        amount: 0,
+      };
     }
 
     const data = await resp.json();
-    const raw = data.message?.content || '';
+    const raw = data.message?.content || "";
     const parsed = parseResponse(raw, agentProfile);
 
     return {
@@ -80,16 +85,16 @@ async function queryAgent(agentProfile, userPrompt) {
       ...parsed,
       raw_response: raw.slice(0, 500),
       eval_count: data.eval_count || 0,
-      duration_ms: Math.round((data.total_duration || 0) / 1e6)
+      duration_ms: Math.round((data.total_duration || 0) / 1e6),
     };
   } catch (e) {
     return {
       success: false,
       error: e.message,
-      direction: 'NOTHING',
+      direction: "NOTHING",
       conviction: 0,
       amount: 0,
-      reasoning: `Agent ${agentProfile.id} failed: ${e.message}`
+      reasoning: `Agent ${agentProfile.id} failed: ${e.message}`,
     };
   }
 }
@@ -103,10 +108,10 @@ function parseResponse(raw, agentProfile) {
   const jsonMatch = raw.match(/\{[\s\S]*?\}/);
   if (!jsonMatch) {
     return {
-      direction: 'NOTHING',
+      direction: "NOTHING",
       conviction: 0,
       amount: 0,
-      reasoning: 'Failed to parse JSON from response'
+      reasoning: "Failed to parse JSON from response",
     };
   }
 
@@ -114,9 +119,9 @@ function parseResponse(raw, agentProfile) {
     const parsed = JSON.parse(jsonMatch[0]);
 
     // Validate direction
-    let direction = (parsed.direction || '').toUpperCase();
-    if (!['YES', 'NO', 'NOTHING'].includes(direction)) {
-      direction = 'NOTHING';
+    let direction = (parsed.direction || "").toUpperCase();
+    if (!["YES", "NO", "NOTHING"].includes(direction)) {
+      direction = "NOTHING";
     }
 
     // Validate conviction
@@ -125,13 +130,16 @@ function parseResponse(raw, agentProfile) {
 
     // Validate amount within agent's risk range
     let amount = parseFloat(parsed.amount) || 0;
-    if (direction !== 'NOTHING') {
-      amount = Math.max(agentProfile.trade_min, Math.min(agentProfile.trade_max, amount));
+    if (direction !== "NOTHING") {
+      amount = Math.max(
+        agentProfile.trade_min,
+        Math.min(agentProfile.trade_max, amount),
+      );
 
       // Check if edge meets minimum threshold
       const edge = Math.abs(conviction - 0.5);
       if (edge < agentProfile.min_edge) {
-        direction = 'NOTHING';
+        direction = "NOTHING";
         amount = 0;
       }
     } else {
@@ -142,14 +150,14 @@ function parseResponse(raw, agentProfile) {
       direction,
       conviction,
       amount,
-      reasoning: (parsed.reasoning || '').slice(0, 300)
+      reasoning: (parsed.reasoning || "").slice(0, 300),
     };
   } catch {
     return {
-      direction: 'NOTHING',
+      direction: "NOTHING",
       conviction: 0,
       amount: 0,
-      reasoning: 'JSON parse error'
+      reasoning: "JSON parse error",
     };
   }
 }
@@ -161,16 +169,16 @@ async function stopModel() {
   try {
     // Ollama keeps model in memory. Send a generate with keep_alive=0 to unload.
     await fetch(`${OLLAMA_URL}/api/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: MODEL,
-        prompt: '',
-        keep_alive: 0
+        prompt: "",
+        keep_alive: 0,
       }),
-      signal: AbortSignal.timeout(10000)
+      signal: AbortSignal.timeout(10000),
     });
-    return { success: true, message: 'Model unloaded' };
+    return { success: true, message: "Model unloaded" };
   } catch (e) {
     return { success: false, error: e.message };
   }
@@ -182,5 +190,5 @@ module.exports = {
   parseResponse,
   stopModel,
   MODEL,
-  OLLAMA_URL
+  OLLAMA_URL,
 };

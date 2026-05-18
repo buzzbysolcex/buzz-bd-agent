@@ -1,6 +1,6 @@
 /**
  * Buzz BD Agent — Token Pipeline Routes
- * 
+ *
  * GET  /api/v1/pipeline                          → Full pipeline view
  * GET  /api/v1/pipeline/stats                    → Pipeline funnel metrics
  * GET  /api/v1/pipeline/stage/:stage             → Tokens at specific stage
@@ -12,88 +12,133 @@
  * POST /api/v1/pipeline/tokens/:address/notes    → Add note
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { getDB } = require('../db');
-const { classifyAndGate } = require('../lib/pipeline-classifier');
+const { getDB } = require("../db");
+const { classifyAndGate } = require("../lib/pipeline-classifier");
 
 const STAGES = [
-  'discovered', 'scanned', 'scored', 'prospect', 'contacted',
-  'negotiating', 'approved', 'listed', 'rejected'
+  "discovered",
+  "scanned",
+  "scored",
+  "prospect",
+  "contacted",
+  "negotiating",
+  "approved",
+  "listed",
+  "rejected",
 ];
 
 // ─── GET / ───────────────────────────────────────────
-router.get('/', (req, res) => {
+router.get("/", (req, res) => {
   const db = getDB();
   const { chain, stage, min_score, limit } = req.query;
 
-  let sql = 'SELECT * FROM pipeline_tokens WHERE 1=1';
+  let sql = "SELECT * FROM pipeline_tokens WHERE 1=1";
   const params = [];
 
-  if (chain) { sql += ' AND chain = ?'; params.push(chain); }
-  if (stage) { sql += ' AND stage = ?'; params.push(stage); }
-  if (min_score) { sql += ' AND score >= ?'; params.push(parseInt(min_score)); }
+  if (chain) {
+    sql += " AND chain = ?";
+    params.push(chain);
+  }
+  if (stage) {
+    sql += " AND stage = ?";
+    params.push(stage);
+  }
+  if (min_score) {
+    sql += " AND score >= ?";
+    params.push(parseInt(min_score));
+  }
 
-  sql += ' ORDER BY updated_at DESC';
-  if (limit) { sql += ' LIMIT ?'; params.push(parseInt(limit)); }
+  sql += " ORDER BY updated_at DESC";
+  if (limit) {
+    sql += " LIMIT ?";
+    params.push(parseInt(limit));
+  }
 
   const tokens = db.prepare(sql).all(...params);
   res.json({ count: tokens.length, tokens });
 });
 
 // ─── GET /stats ──────────────────────────────────────
-router.get('/stats', (req, res) => {
+router.get("/stats", (req, res) => {
   const db = getDB();
 
-  const byStage = db.prepare(`
+  const byStage = db
+    .prepare(
+      `
     SELECT stage, COUNT(*) as count, AVG(score) as avg_score
     FROM pipeline_tokens GROUP BY stage
-  `).all();
+  `,
+    )
+    .all();
 
-  const byChain = db.prepare(`
+  const byChain = db
+    .prepare(
+      `
     SELECT chain, COUNT(*) as count FROM pipeline_tokens GROUP BY chain
-  `).all();
+  `,
+    )
+    .all();
 
-  const recent = db.prepare(`
+  const recent = db
+    .prepare(
+      `
     SELECT COUNT(*) as count FROM pipeline_tokens 
     WHERE created_at > datetime('now', '-1 day')
-  `).get();
+  `,
+    )
+    .get();
 
-  const total = db.prepare('SELECT COUNT(*) as count FROM pipeline_tokens').get();
+  const total = db
+    .prepare("SELECT COUNT(*) as count FROM pipeline_tokens")
+    .get();
 
   // Conversion funnel
   const funnel = {};
-  byStage.forEach(s => { funnel[s.stage] = { count: s.count, avg_score: s.avg_score ? Math.round(s.avg_score) : null }; });
+  byStage.forEach((s) => {
+    funnel[s.stage] = {
+      count: s.count,
+      avg_score: s.avg_score ? Math.round(s.avg_score) : null,
+    };
+  });
 
   res.json({
     total: total.count,
     added_24h: recent.count,
     by_stage: funnel,
     by_chain: byChain,
-    stages: STAGES
+    stages: STAGES,
   });
 });
 
 // ─── GET /stage/:stage ───────────────────────────────
-router.get('/stage/:stage', (req, res) => {
+router.get("/stage/:stage", (req, res) => {
   if (!STAGES.includes(req.params.stage)) {
-    return res.status(400).json({ error: 'invalid_stage', valid_stages: STAGES });
+    return res
+      .status(400)
+      .json({ error: "invalid_stage", valid_stages: STAGES });
   }
 
   const db = getDB();
-  const tokens = db.prepare(
-    'SELECT * FROM pipeline_tokens WHERE stage = ? ORDER BY score DESC, updated_at DESC'
-  ).all(req.params.stage);
+  const tokens = db
+    .prepare(
+      "SELECT * FROM pipeline_tokens WHERE stage = ? ORDER BY score DESC, updated_at DESC",
+    )
+    .all(req.params.stage);
 
   res.json({ stage: req.params.stage, count: tokens.length, tokens });
 });
 
 // ─── POST /tokens ────────────────────────────────────
-router.post('/tokens', (req, res) => {
-  const { address, chain, ticker, name, source, score, score_breakdown } = req.body;
+router.post("/tokens", (req, res) => {
+  const { address, chain, ticker, name, source, score, score_breakdown } =
+    req.body;
 
   if (!address) {
-    return res.status(400).json({ error: 'missing_field', message: 'address is required' });
+    return res
+      .status(400)
+      .json({ error: "missing_field", message: "address is required" });
   }
 
   // Score cap: NEVER exceed 100
@@ -102,7 +147,9 @@ router.post('/tokens', (req, res) => {
   const db = getDB();
 
   try {
-    const result = db.prepare(`
+    const result = db
+      .prepare(
+        `
       INSERT INTO pipeline_tokens (address, chain, ticker, name, source, score, score_breakdown)
       VALUES (?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(address, chain) DO UPDATE SET
@@ -112,149 +159,182 @@ router.post('/tokens', (req, res) => {
         source = COALESCE(excluded.source, pipeline_tokens.source),
         score_breakdown = COALESCE(excluded.score_breakdown, pipeline_tokens.score_breakdown),
         updated_at = datetime('now')
-    `).run(
-      address,
-      chain || 'solana',
-      ticker || null,
-      name || null,
-      source || 'manual',
-      cappedScore,
-      score_breakdown ? JSON.stringify(score_breakdown) : null
-    );
+    `,
+      )
+      .run(
+        address,
+        chain || "solana",
+        ticker || null,
+        name || null,
+        source || "manual",
+        cappedScore,
+        score_breakdown ? JSON.stringify(score_breakdown) : null,
+      );
 
-    const token = db.prepare('SELECT * FROM pipeline_tokens WHERE id = ? OR (address = ? AND chain = ?)').get(result.lastInsertRowid, address, chain || 'solana');
-    res.status(201).json({ message: 'Token added to pipeline', token });
+    const token = db
+      .prepare(
+        "SELECT * FROM pipeline_tokens WHERE id = ? OR (address = ? AND chain = ?)",
+      )
+      .get(result.lastInsertRowid, address, chain || "solana");
+    res.status(201).json({ message: "Token added to pipeline", token });
   } catch (err) {
     throw err;
   }
 });
 
 // ─── GET /tokens/:address ────────────────────────────
-router.get('/tokens/:address', (req, res) => {
+router.get("/tokens/:address", (req, res) => {
   const db = getDB();
-  const chain = req.query.chain || 'solana';
-  const token = db.prepare(
-    'SELECT * FROM pipeline_tokens WHERE address = ? AND chain = ?'
-  ).get(req.params.address, chain);
+  const chain = req.query.chain || "solana";
+  const token = db
+    .prepare("SELECT * FROM pipeline_tokens WHERE address = ? AND chain = ?")
+    .get(req.params.address, chain);
 
   if (!token) {
-    return res.status(404).json({ error: 'not_found' });
+    return res.status(404).json({ error: "not_found" });
   }
 
   res.json(token);
 });
 
 // ─── PATCH /tokens/:address ──────────────────────────
-router.patch('/tokens/:address', (req, res) => {
+router.patch("/tokens/:address", (req, res) => {
   const db = getDB();
-  const chain = req.query.chain || 'solana';
-  const { stage, score, score_breakdown, ticker, name, notes, assigned_to } = req.body;
+  const chain = req.query.chain || "solana";
+  const { stage, score, score_breakdown, ticker, name, notes, assigned_to } =
+    req.body;
 
   const updates = [];
   const params = [];
 
   if (stage) {
     if (!STAGES.includes(stage)) {
-      return res.status(400).json({ error: 'invalid_stage', valid_stages: STAGES });
+      return res
+        .status(400)
+        .json({ error: "invalid_stage", valid_stages: STAGES });
     }
-    updates.push('stage = ?'); params.push(stage);
+    updates.push("stage = ?");
+    params.push(stage);
   }
   if (score !== undefined) {
-    updates.push('score = ?'); params.push(score);
+    updates.push("score = ?");
+    params.push(score);
     // v8.1.0: Auto-classify based on score + dual-gate
     if (!stage) {
       const classification = classifyAndGate(score, score_breakdown);
-      updates.push('stage = ?'); params.push(classification.effective_stage);
+      updates.push("stage = ?");
+      params.push(classification.effective_stage);
     }
   }
-  if (score_breakdown) { updates.push('score_breakdown = ?'); params.push(JSON.stringify(score_breakdown)); }
-  if (ticker) { updates.push('ticker = ?'); params.push(ticker); }
-  if (name) { updates.push('name = ?'); params.push(name); }
-  if (notes) { updates.push('notes = ?'); params.push(notes); }
-  if (assigned_to) { updates.push('assigned_to = ?'); params.push(assigned_to); }
+  if (score_breakdown) {
+    updates.push("score_breakdown = ?");
+    params.push(JSON.stringify(score_breakdown));
+  }
+  if (ticker) {
+    updates.push("ticker = ?");
+    params.push(ticker);
+  }
+  if (name) {
+    updates.push("name = ?");
+    params.push(name);
+  }
+  if (notes) {
+    updates.push("notes = ?");
+    params.push(notes);
+  }
+  if (assigned_to) {
+    updates.push("assigned_to = ?");
+    params.push(assigned_to);
+  }
 
   updates.push("updated_at = datetime('now')");
   params.push(req.params.address, chain);
 
-  const result = db.prepare(
-    `UPDATE pipeline_tokens SET ${updates.join(', ')} WHERE address = ? AND chain = ?`
-  ).run(...params);
+  const result = db
+    .prepare(
+      `UPDATE pipeline_tokens SET ${updates.join(", ")} WHERE address = ? AND chain = ?`,
+    )
+    .run(...params);
 
   if (result.changes === 0) {
-    return res.status(404).json({ error: 'not_found' });
+    return res.status(404).json({ error: "not_found" });
   }
 
-  const token = db.prepare(
-    'SELECT * FROM pipeline_tokens WHERE address = ? AND chain = ?'
-  ).get(req.params.address, chain);
+  const token = db
+    .prepare("SELECT * FROM pipeline_tokens WHERE address = ? AND chain = ?")
+    .get(req.params.address, chain);
 
-  res.json({ message: 'Token updated', token });
+  res.json({ message: "Token updated", token });
 });
 
 // ─── POST /tokens/:address/advance ───────────────────
-router.post('/tokens/:address/advance', (req, res) => {
+router.post("/tokens/:address/advance", (req, res) => {
   const db = getDB();
-  const chain = req.query.chain || 'solana';
+  const chain = req.query.chain || "solana";
 
-  const token = db.prepare(
-    'SELECT * FROM pipeline_tokens WHERE address = ? AND chain = ?'
-  ).get(req.params.address, chain);
+  const token = db
+    .prepare("SELECT * FROM pipeline_tokens WHERE address = ? AND chain = ?")
+    .get(req.params.address, chain);
 
   if (!token) {
-    return res.status(404).json({ error: 'not_found' });
+    return res.status(404).json({ error: "not_found" });
   }
 
   const currentIdx = STAGES.indexOf(token.stage);
   if (currentIdx === -1 || currentIdx >= STAGES.length - 2) {
     return res.status(400).json({
-      error: 'cannot_advance',
+      error: "cannot_advance",
       message: `Token at stage '${token.stage}' cannot be advanced`,
-      current_stage: token.stage
+      current_stage: token.stage,
     });
   }
 
   // Skip 'rejected' — advance goes to next non-terminal stage
   let nextStage = STAGES[currentIdx + 1];
-  if (nextStage === 'rejected') nextStage = STAGES[currentIdx]; // stay put
+  if (nextStage === "rejected") nextStage = STAGES[currentIdx]; // stay put
 
   db.prepare(
-    "UPDATE pipeline_tokens SET stage = ?, updated_at = datetime('now') WHERE address = ? AND chain = ?"
+    "UPDATE pipeline_tokens SET stage = ?, updated_at = datetime('now') WHERE address = ? AND chain = ?",
   ).run(nextStage, req.params.address, chain);
 
   res.json({
     message: `Token advanced: ${token.stage} → ${nextStage}`,
     previous_stage: token.stage,
-    new_stage: nextStage
+    new_stage: nextStage,
   });
 });
 
 // ─── POST /tokens/:address/reject ────────────────────
-router.post('/tokens/:address/reject', (req, res) => {
+router.post("/tokens/:address/reject", (req, res) => {
   const db = getDB();
-  const chain = req.query.chain || 'solana';
+  const chain = req.query.chain || "solana";
   const { reason } = req.body;
 
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     UPDATE pipeline_tokens 
     SET stage = 'rejected', notes = COALESCE(notes || ' | REJECTED: ', '') || ?, updated_at = datetime('now')
     WHERE address = ? AND chain = ?
-  `).run(reason || 'No reason provided', req.params.address, chain);
+  `,
+    )
+    .run(reason || "No reason provided", req.params.address, chain);
 
   if (result.changes === 0) {
-    return res.status(404).json({ error: 'not_found' });
+    return res.status(404).json({ error: "not_found" });
   }
 
-  res.json({ message: 'Token rejected', reason });
+  res.json({ message: "Token rejected", reason });
 });
 
 // ─── POST /sync — Sync scanner MD files to pipeline_tokens ──
-router.post('/sync', (req, res) => {
+router.post("/sync", (req, res) => {
   try {
-    const { syncPipelineFiles } = require('../lib/pipeline-persist');
+    const { syncPipelineFiles } = require("../lib/pipeline-persist");
     const result = syncPipelineFiles();
-    res.json({ message: 'Pipeline sync complete', ...result });
+    res.json({ message: "Pipeline sync complete", ...result });
   } catch (err) {
-    res.status(500).json({ error: 'sync_failed', message: err.message });
+    res.status(500).json({ error: "sync_failed", message: err.message });
   }
 });
 

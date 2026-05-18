@@ -14,23 +14,50 @@
  */
 
 const STABLECOIN_SYMBOLS = new Set([
-  'USDT', 'USDC', 'DAI', 'BUSD', 'TUSD', 'FRAX', 'USDP', 'GUSD',
-  'LUSD', 'sUSD', 'USDD', 'PYUSD', 'USDe', 'crvUSD', 'GHO',
-  'FDUSD', 'ZUSD', 'DOLA', 'MIM', 'UST', 'EURS', 'EURT', 'agEUR'
+  "USDT",
+  "USDC",
+  "DAI",
+  "BUSD",
+  "TUSD",
+  "FRAX",
+  "USDP",
+  "GUSD",
+  "LUSD",
+  "sUSD",
+  "USDD",
+  "PYUSD",
+  "USDe",
+  "crvUSD",
+  "GHO",
+  "FDUSD",
+  "ZUSD",
+  "DOLA",
+  "MIM",
+  "UST",
+  "EURS",
+  "EURT",
+  "agEUR",
 ]);
 
 const TIER1_EXCHANGES = new Set([
-  'binance', 'okx', 'bybit', 'coinbase', 'kraken', 'kucoin', 'htx', 'gate'
+  "binance",
+  "okx",
+  "bybit",
+  "coinbase",
+  "kraken",
+  "kucoin",
+  "htx",
+  "gate",
 ]);
 
 const DEFAULT_CRITERIA = {
-  mcap_min: 500000,       // $500K
-  mcap_max: 50000000,     // $50M
-  liquidity_min: 100000,  // $100K
+  mcap_min: 500000, // $500K
+  mcap_max: 50000000, // $50M
+  liquidity_min: 100000, // $100K
   age_min_days: 7,
   exchange_count_max: 10,
   exclude_stablecoins: true,
-  exclude_honeypots: true
+  exclude_honeypots: true,
 };
 
 /**
@@ -80,18 +107,18 @@ function qualifyToken(token, criteria = {}) {
   // Stablecoin check
   if (c.exclude_stablecoins && token.symbol) {
     if (STABLECOIN_SYMBOLS.has(token.symbol.toUpperCase())) {
-      reasons.push('stablecoin');
+      reasons.push("stablecoin");
     }
   }
 
   // Honeypot check
   if (c.exclude_honeypots && token.safety?.honeypot === true) {
-    reasons.push('honeypot');
+    reasons.push("honeypot");
   }
 
   return {
     pass: reasons.length === 0,
-    reasons
+    reasons,
   };
 }
 
@@ -121,8 +148,11 @@ function filterTokens(tokens, criteria = {}) {
       total: tokens.length,
       qualified: qualified.length,
       rejected: rejected.length,
-      pass_rate: tokens.length > 0 ? parseFloat((qualified.length / tokens.length * 100).toFixed(1)) : 0
-    }
+      pass_rate:
+        tokens.length > 0
+          ? parseFloat(((qualified.length / tokens.length) * 100).toFixed(1))
+          : 0,
+    },
   };
 }
 
@@ -131,5 +161,5 @@ module.exports = {
   filterTokens,
   DEFAULT_CRITERIA,
   STABLECOIN_SYMBOLS,
-  TIER1_EXCHANGES
+  TIER1_EXCHANGES,
 };

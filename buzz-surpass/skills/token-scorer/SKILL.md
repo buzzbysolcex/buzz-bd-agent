@@ -24,51 +24,56 @@ tags: [crypto, defi, scoring, token, security, analysis]
 
 ## Scoring Rules (v2_8rules + 3 new)
 
-| # | Rule | Type | What It Catches |
-|---|------|------|-----------------|
-| 1 | FDV Gap Penalty | Penalty | FDV/mcap divergence > 5x = inflated valuation |
-| 2 | Stablecoin Exclusion | Filter | Stablecoins auto-excluded (not listing candidates) |
-| 3 | Ghost Token Exclusion | Filter | No real on-chain activity = dead project |
-| 4 | Contradictory Audit Hold | Hold | Conflicting security data = needs manual review |
-| 5 | Security Penalty | Penalty | Flagged by Go+ Security / Token Sniffer / Honeypot.is |
-| 6 | Liquidity Cross-Ref | Verify | Liquidity vs volume sanity check |
-| 7 | Age Bonus | Bonus | Token age > 90 days = maturity signal |
-| 8 | Volume Threshold | Filter | Minimum 24h volume required |
-| 9 | GHOST_VOLUME | Penalty | Fake volume detection (wash trading patterns) |
-| 10 | CTO_FLAG | Flag | Community takeover indicator (original team left) |
-| 11 | VOLUME_LIQUIDITY_RATIO | Penalty | Suspicious volume/liquidity ratio > 10x |
+| #   | Rule                     | Type    | What It Catches                                       |
+| --- | ------------------------ | ------- | ----------------------------------------------------- |
+| 1   | FDV Gap Penalty          | Penalty | FDV/mcap divergence > 5x = inflated valuation         |
+| 2   | Stablecoin Exclusion     | Filter  | Stablecoins auto-excluded (not listing candidates)    |
+| 3   | Ghost Token Exclusion    | Filter  | No real on-chain activity = dead project              |
+| 4   | Contradictory Audit Hold | Hold    | Conflicting security data = needs manual review       |
+| 5   | Security Penalty         | Penalty | Flagged by Go+ Security / Token Sniffer / Honeypot.is |
+| 6   | Liquidity Cross-Ref      | Verify  | Liquidity vs volume sanity check                      |
+| 7   | Age Bonus                | Bonus   | Token age > 90 days = maturity signal                 |
+| 8   | Volume Threshold         | Filter  | Minimum 24h volume required                           |
+| 9   | GHOST_VOLUME             | Penalty | Fake volume detection (wash trading patterns)         |
+| 10  | CTO_FLAG                 | Flag    | Community takeover indicator (original team left)     |
+| 11  | VOLUME_LIQUIDITY_RATIO   | Penalty | Suspicious volume/liquidity ratio > 10x               |
 
 ## Score Bands
 
-| Range | Classification | Action |
-|-------|---------------|--------|
-| 85-100 | HOT | BD screening pipeline activated |
-| 70-84 | WARM | Monitor, potential future candidate |
-| 50-69 | COLD | Low priority, log and archive |
-| 0-49 | REJECTED | Auto-filtered, do not pursue |
+| Range  | Classification | Action                              |
+| ------ | -------------- | ----------------------------------- |
+| 85-100 | HOT            | BD screening pipeline activated     |
+| 70-84  | WARM           | Monitor, potential future candidate |
+| 50-69  | COLD           | Low priority, log and archive       |
+| 0-49   | REJECTED       | Auto-filtered, do not pursue        |
 
 ## Usage
 
 ### Via API (x402 micropayment — $0.01 USDC on Base)
+
 ```bash
 curl https://api.buzzbd.ai/api/score/0x...contractAddress
 ```
 
 ### Via Claude Code
+
 ```
 /score PEPE
 /score 0x6982508145454Ce325dDbE47a25d4ec3d2311933
 ```
 
 ### Via Free Widget
+
 Visit https://buzzbd.ai/score — paste contract address, get instant score.
 
 ### Via npm CLI
+
 ```bash
 npx @buzzbd/scorer --token PEPE --chain ethereum
 ```
 
 ## Response Format
+
 ```json
 {
   "token": "PEPE",

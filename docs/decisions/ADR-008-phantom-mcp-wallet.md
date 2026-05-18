@@ -1,7 +1,9 @@
 # ADR-008: Phantom MCP as Wallet Layer + Intel Source #31
 
 ## Status: ACCEPTED
+
 ## Date: March 30, 2026
+
 ## Context
 
 Buzz registered on Phantom Portal on Feb 18, 2026 (App ID: be4a0179).
@@ -13,6 +15,7 @@ Ethereum, Bitcoin, and Sui — capabilities no other intel source provides.
 ## Decision
 
 Integrate Phantom MCP as Intel Source #31 — serving dual roles:
+
 1. ARIA data source (swap quotes as price verification, wallet balance data)
 2. Execution layer for future BD operations (listing fee collection,
    identity signing, token acquisition)
@@ -30,7 +33,7 @@ Integrate Phantom MCP as Intel Source #31 — serving dual roles:
 
 - Intel Sources: 30 → 31
 - New module: api/services/phantom-bridge.js
-- New endpoints: 6 (/api/v1/phantom/*)
+- New endpoints: 6 (/api/v1/phantom/\*)
 - New table: phantom_transactions
 - Requires one-time SSO auth from Ogie's Mac (browser needed)
 - SAFETY: All transfers require CEO approval via Telegram

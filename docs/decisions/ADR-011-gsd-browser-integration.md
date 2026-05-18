@@ -11,6 +11,7 @@ GSD-Browser (github.com/gsd-build/gsd-browser) offers 63 commands in a single Ru
 Released v0.1.2 on March 30, 2026. MIT/Apache-2.0 licensed.
 
 **Decision:**
+
 - Install gsd-browser alongside dev-browser (do not replace)
 - Use gsd-browser for ALL new browser automation tasks
 - Keep dev-browser for existing scripts (contact screener, GeckoTerminal scraper)
@@ -18,6 +19,7 @@ Released v0.1.2 on March 30, 2026. MIT/Apache-2.0 licensed.
 - Browser Use CLI remains for visual proof screenshots only
 
 **Consequences:**
+
 - Three browser tools coexist with clear use-case separation
 - New tasks get 63 commands instead of ~10
 - Network mocking enables rate-limit handling for DexScreener/CoinGecko

@@ -1,18 +1,18 @@
 /**
  * Buzz BD Agent — SQLite Database (WAL Mode)
  * Pattern adopted from Mission Control by Builderz Labs
- * 
+ *
  * Zero external dependencies — no Redis, no Postgres
  * WAL mode for concurrent reads during sub-agent operations
  * Stored at /data/buzz-api/buzz.db (Akash persistent storage)
  */
 
-const Database = require('better-sqlite3');
-const path = require('path');
-const fs = require('fs');
+const Database = require("better-sqlite3");
+const path = require("path");
+const fs = require("fs");
 
-const DB_DIR = process.env.BUZZ_DB_DIR || '/data/buzz-api';
-const DB_PATH = path.join(DB_DIR, 'buzz.db');
+const DB_DIR = process.env.BUZZ_DB_DIR || "/data/buzz-api";
+const DB_PATH = path.join(DB_DIR, "buzz.db");
 
 let db;
 
@@ -23,11 +23,11 @@ function initDB() {
   db = new Database(DB_PATH);
 
   // WAL mode for concurrent read access
-  db.pragma('journal_mode = WAL');
-  db.pragma('synchronous = NORMAL');
-  db.pragma('cache_size = -64000'); // 64MB cache
-  db.pragma('foreign_keys = ON');
-  db.pragma('busy_timeout = 5000');
+  db.pragma("journal_mode = WAL");
+  db.pragma("synchronous = NORMAL");
+  db.pragma("cache_size = -64000"); // 64MB cache
+  db.pragma("foreign_keys = ON");
+  db.pragma("busy_timeout = 5000");
 
   console.log(`[Buzz DB] ✓ SQLite WAL at ${DB_PATH}`);
 
@@ -38,7 +38,7 @@ function initDB() {
 }
 
 function getDB() {
-  if (!db) throw new Error('Database not initialized. Call initDB() first.');
+  if (!db) throw new Error("Database not initialized. Call initDB() first.");
   return db;
 }
 
@@ -56,13 +56,16 @@ function runMigrations() {
   `);
 
   const applied = new Set(
-    db.prepare('SELECT name FROM _migrations').all().map(r => r.name)
+    db
+      .prepare("SELECT name FROM _migrations")
+      .all()
+      .map((r) => r.name),
   );
 
   const migrations = [
     // ─── Migration 001: Agents ───
     {
-      name: '001_agents',
+      name: "001_agents",
       sql: `
         CREATE TABLE IF NOT EXISTS agents (
           id TEXT PRIMARY KEY,
@@ -84,12 +87,12 @@ function runMigrations() {
           ('wall-001', 'wallet-agent', 'onchain_forensics', 'bankr/gpt-5-nano', 'active'),
           ('soci-001', 'social-agent', 'social_intelligence', 'bankr/gpt-5-nano', 'active'),
           ('scor-001', 'scorer-agent', 'token_scoring', 'bankr/gpt-5-nano', 'active');
-      `
+      `,
     },
 
     // ─── Migration 002: Pipeline ───
     {
-      name: '002_pipeline',
+      name: "002_pipeline",
       sql: `
         CREATE TABLE IF NOT EXISTS pipeline_tokens (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -114,12 +117,12 @@ function runMigrations() {
         CREATE INDEX IF NOT EXISTS idx_pipeline_stage ON pipeline_tokens(stage);
         CREATE INDEX IF NOT EXISTS idx_pipeline_score ON pipeline_tokens(score);
         CREATE INDEX IF NOT EXISTS idx_pipeline_chain ON pipeline_tokens(chain);
-      `
+      `,
     },
 
     // ─── Migration 003: Cost Tracking ───
     {
-      name: '003_costs',
+      name: "003_costs",
       sql: `
         CREATE TABLE IF NOT EXISTS cost_logs (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -137,12 +140,12 @@ function runMigrations() {
         CREATE INDEX IF NOT EXISTS idx_costs_agent ON cost_logs(agent_name);
         CREATE INDEX IF NOT EXISTS idx_costs_model ON cost_logs(model);
         CREATE INDEX IF NOT EXISTS idx_costs_date ON cost_logs(created_at);
-      `
+      `,
     },
 
     // ─── Migration 004: Cron Jobs ───
     {
-      name: '004_crons',
+      name: "004_crons",
       sql: `
         CREATE TABLE IF NOT EXISTS cron_jobs (
           id TEXT PRIMARY KEY,
@@ -171,12 +174,12 @@ function runMigrations() {
         );
 
         CREATE INDEX IF NOT EXISTS idx_cron_runs_job ON cron_runs(cron_id);
-      `
+      `,
     },
 
     // ─── Migration 005: API Keys ───
     {
-      name: '005_api_keys',
+      name: "005_api_keys",
       sql: `
         CREATE TABLE IF NOT EXISTS api_keys (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -189,12 +192,12 @@ function runMigrations() {
           active INTEGER DEFAULT 1,
           created_at TEXT DEFAULT (datetime('now'))
         );
-      `
+      `,
     },
 
     // ─── Migration 006: Webhook Deliveries ───
     {
-      name: '006_webhooks',
+      name: "006_webhooks",
       sql: `
         CREATE TABLE IF NOT EXISTS webhooks (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -217,12 +220,12 @@ function runMigrations() {
           created_at TEXT DEFAULT (datetime('now')),
           FOREIGN KEY (webhook_id) REFERENCES webhooks(id)
         );
-      `
+      `,
     },
 
     // ─── Migration 011: Hedge Brain — Persona Signals + Backtest (v7.4.0) ───
     {
-      name: '011_hedge_brain',
+      name: "011_hedge_brain",
       sql: `
         CREATE TABLE IF NOT EXISTS persona_signals (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -283,12 +286,12 @@ function runMigrations() {
           ('whale-001', 'whale-agent', 'persona_smart_money', 'bankr/gpt-5-nano', 'active'),
           ('inst-001', 'institutional-agent', 'persona_compliance', 'bankr/claude-haiku-4.5', 'active'),
           ('comm-001', 'community-agent', 'persona_social', 'bankr/gpt-5-nano', 'active');
-      `
+      `,
     },
 
     // ─── Migration 012: v7.5.0 Bags.fm-First (OKX instruments, listing simulations) ───
     {
-      name: '012_bags_first',
+      name: "012_bags_first",
       sql: `
         CREATE TABLE IF NOT EXISTS okx_instruments (
           instrument_id TEXT PRIMARY KEY,
@@ -314,12 +317,12 @@ function runMigrations() {
           created_at TEXT DEFAULT (datetime('now'))
         );
         CREATE INDEX IF NOT EXISTS idx_sim_token ON listing_simulations(token_address);
-      `
+      `,
     },
 
     // ─── Migration 010: Strategic Orchestrator (v7.0) ───
     {
-      name: '010_strategic',
+      name: "010_strategic",
       sql: `
         CREATE TABLE IF NOT EXISTS strategic_decisions (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -413,43 +416,51 @@ function runMigrations() {
         );
         CREATE INDEX IF NOT EXISTS idx_outreach_active ON outreach_sequences(is_active, next_action_at);
         CREATE INDEX IF NOT EXISTS idx_outreach_token ON outreach_sequences(token_address, chain);
-      `
+      `,
     },
 
     // ─── Migration 015: MiroFish EV — Add EV columns to listing_simulations ───
     {
-      name: '015_mirofish_ev',
-      sql: 'SELECT 1', // Placeholder — actual ALTERs run in postRun due to SQLite limitations
+      name: "015_mirofish_ev",
+      sql: "SELECT 1", // Placeholder — actual ALTERs run in postRun due to SQLite limitations
       postRun: (db) => {
         const columns = [
-          'ALTER TABLE listing_simulations ADD COLUMN ticker TEXT',
-          'ALTER TABLE listing_simulations ADD COLUMN score INTEGER',
-          'ALTER TABLE listing_simulations ADD COLUMN agents_count INTEGER DEFAULT 20',
-          'ALTER TABLE listing_simulations ADD COLUMN probability REAL',
-          'ALTER TABLE listing_simulations ADD COLUMN confidence REAL',
-          'ALTER TABLE listing_simulations ADD COLUMN ev REAL',
-          'ALTER TABLE listing_simulations ADD COLUMN recommendation TEXT',
-          'ALTER TABLE listing_simulations ADD COLUMN cluster_degen TEXT',
-          'ALTER TABLE listing_simulations ADD COLUMN cluster_whale TEXT',
-          'ALTER TABLE listing_simulations ADD COLUMN cluster_institutional TEXT',
-          'ALTER TABLE listing_simulations ADD COLUMN cluster_community TEXT',
-          'ALTER TABLE listing_simulations ADD COLUMN key_risk TEXT',
-          'ALTER TABLE listing_simulations ADD COLUMN key_signal TEXT',
-          'ALTER TABLE listing_simulations ADD COLUMN raw_verdicts TEXT',
-          'ALTER TABLE listing_simulations ADD COLUMN simulated_at TEXT DEFAULT CURRENT_TIMESTAMP',
+          "ALTER TABLE listing_simulations ADD COLUMN ticker TEXT",
+          "ALTER TABLE listing_simulations ADD COLUMN score INTEGER",
+          "ALTER TABLE listing_simulations ADD COLUMN agents_count INTEGER DEFAULT 20",
+          "ALTER TABLE listing_simulations ADD COLUMN probability REAL",
+          "ALTER TABLE listing_simulations ADD COLUMN confidence REAL",
+          "ALTER TABLE listing_simulations ADD COLUMN ev REAL",
+          "ALTER TABLE listing_simulations ADD COLUMN recommendation TEXT",
+          "ALTER TABLE listing_simulations ADD COLUMN cluster_degen TEXT",
+          "ALTER TABLE listing_simulations ADD COLUMN cluster_whale TEXT",
+          "ALTER TABLE listing_simulations ADD COLUMN cluster_institutional TEXT",
+          "ALTER TABLE listing_simulations ADD COLUMN cluster_community TEXT",
+          "ALTER TABLE listing_simulations ADD COLUMN key_risk TEXT",
+          "ALTER TABLE listing_simulations ADD COLUMN key_signal TEXT",
+          "ALTER TABLE listing_simulations ADD COLUMN raw_verdicts TEXT",
+          "ALTER TABLE listing_simulations ADD COLUMN simulated_at TEXT DEFAULT CURRENT_TIMESTAMP",
         ];
         for (const sql of columns) {
-          try { db.exec(sql); } catch (e) { /* duplicate column — OK */ }
+          try {
+            db.exec(sql);
+          } catch (e) {
+            /* duplicate column — OK */
+          }
         }
         try {
-          db.exec('CREATE INDEX IF NOT EXISTS idx_sim_ticker ON listing_simulations(ticker)');
-        } catch (e) { /* index may exist */ }
-      }
+          db.exec(
+            "CREATE INDEX IF NOT EXISTS idx_sim_ticker ON listing_simulations(ticker)",
+          );
+        } catch (e) {
+          /* index may exist */
+        }
+      },
     },
 
     // ─── Migration 016: Listing Proposals (MiroFish Stage 1) ───
     {
-      name: '016_listing_proposals',
+      name: "016_listing_proposals",
       sql: `
         CREATE TABLE IF NOT EXISTS listing_proposals (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -463,12 +474,11 @@ function runMigrations() {
           created_at TEXT DEFAULT CURRENT_TIMESTAMP
         );
         CREATE INDEX IF NOT EXISTS idx_proposal_ticker ON listing_proposals(ticker);
-      `
-    }
-    ,
+      `,
+    },
     // Migration 013: Nansen Enrichments (v7.5.2)
     {
-      name: '013_nansen',
+      name: "013_nansen",
       sql: `
         CREATE TABLE IF NOT EXISTS nansen_enrichments (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -484,12 +494,12 @@ function runMigrations() {
           UNIQUE(token_address, chain)
         );
         CREATE INDEX IF NOT EXISTS idx_nansen_token ON nansen_enrichments(token_address, chain);
-      `
+      `,
     },
 
     // Migration 014: X Layer Transactions (v7.5.2)
     {
-      name: '014_xlayer',
+      name: "014_xlayer",
       sql: `
         CREATE TABLE IF NOT EXISTS xlayer_transactions (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -505,12 +515,12 @@ function runMigrations() {
           created_at TEXT DEFAULT (datetime('now'))
         );
         CREATE INDEX IF NOT EXISTS idx_xlayer_tx ON xlayer_transactions(tx_hash);
-      `
+      `,
     },
 
     // Migration 017: LLM Cost Proxy (v7.5.5)
     {
-      name: '017_llm_costs',
+      name: "017_llm_costs",
       sql: `
         CREATE TABLE IF NOT EXISTS llm_costs (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -530,11 +540,11 @@ function runMigrations() {
         CREATE INDEX IF NOT EXISTS idx_llm_costs_timestamp ON llm_costs(timestamp);
         CREATE INDEX IF NOT EXISTS idx_llm_costs_model ON llm_costs(model);
         CREATE INDEX IF NOT EXISTS idx_llm_costs_caller ON llm_costs(caller);
-      `
+      `,
     },
     // ─── Migration 015: LLM Provider Cascade Logging ───
     {
-      name: '015_llm_provider_log',
+      name: "015_llm_provider_log",
       sql: `
         CREATE TABLE IF NOT EXISTS llm_provider_log (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -551,11 +561,11 @@ function runMigrations() {
         CREATE INDEX IF NOT EXISTS idx_provider_log_provider ON llm_provider_log(provider, created_at);
         CREATE INDEX IF NOT EXISTS idx_provider_log_agent ON llm_provider_log(agent);
         CREATE INDEX IF NOT EXISTS idx_provider_log_date ON llm_provider_log(created_at);
-      `
-    }
+      `,
+    },
   ];
 
-  const insert = db.prepare('INSERT INTO _migrations (name) VALUES (?)');
+  const insert = db.prepare("INSERT INTO _migrations (name) VALUES (?)");
 
   for (const m of migrations) {
     if (!applied.has(m.name)) {
@@ -568,47 +578,65 @@ function runMigrations() {
 
   console.log(`[Buzz DB] ✓ ${migrations.length} migrations checked`);
   // Run score-table migrations
-  const {migrations: scoreMigrations} = require('./migrations/score-tables');
-  for (const m of scoreMigrations) { try { db.exec(m.sql); } catch(e) {} }
+  const { migrations: scoreMigrations } = require("./migrations/score-tables");
+  for (const m of scoreMigrations) {
+    try {
+      db.exec(m.sql);
+    } catch (e) {}
+  }
 
   // Run financial-datasets migration (P1-A)
-  const {migrations: finDataMigrations} = require('./migrations/016-financial-datasets');
+  const {
+    migrations: finDataMigrations,
+  } = require("./migrations/016-financial-datasets");
   for (const m of finDataMigrations) {
     if (!applied.has(m.name)) {
       try {
         console.log(`[Buzz DB] Running migration: ${m.name}`);
         db.exec(m.sql);
         insert.run(m.name);
-      } catch(e) { console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message); }
+      } catch (e) {
+        console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message);
+      }
     }
   }
 
   // Run simulation-results migration (P1-B)
-  const {migrations: simResultMigrations} = require('./migrations/017-simulation-results');
+  const {
+    migrations: simResultMigrations,
+  } = require("./migrations/017-simulation-results");
   for (const m of simResultMigrations) {
     if (!applied.has(m.name)) {
       try {
         console.log(`[Buzz DB] Running migration: ${m.name}`);
         db.exec(m.sql);
         insert.run(m.name);
-      } catch(e) { console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message); }
+      } catch (e) {
+        console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message);
+      }
     }
   }
 
   // Run technical-analysis migration (B4)
-  const {migrations: techMigrations} = require('./migrations/021-technical-analysis');
+  const {
+    migrations: techMigrations,
+  } = require("./migrations/021-technical-analysis");
   for (const m of techMigrations) {
     if (!applied.has(m.name)) {
       try {
         console.log(`[Buzz DB] Running migration: ${m.name}`);
         db.exec(m.sql);
         insert.run(m.name);
-      } catch(e) { console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message); }
+      } catch (e) {
+        console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message);
+      }
     }
   }
 
   // Run agent-cost-tracking migration (B3)
-  const {migrations: agentCostMigrations} = require('./migrations/020-agent-cost-tracking');
+  const {
+    migrations: agentCostMigrations,
+  } = require("./migrations/020-agent-cost-tracking");
   for (const m of agentCostMigrations) {
     if (!applied.has(m.name)) {
       try {
@@ -616,31 +644,41 @@ function runMigrations() {
         db.exec(m.sql);
         if (m.postRun) m.postRun(db);
         insert.run(m.name);
-      } catch(e) { console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message); }
+      } catch (e) {
+        console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message);
+      }
     }
   }
 
   // Run whale-signal-cache migration
-  const {migrations: whaleSignalMigrations} = require('./migrations/022-whale-signal-cache');
+  const {
+    migrations: whaleSignalMigrations,
+  } = require("./migrations/022-whale-signal-cache");
   for (const m of whaleSignalMigrations) {
     if (!applied.has(m.name)) {
       try {
         console.log(`[Buzz DB] Running migration: ${m.name}`);
         db.exec(m.sql);
         insert.run(m.name);
-      } catch(e) { console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message); }
+      } catch (e) {
+        console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message);
+      }
     }
   }
 
   // Run knowledge-graph migration (v7.8.0)
-  const {migrations: kgMigrations} = require('./migrations/023-knowledge-graph');
+  const {
+    migrations: kgMigrations,
+  } = require("./migrations/023-knowledge-graph");
   for (const m of kgMigrations) {
     if (!applied.has(m.name)) {
       try {
         console.log(`[Buzz DB] Running migration: ${m.name}`);
         db.exec(m.sql);
         insert.run(m.name);
-      } catch(e) { console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message); }
+      } catch (e) {
+        console.error(`[Buzz DB] Migration ${m.name} failed:`, e.message);
+      }
     }
   }
 }

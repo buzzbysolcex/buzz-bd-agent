@@ -28,10 +28,11 @@ Sub-agents instantiated once in `__init__`, stored in `self._agents` dict. Scann
 ### execute(params)
 
 Two modes:
-- `mode="scan"`: Full pipeline. Calls ScannerAgent.run(), iterates tokens, evaluates each via _evaluate_single_token().
+
+- `mode="scan"`: Full pipeline. Calls ScannerAgent.run(), iterates tokens, evaluates each via \_evaluate_single_token().
 - `mode="evaluate"`: Single token evaluation.
 
-### _evaluate_single_token(token_data, depth)
+### \_evaluate_single_token(token_data, depth)
 
 1. Build per-agent params from unified token_data
 2. Run 5 Layer 2 agents in parallel via asyncio.gather with asyncio.wait_for (30s timeout each)
@@ -85,6 +86,7 @@ All flags prefixed with agent name: `"safety:honeypot_detected"`, `"wallet:lp_bu
 ## Telegram Formatting
 
 Methods on Orchestrator:
+
 - `format_scan_result(scan_result)`: Summary + top 10 passing tokens
 - `format_evaluate_result(eval_result)`: Full breakdown with agent scores, flags, failed agents
 

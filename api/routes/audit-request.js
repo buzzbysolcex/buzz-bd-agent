@@ -11,16 +11,16 @@
  * Buzz BD Agent | SolCex Exchange
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { getDB } = require('../db');
-const { apiKeyAuth } = require('../middleware/auth');
+const { getDB } = require("../db");
+const { apiKeyAuth } = require("../middleware/auth");
 
 // ─── Tier pricing map ────────────────────────────────
 const TIER_PRICING = {
   quick_scan: 500,
   full_analysis: 1500,
-  swarm_audit: 2500
+  swarm_audit: 2500,
 };
 
 // ─── Create table on load ────────────────────────────
@@ -49,47 +49,55 @@ try {
     CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_requests(created_at);
   `);
 } catch (e) {
-  console.error('[audit-request] Table init deferred:', e.message);
+  console.error("[audit-request] Table init deferred:", e.message);
 }
 
 // ─── POST /request — Public audit intake ─────────────
-router.post('/request', (req, res) => {
+router.post("/request", (req, res) => {
   try {
     const db = getDB();
-    const { token_address, chain, contact_email, contact_twitter, tier, message } = req.body;
+    const {
+      token_address,
+      chain,
+      contact_email,
+      contact_twitter,
+      tier,
+      message,
+    } = req.body;
 
     // Validate required fields
     const missing = [];
-    if (!token_address) missing.push('token_address');
-    if (!chain) missing.push('chain');
-    if (!contact_email) missing.push('contact_email');
-    if (!tier) missing.push('tier');
+    if (!token_address) missing.push("token_address");
+    if (!chain) missing.push("chain");
+    if (!contact_email) missing.push("contact_email");
+    if (!tier) missing.push("tier");
 
     if (missing.length > 0) {
       return res.status(400).json({
-        error: 'Missing required fields',
+        error: "Missing required fields",
         missing,
-        required: ['token_address', 'chain', 'contact_email', 'tier'],
-        tiers: Object.keys(TIER_PRICING)
+        required: ["token_address", "chain", "contact_email", "tier"],
+        tiers: Object.keys(TIER_PRICING),
       });
     }
 
     // Validate tier
     if (!TIER_PRICING[tier]) {
       return res.status(400).json({
-        error: 'Invalid tier',
+        error: "Invalid tier",
         provided: tier,
         valid_tiers: {
-          quick_scan: '$500 — 11-factor scoring + basic report',
-          full_analysis: '$1,500 — Deep analysis + Monte Carlo simulation',
-          swarm_audit: '$2,500 — 1,000-agent adversarial swarm + on-chain proof'
-        }
+          quick_scan: "$500 — 11-factor scoring + basic report",
+          full_analysis: "$1,500 — Deep analysis + Monte Carlo simulation",
+          swarm_audit:
+            "$2,500 — 1,000-agent adversarial swarm + on-chain proof",
+        },
       });
     }
 
     // Validate email format (basic)
-    if (!contact_email.includes('@') || !contact_email.includes('.')) {
-      return res.status(400).json({ error: 'Invalid email format' });
+    if (!contact_email.includes("@") || !contact_email.includes(".")) {
+      return res.status(400).json({ error: "Invalid email format" });
     }
 
     // Generate request ID
@@ -97,43 +105,54 @@ router.post('/request', (req, res) => {
     const price = TIER_PRICING[tier];
 
     // Insert
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO audit_requests (request_id, token_address, chain, contact_email, contact_twitter, tier, price, message)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(request_id, token_address, chain, contact_email, contact_twitter || null, tier, price, message || null);
+    `,
+    ).run(
+      request_id,
+      token_address,
+      chain,
+      contact_email,
+      contact_twitter || null,
+      tier,
+      price,
+      message || null,
+    );
 
     res.status(201).json({
       request_id,
       tier,
       price,
-      status: 'received',
+      status: "received",
       message: "Audit request received. We'll respond within 24h via email.",
-      provider: 'Buzz BD Agent | SolCex Exchange'
+      provider: "Buzz BD Agent | SolCex Exchange",
     });
   } catch (err) {
-    console.error('[audit-request] Error:', err.message);
-    res.status(500).json({ error: 'Internal error', message: err.message });
+    console.error("[audit-request] Error:", err.message);
+    res.status(500).json({ error: "Internal error", message: err.message });
   }
 });
 
 // ─── GET /requests — Admin-only list ─────────────────
-router.get('/requests', apiKeyAuth, (req, res) => {
+router.get("/requests", apiKeyAuth, (req, res) => {
   try {
     const db = getDB();
     const { status, limit } = req.query;
 
-    let sql = 'SELECT * FROM audit_requests';
+    let sql = "SELECT * FROM audit_requests";
     const params = [];
 
     if (status) {
-      sql += ' WHERE status = ?';
+      sql += " WHERE status = ?";
       params.push(status);
     }
 
-    sql += ' ORDER BY created_at DESC';
+    sql += " ORDER BY created_at DESC";
 
     if (limit) {
-      sql += ' LIMIT ?';
+      sql += " LIMIT ?";
       params.push(parseInt(limit) || 50);
     }
 
@@ -142,11 +161,11 @@ router.get('/requests', apiKeyAuth, (req, res) => {
     res.json({
       count: requests.length,
       requests,
-      revenue_potential: requests.reduce((sum, r) => sum + (r.price || 0), 0)
+      revenue_potential: requests.reduce((sum, r) => sum + (r.price || 0), 0),
     });
   } catch (err) {
-    console.error('[audit-request] Error:', err.message);
-    res.status(500).json({ error: 'Internal error', message: err.message });
+    console.error("[audit-request] Error:", err.message);
+    res.status(500).json({ error: "Internal error", message: err.message });
   }
 });
 

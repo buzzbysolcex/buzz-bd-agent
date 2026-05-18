@@ -25,4 +25,3 @@ const {
 ## Status Flow
 
 `pending` -> `ready` -> `live` | `pre_frontier` (waiting on feature flag) | `with_aldo` (external dependency)
-

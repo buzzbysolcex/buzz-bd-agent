@@ -1,6 +1,9 @@
 # BUZZ SMART CONTRACT CAPABILITIES — DEPLOYMENT PLAN
+
 ## "We Build It. No Dependencies."
+
 ## Sprint Day 39+ | Foundry on Hetzner
+
 ## Bismillah 🤲
 
 ---
@@ -15,6 +18,7 @@ ClawdBotATG deployed 52 contracts. We will build the same capability.
 Not copy ClawdBot's contracts — build our OWN, for OUR use cases.
 
 This means Buzz can autonomously:
+
 - Deploy the Listing Oracle (getListingScore())
 - Deploy Score Storage contracts
 - Deploy Listing Escrow contracts
@@ -29,12 +33,14 @@ NO AUSTIN. NO CLAWDBOT. WE BUILD IT.
 ## WHAT GETS INSTALLED
 
 ### Foundry Toolchain
+
 - **forge** — compile, test, deploy smart contracts
 - **cast** — interact with on-chain contracts (read/write/send)
 - **anvil** — local testnet node for testing
 - **chisel** — Solidity REPL for quick experiments
 
 ### Why Foundry (not Hardhat)
+
 - Written in Rust = blazing fast
 - Tests in Solidity (not JavaScript) = Claude Code already writes Solidity
 - forge create = one-command deploy
@@ -45,11 +51,11 @@ NO AUSTIN. NO CLAWDBOT. WE BUILD IT.
 
 ## THE WAR ROOM PROMPT (copy-paste to Telegram)
 
-```
+````
 PRIORITY TASK: Give Buzz Smart Contract Deployment Capabilities
 
 CONTEXT:
-We're adding Foundry (Solidity toolchain) to Hetzner so Buzz can 
+We're adding Foundry (Solidity toolchain) to Hetzner so Buzz can
 autonomously write, compile, test, and deploy smart contracts on Base.
 Same capability as ClawdBotATG (52 contracts) but for our own use cases.
 This is the foundation for the Listing Protocol — no external dependencies.
@@ -153,7 +159,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @notice Stores token listing scores from Buzz BD Agent
 /// @dev Only the Buzz deployer (owner) can update scores
 contract ScoreStorage is Ownable {
-    
+
     struct TokenScore {
         uint256 score;           // 0-100 composite score
         uint8 confidence;        // 1-5 verification depth
@@ -165,11 +171,11 @@ contract ScoreStorage is Ownable {
         uint8 technicalScore;    // 0-100
         uint8 socialScore;       // 0-100
     }
-    
+
     mapping(address => TokenScore) public scores;
     address[] public scoredTokens;
     mapping(address => bool) private tokenExists;
-    
+
     event ScoreUpdated(
         address indexed token,
         uint256 score,
@@ -177,9 +183,9 @@ contract ScoreStorage is Ownable {
         bool triVerified,
         uint256 timestamp
     );
-    
+
     constructor() Ownable(msg.sender) {}
-    
+
     /// @notice Update or create a token's listing score
     /// @param token The token contract address
     /// @param score Composite score (0-100)
@@ -202,7 +208,7 @@ contract ScoreStorage is Ownable {
         uint8 socialScore
     ) external onlyOwner {
         require(score <= 100, "Score must be 0-100");
-        
+
         scores[token] = TokenScore({
             score: score,
             confidence: confidence,
@@ -214,15 +220,15 @@ contract ScoreStorage is Ownable {
             technicalScore: technicalScore,
             socialScore: socialScore
         });
-        
+
         if (!tokenExists[token]) {
             scoredTokens.push(token);
             tokenExists[token] = true;
         }
-        
+
         emit ScoreUpdated(token, score, confidence, triVerified, block.timestamp);
     }
-    
+
     /// @notice Get a token's listing score (the oracle function)
     /// @param token The token contract address
     /// @return score Composite score
@@ -240,19 +246,19 @@ contract ScoreStorage is Ownable {
         TokenScore memory s = scores[token];
         return (s.score, s.confidence, s.sourceCount, s.lastUpdated, s.triVerified);
     }
-    
+
     /// @notice Get detailed breakdown of a token's score
     /// @param token The token contract address
     function getDetailedScore(address token) external view returns (TokenScore memory) {
         return scores[token];
     }
-    
+
     /// @notice Get total number of scored tokens
     function totalScored() external view returns (uint256) {
         return scoredTokens.length;
     }
 }
-```
+````
 
 ═══════════════════════════════════════
 STEP 5: WRITE TEST
@@ -270,35 +276,35 @@ import "../src/ScoreStorage.sol";
 contract ScoreStorageTest is Test {
     ScoreStorage public store;
     address public token1 = address(0x1234);
-    
+
     function setUp() public {
         store = new ScoreStorage();
     }
-    
+
     function testUpdateScore() public {
         store.updateScore(token1, 85, 5, 29, true, 90, 80, 75, 85);
-        
-        (uint256 score, uint8 conf, uint8 sources, , bool verified) = 
+
+        (uint256 score, uint8 conf, uint8 sources, , bool verified) =
             store.getListingScore(token1);
-        
+
         assertEq(score, 85);
         assertEq(conf, 5);
         assertEq(sources, 29);
         assertTrue(verified);
     }
-    
+
     function testTotalScored() public {
         assertEq(store.totalScored(), 0);
         store.updateScore(token1, 85, 5, 29, true, 90, 80, 75, 85);
         assertEq(store.totalScored(), 1);
     }
-    
+
     function testOnlyOwner() public {
         vm.prank(address(0xBEEF));
         vm.expectRevert();
         store.updateScore(token1, 85, 5, 29, true, 90, 80, 75, 85);
     }
-    
+
     function testScoreCap() public {
         vm.expectRevert("Score must be 0-100");
         store.updateScore(token1, 101, 5, 29, true, 90, 80, 75, 85);
@@ -313,9 +319,11 @@ STEP 6: COMPILE + TEST
 cd /home/claude-code/buzz-contracts
 
 # Compile
+
 forge build
 
 # Run tests
+
 forge test -vvv
 
 # All tests should pass before ANY deployment
@@ -325,26 +333,35 @@ STEP 7: DEPLOY TO BASE SEPOLIA (TESTNET FIRST)
 ═══════════════════════════════════════
 
 # Get testnet ETH from Base Sepolia faucet first
+
 # https://www.alchemy.com/faucets/base-sepolia
 
 # Deploy to testnet using buzz-deployer (0xa57f..9206)
+
 forge create src/ScoreStorage.sol:ScoreStorage \
-  --rpc-url https://sepolia.base.org \
-  --account buzz-deployer \
-  --verify
+ --rpc-url https://sepolia.base.org \
+ --account buzz-deployer \
+ --verify
 
 # Save the deployed address
+
 # Example output: Deployed to: 0x...
 
 # Test the deployed contract
+
 cast call <DEPLOYED_ADDRESS> "totalScored()" --rpc-url https://sepolia.base.org
+
 # Expected: 0x0 (zero tokens scored initially)
 
 # AFTER TESTNET VERIFIED — Transfer ownership to Main Identity:
+
 # cast send <DEPLOYED_ADDRESS> "transferOwnership(address)" \
-#   0x2Dc03124091104E7798C0273D96FC5ED65F05aA9 \
-#   --rpc-url https://mainnet.base.org \
-#   --account buzz-deployer
+
+# 0x2Dc03124091104E7798C0273D96FC5ED65F05aA9 \
+
+# --rpc-url https://mainnet.base.org \
+
+# --account buzz-deployer
 
 ═══════════════════════════════════════
 STEP 8: ADD WAR ROOM COMMANDS
@@ -352,13 +369,13 @@ STEP 8: ADD WAR ROOM COMMANDS
 
 Add these smart contract commands to War Room:
 
-/contract-build          — Compile all contracts (forge build)
-/contract-test           — Run all tests (forge test -vvv)
-/contract-deploy <name>  — Deploy contract to Base (forge create)
-/contract-call <addr> <fn>  — Read from contract (cast call)
-/contract-send <addr> <fn>  — Write to contract (cast send)
-/contract-balance        — Check deployer wallet balance
-/contract-list           — List all deployed contracts
+/contract-build — Compile all contracts (forge build)
+/contract-test — Run all tests (forge test -vvv)
+/contract-deploy <name> — Deploy contract to Base (forge create)
+/contract-call <addr> <fn> — Read from contract (cast call)
+/contract-send <addr> <fn> — Write to contract (cast send)
+/contract-balance — Check deployer wallet balance
+/contract-list — List all deployed contracts
 
 ═══════════════════════════════════════
 STEP 9: CREATE DEPLOYMENT SCRIPT
@@ -378,7 +395,7 @@ contract DeployScoreStorage is Script {
         vm.startBroadcast();
         ScoreStorage store = new ScoreStorage();
         vm.stopBroadcast();
-        
+
         console.log("ScoreStorage deployed at:", address(store));
     }
 }
@@ -391,9 +408,8 @@ STEP 10: WIRE INTO BUZZ PIPELINE (Phase 2)
 After testnet deploy is verified, wire the score storage into Buzz:
 
 1. When pipeline-scorer finalizes a HOT token score:
-   - Claude Code runs: cast send <ScoreStorage> "updateScore(...)" 
+   - Claude Code runs: cast send <ScoreStorage> "updateScore(...)"
    - Score is stored on-chain (Base L2, ~$0.001 gas)
-   
 2. Anyone can read scores:
    - cast call <ScoreStorage> "getListingScore(address)" <tokenAddress>
    - Or via the x402 API endpoint
@@ -408,20 +424,23 @@ FUTURE CONTRACTS (after ScoreStorage works)
 ═══════════════════════════════════════
 
 Contract #2: ListingEscrow.sol
-  - Token project deposits $5K USDC
-  - SolCex confirms listing
-  - Escrow releases to SolCex
-  - On-chain, auditable, trustless
+
+- Token project deposits $5K USDC
+- SolCex confirms listing
+- Escrow releases to SolCex
+- On-chain, auditable, trustless
 
 Contract #3: ListingOracle.sol
-  - getListingScore() with x402 payment
-  - Any dApp calls it, pays per query
-  - Revenue flows to Buzz wallet
+
+- getListingScore() with x402 payment
+- Any dApp calls it, pays per query
+- Revenue flows to Buzz wallet
 
 Contract #4: BuzzReputation.sol
-  - On-chain reputation for scoring accuracy
-  - Tracks predictions vs outcomes
-  - Builds trust over time
+
+- On-chain reputation for scoring accuracy
+- Tracks predictions vs outcomes
+- Builds trust over time
 
 ═══════════════════════════════════════
 SAFETY RULES (PERMANENT)
@@ -448,14 +467,14 @@ PERSISTENCE
 COST
 ═══════════════════════════════════════
 
-| Item | Cost |
-|------|------|
-| Foundry toolchain | $0 (open source, Rust) |
-| Deployment wallet | 0xa57f..9206 — $10.32 ETH on Base (CONFIRMED) |
-| Base L2 gas per deploy | ~$0.01-$0.10 |
-| Base L2 gas per score update | ~$0.001 |
-| Testnet gas | $0 (faucet) |
-| Total available for deploys | ~50-100 contract deploys |
+| Item                         | Cost                                          |
+| ---------------------------- | --------------------------------------------- |
+| Foundry toolchain            | $0 (open source, Rust)                        |
+| Deployment wallet            | 0xa57f..9206 — $10.32 ETH on Base (CONFIRMED) |
+| Base L2 gas per deploy       | ~$0.01-$0.10                                  |
+| Base L2 gas per score update | ~$0.001                                       |
+| Testnet gas                  | $0 (faucet)                                   |
+| Total available for deploys  | ~50-100 contract deploys                      |
 
 ═══════════════════════════════════════
 REPORT WHEN DONE
@@ -467,10 +486,11 @@ REPORT WHEN DONE
 - ✅ ScoreStorage.sol compiled
 - ✅ All tests pass (forge test)
 - ✅ Wallet configured (buzz-deployer keystore)
-- ✅ Wallet balance on Base: ___ ETH
+- ✅ Wallet balance on Base: \_\_\_ ETH
 - ✅ War Room commands added
 - ✅ Document saved + CLAUDE.md updated
 - Ready for testnet deploy (awaiting Ogie approval + testnet ETH)
+
 ```
 
 ---
@@ -507,3 +527,4 @@ PLUS what ClawdBot DOESN'T have:
 *The chef who became a CEO who became a smart contract deployer.*
 *No CS degree. No dependencies. Just Claude and persistence.*
 *Bismillah* 🤲
+```

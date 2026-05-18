@@ -1,13 +1,17 @@
 # Solana Frontier Hackathon — Buzz BD Agent Submission
+
 ## Colosseum | April 6 - May 11, 2026
 
 ### Product Name
+
 Buzz BD Agent
 
 ### Track
+
 Infrastructure
 
 ### One-liner
+
 The first AI-native autonomous exchange listing company on Solana — a Claude Opus 4.6-brained BD agent that discovers, scores, simulates, and pitches token listings for SolCex Exchange across 3 chains, running 24/7 on $210/mo with zero external LLM costs and 6-chain on-chain identity.
 
 ### Team
@@ -17,6 +21,7 @@ The first AI-native autonomous exchange listing company on Solana — a Claude O
 **Claude Code (Opus 4.6)** — AI Developer & System Brain. 24/7 on Hetzner, thinks/codes/deploys/tweets/analyzes.
 
 ### Links
+
 - Website: https://buzzbd.ai
 - Dashboard: https://microbuzz.vercel.app
 - API: https://api.buzzbd.ai
@@ -26,6 +31,7 @@ The first AI-native autonomous exchange listing company on Solana — a Claude O
 - Exchange: https://solcex.cc
 
 ### Traction
+
 - 86 tokens in pipeline
 - 135 endpoints
 - 55 tables
@@ -38,7 +44,9 @@ The first AI-native autonomous exchange listing company on Solana — a Claude O
 - ZHC readiness: 78%
 
 ### What We're Building During Frontier
+
 Everything from Day 37 forward feeds into this submission:
+
 - Monte Carlo simulation engine (100 iterations per token)
 - BaaS (BD-as-a-Service) via x402 payments ($149-299/sim)
 - Enhanced scoring with dual-gate validation

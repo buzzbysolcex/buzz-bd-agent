@@ -8,6 +8,7 @@ description: Show the public token leaderboard. 482 tokens scored, ranked by Buz
 Public token rankings by Buzz score.
 
 ## Usage
+
 ```
 /leaderboard                    # Top 20
 /leaderboard --top 50           # Top 50
@@ -16,8 +17,10 @@ Public token rankings by Buzz score.
 ```
 
 ## Public URL
+
 https://buzzbd.ai/scores — 482 tokens scored, real-time updates.
 
 ## Data
+
 Pulls from token_pipeline table, sorted by score DESC.
 Includes: token name, chain, score, classification, last scored timestamp.

@@ -9,8 +9,22 @@
       "endpoint": "https://api.buzzbd.ai/api/v1/score-token",
       "tags": ["token-scoring", "intelligence", "defi", "exchange-listing"],
       "schema": {
-        "input": { "type": "object", "properties": { "address": { "type": "string" }, "chain": { "type": "string", "default": "auto" } }, "required": ["address"] },
-        "output": { "type": "object", "properties": { "score": { "type": "number" }, "factors": { "type": "object" }, "classification": { "type": "string" } } }
+        "input": {
+          "type": "object",
+          "properties": {
+            "address": { "type": "string" },
+            "chain": { "type": "string", "default": "auto" }
+          },
+          "required": ["address"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "score": { "type": "number" },
+            "factors": { "type": "object" },
+            "classification": { "type": "string" }
+          }
+        }
       }
     },
     "mirofish-sim": {
@@ -20,8 +34,23 @@
       "endpoint": "https://api.buzzbd.ai/api/v1/simulate",
       "tags": ["simulation", "swarm", "consensus", "institutional-skepticism"],
       "schema": {
-        "input": { "type": "object", "properties": { "token_address": { "type": "string" }, "agents": { "type": "number", "default": 1000 }, "rounds": { "type": "number", "default": 10 } }, "required": ["token_address"] },
-        "output": { "type": "object", "properties": { "belief": { "type": "number" }, "clusters": { "type": "object" }, "ev": { "type": "number" } } }
+        "input": {
+          "type": "object",
+          "properties": {
+            "token_address": { "type": "string" },
+            "agents": { "type": "number", "default": 1000 },
+            "rounds": { "type": "number", "default": 10 }
+          },
+          "required": ["token_address"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "belief": { "type": "number" },
+            "clusters": { "type": "object" },
+            "ev": { "type": "number" }
+          }
+        }
       }
     },
     "cex-gap": {
@@ -31,8 +60,19 @@
       "endpoint": "https://api.buzzbd.ai/api/v1/cex-gap",
       "tags": ["cex", "exchange-listing", "gap-analysis", "bd-intelligence"],
       "schema": {
-        "input": { "type": "object", "properties": { "symbol": { "type": "string" } }, "required": ["symbol"] },
-        "output": { "type": "object", "properties": { "symbol": { "type": "string" }, "exchanges": { "type": "object" }, "listed_count": { "type": "number" } } }
+        "input": {
+          "type": "object",
+          "properties": { "symbol": { "type": "string" } },
+          "required": ["symbol"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "symbol": { "type": "string" },
+            "exchanges": { "type": "object" },
+            "listed_count": { "type": "number" }
+          }
+        }
       }
     },
     "defi-audit": {
@@ -42,8 +82,19 @@
       "endpoint": "https://api.buzzbd.ai/api/v1/audit",
       "tags": ["security", "audit", "rug-detection", "safety", "hsaas"],
       "schema": {
-        "input": { "type": "object", "properties": { "token_address": { "type": "string" } }, "required": ["token_address"] },
-        "output": { "type": "object", "properties": { "safety_score": { "type": "number" }, "rug_risk": { "type": "string" }, "il_risk": { "type": "string" } } }
+        "input": {
+          "type": "object",
+          "properties": { "token_address": { "type": "string" } },
+          "required": ["token_address"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "safety_score": { "type": "number" },
+            "rug_risk": { "type": "string" },
+            "il_risk": { "type": "string" }
+          }
+        }
       }
     },
     "yield-compare": {
@@ -53,8 +104,22 @@
       "endpoint": "https://api.buzzbd.ai/api/v1/yield",
       "tags": ["yield", "defi", "lending", "staking", "comparison"],
       "schema": {
-        "input": { "type": "object", "properties": { "asset": { "type": "string" }, "chain": { "type": "string" } }, "required": ["asset"] },
-        "output": { "type": "object", "properties": { "asset": { "type": "string" }, "protocols": { "type": "array" }, "best": { "type": "string" } } }
+        "input": {
+          "type": "object",
+          "properties": {
+            "asset": { "type": "string" },
+            "chain": { "type": "string" }
+          },
+          "required": ["asset"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "asset": { "type": "string" },
+            "protocols": { "type": "array" },
+            "best": { "type": "string" }
+          }
+        }
       }
     },
     "portfolio": {
@@ -64,8 +129,19 @@
       "endpoint": "https://api.buzzbd.ai/api/v1/portfolio",
       "tags": ["portfolio", "wallet", "cross-chain", "tracking"],
       "schema": {
-        "input": { "type": "object", "properties": { "wallet_address": { "type": "string" } }, "required": ["wallet_address"] },
-        "output": { "type": "object", "properties": { "tokens": { "type": "array" }, "total_usd": { "type": "number" }, "chains": { "type": "array" } } }
+        "input": {
+          "type": "object",
+          "properties": { "wallet_address": { "type": "string" } },
+          "required": ["wallet_address"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "tokens": { "type": "array" },
+            "total_usd": { "type": "number" },
+            "chains": { "type": "array" }
+          }
+        }
       }
     },
     "price-alerts": {
@@ -75,8 +151,25 @@
       "endpoint": "https://api.buzzbd.ai/api/v1/alerts/price",
       "tags": ["alerts", "monitoring", "price", "automation"],
       "schema": {
-        "input": { "type": "object", "properties": { "token_address": { "type": "string" }, "condition": { "type": "string", "enum": ["above", "below", "change_pct"] }, "value": { "type": "number" } }, "required": ["token_address", "condition", "value"] },
-        "output": { "type": "object", "properties": { "alert_id": { "type": "string" }, "status": { "type": "string" } } }
+        "input": {
+          "type": "object",
+          "properties": {
+            "token_address": { "type": "string" },
+            "condition": {
+              "type": "string",
+              "enum": ["above", "below", "change_pct"]
+            },
+            "value": { "type": "number" }
+          },
+          "required": ["token_address", "condition", "value"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "alert_id": { "type": "string" },
+            "status": { "type": "string" }
+          }
+        }
       }
     },
     "reputation": {
@@ -86,8 +179,19 @@
       "endpoint": "https://api.buzzbd.ai/api/v1/reputation",
       "tags": ["reputation", "identity", "erc-8004", "trust", "on-chain"],
       "schema": {
-        "input": { "type": "object", "properties": { "agent_id": { "type": "string" } }, "required": ["agent_id"] },
-        "output": { "type": "object", "properties": { "agent_id": { "type": "string" }, "reputation_score": { "type": "number" }, "chains": { "type": "array" } } }
+        "input": {
+          "type": "object",
+          "properties": { "agent_id": { "type": "string" } },
+          "required": ["agent_id"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "agent_id": { "type": "string" },
+            "reputation_score": { "type": "number" },
+            "chains": { "type": "array" }
+          }
+        }
       }
     }
   }

@@ -131,18 +131,18 @@ Born from surviving a North Korean state-actor supply chain attack (March 31, 20
 
 Every pattern is derived from a real exploit. Every sub-pattern has a detection signature. The scanner doesn't guess — it matches against proven attack shapes.
 
-| Class | Name | Sub-Patterns | Ground Truth Example |
-|-------|------|-------------|---------------------|
-| **A** | Validation Asymmetry | 12 | CometBFT vote-extension DoS — expensive verify before cheap address check |
-| **B** | Identity Trust | 8 | Ekubo $1.4M — callback decoded payer without authorization check |
-| **C** | Operation Ordering | 4 | Classic expensive-before-cheap patterns across consensus codebases |
-| **D** | Reentrancy / TOCTOU | 2 | Sharwa $33K — ERC721 onReceived callback reentrancy |
-| **E** | Oracle / Price Feed | 2 | Sharwa $33K — Uniswap V3 spot Quoter as sole oracle (no TWAP) |
-| **F** | Signature Replay | 5 | Circle ARC chain_id omission in signing functions |
-| **G** | Capability Injection | 3 | Grok/Bankr $174K — NFT membership auto-granted agent permissions, attacker posted malicious prompt |
-| **H** | Off-Chain Trust | 8 | Kelp/Resolv $293M — single DVN verifier on LayerZero OApp |
-| **I** | Parser Differential | 4 | Firedancer HTTP RFC 7230 non-compliance (2 PoCs built) |
-| **J** | C Memory Safety | 10 | CVE-2026-0300 — PAN-OS captive portal buffer overflow, CVSS 9.3 |
+| Class | Name                 | Sub-Patterns | Ground Truth Example                                                                               |
+| ----- | -------------------- | ------------ | -------------------------------------------------------------------------------------------------- |
+| **A** | Validation Asymmetry | 12           | CometBFT vote-extension DoS — expensive verify before cheap address check                          |
+| **B** | Identity Trust       | 8            | Ekubo $1.4M — callback decoded payer without authorization check                                   |
+| **C** | Operation Ordering   | 4            | Classic expensive-before-cheap patterns across consensus codebases                                 |
+| **D** | Reentrancy / TOCTOU  | 2            | Sharwa $33K — ERC721 onReceived callback reentrancy                                                |
+| **E** | Oracle / Price Feed  | 2            | Sharwa $33K — Uniswap V3 spot Quoter as sole oracle (no TWAP)                                      |
+| **F** | Signature Replay     | 5            | Circle ARC chain_id omission in signing functions                                                  |
+| **G** | Capability Injection | 3            | Grok/Bankr $174K — NFT membership auto-granted agent permissions, attacker posted malicious prompt |
+| **H** | Off-Chain Trust      | 8            | Kelp/Resolv $293M — single DVN verifier on LayerZero OApp                                          |
+| **I** | Parser Differential  | 4            | Firedancer HTTP RFC 7230 non-compliance (2 PoCs built)                                             |
+| **J** | C Memory Safety      | 10           | CVE-2026-0300 — PAN-OS captive portal buffer overflow, CVSS 9.3                                    |
 
 **Total: 68 sub-patterns. 10 classes. $583M+ in cataloged damage.**
 
@@ -150,16 +150,16 @@ Every pattern is derived from a real exploit. Every sub-pattern has a detection 
 
 Real exploits. Real damage. Real detection signatures.
 
-| # | Exploit | Damage | Pattern | Date | Detection Method |
-|---|---------|--------|---------|------|-----------------|
-| 1 | Ekubo Protocol | $1.4M | B.8 | May 6, 2026 | B.8 hunter scans for transferFrom(decoded_address) inside protocol-gated callbacks |
-| 2 | Grok/Bankr | $174K | G | May 4, 2026 | Pattern G checks balanceOf-gated tool registration + NL-to-tx-signing without sender auth |
-| 3 | Wasabi Protocol | $5.5M | H.2d | Apr 30, 2026 | H.2 precondition scanner checks single admin + zero timelock + arbitrary strategy setter |
-| 4 | Kelp/Resolv | $293M | H.1 | 2026 | DVN config enumeration reads on-chain verifier count per channel |
-| 5 | Drift | $285M | H | Apr 1, 2026 | Admin key compromise on perpetuals exchange |
-| 6 | Sharwa Finance | $33K | E+D | May 1, 2026 | Phase 7 oracle detector + Phase 6 reentrancy detector flag compound E+D |
-| 7 | DABE Protocol | Whitehat | H.2c | May 5, 2026 | H.2c hunter: is initialize() callable? Is admin == address(0)? |
-| 8 | CVE-2026-0300 | Active | J.4b | May 2026 | Pattern J.4b regex matches unbounded copy ops in auth portal code |
+| #   | Exploit         | Damage   | Pattern | Date         | Detection Method                                                                          |
+| --- | --------------- | -------- | ------- | ------------ | ----------------------------------------------------------------------------------------- |
+| 1   | Ekubo Protocol  | $1.4M    | B.8     | May 6, 2026  | B.8 hunter scans for transferFrom(decoded_address) inside protocol-gated callbacks        |
+| 2   | Grok/Bankr      | $174K    | G       | May 4, 2026  | Pattern G checks balanceOf-gated tool registration + NL-to-tx-signing without sender auth |
+| 3   | Wasabi Protocol | $5.5M    | H.2d    | Apr 30, 2026 | H.2 precondition scanner checks single admin + zero timelock + arbitrary strategy setter  |
+| 4   | Kelp/Resolv     | $293M    | H.1     | 2026         | DVN config enumeration reads on-chain verifier count per channel                          |
+| 5   | Drift           | $285M    | H       | Apr 1, 2026  | Admin key compromise on perpetuals exchange                                               |
+| 6   | Sharwa Finance  | $33K     | E+D     | May 1, 2026  | Phase 7 oracle detector + Phase 6 reentrancy detector flag compound E+D                   |
+| 7   | DABE Protocol   | Whitehat | H.2c    | May 5, 2026  | H.2c hunter: is initialize() callable? Is admin == address(0)?                            |
+| 8   | CVE-2026-0300   | Active   | J.4b    | May 2026     | Pattern J.4b regex matches unbounded copy ops in auth portal code                         |
 
 **Every new exploit gets cataloged within hours. Pattern G (Grok $174K) was cataloged the same day it happened.**
 
@@ -167,17 +167,17 @@ Real exploits. Real damage. Real detection signatures.
 
 Buzz doesn't just scan. It finds real bugs in production infrastructure and files responsible disclosures.
 
-| Target | Finding | Severity | Platform | Status |
-|--------|---------|----------|----------|--------|
-| CometBFT | Vote-Extension DoS Amplifier | HIGH (CVSS 7.5) | HackerOne #3709966 | Closed |
-| Sui | ExecutionTimeObservation Authority Spoofing | HIGH (CVSS 7.2) | HackenProof | Blocked (150 rep) |
-| Firedancer | VarInt Offset Accumulation (CHOREO-001) | HIGH (conf 0.95) | Immunefi | Blocked ($100 deposit) |
-| Firedancer | PRUNE-storm Reflection (GOSSIP-001) | HIGH (conf 0.94) | Immunefi | Blocked ($100 deposit) |
-| Firedancer | Runtime Stack Overflow (RUNTIME-001) | HIGH | Immunefi | Blocked ($100 deposit) |
-| Circle MALA | Sync Proposer Attribution | HIGH | HackerOne | Pending |
-| Circle ARC | chain_id Omission | HIGH | HackerOne | Pending |
-| Drift | VAULTS-001 + ORACLE-001 | CRITICAL + HIGH | Direct email | No reply |
-| OKX | WC-001 Session Executor + WC-002 EIP-1271 | CRITICAL (10.0) | HackerOne | Duplicate |
+| Target      | Finding                                     | Severity         | Platform           | Status                 |
+| ----------- | ------------------------------------------- | ---------------- | ------------------ | ---------------------- |
+| CometBFT    | Vote-Extension DoS Amplifier                | HIGH (CVSS 7.5)  | HackerOne #3709966 | Closed                 |
+| Sui         | ExecutionTimeObservation Authority Spoofing | HIGH (CVSS 7.2)  | HackenProof        | Blocked (150 rep)      |
+| Firedancer  | VarInt Offset Accumulation (CHOREO-001)     | HIGH (conf 0.95) | Immunefi           | Blocked ($100 deposit) |
+| Firedancer  | PRUNE-storm Reflection (GOSSIP-001)         | HIGH (conf 0.94) | Immunefi           | Blocked ($100 deposit) |
+| Firedancer  | Runtime Stack Overflow (RUNTIME-001)        | HIGH             | Immunefi           | Blocked ($100 deposit) |
+| Circle MALA | Sync Proposer Attribution                   | HIGH             | HackerOne          | Pending                |
+| Circle ARC  | chain_id Omission                           | HIGH             | HackerOne          | Pending                |
+| Drift       | VAULTS-001 + ORACLE-001                     | CRITICAL + HIGH  | Direct email       | No reply               |
+| OKX         | WC-001 Session Executor + WC-002 EIP-1271   | CRITICAL (10.0)  | HackerOne          | Duplicate              |
 
 **Key moment:** Solana co-founder Anatoly Yakovenko personally reviewed our Percolator PR #79. Gave a 4-point technical review. Gracious reply. We ran the FULL V6 pipeline — all layers, no shortcuts — because Ogie insisted. That's now a permanent operational rule: every target, every layer, no exceptions.
 
@@ -185,20 +185,20 @@ Buzz doesn't just scan. It finds real bugs in production infrastructure and file
 
 The pipeline for scaling from 9 manual reports to autonomous bug bounty operations.
 
-| # | Priority | Purpose | Status |
-|---|----------|---------|--------|
-| 1 | **Auto-Submit Module** | 3-tier submission: AUTO (>0.90 confidence) / 1HR Timer / Ogie Gate | Building |
-| 2 | **Watchdog Resurrection** | 15-min poll on 30+ repos, diff analysis, auto-scan changed functions | Building |
-| 3 | **Consensus Integration** | Wire MiroFish 8-agent consensus scoring into pipeline | Building |
-| 4 | Contest Monitor Fixes | Fix broken Cantina/Sherlock parsers, add Codehawks | Queued |
-| 5 | Target Scorer | Score 859 programs by complexity, bounty, audit freshness | Queued |
-| 6 | Writeup Miner | Ingest public writeups, classify into Pattern A-J, auto-generate rules | Queued |
-| 7 | Auto-PoC Generator | Foundry fork tests (EVM), Anchor tests (Solana), auto-calculate impact | Queued |
-| 8 | Report Templates | Platform-specific auto-fill from pipeline output | Queued |
-| 9 | Speed Optimization | SPEEDRUNNER mode (<60s), Standard (<15 min), Deep (~52 min) | Queued |
-| 10 | Outcome Tracker | Track submission results, feed back into target scorer | Queued |
-| 11 | Rejection Log | Log skipped programs, calculate EV for deposit-gated targets | Queued |
-| 12 | Intel Feedback Loop | 16,295 unified findings auto-feeding new invariant rules | Queued |
+| #   | Priority                  | Purpose                                                                | Status   |
+| --- | ------------------------- | ---------------------------------------------------------------------- | -------- |
+| 1   | **Auto-Submit Module**    | 3-tier submission: AUTO (>0.90 confidence) / 1HR Timer / Ogie Gate     | Building |
+| 2   | **Watchdog Resurrection** | 15-min poll on 30+ repos, diff analysis, auto-scan changed functions   | Building |
+| 3   | **Consensus Integration** | Wire MiroFish 8-agent consensus scoring into pipeline                  | Building |
+| 4   | Contest Monitor Fixes     | Fix broken Cantina/Sherlock parsers, add Codehawks                     | Queued   |
+| 5   | Target Scorer             | Score 859 programs by complexity, bounty, audit freshness              | Queued   |
+| 6   | Writeup Miner             | Ingest public writeups, classify into Pattern A-J, auto-generate rules | Queued   |
+| 7   | Auto-PoC Generator        | Foundry fork tests (EVM), Anchor tests (Solana), auto-calculate impact | Queued   |
+| 8   | Report Templates          | Platform-specific auto-fill from pipeline output                       | Queued   |
+| 9   | Speed Optimization        | SPEEDRUNNER mode (<60s), Standard (<15 min), Deep (~52 min)            | Queued   |
+| 10  | Outcome Tracker           | Track submission results, feed back into target scorer                 | Queued   |
+| 11  | Rejection Log             | Log skipped programs, calculate EV for deposit-gated targets           | Queued   |
+| 12  | Intel Feedback Loop       | 16,295 unified findings auto-feeding new invariant rules               | Queued   |
 
 **P1 + P2 + P3 are independent modules building in parallel right now.**
 
@@ -212,20 +212,20 @@ DISCOVER → SCORE → SIMULATE → VERIFY → OUTREACH → NEGOTIATE → LIST
     └──────────────── feedback loop (calibration) ───────────────┘
 ```
 
-| Stage | What Happens |
-|-------|-------------|
-| **Discover** | ARIA v2 scans DexScreener, CoinGecko, HeyAnon MCP across 19 chains |
-| **Pre-Screen** | 4-probe analysis (chain fingerprint, signal count, source alignment, Ouroboros detection) |
-| **Score** | 15 rules, 4 categories, dual-gate verification (max 100 points) |
-| **Forecast** | TimesFM 2.5 predictive intelligence (Phase 0 data collection) |
-| **Monte Carlo** | 1,000 rule-based agents x 100 iterations in 26ms |
-| **MiroFish** | 10,000 agents (Wave 4) simulate market reaction across 5 clusters |
-| **Verify** | Triple verification (3 independent sources) + on-chain recording |
-| **Identity** | ATV Web3 Identity — deployer verification via x402 micropayment |
-| **Shield** | BuzzShield V6 — 10-layer autonomous security pipeline |
-| **Guard** | Wallet Guard (AION) — pre-execution governance with cryptographic receipts |
-| **Broadcast** | Tweet image cards — 1200x675 cyberpunk PNG on every scan reply to X |
-| **Propose** | Only tokens scoring 70+ with MiroFish consensus > 50% get a listing conversation |
+| Stage           | What Happens                                                                              |
+| --------------- | ----------------------------------------------------------------------------------------- |
+| **Discover**    | ARIA v2 scans DexScreener, CoinGecko, HeyAnon MCP across 19 chains                        |
+| **Pre-Screen**  | 4-probe analysis (chain fingerprint, signal count, source alignment, Ouroboros detection) |
+| **Score**       | 15 rules, 4 categories, dual-gate verification (max 100 points)                           |
+| **Forecast**    | TimesFM 2.5 predictive intelligence (Phase 0 data collection)                             |
+| **Monte Carlo** | 1,000 rule-based agents x 100 iterations in 26ms                                          |
+| **MiroFish**    | 10,000 agents (Wave 4) simulate market reaction across 5 clusters                         |
+| **Verify**      | Triple verification (3 independent sources) + on-chain recording                          |
+| **Identity**    | ATV Web3 Identity — deployer verification via x402 micropayment                           |
+| **Shield**      | BuzzShield V6 — 10-layer autonomous security pipeline                                     |
+| **Guard**       | Wallet Guard (AION) — pre-execution governance with cryptographic receipts                |
+| **Broadcast**   | Tweet image cards — 1200x675 cyberpunk PNG on every scan reply to X                       |
+| **Propose**     | Only tokens scoring 70+ with MiroFish consensus > 50% get a listing conversation          |
 
 **1,044+ tokens scored. Zero passed the MiroFish consensus gate honestly. That's integrity.**
 
@@ -309,10 +309,10 @@ Buzz operates as both buyer and seller in the x402 agent economy. Six premium en
 
 Real-time intel pipeline from on-chain investigators and DeFi alert systems, triaged automatically into the BD pipeline.
 
-| Channel Category | Channels | Status |
-|-----------------|----------|--------|
-| **OPS** | daily-report, signal-stream, streak-alerts, shield-scans, sentinel-health, bd-hot-tokens, mining-pulse, tweet-approval-queue, kill-switch-log | LIVE |
-| **INTEL** | zachxbt, lookonchain, defi-alerts, intel-raw, intel-triaged, intel-actioned | LIVE |
+| Channel Category | Channels                                                                                                                                      | Status |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| **OPS**          | daily-report, signal-stream, streak-alerts, shield-scans, sentinel-health, bd-hot-tokens, mining-pulse, tweet-approval-queue, kill-switch-log | LIVE   |
+| **INTEL**        | zachxbt, lookonchain, defi-alerts, intel-raw, intel-triaged, intel-actioned                                                                   | LIVE   |
 
 ## Mining Intelligence Engine — Intel Source #34
 
@@ -415,40 +415,40 @@ Layer 10: DISTRIBUTION (multi-channel)
 
 ## By the Numbers
 
-| Metric | Value |
-|--------|-------|
-| BuzzShield Version | **V6** (10-layer autonomous pipeline) |
-| Pattern Classes | **10** (A through J) |
-| Sub-Patterns | **68** |
-| Programs Monitored | **859** across 6 platforms |
-| Ground Truth | **$583M+** in 8 cataloged exploits |
-| Vulnerability Reports | **9 filed** across HackerOne, Immunefi, direct email |
-| Toly Code Review | **PR #79** on Percolator — 4-point review |
-| Intelligence Sources | **36** |
-| Database Tables | **141+** |
-| Wiki Pages | **140+** |
-| Endpoints | **~200+** |
-| Services | **27+** |
-| Feature Flags | **68 active / 122 total** |
-| autoDream Phases | **15** |
-| x402 Endpoints | **6** (CDP facilitator, Bazaar discovery) |
-| Tokens Scored | **1,044+** |
-| Smart Contracts | **4 on Base mainnet + 1 on Solana** |
-| MiroFish Agents | **10,000** (Wave 4 complete) |
-| Persistent Memory | **Obsidian Mind** (11 brain/project notes, auto-read) |
-| LLM Cost | **$0/day** (Opus 4.7 Pro Max unlimited + Ollama local) |
-| Server Cost | **$43/month** (Hetzner CPX62, 16 vCPU, 32GB RAM) |
-| Total Stack Cost | **~$243/month** (server + Pro Max) |
+| Metric                | Value                                                  |
+| --------------------- | ------------------------------------------------------ |
+| BuzzShield Version    | **V6** (10-layer autonomous pipeline)                  |
+| Pattern Classes       | **10** (A through J)                                   |
+| Sub-Patterns          | **68**                                                 |
+| Programs Monitored    | **859** across 6 platforms                             |
+| Ground Truth          | **$583M+** in 8 cataloged exploits                     |
+| Vulnerability Reports | **9 filed** across HackerOne, Immunefi, direct email   |
+| Toly Code Review      | **PR #79** on Percolator — 4-point review              |
+| Intelligence Sources  | **36**                                                 |
+| Database Tables       | **141+**                                               |
+| Wiki Pages            | **140+**                                               |
+| Endpoints             | **~200+**                                              |
+| Services              | **27+**                                                |
+| Feature Flags         | **68 active / 122 total**                              |
+| autoDream Phases      | **15**                                                 |
+| x402 Endpoints        | **6** (CDP facilitator, Bazaar discovery)              |
+| Tokens Scored         | **1,044+**                                             |
+| Smart Contracts       | **4 on Base mainnet + 1 on Solana**                    |
+| MiroFish Agents       | **10,000** (Wave 4 complete)                           |
+| Persistent Memory     | **Obsidian Mind** (11 brain/project notes, auto-read)  |
+| LLM Cost              | **$0/day** (Opus 4.7 Pro Max unlimited + Ollama local) |
+| Server Cost           | **$43/month** (Hetzner CPX62, 16 vCPU, 32GB RAM)       |
+| Total Stack Cost      | **~$243/month** (server + Pro Max)                     |
 
 ## Domain Ecosystem
 
-| Domain | Purpose | Status |
-|--------|---------|--------|
-| [buzzbd.ai](https://buzzbd.ai) | Main landing — what Buzz does and has | LIVE |
-| [api.buzzbd.ai](https://api.buzzbd.ai) | Buzz API (6 x402 endpoints) | LIVE |
-| [shield.buzzbd.ai](https://shield.buzzbd.ai) | BuzzShield V6 Scanner (Noah AI / Plena) | LIVE |
-| [sentinel.buzzbd.ai](https://sentinel.buzzbd.ai) | Sentinel health dashboard | LIVE |
-| [dash.buzzbd.ai](https://dash.buzzbd.ai) | MicroBuzz dashboard (Vercel) | LIVE |
+| Domain                                           | Purpose                                 | Status |
+| ------------------------------------------------ | --------------------------------------- | ------ |
+| [buzzbd.ai](https://buzzbd.ai)                   | Main landing — what Buzz does and has   | LIVE   |
+| [api.buzzbd.ai](https://api.buzzbd.ai)           | Buzz API (6 x402 endpoints)             | LIVE   |
+| [shield.buzzbd.ai](https://shield.buzzbd.ai)     | BuzzShield V6 Scanner (Noah AI / Plena) | LIVE   |
+| [sentinel.buzzbd.ai](https://sentinel.buzzbd.ai) | Sentinel health dashboard               | LIVE   |
+| [dash.buzzbd.ai](https://dash.buzzbd.ai)         | MicroBuzz dashboard (Vercel)            | LIVE   |
 
 ## The Story
 
@@ -486,23 +486,23 @@ No CS degree. No VC. No team. Just persistence. Bismillah.
 
 ## Links
 
-| Resource | URL |
-|----------|-----|
-| Website | [buzzbd.ai](https://buzzbd.ai) |
-| Free Score | [buzzbd.ai/score](https://buzzbd.ai/score) |
-| Public Leaderboard | [buzzbd.ai/scores](https://buzzbd.ai/scores) |
-| BuzzShield V6 dApp | [shield.buzzbd.ai](https://shield.buzzbd.ai) |
-| BuzzShield API | [api.buzzbd.ai/api/v1/shield/public/scan](https://api.buzzbd.ai/api/v1/shield/public/scan) |
+| Resource                  | URL                                                                                                             |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Website                   | [buzzbd.ai](https://buzzbd.ai)                                                                                  |
+| Free Score                | [buzzbd.ai/score](https://buzzbd.ai/score)                                                                      |
+| Public Leaderboard        | [buzzbd.ai/scores](https://buzzbd.ai/scores)                                                                    |
+| BuzzShield V6 dApp        | [shield.buzzbd.ai](https://shield.buzzbd.ai)                                                                    |
+| BuzzShield API            | [api.buzzbd.ai/api/v1/shield/public/scan](https://api.buzzbd.ai/api/v1/shield/public/scan)                      |
 | Smart Contract Checklists | [api.buzzbd.ai/api/v1/shield/public/checklist](https://api.buzzbd.ai/api/v1/shield/public/checklist?type=erc20) |
-| Mining Dashboard | [api.buzzbd.ai/api/v1/mining/snapshot](https://api.buzzbd.ai/api/v1/mining/snapshot) |
-| Signal Performance | [api.buzzbd.ai/api/v1/signals/performance](https://api.buzzbd.ai/api/v1/signals/performance) |
-| x402 Pipeline | [api.buzzbd.ai/api/v1/premium/pipeline](https://api.buzzbd.ai/api/v1/premium/pipeline) |
-| x402 Mining | [api.buzzbd.ai/api/v1/premium/mining](https://api.buzzbd.ai/api/v1/premium/mining) |
-| Skills Discovery | [buzzbd.ai/.well-known/skills/](https://buzzbd.ai/.well-known/skills/) |
-| API | [api.buzzbd.ai](https://api.buzzbd.ai) |
-| Twitter | [@BuzzBySolCex](https://x.com/BuzzBySolCex) |
-| Builder | [@HidayahAnka1](https://x.com/HidayahAnka1) |
-| SolCex Exchange | [@SolCex_Exchange](https://x.com/SolCex_Exchange) |
+| Mining Dashboard          | [api.buzzbd.ai/api/v1/mining/snapshot](https://api.buzzbd.ai/api/v1/mining/snapshot)                            |
+| Signal Performance        | [api.buzzbd.ai/api/v1/signals/performance](https://api.buzzbd.ai/api/v1/signals/performance)                    |
+| x402 Pipeline             | [api.buzzbd.ai/api/v1/premium/pipeline](https://api.buzzbd.ai/api/v1/premium/pipeline)                          |
+| x402 Mining               | [api.buzzbd.ai/api/v1/premium/mining](https://api.buzzbd.ai/api/v1/premium/mining)                              |
+| Skills Discovery          | [buzzbd.ai/.well-known/skills/](https://buzzbd.ai/.well-known/skills/)                                          |
+| API                       | [api.buzzbd.ai](https://api.buzzbd.ai)                                                                          |
+| Twitter                   | [@BuzzBySolCex](https://x.com/BuzzBySolCex)                                                                     |
+| Builder                   | [@HidayahAnka1](https://x.com/HidayahAnka1)                                                                     |
+| SolCex Exchange           | [@SolCex_Exchange](https://x.com/SolCex_Exchange)                                                               |
 
 ---
 

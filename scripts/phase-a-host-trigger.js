@@ -66,7 +66,10 @@ async function fetchRecentQuantumPRs(slotsNeeded = 2) {
     const r = await fetch(
       "https://api.github.com/repos/bitcoin/bips/pulls?state=all&sort=updated&direction=desc&per_page=20",
       {
-        headers: { "User-Agent": "buzz-phase-a", Accept: "application/vnd.github+json" },
+        headers: {
+          "User-Agent": "buzz-phase-a",
+          Accept: "application/vnd.github+json",
+        },
         signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
       },
     );
@@ -165,7 +168,9 @@ function buildLiveBmHook(bmLive, subAngle, slot) {
   }
   if (subAngle === 1 && bmLive.pools_24h) {
     const t = bmLive.pools_24h.top || [];
-    const t1 = t[0], t2 = t[1], t3 = t[2];
+    const t1 = t[0],
+      t2 = t[1],
+      t3 = t[2];
     return `slot ${slot} angle: pool concentration — ${bmLive.pools_24h.total_blocks} blocks 24h: ${t1?.name} ${t1?.blocks}(${t1?.pct}%), ${t2?.name} ${t2?.blocks}(${t2?.pct}%), ${t3?.name} ${t3?.blocks}(${t3?.pct}%). Cross-layer: pool concentration vs hashrate change vs sentiment index.`;
   }
   if (bmLive.difficulty) {
@@ -303,12 +308,15 @@ async function main() {
     if (beat === "bitcoin-macro") {
       const subAngle = bmIdx % 3; // rotate fee/pool/difficulty sub-angles
       const liveHook = buildLiveBmHook(bmLive, subAngle, slot);
-      angle = liveHook || BM_FALLBACK_ANGLES[subAngle % BM_FALLBACK_ANGLES.length];
+      angle =
+        liveHook || BM_FALLBACK_ANGLES[subAngle % BM_FALLBACK_ANGLES.length];
       bmIdx++;
     } else if (beat === "quantum") {
       const pr = quantumPRs[qIdx];
       const liveHook = buildLiveQuantumHook(pr, slot);
-      angle = liveHook || QUANTUM_FALLBACK_ANGLES[qIdx % QUANTUM_FALLBACK_ANGLES.length];
+      angle =
+        liveHook ||
+        QUANTUM_FALLBACK_ANGLES[qIdx % QUANTUM_FALLBACK_ANGLES.length];
       qIdx++;
     } else {
       angle = "general research prompt";

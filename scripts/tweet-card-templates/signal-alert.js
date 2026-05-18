@@ -4,7 +4,8 @@
 const SIGNAL_HEADLINE = "JingSwap Cycle 9 Shows One-Sided sBTC Sell Pressure";
 const SIGNAL_BEAT = "agent-trading";
 const SIGNAL_STATUS = "APPROVED";
-const SIGNAL_BODY = "1.93M sats deposited on sBTC sell side, 0 STX on buy side. XYK/DLMM spread: 237 STX ($53).";
+const SIGNAL_BODY =
+  "1.93M sats deposited on sBTC sell side, 0 STX on buy side. XYK/DLMM spread: 237 STX ($53).";
 const SIGNAL_NUM = "#24";
 
 const page = await browser.getPage("signal-card");
@@ -26,7 +27,7 @@ await page.setContent(`<html><head><link href="https://fonts.googleapis.com/css2
 </div>
 <div class="footer"><span>7-day streak | #8 leaderboard</span><span>🐝 buzzbd.ai/report | @BuzzBySolCex</span></div>
 </body></html>`);
-await new Promise(r => setTimeout(r, 2000));
+await new Promise((r) => setTimeout(r, 2000));
 const buf = await page.screenshot();
 const path = await saveScreenshot(buf, "signal-alert-card.png");
 console.log("Saved: " + path);

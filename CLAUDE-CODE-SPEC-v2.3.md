@@ -1,4 +1,5 @@
 # 🐝 BUZZ TWITTER BOT v2.3 — Claude Code Build Spec
+
 ## Sprint Day 5 — February 28, 2026
 
 ---
@@ -6,6 +7,7 @@
 ## OVERVIEW
 
 Upgrade twitter-bot.js from v2.2 to v2.3 with three goals:
+
 1. **Bug Fixes** — Ticker collision and chain mismatch in DexScreener search
 2. **L5 SmartMoneyAgent** — Nansen x402 integration for Smart Money intelligence
 3. **Factor 11** — New scoring factor (Smart Money Signal) bringing total to 110 → normalized to 100
@@ -28,22 +30,24 @@ Upgrade twitter-bot.js from v2.2 to v2.3 with three goals:
 
 ```javascript
 // CURRENT (broken):
-const pair = res.data.pairs.sort((a, b) =>
-  (parseFloat(b.liquidity?.usd || 0)) - (parseFloat(a.liquidity?.usd || 0))
+const pair = res.data.pairs.sort(
+  (a, b) =>
+    parseFloat(b.liquidity?.usd || 0) - parseFloat(a.liquidity?.usd || 0),
 )[0];
 
 // FIXED:
 const pairs = res.data.pairs;
 
 // Step 1: Try exact symbol match (case-insensitive)
-const exactMatches = pairs.filter(p =>
-  p.baseToken?.symbol?.toUpperCase() === query.toUpperCase()
+const exactMatches = pairs.filter(
+  (p) => p.baseToken?.symbol?.toUpperCase() === query.toUpperCase(),
 );
 
 // Step 2: Sort candidates by liquidity
 const candidates = exactMatches.length > 0 ? exactMatches : pairs;
-const pair = candidates.sort((a, b) =>
-  (parseFloat(b.liquidity?.usd || 0)) - (parseFloat(a.liquidity?.usd || 0))
+const pair = candidates.sort(
+  (a, b) =>
+    parseFloat(b.liquidity?.usd || 0) - parseFloat(a.liquidity?.usd || 0),
 )[0];
 ```
 
@@ -56,10 +60,11 @@ const pair = candidates.sort((a, b) =>
 ```javascript
 // After finding exact matches, prefer pairs with volume
 if (candidates.length > 1) {
-  const withVolume = candidates.filter(p =>
-    parseFloat(p.volume?.h24 || 0) > 0 ||
-    parseFloat(p.volume?.h6 || 0) > 0 ||
-    parseFloat(p.volume?.h1 || 0) > 0
+  const withVolume = candidates.filter(
+    (p) =>
+      parseFloat(p.volume?.h24 || 0) > 0 ||
+      parseFloat(p.volume?.h6 || 0) > 0 ||
+      parseFloat(p.volume?.h1 || 0) > 0,
   );
   if (withVolume.length > 0) {
     // Sort by 24h volume descending (active trading = real pair)
@@ -71,7 +76,7 @@ const pair = candidates.sort((a, b) => {
   const volA = parseFloat(a.volume?.h24 || 0);
   const volB = parseFloat(b.volume?.h24 || 0);
   if (volA > 0 || volB > 0) return volB - volA; // prefer volume
-  return (parseFloat(b.liquidity?.usd || 0)) - (parseFloat(a.liquidity?.usd || 0));
+  return parseFloat(b.liquidity?.usd || 0) - parseFloat(a.liquidity?.usd || 0);
 })[0];
 ```
 
@@ -90,8 +95,11 @@ if (vol24h === 0) {
   else if (vol1h > 0) vol24h = vol1h * 24;
 }
 // Also check txns as volume proxy — if txns exist but vol=0, flag it
-if (vol24h === 0 && ((pair.txns?.h24?.buys || 0) + (pair.txns?.h24?.sells || 0)) > 10) {
-  log('  [L1] ⚠ Volume=0 but has txns — DexScreener may be delayed');
+if (
+  vol24h === 0 &&
+  (pair.txns?.h24?.buys || 0) + (pair.txns?.h24?.sells || 0) > 10
+) {
+  log("  [L1] ⚠ Volume=0 but has txns — DexScreener may be delayed");
 }
 ```
 
@@ -127,13 +135,15 @@ NANSEN_DAILY_BUDGET_CENTS=50                  # Max daily spend in cents ($0.50)
 // Pays USDC on Base from NANSEN_X402_WALLET_KEY
 // =============================================================================
 
-const NANSEN_ENABLED = process.env.NANSEN_X402_ENABLED === 'true';
-const NANSEN_THRESHOLD = parseInt(process.env.NANSEN_SCORE_THRESHOLD || '65');
-const NANSEN_DAILY_BUDGET = parseInt(process.env.NANSEN_DAILY_BUDGET_CENTS || '50');
+const NANSEN_ENABLED = process.env.NANSEN_X402_ENABLED === "true";
+const NANSEN_THRESHOLD = parseInt(process.env.NANSEN_SCORE_THRESHOLD || "65");
+const NANSEN_DAILY_BUDGET = parseInt(
+  process.env.NANSEN_DAILY_BUDGET_CENTS || "50",
+);
 const NANSEN_DAILY_SPEND_FILE = `${DATA_DIR}/nansen-daily-spend.json`;
 
 function getNansenDailySpend() {
-  const d = loadJSON(NANSEN_DAILY_SPEND_FILE, { date: '', cents: 0 });
+  const d = loadJSON(NANSEN_DAILY_SPEND_FILE, { date: "", cents: 0 });
   const today = new Date().toISOString().slice(0, 10);
   return d.date === today ? d : { date: today, cents: 0 };
 }
@@ -147,10 +157,10 @@ function addNansenSpend(cents) {
 
 async function l5_smartMoneyAgent(l1, currentScore) {
   if (!NANSEN_ENABLED) {
-    log('  [L5] ⏭ Nansen x402 disabled');
+    log("  [L5] ⏭ Nansen x402 disabled");
     return null;
   }
-  
+
   if (currentScore < NANSEN_THRESHOLD) {
     log(`  [L5] ⏭ Score ${currentScore} below threshold ${NANSEN_THRESHOLD}`);
     return null;
@@ -158,7 +168,9 @@ async function l5_smartMoneyAgent(l1, currentScore) {
 
   const dailySpend = getNansenDailySpend();
   if (dailySpend.cents >= NANSEN_DAILY_BUDGET) {
-    log(`  [L5] ⏭ Daily budget exhausted (${dailySpend.cents}¢ / ${NANSEN_DAILY_BUDGET}¢)`);
+    log(
+      `  [L5] ⏭ Daily budget exhausted (${dailySpend.cents}¢ / ${NANSEN_DAILY_BUDGET}¢)`,
+    );
     return null;
   }
 
@@ -166,18 +178,22 @@ async function l5_smartMoneyAgent(l1, currentScore) {
 
   const smData = {
     smHolders: 0,
-    netFlow: 0,      // positive = accumulating, negative = dumping
+    netFlow: 0, // positive = accumulating, negative = dumping
     topBuyers: [],
     topSellers: [],
-    signal: 'UNKNOWN',
-    cost: 0,         // cents spent
+    signal: "UNKNOWN",
+    cost: 0, // cents spent
   };
 
   // Determine chain for Nansen
-  const nansenChain = l1.chain === 'solana' ? 'solana'
-    : l1.chain === 'base' ? 'base'
-    : l1.chain === 'ethereum' ? 'ethereum'
-    : null;
+  const nansenChain =
+    l1.chain === "solana"
+      ? "solana"
+      : l1.chain === "base"
+        ? "base"
+        : l1.chain === "ethereum"
+          ? "ethereum"
+          : null;
 
   if (!nansenChain) {
     log(`  [L5] ⚠ Chain ${l1.chain} not supported by Nansen`);
@@ -187,8 +203,8 @@ async function l5_smartMoneyAgent(l1, currentScore) {
   // --- Call 1: Smart Money Holdings ($0.05 = 5¢) ---
   try {
     const holdingsRes = await nansenX402Call(
-      'https://api.nansen.ai/api/v1/smart-money/holdings',
-      { chains: [nansenChain], token_address: l1.ca }
+      "https://api.nansen.ai/api/v1/smart-money/holdings",
+      { chains: [nansenChain], token_address: l1.ca },
     );
     if (holdingsRes) {
       smData.smHolders = holdingsRes.total_holders || holdingsRes.count || 0;
@@ -203,14 +219,16 @@ async function l5_smartMoneyAgent(l1, currentScore) {
   // --- Call 2: Smart Money Net Flow ($0.05 = 5¢) ---
   try {
     const flowRes = await nansenX402Call(
-      'https://api.nansen.ai/api/v1/smart-money/netflow',
-      { chains: [nansenChain], token_address: l1.ca }
+      "https://api.nansen.ai/api/v1/smart-money/netflow",
+      { chains: [nansenChain], token_address: l1.ca },
     );
     if (flowRes) {
       smData.netFlow = flowRes.net_flow || flowRes.netflow || 0;
       smData.cost += 5;
       addNansenSpend(5);
-      log(`  [L5] SM Net Flow: ${smData.netFlow > 0 ? '+' : ''}${smData.netFlow}`);
+      log(
+        `  [L5] SM Net Flow: ${smData.netFlow > 0 ? "+" : ""}${smData.netFlow}`,
+      );
     }
   } catch (e) {
     log(`  [L5] ⚠ SM Net Flow failed: ${e.message}`);
@@ -219,15 +237,17 @@ async function l5_smartMoneyAgent(l1, currentScore) {
   // --- Call 3: Who Bought/Sold ($0.01 = 1¢) ---
   try {
     const whoRes = await nansenX402Call(
-      'https://api.nansen.ai/api/v1/tgm/who-bought-sold',
-      { token_address: l1.ca }
+      "https://api.nansen.ai/api/v1/tgm/who-bought-sold",
+      { token_address: l1.ca },
     );
     if (whoRes) {
       smData.topBuyers = (whoRes.buyers || []).slice(0, 3);
       smData.topSellers = (whoRes.sellers || []).slice(0, 3);
       smData.cost += 1;
       addNansenSpend(1);
-      log(`  [L5] Who Bought/Sold: ${smData.topBuyers.length}B / ${smData.topSellers.length}S`);
+      log(
+        `  [L5] Who Bought/Sold: ${smData.topBuyers.length}B / ${smData.topSellers.length}S`,
+      );
     }
   } catch (e) {
     log(`  [L5] ⚠ Who Bought/Sold failed: ${e.message}`);
@@ -235,18 +255,20 @@ async function l5_smartMoneyAgent(l1, currentScore) {
 
   // Determine signal
   if (smData.netFlow > 0 && smData.smHolders > 5) {
-    smData.signal = 'STRONG_ACCUMULATE';
+    smData.signal = "STRONG_ACCUMULATE";
   } else if (smData.netFlow > 0) {
-    smData.signal = 'ACCUMULATE';
+    smData.signal = "ACCUMULATE";
   } else if (smData.smHolders > 0 && smData.netFlow === 0) {
-    smData.signal = 'HOLD';
+    smData.signal = "HOLD";
   } else if (smData.netFlow < 0) {
-    smData.signal = 'DUMPING';
+    smData.signal = "DUMPING";
   } else {
-    smData.signal = 'NO_DATA';
+    smData.signal = "NO_DATA";
   }
 
-  log(`  [L5] ✅ Signal: ${smData.signal} (cost: $${(smData.cost / 100).toFixed(2)})`);
+  log(
+    `  [L5] ✅ Signal: ${smData.signal} (cost: $${(smData.cost / 100).toFixed(2)})`,
+  );
   return smData;
 }
 ```
@@ -260,15 +282,18 @@ async function l5_smartMoneyAgent(l1, currentScore) {
 // 3. Retry with payment receipt
 async function nansenX402Call(url, body) {
   // Step 1: Initial request (will return 402)
-  const initial = await safeReq({
-    hostname: new URL(url).hostname,
-    path: new URL(url).pathname,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(JSON.stringify(body))
-    }
-  }, JSON.stringify(body));
+  const initial = await safeReq(
+    {
+      hostname: new URL(url).hostname,
+      path: new URL(url).pathname,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(JSON.stringify(body)),
+      },
+    },
+    JSON.stringify(body),
+  );
 
   if (!initial) return null;
 
@@ -284,7 +309,7 @@ async function nansenX402Call(url, body) {
   // Step 2: Parse 402 payment details from response
   // x402 returns payment info in the response body or headers
   const paymentDetails = initial.data;
-  
+
   // Step 3: Sign payment using ethers/viem (need to add to container)
   // NOTE: This requires the x402 npm package or manual USDC transfer signing
   // For v2.3 MVP, we can use the x402-client package
@@ -294,18 +319,21 @@ async function nansenX402Call(url, body) {
   // - Create EIP-712 typed data for USDC permit/transfer
   // - Sign with NANSEN_X402_WALLET_KEY
   // - Retry original request with X-PAYMENT header containing signed receipt
-  
+
   // PLACEHOLDER: Implement with x402 npm package
   // const { createX402Client } = require('x402-client');
   // const client = createX402Client({ privateKey: process.env.NANSEN_X402_WALLET_KEY });
   // return await client.post(url, body);
-  
-  log('  [L5] ⚠ x402 payment signing not yet implemented (needs x402-client package)');
+
+  log(
+    "  [L5] ⚠ x402 payment signing not yet implemented (needs x402-client package)",
+  );
   return null;
 }
 ```
 
 **IMPORTANT FOR CLAUDE CODE:** The x402 payment signing is the hardest part. Options:
+
 1. **x402 npm package** (`npm install x402-client`) — simplest, handles all payment signing
 2. **Manual ethers.js** — sign EIP-712 USDC permit, more control but more code
 3. **Corbits/Faremeter SDK** — open-source x402 framework
@@ -322,18 +350,18 @@ Add Factor 11 after existing 10 factors. Normalize total from 110 max to 100.
 
 ```javascript
 // Factor 11: Smart Money Signal (0-10) — only populated for 65+ tokens
-if (l5Data && l5Data.signal !== 'NO_DATA') {
+if (l5Data && l5Data.signal !== "NO_DATA") {
   switch (l5Data.signal) {
-    case 'STRONG_ACCUMULATE':
+    case "STRONG_ACCUMULATE":
       factors.smartMoney = 10;
       break;
-    case 'ACCUMULATE':
+    case "ACCUMULATE":
       factors.smartMoney = 7;
       break;
-    case 'HOLD':
+    case "HOLD":
       factors.smartMoney = 5;
       break;
-    case 'DUMPING':
+    case "DUMPING":
       factors.smartMoney = 2;
       break;
     default:
@@ -365,15 +393,17 @@ Add Smart Money signal to the 280-char reply when L5 is triggered:
 ```javascript
 function buildReply(l1, l2, l3, scoring, l5Data) {
   // ... existing code ...
-  
+
   // Add SM signal if available (between score and CA)
-  if (l5Data && l5Data.signal !== 'NO_DATA' && l5Data.signal !== 'UNKNOWN') {
-    const smEmoji = l5Data.signal.includes('ACCUMULATE') ? '🟢'
-      : l5Data.signal === 'HOLD' ? '🟡'
-      : '🔴';
-    t += `${smEmoji} SM: ${l5Data.signal.replace('_', ' ')}\n`;
+  if (l5Data && l5Data.signal !== "NO_DATA" && l5Data.signal !== "UNKNOWN") {
+    const smEmoji = l5Data.signal.includes("ACCUMULATE")
+      ? "🟢"
+      : l5Data.signal === "HOLD"
+        ? "🟡"
+        : "🔴";
+    t += `${smEmoji} SM: ${l5Data.signal.replace("_", " ")}\n`;
   }
-  
+
   // ... rest of reply ...
 }
 ```
@@ -384,13 +414,13 @@ Add L5 section to Buzz's Telegram report:
 
 ```javascript
 // In notifyBuzz(), add after L4 section:
-if (l5Data && l5Data.signal !== 'NO_DATA') {
+if (l5Data && l5Data.signal !== "NO_DATA") {
   msg += `━━ L5 SmartMoneyAgent ━━\n`;
   msg += `Signal: ${l5Data.signal}\n`;
   msg += `SM Holders: ${l5Data.smHolders}\n`;
-  msg += `Net Flow: ${l5Data.netFlow > 0 ? '+' : ''}${l5Data.netFlow}\n`;
+  msg += `Net Flow: ${l5Data.netFlow > 0 ? "+" : ""}${l5Data.netFlow}\n`;
   if (l5Data.topBuyers.length > 0) {
-    msg += `Top Buyers: ${l5Data.topBuyers.map(b => b.label || b.address?.slice(0,8)).join(', ')}\n`;
+    msg += `Top Buyers: ${l5Data.topBuyers.map((b) => b.label || b.address?.slice(0, 8)).join(", ")}\n`;
   }
   msg += `Cost: $${(l5Data.cost / 100).toFixed(2)}\n\n`;
 }
@@ -405,26 +435,32 @@ if (l5Data && l5Data.signal !== 'NO_DATA') {
 ```javascript
 async function runScanPipeline(query) {
   // ... existing L1-L4 ...
-  
+
   // L5: Smart Money (conditional on score)
   let l5Data = null;
   if (NANSEN_ENABLED && scoring.score >= NANSEN_THRESHOLD) {
     l5Data = await l5_smartMoneyAgent(l1, scoring.score);
-    
+
     // Adjust score if L5 data available
-    if (l5Data && l5Data.signal !== 'NO_DATA') {
+    if (l5Data && l5Data.signal !== "NO_DATA") {
       // Recalculate with Factor 11
       scoring = l4_scoringAgent(l1, l2, l3, l5Data); // Pass l5Data
     }
   }
-  
+
   const reply = buildReply(l1, l2, l3, scoring, l5Data);
-  
+
   // ... save history with SM data ...
   saveScanHistory({
-    symbol: l1.symbol, chain: l1.chain, ca: l1.ca,
-    score: scoring.score, grade: scoring.grade, identity: l3.label,
-    price: l1.price, fdv: l1.fdv, liq: l1.liq,
+    symbol: l1.symbol,
+    chain: l1.chain,
+    ca: l1.ca,
+    score: scoring.score,
+    grade: scoring.grade,
+    identity: l3.label,
+    price: l1.price,
+    fdv: l1.fdv,
+    liq: l1.liq,
     smartMoney: l5Data?.signal || null,
     nansenCost: l5Data?.cost || 0,
   });
@@ -453,7 +489,7 @@ Or better: create a `package.json` in `/opt/buzz-scripts/` with the dependency.
 ```yaml
 # Nansen x402 Smart Money
 - "NANSEN_X402_ENABLED=true"
-- "NANSEN_X402_WALLET_KEY=ROTATE_ME"   # Ogie fills in anet private key
+- "NANSEN_X402_WALLET_KEY=ROTATE_ME" # Ogie fills in anet private key
 - "NANSEN_SCORE_THRESHOLD=65"
 - "NANSEN_DAILY_BUDGET_CENTS=50"
 ```
@@ -463,6 +499,7 @@ Or better: create a `package.json` in `/opt/buzz-scripts/` with the dependency.
 ## PART 8: FULL FUNCTION SIGNATURES (for Claude Code)
 
 ### Modified functions:
+
 - `l1_tokenAgent(query)` — Add exact symbol match + volume-preferred sorting
 - `l4_scoringAgent(l1, l2, l3, l5Data = null)` — Add optional l5Data param, Factor 11
 - `buildReply(l1, l2, l3, scoring, l5Data = null)` — Add SM signal line
@@ -470,12 +507,14 @@ Or better: create a `package.json` in `/opt/buzz-scripts/` with the dependency.
 - `runScanPipeline(query)` — Add L5 call between L4 and reply
 
 ### New functions:
+
 - `l5_smartMoneyAgent(l1, currentScore)` — Nansen x402 calls
 - `nansenX402Call(url, body)` — x402 payment helper
 - `getNansenDailySpend()` — Budget tracking
 - `addNansenSpend(cents)` — Budget tracking
 
 ### New constants:
+
 - `NANSEN_ENABLED` — from env
 - `NANSEN_THRESHOLD` — from env
 - `NANSEN_DAILY_BUDGET` — from env
@@ -527,5 +566,5 @@ After building, verify:
 
 ---
 
-*Spec compiled: February 28, 2026 — Jakarta, Indonesia (Sprint Day 5)*
-*"Smart Money follows the alpha. Buzz finds the alpha." 🐝*
+_Spec compiled: February 28, 2026 — Jakarta, Indonesia (Sprint Day 5)_
+_"Smart Money follows the alpha. Buzz finds the alpha." 🐝_

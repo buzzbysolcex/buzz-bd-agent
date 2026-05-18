@@ -1,6 +1,6 @@
 /**
  * Buzz BD Agent — Cost Tracking Routes
- * 
+ *
  * GET  /api/v1/costs                → Total spend summary
  * GET  /api/v1/costs/by-model       → Per-model breakdown
  * GET  /api/v1/costs/by-agent       → Per sub-agent breakdown
@@ -8,18 +8,18 @@
  * POST /api/v1/costs/log            → Log a cost event
  */
 
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
 const router = express.Router();
-const { getDB } = require('../db');
+const { getDB } = require("../db");
 
 // ─── Helper: read cost-tracker.json ─────────────
 function readCostTracker() {
-  const base = process.env.BUZZ_DATA_DIR || '/data';
-  const trackerPath = path.join(base, 'workspace/memory/cost-tracker.json');
+  const base = process.env.BUZZ_DATA_DIR || "/data";
+  const trackerPath = path.join(base, "workspace/memory/cost-tracker.json");
   try {
-    return JSON.parse(fs.readFileSync(trackerPath, 'utf8'));
+    return JSON.parse(fs.readFileSync(trackerPath, "utf8"));
   } catch {
     return {
       date: new Date().toISOString().slice(0, 10),
@@ -28,21 +28,26 @@ function readCostTracker() {
       calls_bankr_fallback: 0,
       alert_70pct_sent: false,
       alert_cap_sent: false,
-      by_agent: {}
+      by_agent: {},
     };
   }
 }
 
 // ─── GET /summary ───────────────────────────────
-router.get('/summary', (req, res) => {
+router.get("/summary", (req, res) => {
   const db = getDB();
-  const dailyCap = 10.00;
+  const dailyCap = 10.0;
   const today = new Date().toISOString().slice(0, 10);
-  let dailyTotal = 0, callsMinimax = 0, callsBankr = 0, totalCalls = 0;
+  let dailyTotal = 0,
+    callsMinimax = 0,
+    callsBankr = 0,
+    totalCalls = 0;
 
   // Primary source: llm_costs table (populated by LLM proxy on every call)
   try {
-    const row = db.prepare(`
+    const row = db
+      .prepare(
+        `
       SELECT
         COALESCE(SUM(cost_usd), 0) as daily_total,
         COUNT(*) as total_calls,
@@ -51,7 +56,9 @@ router.get('/summary', (req, res) => {
         COALESCE(SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END), 0) as success_calls,
         COALESCE(SUM(CASE WHEN status = 'error' THEN 1 ELSE 0 END), 0) as error_calls
       FROM llm_costs WHERE date(timestamp) = date('now')
-    `).get();
+    `,
+      )
+      .get();
     dailyTotal = row.daily_total || 0;
     callsMinimax = row.calls_minimax || 0;
     callsBankr = row.calls_bankr || 0;
@@ -63,7 +70,9 @@ router.get('/summary', (req, res) => {
   // Fallback: if llm_costs is empty, use llm_provider_log (populated by cascade logger)
   if (totalCalls === 0) {
     try {
-      const row = db.prepare(`
+      const row = db
+        .prepare(
+          `
         SELECT
           COUNT(*) as total_calls,
           COALESCE(SUM(CASE WHEN provider = 'minimax' THEN 1 ELSE 0 END), 0) as calls_minimax,
@@ -73,7 +82,9 @@ router.get('/summary', (req, res) => {
           COALESCE(SUM(tokens_in), 0) as total_tokens_in,
           COALESCE(SUM(tokens_out), 0) as total_tokens_out
         FROM llm_provider_log WHERE date(created_at) = date('now')
-      `).get();
+      `,
+        )
+        .get();
       totalCalls = row.total_calls || 0;
       callsMinimax = row.calls_minimax || 0;
       callsBankr = row.calls_bankr || 0;
@@ -85,10 +96,11 @@ router.get('/summary', (req, res) => {
       const mmIn = row.total_tokens_in || 0;
       const mmOut = row.total_tokens_out || 0;
       const anthCalls = row.calls_anthropic || 0;
-      dailyTotal = (callsMinimax * mmIn / totalCalls * 0.30 / 1_000_000) +
-                   (callsMinimax * mmOut / totalCalls * 1.50 / 1_000_000) +
-                   (anthCalls * mmIn / totalCalls * 0.80 / 1_000_000) +
-                   (anthCalls * mmOut / totalCalls * 4.00 / 1_000_000);
+      dailyTotal =
+        (((callsMinimax * mmIn) / totalCalls) * 0.3) / 1_000_000 +
+        (((callsMinimax * mmOut) / totalCalls) * 1.5) / 1_000_000 +
+        (((anthCalls * mmIn) / totalCalls) * 0.8) / 1_000_000 +
+        (((anthCalls * mmOut) / totalCalls) * 4.0) / 1_000_000;
       if (!isFinite(dailyTotal)) dailyTotal = 0;
     } catch (err) {
       console.error("[costs] llm_provider_log fallback error:", err.message);
@@ -98,30 +110,50 @@ router.get('/summary', (req, res) => {
   // Per-agent breakdown for Sentinel/Telegram
   let byAgent = {};
   try {
-    const agents = db.prepare(`
+    const agents = db
+      .prepare(
+        `
       SELECT caller, COUNT(*) as calls, COALESCE(SUM(cost_usd), 0) as cost
       FROM llm_costs WHERE date(timestamp) = date('now')
       GROUP BY caller ORDER BY cost DESC
-    `).all();
-    for (const a of agents) byAgent[a.caller] = { calls: a.calls, cost: Math.round(a.cost * 1_000_000) / 1_000_000 };
+    `,
+      )
+      .all();
+    for (const a of agents)
+      byAgent[a.caller] = {
+        calls: a.calls,
+        cost: Math.round(a.cost * 1_000_000) / 1_000_000,
+      };
   } catch (e) {}
 
   // Fallback: if byAgent is empty, use llm_provider_log
   if (Object.keys(byAgent).length === 0) {
     try {
-      const agents = db.prepare(`
+      const agents = db
+        .prepare(
+          `
         SELECT agent, provider, COUNT(*) as calls,
           COALESCE(SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END), 0) as ok_calls
         FROM llm_provider_log WHERE date(created_at) = date('now')
         GROUP BY agent ORDER BY calls DESC
-      `).all();
-      for (const a of agents) byAgent[a.agent] = { calls: a.calls, ok: a.ok_calls, provider: a.provider };
+      `,
+        )
+        .all();
+      for (const a of agents)
+        byAgent[a.agent] = {
+          calls: a.calls,
+          ok: a.ok_calls,
+          provider: a.provider,
+        };
     } catch (e) {}
   }
 
   // Write to cost-tracker.json for Sentinel compatibility
   try {
-    const trackerPath = path.join(process.env.BUZZ_DATA_DIR || "/data", "workspace/memory/cost-tracker.json");
+    const trackerPath = path.join(
+      process.env.BUZZ_DATA_DIR || "/data",
+      "workspace/memory/cost-tracker.json",
+    );
     const t = readCostTracker();
     t.date = today;
     t.daily_total = Math.round(dailyTotal * 1_000_000) / 1_000_000;
@@ -137,8 +169,12 @@ router.get('/summary', (req, res) => {
     date: today,
     daily_total: Math.round(dailyTotal * 1_000_000) / 1_000_000,
     daily_cap: dailyCap,
-    remaining: Math.max(0, Math.round((dailyCap - dailyTotal) * 1_000_000) / 1_000_000),
-    pct_used: dailyCap > 0 ? Math.round((dailyTotal / dailyCap) * 10000) / 100 : 0,
+    remaining: Math.max(
+      0,
+      Math.round((dailyCap - dailyTotal) * 1_000_000) / 1_000_000,
+    ),
+    pct_used:
+      dailyCap > 0 ? Math.round((dailyTotal / dailyCap) * 10000) / 100 : 0,
     throttled: dailyTotal >= dailyCap,
     calls_minimax: callsMinimax,
     calls_bankr: callsBankr,
@@ -147,16 +183,21 @@ router.get('/summary', (req, res) => {
 });
 
 // ─── GET /by-agent — Per-agent cost breakdown ────────
-router.get('/by-agent', (req, res) => {
+router.get("/by-agent", (req, res) => {
   const db = getDB();
   const today = new Date().toISOString().slice(0, 10);
-  const period = req.query.period || 'today';
-  const dateFilter = period === 'today' ? "date(timestamp) = date('now')" :
-                     period === '7d' ? "timestamp >= datetime('now', '-7 days')" :
-                     "timestamp >= datetime('now', '-30 days')";
+  const period = req.query.period || "today";
+  const dateFilter =
+    period === "today"
+      ? "date(timestamp) = date('now')"
+      : period === "7d"
+        ? "timestamp >= datetime('now', '-7 days')"
+        : "timestamp >= datetime('now', '-30 days')";
 
   try {
-    const agents = db.prepare(`
+    const agents = db
+      .prepare(
+        `
       SELECT
         caller as agent,
         COUNT(*) as total_calls,
@@ -169,19 +210,25 @@ router.get('/by-agent', (req, res) => {
       WHERE ${dateFilter}
       GROUP BY caller
       ORDER BY total_cost DESC
-    `).all();
+    `,
+      )
+      .all();
 
-    const totals = db.prepare(`
+    const totals = db
+      .prepare(
+        `
       SELECT COALESCE(SUM(cost_usd), 0) as cost, COUNT(*) as calls
       FROM llm_costs WHERE ${dateFilter}
-    `).get();
+    `,
+      )
+      .get();
 
     res.json({
       date: today,
       period,
       total_cost: Math.round((totals.cost || 0) * 1_000_000) / 1_000_000,
       total_calls: totals.calls || 0,
-      agents: agents.map(a => ({
+      agents: agents.map((a) => ({
         agent: a.agent,
         calls: a.total_calls,
         success: a.success_calls,
@@ -192,26 +239,28 @@ router.get('/by-agent', (req, res) => {
       })),
     });
   } catch (err) {
-    res.status(500).json({ error: 'query_error', message: err.message });
+    res.status(500).json({ error: "query_error", message: err.message });
   }
 });
 
 // ─── GET / ───────────────────────────────────────────
-router.get('/', (req, res) => {
+router.get("/", (req, res) => {
   const db = getDB();
-  const period = req.query.period || '24h';
+  const period = req.query.period || "24h";
 
   const periodMap = {
-    '1h': '-1 hour',
-    '24h': '-1 day',
-    '7d': '-7 days',
-    '30d': '-30 days',
-    'all': '-100 years'
+    "1h": "-1 hour",
+    "24h": "-1 day",
+    "7d": "-7 days",
+    "30d": "-30 days",
+    all: "-100 years",
   };
 
-  const interval = periodMap[period] || '-1 day';
+  const interval = periodMap[period] || "-1 day";
 
-  const summary = db.prepare(`
+  const summary = db
+    .prepare(
+      `
     SELECT 
       COUNT(*) as total_requests,
       SUM(input_tokens) as total_input_tokens,
@@ -221,19 +270,29 @@ router.get('/', (req, res) => {
       ROUND(AVG(duration_ms), 0) as avg_duration_ms
     FROM cost_logs 
     WHERE created_at > datetime('now', ?)
-  `).get(interval);
+  `,
+    )
+    .get(interval);
 
   res.json({ period, ...summary });
 });
 
 // ─── GET /by-model ───────────────────────────────────
-router.get('/by-model', (req, res) => {
+router.get("/by-model", (req, res) => {
   const db = getDB();
-  const period = req.query.period || '24h';
-  const periodMap = { '1h': '-1 hour', '24h': '-1 day', '7d': '-7 days', '30d': '-30 days', 'all': '-100 years' };
-  const interval = periodMap[period] || '-1 day';
+  const period = req.query.period || "24h";
+  const periodMap = {
+    "1h": "-1 hour",
+    "24h": "-1 day",
+    "7d": "-7 days",
+    "30d": "-30 days",
+    all: "-100 years",
+  };
+  const interval = periodMap[period] || "-1 day";
 
-  const models = db.prepare(`
+  const models = db
+    .prepare(
+      `
     SELECT 
       model,
       COUNT(*) as requests,
@@ -245,39 +304,46 @@ router.get('/by-model', (req, res) => {
     WHERE created_at > datetime('now', ?)
     GROUP BY model
     ORDER BY cost_usd DESC
-  `).all(interval);
+  `,
+    )
+    .all(interval);
 
   res.json({ period, models });
 });
 
 // ─── GET /by-agent ───────────────────────────────────
-router.get('/by-agent', (req, res) => {
+router.get("/by-agent", (req, res) => {
   const tracker = readCostTracker();
   const byAgent = tracker.by_agent || {};
 
-  const agents = Object.entries(byAgent).map(([name, cost]) => ({ name, cost }));
+  const agents = Object.entries(byAgent).map(([name, cost]) => ({
+    name,
+    cost,
+  }));
 
   res.json({ period: tracker.date, agents });
 });
 
 // ─── GET /trends ─────────────────────────────────────
-router.get('/trends', (req, res) => {
+router.get("/trends", (req, res) => {
   const db = getDB();
-  const granularity = req.query.granularity || 'daily';
+  const granularity = req.query.granularity || "daily";
 
   let groupBy, interval;
-  if (granularity === 'hourly') {
+  if (granularity === "hourly") {
     groupBy = "strftime('%Y-%m-%d %H:00', created_at)";
-    interval = '-2 days';
-  } else if (granularity === 'daily') {
+    interval = "-2 days";
+  } else if (granularity === "daily") {
     groupBy = "date(created_at)";
-    interval = '-30 days';
+    interval = "-30 days";
   } else {
     groupBy = "strftime('%Y-W%W', created_at)";
-    interval = '-90 days';
+    interval = "-90 days";
   }
 
-  const trends = db.prepare(`
+  const trends = db
+    .prepare(
+      `
     SELECT 
       ${groupBy} as period,
       COUNT(*) as requests,
@@ -287,34 +353,53 @@ router.get('/trends', (req, res) => {
     WHERE created_at > datetime('now', ?)
     GROUP BY ${groupBy}
     ORDER BY period ASC
-  `).all(interval);
+  `,
+    )
+    .all(interval);
 
   res.json({ granularity, data: trends });
 });
 
 // ─── POST /log ───────────────────────────────────────
-router.post('/log', (req, res) => {
-  const { agent_name, model, operation, input_tokens, output_tokens, cost_usd, duration_ms, metadata } = req.body;
+router.post("/log", (req, res) => {
+  const {
+    agent_name,
+    model,
+    operation,
+    input_tokens,
+    output_tokens,
+    cost_usd,
+    duration_ms,
+    metadata,
+  } = req.body;
 
   if (!agent_name || !model) {
-    return res.status(400).json({ error: 'missing_fields', message: 'agent_name and model are required' });
+    return res.status(400).json({
+      error: "missing_fields",
+      message: "agent_name and model are required",
+    });
   }
 
   const db = getDB();
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     INSERT INTO cost_logs (agent_name, model, operation, input_tokens, output_tokens, cost_usd, duration_ms, metadata)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    agent_name, model,
-    operation || null,
-    input_tokens || 0,
-    output_tokens || 0,
-    cost_usd || 0,
-    duration_ms || null,
-    metadata ? JSON.stringify(metadata) : null
-  );
+  `,
+    )
+    .run(
+      agent_name,
+      model,
+      operation || null,
+      input_tokens || 0,
+      output_tokens || 0,
+      cost_usd || 0,
+      duration_ms || null,
+      metadata ? JSON.stringify(metadata) : null,
+    );
 
-  res.status(201).json({ message: 'Cost logged', id: result.lastInsertRowid });
+  res.status(201).json({ message: "Cost logged", id: result.lastInsertRowid });
 });
 
 module.exports = router;

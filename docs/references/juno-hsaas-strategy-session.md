@@ -1,13 +1,19 @@
 # REFERENCE: Juno Strategy Sessions — ZHC Discord
+
 # Date: March 30-31, 2026
+
 # Location: docs/references/juno-hsaas-strategy-session.md
+
 # Status: RAW TRANSCRIPT — Do not modify session content
+
 # Value: ~$5,000 worth of free strategy consulting
+
 # Version: 2.0 — Session 2 added March 31, 2026
 
 ---
 
 ## SESSION 1 CONTEXT (March 30, 2026)
+
 - Platform: ZHC (Zero-Human Company) Discord, #business-guides channel
 - AI: Juno (ZHC's built-in strategy bot)
 - Participant: Ogie (BuzzBD / SolCex)
@@ -27,12 +33,14 @@ This is a solid positioning question. Let me break down the pricing strategy for
 Your Positioning: Your edge isn't just the tech — it's trust through automation. On-chain scores eliminate human bias/manipulation. That's the product. Lean into it hard.
 
 Pricing Tiers:
+
 - Tier 1: Free Signal Access ($0) — Basic scores, 5 sources, daily updates. Build adoption.
 - Tier 2: Professional ($200-400/month) — Full 31-source, all 19 chains, adversarial reports.
 - Tier 3: Protocol/Business ($1-2K/month) — Complete audits, API, priority queue.
 - Tier 4: Enterprise ($2-5K/month) — White-label, real-time feeds, audit badges.
 
 Key moves:
+
 1. Position audits as "proof, not opinion"
 2. Target the listing anxiety
 3. API as revenue multiplier
@@ -48,6 +56,7 @@ The $200/month comes from AIBTC News — signal intelligence. The audit product 
 
 **Juno:**
 AIBTC News — Maximize Before You Pivot:
+
 - Diversify signal types (add cross-chain sentiment)
 - Frequency beats volume
 - Build a reputation hit ("Our simulation caught RugpullCoin 3 weeks before the dump")
@@ -55,11 +64,13 @@ AIBTC News — Maximize Before You Pivot:
 The 11 Tokens = Your Golden Case Study. Frame it: "11 tokens passed every other audit. We caught them anyway." Put this on your landing page.
 
 HSaaS Launch Sequence:
+
 1. 3 discounted pilot audits at $500
 2. Public leaderboard of 256 scored tokens
 3. "Honest Calibration" badge
 
 Revenue Math:
+
 - AIBTC signals: ~$350/mo
 - Pilot audits: $1,000/mo
 - Subscriptions: $2,000/mo
@@ -73,6 +84,7 @@ HSaaS timeline: Week 1-4 execution plan shared.
 
 **Juno:**
 Pushback:
+
 - Week 1: Don't wait on AIBTC admin. Keep filing.
 - Week 2: Scored leaderboard BEFORE MVP. Show data first.
 - "Free Score" funnel: 50 lines of code for a lead capture machine.
@@ -88,6 +100,7 @@ Pushback:
 ---
 
 ## SESSION 2 CONTEXT (March 31, 2026)
+
 - Platform: ZHC Discord, DM with Juno
 - Topic: MiroFish upgrade changes pricing math
 - Trigger: Ogie reported 50 → 1000 agent upgrade, Monte Carlo 26ms
@@ -100,6 +113,7 @@ Pushback:
 @Juno Update from yesterday's session — shipped fast.
 
 Since we talked:
+
 - MiroFish upgraded: 1000-agent swarm (200 LLM + 800 heuristic), not 50. Monte Carlo runs in 26ms.
 - Pipeline: 363 tokens now (was 256), 66 scored
 - Server: CPX62 (16 vCPU, 32GB RAM) — MiroFish runs as sidecar
@@ -122,6 +136,7 @@ Absolutely changes the math. 50 → 1000 agents at 26ms isn't just more — it's
 You're not charging for "more agents." You're charging for resolution. 1000 agents catches failure modes 50 agents miss. That's the value to the client.
 
 Pricing philosophy:
+
 - $500 for 50-agent report was fair when that was the limit
 - $1,500 for 1000-agent swarm is underpriced for what it actually does
 - The 26ms execution time is your differentiator — most can't run this fast at this scale
@@ -137,6 +152,7 @@ First, get those 3 pilots. Then tier up.
 ## KEY ACTIONABLES EXTRACTED (Combined Sessions)
 
 ### From Session 1:
+
 1. buzzbd.ai/scores — public leaderboard THIS WEEK
 2. Free Score funnel — paste address, get basic score
 3. "11 tokens caught" on landing page
@@ -149,6 +165,7 @@ First, get those 3 pilots. Then tier up.
 10. Base airdrop hunter audience
 
 ### From Session 2:
+
 11. 3-tier pricing: Quick Scan ($500) / Full Analysis ($1,500) / Swarm ($2,500-3K)
 12. "Resolution, not agents" — pricing philosophy
 13. Launch at $1,500 with 1000-agent as headline, tier up after case studies
@@ -157,5 +174,5 @@ First, get those 3 pilots. Then tier up.
 
 ---
 
-*Session 1 value: priceless. Session 2 value: $1,000+ in pricing uplift.*
-*Execution: 4 weeks to $1K. The math is there.* 🐝
+_Session 1 value: priceless. Session 2 value: $1,000+ in pricing uplift._
+_Execution: 4 weeks to $1K. The math is there._ 🐝

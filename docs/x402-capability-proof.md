@@ -12,14 +12,14 @@ Buzz operates as an **x402 buyer agent** — an autonomous AI that pays for prem
 
 ## 2. Dedicated x402 Payment Wallet
 
-| Field | Value |
-|-------|-------|
-| **Address** | `79AVHaE2g3GQYoqXCpvim12HeV563mYe7VHDrw28uzxG` |
-| **Network** | Solana Mainnet |
-| **USDC Balance** | $10.66 |
-| **SOL Balance** | 0.05 (gas) |
-| **Created** | February 5, 2026 |
-| **Purpose** | x402 micropayments exclusively |
+| Field            | Value                                          |
+| ---------------- | ---------------------------------------------- |
+| **Address**      | `79AVHaE2g3GQYoqXCpvim12HeV563mYe7VHDrw28uzxG` |
+| **Network**      | Solana Mainnet                                 |
+| **USDC Balance** | $10.66                                         |
+| **SOL Balance**  | 0.05 (gas)                                     |
+| **Created**      | February 5, 2026                               |
+| **Purpose**      | x402 micropayments exclusively                 |
 
 **On-chain verification:** [solscan.io/account/79AVHaE2g3GQYoqXCpvim12HeV563mYe7VHDrw28uzxG](https://solscan.io/account/79AVHaE2g3GQYoqXCpvim12HeV563mYe7VHDrw28uzxG)
 
@@ -27,11 +27,11 @@ Buzz operates as an **x402 buyer agent** — an autonomous AI that pays for prem
 
 ## 3. Three-Wallet Architecture
 
-| # | Wallet | Purpose | Funded |
-|---|--------|---------|--------|
-| 1 | `BPRgNKqFpsxHczxqp9e3WcEQjgFy8mnRdiKt8ocLEUhm` | BD Operations / Moltbook Hackathon | SOL gas only |
-| 2 | `79AVHaE2g3GQYoqXCpvim12HeV563mYe7VHDrw28uzxG` | **x402 Micropayments** | ✅ $10.66 USDC |
-| 3 | `6gbSPsUdeMj31bfveey7qwnrKfvsQDcg9Tjv75A3jNJf` | AgentWallet / Colosseum | Pending |
+| #   | Wallet                                         | Purpose                            | Funded         |
+| --- | ---------------------------------------------- | ---------------------------------- | -------------- |
+| 1   | `BPRgNKqFpsxHczxqp9e3WcEQjgFy8mnRdiKt8ocLEUhm` | BD Operations / Moltbook Hackathon | SOL gas only   |
+| 2   | `79AVHaE2g3GQYoqXCpvim12HeV563mYe7VHDrw28uzxG` | **x402 Micropayments**             | ✅ $10.66 USDC |
+| 3   | `6gbSPsUdeMj31bfveey7qwnrKfvsQDcg9Tjv75A3jNJf` | AgentWallet / Colosseum            | Pending        |
 
 Each hackathon and function has its own wallet. Clean audit trail for judges.
 
@@ -100,23 +100,23 @@ Endpoint verified on zauthx402?
   NO  → Flag [x402-CAUTION] → Manual review
 ```
 
-| Parameter | Value |
-|-----------|-------|
-| Daily target | $0.30 |
-| Monthly budget | ~$9.00 |
-| Current balance | $10.66 |
-| Runway | 35+ days |
-| Auto-approve ceiling | $1.00 |
-| Hard block per tx | $5.00 |
-| Hard block per day | $50.00 |
+| Parameter            | Value    |
+| -------------------- | -------- |
+| Daily target         | $0.30    |
+| Monthly budget       | ~$9.00   |
+| Current balance      | $10.66   |
+| Runway               | 35+ days |
+| Auto-approve ceiling | $1.00    |
+| Hard block per tx    | $5.00    |
+| Hard block per day   | $50.00   |
 
 ### Emergency Controls
 
-| Command | Effect |
-|---------|--------|
-| `STOP x402` | Freeze all x402 payments immediately |
-| `STOP PAYMENTS` | Freeze ALL payment types |
-| `STOP` | Full agent freeze |
+| Command         | Effect                               |
+| --------------- | ------------------------------------ |
+| `STOP x402`     | Freeze all x402 payments immediately |
+| `STOP PAYMENTS` | Freeze ALL payment types             |
+| `STOP`          | Full agent freeze                    |
 
 All accessible via Telegram to @BuzzBySolCex_bot.
 
@@ -140,22 +140,22 @@ Before every x402 transaction:
 
 ### Integration Points
 
-| Component | Reference | Status |
-|-----------|-----------|--------|
-| zauthx402 API | zauthx402.com/docs | ✅ Documented |
-| Trust database | zauthx402.com/database | ✅ Queryable |
-| Contract (Solana) | `DNhQZ1CE9qZ2FNrVhsCXwQJ2vZG8ufZkcYakTS5Jpump` | ✅ On-chain |
+| Component         | Reference                                      | Status        |
+| ----------------- | ---------------------------------------------- | ------------- |
+| zauthx402 API     | zauthx402.com/docs                             | ✅ Documented |
+| Trust database    | zauthx402.com/database                         | ✅ Queryable  |
+| Contract (Solana) | `DNhQZ1CE9qZ2FNrVhsCXwQJ2vZG8ufZkcYakTS5Jpump` | ✅ On-chain   |
 
 ---
 
 ## 7. Daily x402 Schedule
 
-| Time (AST) | Service | Purpose | Cost |
-|------------|---------|---------|------|
-| 06:00 | Einstein AI | Whale movement scan | $0.10 |
-| 12:00 | Gloria AI | Breaking news #1 | $0.10 |
-| 18:00 | Gloria AI | Breaking news #2 | $0.10 |
-| **Total** | | | **$0.30/day** |
+| Time (AST) | Service     | Purpose             | Cost          |
+| ---------- | ----------- | ------------------- | ------------- |
+| 06:00      | Einstein AI | Whale movement scan | $0.10         |
+| 12:00      | Gloria AI   | Breaking news #1    | $0.10         |
+| 18:00      | Gloria AI   | Breaking news #2    | $0.10         |
+| **Total**  |             |                     | **$0.30/day** |
 
 ### Cost vs. Value
 
@@ -173,29 +173,36 @@ ROI AT FIRST LISTING: 555x ($5,000 / $9)
 // src/x402/x402-client.js (core payment function)
 
 const BUDGET_LIMITS = {
-  autoApprove: 1.00,      // USDC - no human needed
-  requireApproval: 5.00,  // USDC - Ogie must approve
-  dailyMax: 50.00,        // USDC - hard circuit breaker
-  targetDaily: 0.30       // USDC - operational target
+  autoApprove: 1.0, // USDC - no human needed
+  requireApproval: 5.0, // USDC - Ogie must approve
+  dailyMax: 50.0, // USDC - hard circuit breaker
+  targetDaily: 0.3, // USDC - operational target
 };
 
 async function executeX402Payment(serviceUrl, amount, recipientWallet) {
   // 1. Trust verification via zauthx402
   const trust = await verifyWithZauthx402(serviceUrl);
-  if (!trust.verified) return { status: 'BLOCKED', reason: 'x402-CAUTION' };
+  if (!trust.verified) return { status: "BLOCKED", reason: "x402-CAUTION" };
 
   // 2. Budget check
   const dailySpend = await getDailySpendTotal();
-  if (dailySpend + amount > BUDGET_LIMITS.dailyMax) return { status: 'BLOCKED', reason: 'DAILY_LIMIT' };
-  if (amount > BUDGET_LIMITS.requireApproval) return { status: 'BLOCKED', reason: 'NEEDS_APPROVAL' };
+  if (dailySpend + amount > BUDGET_LIMITS.dailyMax)
+    return { status: "BLOCKED", reason: "DAILY_LIMIT" };
+  if (amount > BUDGET_LIMITS.requireApproval)
+    return { status: "BLOCKED", reason: "NEEDS_APPROVAL" };
 
   // 3. Execute USDC SPL transfer from 79AV wallet
   const signature = await sendUSDCTransfer(amount, recipientWallet);
 
   // 4. Log transaction
-  await logTransaction({ service: serviceUrl, amount, signature, timestamp: new Date().toISOString() });
+  await logTransaction({
+    service: serviceUrl,
+    amount,
+    signature,
+    timestamp: new Date().toISOString(),
+  });
 
-  return { status: 'SUCCESS', signature, amount };
+  return { status: "SUCCESS", signature, amount };
 }
 ```
 
@@ -203,18 +210,18 @@ async function executeX402Payment(serviceUrl, amount, recipientWallet) {
 
 ## 9. Capability Summary
 
-| Capability | Status | Evidence |
-|-----------|--------|----------|
-| Dedicated x402 wallet | ✅ | `79AV...uzxG` on Solana mainnet |
-| Wallet funded with USDC | ✅ | $10.66 (on-chain verifiable) |
-| SOL for gas fees | ✅ | 0.05 SOL |
-| x402 client code | ✅ | `src/x402/x402-client.js` |
-| Payment safety limits | ✅ | Auto ≤ $1, block > $5 |
-| Budget tracking | ✅ | Daily reports at 23:00 |
-| zauthx402 trust check | ✅ | Pre-transaction verification |
-| Emergency stop | ✅ | `STOP x402` via Telegram |
-| Multi-wallet separation | ✅ | 3 wallets, 3 purposes |
-| 35+ day runway | ✅ | $10.66 / $0.30 per day |
+| Capability              | Status | Evidence                        |
+| ----------------------- | ------ | ------------------------------- |
+| Dedicated x402 wallet   | ✅     | `79AV...uzxG` on Solana mainnet |
+| Wallet funded with USDC | ✅     | $10.66 (on-chain verifiable)    |
+| SOL for gas fees        | ✅     | 0.05 SOL                        |
+| x402 client code        | ✅     | `src/x402/x402-client.js`       |
+| Payment safety limits   | ✅     | Auto ≤ $1, block > $5           |
+| Budget tracking         | ✅     | Daily reports at 23:00          |
+| zauthx402 trust check   | ✅     | Pre-transaction verification    |
+| Emergency stop          | ✅     | `STOP x402` via Telegram        |
+| Multi-wallet separation | ✅     | 3 wallets, 3 purposes           |
+| 35+ day runway          | ✅     | $10.66 / $0.30 per day          |
 
 ### Infrastructure Ready vs. Pending External
 
@@ -241,5 +248,5 @@ This is not a demo. This is production infrastructure for autonomous commerce.
 
 ---
 
-*Buzz BD Agent v3.3 — Built by SolCex Exchange*
-*February 7, 2026*
+_Buzz BD Agent v3.3 — Built by SolCex Exchange_
+_February 7, 2026_

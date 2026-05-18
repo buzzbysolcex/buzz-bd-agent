@@ -1,6 +1,9 @@
 # BUZZ — FULL SYSTEM WIRING AUDIT
+
 ## All 21 Services × PULSE × autoDream × Autonomous Operations
+
 ### April 5, 2026 | Priority: HIGH
+
 ### "Every service that isn't wired to PULSE is a service that sleeps when Buzz is awake."
 
 ---
@@ -60,7 +63,7 @@ Verify each endpoint returns HTTP 402 (payment required):
 
 1. Token Score API
    curl -s -o /dev/null -w "%{http_code}" https://api.buzzbd.ai/x402/score
-   
+
 2. MiroFish Simulation (1K agents)
    curl -s -o /dev/null -w "%{http_code}" https://api.buzzbd.ai/x402/simulate
 

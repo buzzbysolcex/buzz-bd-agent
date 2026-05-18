@@ -8,11 +8,14 @@
  * GET  /api/v1/microbuzz/status             — Ollama + queue status
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { getDB } = require('../db');
-const { runSimulation, getTokenContext } = require('../lib/microbuzz-simulator');
-const { checkOllamaHealth, stopModel } = require('../lib/microbuzz-ollama');
+const { getDB } = require("../db");
+const {
+  runSimulation,
+  getTokenContext,
+} = require("../lib/microbuzz-simulator");
+const { checkOllamaHealth, stopModel } = require("../lib/microbuzz-ollama");
 
 // Track running simulation
 let currentSimulation = null;
@@ -64,19 +67,21 @@ function ensureTables() {
 }
 
 // Initialize tables on load
-try { ensureTables(); } catch {}
+try {
+  ensureTables();
+} catch {}
 
 // ─── POST /simulate/:address ─────────────────────────
 
-router.post('/simulate/:address', async (req, res) => {
+router.post("/simulate/:address", async (req, res) => {
   const { address } = req.params;
-  const chain = req.query.chain || req.body?.chain || 'solana';
+  const chain = req.query.chain || req.body?.chain || "solana";
 
   if (currentSimulation) {
     return res.status(409).json({
-      error: 'simulation_running',
+      error: "simulation_running",
       message: `Simulation already running for ${currentSimulation.symbol}`,
-      started: currentSimulation.started
+      started: currentSimulation.started,
     });
   }
 
@@ -84,8 +89,8 @@ router.post('/simulate/:address', async (req, res) => {
   const health = await checkOllamaHealth();
   if (!health.ready) {
     return res.status(503).json({
-      error: 'ollama_not_ready',
-      health
+      error: "ollama_not_ready",
+      health,
     });
   }
 
@@ -97,16 +102,16 @@ router.post('/simulate/:address', async (req, res) => {
   currentSimulation = {
     address,
     symbol: tokenData.symbol || address.slice(0, 8),
-    started: new Date().toISOString()
+    started: new Date().toISOString(),
   };
 
   // Return immediately, simulation runs in background
   res.json({
-    message: 'Simulation started',
+    message: "Simulation started",
     token: tokenData.symbol || address,
     chain,
-    estimated_time: '~27 minutes',
-    status_endpoint: `/api/v1/microbuzz/status`
+    estimated_time: "~27 minutes",
+    status_endpoint: `/api/v1/microbuzz/status`,
   });
 
   // Run simulation in background
@@ -118,7 +123,7 @@ router.post('/simulate/:address', async (req, res) => {
     }
   } catch (e) {
     // Log error but don't crash
-    console.error('[microbuzz-v2] Simulation failed:', e.message);
+    console.error("[microbuzz-v2] Simulation failed:", e.message);
   } finally {
     currentSimulation = null;
   }
@@ -126,18 +131,22 @@ router.post('/simulate/:address', async (req, res) => {
 
 // ─── GET /result/:address ────────────────────────────
 
-router.get('/result/:address', (req, res) => {
+router.get("/result/:address", (req, res) => {
   const db = getDB();
-  const chain = req.query.chain || 'solana';
+  const chain = req.query.chain || "solana";
 
-  const row = db.prepare(`
+  const row = db
+    .prepare(
+      `
     SELECT * FROM microbuzz_v2_simulations
     WHERE token_address = ? AND chain = ?
     ORDER BY created_at DESC LIMIT 1
-  `).get(req.params.address, chain);
+  `,
+    )
+    .get(req.params.address, chain);
 
   if (!row) {
-    return res.status(404).json({ error: 'no_simulation_found' });
+    return res.status(404).json({ error: "no_simulation_found" });
   }
 
   res.json({ simulation: row });
@@ -145,41 +154,48 @@ router.get('/result/:address', (req, res) => {
 
 // ─── GET /history/:address ───────────────────────────
 
-router.get('/history/:address', (req, res) => {
+router.get("/history/:address", (req, res) => {
   const db = getDB();
-  const chain = req.query.chain || 'solana';
+  const chain = req.query.chain || "solana";
   const limit = Math.min(parseInt(req.query.limit) || 10, 50);
 
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT * FROM microbuzz_v2_simulations
     WHERE token_address = ? AND chain = ?
     ORDER BY created_at DESC LIMIT ?
-  `).all(req.params.address, chain, limit);
+  `,
+    )
+    .all(req.params.address, chain, limit);
 
   res.json({ count: rows.length, simulations: rows });
 });
 
 // ─── GET /status ─────────────────────────────────────
 
-router.get('/status', async (req, res) => {
+router.get("/status", async (req, res) => {
   const health = await checkOllamaHealth();
   const db = getDB();
 
   let totalSims = 0;
   let totalTrades = 0;
   try {
-    totalSims = db.prepare('SELECT COUNT(*) as c FROM microbuzz_v2_simulations').get()?.c || 0;
-    totalTrades = db.prepare('SELECT COUNT(*) as c FROM microbuzz_v2_trades').get()?.c || 0;
+    totalSims =
+      db.prepare("SELECT COUNT(*) as c FROM microbuzz_v2_simulations").get()
+        ?.c || 0;
+    totalTrades =
+      db.prepare("SELECT COUNT(*) as c FROM microbuzz_v2_trades").get()?.c || 0;
   } catch {}
 
   res.json({
-    version: 'v2',
+    version: "v2",
     ollama: health,
     running: currentSimulation,
     agents: { llm: 30, heuristic: 470, total: 500 },
     rounds: 3,
-    model: 'qwen3:14b',
-    stats: { total_simulations: totalSims, total_trades: totalTrades }
+    model: "qwen3:14b",
+    stats: { total_simulations: totalSims, total_trades: totalTrades },
   });
 });
 
@@ -200,13 +216,24 @@ function saveSimulation(result) {
   `);
 
   const simResult = simInsert.run(
-    result.token_address, result.token_symbol, result.chain,
-    result.round_1_price, result.round_2_price, result.round_3_price,
-    result.amm_final_price, result.ev_score,
-    result.llm_agent_count, result.heuristic_agent_count, result.total_agent_count,
+    result.token_address,
+    result.token_symbol,
+    result.chain,
+    result.round_1_price,
+    result.round_2_price,
+    result.round_3_price,
+    result.amm_final_price,
+    result.ev_score,
+    result.llm_agent_count,
+    result.heuristic_agent_count,
+    result.total_agent_count,
     result.total_trades,
-    result.llm_consensus_r1, result.llm_consensus_r2, result.llm_consensus_r3,
-    result.simulation_time_ms, result.simulation_seed, 'completed'
+    result.llm_consensus_r1,
+    result.llm_consensus_r2,
+    result.llm_consensus_r3,
+    result.simulation_time_ms,
+    result.simulation_seed,
+    "completed",
   );
 
   const simId = simResult.lastInsertRowid;
@@ -222,9 +249,17 @@ function saveSimulation(result) {
   const insertTrades = db.transaction((trades) => {
     for (const t of trades) {
       tradeInsert.run(
-        simId, t.round, t.agent_id, t.agent_type, t.agent_persona, t.agent_risk,
-        t.direction, t.amount, t.price_before, t.price_after,
-        (t.reasoning || '').slice(0, 500)
+        simId,
+        t.round,
+        t.agent_id,
+        t.agent_type,
+        t.agent_persona,
+        t.agent_risk,
+        t.direction,
+        t.amount,
+        t.price_before,
+        t.price_after,
+        (t.reasoning || "").slice(0, 500),
       );
     }
   });

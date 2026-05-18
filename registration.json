@@ -7,8 +7,8 @@
       "operator": "SolCex Exchange"
     },
     "registrations": [
-      {"chain": "ethereum", "registry_id": 25045},
-      {"chain": "base", "registry_id": 17483}
+      { "chain": "ethereum", "registry_id": 25045 },
+      { "chain": "base", "registry_id": 17483 }
     ]
   }
 }

@@ -5,31 +5,33 @@
  * Buzz BD Agent | MiroFish Integration
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { getDB } = require('../db');
-const { analyzeTechnical } = require('../lib/technical-analyst');
+const { getDB } = require("../db");
+const { analyzeTechnical } = require("../lib/technical-analyst");
 
 /**
  * GET /technical/:address?chain=solana
  * Returns technical analysis with 1-hour cache
  */
-router.get('/:address', async (req, res) => {
+router.get("/:address", async (req, res) => {
   try {
     const { address } = req.params;
-    const chain = req.query.chain || 'solana';
+    const chain = req.query.chain || "solana";
     const db = getDB();
 
     // Check cache
     try {
-      const cached = db.prepare(
-        `SELECT technical_score, indicators_json, computed_at
+      const cached = db
+        .prepare(
+          `SELECT technical_score, indicators_json, computed_at
          FROM technical_analysis_cache
-         WHERE token_address = ? AND chain = ? AND expires_at > datetime('now')`
-      ).get(address, chain);
+         WHERE token_address = ? AND chain = ? AND expires_at > datetime('now')`,
+        )
+        .get(address, chain);
 
       if (cached) {
-        const indicators = JSON.parse(cached.indicators_json || '{}');
+        const indicators = JSON.parse(cached.indicators_json || "{}");
         return res.json({
           success: true,
           technical_score: cached.technical_score,
@@ -41,7 +43,9 @@ router.get('/:address', async (req, res) => {
           computed_at: cached.computed_at,
         });
       }
-    } catch { /* cache miss, compute fresh */ }
+    } catch {
+      /* cache miss, compute fresh */
+    }
 
     // Compute fresh analysis
     const result = await analyzeTechnical(address, chain);
@@ -51,10 +55,10 @@ router.get('/:address', async (req, res) => {
       db.prepare(
         `INSERT OR REPLACE INTO technical_analysis_cache
          (token_address, chain, technical_score, indicators_json, computed_at, expires_at)
-         VALUES (?, ?, ?, ?, datetime('now'), datetime('now', '+60 minutes'))`
+         VALUES (?, ?, ?, ?, datetime('now'), datetime('now', '+60 minutes'))`,
       ).run(address, chain, result.technical_score, result.indicators_json);
     } catch (e) {
-      console.error('[Technical] Cache write error:', e.message);
+      console.error("[Technical] Cache write error:", e.message);
     }
 
     res.json({

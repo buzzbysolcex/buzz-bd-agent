@@ -24,17 +24,17 @@ npx @buzzbd/scorer --leaderboard
 ## As a Library
 
 ```javascript
-const { scoreToken, calculateScore, RULES } = require('@buzzbd/scorer');
+const { scoreToken, calculateScore, RULES } = require("@buzzbd/scorer");
 
 // Score via Buzz API (with DexScreener fallback)
-const result = await scoreToken('PEPE');
-console.log(result.score);          // 78
+const result = await scoreToken("PEPE");
+console.log(result.score); // 78
 console.log(result.classification); // "WARM"
-console.log(result.breakdown);      // Detailed breakdown
+console.log(result.breakdown); // Detailed breakdown
 
 // Local scoring with your own data
 const score = calculateScore({
-  symbol: 'MYTOKEN',
+  symbol: "MYTOKEN",
   marketCap: 5000000,
   fdv: 8000000,
   volume24h: 250000,
@@ -48,28 +48,28 @@ const score = calculateScore({
 
 ## 11 Scoring Rules
 
-| Rule | Type | What It Catches |
-|------|------|-----------------|
-| FDV_GAP_PENALTY | Penalty | FDV/mcap divergence > 5x |
-| STABLECOIN_EXCLUSION | Filter | Stablecoins auto-excluded |
-| GHOST_TOKEN | Filter | No real on-chain activity |
-| CONTRADICTORY_AUDIT | Hold | Conflicting security data |
-| SECURITY_PENALTY | Penalty | Honeypot, security flags |
-| LIQUIDITY_CROSSREF | Verify | Liquidity depth check |
-| AGE_BONUS | Bonus | Token maturity (>90 days) |
-| VOLUME_THRESHOLD | Filter | Minimum 24h volume |
-| GHOST_VOLUME | Penalty | Wash trading detection |
-| CTO_FLAG | Flag | Community takeover indicator |
-| VOLUME_LIQUIDITY_RATIO | Penalty | Suspicious vol/liq ratio |
+| Rule                   | Type    | What It Catches              |
+| ---------------------- | ------- | ---------------------------- |
+| FDV_GAP_PENALTY        | Penalty | FDV/mcap divergence > 5x     |
+| STABLECOIN_EXCLUSION   | Filter  | Stablecoins auto-excluded    |
+| GHOST_TOKEN            | Filter  | No real on-chain activity    |
+| CONTRADICTORY_AUDIT    | Hold    | Conflicting security data    |
+| SECURITY_PENALTY       | Penalty | Honeypot, security flags     |
+| LIQUIDITY_CROSSREF     | Verify  | Liquidity depth check        |
+| AGE_BONUS              | Bonus   | Token maturity (>90 days)    |
+| VOLUME_THRESHOLD       | Filter  | Minimum 24h volume           |
+| GHOST_VOLUME           | Penalty | Wash trading detection       |
+| CTO_FLAG               | Flag    | Community takeover indicator |
+| VOLUME_LIQUIDITY_RATIO | Penalty | Suspicious vol/liq ratio     |
 
 ## Score Bands
 
-| Range | Classification | Meaning |
-|-------|---------------|---------|
-| 85-100 | HOT | BD screening pipeline activated |
-| 70-84 | WARM | Monitor, potential candidate |
-| 50-69 | COLD | Low priority |
-| 0-49 | REJECTED | Auto-filtered |
+| Range  | Classification | Meaning                         |
+| ------ | -------------- | ------------------------------- |
+| 85-100 | HOT            | BD screening pipeline activated |
+| 70-84  | WARM           | Monitor, potential candidate    |
+| 50-69  | COLD           | Low priority                    |
+| 0-49   | REJECTED       | Auto-filtered                   |
 
 ## Architecture
 

@@ -11,6 +11,7 @@ and 15-second blocking budget. Buzz v9 already has event bus and mailbox but
 lacks the proactive orchestration layer that ties them together.
 
 **Decision:**
+
 - PULSE engine: 60s tick loop with adaptive sleep (doubles on idle, caps at 5min)
 - Rule-based context evaluation (zero LLM burn)
 - 15s blocking budget per proactive action
@@ -20,6 +21,7 @@ lacks the proactive orchestration layer that ties them together.
 - autoDream trigger after 10 consecutive idle ticks
 
 **Consequences:**
+
 - Agents wake proactively without cron polling
 - ARIA discovery, streak protection, cron firing become tick-driven
 - Foundation for autoDream (Task 15) consolidation

@@ -1,6 +1,9 @@
 # MOLTBOOK POST DRAFT — Sunday Slot 1 (~06:00 UTC)
+
 # Community: m/crypto
+
 # Pattern: #3 (naming a hidden problem) + #4 (technical receipts)
+
 # STATUS: DRAFT — needs Ogie approval before posting
 
 ---

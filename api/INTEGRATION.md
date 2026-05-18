@@ -1,5 +1,7 @@
 # 🐝 /score-token Endpoint — Integration Guide
+
 ## Sprint Day 9 | March 3, 2026
+
 ## Buzz BD Agent v6.1.1
 
 ---
@@ -47,10 +49,10 @@ Add to your existing `~/buzz-bd-agent/api/server.js`:
 
 ```javascript
 // Add after existing route imports
-const scoreRoutes = require('./routes/score');
+const scoreRoutes = require("./routes/score");
 
 // Add after existing app.use() route registrations
-app.use('/api/v1', scoreRoutes);
+app.use("/api/v1", scoreRoutes);
 ```
 
 ---
@@ -60,7 +62,7 @@ app.use('/api/v1', scoreRoutes);
 Add to your existing `db.js` initDb() function:
 
 ```javascript
-const { migrations: scoreMigrations } = require('./migrations/score-tables');
+const { migrations: scoreMigrations } = require("./migrations/score-tables");
 
 // In initDb():
 for (const migration of scoreMigrations) {
@@ -119,12 +121,12 @@ curl -s "http://localhost:3000/api/v1/score-token/leaderboard?since=24h" \
 
 ## ENDPOINTS ADDED (4 new → total 34/64)
 
-| # | Method | Path | Description | Auth |
-|---|--------|------|-------------|------|
-| 31 | POST | `/api/v1/score-token` | Score a token (5 parallel agents) | API key / x402 |
-| 32 | GET | `/api/v1/score-token/:address` | Get latest cached score | API key |
-| 33 | GET | `/api/v1/score-token/history/:address` | Score history for token | API key |
-| 34 | GET | `/api/v1/score-token/leaderboard` | Top scored tokens | API key |
+| #   | Method | Path                                   | Description                       | Auth           |
+| --- | ------ | -------------------------------------- | --------------------------------- | -------------- |
+| 31  | POST   | `/api/v1/score-token`                  | Score a token (5 parallel agents) | API key / x402 |
+| 32  | GET    | `/api/v1/score-token/:address`         | Get latest cached score           | API key        |
+| 33  | GET    | `/api/v1/score-token/history/:address` | Score history for token           | API key        |
+| 34  | GET    | `/api/v1/score-token/leaderboard`      | Top scored tokens                 | API key        |
 
 ---
 
@@ -132,6 +134,7 @@ curl -s "http://localhost:3000/api/v1/score-token/leaderboard?since=24h" \
 
 The `/score-token` endpoint serves double duty for ACP `token_intelligence_score` offering.
 Update the ACP handler at:
+
 ```
 /data/workspace/skills/virtuals-acp/src/seller/offerings/buzz-bd-agent/token_intelligence_score/handlers.ts
 ```
@@ -139,30 +142,30 @@ Update the ACP handler at:
 Replace the TODO with:
 
 ```typescript
-import { handleJob } from '../../../utils/handler';
+import { handleJob } from "../../../utils/handler";
 
 export async function onNewJob(job: any) {
   const { contract_address, chain, depth } = job.requirements;
-  
+
   // Call Buzz REST API
-  const response = await fetch('http://localhost:3000/api/v1/score-token', {
-    method: 'POST',
+  const response = await fetch("http://localhost:3000/api/v1/score-token", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': process.env.BUZZ_API_ADMIN_KEY || 'internal'
+      "Content-Type": "application/json",
+      "X-API-Key": process.env.BUZZ_API_ADMIN_KEY || "internal",
     },
     body: JSON.stringify({
       address: contract_address,
-      chain: chain || 'solana',
-      depth: depth || 'standard'
-    })
+      chain: chain || "solana",
+      depth: depth || "standard",
+    }),
   });
 
   const result = await response.json();
-  
+
   return {
-    status: result.success ? 'completed' : 'failed',
-    result: result
+    status: result.success ? "completed" : "failed",
+    result: result,
   };
 }
 ```
@@ -192,20 +195,40 @@ and `trending_token_intelligence` to the scanner endpoint.
     "verdict": "QUALIFIED",
     "verdict_emoji": "✅",
     "breakdown": {
-      "safety": { "raw_score": 80, "weight": 0.30, "weighted": 24 },
-      "wallet": { "raw_score": 65, "weight": 0.30, "weighted": 19.5 },
-      "social": { "raw_score": 55, "weight": 0.20, "weighted": 11 },
-      "scorer": { "raw_score": 72, "weight": 0.20, "weighted": 14.4 },
+      "safety": { "raw_score": 80, "weight": 0.3, "weighted": 24 },
+      "wallet": { "raw_score": 65, "weight": 0.3, "weighted": 19.5 },
+      "social": { "raw_score": 55, "weight": 0.2, "weighted": 11 },
+      "scorer": { "raw_score": 72, "weight": 0.2, "weighted": 14.4 },
       "composite": 72,
       "formula": "safety(0.30) + wallet(0.30) + social(0.20) + scorer(0.20)"
     }
   },
   "sub_agents": {
     "scanner": { "status": "completed", "duration_ms": 1200 },
-    "safety":  { "status": "completed", "score": 80, "weight": 0.30, "duration_ms": 3400 },
-    "wallet":  { "status": "completed", "score": 65, "weight": 0.30, "duration_ms": 2800 },
-    "social":  { "status": "completed", "score": 55, "weight": 0.20, "duration_ms": 45000 },
-    "scorer":  { "status": "completed", "score": 72, "weight": 0.20, "duration_ms": 150 }
+    "safety": {
+      "status": "completed",
+      "score": 80,
+      "weight": 0.3,
+      "duration_ms": 3400
+    },
+    "wallet": {
+      "status": "completed",
+      "score": 65,
+      "weight": 0.3,
+      "duration_ms": 2800
+    },
+    "social": {
+      "status": "completed",
+      "score": 55,
+      "weight": 0.2,
+      "duration_ms": 45000
+    },
+    "scorer": {
+      "status": "completed",
+      "score": 72,
+      "weight": 0.2,
+      "duration_ms": 150
+    }
   },
   "agents_completed": 5,
   "agents_total": 5,
@@ -234,5 +257,5 @@ and `trending_token_intelligence` to the scanner endpoint.
 
 ---
 
-*Sprint Day 9 | March 3, 2026 | Jakarta, WIB*
-*"The intel is the hook. The relationship is the close." 🐝*
+_Sprint Day 9 | March 3, 2026 | Jakarta, WIB_
+_"The intel is the hook. The relationship is the close." 🐝_

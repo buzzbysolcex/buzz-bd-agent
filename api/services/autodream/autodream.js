@@ -797,7 +797,11 @@ async function generateSignalAngles() {
               dataStamp = `live difficulty change ${d.difficultyChange}% in ${d.remainingBlocks} blks (${d.progressPercent}%); prev retarget ${d.previousRetarget}%; tip #${bmLive.tip_height ?? "?"}`;
             }
           }
-          const subAngleLabel = ["fee market", "pool concentration", "difficulty/hashrate"][subAngle];
+          const subAngleLabel = [
+            "fee market",
+            "pool concentration",
+            "difficulty/hashrate",
+          ][subAngle];
           headline = `Bitcoin macro — ${subAngleLabel} — ${headlineStamp}`;
           hook = `Research prompt for morning rewrite (slot ${slotIdx + 1}, sub-angle: ${subAngleLabel}): rewrite around ${dataStamp || "live mempool.space data"}; cross-layer required (mining + social, fees + flows, or pool concentration + sentiment) per BM differentiation rule. Sources must include mempool.space and at least one of Mining Intel #34 / LunarCrush #37. File BEFORE 06:00 UTC — BM cap fills fast (~09:55 UTC observed Apr 20). Active editor: Ivory Coda.`;
           break;
@@ -859,7 +863,11 @@ async function generateSignalAngles() {
       // referenced in the hook without a second fetch.
       if (beat === "bitcoin-macro" && bmLive) {
         dataPoints.bm_live = bmLive;
-        dataPoints.bm_sub_angle = ["fee market", "pool concentration", "difficulty/hashrate"][(bmIdx - 1) % 3];
+        dataPoints.bm_sub_angle = [
+          "fee market",
+          "pool concentration",
+          "difficulty/hashrate",
+        ][(bmIdx - 1) % 3];
       }
 
       drafts.push({

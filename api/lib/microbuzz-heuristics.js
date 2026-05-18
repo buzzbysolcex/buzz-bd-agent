@@ -8,7 +8,7 @@
  * 100 Threshold Followers: trade only at price extremes
  */
 
-const { agentTrade, getPrice } = require('./microbuzz-amm');
+const { agentTrade, getPrice } = require("./microbuzz-amm");
 
 // ─── Seeded PRNG (reproducible noise) ────────────────
 
@@ -27,16 +27,28 @@ function generateHeuristicAgents() {
   let id = 0;
 
   for (let i = 0; i < 150; i++) {
-    agents.push({ id: `momentum_${++id}`, type: 'momentum', subtype: 'heuristic' });
+    agents.push({
+      id: `momentum_${++id}`,
+      type: "momentum",
+      subtype: "heuristic",
+    });
   }
   for (let i = 0; i < 100; i++) {
-    agents.push({ id: `contrarian_${++id}`, type: 'contrarian', subtype: 'heuristic' });
+    agents.push({
+      id: `contrarian_${++id}`,
+      type: "contrarian",
+      subtype: "heuristic",
+    });
   }
   for (let i = 0; i < 120; i++) {
-    agents.push({ id: `noise_${++id}`, type: 'noise', subtype: 'heuristic' });
+    agents.push({ id: `noise_${++id}`, type: "noise", subtype: "heuristic" });
   }
   for (let i = 0; i < 100; i++) {
-    agents.push({ id: `threshold_${++id}`, type: 'threshold', subtype: 'heuristic' });
+    agents.push({
+      id: `threshold_${++id}`,
+      type: "threshold",
+      subtype: "heuristic",
+    });
   }
 
   return agents;
@@ -59,9 +71,9 @@ function executeMomentumFollowers(agents, llmSummary, market, round, rng) {
     const baseAmount = 5 + rng() * 20;
     const amount = baseAmount * (0.5 + strength); // stronger consensus = bigger trades
 
-    const result = agentTrade(market, agent.id, 'momentum', direction, amount, {
+    const result = agentTrade(market, agent.id, "momentum", direction, amount, {
       round,
-      persona: 'momentum_follower'
+      persona: "momentum_follower",
     });
     if (result.success) trades.push(result.trade);
   }
@@ -75,7 +87,7 @@ function executeMomentumFollowers(agents, llmSummary, market, round, rng) {
 
 function executeContrarians(agents, llmSummary, market, round, rng) {
   const trades = [];
-  const direction = llmSummary.majority_direction === 'YES' ? 'NO' : 'YES';
+  const direction = llmSummary.majority_direction === "YES" ? "NO" : "YES";
   const strength = llmSummary.consensus_strength;
 
   const shuffled = [...agents].sort(() => rng() - 0.5);
@@ -85,10 +97,17 @@ function executeContrarians(agents, llmSummary, market, round, rng) {
     const baseAmount = 5 + rng() * 15;
     const amount = baseAmount * (1.5 - strength); // weaker consensus = bigger contrarian
 
-    const result = agentTrade(market, agent.id, 'contrarian', direction, amount, {
-      round,
-      persona: 'contrarian'
-    });
+    const result = agentTrade(
+      market,
+      agent.id,
+      "contrarian",
+      direction,
+      amount,
+      {
+        round,
+        persona: "contrarian",
+      },
+    );
     if (result.success) trades.push(result.trade);
   }
 
@@ -105,12 +124,12 @@ function executeNoiseTraders(agents, market, round, rng) {
   const shuffled = [...agents].sort(() => rng() - 0.5);
 
   for (const agent of shuffled) {
-    const direction = rng() > 0.5 ? 'YES' : 'NO';
+    const direction = rng() > 0.5 ? "YES" : "NO";
     const amount = 5 + rng() * 15; // $5-20
 
-    const result = agentTrade(market, agent.id, 'noise', direction, amount, {
+    const result = agentTrade(market, agent.id, "noise", direction, amount, {
       round,
-      persona: 'noise_trader'
+      persona: "noise_trader",
     });
     if (result.success) trades.push(result.trade);
   }
@@ -132,24 +151,31 @@ function executeThresholdFollowers(agents, market, round, rng) {
     let direction = null;
     let amount = 0;
 
-    if (currentPrice > 0.60) {
+    if (currentPrice > 0.6) {
       // Bullish breakout — buy YES
-      direction = 'YES';
-      const distance = currentPrice - 0.50;
+      direction = "YES";
+      const distance = currentPrice - 0.5;
       amount = 10 + distance * 100 + rng() * 10; // bigger as price rises
-    } else if (currentPrice < 0.40) {
+    } else if (currentPrice < 0.4) {
       // Bearish breakdown — buy NO
-      direction = 'NO';
-      const distance = 0.50 - currentPrice;
+      direction = "NO";
+      const distance = 0.5 - currentPrice;
       amount = 10 + distance * 100 + rng() * 10;
     }
     // Between 0.40-0.60: do nothing (wait and see)
 
     if (direction) {
-      const result = agentTrade(market, agent.id, 'threshold', direction, amount, {
-        round,
-        persona: 'threshold_follower'
-      });
+      const result = agentTrade(
+        market,
+        agent.id,
+        "threshold",
+        direction,
+        amount,
+        {
+          round,
+          persona: "threshold_follower",
+        },
+      );
       if (result.success) trades.push(result.trade);
     }
   }
@@ -163,22 +189,43 @@ function executeAllHeuristics(market, llmSummary, round, seed) {
   const agents = generateHeuristicAgents();
   const rng = createSeededRNG(seed + round * 1000);
 
-  const momentum = agents.filter(a => a.type === 'momentum');
-  const contrarian = agents.filter(a => a.type === 'contrarian');
-  const noise = agents.filter(a => a.type === 'noise');
-  const threshold = agents.filter(a => a.type === 'threshold');
+  const momentum = agents.filter((a) => a.type === "momentum");
+  const contrarian = agents.filter((a) => a.type === "contrarian");
+  const noise = agents.filter((a) => a.type === "noise");
+  const threshold = agents.filter((a) => a.type === "threshold");
 
-  const momentumTrades = executeMomentumFollowers(momentum, llmSummary, market, round, rng);
-  const contrarianTrades = executeContrarians(contrarian, llmSummary, market, round, rng);
+  const momentumTrades = executeMomentumFollowers(
+    momentum,
+    llmSummary,
+    market,
+    round,
+    rng,
+  );
+  const contrarianTrades = executeContrarians(
+    contrarian,
+    llmSummary,
+    market,
+    round,
+    rng,
+  );
   const noiseTrades = executeNoiseTraders(noise, market, round, rng);
-  const thresholdTrades = executeThresholdFollowers(threshold, market, round, rng);
+  const thresholdTrades = executeThresholdFollowers(
+    threshold,
+    market,
+    round,
+    rng,
+  );
 
   return {
     momentum: momentumTrades.length,
     contrarian: contrarianTrades.length,
     noise: noiseTrades.length,
     threshold: thresholdTrades.length,
-    total: momentumTrades.length + contrarianTrades.length + noiseTrades.length + thresholdTrades.length
+    total:
+      momentumTrades.length +
+      contrarianTrades.length +
+      noiseTrades.length +
+      thresholdTrades.length,
   };
 }
 
@@ -188,5 +235,5 @@ module.exports = {
   executeContrarians,
   executeNoiseTraders,
   executeThresholdFollowers,
-  executeAllHeuristics
+  executeAllHeuristics,
 };

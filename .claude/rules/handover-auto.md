@@ -1,7 +1,9 @@
 ---
 paths: ["**/*"]
 ---
+
 # Auto-Handover Rules (CONTEXT SURVIVAL)
+
 - After every git commit: update .claude/HANDOVER.md with current state
 - HANDOVER.md format (keep under 100 lines):
   1. DATE + SESSION: what day, what session number

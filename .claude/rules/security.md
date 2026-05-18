@@ -1,7 +1,9 @@
 ---
 paths: ["**/auth*", "**/security*", "**/wallet*", "**/.env*", "**/credential*"]
 ---
+
 # Security Rules
+
 - NEVER share listing fees ($5K) or commission ($1K) publicly
 - NEVER log private keys or API secrets
 - NEVER reveal Hetzner IP in ANY public content

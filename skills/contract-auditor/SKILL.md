@@ -34,14 +34,15 @@ automated scanners miss or under-weight.
 
 Run contract-auditor automatically when ANY of these conditions are met:
 
-| Trigger | Condition |
-|---------|-----------|
-| `/score-token` called | Contract address provided + source is verified |
-| Listing inquiry received | Prospect submits token for SolCex listing review |
+| Trigger                  | Condition                                             |
+| ------------------------ | ----------------------------------------------------- |
+| `/score-token` called    | Contract address provided + source is verified        |
+| Listing inquiry received | Prospect submits token for SolCex listing review      |
 | Safety sub-agent invoked | Scanner sub-agent passes contract to safety sub-agent |
-| Manual request | Ogie asks Buzz to audit a specific contract address |
+| Manual request           | Ogie asks Buzz to audit a specific contract address   |
 
 Skip if:
+
 - Contract source is **not verified** on Etherscan/Sourcify (flag this as a RED signal)
 - Token is Solana SPL (use Helius + RugCheck instead — see Section 6)
 - Contract is > 5,000 lines (flag for manual audit referral)
@@ -61,6 +62,7 @@ GET https://api.etherscan.io/api
 ```
 
 For Base chain:
+
 ```
 GET https://api.basescan.org/api
   ?module=contract
@@ -83,6 +85,7 @@ if lines < 50: flag SUSPICIOUSLY_SMALL, add to findings
 ### Step 3 — Pattern Analysis Pass
 
 Run ALL checks in Section 4. Log each finding with:
+
 - `severity`: CRITICAL | HIGH | MEDIUM | LOW | INFO
 - `pattern`: the vulnerability class
 - `evidence`: the specific function/line pattern found
@@ -114,27 +117,27 @@ Read `/contract-auditor/references/patterns.md` for the full pattern library.
 
 Quick reference — **CRITICAL checks** (always run these first):
 
-| Check | Pattern to Find | Flag If... |
-|-------|----------------|------------|
-| **Hidden Mint** | `mint()`, `_mint()` outside constructor | Callable post-deploy by owner |
-| **Backdoor Transfer** | `transferFrom` override, `_transfer` with owner bypass | Owner can move any wallet's tokens |
-| **Fee Trap** | `_taxFee`, `_liquidityFee` > 25% or dynamically settable | Fees can be set to 100% |
-| **Blacklist** | `blacklist[]`, `isBlacklisted`, `bots[]` mapping | Owner can freeze arbitrary wallets |
-| **Pausable** | `pause()`, `whenNotPaused` modifier | Owner can halt all transfers |
-| **Upgrade Proxy** | `upgradeTo()`, `_implementation`, `delegatecall` | Contract logic replaceable post-deploy |
-| **Ownership Not Renounced** | `owner()` != address(0) | Single point of control remains |
-| **Rug via LP** | `removeLiquidity` callable by owner without timelock | Instant LP drain possible |
+| Check                       | Pattern to Find                                          | Flag If...                             |
+| --------------------------- | -------------------------------------------------------- | -------------------------------------- |
+| **Hidden Mint**             | `mint()`, `_mint()` outside constructor                  | Callable post-deploy by owner          |
+| **Backdoor Transfer**       | `transferFrom` override, `_transfer` with owner bypass   | Owner can move any wallet's tokens     |
+| **Fee Trap**                | `_taxFee`, `_liquidityFee` > 25% or dynamically settable | Fees can be set to 100%                |
+| **Blacklist**               | `blacklist[]`, `isBlacklisted`, `bots[]` mapping         | Owner can freeze arbitrary wallets     |
+| **Pausable**                | `pause()`, `whenNotPaused` modifier                      | Owner can halt all transfers           |
+| **Upgrade Proxy**           | `upgradeTo()`, `_implementation`, `delegatecall`         | Contract logic replaceable post-deploy |
+| **Ownership Not Renounced** | `owner()` != address(0)                                  | Single point of control remains        |
+| **Rug via LP**              | `removeLiquidity` callable by owner without timelock     | Instant LP drain possible              |
 
 **HIGH checks:**
 
-| Check | Pattern | Flag If... |
-|-------|---------|------------|
-| **Max TX Manipulation** | `_maxTxAmount` setter | Settable to 0 (trading halt) |
-| **Unchecked Return** | Low-level `call()` without return check | Silent failure on ETH send |
-| **Reentrancy** | State change AFTER external call | Classic reentrancy shape |
-| **Integer Overflow** | Pre-0.8.0 Solidity without SafeMath | Any arithmetic on token amounts |
-| **tx.origin Auth** | `require(tx.origin == owner)` | Phishing vulnerability |
-| **Centralized Price Oracle** | Single `setPrice()` owner function | Price manipulation |
+| Check                        | Pattern                                 | Flag If...                      |
+| ---------------------------- | --------------------------------------- | ------------------------------- |
+| **Max TX Manipulation**      | `_maxTxAmount` setter                   | Settable to 0 (trading halt)    |
+| **Unchecked Return**         | Low-level `call()` without return check | Silent failure on ETH send      |
+| **Reentrancy**               | State change AFTER external call        | Classic reentrancy shape        |
+| **Integer Overflow**         | Pre-0.8.0 Solidity without SafeMath     | Any arithmetic on token amounts |
+| **tx.origin Auth**           | `require(tx.origin == owner)`           | Phishing vulnerability          |
+| **Centralized Price Oracle** | Single `setPrice()` owner function      | Price manipulation              |
 
 ---
 
@@ -169,6 +172,7 @@ Quick reference — **CRITICAL checks** (always run these first):
 ```
 
 **`listing_recommendation` values:**
+
 - `APPROVE` — No CRITICAL/HIGH findings, ownership renounced
 - `CONDITIONAL` — HIGH findings present but mitigable, or ownership not renounced
 - `REJECT` — CRITICAL findings, or contract not verified
@@ -182,7 +186,7 @@ Contract source auditing does NOT apply to Solana SPL tokens.
 For SPL tokens, use this alternative safety chain:
 
 1. **Helius** — Check mint authority (`mintAuthority: null` = frozen = GOOD)
-2. **Helius** — Check freeze authority (`freezeAuthority: null` = GOOD)  
+2. **Helius** — Check freeze authority (`freezeAuthority: null` = GOOD)
 3. **RugCheck** (`rugcheck.xyz/tokens/{mint}`) — Full rug score
 4. **DexScreener** — Liquidity lock status, LP burned %
 
@@ -194,24 +198,32 @@ Flag `FREEZE_AUTHORITY_ACTIVE` as HIGH risk if freezeAuthority is not null.
 ## 7. INTEGRATION WITH BUZZ PIPELINE
 
 ### REST API Endpoint
+
 Audit results are stored in SQLite and exposed via:
+
 ```
 GET /api/v1/audit/{address}
 POST /api/v1/audit/run  { "address": "0x...", "chain": "base" }
 ```
 
 ### Score-Token Integration
+
 `contract_safety_score` from this skill feeds into `/score-token` response:
+
 ```
 final_safety_score = (rugcheck_score * 0.4) + (contract_audit_score * 0.6)
 ```
+
 Contract audit carries MORE weight than RugCheck because it's source-level.
 
 ### JVR Receipt
+
 After every audit, log to JVR receipt system:
+
 ```
 AUDIT_COMPLETE | {address} | score:{N} | findings:{N} | {recommendation}
 ```
+
 Send Telegram notification to Ogie for any CRITICAL findings or REJECT recommendations.
 
 ---
@@ -232,6 +244,7 @@ Tell prospects clearly:
 ## 9. AUDIT REFERRAL (BD OPPORTUNITY)
 
 When a contract has HIGH/CRITICAL findings or is > 3,000 lines:
+
 - Suggest formal audit partners: Pashov Audit Group, Code4rena, Sherlock
 - Frame as: "We recommend completing a formal audit before listing — we can fast-track
   your listing to front-of-queue once audit is complete"
@@ -239,7 +252,7 @@ When a contract has HIGH/CRITICAL findings or is > 3,000 lines:
 
 ---
 
-*Contract Auditor Skill v1.0 — Indonesia Sprint Day 9*  
-*For Buzz BD Agent v6.2.1-bnb | SolCex Exchange*  
-*Pattern library: references/patterns.md*  
-*"Catch what humans forget to check."*
+_Contract Auditor Skill v1.0 — Indonesia Sprint Day 9_  
+_For Buzz BD Agent v6.2.1-bnb | SolCex Exchange_  
+_Pattern library: references/patterns.md_  
+_"Catch what humans forget to check."_

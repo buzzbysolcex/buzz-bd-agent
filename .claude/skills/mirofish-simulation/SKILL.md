@@ -6,6 +6,7 @@
 ---
 
 ## MiroFish Dual-Brain (90% Opus / 10% Ollama)
+
 MiroFish Real Sim uses Claude Opus 4.6 Pro Max for 90% of all LLM calls.
 Ollama qwen3:8b handles only degen early-round FOMO (rounds 1-4).
 
@@ -13,9 +14,9 @@ Every agent that matters — institutional, whale, market dynamics, community,
 and degen round 5+ — thinks with frontier-model reasoning at $0 cost.
 
 The router (llm_router.py) makes this automatic:
-  degen R1-4 → Ollama (fast FOMO, 10% of calls)
-  EVERYTHING ELSE → Opus (genius reasoning, 90% of calls)
-  Default → Opus. When in doubt → Opus. Always → Opus.
+degen R1-4 → Ollama (fast FOMO, 10% of calls)
+EVERYTHING ELSE → Opus (genius reasoning, 90% of calls)
+Default → Opus. When in doubt → Opus. Always → Opus.
 
 Pro Max = $200/month for UNLIMITED genius. 90% usage.
 The simulation quality IS the product. Genius reasoning = better predictions.
@@ -34,13 +35,13 @@ JS modules: api/lib/microbuzz-*.js + api/lib/mirofish-oasis.js
 
 ## MODULES
 
-| File | Purpose |
-|------|---------|
-| api/lib/microbuzz-amm.js | Constant-product AMM engine (x*y=k) |
-| api/lib/microbuzz-agents.js | 30 LLM agent profiles (5×2×3) |
-| api/lib/microbuzz-heuristics.js | 470 rule-based market agents |
-| api/lib/microbuzz-ollama.js | Ollama client + prompt builder |
-| api/lib/microbuzz-simulator.js | 3-round orchestrator (500 agents) |
+| File                            | Purpose                              |
+| ------------------------------- | ------------------------------------ |
+| api/lib/microbuzz-amm.js        | Constant-product AMM engine (x\*y=k) |
+| api/lib/microbuzz-agents.js     | 30 LLM agent profiles (5×2×3)        |
+| api/lib/microbuzz-heuristics.js | 470 rule-based market agents         |
+| api/lib/microbuzz-ollama.js     | Ollama client + prompt builder       |
+| api/lib/microbuzz-simulator.js  | 3-round orchestrator (500 agents)    |
 
 ## 500-AGENT HYBRID MODEL
 
@@ -240,6 +241,6 @@ Both write to same pipeline — v2 overwrites v1 scores when available.
 
 ---
 
-*Skill: microbuzz-v2 | ADR-010 | 500-agent hybrid | Ollama + AMM + 3 rounds*
-*$0/sim | MiroShark-informed | CPX62*
-*Bismillah* 🤲
+_Skill: microbuzz-v2 | ADR-010 | 500-agent hybrid | Ollama + AMM + 3 rounds_
+_$0/sim | MiroShark-informed | CPX62_
+_Bismillah_ 🤲

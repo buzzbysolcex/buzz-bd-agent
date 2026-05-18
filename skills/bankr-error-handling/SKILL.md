@@ -10,10 +10,12 @@ description: >
 # Bankr Error Handling — Self-Healing API Diagnostics
 
 ## Source
+
 Install from: `https://github.com/BankrBot/claude-plugins`
 Path: `bankr-error-handling/`
 
 ## Setup
+
 ```bash
 git clone https://github.com/BankrBot/claude-plugins.git /tmp/bankr-plugins
 cp -r /tmp/bankr-plugins/bankr-error-handling/* ./
@@ -21,6 +23,7 @@ rm -rf /tmp/bankr-plugins
 ```
 
 ## When to Use
+
 - HTTP 401 from Bankr API
 - "Invalid API key" errors
 - Job failures or timeouts
@@ -28,6 +31,7 @@ rm -rf /tmp/bankr-plugins
 - Any BANKR_API_KEY configuration issues
 
 ## Self-Healing Flow
+
 ```
 Bankr API error detected
   ↓
@@ -41,6 +45,7 @@ Bankr API error detected
 ```
 
 ## Integration
+
 - SafetyAgent uses this for Bankr-related checks
 - DeployAgent uses this for deploy execution errors
 - Auto-retry with backoff before alerting Ogie

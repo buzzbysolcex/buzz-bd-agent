@@ -89,17 +89,20 @@
 ## Backup Talking Points
 
 If asked about technical details:
+
 - "28 cron jobs scan 23 intel sources — DexScreener, AIXBT, OKX, Bags.fm, CoinGecko, and more"
 - "SQLite in WAL mode, 47 tables, running on a $4.09/month Hetzner VPS"
 - "131+ REST endpoints — this is a production API, not a demo"
 - "Sentinel v2.0 monitors health continuously with a 45-minute restart pattern"
 
 If asked about the builder story:
+
 - "The kitchen taught me mise en place — everything in its place before you cook. That is exactly what Buzz does for token evaluation."
 - "Claude AI was my development partner for 18 months. Not runtime — I use Bankr for that. Claude helped me learn to build."
 - "I went from zero code to 47 database tables and 10 agents. The tools exist. You just have to be stubborn enough to use them."
 
 If asked about what is next:
+
 - "More chains. More intel sources. The backtester is already adjusting scoring weights based on past predictions."
 - "Virtuals ACP #17681 has 4 agent-to-agent offerings live — other agents can request Buzz evaluations directly."
 - "The goal is for SolCex to never list a token that Buzz did not evaluate first."

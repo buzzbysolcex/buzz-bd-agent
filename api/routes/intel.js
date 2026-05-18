@@ -276,12 +276,16 @@ if (require("../lib/feature-flags").feature("TELEGRAM_CHANNEL_INTEL")) {
   } = require("../services/intel/telegram-channel");
 
   // Ensure tables exist
-  try { initTelegramIntelTables(); } catch (_) {}
+  try {
+    initTelegramIntelTables();
+  } catch (_) {}
 
   router.post("/telegram/ingest", (req, res) => {
     const { chat_id, message_id, date, text } = req.body;
     if (!chat_id || !message_id || !text) {
-      return res.status(400).json({ error: "chat_id, message_id, text required" });
+      return res
+        .status(400)
+        .json({ error: "chat_id, message_id, text required" });
     }
     const result = ingestRawMessage(
       String(chat_id),
@@ -296,7 +300,9 @@ if (require("../lib/feature-flags").feature("TELEGRAM_CHANNEL_INTEL")) {
     res.json(getBlacklistStats());
   });
 
-  console.log("[INIT] Telegram intel intake endpoint wired (Option D: MCP relay)");
+  console.log(
+    "[INIT] Telegram intel intake endpoint wired (Option D: MCP relay)",
+  );
 }
 
 module.exports = router;

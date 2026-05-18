@@ -8,6 +8,7 @@ description: Quick-score a token already in the pipeline. Returns cached score i
 Get the current Buzz score for a token in the pipeline.
 
 ## Usage
+
 ```
 /score PEPE
 /score 0x... --refresh          # Force re-score
@@ -15,12 +16,14 @@ Get the current Buzz score for a token in the pipeline.
 ```
 
 ## Behavior
+
 - If token is in pipeline and score is <1h old → return cached score
 - If stale or not in pipeline → run /scan automatically
 - `--refresh` forces re-scoring regardless of cache age
 - `--top N` returns top N tokens from the 482-token leaderboard
 
 ## API Equivalent
+
 ```
 GET https://api.buzzbd.ai/api/score/{address}
 GET https://buzzbd.ai/scores  (public leaderboard)

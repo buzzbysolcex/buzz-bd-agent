@@ -10,8 +10,12 @@
  * Buzz BD Agent | SolCex
  */
 
-const { getDB } = require('../db');
-const { PERSONAS, VARIATIONS, VERDICT_MAP } = require('../lib/simulation-engine');
+const { getDB } = require("../db");
+const {
+  PERSONAS,
+  VARIATIONS,
+  VERDICT_MAP,
+} = require("../lib/simulation-engine");
 
 // ─── BUZZ_RULES Guardrails ──────────────────────────────
 const BUZZ_RULES = `
@@ -38,14 +42,16 @@ function loadSimulation(simulationId) {
   // 1. Try simulation_results table (new engine — has simulation_id PK)
   let sim = null;
   try {
-    sim = db.prepare(
-      'SELECT * FROM simulation_results WHERE simulation_id = ?'
-    ).get(simulationId);
+    sim = db
+      .prepare("SELECT * FROM simulation_results WHERE simulation_id = ?")
+      .get(simulationId);
   } catch {}
 
   if (sim) {
     let verdicts = [];
-    try { verdicts = JSON.parse(sim.verdicts_json || '[]'); } catch {}
+    try {
+      verdicts = JSON.parse(sim.verdicts_json || "[]");
+    } catch {}
     return {
       simulationId: sim.simulation_id,
       symbol: sim.token_address,
@@ -60,26 +66,32 @@ function loadSimulation(simulationId) {
 
   // 2. Try listing_simulations table by integer id
   try {
-    sim = db.prepare(
-      'SELECT * FROM listing_simulations WHERE id = ? ORDER BY id DESC LIMIT 1'
-    ).get(simulationId);
+    sim = db
+      .prepare(
+        "SELECT * FROM listing_simulations WHERE id = ? ORDER BY id DESC LIMIT 1",
+      )
+      .get(simulationId);
   } catch {}
 
   // 3. Try listing_simulations by ticker
   if (!sim) {
     try {
-      sim = db.prepare(
-        'SELECT * FROM listing_simulations WHERE UPPER(ticker) = UPPER(?) ORDER BY id DESC LIMIT 1'
-      ).get(simulationId);
+      sim = db
+        .prepare(
+          "SELECT * FROM listing_simulations WHERE UPPER(ticker) = UPPER(?) ORDER BY id DESC LIMIT 1",
+        )
+        .get(simulationId);
     } catch {}
   }
 
   // 4. Try listing_simulations by token_address
   if (!sim) {
     try {
-      sim = db.prepare(
-        'SELECT * FROM listing_simulations WHERE token_address = ? ORDER BY id DESC LIMIT 1'
-      ).get(simulationId);
+      sim = db
+        .prepare(
+          "SELECT * FROM listing_simulations WHERE token_address = ? ORDER BY id DESC LIMIT 1",
+        )
+        .get(simulationId);
     } catch {}
   }
 
@@ -87,7 +99,9 @@ function loadSimulation(simulationId) {
 
   // Reconstruct verdicts from raw_verdicts (listing_simulations stores full verdict array there)
   let verdicts = [];
-  try { verdicts = JSON.parse(sim.raw_verdicts || '[]'); } catch {}
+  try {
+    verdicts = JSON.parse(sim.raw_verdicts || "[]");
+  } catch {}
 
   return {
     simulationId: `sim_ls_${sim.id}`,
@@ -129,16 +143,16 @@ function listInterviewableAgents(simulationId) {
     score: VERDICT_MAP[v.verdict] != null ? VERDICT_MAP[v.verdict] : 0,
     verdict: v.verdict,
     confidence: v.confidence,
-    reasoning: v.reasoning || '',
-    riskLevel: v.riskLevel || 'MEDIUM',
-    priceTarget30d: v.priceTarget30d || 'STABLE',
-    status: v.status || 'COMPLETED',
+    reasoning: v.reasoning || "",
+    riskLevel: v.riskLevel || "MEDIUM",
+    priceTarget30d: v.priceTarget30d || "STABLE",
+    status: v.status || "COMPLETED",
     isMostBullish: false,
     isMostBearish: false,
   }));
 
   // Flag top-5 most bullish and top-5 most bearish among completed agents
-  const completed = agents.filter(a => a.status === 'COMPLETED');
+  const completed = agents.filter((a) => a.status === "COMPLETED");
   if (completed.length > 0) {
     const sorted = [...completed].sort((a, b) => {
       const va = VERDICT_MAP[a.verdict] != null ? VERDICT_MAP[a.verdict] : 0;
@@ -181,7 +195,12 @@ function listInterviewableAgents(simulationId) {
  * @param {Array<{question: string, response: string}>} conversationHistory — prior turns
  * @returns {Promise<{agent: object, response: string, model: string, cost: number}>}
  */
-async function interviewAgent(simulationId, agentIndex, userQuestion, conversationHistory = []) {
+async function interviewAgent(
+  simulationId,
+  agentIndex,
+  userQuestion,
+  conversationHistory = [],
+) {
   const sim = loadSimulation(simulationId);
   if (!sim) {
     throw new Error(`Simulation not found: ${simulationId}`);
@@ -189,12 +208,16 @@ async function interviewAgent(simulationId, agentIndex, userQuestion, conversati
 
   const verdicts = sim.verdicts || [];
   if (agentIndex < 0 || agentIndex >= verdicts.length) {
-    throw new Error(`Invalid agent index: ${agentIndex}. Valid range: 0-${verdicts.length - 1}`);
+    throw new Error(
+      `Invalid agent index: ${agentIndex}. Valid range: 0-${verdicts.length - 1}`,
+    );
   }
 
   const agent = verdicts[agentIndex];
-  if (agent.status && agent.status !== 'COMPLETED') {
-    throw new Error(`Agent ${agentIndex} abstained from the simulation and cannot be interviewed.`);
+  if (agent.status && agent.status !== "COMPLETED") {
+    throw new Error(
+      `Agent ${agentIndex} abstained from the simulation and cannot be interviewed.`,
+    );
   }
 
   // Reconstruct persona context
@@ -202,19 +225,19 @@ async function interviewAgent(simulationId, agentIndex, userQuestion, conversati
   const variation = agent.variation || {};
   const variationDesc = variation.risk_tolerance
     ? `Your risk tolerance is ${variation.risk_tolerance}. Your time horizon is ${variation.time_horizon}. You are a ${variation.experience} trader.`
-    : '';
+    : "";
 
-  const symbol = sim.symbol || 'UNKNOWN';
-  const chain = sim.chain || 'unknown';
+  const symbol = sim.symbol || "UNKNOWN";
+  const chain = sim.chain || "unknown";
 
   const systemPrompt = `You are a ${agent.persona} analyst persona in a crypto listing simulation for SolCex Exchange.
 You evaluated ${symbol} (${chain}) and gave it a verdict of ${agent.verdict} with ${((agent.confidence || 0) * 100).toFixed(0)}% confidence.
-Your influence weight was ${agent.weight}. Your focus area is: ${personaConfig.focus || 'general analysis'}.
+Your influence weight was ${agent.weight}. Your focus area is: ${personaConfig.focus || "general analysis"}.
 ${variationDesc}
 
-Your original reasoning was: "${agent.reasoning || 'No reasoning recorded.'}"
-Your risk assessment: ${agent.riskLevel || 'MEDIUM'}
-Your 30-day price target: ${agent.priceTarget30d || 'STABLE'}
+Your original reasoning was: "${agent.reasoning || "No reasoning recorded."}"
+Your risk assessment: ${agent.riskLevel || "MEDIUM"}
+Your 30-day price target: ${agent.priceTarget30d || "STABLE"}
 
 The user is now interviewing you about your decision.
 Stay in character. Defend your position but acknowledge valid counterpoints.
@@ -224,10 +247,11 @@ ${BUZZ_RULES}`;
 
   // Project Opus Brain: Return agent data for Claude Code to analyze.
   // Claude Code handles the conversational interview directly.
-  const response = `[${agent.persona}/${variation.risk_tolerance || 'moderate'}/${variation.experience || 'veteran'}] ` +
+  const response =
+    `[${agent.persona}/${variation.risk_tolerance || "moderate"}/${variation.experience || "veteran"}] ` +
     `Verdict: ${agent.verdict} (${((agent.confidence || 0) * 100).toFixed(0)}% confidence). ` +
-    `${agent.reasoning || 'No reasoning recorded.'} ` +
-    `Risk: ${agent.riskLevel || 'MEDIUM'}. 30d target: ${agent.priceTarget30d || 'STABLE'}.`;
+    `${agent.reasoning || "No reasoning recorded."} ` +
+    `Risk: ${agent.riskLevel || "MEDIUM"}. 30d target: ${agent.priceTarget30d || "STABLE"}.`;
 
   return {
     agent: {
@@ -237,12 +261,12 @@ ${BUZZ_RULES}`;
       weight: agent.weight,
       original_verdict: agent.verdict,
       original_confidence: agent.confidence,
-      reasoning: agent.reasoning || '',
-      riskLevel: agent.riskLevel || 'MEDIUM',
-      priceTarget30d: agent.priceTarget30d || 'STABLE',
+      reasoning: agent.reasoning || "",
+      riskLevel: agent.riskLevel || "MEDIUM",
+      priceTarget30d: agent.priceTarget30d || "STABLE",
     },
     response,
-    model: 'rule-based',
+    model: "rule-based",
     cost: 0,
   };
 }

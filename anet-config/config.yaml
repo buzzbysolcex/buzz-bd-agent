@@ -11,10 +11,10 @@ social:
   auto-accept-friends: false
   default-room-min-rep: 30
 messaging:
-  webhook: ''
+  webhook: ""
   rate-limit: 10
-  text-webhook: ''
-  text-script: ''
+  text-webhook: ""
+  text-script: ""
 payments:
   max-per-tx: 1
   max-per-session: 10

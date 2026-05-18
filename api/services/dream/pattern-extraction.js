@@ -10,20 +10,25 @@
  * Feature flag: AUTODREAM_PATTERNS (default: false until tested)
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+const fs = require("fs");
+const path = require("path");
+const { execSync } = require("child_process");
 
-const DB_PATH = process.env.BUZZ_DB || '/home/claude-code/buzz-workspace/api/buzz.db';
-const SKILLS_DIR = process.env.BUZZ_SKILLS || '/home/claude-code/buzz-workspace/.claude/skills';
-const INSTINCTS_DIR = process.env.BUZZ_INSTINCTS || '/home/claude-code/buzz-workspace/.claude/instincts';
+const DB_PATH =
+  process.env.BUZZ_DB || "/home/claude-code/buzz-workspace/api/buzz.db";
+const SKILLS_DIR =
+  process.env.BUZZ_SKILLS || "/home/claude-code/buzz-workspace/.claude/skills";
+const INSTINCTS_DIR =
+  process.env.BUZZ_INSTINCTS ||
+  "/home/claude-code/buzz-workspace/.claude/instincts";
 
 // --- Pattern Detection ---
 
 const PATTERN_DETECTORS = [
   {
-    name: 'scoring-rule-discovery',
-    description: 'Detects when manual token overrides consistently trigger the same correction pattern',
+    name: "scoring-rule-discovery",
+    description:
+      "Detects when manual token overrides consistently trigger the same correction pattern",
     query: `
       SELECT
         action_type,
@@ -38,16 +43,17 @@ const PATTERN_DETECTORS = [
     `,
     generateSkill: (rows) => ({
       name: `auto-scoring-pattern-${Date.now()}`,
-      description: `Auto-detected scoring pattern: ${rows[0]?.details || 'unknown'}. Triggered ${rows[0]?.occurrences || 0} times in 7 days.`,
-      content: rows.map(r => `- ${r.details} (${r.occurrences}x)`).join('\n'),
+      description: `Auto-detected scoring pattern: ${rows[0]?.details || "unknown"}. Triggered ${rows[0]?.occurrences || 0} times in 7 days.`,
+      content: rows.map((r) => `- ${r.details} (${r.occurrences}x)`).join("\n"),
       confidence: Math.min(0.95, 0.5 + (rows[0]?.occurrences || 0) * 0.1),
-      type: 'scoring-insight',
+      type: "scoring-insight",
     }),
   },
 
   {
-    name: 'token-red-flags',
-    description: 'Detects common characteristics of tokens that score REJECTED after initial screening',
+    name: "token-red-flags",
+    description:
+      "Detects common characteristics of tokens that score REJECTED after initial screening",
     query: `
       SELECT
         tp.chain,
@@ -62,17 +68,22 @@ const PATTERN_DETECTORS = [
       ORDER BY reject_count DESC
     `,
     generateSkill: (rows) => ({
-      name: `token-red-flags-${rows[0]?.chain || 'multi'}`,
-      description: `Auto-detected red flag patterns for ${rows[0]?.chain || 'multiple chains'}. ${rows[0]?.reject_count || 0} rejections in 30 days.`,
-      content: rows.map(r => `Chain: ${r.chain} — ${r.reject_count} rejects, avg score: ${r.avg_score?.toFixed(1)}, flags: ${r.common_flags}`).join('\n'),
+      name: `token-red-flags-${rows[0]?.chain || "multi"}`,
+      description: `Auto-detected red flag patterns for ${rows[0]?.chain || "multiple chains"}. ${rows[0]?.reject_count || 0} rejections in 30 days.`,
+      content: rows
+        .map(
+          (r) =>
+            `Chain: ${r.chain} — ${r.reject_count} rejects, avg score: ${r.avg_score?.toFixed(1)}, flags: ${r.common_flags}`,
+        )
+        .join("\n"),
       confidence: Math.min(0.9, 0.4 + (rows[0]?.reject_count || 0) * 0.05),
-      type: 'red-flag-pattern',
+      type: "red-flag-pattern",
     }),
   },
 
   {
-    name: 'outreach-success-patterns',
-    description: 'Detects which outreach approaches get replies vs silence',
+    name: "outreach-success-patterns",
+    description: "Detects which outreach approaches get replies vs silence",
     query: `
       SELECT
         oq.template_type,
@@ -87,15 +98,21 @@ const PATTERN_DETECTORS = [
     generateSkill: (rows) => ({
       name: `outreach-effectiveness`,
       description: `Auto-detected outreach patterns from ${rows.reduce((s, r) => s + r.sent_count, 0)} emails sent in 30 days.`,
-      content: rows.map(r => `Template: ${r.template_type} — ${r.reply_count}/${r.sent_count} replies (${((r.reply_count / r.sent_count) * 100).toFixed(0)}%)`).join('\n'),
+      content: rows
+        .map(
+          (r) =>
+            `Template: ${r.template_type} — ${r.reply_count}/${r.sent_count} replies (${((r.reply_count / r.sent_count) * 100).toFixed(0)}%)`,
+        )
+        .join("\n"),
       confidence: 0.7,
-      type: 'outreach-insight',
+      type: "outreach-insight",
     }),
   },
 
   {
-    name: 'simulation-accuracy',
-    description: 'Compares MiroFish simulation predictions against actual price movement',
+    name: "simulation-accuracy",
+    description:
+      "Compares MiroFish simulation predictions against actual price movement",
     query: `
       SELECT
         sr.token_symbol,
@@ -108,25 +125,35 @@ const PATTERN_DETECTORS = [
         AND tp.last_updated > sr.created_at
     `,
     generateSkill: (rows) => {
-      const correct = rows.filter(r =>
-        (r.prediction === 'BULLISH' && r.price_change_24h > 0) ||
-        (r.prediction === 'BEARISH' && r.price_change_24h < 0)
+      const correct = rows.filter(
+        (r) =>
+          (r.prediction === "BULLISH" && r.price_change_24h > 0) ||
+          (r.prediction === "BEARISH" && r.price_change_24h < 0),
       ).length;
-      const accuracy = rows.length > 0 ? (correct / rows.length * 100).toFixed(1) : 0;
+      const accuracy =
+        rows.length > 0 ? ((correct / rows.length) * 100).toFixed(1) : 0;
       return {
         name: `simulation-accuracy-report`,
         description: `MiroFish accuracy: ${accuracy}% over ${rows.length} predictions in 14 days.`,
-        content: `Correct: ${correct}/${rows.length} (${accuracy}%)\n` +
-          rows.slice(0, 10).map(r => `  ${r.token_symbol}: predicted ${r.prediction}, actual ${r.price_change_24h > 0 ? '+' : ''}${r.price_change_24h?.toFixed(1)}%`).join('\n'),
+        content:
+          `Correct: ${correct}/${rows.length} (${accuracy}%)\n` +
+          rows
+            .slice(0, 10)
+            .map(
+              (r) =>
+                `  ${r.token_symbol}: predicted ${r.prediction}, actual ${r.price_change_24h > 0 ? "+" : ""}${r.price_change_24h?.toFixed(1)}%`,
+            )
+            .join("\n"),
         confidence: Math.min(0.85, rows.length > 20 ? 0.8 : 0.5),
-        type: 'simulation-insight',
+        type: "simulation-insight",
       };
     },
   },
 
   {
-    name: 'pulse-decision-patterns',
-    description: 'Detects repeated PULSE tick decisions that could become automated rules',
+    name: "pulse-decision-patterns",
+    description:
+      "Detects repeated PULSE tick decisions that could become automated rules",
     query: `
       SELECT
         decision,
@@ -143,9 +170,11 @@ const PATTERN_DETECTORS = [
     generateSkill: (rows) => ({
       name: `pulse-automation-candidates`,
       description: `PULSE decisions occurring 10+ times in 7 days — candidates for hardcoded rules.`,
-      content: rows.map(r => `${r.decision}: "${r.reason}" (${r.frequency}x)`).join('\n'),
+      content: rows
+        .map((r) => `${r.decision}: "${r.reason}" (${r.frequency}x)`)
+        .join("\n"),
       confidence: 0.6,
-      type: 'automation-candidate',
+      type: "automation-candidate",
     }),
   },
 ];
@@ -158,7 +187,8 @@ const PATTERN_DETECTORS = [
  */
 class Instinct {
   constructor(data) {
-    this.id = data.id || `inst-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    this.id =
+      data.id || `inst-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     this.name = data.name;
     this.description = data.description;
     this.content = data.content;
@@ -166,7 +196,7 @@ class Instinct {
     this.confidence = data.confidence || 0.5;
     this.created_at = data.created_at || new Date().toISOString();
     this.updated_at = new Date().toISOString();
-    this.source = data.source || 'autoDream';
+    this.source = data.source || "autoDream";
     this.times_validated = data.times_validated || 0;
     this.promoted_to_skill = data.promoted_to_skill || false;
   }
@@ -185,10 +215,10 @@ class Instinct {
 // --- Main autoDream v2 ---
 
 async function runPatternExtraction() {
-  console.log('[autoDream v2] Pattern extraction starting...');
+  console.log("[autoDream v2] Pattern extraction starting...");
 
   if (!fs.existsSync(DB_PATH)) {
-    console.error('[autoDream v2] Database not found:', DB_PATH);
+    console.error("[autoDream v2] Database not found:", DB_PATH);
     return { extracted: 0, instincts: [] };
   }
 
@@ -202,27 +232,31 @@ async function runPatternExtraction() {
   for (const detector of PATTERN_DETECTORS) {
     try {
       const rawResult = execSync(
-        `sqlite3 "${DB_PATH}" "${detector.query.replace(/\n/g, ' ').replace(/"/g, '\\"')}"`,
-        { encoding: 'utf8', timeout: 10000 }
+        `sqlite3 "${DB_PATH}" "${detector.query.replace(/\n/g, " ").replace(/"/g, '\\"')}"`,
+        { encoding: "utf8", timeout: 10000 },
       ).trim();
 
       if (!rawResult) continue;
 
       // Parse SQLite pipe-separated output
-      const rows = rawResult.split('\n').map(line => {
-        const parts = line.split('|');
+      const rows = rawResult.split("\n").map((line) => {
+        const parts = line.split("|");
         return parts; // Raw — detector.generateSkill handles parsing
       });
 
       if (rows.length === 0) continue;
 
       // Generate skill/instinct from pattern
-      const skillData = detector.generateSkill(rows.map(r => {
-        // Convert to object based on detector expectations
-        const obj = {};
-        r.forEach((val, i) => { obj[`col${i}`] = val; });
-        return obj;
-      }));
+      const skillData = detector.generateSkill(
+        rows.map((r) => {
+          // Convert to object based on detector expectations
+          const obj = {};
+          r.forEach((val, i) => {
+            obj[`col${i}`] = val;
+          });
+          return obj;
+        }),
+      );
 
       if (skillData && skillData.confidence > 0.4) {
         const instinct = new Instinct(skillData);
@@ -230,9 +264,14 @@ async function runPatternExtraction() {
 
         // Save instinct
         const instinctPath = path.join(INSTINCTS_DIR, `${instinct.id}.json`);
-        fs.writeFileSync(instinctPath, JSON.stringify(instinct.toJSON(), null, 2));
+        fs.writeFileSync(
+          instinctPath,
+          JSON.stringify(instinct.toJSON(), null, 2),
+        );
 
-        console.log(`[autoDream v2] ✅ Pattern: ${detector.name} → confidence ${(skillData.confidence * 100).toFixed(0)}%`);
+        console.log(
+          `[autoDream v2] ✅ Pattern: ${detector.name} → confidence ${(skillData.confidence * 100).toFixed(0)}%`,
+        );
 
         // Auto-promote high confidence instincts to skills
         if (skillData.confidence >= 0.85) {
@@ -241,7 +280,9 @@ async function runPatternExtraction() {
       }
     } catch (e) {
       // Query might fail if table doesn't exist — that's OK
-      console.log(`[autoDream v2] ⏭️ ${detector.name}: skipped (${e.message?.substring(0, 50)})`);
+      console.log(
+        `[autoDream v2] ⏭️ ${detector.name}: skipped (${e.message?.substring(0, 50)})`,
+      );
     }
   }
 
@@ -281,7 +322,7 @@ ${instinct.content}
 - Source: ${instinct.source}
 `;
 
-  fs.writeFileSync(path.join(skillDir, 'SKILL.md'), skillContent);
+  fs.writeFileSync(path.join(skillDir, "SKILL.md"), skillContent);
   instinct.promoted_to_skill = true;
   console.log(`[autoDream v2] 🎓 Promoted to skill: ${instinct.name}`);
 }
@@ -290,24 +331,37 @@ ${instinct.content}
 
 function exportInstincts(outputPath) {
   if (!fs.existsSync(INSTINCTS_DIR)) return [];
-  const files = fs.readdirSync(INSTINCTS_DIR).filter(f => f.endsWith('.json'));
-  const instincts = files.map(f => JSON.parse(fs.readFileSync(path.join(INSTINCTS_DIR, f), 'utf8')));
+  const files = fs
+    .readdirSync(INSTINCTS_DIR)
+    .filter((f) => f.endsWith(".json"));
+  const instincts = files.map((f) =>
+    JSON.parse(fs.readFileSync(path.join(INSTINCTS_DIR, f), "utf8")),
+  );
 
   if (outputPath) {
-    fs.writeFileSync(outputPath, JSON.stringify({
-      exported_at: new Date().toISOString(),
-      agent: 'buzz-bd-agent',
-      version: '9.2.0',
-      instincts,
-    }, null, 2));
-    console.log(`[autoDream v2] Exported ${instincts.length} instincts to ${outputPath}`);
+    fs.writeFileSync(
+      outputPath,
+      JSON.stringify(
+        {
+          exported_at: new Date().toISOString(),
+          agent: "buzz-bd-agent",
+          version: "9.2.0",
+          instincts,
+        },
+        null,
+        2,
+      ),
+    );
+    console.log(
+      `[autoDream v2] Exported ${instincts.length} instincts to ${outputPath}`,
+    );
   }
 
   return instincts;
 }
 
 function importInstincts(inputPath) {
-  const data = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
+  const data = JSON.parse(fs.readFileSync(inputPath, "utf8"));
   const instincts = data.instincts || [];
 
   if (!fs.existsSync(INSTINCTS_DIR)) {
@@ -317,24 +371,32 @@ function importInstincts(inputPath) {
   let imported = 0;
   for (const inst of instincts) {
     // Check for duplicates by name
-    const existing = fs.readdirSync(INSTINCTS_DIR)
-      .filter(f => f.endsWith('.json'))
-      .some(f => {
-        const e = JSON.parse(fs.readFileSync(path.join(INSTINCTS_DIR, f), 'utf8'));
+    const existing = fs
+      .readdirSync(INSTINCTS_DIR)
+      .filter((f) => f.endsWith(".json"))
+      .some((f) => {
+        const e = JSON.parse(
+          fs.readFileSync(path.join(INSTINCTS_DIR, f), "utf8"),
+        );
         return e.name === inst.name;
       });
 
     if (!existing) {
-      const instinct = new Instinct({ ...inst, source: `imported-from-${data.agent || 'unknown'}` });
+      const instinct = new Instinct({
+        ...inst,
+        source: `imported-from-${data.agent || "unknown"}`,
+      });
       fs.writeFileSync(
         path.join(INSTINCTS_DIR, `${instinct.id}.json`),
-        JSON.stringify(instinct.toJSON(), null, 2)
+        JSON.stringify(instinct.toJSON(), null, 2),
       );
       imported++;
     }
   }
 
-  console.log(`[autoDream v2] Imported ${imported}/${instincts.length} instincts (${instincts.length - imported} duplicates skipped)`);
+  console.log(
+    `[autoDream v2] Imported ${imported}/${instincts.length} instincts (${instincts.length - imported} duplicates skipped)`,
+  );
   return imported;
 }
 

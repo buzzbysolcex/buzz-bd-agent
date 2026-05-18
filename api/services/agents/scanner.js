@@ -2,25 +2,27 @@
  * Scanner Sub-Agent — L1 Discovery
  * Sources: DexScreener API, CoinMarketCap API, GeckoTerminal, AIXBT, DS Boosts
  * Model: bankr/gpt-5-nano (on OpenClaw) | Direct API calls (on REST API)
- * 
+ *
  * CMC Basic Plan: 10K calls/month, 30 req/min, 14 endpoints, personal use
- * 
+ *
  * Returns token metadata, market data, pair info, CMC rankings
  */
 
-const DEXSCREENER_BASE = 'https://api.dexscreener.com';
-const CMC_BASE = 'https://pro-api.coinmarketcap.com';
+const DEXSCREENER_BASE = "https://api.dexscreener.com";
+const CMC_BASE = "https://pro-api.coinmarketcap.com";
 
 async function runScannerAgent({ address, chain, requestId }) {
   const start = Date.now();
-  console.log(`[${requestId}] 📡 scanner-agent: Starting for ${address} on ${chain}`);
+  console.log(
+    `[${requestId}] 📡 scanner-agent: Starting for ${address} on ${chain}`,
+  );
 
   try {
     // ─── DexScreener: Token pairs endpoint ───
     const pairsUrl = `${DEXSCREENER_BASE}/latest/dex/tokens/${address}`;
     const pairsRes = await fetch(pairsUrl, {
-      headers: { 'Accept': 'application/json' },
-      signal: AbortSignal.timeout(15000)
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(15000),
     });
 
     if (!pairsRes.ok) {
@@ -32,7 +34,7 @@ async function runScannerAgent({ address, chain, requestId }) {
 
     if (pairs.length === 0) {
       return {
-        status: 'completed',
+        status: "completed",
         score: 0,
         duration_ms: Date.now() - start,
         tokenName: null,
@@ -40,15 +42,15 @@ async function runScannerAgent({ address, chain, requestId }) {
         data: {
           found: false,
           pairs_count: 0,
-          message: 'No pairs found on DexScreener'
-        }
+          message: "No pairs found on DexScreener",
+        },
       };
     }
 
     // Get the primary pair (highest liquidity)
     const primaryPair = pairs.reduce((best, pair) => {
       const liq = parseFloat(pair.liquidity?.usd || 0);
-      return liq > (parseFloat(best.liquidity?.usd || 0)) ? pair : best;
+      return liq > parseFloat(best.liquidity?.usd || 0) ? pair : best;
     }, pairs[0]);
 
     // Extract token data
@@ -60,57 +62,58 @@ async function runScannerAgent({ address, chain, requestId }) {
       chain: primaryPair.chainId || chain,
       dex: primaryPair.dexId || null,
       pair_address: primaryPair.pairAddress || null,
-      
+
       // Market data
       price_usd: parseFloat(primaryPair.priceUsd || 0),
       price_native: parseFloat(primaryPair.priceNative || 0),
       market_cap: parseFloat(primaryPair.marketCap || primaryPair.fdv || 0),
       fdv: parseFloat(primaryPair.fdv || 0),
       liquidity_usd: parseFloat(primaryPair.liquidity?.usd || 0),
-      
+
       // Volume
       volume_24h: parseFloat(primaryPair.volume?.h24 || 0),
       volume_6h: parseFloat(primaryPair.volume?.h6 || 0),
       volume_1h: parseFloat(primaryPair.volume?.h1 || 0),
-      
+
       // Price changes
       price_change_24h: parseFloat(primaryPair.priceChange?.h24 || 0),
       price_change_6h: parseFloat(primaryPair.priceChange?.h6 || 0),
       price_change_1h: parseFloat(primaryPair.priceChange?.h1 || 0),
       price_change_5m: parseFloat(primaryPair.priceChange?.m5 || 0),
-      
+
       // Transactions
       txns_24h_buys: primaryPair.txns?.h24?.buys || 0,
       txns_24h_sells: primaryPair.txns?.h24?.sells || 0,
       txns_1h_buys: primaryPair.txns?.h1?.buys || 0,
       txns_1h_sells: primaryPair.txns?.h1?.sells || 0,
-      
+
       // URLs
-      dexscreener_url: primaryPair.url || `https://dexscreener.com/${chain}/${address}`,
-      
+      dexscreener_url:
+        primaryPair.url || `https://dexscreener.com/${chain}/${address}`,
+
       // Pair age
       pair_created_at: primaryPair.pairCreatedAt || null,
-      
+
       // Social/info
       websites: primaryPair.info?.websites || [],
       socials: primaryPair.info?.socials || [],
       image_url: primaryPair.info?.imageUrl || null,
-      
+
       // Boosts (if present)
-      boosts: primaryPair.boosts?.active || 0
+      boosts: primaryPair.boosts?.active || 0,
     };
 
     // ─── DexScreener: Token profile (boosted info) ───
     try {
       const profileUrl = `${DEXSCREENER_BASE}/token-profiles/latest/v1`;
       const profileRes = await fetch(profileUrl, {
-        headers: { 'Accept': 'application/json' },
-        signal: AbortSignal.timeout(5000)
+        headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(5000),
       });
       if (profileRes.ok) {
         const profiles = await profileRes.json();
-        const match = profiles.find(p => 
-          p.tokenAddress?.toLowerCase() === address.toLowerCase()
+        const match = profiles.find(
+          (p) => p.tokenAddress?.toLowerCase() === address.toLowerCase(),
         );
         if (match) {
           tokenData.boosted = true;
@@ -138,7 +141,8 @@ async function runScannerAgent({ address, chain, requestId }) {
           circulating_supply: cmcData.circulating_supply || null,
           total_supply: cmcData.total_supply || null,
           max_supply: cmcData.max_supply || null,
-          market_cap_dominance: cmcData.quote?.USD?.market_cap_dominance || null,
+          market_cap_dominance:
+            cmcData.quote?.USD?.market_cap_dominance || null,
           // Price changes not available in DexScreener
           price_change_7d: cmcData.quote?.USD?.percent_change_7d || null,
           price_change_30d: cmcData.quote?.USD?.percent_change_30d || null,
@@ -154,23 +158,29 @@ async function runScannerAgent({ address, chain, requestId }) {
           // Platform info
           platform: cmcData.platform || null,
           // CMC URL
-          url: cmcData.slug ? `https://coinmarketcap.com/currencies/${cmcData.slug}/` : null
+          url: cmcData.slug
+            ? `https://coinmarketcap.com/currencies/${cmcData.slug}/`
+            : null,
         };
         tokenData.cmc_listed = true;
 
         // Cross-validate MC between DexScreener and CMC
         const cmcMc = cmcData.quote?.USD?.market_cap || 0;
         if (cmcMc > 0 && tokenData.market_cap > 0) {
-          const mcDiff = Math.abs(cmcMc - tokenData.market_cap) / tokenData.market_cap;
+          const mcDiff =
+            Math.abs(cmcMc - tokenData.market_cap) / tokenData.market_cap;
           tokenData.cmc.mc_difference_pct = Math.round(mcDiff * 100);
           if (mcDiff > 0.5) {
-            tokenData.cmc.mc_warning = 'Large MC discrepancy between DexScreener and CMC';
+            tokenData.cmc.mc_warning =
+              "Large MC discrepancy between DexScreener and CMC";
           }
         }
       }
     } catch (cmcErr) {
       // Non-critical — DexScreener is primary, CMC enriches
-      console.log(`[${requestId}] ⚠️ CMC enrichment skipped: ${cmcErr.message}`);
+      console.log(
+        `[${requestId}] ⚠️ CMC enrichment skipped: ${cmcErr.message}`,
+      );
     }
 
     // ─── Compute scanner discovery score ───
@@ -178,23 +188,26 @@ async function runScannerAgent({ address, chain, requestId }) {
     const discoverySignals = {
       has_liquidity: tokenData.liquidity_usd > 1000,
       has_volume: tokenData.volume_24h > 5000,
-      active_trading: (tokenData.txns_24h_buys + tokenData.txns_24h_sells) > 50,
+      active_trading: tokenData.txns_24h_buys + tokenData.txns_24h_sells > 50,
       multi_pair: tokenData.pairs_count > 1,
       has_social: tokenData.socials.length > 0,
       has_website: tokenData.websites.length > 0,
       is_boosted: tokenData.boosted || tokenData.boosts > 0,
-      reasonable_mc: tokenData.market_cap >= 10000 && tokenData.market_cap <= 100000000,
+      reasonable_mc:
+        tokenData.market_cap >= 10000 && tokenData.market_cap <= 100000000,
       // CMC signals (new)
       cmc_listed: tokenData.cmc_listed || false,
-      cmc_ranked: (tokenData.cmc?.cmc_rank || 0) > 0 && (tokenData.cmc?.cmc_rank || 99999) < 5000,
+      cmc_ranked:
+        (tokenData.cmc?.cmc_rank || 0) > 0 &&
+        (tokenData.cmc?.cmc_rank || 99999) < 5000,
       has_7d_history: tokenData.cmc?.price_change_7d !== null,
-      cmc_tagged: (tokenData.cmc?.tags?.length || 0) > 0
+      cmc_tagged: (tokenData.cmc?.tags?.length || 0) > 0,
     };
 
     const signalCount = Object.values(discoverySignals).filter(Boolean).length;
-    
+
     return {
-      status: 'completed',
+      status: "completed",
       score: 0, // Scanner doesn't score — provides data for other agents
       duration_ms: Date.now() - start,
       tokenName: tokenData.name,
@@ -207,17 +220,16 @@ async function runScannerAgent({ address, chain, requestId }) {
         ...tokenData,
         discovery_signals: discoverySignals,
         signal_count: signalCount,
-        signal_max: Object.keys(discoverySignals).length
-      }
+        signal_max: Object.keys(discoverySignals).length,
+      },
     };
-
   } catch (err) {
     console.error(`[${requestId}] ❌ scanner-agent failed:`, err.message);
     return {
-      status: 'error',
+      status: "error",
       score: 0,
       duration_ms: Date.now() - start,
-      data: { error: err.message }
+      data: { error: err.message },
     };
   }
 }
@@ -242,44 +254,44 @@ async function fetchCmcData(address, chain, symbol, requestId) {
   }
 
   const headers = {
-    'X-CMC_PRO_API_KEY': CMC_KEY,
-    'Accept': 'application/json'
+    "X-CMC_PRO_API_KEY": CMC_KEY,
+    Accept: "application/json",
   };
 
   // ─── Method 1: Lookup by contract address (most accurate) ───
   // /v1/cryptocurrency/info supports contract_address parameter
   try {
     const platformMap = {
-      'solana': 'solana',
-      'sol': 'solana',
-      'ethereum': 'ethereum',
-      'eth': 'ethereum',
-      'base': 'base',
-      'bsc': 'binance-smart-chain',
-      'polygon': 'polygon',
-      'avalanche': 'avalanche',
-      'arbitrum': 'arbitrum',
-      'optimism': 'optimism'
+      solana: "solana",
+      sol: "solana",
+      ethereum: "ethereum",
+      eth: "ethereum",
+      base: "base",
+      bsc: "binance-smart-chain",
+      polygon: "polygon",
+      avalanche: "avalanche",
+      arbitrum: "arbitrum",
+      optimism: "optimism",
     };
-    
+
     const platform = platformMap[chain.toLowerCase()];
-    
+
     if (platform) {
       // /v2/cryptocurrency/info — lookup by contract address
       const infoUrl = `${CMC_BASE}/v2/cryptocurrency/info?address=${address}`;
       const infoRes = await fetch(infoUrl, {
         headers,
-        signal: AbortSignal.timeout(8000)
+        signal: AbortSignal.timeout(8000),
       });
 
       if (infoRes.ok) {
         const infoData = await infoRes.json();
         const tokens = infoData.data ? Object.values(infoData.data) : [];
-        
+
         if (tokens.length > 0) {
           const token = Array.isArray(tokens[0]) ? tokens[0][0] : tokens[0];
           const cmcId = token.id;
-          
+
           if (cmcId) {
             // Got CMC ID — now get quotes for price/volume data
             return await fetchCmcQuotes(cmcId, headers, requestId);
@@ -298,7 +310,7 @@ async function fetchCmcData(address, chain, symbol, requestId) {
       const quotesUrl = `${CMC_BASE}/v1/cryptocurrency/quotes/latest?symbol=${encodeURIComponent(symbol)}&convert=USD`;
       const quotesRes = await fetch(quotesUrl, {
         headers,
-        signal: AbortSignal.timeout(8000)
+        signal: AbortSignal.timeout(8000),
       });
 
       if (quotesRes.ok) {
@@ -324,7 +336,7 @@ async function fetchCmcQuotes(cmcId, headers, requestId) {
     const url = `${CMC_BASE}/v1/cryptocurrency/quotes/latest?id=${cmcId}&convert=USD`;
     const res = await fetch(url, {
       headers,
-      signal: AbortSignal.timeout(8000)
+      signal: AbortSignal.timeout(8000),
     });
 
     if (res.ok) {

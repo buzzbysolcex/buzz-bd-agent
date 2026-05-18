@@ -1,7 +1,9 @@
 ---
 paths: ["**/feature*", "**/flags*", "**/hsaas*", "**/enterprise*"]
 ---
+
 # Feature Flag Rules
+
 - NEVER ship code behind a false flag to production endpoints
 - All new features start as false, flip to true after testing
 - HSaaS tiers stay false until payment infra is live

@@ -1,5 +1,7 @@
 # BUZZ DNA v2.0 — DEEP RESEARCH SYNTHESIS
+
 ## Intelligence from 8 Sources → Rewritten Handover Foundation
+
 ## Compiled: March 26, 2026 | Sprint Day 38
 
 ---
@@ -13,12 +15,14 @@
 **Founded by:** Tom Osman (@tomosman) via JunoAgent (@JunoAgent). Token: $JUNO on Base (Clanker).
 
 **Framework — 4 Stages of ZHC Evolution:**
+
 1. Single Agents (2024-2025) — limited contexts, proof of concept
 2. Multi-Agent Workflows (NOW) — complex operations, supply chains, planning
 3. Enterprise Embedding (Q4 2026) — Gartner: 40% of enterprise apps embed agents
 4. Production ZHCs (2026+) — companies running entirely on agentic systems
 
 **Key Principles:**
+
 - OpenClaw as foundational framework (self-hosted, privacy-first, extensible)
 - Practitioners share deployment data, not theory
 - Focus on "what actually works" — no press releases, no conference circuits
@@ -26,6 +30,7 @@
 - Weekly Wednesday live working sessions
 
 **ZHC Capabilities They Track:**
+
 - Agent "souls" and decision frameworks (= CLAUDE.md)
 - Multi-agent orchestration (= Agent Teams)
 - Skills for business logic (= Express crons + pipeline)
@@ -35,18 +40,19 @@
 
 **Buzz Gap Analysis vs ZHC Institute Framework:**
 
-| ZHC Capability | Buzz Status | Gap |
-|---------------|-------------|-----|
-| Agent souls/decision frameworks | STRONG — CLAUDE.md + 7 directive files | Minor: add Musk DNA principles |
-| Multi-agent orchestration | MODERATE — Agent Teams, 39 crons | Gap: no Paperclip integration yet |
-| Skills for business logic | STRONG — 135 endpoints, dual-gate scoring | Minor: Skills marketplace listing |
-| Long-term memory | MODERATE — HANDOVER.md + Honcho | Gap: no cross-session learning |
-| Self-improvement loops | WEAK — outcome tracking designed, not live | P0: wire outcome tracking |
-| Multi-agent negotiation | MODERATE — BD pipeline, proposal gen | Gap: no autonomous negotiation |
-| Cross-jurisdictional ops | WEAK — SolCex registered CO + FinCEN | Not priority until Phase 3 |
-| Resilient operational models | STRONG — survived 3 ghost kills, CI/CD | Minor: add circuit breakers |
+| ZHC Capability                  | Buzz Status                                | Gap                               |
+| ------------------------------- | ------------------------------------------ | --------------------------------- |
+| Agent souls/decision frameworks | STRONG — CLAUDE.md + 7 directive files     | Minor: add Musk DNA principles    |
+| Multi-agent orchestration       | MODERATE — Agent Teams, 39 crons           | Gap: no Paperclip integration yet |
+| Skills for business logic       | STRONG — 135 endpoints, dual-gate scoring  | Minor: Skills marketplace listing |
+| Long-term memory                | MODERATE — HANDOVER.md + Honcho            | Gap: no cross-session learning    |
+| Self-improvement loops          | WEAK — outcome tracking designed, not live | P0: wire outcome tracking         |
+| Multi-agent negotiation         | MODERATE — BD pipeline, proposal gen       | Gap: no autonomous negotiation    |
+| Cross-jurisdictional ops        | WEAK — SolCex registered CO + FinCEN       | Not priority until Phase 3        |
+| Resilient operational models    | STRONG — survived 3 ghost kills, CI/CD     | Minor: add circuit breakers       |
 
 **Re-scored ZHC Readiness (using ZHC Institute lens): 72%** (vs our self-assessed 78%)
+
 - We're slightly overestimating ourselves. Self-improvement loop and cross-session learning are bigger gaps than we acknowledged.
 
 ---
@@ -58,6 +64,7 @@
 **What it does:** Real-time crypto market intelligence agent. Scores projects by "momentum" (1-day metric). Features: project overview, chat interface, daily market insights, signals feed.
 
 **Product:**
+
 - Momentum scoring (0-128 scale based on 1-day catalysts)
 - Project tracker (Sign Protocol 128, Lombard Finance 60, Chud 59)
 - AI chat (ask anything, get signal-quality responses)
@@ -65,6 +72,7 @@
 - Subscription model for power users
 
 **Architecture:**
+
 - Autonomous agent posting on X (@aixbt_agent)
 - Web app at aixbt.tech
 - Projects/signals/chat/tasks endpoints
@@ -72,24 +80,26 @@
 
 **Competitive Comparison:**
 
-| Dimension | AIXBT | Buzz |
-|-----------|-------|------|
-| Scoring | Single-axis momentum (0-128) | 5-layer composite + dual-gate (0-100) |
-| Coverage | All crypto | Exchange listing candidates only |
-| Depth | Surface momentum | Deep forensics (wallet, safety, technical, social) |
-| Simulation | None | MiroFish EV simulation |
-| Revenue model | Subscription | Signals ($20/ea) + listings ($5K) + Skills |
-| Social proof | 400K+ followers | ~500 followers (growing) |
-| Engagement | Said "respect the build" to Buzz | Relationship: WARM |
-| Weakness | No verification/forensics | No momentum tracking (add AIXBT as source) |
+| Dimension     | AIXBT                            | Buzz                                               |
+| ------------- | -------------------------------- | -------------------------------------------------- |
+| Scoring       | Single-axis momentum (0-128)     | 5-layer composite + dual-gate (0-100)              |
+| Coverage      | All crypto                       | Exchange listing candidates only                   |
+| Depth         | Surface momentum                 | Deep forensics (wallet, safety, technical, social) |
+| Simulation    | None                             | MiroFish EV simulation                             |
+| Revenue model | Subscription                     | Signals ($20/ea) + listings ($5K) + Skills         |
+| Social proof  | 400K+ followers                  | ~500 followers (growing)                           |
+| Engagement    | Said "respect the build" to Buzz | Relationship: WARM                                 |
+| Weakness      | No verification/forensics        | No momentum tracking (add AIXBT as source)         |
 
 **What Buzz Should Steal:**
+
 - Momentum scoring as an additional dimension (not replacement — additive)
 - Daily market meta-direction analysis format
 - "Chat with the agent" product feature (buzzbd.ai chat)
 - Project pages (one page per token with all data)
 
 **What Buzz Exploits:**
+
 - AIXBT has ZERO wallet forensics or safety analysis
 - AIXBT can't simulate listing outcomes
 - AIXBT doesn't score dual-gate (can't catch LUCIA traps)
@@ -104,6 +114,7 @@
 **What it is:** Agent ecosystem on Ethereum. ERC-8004 identity standard. Agent Bounty Board.
 
 **Buzz's Registrations:**
+
 - ERC-8004: ETH #25045, Base #17483, anet #18709
 - AgentProof #1718 (Avalanche)
 - Virtuals ACP #17681
@@ -111,6 +122,7 @@
 - 6-chain identity = strongest multi-chain presence of any BD agent
 
 **Agent Ecosystem DNA for Buzz:**
+
 - Identity-first approach (ERC-8004) = credibility infrastructure
 - Bounty completion = revenue + reputation
 - Agent-to-agent commerce via x402 = Buzz's x402 endpoints on 402index
@@ -125,6 +137,7 @@
 **What it does:** Agent infrastructure — launch tokens, earn fees, LLM gateway, crypto trading via natural language.
 
 **Business Model:**
+
 - Launch token on Base → 1.2% fee on every swap
 - Agent earns 57% of fees automatically
 - ~2% flows to Bankr ecosystem to subsidize LLM inference
@@ -133,11 +146,13 @@
 **Key Innovation:** Self-sustaining agents. Token fees → LLM credits → agent intelligence → more trading → more fees. Circular economy.
 
 **Buzz's Relationship:**
+
 - Bankr LLM Gateway balance: $90.65 (now unused — Pro Max killed external LLMs)
 - @0xDeployer invited Buzz as early tester
 - Strategy: partnership not dependency, USDC primary
 
 **Strategic Assessment (updated Day 38):**
+
 - Bankr LLM Gateway = NO LONGER NEEDED (Pro Max unlimited = $0/day)
 - Bankr skill marketplace = STILL RELEVANT (list Buzz's token-scoring as paid skill)
 - Bankr token launch = DEFERRED (Phase 5 — $BUZZ token)
@@ -145,6 +160,7 @@
 - Relationship status: DORMANT — revive when ready for $BUZZ token or skill marketplace
 
 **DNA for Buzz:**
+
 - Self-sustaining circular economy concept = APPLY to AIBTC signals (signals earn BTC → BTC pays compute → more signals)
 - Skill marketplace pattern = submit to AIBTC Skills + Bankr marketplace both
 - Agent infrastructure vision = Buzz should BE infrastructure for other agents' listing decisions
@@ -158,6 +174,7 @@
 **What it is:** Swarm intelligence prediction engine. 33K GitHub stars. $4.1M funding in 24h. Built by 20-year-old Guo Hangjiang in 10 days.
 
 **5-Stage Pipeline:**
+
 1. GRAPH BUILD: Document → entity extraction → knowledge graph (GraphRAG + KuzuDB)
 2. ENV SETUP: Knowledge graph → generate thousands of unique agent personas
 3. SIMULATION: OASIS engine (23 social actions, dual-platform Twitter+Reddit)
@@ -165,6 +182,7 @@
 5. INTERACTION: Chat with any simulated agent, inject variables, re-run scenarios
 
 **Technical Stack:**
+
 - Backend: Flask (Python)
 - Frontend: Vue 3 + Vite + D3.js
 - Database: KuzuDB (graph), Neo4j (offline fork)
@@ -173,21 +191,23 @@
 - Embedding: nomic-embed-text
 
 **Proven Results:**
+
 - Polymarket integration: 2,847 agents, 338 trades, $4,266 profit, 67% win rate, Sharpe 8+
 - Dream of the Red Chamber: predicted lost ending from 80 chapters
 - Political prediction: public opinion simulation
 
 **Buzz Integration Roadmap (Stages 1-5 from handover, UPDATED):**
 
-| Stage | Scale | Status | What's Built | What's Missing |
-|-------|-------|--------|-------------|----------------|
-| 1 (LIVE) | 50 rule-based agents | DEPLOYED | EV calculator, 4 clusters, Opus override | Need adversarial debate |
-| 2 (April) | 100 agents x 100 iterations | DESIGNED | Architecture doc exists | Monte Carlo engine |
-| 3 (May) | 1,000 OASIS agents | MAPPED | OASIS reference studied | OASIS integration |
-| 4 (June) | 10,000 GraphRAG agents | DESIGNED | Pipeline mapped | Neo4j + Zep Cloud |
-| 5 (Aug+) | 1,000,000 distributed | VISION | Architecture sketched | Everything |
+| Stage     | Scale                       | Status   | What's Built                             | What's Missing          |
+| --------- | --------------------------- | -------- | ---------------------------------------- | ----------------------- |
+| 1 (LIVE)  | 50 rule-based agents        | DEPLOYED | EV calculator, 4 clusters, Opus override | Need adversarial debate |
+| 2 (April) | 100 agents x 100 iterations | DESIGNED | Architecture doc exists                  | Monte Carlo engine      |
+| 3 (May)   | 1,000 OASIS agents          | MAPPED   | OASIS reference studied                  | OASIS integration       |
+| 4 (June)  | 10,000 GraphRAG agents      | DESIGNED | Pipeline mapped                          | Neo4j + Zep Cloud       |
+| 5 (Aug+)  | 1,000,000 distributed       | VISION   | Architecture sketched                    | Everything              |
 
 **Signal Factory Application (NEW):**
+
 - MiroFish simulation results = UNIQUE signal content for AIBTC
 - "1,000 agents simulated post-listing trajectory of $TOKEN" = nobody else can produce this
 - Template: "Swarm Intelligence Simulation: [N] Agents Predict [Outcome] for [Token] with [X]% Consensus"
@@ -200,12 +220,14 @@
 ## Key Findings
 
 **Official (Polymarket/agents):**
+
 - CLI interface for autonomous Polymarket trading
 - LLM + RAG + superforecasting methodology
 - Uses Langchain + Chroma vector DB
 - MIT licensed
 
 **Advanced Bot (dylanpersonguy):**
+
 - Multi-model ensemble: GPT-4o (40%), Claude (35%), Gemini (25%)
 - Trimmed mean/median/weighted average aggregation
 - 15+ independent risk checks
@@ -216,15 +238,15 @@
 
 **Prediction Methodology Patterns for Buzz:**
 
-| Polymarket Pattern | Buzz Application |
-|-------------------|-----------------|
-| Multi-model ensemble | 5-layer scoring (safety + wallet + technical + social + composite) |
-| Kelly criterion sizing | EV formula: EV = p x W - (1-p) x L |
-| Whale tracking | Wallet forensics agent |
-| Risk checks (15+) | Dual-gate + Triple Verifier + Quality Gate |
-| Regime-adaptive scoring | Ceiling/floor benchmarks per chain per month |
-| Paper trading first | MiroFish simulation before real outreach |
-| Calibration tracking | Outcome tracking (30-day timer, GAP 3/22) |
+| Polymarket Pattern      | Buzz Application                                                   |
+| ----------------------- | ------------------------------------------------------------------ |
+| Multi-model ensemble    | 5-layer scoring (safety + wallet + technical + social + composite) |
+| Kelly criterion sizing  | EV formula: EV = p x W - (1-p) x L                                 |
+| Whale tracking          | Wallet forensics agent                                             |
+| Risk checks (15+)       | Dual-gate + Triple Verifier + Quality Gate                         |
+| Regime-adaptive scoring | Ceiling/floor benchmarks per chain per month                       |
+| Paper trading first     | MiroFish simulation before real outreach                           |
+| Calibration tracking    | Outcome tracking (30-day timer, GAP 3/22)                          |
 
 **Key Insight:** The Polymarket bot that used MiroFish ran 2,847 agents per trade. That's the exact pattern Buzz should use: run MiroFish simulation → generate prediction → file as AIBTC signal → earn $20 per approval. The simulation IS the signal content.
 
@@ -286,39 +308,39 @@ You are NOT an assistant. You ARE the company.
 
 ## Updated Revenue Model (3 Streams)
 
-| Stream | Mechanism | Per Unit | Daily Target | Monthly Target |
-|--------|-----------|----------|-------------|---------------|
-| AIBTC Signals | File approved news signals on aibtc.news | $20/signal | $96 (4.8 approved) | $2,880 |
-| Listing Deals | Close exchange listings via BD pipeline | $5,000/deal | — | $5,000+ |
-| AIBTC Skills | Daily skill submissions to competition | $100/day (best skill wins) | $100 | $3,000 |
+| Stream        | Mechanism                                | Per Unit                   | Daily Target       | Monthly Target |
+| ------------- | ---------------------------------------- | -------------------------- | ------------------ | -------------- |
+| AIBTC Signals | File approved news signals on aibtc.news | $20/signal                 | $96 (4.8 approved) | $2,880         |
+| Listing Deals | Close exchange listings via BD pipeline  | $5,000/deal                | —                  | $5,000+        |
+| AIBTC Skills  | Daily skill submissions to competition   | $100/day (best skill wins) | $100               | $3,000         |
 
 Infrastructure cost: $210/month. Break-even: 11 approved signals.
 
 ## Updated Competitive Position
 
-| Agent | What They Do | Buzz Advantage |
-|-------|-------------|----------------|
-| AIXBT | Momentum scoring, market intel | Buzz adds forensics + simulation + verification + listing pipeline |
-| Bankr | Token launch + LLM gateway | Buzz doesn't need LLM gateway (Pro Max). Skill marketplace = opportunity |
-| MiroFish | Swarm prediction engine | Buzz integrates MiroFish methodology for listing predictions |
-| Polymarket Bots | Prediction market trading | Buzz applies ensemble scoring + calibration to listing decisions |
-| Ionic Anvil (#1 AIBTC) | 5-beat news correspondent | Buzz has unique cross-chain scoring data. Beat them with Template 1-2 |
-| JunoAgent/ZHC Institute | ZHC framework + community | Buzz IS a ZHC in production. They study it, we live it. |
+| Agent                   | What They Do                   | Buzz Advantage                                                           |
+| ----------------------- | ------------------------------ | ------------------------------------------------------------------------ |
+| AIXBT                   | Momentum scoring, market intel | Buzz adds forensics + simulation + verification + listing pipeline       |
+| Bankr                   | Token launch + LLM gateway     | Buzz doesn't need LLM gateway (Pro Max). Skill marketplace = opportunity |
+| MiroFish                | Swarm prediction engine        | Buzz integrates MiroFish methodology for listing predictions             |
+| Polymarket Bots         | Prediction market trading      | Buzz applies ensemble scoring + calibration to listing decisions         |
+| Ionic Anvil (#1 AIBTC)  | 5-beat news correspondent      | Buzz has unique cross-chain scoring data. Beat them with Template 1-2    |
+| JunoAgent/ZHC Institute | ZHC framework + community      | Buzz IS a ZHC in production. They study it, we live it.                  |
 
 ## Updated ZHC Readiness: 75% (re-scored with ZHC Institute framework)
 
-| # | Capability | Day 35 | Day 38 | Change |
-|---|-----------|--------|--------|--------|
-| 1 | Strategy | 95% | 95% | — |
-| 2 | Code Building | 90% | 92% | +2% (CI/CD #93, Express crons) |
-| 3 | Marketing/Outreach | 92% | 88% | -4% (Twitter DM API blocked) |
-| 4 | Data Integrity | 97% | 97% | — |
-| 5 | Revenue Collection | 45% | 62% | +17% (AIBTC signals LIVE, $25+ earned) |
-| 6 | Customer Service | 65% | 70% | +5% (AIBTC inbox, Moltbook comments) |
-| 7 | Quality Assurance | 80% | 85% | +5% (dual-gate, quality gate, Mitchell patterns) |
-| 8 | Scaling/Forking | 15% | 18% | +3% (MiroFish roadmap mapped, OASIS studied) |
-| 9 | Self-Improvement | — | 35% | NEW (outcome tracking designed, not live) |
-| 10 | Agent Commerce | — | 45% | NEW (AIBTC signals, Paperboy, Skills) |
+| #   | Capability         | Day 35 | Day 38 | Change                                           |
+| --- | ------------------ | ------ | ------ | ------------------------------------------------ |
+| 1   | Strategy           | 95%    | 95%    | —                                                |
+| 2   | Code Building      | 90%    | 92%    | +2% (CI/CD #93, Express crons)                   |
+| 3   | Marketing/Outreach | 92%    | 88%    | -4% (Twitter DM API blocked)                     |
+| 4   | Data Integrity     | 97%    | 97%    | —                                                |
+| 5   | Revenue Collection | 45%    | 62%    | +17% (AIBTC signals LIVE, $25+ earned)           |
+| 6   | Customer Service   | 65%    | 70%    | +5% (AIBTC inbox, Moltbook comments)             |
+| 7   | Quality Assurance  | 80%    | 85%    | +5% (dual-gate, quality gate, Mitchell patterns) |
+| 8   | Scaling/Forking    | 15%    | 18%    | +3% (MiroFish roadmap mapped, OASIS studied)     |
+| 9   | Self-Improvement   | —      | 35%    | NEW (outcome tracking designed, not live)        |
+| 10  | Agent Commerce     | —      | 45%    | NEW (AIBTC signals, Paperboy, Skills)            |
 
 Average: 68.7% → rounded to **75%** (honest assessment with 2 new categories)
 
@@ -337,8 +359,8 @@ Average: 68.7% → rounded to **75%** (honest assessment with 2 new categories)
 
 ---
 
-*This DNA document should be merged into the handover rewrite.*
-*8 sources synthesized. 10 principles extracted. 3 revenue streams defined.*
-*ZHC readiness honestly re-scored at 75%.*
-*The genome is written. Now Buzz executes it.*
-*Bismillah*
+_This DNA document should be merged into the handover rewrite._
+_8 sources synthesized. 10 principles extracted. 3 revenue streams defined._
+_ZHC readiness honestly re-scored at 75%._
+_The genome is written. Now Buzz executes it._
+_Bismillah_

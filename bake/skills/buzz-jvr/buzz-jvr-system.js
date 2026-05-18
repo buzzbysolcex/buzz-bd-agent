@@ -29,40 +29,75 @@
  * ═══════════════════════════════════════════════════════════════
  */
 
-const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
+const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
 
 // ─── Constants ───────────────────────────────────────────────
-const RECEIPT_PREFIX = 'AAB';
-const RECEIPT_DIR = process.env.JVR_DIR || '/data/workspace/memory/receipts';
-const INDEX_FILE = path.join(RECEIPT_DIR, 'receipt-index.json');
-const SEQUENCE_FILE = path.join(RECEIPT_DIR, 'sequence.dat');
+const RECEIPT_PREFIX = "AAB";
+const RECEIPT_DIR = process.env.JVR_DIR || "/data/workspace/memory/receipts";
+const INDEX_FILE = path.join(RECEIPT_DIR, "receipt-index.json");
+const SEQUENCE_FILE = path.join(RECEIPT_DIR, "sequence.dat");
 
 const CATEGORIES = [
-  'scan', 'safety', 'wallet', 'social', 'score', 'orchestrate',
-  'outreach', 'cron', 'api', 'deploy', 'twitter', 'pipeline',
-  'reputation', 'x402', 'system', 'manual',
+  "scan",
+  "safety",
+  "wallet",
+  "social",
+  "score",
+  "orchestrate",
+  "outreach",
+  "cron",
+  "api",
+  "deploy",
+  "twitter",
+  "pipeline",
+  "reputation",
+  "x402",
+  "system",
+  "manual",
 ];
 
 const SESSIONS = [
-  'scanner-agent', 'safety-agent', 'wallet-agent', 'social-agent',
-  'scorer-agent', 'orchestrator', 'twitter-bot', 'cron-scheduler',
-  'api-server', 'system', 'manual',
+  "scanner-agent",
+  "safety-agent",
+  "wallet-agent",
+  "social-agent",
+  "scorer-agent",
+  "orchestrator",
+  "twitter-bot",
+  "cron-scheduler",
+  "api-server",
+  "system",
+  "manual",
 ];
 
 const CATEGORY_EMOJI = {
-  scan: '🔍', safety: '🛡️', wallet: '💰', social: '📱', score: '📊',
-  orchestrate: '🎯', outreach: '📧', cron: '⏰', api: '🌐', deploy: '🚀',
-  twitter: '🐦', pipeline: '📋', reputation: '🏆', x402: '💳',
-  system: '⚙️', manual: '🔧',
+  scan: "🔍",
+  safety: "🛡️",
+  wallet: "💰",
+  social: "📱",
+  score: "📊",
+  orchestrate: "🎯",
+  outreach: "📧",
+  cron: "⏰",
+  api: "🌐",
+  deploy: "🚀",
+  twitter: "🐦",
+  pipeline: "📋",
+  reputation: "🏆",
+  x402: "💳",
+  system: "⚙️",
+  manual: "🔧",
 };
 
 // ─── Receipt Manager ─────────────────────────────────────────
 class ReceiptManager {
   constructor(options = {}) {
-    this.telegramBotToken = options.telegramBotToken || process.env.TELEGRAM_BOT_TOKEN || '';
-    this.telegramChatId = options.telegramChatId || process.env.TELEGRAM_CHAT_ID || '950395553';
+    this.telegramBotToken =
+      options.telegramBotToken || process.env.TELEGRAM_BOT_TOKEN || "";
+    this.telegramChatId =
+      options.telegramChatId || process.env.TELEGRAM_CHAT_ID || "950395553";
     this.onchainEnabled = options.onchainEnabled || false;
     this.notifyByDefault = options.notifyByDefault !== false;
 
@@ -71,22 +106,25 @@ class ReceiptManager {
 
     // Initialize sequence counter
     if (!fs.existsSync(SEQUENCE_FILE)) {
-      fs.writeFileSync(SEQUENCE_FILE, '0');
+      fs.writeFileSync(SEQUENCE_FILE, "0");
     }
 
     // Initialize index
     if (!fs.existsSync(INDEX_FILE)) {
-      fs.writeFileSync(INDEX_FILE, JSON.stringify({ receipts: [], stats: { total: 0 } }));
+      fs.writeFileSync(
+        INDEX_FILE,
+        JSON.stringify({ receipts: [], stats: { total: 0 } }),
+      );
     }
   }
 
   // ─── Core: Create Receipt ────────────────────────────────
   async createReceipt(params) {
     const {
-      category = 'system',
-      session = 'system',
-      status = 'completed',
-      summary = '',
+      category = "system",
+      session = "system",
+      status = "completed",
+      summary = "",
       tokenSymbol = null,
       tokenAddress = null,
       chain = null,
@@ -125,26 +163,42 @@ class ReceiptManager {
     receipt.hash = this._generateHash(receipt);
 
     // Save to disk
-    const dateDir = timestamp.split('T')[0];
+    const dateDir = timestamp.split("T")[0];
     const dayDir = path.join(RECEIPT_DIR, dateDir);
     this._ensureDir(dayDir);
     fs.writeFileSync(
       path.join(dayDir, `${code}.json`),
-      JSON.stringify(receipt, null, 2)
+      JSON.stringify(receipt, null, 2),
     );
 
     // Update index
     this._addToIndex(receipt);
 
     // Telegram notification — only for high-value events (skip routine cron/scan/system noise)
-    const SILENT_CATEGORIES = ['api', 'cron', 'scan', 'system', 'score', 'safety', 'wallet', 'social', 'reputation'];
-    if (notify && this.telegramBotToken && !SILENT_CATEGORIES.includes(category)) {
+    const SILENT_CATEGORIES = [
+      "api",
+      "cron",
+      "scan",
+      "system",
+      "score",
+      "safety",
+      "wallet",
+      "social",
+      "reputation",
+    ];
+    if (
+      notify &&
+      this.telegramBotToken &&
+      !SILENT_CATEGORIES.includes(category)
+    ) {
       await this._notifyTelegram(receipt);
     }
 
     // Console log
-    const emoji = CATEGORY_EMOJI[category] || '📝';
-    console.log(`[JVR] ${emoji} ${code} | ${category}/${session} | ${status} | ${summary}`);
+    const emoji = CATEGORY_EMOJI[category] || "📝";
+    console.log(
+      `[JVR] ${emoji} ${code} | ${category}/${session} | ${status} | ${summary}`,
+    );
 
     return receipt;
   }
@@ -152,26 +206,34 @@ class ReceiptManager {
   // ─── Query Receipts ──────────────────────────────────────
   getReceipt(code) {
     const index = this._loadIndex();
-    const entry = index.receipts.find(r => r.code === code);
+    const entry = index.receipts.find((r) => r.code === code);
     if (!entry) return null;
 
     const filePath = path.join(RECEIPT_DIR, entry.date, `${code}.json`);
     if (!fs.existsSync(filePath)) return null;
 
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
   }
 
   queryReceipts(filters = {}) {
-    const { category, session, status, from, to, limit = 50, offset = 0 } = filters;
+    const {
+      category,
+      session,
+      status,
+      from,
+      to,
+      limit = 50,
+      offset = 0,
+    } = filters;
     const index = this._loadIndex();
 
     let results = index.receipts;
 
-    if (category) results = results.filter(r => r.category === category);
-    if (session) results = results.filter(r => r.session === session);
-    if (status) results = results.filter(r => r.status === status);
-    if (from) results = results.filter(r => r.timestamp >= from);
-    if (to) results = results.filter(r => r.timestamp <= to);
+    if (category) results = results.filter((r) => r.category === category);
+    if (session) results = results.filter((r) => r.session === session);
+    if (status) results = results.filter((r) => r.status === status);
+    if (from) results = results.filter((r) => r.timestamp >= from);
+    if (to) results = results.filter((r) => r.timestamp <= to);
 
     const total = results.length;
     results = results.slice(offset, offset + limit);
@@ -232,16 +294,17 @@ class ReceiptManager {
     // Success rate
     const completed = stats.byStatus.completed || 0;
     const failed = stats.byStatus.failed || 0;
-    stats.successRate = completed + failed > 0
-      ? ((completed / (completed + failed)) * 100).toFixed(1) + '%'
-      : 'N/A';
+    stats.successRate =
+      completed + failed > 0
+        ? ((completed / (completed + failed)) * 100).toFixed(1) + "%"
+        : "N/A";
 
     return stats;
   }
 
   verifyReceipt(code) {
     const receipt = this.getReceipt(code);
-    if (!receipt) return { valid: false, error: 'Receipt not found' };
+    if (!receipt) return { valid: false, error: "Receipt not found" };
 
     const storedHash = receipt.hash;
     const { hash, ...receiptWithoutHash } = receipt;
@@ -259,11 +322,11 @@ class ReceiptManager {
 
   // ─── Express Router ──────────────────────────────────────
   getRouter() {
-    const express = require('express');
+    const express = require("express");
     const router = express.Router();
 
     // POST /receipts — create
-    router.post('/', async (req, res) => {
+    router.post("/", async (req, res) => {
       try {
         const receipt = await this.createReceipt(req.body);
         res.status(201).json(receipt);
@@ -273,25 +336,25 @@ class ReceiptManager {
     });
 
     // GET /receipts — query
-    router.get('/', (req, res) => {
+    router.get("/", (req, res) => {
       const results = this.queryReceipts(req.query);
       res.json(results);
     });
 
     // GET /receipts/stats
-    router.get('/stats', (req, res) => {
+    router.get("/stats", (req, res) => {
       res.json(this.getStats());
     });
 
     // GET /receipts/:code
-    router.get('/:code', (req, res) => {
+    router.get("/:code", (req, res) => {
       const receipt = this.getReceipt(req.params.code);
-      if (!receipt) return res.status(404).json({ error: 'Receipt not found' });
+      if (!receipt) return res.status(404).json({ error: "Receipt not found" });
       res.json(receipt);
     });
 
     // GET /receipts/:code/verify
-    router.get('/:code/verify', (req, res) => {
+    router.get("/:code/verify", (req, res) => {
       const result = this.verifyReceipt(req.params.code);
       res.json(result);
     });
@@ -302,16 +365,16 @@ class ReceiptManager {
   // ─── Express Middleware (auto-receipt for all API calls) ──
   middleware() {
     return (req, res, next) => {
-      if (req.path.includes('/receipts')) return next(); // skip self
+      if (req.path.includes("/receipts")) return next(); // skip self
 
       const start = Date.now();
-      res.on('finish', () => {
+      res.on("finish", () => {
         // Fire and forget — don't block response
         this.createReceipt({
-          category: 'api',
-          session: 'api-server',
+          category: "api",
+          session: "api-server",
           endpoint: `${req.method} ${req.path}`,
-          status: res.statusCode < 400 ? 'completed' : 'failed',
+          status: res.statusCode < 400 ? "completed" : "failed",
           summary: `${req.method} ${req.path} → ${res.statusCode}`,
           duration_ms: Date.now() - start,
           notify: false, // don't spam Telegram for API calls
@@ -330,11 +393,15 @@ class ReceiptManager {
 
   _generateHash(receipt) {
     const payload = JSON.stringify(receipt, Object.keys(receipt).sort());
-    return crypto.createHash('sha256').update(payload).digest('hex').substring(0, 16);
+    return crypto
+      .createHash("sha256")
+      .update(payload)
+      .digest("hex")
+      .substring(0, 16);
   }
 
   _nextSequence() {
-    const current = parseInt(fs.readFileSync(SEQUENCE_FILE, 'utf8') || '0', 10);
+    const current = parseInt(fs.readFileSync(SEQUENCE_FILE, "utf8") || "0", 10);
     const next = current + 1;
     fs.writeFileSync(SEQUENCE_FILE, next.toString());
     return next;
@@ -349,8 +416,10 @@ class ReceiptManager {
       status: receipt.status,
       timestamp: receipt.timestamp,
       summary: receipt.summary,
-      date: receipt.timestamp.split('T')[0],
-      ...(receipt.duration_ms !== undefined && { duration_ms: receipt.duration_ms }),
+      date: receipt.timestamp.split("T")[0],
+      ...(receipt.duration_ms !== undefined && {
+        duration_ms: receipt.duration_ms,
+      }),
     });
     index.stats.total = index.receipts.length;
 
@@ -364,7 +433,7 @@ class ReceiptManager {
 
   _loadIndex() {
     try {
-      return JSON.parse(fs.readFileSync(INDEX_FILE, 'utf8'));
+      return JSON.parse(fs.readFileSync(INDEX_FILE, "utf8"));
     } catch {
       return { receipts: [], stats: { total: 0 } };
     }
@@ -373,9 +442,13 @@ class ReceiptManager {
   async _notifyTelegram(receipt) {
     if (!this.telegramBotToken) return;
 
-    const emoji = CATEGORY_EMOJI[receipt.category] || '📝';
-    const statusEmoji = receipt.status === 'completed' ? '✅' :
-                        receipt.status === 'failed' ? '❌' : '⚠️';
+    const emoji = CATEGORY_EMOJI[receipt.category] || "📝";
+    const statusEmoji =
+      receipt.status === "completed"
+        ? "✅"
+        : receipt.status === "failed"
+          ? "❌"
+          : "⚠️";
 
     let msg = `${statusEmoji} <b>Job Receipt</b>\n`;
     msg += `<code>${receipt.code}</code>\n`;
@@ -384,13 +457,13 @@ class ReceiptManager {
 
     if (receipt.tokenSymbol) msg += `🪙 $${receipt.tokenSymbol}`;
     if (receipt.chain) msg += ` (${receipt.chain})`;
-    if (receipt.tokenSymbol) msg += '\n';
+    if (receipt.tokenSymbol) msg += "\n";
 
     if (receipt.duration_ms !== null && receipt.duration_ms !== undefined) {
       msg += `⏱ ${receipt.duration_ms}ms\n`;
     }
     if (receipt.sources && receipt.sources.length > 0) {
-      msg += `📡 Sources: ${receipt.sources.join(', ')}\n`;
+      msg += `📡 Sources: ${receipt.sources.join(", ")}\n`;
     }
 
     msg += `🔐 Hash: ${receipt.hash}\n`;
@@ -400,14 +473,14 @@ class ReceiptManager {
       await fetch(
         `https://api.telegram.org/bot${this.telegramBotToken}/sendMessage`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             chat_id: this.telegramChatId,
             text: msg,
-            parse_mode: 'HTML',
+            parse_mode: "HTML",
           }),
-        }
+        },
       );
     } catch {
       // Silent fail

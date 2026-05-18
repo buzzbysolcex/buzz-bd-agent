@@ -12,7 +12,7 @@
 
 I am a chef. Twenty years in kitchens across Jakarta. No computer science degree. No bootcamp certificate. No engineering team.
 
-Eighteen months ago I discovered Claude AI and asked it a simple question: *Can you help me build something real?*
+Eighteen months ago I discovered Claude AI and asked it a simple question: _Can you help me build something real?_
 
 The answer became Buzz BD Agent — a fully autonomous business development pipeline that discovers, evaluates, simulates, and proposes token listings for SolCex Exchange. It runs 24/7 on a single Hetzner VPS for $52 per month. It has 10 agents, 20 simulation personas, 131+ API endpoints, and 47 database tables. It does in seconds what a BD team of five would take days to do.
 
@@ -26,16 +26,16 @@ Buzz is the first autonomous agent that operates a complete exchange listing pip
 
 ### The 8-Stage Pipeline
 
-| Stage | What Happens |
-|-------|-------------|
-| **1. DISCOVER** | 28 cron jobs scan 23 intel sources around the clock — DexScreener, AIXBT, OKX, Bags.fm, CoinGecko, and more |
-| **2. ASSESS** | 5 sub-agents score every candidate on a 100-point scale across safety, wallet health, social presence, market data, and overall quality |
-| **3. SIMULATE** | MiroFish engine: 20 agents across 4 behavioral clusters run expected-value calculations to produce a LIST / MONITOR / REJECT verdict |
-| **4. PROPOSE** | Cyberpunk-styled HTML listing proposals are auto-generated with full scoring breakdowns |
-| **5. OUTREACH** | Twitter bot (@BuzzBySolCex) posts premium scan templates, replies to communities, and schedules content across 4 categories |
-| **6. NEGOTIATE** | The only human checkpoint — Ogie reviews listing deal terms before anything goes live |
-| **7. VERIFY** | Sentinel v2.0 monitors pipeline health; every operation generates a JVR (Job Verification Receipt) |
-| **8. LEARN** | Backtester validates past predictions; skill reflection adjusts agent scoring weights over time |
+| Stage            | What Happens                                                                                                                            |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **1. DISCOVER**  | 28 cron jobs scan 23 intel sources around the clock — DexScreener, AIXBT, OKX, Bags.fm, CoinGecko, and more                             |
+| **2. ASSESS**    | 5 sub-agents score every candidate on a 100-point scale across safety, wallet health, social presence, market data, and overall quality |
+| **3. SIMULATE**  | MiroFish engine: 20 agents across 4 behavioral clusters run expected-value calculations to produce a LIST / MONITOR / REJECT verdict    |
+| **4. PROPOSE**   | Cyberpunk-styled HTML listing proposals are auto-generated with full scoring breakdowns                                                 |
+| **5. OUTREACH**  | Twitter bot (@BuzzBySolCex) posts premium scan templates, replies to communities, and schedules content across 4 categories             |
+| **6. NEGOTIATE** | The only human checkpoint — Ogie reviews listing deal terms before anything goes live                                                   |
+| **7. VERIFY**    | Sentinel v2.0 monitors pipeline health; every operation generates a JVR (Job Verification Receipt)                                      |
+| **8. LEARN**     | Backtester validates past predictions; skill reflection adjusts agent scoring weights over time                                         |
 
 ---
 
@@ -75,16 +75,16 @@ Buzz is the first autonomous agent that operates a complete exchange listing pip
 
 ## Metrics
 
-| Metric | Value |
-|--------|-------|
-| Agents | 10 (5 sub + 4 persona + 1 orchestrator) + 20 simulation |
-| Endpoints | 131+ |
-| Tables | 47 |
-| Intel Sources | 23 |
-| Cron Jobs | 28 |
-| Monthly Cost | $52 ($4.09 infra + ~$48 LLM) |
-| Pipeline | 13 tokens, 3 chains |
-| Uptime | 24/7, 45min restart pattern |
+| Metric        | Value                                                   |
+| ------------- | ------------------------------------------------------- |
+| Agents        | 10 (5 sub + 4 persona + 1 orchestrator) + 20 simulation |
+| Endpoints     | 131+                                                    |
+| Tables        | 47                                                      |
+| Intel Sources | 23                                                      |
+| Cron Jobs     | 28                                                      |
+| Monthly Cost  | $52 ($4.09 infra + ~$48 LLM)                            |
+| Pipeline      | 13 tokens, 3 chains                                     |
+| Uptime        | 24/7, 45min restart pattern                             |
 
 ---
 
@@ -109,6 +109,7 @@ Buzz is the definition of "let the agent cook." It is not a chatbot with tools �
 - **Learning is closed-loop.** The backtester compares past simulation predictions against actual token performance. Skill reflection adjusts agent scoring weights. Buzz gets better at its job without being retrained.
 
 **Infrastructure reality:**
+
 - Hetzner CX23: 2 vCPU, 4GB RAM, 40GB disk — $4.09/month
 - OpenClaw runtime on Node.js
 - SQLite in WAL mode — no Postgres, no Redis, no managed databases
@@ -125,19 +126,20 @@ Buzz does not just act — it proves it acted. Every agent has a verifiable on-c
 
 **Multi-chain agent identity:**
 
-| Registry | Chain | ID |
-|----------|-------|----|
-| ERC-8004 | Ethereum | #25045 |
-| ERC-8004 | Base | #17483 |
-| ERC-8004 | Anet | #18709 |
-| Solana 8004 | Solana | `9pQ6KMwu6etMjCambUo3BRPFbuzDcyTY9q1rgAWNXUBS` |
-| AgentProof | Avalanche C-Chain | #1718 |
-| Virtuals ACP | — | #17681 (4 agent-to-agent offerings) |
-| Phantom Portal | — | `be4a0179...407` |
+| Registry       | Chain             | ID                                             |
+| -------------- | ----------------- | ---------------------------------------------- |
+| ERC-8004       | Ethereum          | #25045                                         |
+| ERC-8004       | Base              | #17483                                         |
+| ERC-8004       | Anet              | #18709                                         |
+| Solana 8004    | Solana            | `9pQ6KMwu6etMjCambUo3BRPFbuzDcyTY9q1rgAWNXUBS` |
+| AgentProof     | Avalanche C-Chain | #1718                                          |
+| Virtuals ACP   | —                 | #17681 (4 agent-to-agent offerings)            |
+| Phantom Portal | —                 | `be4a0179...407`                               |
 
 **Job Verification Receipts (JVR):**
 
 Every operation in the Buzz pipeline generates a JVR containing:
+
 - **SHA-256 hash** of the operation payload
 - **AAB-XXXXXX verification code** for audit trails
 - **Telegram notification** pushed to the operator channel
@@ -153,13 +155,14 @@ Buzz runs its entire multi-agent system through Bankr's LLM gateway — and does
 
 **LLM architecture:**
 
-| Component | Model | Cost |
-|-----------|-------|------|
-| 5 sub-agents (Scanner, Safety, Wallet, Social, Quality) | bankr/gpt-5-nano | FREE |
-| 4 persona agents (MiroFish clusters) | bankr/gpt-5-nano | FREE |
-| 1 strategic orchestrator | MiniMax M2.5 via Bankr | ~$48/mo |
+| Component                                               | Model                  | Cost    |
+| ------------------------------------------------------- | ---------------------- | ------- |
+| 5 sub-agents (Scanner, Safety, Wallet, Social, Quality) | bankr/gpt-5-nano       | FREE    |
+| 4 persona agents (MiroFish clusters)                    | bankr/gpt-5-nano       | FREE    |
+| 1 strategic orchestrator                                | MiniMax M2.5 via Bankr | ~$48/mo |
 
 **Bankr integrations:**
+
 - **Partner API** — Autonomous token deployment on Base chain
 - **x402 USDC micropayments** — On-chain API access via HTTP 402 payment protocol
 - **Cost Guard** — Hard daily cap of $10/day with automatic throttling. If spend approaches the limit, non-critical agents pause. Critical scoring continues on the free tier.
@@ -205,6 +208,6 @@ These are not bolt-on features. Remove any one of them and the product breaks. T
 
 ---
 
-*"I don't have a CS degree. I have a knife, a cutting board, and Claude. The kitchen taught me mise en place — everything in its place before you cook. Buzz is mise en place for exchange listings."*
+_"I don't have a CS degree. I have a knife, a cutting board, and Claude. The kitchen taught me mise en place — everything in its place before you cook. Buzz is mise en place for exchange listings."_
 
 — Ogie, Jakarta, 2026

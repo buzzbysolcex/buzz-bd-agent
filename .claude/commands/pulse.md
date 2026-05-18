@@ -8,6 +8,7 @@ description: Check PULSE engine heartbeat status. Load-aware tick loop, observat
 KAIROS architecture heartbeat monitor.
 
 ## Usage
+
 ```
 /pulse status                   # Current tick rate + CPU load
 /pulse log                      # Recent observation entries
@@ -15,6 +16,7 @@ KAIROS architecture heartbeat monitor.
 ```
 
 ## PULSE Engine
+
 - Normal tick: 60s interval
 - Under load (CPU >80%): 300s interval
 - Every tick: decision logged to observation_log

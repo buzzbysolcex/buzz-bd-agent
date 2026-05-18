@@ -1,17 +1,20 @@
 # Outreach Engine
 
 ## Pattern
+
 Email-first autonomous outreach. Wired into v9 reactive flow via event bus.
 Twitter DM is DEAD (403, closed DMs, wrong contacts — proven over 42-day sprint).
 Gmail OAuth on buzzbysolcex@gmail.com is the primary channel.
 
 ## Channel Priority (proven by 42-day sprint history)
+
 1. Email (Gmail OAuth) — ~60% success, FULL automation
 2. Telegram group — ~30% success, SEMI automation
 3. Twitter public reply — ~15% success, postReply works
 4. Twitter DM — ~2% success, DEAD — never invest further
 
 ## Flow
+
 1. Event bus emits 'token.hot' (score 85+)
 2. BD Agent receives via mailbox → starts BD Screening (7 phases)
 3. Phase 4 triggers contact discovery via gsd-browser + dev-browser
@@ -25,6 +28,7 @@ Gmail OAuth on buzzbysolcex@gmail.com is the primary channel.
 11. Event emitted: 'outreach.sent'
 
 ## Limits
+
 - Max 10 outreach emails per day (spam prevention)
 - Template-only for auto sends — no LLM-generated bodies
 - 3-source contact verification before sending
@@ -32,10 +36,12 @@ Gmail OAuth on buzzbysolcex@gmail.com is the primary channel.
 - NEVER send without CC to Ogie — non-negotiable
 
 ## Tables
+
 - outreach_queue: email send queue with status tracking
 - outreach_contacts: discovered contacts per token
 
 ## Danger Zones
+
 - Gmail OAuth refresh token is permanent but check for 401 errors
 - Don't send to personal emails (only team@, info@, contact@, hello@)
 - Rate limit: 500 Gmail sends/day (10/day self-imposed limit)

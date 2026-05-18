@@ -1,48 +1,87 @@
-const { Client, GatewayIntentBits, ChannelType, PermissionFlagsBits } = require('discord.js');
+const {
+  Client,
+  GatewayIntentBits,
+  ChannelType,
+  PermissionFlagsBits,
+} = require("discord.js");
 
 const TOKEN = process.env.DISCORD_BOT_TOKEN;
-const GUILD_ID = '1487647664647438476';
+const GUILD_ID = "1487647664647438476";
 
 const CATEGORIES = [
   {
-    name: 'GETTING STARTED',
+    name: "GETTING STARTED",
     channels: [
-      { name: 'welcome', topic: 'Welcome to BuzzBD — Zero-Human Exchange Listing Company' },
-      { name: 'how-it-works', topic: 'Scoring methodology — 11 factors, dual-gate, tri-source verification' },
-      { name: 'faq', topic: 'Common questions about BuzzBD and SolCex listings' }
-    ]
+      {
+        name: "welcome",
+        topic: "Welcome to BuzzBD — Zero-Human Exchange Listing Company",
+      },
+      {
+        name: "how-it-works",
+        topic:
+          "Scoring methodology — 11 factors, dual-gate, tri-source verification",
+      },
+      {
+        name: "faq",
+        topic: "Common questions about BuzzBD and SolCex listings",
+      },
+    ],
   },
   {
-    name: 'LISTING INTELLIGENCE',
+    name: "LISTING INTELLIGENCE",
     channels: [
-      { name: 'weekly-report', topic: 'Sunday Listing Intelligence Report — published weekly' },
-      { name: 'token-scores', topic: 'Live token scores from the Buzz scoring engine' },
-      { name: 'market-intel', topic: 'AIBTC signal approvals and market observations' }
-    ]
+      {
+        name: "weekly-report",
+        topic: "Sunday Listing Intelligence Report — published weekly",
+      },
+      {
+        name: "token-scores",
+        topic: "Live token scores from the Buzz scoring engine",
+      },
+      {
+        name: "market-intel",
+        topic: "AIBTC signal approvals and market observations",
+      },
+    ],
   },
   {
-    name: 'FOR PROJECTS',
+    name: "FOR PROJECTS",
     channels: [
-      { name: 'get-listed', topic: 'Apply for a SolCex listing — DM @BuzzBySolCex or post here' },
-      { name: 'listing-status', topic: 'Public tracking of listing pipeline status' },
-      { name: 'support', topic: 'Project support and scoring questions' }
-    ]
+      {
+        name: "get-listed",
+        topic: "Apply for a SolCex listing — DM @BuzzBySolCex or post here",
+      },
+      {
+        name: "listing-status",
+        topic: "Public tracking of listing pipeline status",
+      },
+      { name: "support", topic: "Project support and scoring questions" },
+    ],
   },
   {
-    name: 'FOR BUILDERS',
+    name: "FOR BUILDERS",
     channels: [
-      { name: 'els-1', topic: 'ELS-1 Listing Standard discussion — buzzbd.ai/proposal' },
-      { name: 'api-access', topic: 'Buzz API documentation and integration help' },
-      { name: 'open-source', topic: 'Open-source contributions and Agent Skills' }
-    ]
+      {
+        name: "els-1",
+        topic: "ELS-1 Listing Standard discussion — buzzbd.ai/proposal",
+      },
+      {
+        name: "api-access",
+        topic: "Buzz API documentation and integration help",
+      },
+      {
+        name: "open-source",
+        topic: "Open-source contributions and Agent Skills",
+      },
+    ],
   },
   {
-    name: 'COMMUNITY',
+    name: "COMMUNITY",
     channels: [
-      { name: 'announcements', topic: 'Deployments, milestones, partnerships' }
+      { name: "announcements", topic: "Deployments, milestones, partnerships" },
       // #general already exists
-    ]
-  }
+    ],
+  },
 ];
 
 const WELCOME_MSG = `🐝 **Welcome to BuzzBD**
@@ -84,7 +123,7 @@ The Listing Protocol is on-chain. Service starts now.
 
 async function setup() {
   const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
   });
 
   await client.login(TOKEN);
@@ -100,9 +139,9 @@ async function setup() {
     console.log(`\nCreating category: ${cat.name}`);
     const category = await guild.channels.create({
       name: cat.name,
-      type: ChannelType.GuildCategory
+      type: ChannelType.GuildCategory,
     });
-    created.push({ type: 'category', name: cat.name, id: category.id });
+    created.push({ type: "category", name: cat.name, id: category.id });
 
     // Create channels under category
     for (const ch of cat.channels) {
@@ -111,20 +150,25 @@ async function setup() {
         name: ch.name,
         type: ChannelType.GuildText,
         parent: category.id,
-        topic: ch.topic
+        topic: ch.topic,
       });
-      created.push({ type: 'channel', name: ch.name, id: channel.id, category: cat.name });
+      created.push({
+        type: "channel",
+        name: ch.name,
+        id: channel.id,
+        category: cat.name,
+      });
 
       // Post messages to specific channels
-      if (ch.name === 'welcome') {
+      if (ch.name === "welcome") {
         await channel.send(WELCOME_MSG);
-        console.log('    Posted welcome message');
+        console.log("    Posted welcome message");
       }
-      if (ch.name === 'announcements') {
+      if (ch.name === "announcements") {
         await channel.send(ANNOUNCE_MSG);
-        console.log('    Posted announcement');
+        console.log("    Posted announcement");
       }
-      if (ch.name === 'how-it-works') {
+      if (ch.name === "how-it-works") {
         await channel.send(`**Buzz Scoring Methodology**
 
 Every token is evaluated across **11 factors in 4 categories** (max 100 points):
@@ -143,9 +187,9 @@ Every token is evaluated across **11 factors in 4 categories** (max 100 points):
 **Current pipeline:** 256 tokens tracked. 0 score HOT (85+). That's honest scoring working correctly.
 
 Learn more: https://buzzbd.ai/report`);
-        console.log('    Posted methodology');
+        console.log("    Posted methodology");
       }
-      if (ch.name === 'get-listed') {
+      if (ch.name === "get-listed") {
         await channel.send(`**Get Your Token Scored**
 
 Post your token's contract address and chain here. Buzz will score it across 29 intel sources with tri-source verification.
@@ -163,14 +207,17 @@ Post your token's contract address and chain here. Buzz will score it across 29 
 • If you score 70+, we initiate the listing conversation
 
 *No paid fast-tracks. No relationship overrides. Same engine for every token.*`);
-        console.log('    Posted get-listed info');
+        console.log("    Posted get-listed info");
       }
     }
   }
 
-  console.log('\n=== SETUP COMPLETE ===');
+  console.log("\n=== SETUP COMPLETE ===");
   console.log(JSON.stringify(created, null, 2));
   client.destroy();
 }
 
-setup().catch(err => { console.error('Setup failed:', err.message); process.exit(1); });
+setup().catch((err) => {
+  console.error("Setup failed:", err.message);
+  process.exit(1);
+});

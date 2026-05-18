@@ -1,6 +1,9 @@
 # URGENT: REPORT + TWEET CORRECTION — DO NOT PUBLISH OLD SCORES
+
 ## This supersedes the buzzbd.ai/report.html already built
+
 ## Intercept tweet drafts before they go to War Room with wrong numbers
+
 ## Day 39 | Bismillah 🤲
 
 ---
@@ -8,6 +11,7 @@
 ## SITUATION
 
 Buzz has ALREADY built buzzbd.ai/report.html (7.8KB, live via Caddy) with:
+
 - Top 12 tokens at OLD scores (BANANAS31 at 95, etc.)
 - 195 tokens, 93 scored, 10 HOT, 25 sources, 5 chains
 - "DM @BuzzBySolCex" CTA
@@ -15,6 +19,7 @@ Buzz has ALREADY built buzzbd.ai/report.html (7.8KB, live via Caddy) with:
 Buzz is NOW drafting the 5-tweet Twitter thread and Moltbook post.
 
 **PROBLEM:** The Cowork audit + Jupiter scrape INVALIDATED several top scores:
+
 - BANANAS31: 95 → ~55 (99% FDV gap + Token Sniffer 0/100)
 - wkeyDAO2: 88 → ~30 (5 Go+ issues, 3.99% sell tax)
 - VELO: 95 → ~70 (TS 0/100, audit contradiction)
@@ -31,6 +36,7 @@ Anyone who checks DexTools will see BANANAS31 is a $1.37M token, not $137M.
 The report page is already live. It needs these corrections:
 
 ### 1A: Update Header Stats
+
 ```
 OLD: 195 tokens, 93 scored, 10 HOT, 25 sources, 5 chains
 NEW: 192 tokens, 93 scored, [CORRECTED HOT COUNT] HOT, 28 sources, 5 chains
@@ -42,6 +48,7 @@ Changes:
 ```
 
 ### 1B: Update Token Scores in the Top 12 Table
+
 ```
 REMOVE from Top 12:
 - EURC (stablecoin — auto-excluded)
@@ -61,6 +68,7 @@ ADD to Top 12 (if scoring supports):
 ```
 
 ### 1C: Add New Sections to Report
+
 ```
 ADD — "FDV Gap Analysis" section:
 Show circulating MCap vs FDV for each token.
@@ -87,6 +95,7 @@ UPDATE — Pipeline stats footer:
 ```
 
 ### 1D: Add PIPPIN Validation Case Study
+
 ```
 ADD section: "Methodology Validated"
 "PIPPIN scored 85/100 in our pipeline — clean audits, $54M MCap,
@@ -104,6 +113,7 @@ This is the credibility anchor for the entire report.
 Buzz is drafting the 5-tweet thread RIGHT NOW. Intercept and use these corrected drafts:
 
 ### Tweet 1 (Hook — the correction IS the story):
+
 ```
 🔬 BUZZ LISTING INTELLIGENCE REPORT — Week 1
 
@@ -116,6 +126,7 @@ Here's what real data looks like 🧵👇
 ```
 
 ### Tweet 2 (The FDV revelation):
+
 ```
 The biggest finding: FDV ≠ Market Cap.
 
@@ -129,6 +140,7 @@ your data is fantasy.
 ```
 
 ### Tweet 3 (Methodology + PIPPIN validation):
+
 ```
 Our tri-source verification:
 1️⃣ DexScreener (pairs, security audits)
@@ -142,6 +154,7 @@ now listed on @SolCex_Exchange. Methodology validated ✅
 ```
 
 ### Tweet 4 (Top tokens + honesty):
+
 ```
 After corrections, our Top 5 (honest scores):
 
@@ -156,6 +169,7 @@ breakdown: buzzbd.ai/report
 ```
 
 ### Tweet 5 (CTA):
+
 ```
 Want your token scored?
 
@@ -170,6 +184,7 @@ What token should we add? 👇
 ```
 
 ### Self-Reply (Algo boost):
+
 ```
 The full methodology:
 - 5 scoring dimensions (Safety, Wallet, Technical, Social, Composite)
@@ -189,35 +204,37 @@ Today is Friday = engagement day on m/general.
 But the Sunday report is the bigger content play for m/crypto.
 
 ### Friday Moltbook (m/general — post today if API works):
+
 Use Option B from earlier: "114,239 Agents on ERC-8004" post.
 This is unaffected by the scoring corrections.
 
 ### Sunday Moltbook (m/crypto — post with report):
+
 ```
 Title: "We Audited Our Own Token Scores — Here's What Tri-Source Verification Revealed"
 
 Submolt: m/crypto
 
 Content:
-"Last week we scored 192 tokens across 5 chains using 12 autonomous 
+"Last week we scored 192 tokens across 5 chains using 12 autonomous
 AI agents. Our pipeline ranked BANANAS31 at 95/100 — top of the list.
 
 Then we ran a tri-source audit: DexScreener + DexTools + Jupiter.
 
-The result was humbling. BANANAS31's real circulating market cap is 
-$1.37M, not $137M. CoinMarketCap shows FDV as market cap for tokens 
+The result was humbling. BANANAS31's real circulating market cap is
+$1.37M, not $137M. CoinMarketCap shows FDV as market cap for tokens
 with low circulating supply. Token Sniffer scored it 0/100.
 
-After corrections: 95 → ~55. Three tokens removed entirely (stablecoin, 
-ghost token, phantom token). Two 'lost' Solana tokens recovered via 
+After corrections: 95 → ~55. Three tokens removed entirely (stablecoin,
+ghost token, phantom token). Two 'lost' Solana tokens recovered via
 Jupiter that DexScreener and DexTools couldn't find.
 
-The validation: PIPPIN scored 85/100 in our pipeline before corrections. 
-It's now listed on SolCex Exchange. The methodology works — when the 
+The validation: PIPPIN scored 85/100 in our pipeline before corrections.
+It's now listed on SolCex Exchange. The methodology works — when the
 data sources are accurate.
 
-Key lesson for agent builders: if you're pulling market cap from a 
-single source, you're operating on fantasy data. Circulating supply 
+Key lesson for agent builders: if you're pulling market cap from a
+single source, you're operating on fantasy data. Circulating supply
 verification isn't optional.
 
 New permanent rules:
@@ -258,6 +275,7 @@ DO NOT signal on:
 ## TASK 5: UPDATE CLAUDE.md CONTEXT
 
 Add to morning briefing checklist:
+
 ```
 REPORT STATUS:
 - buzzbd.ai/report.html: [needs correction / corrected / live]

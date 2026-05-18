@@ -5,7 +5,7 @@
 
 const migrations = [
   {
-    name: '021_technical_analysis',
+    name: "021_technical_analysis",
     sql: `
       CREATE TABLE IF NOT EXISTS technical_analysis_cache (
         token_address TEXT NOT NULL,

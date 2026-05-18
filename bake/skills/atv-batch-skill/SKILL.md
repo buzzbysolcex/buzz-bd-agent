@@ -14,7 +14,7 @@ Resolve Ethereum addresses to ENS names and social profiles in batches of up to 
 **Endpoint:** `GET /api/ens/batch-resolve`  
 **Base URL:** `https://api.web3identity.com`  
 **Performance:** Sub-second for cached data, typically under 2 seconds for cold lookups  
-**Pricing:** 100 addresses/day free, $0.01 per batch after  
+**Pricing:** 100 addresses/day free, $0.01 per batch after
 
 ---
 
@@ -27,17 +27,19 @@ Resolve Ethereum addresses to ENS names and social profiles in batches of up to 
 
 **Query Parameters:**
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `addresses` | string | Yes | Comma-separated Ethereum addresses (1-100) |
-| `include` | string | No | Fields to resolve: `name,avatar,twitter,github,discord,email,url` |
+| Parameter   | Type   | Required | Description                                                       |
+| ----------- | ------ | -------- | ----------------------------------------------------------------- |
+| `addresses` | string | Yes      | Comma-separated Ethereum addresses (1-100)                        |
+| `include`   | string | No       | Fields to resolve: `name,avatar,twitter,github,discord,email,url` |
 
 **Example:**
+
 ```
 GET /api/ens/batch-resolve?addresses=0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045,0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5
 ```
 
 **With include parameter:**
+
 ```
 GET /api/ens/batch-resolve?addresses=0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045&include=name,twitter,github
 ```
@@ -57,6 +59,7 @@ GET /api/ens/batch-resolve?addresses=0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045&
 **Default (if omitted):** `name,avatar,twitter,github,discord`
 
 **Examples:**
+
 ```bash
 # Just ENS name, no social data
 ?include=name
@@ -123,13 +126,13 @@ GET /api/ens/batch-resolve?addresses=0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045&
 
 ### Address Object Fields
 
-| Field | Type | Always Present? | Description |
-|-------|------|-----------------|-------------|
-| `address` | string | Yes | Ethereum address (lowercase) |
-| `ens` | string \| null | Yes | ENS name (null if no ENS or `name` not in include) |
-| `social` | object | Yes | Social profiles (empty object if none) |
-| `avatar` | string | No | Avatar URL (only if ENS exists AND `avatar` in include) |
-| `error` | string | No | Error message (only if resolution failed) |
+| Field     | Type           | Always Present? | Description                                             |
+| --------- | -------------- | --------------- | ------------------------------------------------------- |
+| `address` | string         | Yes             | Ethereum address (lowercase)                            |
+| `ens`     | string \| null | Yes             | ENS name (null if no ENS or `name` not in include)      |
+| `social`  | object         | Yes             | Social profiles (empty object if none)                  |
+| `avatar`  | string         | No              | Avatar URL (only if ENS exists AND `avatar` in include) |
+| `error`   | string         | No              | Error message (only if resolution failed)               |
 
 ### Social Object
 
@@ -137,41 +140,41 @@ Contains only the fields requested via `include` parameter:
 
 ```json
 {
-  "twitter": "VitalikButerin",    // If include=twitter or default
-  "github": "vbuterin",            // If include=github or default
-  "discord": "vitalik#1234",       // If include=discord or default
-  "email": "v@ethereum.org",       // If include=email (rarely set)
-  "url": "https://vitalik.ca"      // If include=url (rarely set)
+  "twitter": "VitalikButerin", // If include=twitter or default
+  "github": "vbuterin", // If include=github or default
+  "discord": "vitalik#1234", // If include=discord or default
+  "email": "v@ethereum.org", // If include=email (rarely set)
+  "url": "https://vitalik.ca" // If include=url (rarely set)
 }
 ```
 
 ### Metadata Object
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `total` | number | Total addresses in request |
-| `resolved` | number | Addresses with ENS names found |
-| `failed` | number | Addresses that failed to resolve |
-| `noEns` | number | Valid addresses with no ENS |
-| `cacheHits` | number | Lookups served from cache |
-| `cacheMisses` | number | Lookups fetched from RPC |
-| `cacheHitRate` | string | Cache efficiency percentage |
-| `processingTimeMs` | number | Total processing time |
-| `phase` | number | Implementation phase (always 2) |
-| `usage` | object | Free tier usage information |
-| `recommendation` | string | Performance tip (if batch > 50) |
-| `warning` | string | Performance warning (if time > 10s) |
+| Field              | Type   | Description                         |
+| ------------------ | ------ | ----------------------------------- |
+| `total`            | number | Total addresses in request          |
+| `resolved`         | number | Addresses with ENS names found      |
+| `failed`           | number | Addresses that failed to resolve    |
+| `noEns`            | number | Valid addresses with no ENS         |
+| `cacheHits`        | number | Lookups served from cache           |
+| `cacheMisses`      | number | Lookups fetched from RPC            |
+| `cacheHitRate`     | string | Cache efficiency percentage         |
+| `processingTimeMs` | number | Total processing time               |
+| `phase`            | number | Implementation phase (always 2)     |
+| `usage`            | object | Free tier usage information         |
+| `recommendation`   | string | Performance tip (if batch > 50)     |
+| `warning`          | string | Performance warning (if time > 10s) |
 
 ### Usage Object
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `tier` | string | `"free"` or `"paid"` |
-| `addressesUsed` | number | Addresses consumed in this request |
-| `totalToday` | number | Total addresses used today |
-| `limit` | number | Daily limit (100 for free tier) |
-| `remaining` | number | Addresses remaining today |
-| `resetsAt` | string | ISO timestamp of next reset (00:00 UTC) |
+| Field           | Type   | Description                             |
+| --------------- | ------ | --------------------------------------- |
+| `tier`          | string | `"free"` or `"paid"`                    |
+| `addressesUsed` | number | Addresses consumed in this request      |
+| `totalToday`    | number | Total addresses used today              |
+| `limit`         | number | Daily limit (100 for free tier)         |
+| `remaining`     | number | Addresses remaining today               |
+| `resetsAt`      | string | ISO timestamp of next reset (00:00 UTC) |
 
 ---
 
@@ -190,15 +193,15 @@ All errors return HTTP status code + JSON body with:
 
 ### Common Errors
 
-| HTTP | Code | Example Message | Fix |
-|------|------|-----------------|-----|
-| 400 | `ERROR` | "Query parameter 'addresses' is required" | Add addresses parameter |
-| 400 | `ERROR` | "Invalid Ethereum addresses: 0xinvalid" | Use valid 0x addresses |
-| 400 | `ERROR` | "Maximum 100 addresses allowed per request. Requested: 150" | Reduce batch size |
-| 402 | `PAYMENT_REQUIRED` | "Free tier limit exceeded..." | Use x402 payment |
-| 429 | `RATE_LIMITED` | "Rate limit exceeded" | Slow down requests |
-| 404 | `NOT_FOUND` | "Endpoint not found" | Check URL |
-| 503 | `SERVICE_UNAVAILABLE` | "Upstream service unavailable" | Retry later |
+| HTTP | Code                  | Example Message                                             | Fix                     |
+| ---- | --------------------- | ----------------------------------------------------------- | ----------------------- |
+| 400  | `ERROR`               | "Query parameter 'addresses' is required"                   | Add addresses parameter |
+| 400  | `ERROR`               | "Invalid Ethereum addresses: 0xinvalid"                     | Use valid 0x addresses  |
+| 400  | `ERROR`               | "Maximum 100 addresses allowed per request. Requested: 150" | Reduce batch size       |
+| 402  | `PAYMENT_REQUIRED`    | "Free tier limit exceeded..."                               | Use x402 payment        |
+| 429  | `RATE_LIMITED`        | "Rate limit exceeded"                                       | Slow down requests      |
+| 404  | `NOT_FOUND`           | "Endpoint not found"                                        | Check URL               |
+| 503  | `SERVICE_UNAVAILABLE` | "Upstream service unavailable"                              | Retry later             |
 
 **Note:** Most validation errors return generic `ERROR` code for security. Only specific codes like `PAYMENT_REQUIRED`, `RATE_LIMITED`, `NOT_FOUND` are returned as-is.
 
@@ -208,39 +211,43 @@ All errors return HTTP status code + JSON body with:
 
 **Daily Quota:** 100 addresses per day (not requests - total addresses resolved)  
 **Rate Limit:** 10 requests per minute  
-**Resets:** Daily at 00:00 UTC  
+**Resets:** Daily at 00:00 UTC
 
 ### Understanding the Counting System
 
 **IMPORTANT:** Free tier quota and payment use different counting:
 
-| Metric | Free Tier Quota | Payment |
-|--------|----------------|---------|
-| **Counts** | Total addresses resolved | HTTP requests (batches) |
-| **Limit** | 100 addresses/day | No limit (pay per request) |
-| **Price** | Free | $0.01 per request |
+| Metric     | Free Tier Quota          | Payment                    |
+| ---------- | ------------------------ | -------------------------- |
+| **Counts** | Total addresses resolved | HTTP requests (batches)    |
+| **Limit**  | 100 addresses/day        | No limit (pay per request) |
+| **Price**  | Free                     | $0.01 per request          |
 
 **Examples:**
 
 **Scenario A:** 10 requests × 10 addresses each
+
 - **Requests:** 10 HTTP calls
 - **Addresses used:** 100 total
 - **Free tier:** Uses entire daily quota (100 addresses)
 - **Cost:** $0.00 (all covered by free tier)
 
 **Scenario B:** 20 requests × 10 addresses each
+
 - **Requests:** 20 HTTP calls
 - **Addresses used:** 200 total
 - **Free tier:** Covers first 100 addresses (~first 10 requests)
 - **Cost:** Remaining 10 requests × $0.01 = $0.10
 
 **Scenario C:** 2 requests × 50 addresses each
+
 - **Requests:** 2 HTTP calls
 - **Addresses used:** 100 total
 - **Free tier:** Uses entire daily quota
 - **Cost:** $0.00
 
 **Scenario D:** 30 requests × 50 addresses each
+
 - **Requests:** 30 HTTP calls
 - **Addresses used:** 1,500 total
 - **Free tier:** Covers first 100 addresses (~first 2 requests)
@@ -278,6 +285,7 @@ All errors return HTTP status code + JSON body with:
 ```
 
 **Payment Details:**
+
 - **Price:** $0.01 USD per batch (flat fee, any batch size)
 - **Method:** x402 payment via CDP facilitator
 - **Network:** Base (Chain ID 8453)
@@ -291,18 +299,18 @@ All errors return HTTP status code + JSON body with:
 ### Basic JavaScript Example
 
 ```javascript
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE = 'https://api.web3identity.com';
+const API_BASE = "https://api.web3identity.com";
 
 async function resolveAddresses(addresses) {
   try {
     const response = await axios.get(`${API_BASE}/api/ens/batch-resolve`, {
       params: {
-        addresses: addresses.join(','),
+        addresses: addresses.join(","),
         // Using defaults: name,avatar,twitter,github,discord
       },
-      timeout: 10000
+      timeout: 10000,
     });
 
     // Parse results
@@ -313,15 +321,14 @@ async function resolveAddresses(addresses) {
         twitter: item.social?.twitter || null,
         github: item.social?.github || null,
         discord: item.social?.discord || null,
-        avatar: item.avatar  // undefined if not present, which is fine
+        avatar: item.avatar, // undefined if not present, which is fine
       };
     }
 
     return results;
-
   } catch (error) {
     if (error.response?.status === 402) {
-      console.log('Payment required:', error.response.data.payment);
+      console.log("Payment required:", error.response.data.payment);
       // Handle x402 payment flow via CDP facilitator
     }
     throw error;
@@ -330,8 +337,8 @@ async function resolveAddresses(addresses) {
 
 // Usage
 const deployers = [
-  '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',
-  '0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5'
+  "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+  "0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5",
 ];
 
 const identities = await resolveAddresses(deployers);
@@ -344,9 +351,9 @@ console.log(identities);
 // Only resolve ENS names + Twitter (faster, smaller response)
 const response = await axios.get(`${API_BASE}/api/ens/batch-resolve`, {
   params: {
-    addresses: addresses.join(','),
-    include: 'name,twitter'  // Minimal set
-  }
+    addresses: addresses.join(","),
+    include: "name,twitter", // Minimal set
+  },
 });
 ```
 
@@ -360,18 +367,18 @@ async function safeResolve(addresses) {
     if (error.response?.status === 402) {
       // Free tier exhausted - decide: wait or pay
       const resetTime = error.response.data.freeTier?.resetsAt;
-      console.log('Free tier exhausted. Resets at:', resetTime);
+      console.log("Free tier exhausted. Resets at:", resetTime);
       return null;
     }
-    
+
     if (error.response?.status === 429) {
       // Rate limited - wait and retry
-      await new Promise(resolve => setTimeout(resolve, 60000));
+      await new Promise((resolve) => setTimeout(resolve, 60000));
       return await resolveAddresses(addresses);
     }
-    
+
     // Other errors - log and continue
-    console.error('Resolution failed:', error.message);
+    console.error("Resolution failed:", error.message);
     return null;
   }
 }
@@ -383,11 +390,11 @@ async function safeResolve(addresses) {
 
 ### Batch Sizes
 
-| Size | Use Case | Expected Latency | Recommendation |
-|------|----------|------------------|----------------|
-| 1-20 | Real-time | 50-300ms | ✅ Optimal for user-facing |
-| 21-50 | Background | 300-800ms | ✅ Good balance |
-| 51-100 | Bulk | 800-2000ms | ⚠️ May be slow, API may add `recommendation` field |
+| Size   | Use Case   | Expected Latency | Recommendation                                     |
+| ------ | ---------- | ---------------- | -------------------------------------------------- |
+| 1-20   | Real-time  | 50-300ms         | ✅ Optimal for user-facing                         |
+| 21-50  | Background | 300-800ms        | ✅ Good balance                                    |
+| 51-100 | Bulk       | 800-2000ms       | ⚠️ May be slow, API may add `recommendation` field |
 
 **Performance Warning:** Batches over 50 addresses receive a `metadata.recommendation` field suggesting smaller batches.
 
@@ -409,18 +416,18 @@ For Buzz BD Agent's token deployer scoring:
 async function enrichTokenDeployers(deployerAddresses) {
   // Use minimal fields for speed
   const response = await axios.get(
-    'https://api.web3identity.com/api/ens/batch-resolve',
+    "https://api.web3identity.com/api/ens/batch-resolve",
     {
       params: {
-        addresses: deployerAddresses.join(','),
-        include: 'name,twitter,github'  // Just what we need
-      }
-    }
+        addresses: deployerAddresses.join(","),
+        include: "name,twitter,github", // Just what we need
+      },
+    },
   );
 
   // Calculate identity bonus for scoring
   let identityBonus = 0;
-  
+
   for (const item of response.data.addresses) {
     if (item.ens && (item.social?.twitter || item.social?.github)) {
       // Verified identity: ENS + social proof
@@ -431,12 +438,13 @@ async function enrichTokenDeployers(deployerAddresses) {
     }
     // No ENS: 0 points
   }
-  
+
   return identityBonus;
 }
 ```
 
 **Buzz's Economics:**
+
 - Baseline: 20-30 calls/day × 10-50 addresses = 200-1,500 addresses/day
 - Free tier: 100 addresses/day (covers ~2-10 requests depending on batch size)
 - Cost after free tier: $0.10-$0.28/day ($3.00-$8.40/month)
@@ -449,9 +457,9 @@ async function enrichTokenDeployers(deployerAddresses) {
 
 ```javascript
 const TEST_ADDRESSES = {
-  vitalik: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045',  // vitalik.eth
-  nick: '0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5',     // nick.eth
-  none: '0x0000000000000000000000000000000000000000'      // No ENS
+  vitalik: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", // vitalik.eth
+  nick: "0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5", // nick.eth
+  none: "0x0000000000000000000000000000000000000000", // No ENS
 };
 ```
 
@@ -504,6 +512,7 @@ curl "https://api.web3identity.com/api/ens/batch-resolve?addresses=0xd8dA6BF2696
 
 **Current Version:** 2.0  
 **Versioning Strategy:** Breaking changes will be announced via:
+
 - Email notification (if contact provided)
 - Changelog updates
 - Minimum 30 days notice for breaking changes
@@ -514,7 +523,8 @@ curl "https://api.web3identity.com/api/ens/batch-resolve?addresses=0xd8dA6BF2696
 
 **Source:** ENS data is sourced from Ethereum mainnet via public RPC providers and cached for performance.
 
-**Accuracy Disclaimer:** 
+**Accuracy Disclaimer:**
+
 - ENS names are resolved from blockchain state and may be subject to network delays
 - Social profiles (Twitter, GitHub, Discord) are self-reported by ENS name owners
 - We do not verify the authenticity of social profile claims
@@ -571,6 +581,7 @@ We reserve the right to modify, suspend, or discontinue the API, any features, p
 **ACCEPTABLE USE**
 
 You agree NOT to:
+
 - Use the API in any manner that could damage, disable, overburden, or impair our infrastructure
 - Attempt to bypass rate limits or authentication mechanisms
 - Scrape or systematically download large portions of ENS data for competing services
@@ -619,9 +630,9 @@ Privacy Policy: https://technorealism.com/privacy.html
 
 **CONTACT**
 
-- **Legal inquiries:** support@web3identity.com  
-- **Privacy inquiries:** support@web3identity.com  
-- **Technical support:** support@web3identity.com  
+- **Legal inquiries:** support@web3identity.com
+- **Privacy inquiries:** support@web3identity.com
+- **Technical support:** support@web3identity.com
 - **Telegram:** @GaryPalmerJr
 
 ---
@@ -629,6 +640,7 @@ Privacy Policy: https://technorealism.com/privacy.html
 ## Changelog
 
 ### Version 2.0 (2026-02-17)
+
 - Complete rewrite based on actual API testing
 - Fixed `include` parameter documentation
 - Fixed error response formats

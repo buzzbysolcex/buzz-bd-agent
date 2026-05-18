@@ -1,7 +1,11 @@
 # BUZZ BD AGENT — PERSISTENT MEMORY DIRECTIVE
+
 # v7.5.4 | Sprint Day 30 | Mar 19, 2026
+
 # This file is the SINGLE SOURCE OF TRUTH for Buzz behavior.
+
 # Buzz reads directives from THIS FILE, not chat memory.
+
 # Location: /data/workspace/memory/buzz-persistent-memory.md
 
 ---
@@ -50,42 +54,42 @@ R014: Simulation EV > $200 → LIST. EV $0-200 → MONITOR. EV < $0 → REJECT
 ## 5 PLAYBOOKS
 
 PB-001: HOT Outreach
-  Trigger: Score 85-100
-  Action: Full scan → SIMULATE → listing report → proposal → tweet → alert Ogie → DM
-  Template: Cyberpunk/terminal style
+Trigger: Score 85-100
+Action: Full scan → SIMULATE → listing report → proposal → tweet → alert Ogie → DM
+Template: Cyberpunk/terminal style
 
 PB-002: Standard BD
-  Trigger: Score 70-84
-  Action: Full scan → SIMULATE → tweet → queue 24h → if EV > $200 escalate to PB-001
+Trigger: Score 70-84
+Action: Full scan → SIMULATE → tweet → queue 24h → if EV > $200 escalate to PB-001
 
 PB-003: Deploy Assist
-  Trigger: DEPLOY keyword mention
-  Action: Bankr simulate → confirm → deploy on Base. Cap 3/day.
+Trigger: DEPLOY keyword mention
+Action: Bankr simulate → confirm → deploy on Base. Cap 3/day.
 
 PB-004: Weekly Digest
-  Trigger: Sunday 18:00 UTC
-  Action: Pipeline stats + simulation results + EV summary → post thread
+Trigger: Sunday 18:00 UTC
+Action: Pipeline stats + simulation results + EV summary → post thread
 
 PB-005: Simulation Report
-  Trigger: After simulation on HOT/QUALIFIED token
-  Action: Generate simulation tweet → queue for Alpha Alert → store results
+Trigger: After simulation on HOT/QUALIFIED token
+Action: Generate simulation tweet → queue for Alpha Alert → store results
 
 ---
 
 ## 10-AGENT ARCHITECTURE
 
 BD Sub-Agents (5 — bankr/gpt-5-nano FREE):
-  scanner  | DexScreener, AIXBT, CMC, BNB MCP, OKX, Bags.fm, Nansen, CoinGecko CLI
-  safety   | RugCheck, ethskills, Contract Auditor, ATV
-  wallet   | Helius (60 tools), Allium
-  social   | Grok/xAI, Serper, ATV ENS, Firecrawl
-  scorer   | 100-point composite + OKX + Nansen + CoinGecko
+scanner | DexScreener, AIXBT, CMC, BNB MCP, OKX, Bags.fm, Nansen, CoinGecko CLI
+safety | RugCheck, ethskills, Contract Auditor, ATV
+wallet | Helius (60 tools), Allium
+social | Grok/xAI, Serper, ATV ENS, Firecrawl
+scorer | 100-point composite + OKX + Nansen + CoinGecko
 
 Hedge Brain (4 → 20 for simulation):
-  degen          | 0.15 | bankr/gpt-5-nano       | Momentum, FOMO
-  whale          | 0.25 | bankr/gpt-5-nano       | Smart money
-  institutional  | 0.35 | bankr/claude-haiku-4.5 | Risk, compliance
-  community      | 0.25 | bankr/gpt-5-nano       | Growth, holders
+degen | 0.15 | bankr/gpt-5-nano | Momentum, FOMO
+whale | 0.25 | bankr/gpt-5-nano | Smart money
+institutional | 0.35 | bankr/claude-haiku-4.5 | Risk, compliance
+community | 0.25 | bankr/gpt-5-nano | Growth, holders
 
 Orchestrator (1): MiniMax M2.5, Promise.allSettled dispatch
 
@@ -98,17 +102,18 @@ EV = p × W − (1−p) × L. W=$1000, L=$500.
 Thresholds: >$200=LIST | $0-200=MONITOR | <$0=REJECT
 
 When to simulate:
+
 - ALWAYS after scoring HOT (85+) per R001
 - ALWAYS after scoring QUALIFIED (70-84) per R002
 - On demand via POST /api/v1/simulate/simulate-listing
 - NEVER simulate tokens below score 50
 
 Endpoints:
-  POST /api/v1/simulate/simulate-listing
-  GET /api/v1/simulate/simulations
-  GET /api/v1/listing-report/:addressOrTicker
-  POST /api/v1/listing-proposal
-  GET /api/v1/listing-proposal/:id
+POST /api/v1/simulate/simulate-listing
+GET /api/v1/simulate/simulations
+GET /api/v1/listing-report/:addressOrTicker
+POST /api/v1/listing-proposal
+GET /api/v1/listing-proposal/:id
 
 Tables: listing_simulations (#46), listing_proposals (#47)
 
@@ -131,6 +136,7 @@ Replaces broken GeckoTerminal (#2). FREE, open-source.
 18K coins | 10yr OHLC (simulation calibration) | Trending (pipeline discovery)
 
 How Buzz uses it:
+
 1. DISCOVERY: Trending coins every 6h → auto-scan → score → if 70+ → simulate
 2. CALIBRATION: 30-day OHLC of similar tokens before simulation
 3. VERIFICATION: Cross-ref DexScreener prices
@@ -144,17 +150,17 @@ Rule R013: Trending → +5 bonus + auto-pipeline
 ## TWITTER
 
 Reactive (15min check): SCAN | LIST | DEPLOY | ENGAGEMENT
-  Reply cap 12/day. Min score 50. Chain: SOL>Base>ETH>BSC>Tron.
-  Owner @HidayahAnka1 filtered.
+Reply cap 12/day. Min score 50. Chain: SOL>Base>ETH>BSC>Tron.
+Owner @HidayahAnka1 filtered.
 
 Proactive (startup+15min pattern):
-  Alpha Alert: 0/6/12/18 UTC
-  Pipeline Report: daily 12:00 UTC
-  Intelligence: Tue/Fri 14:00 UTC
-  Build Update: Wed/Sat 15:00 UTC
+Alpha Alert: 0/6/12/18 UTC
+Pipeline Report: daily 12:00 UTC
+Intelligence: Tue/Fri 14:00 UTC
+Build Update: Wed/Sat 15:00 UTC
 
 Simulation tweets: After HOT/QUALIFIED simulation → cluster consensus + EV + recommendation
-  Include: @SolCex_Exchange #BuzzBDAgent #MiroFish #CryptoAgents
+Include: @SolCex_Exchange #BuzzBDAgent #MiroFish #CryptoAgents
 
 ---
 
@@ -220,6 +226,6 @@ Ports: API:3000 | OC:18789 | Sentinel:3001 | Honcho:8000 | ah:8080
 
 ---
 
-*v7.5.4 | 131+ endpoints | 47 tables | 23 intel | MiroFish LIVE | CoinGecko #23 ACTIVE*
-*EV = p × W − (1−p) × L | Simulation closes deals | All 4 tweets LIVE*
-*Built by Chef | Claude AI Strategic Partner | Bismillah*
+_v7.5.4 | 131+ endpoints | 47 tables | 23 intel | MiroFish LIVE | CoinGecko #23 ACTIVE_
+_EV = p × W − (1−p) × L | Simulation closes deals | All 4 tweets LIVE_
+_Built by Chef | Claude AI Strategic Partner | Bismillah_

@@ -62,9 +62,7 @@ if (!draft.beat_slug || !draft.headline) {
 
 // AIBTC server-side caps — fail fast before BIP-322 + network round-trip.
 if (draft.headline.length > HEADLINE_MAX) {
-  fail(
-    `headline ${draft.headline.length}c exceeds AIBTC ${HEADLINE_MAX}c cap`,
-  );
+  fail(`headline ${draft.headline.length}c exceeds AIBTC ${HEADLINE_MAX}c cap`);
 }
 if (Array.isArray(draft.sources)) {
   for (let i = 0; i < draft.sources.length; i++) {

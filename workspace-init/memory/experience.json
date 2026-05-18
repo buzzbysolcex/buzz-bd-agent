@@ -2,11 +2,11 @@
   "version": "5.3.8",
   "lastUpdated": "",
   "sourceHitRate": {
-    "dexscreener": {"scans": 0, "qualifiedFound": 0, "hitRate": 0},
-    "aixbt": {"scans": 0, "qualifiedFound": 0, "hitRate": 0},
-    "coingecko": {"scans": 0, "qualifiedFound": 0, "hitRate": 0},
-    "dsBoosts": {"scans": 0, "qualifiedFound": 0, "hitRate": 0},
-    "clawpump": {"scans": 0, "qualifiedFound": 0, "hitRate": 0}
+    "dexscreener": { "scans": 0, "qualifiedFound": 0, "hitRate": 0 },
+    "aixbt": { "scans": 0, "qualifiedFound": 0, "hitRate": 0 },
+    "coingecko": { "scans": 0, "qualifiedFound": 0, "hitRate": 0 },
+    "dsBoosts": { "scans": 0, "qualifiedFound": 0, "hitRate": 0 },
+    "clawpump": { "scans": 0, "qualifiedFound": 0, "hitRate": 0 }
   },
   "safetyPatterns": {
     "rugsCaught": [],

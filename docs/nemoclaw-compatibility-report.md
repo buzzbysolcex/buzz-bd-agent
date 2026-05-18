@@ -11,6 +11,7 @@
 NemoClaw is NVIDIA's open-source agentic container orchestration stack, announced at GTC 2026 on March 16, 2026. It is an OpenClaw plugin that packages the NVIDIA OpenShell runtime with enterprise-grade security, privacy, and policy controls for running autonomous AI agents ("claws") in sandboxed environments.
 
 Key characteristics:
+
 - **Enterprise wrapper around OpenClaw** — a distribution that ships with the components a security-conscious organization needs before letting autonomous agents near production systems.
 - **CLI-driven orchestration** — the `nemoclaw` CLI orchestrates the full stack: OpenShell gateway, sandbox, inference provider, and network policy.
 - **Sandboxed execution** — each agent runs inside an isolated OpenShell sandbox (effectively a Docker container with kernel-level cgroup isolation and YAML-based policy controls).
@@ -18,6 +19,7 @@ Key characteristics:
 - **Early-stage** — NVIDIA states NemoClaw should not yet be considered production-ready.
 
 Sources:
+
 - [GitHub - NVIDIA/NemoClaw](https://github.com/NVIDIA/NemoClaw)
 - [NVIDIA Announces NemoClaw](https://nvidianews.nvidia.com/news/nvidia-announces-nemoclaw)
 - [VentureBeat: NemoClaw brings security, scale to the agent platform](https://venturebeat.com/technology/nvidia-lets-its-claws-out-nemoclaw-brings-security-scale-to-the-agent)
@@ -27,15 +29,15 @@ Sources:
 
 ## 2. How NemoClaw Relates to OpenClaw / agentic.hosting (ah)
 
-| Aspect | OpenClaw (standalone) | NemoClaw | ah (agentic.hosting) |
-|--------|----------------------|----------|---------------------|
-| Runtime | OpenClaw gateway | OpenShell (wraps OpenClaw) | OpenClaw gateway |
-| Orchestration | Manual / CLI | `nemoclaw` CLI + blueprints | `ah` CLI |
-| Sandbox | Basic Docker | OpenShell kernel-level isolation | Docker containers |
-| Security | User-managed | YAML policy-based guardrails | User-managed |
-| Inference | User-configured | Nemotron models + NVIDIA cloud routing | User-configured |
+| Aspect        | OpenClaw (standalone) | NemoClaw                               | ah (agentic.hosting) |
+| ------------- | --------------------- | -------------------------------------- | -------------------- |
+| Runtime       | OpenClaw gateway      | OpenShell (wraps OpenClaw)             | OpenClaw gateway     |
+| Orchestration | Manual / CLI          | `nemoclaw` CLI + blueprints            | `ah` CLI             |
+| Sandbox       | Basic Docker          | OpenShell kernel-level isolation       | Docker containers    |
+| Security      | User-managed          | YAML policy-based guardrails           | User-managed         |
+| Inference     | User-configured       | Nemotron models + NVIDIA cloud routing | User-configured      |
 
-NemoClaw sits *above* OpenClaw — it installs and manages OpenClaw via OpenShell. Our current setup uses `ah` (agentic.hosting) to manage OpenClaw containers on Akash Network. NemoClaw would be an alternative management layer that replaces `ah` as the orchestrator, not a complementary tool that runs alongside it.
+NemoClaw sits _above_ OpenClaw — it installs and manages OpenClaw via OpenShell. Our current setup uses `ah` (agentic.hosting) to manage OpenClaw containers on Akash Network. NemoClaw would be an alternative management layer that replaces `ah` as the orchestrator, not a complementary tool that runs alongside it.
 
 ---
 
@@ -43,21 +45,21 @@ NemoClaw sits *above* OpenClaw — it installs and manages OpenClaw via OpenShel
 
 ### Ports Used by Our Stack (Buzz BD Agent)
 
-| Port | Service | Notes |
-|------|---------|-------|
-| 3000 | Buzz REST API (Express) | `BUZZ_API_PORT` env var |
-| 3001 | Not currently used | Reserved for future use |
-| 8000 | Not currently used | — |
-| 8080 | Not currently used | — |
-| 18789 | OpenClaw gateway | `OPENCLAW_PORT` env var |
+| Port  | Service                 | Notes                   |
+| ----- | ----------------------- | ----------------------- |
+| 3000  | Buzz REST API (Express) | `BUZZ_API_PORT` env var |
+| 3001  | Not currently used      | Reserved for future use |
+| 8000  | Not currently used      | —                       |
+| 8080  | Not currently used      | —                       |
+| 18789 | OpenClaw gateway        | `OPENCLAW_PORT` env var |
 
 ### Ports Used by NemoClaw / OpenShell
 
-| Port | Service | Notes |
-|------|---------|-------|
-| 18789 | OpenShell gateway (default) | Same as OpenClaw default |
-| 3000 | Configurable alternative | Can be set via `openclaw config set gateway.port 3000` |
-| 8080 | Configurable alternative | Can be set via `openclaw config set gateway.port 8080` |
+| Port  | Service                     | Notes                                                  |
+| ----- | --------------------------- | ------------------------------------------------------ |
+| 18789 | OpenShell gateway (default) | Same as OpenClaw default                               |
+| 3000  | Configurable alternative    | Can be set via `openclaw config set gateway.port 3000` |
+| 8080  | Configurable alternative    | Can be set via `openclaw config set gateway.port 8080` |
 
 ### Conflict Assessment
 
@@ -80,6 +82,7 @@ NemoClaw uses Docker under the hood but manages containers through its own orche
 ### Does NemoClaw Create Its Own Containers?
 
 **Yes.** When you run the NemoClaw launch command, it:
+
 1. Creates an OpenShell sandbox (an isolated Docker container).
 2. Configures the gateway, inference providers, sandbox, and network policy based on a versioned blueprint.
 3. Manages the full container lifecycle through the `nemoclaw` CLI.
@@ -91,19 +94,20 @@ This means NemoClaw would create and manage its own set of Docker containers, po
 ## 5. Compatibility Assessment with ah-Managed Containers
 
 ### Current Setup
+
 - Buzz runs on Akash Network via `ah` (agentic.hosting)
 - `ah` manages OpenClaw containers, deploys to Akash providers
 - Our Docker image: `ghcr.io/buzzbysolcex/buzz-bd-agent:v6.3.6`
 
 ### Compatibility Issues
 
-| Issue | Severity | Detail |
-|-------|----------|--------|
-| Gateway port conflict (18789) | Critical | Both `ah` and NemoClaw want to run an OpenClaw/OpenShell gateway on 18789 |
-| Docker daemon config changes | High | NemoClaw requires `default-cgroupns-mode: host`, which may affect all containers |
-| Container network namespace | High | NemoClaw's `network: none` default and `network_mode: service:` pattern may conflict with ah networking |
-| k3s embedded in Docker | Medium | OpenShell embeds k3s, adding resource overhead and potential conflicts |
-| Inference routing | Medium | NemoClaw routes inference through NVIDIA cloud by default; our stack uses MiniMax + Bankr |
+| Issue                         | Severity | Detail                                                                                                  |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| Gateway port conflict (18789) | Critical | Both `ah` and NemoClaw want to run an OpenClaw/OpenShell gateway on 18789                               |
+| Docker daemon config changes  | High     | NemoClaw requires `default-cgroupns-mode: host`, which may affect all containers                        |
+| Container network namespace   | High     | NemoClaw's `network: none` default and `network_mode: service:` pattern may conflict with ah networking |
+| k3s embedded in Docker        | Medium   | OpenShell embeds k3s, adding resource overhead and potential conflicts                                  |
+| Inference routing             | Medium   | NemoClaw routes inference through NVIDIA cloud by default; our stack uses MiniMax + Bankr               |
 
 ### Verdict
 
@@ -151,14 +155,14 @@ If we wanted to adopt NemoClaw, the migration would look like:
 
 ### Risk Level: HIGH
 
-| Risk | Impact | Likelihood |
-|------|--------|------------|
-| Port 18789 conflict kills existing OpenClaw gateway | Service outage | Very High |
-| Docker daemon config change (`cgroupns-mode: host`) affects all running containers | Service degradation | High |
-| NemoClaw installer modifies Node.js installation | API server instability | Medium |
-| k3s embedded in Docker consumes shared resources | Performance degradation | Medium |
-| Network policy (default `network: none`) blocks Buzz API traffic | Complete outage | Medium |
-| NemoClaw overwrites OpenClaw config files | Config corruption | Medium |
+| Risk                                                                               | Impact                  | Likelihood |
+| ---------------------------------------------------------------------------------- | ----------------------- | ---------- |
+| Port 18789 conflict kills existing OpenClaw gateway                                | Service outage          | Very High  |
+| Docker daemon config change (`cgroupns-mode: host`) affects all running containers | Service degradation     | High       |
+| NemoClaw installer modifies Node.js installation                                   | API server instability  | Medium     |
+| k3s embedded in Docker consumes shared resources                                   | Performance degradation | Medium     |
+| Network policy (default `network: none`) blocks Buzz API traffic                   | Complete outage         | Medium     |
+| NemoClaw overwrites OpenClaw config files                                          | Config corruption       | Medium     |
 
 ### Recommendation
 
@@ -184,4 +188,4 @@ Since this is a research-only report based on public sources (we did not downloa
 
 ---
 
-*Report generated from public sources only. No installer scripts were downloaded or executed.*
+_Report generated from public sources only. No installer scripts were downloaded or executed._

@@ -1,12 +1,15 @@
 # Content Filter Skill
 
 ## Description
+
 Content moderation and filtering for Buzz BD Agent outreach. Ensures tweets, threads, and Telegram messages comply with platform rules and SolCex brand guidelines.
 
 ## Trigger
+
 Keywords: content filter, moderate, check content, review message
 
 ## Rules
+
 1. No financial advice or price predictions
 2. No guaranteed returns language
 3. No @mentions in Twitter replies (API tier restriction)
@@ -18,11 +21,13 @@ Keywords: content filter, moderate, check content, review message
 9. Hashtags: always include #SolCex + relevant chain/project tags
 
 ## Brand Voice
+
 - Professional but approachable
 - Data-driven (always cite scores, metrics)
 - Cyberpunk/terminal aesthetic for scan reports
 - Gold coin style for SolCex official content
 
 ## Usage
+
 @buzz filter [message]
 @buzz review tweet [text]

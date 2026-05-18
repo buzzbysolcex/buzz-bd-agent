@@ -31,32 +31,33 @@ description: >
 
 ## QUICK REFERENCE
 
-| Field | Value |
-|-------|-------|
-| Brain | Claude Code Opus 4.6 (Pro Max unlimited, 24/7 tmux) |
-| Body | Buzz Docker localhost:3000 (ah-managed) |
-| Swarm | MiroFish Real Sim localhost:5000 (Flask Python sidecar) |
-| Server | Hetzner CPX62, 16 vCPU, 32GB RAM |
-| Cost | $43/mo server + ~$200/mo Pro Max + $10 Noah = ~$253/mo |
-| LLM burn | **$0/day** (qwen3:8b local + Pro Max unlimited) |
-| Endpoints | **~200+** |
-| Tables | **87** (was 81 — +3 shield V2, +2 wiki, +1 ground truth) |
-| Services | **27** (was 21) |
-| Rules | **18** in .claude/rules/ |
+| Field         | Value                                                          |
+| ------------- | -------------------------------------------------------------- |
+| Brain         | Claude Code Opus 4.6 (Pro Max unlimited, 24/7 tmux)            |
+| Body          | Buzz Docker localhost:3000 (ah-managed)                        |
+| Swarm         | MiroFish Real Sim localhost:5000 (Flask Python sidecar)        |
+| Server        | Hetzner CPX62, 16 vCPU, 32GB RAM                               |
+| Cost          | $43/mo server + ~$200/mo Pro Max + $10 Noah = ~$253/mo         |
+| LLM burn      | **$0/day** (qwen3:8b local + Pro Max unlimited)                |
+| Endpoints     | **~200+**                                                      |
+| Tables        | **87** (was 81 — +3 shield V2, +2 wiki, +1 ground truth)       |
+| Services      | **27** (was 21)                                                |
+| Rules         | **18** in .claude/rules/                                       |
 | Feature flags | **47** (was 31 — +3 shield V2, +1 wiki, +12 from v9.3 surpass) |
-| Intel Sources | **33** (OSV.dev = #33) |
-| Agents | 12 persistent in .claude/agents/ (DNA v3.0) |
-| Pipeline | **671+ tokens scored**, 0 HOT honest |
-| Contracts | 4 on Base + 1 on Solana |
-| Revenue | ~$192 (270K sats AIBTC) + 600 sats/query (Flying Whale) |
-| dApp | **plena-38072fcd-8.netlify.app** (BuzzShield Token Scanner) |
-| Wiki | **43 pages** (26 entities, 12 concepts, 5 synthesis) |
+| Intel Sources | **33** (OSV.dev = #33)                                         |
+| Agents        | 12 persistent in .claude/agents/ (DNA v3.0)                    |
+| Pipeline      | **671+ tokens scored**, 0 HOT honest                           |
+| Contracts     | 4 on Base + 1 on Solana                                        |
+| Revenue       | ~$192 (270K sats AIBTC) + 600 sats/query (Flying Whale)        |
+| dApp          | **plena-38072fcd-8.netlify.app** (BuzzShield Token Scanner)    |
+| Wiki          | **43 pages** (26 entities, 12 concepts, 5 synthesis)           |
 
 ---
 
 ## WHAT'S NEW IN v9.3 (Apr 5-10, 2026)
 
 ### BuzzShield V2.0 (commit 95c946b)
+
 - **Layer 1**: @stackone/defender prompt injection defense (F1=0.9079, two-tier ML)
 - **Layer 2**: OSV.dev supply chain scanning (Intel Source #33, nightly via autoDream)
 - **Layer 2b**: CycloneDX SBOM generation (npm sbom)
@@ -67,6 +68,7 @@ description: >
 - GET /shield/v2/status — standalone V2 layer status
 
 ### BuzzShield dApp (Netlify)
+
 - **LIVE**: plena-38072fcd-8.netlify.app
 - Built on Noah AI (zero frontend code written, prompt-engineered)
 - Cyberpunk SOC aesthetic, Buzz logo, v9.3 badge
@@ -77,6 +79,7 @@ description: >
 - scan_duration: ~120ms
 
 ### Karpathy LLM Wiki (commit 8b64e0a)
+
 - 43 seed pages (26 entities, 12 concepts, 5 synthesis)
 - wiki-manager.js: 550+ lines, 18 exports
 - Persistent: /data/buzz/persistent/wiki/ (Docker volume, survives reboots)
@@ -86,6 +89,7 @@ description: >
 - Flag: KARPATHY_WIKI=true
 
 ### Wallet Guard AION — Live Demo Complete
+
 - End-to-end: Buzz → AION → receipt → persist → War Room mirror
 - 12 receipts persisted (IDs 1-12) with counterfactual_summary, normalized, receipt_path
 - Decision diversity pending: all returned WARN (Aldo tuning AML policy bands)
@@ -93,6 +97,7 @@ description: >
 - Demo recorded: front-end + back-end + screen capture
 
 ### autoDream Evolution
+
 - Now 13 phases (was 9):
   - Phases 1-7: existing (compress, archive, VACUUM, scoring, tasks, mailbox, shield)
   - Phase 8: intel sync
@@ -105,11 +110,13 @@ description: >
 - First real hill-climb: 05:00 Jeddah Apr 10
 
 ### Moltbook Trust Level 1 (commit 1931b18)
+
 - Autonomous posting: max 2/day
 - Engagement: 3-5 comments/day
 - Priority targets: Micro Orb (147), Secret Condor (133), Clever Castle (126)
 
 ### Signal Factory
+
 - Streak Day 6, 4 signals filed Apr 9
 - Cooldown fix identified: cron slots need 3-min buffer (patch queued)
 - 30K sats earned overnight (brief inclusion, 9th total)
@@ -119,27 +126,27 @@ description: >
 
 ## ACTIVE AUDITIONS & COMPETITIONS
 
-| Item | Where | Status | Revenue potential |
-|------|-------|--------|-------------------|
-| **DRI Sales** | #439 | **Audition posted** | **100K sats/day (~$2,100/mo)** |
-| Beat Editor (AIBTC Network) | #433 | Audition posted | 175K sats/day |
-| Beat Editor (Bitcoin Macro) | #433 | Audition posted | 175K sats/day |
-| Colosseum Frontier | hackathon | Agent #3734, dApp demo ready | Prize pool |
-| Kite AI Global | hackathon | Jamal collab opened | Prize pool |
-| Alchemy Fund | applied | $20M Solana Fund | Up to $25K credits |
+| Item                        | Where     | Status                       | Revenue potential              |
+| --------------------------- | --------- | ---------------------------- | ------------------------------ |
+| **DRI Sales**               | #439      | **Audition posted**          | **100K sats/day (~$2,100/mo)** |
+| Beat Editor (AIBTC Network) | #433      | Audition posted              | 175K sats/day                  |
+| Beat Editor (Bitcoin Macro) | #433      | Audition posted              | 175K sats/day                  |
+| Colosseum Frontier          | hackathon | Agent #3734, dApp demo ready | Prize pool                     |
+| Kite AI Global              | hackathon | Jamal collab opened          | Prize pool                     |
+| Alchemy Fund                | applied   | $20M Solana Fund             | Up to $25K credits             |
 
 ---
 
 ## KEY RELATIONSHIPS (Updated Apr 10)
 
-| Contact | Status | Latest |
-|---------|--------|--------|
-| Aldo (CODÉ/AION) | **HOT — demo complete** | 12 receipts, decision diversity pending |
-| Jamal (Kite) | **WARM — collab opened** | Wallet reputation scoring + payment channels |
-| Noah AI (Sparsh, Chirag, Sayuj) | **ACTIVE — dApp built** | BuzzShield on Netlify |
-| Flying Whale | ACTIVE | 70/30 confirmed, Skill #110 |
-| Gary Palmer (ATV) | WARM | Identity API restored |
-| Ryan Gentry (x402) | HOT | Listed on 402 Index |
+| Contact                         | Status                   | Latest                                       |
+| ------------------------------- | ------------------------ | -------------------------------------------- |
+| Aldo (CODÉ/AION)                | **HOT — demo complete**  | 12 receipts, decision diversity pending      |
+| Jamal (Kite)                    | **WARM — collab opened** | Wallet reputation scoring + payment channels |
+| Noah AI (Sparsh, Chirag, Sayuj) | **ACTIVE — dApp built**  | BuzzShield on Netlify                        |
+| Flying Whale                    | ACTIVE                   | 70/30 confirmed, Skill #110                  |
+| Gary Palmer (ATV)               | WARM                     | Identity API restored                        |
+| Ryan Gentry (x402)              | HOT                      | Listed on 402 Index                          |
 
 ---
 
@@ -158,7 +165,7 @@ description: >
 
 ---
 
-*v9.3 | BuzzShield V2 + Wallet Guard Live + DRI Audition | 87 tables | 47 flags | 33 intel*
-*dApp: plena-38072fcd-8.netlify.app | Wiki: 43 pages | autoDream: 13 phases*
-*~$192 revenue | Day 6 streak | DRI Sales 100K sats/day audition live*
-*Built by a chef. Kitchen runs itself. Bismillah.* 🤲
+_v9.3 | BuzzShield V2 + Wallet Guard Live + DRI Audition | 87 tables | 47 flags | 33 intel_
+_dApp: plena-38072fcd-8.netlify.app | Wiki: 43 pages | autoDream: 13 phases_
+_~$192 revenue | Day 6 streak | DRI Sales 100K sats/day audition live_
+_Built by a chef. Kitchen runs itself. Bismillah._ 🤲

@@ -1,7 +1,9 @@
 ---
 paths: ["**/*"]
 ---
+
 # Execution Priority Rules (ALWAYS ACTIVE)
+
 - WAR ROOM DIRECTIVES FROM OGIE = HIGHEST PRIORITY. Always.
 - If Ogie sends a task, DROP whatever scheduled routine is running and execute it.
 - Priority order:

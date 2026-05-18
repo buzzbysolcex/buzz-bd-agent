@@ -25,7 +25,7 @@ function createMarket(tokenSymbol) {
     k: INITIAL_RESERVE * INITIAL_RESERVE,
     trades: [],
     round_prices: [],
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   };
 }
 
@@ -56,10 +56,10 @@ function getPrice(market) {
  */
 function agentTrade(market, agentId, agentType, direction, amount, meta = {}) {
   if (amount <= 0) {
-    return { success: false, reason: 'amount must be positive' };
+    return { success: false, reason: "amount must be positive" };
   }
-  if (direction !== 'YES' && direction !== 'NO') {
-    return { success: false, reason: 'direction must be YES or NO' };
+  if (direction !== "YES" && direction !== "NO") {
+    return { success: false, reason: "direction must be YES or NO" };
   }
 
   const priceBefore = getPrice(market);
@@ -67,7 +67,7 @@ function agentTrade(market, agentId, agentType, direction, amount, meta = {}) {
 
   let sharesReceived, effectivePrice;
 
-  if (direction === 'YES') {
+  if (direction === "YES") {
     // Mint complete sets, sell NO shares back to pool
     const newReserveNo = market.reserve_no + minted;
     const newReserveYes = market.k / newReserveNo;
@@ -99,7 +99,7 @@ function agentTrade(market, agentId, agentType, direction, amount, meta = {}) {
     price_after: priceAfter,
     reasoning: meta.reasoning || null,
     round: meta.round || 0,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 
   market.trades.push(trade);
@@ -115,22 +115,23 @@ function agentTrade(market, agentId, agentType, direction, amount, meta = {}) {
  */
 function getLLMSummary(market, round) {
   const llmTrades = market.trades.filter(
-    t => t.agent_type === 'llm' && t.round === round
+    (t) => t.agent_type === "llm" && t.round === round,
   );
 
-  const yesCount = llmTrades.filter(t => t.direction === 'YES').length;
-  const noCount = llmTrades.filter(t => t.direction === 'NO').length;
+  const yesCount = llmTrades.filter((t) => t.direction === "YES").length;
+  const noCount = llmTrades.filter((t) => t.direction === "NO").length;
   const totalLLM = yesCount + noCount;
 
-  const yesAmount = llmTrades.filter(t => t.direction === 'YES')
+  const yesAmount = llmTrades
+    .filter((t) => t.direction === "YES")
     .reduce((sum, t) => sum + t.amount, 0);
-  const noAmount = llmTrades.filter(t => t.direction === 'NO')
+  const noAmount = llmTrades
+    .filter((t) => t.direction === "NO")
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const majorityDirection = yesCount >= noCount ? 'YES' : 'NO';
-  const consensusStrength = totalLLM > 0
-    ? Math.max(yesCount, noCount) / totalLLM
-    : 0.5;
+  const majorityDirection = yesCount >= noCount ? "YES" : "NO";
+  const consensusStrength =
+    totalLLM > 0 ? Math.max(yesCount, noCount) / totalLLM : 0.5;
 
   return {
     round,
@@ -142,7 +143,7 @@ function getLLMSummary(market, round) {
     no_amount: noAmount,
     avg_amount: totalLLM > 0 ? (yesAmount + noAmount) / totalLLM : 0,
     majority_direction: majorityDirection,
-    consensus_strength: consensusStrength // 0.5 = split, 1.0 = unanimous
+    consensus_strength: consensusStrength, // 0.5 = split, 1.0 = unanimous
   };
 }
 
@@ -155,8 +156,8 @@ function recordRoundPrice(market, round) {
   market.round_prices.push({
     round,
     price: getPrice(market),
-    total_trades: market.trades.filter(t => t.round === round).length,
-    timestamp: new Date().toISOString()
+    total_trades: market.trades.filter((t) => t.round === round).length,
+    timestamp: new Date().toISOString(),
   });
 }
 
@@ -177,7 +178,7 @@ function settlePrediction(market) {
     reserve_yes: market.reserve_yes,
     reserve_no: market.reserve_no,
     trades: market.trades,
-    settled_at: new Date().toISOString()
+    settled_at: new Date().toISOString(),
   };
 }
 
@@ -188,5 +189,5 @@ module.exports = {
   getLLMSummary,
   recordRoundPrice,
   settlePrediction,
-  INITIAL_RESERVE
+  INITIAL_RESERVE,
 };

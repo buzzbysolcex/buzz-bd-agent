@@ -7,6 +7,7 @@
 # BATCH 1: TWITTER BRAIN — SERPER REAL SEARCH
 
 ## Problem
+
 - Grok x_search doesn't exist as a real-time Twitter search API
 - Grok chat generates fake/hallucinated tweet data
 - Twitter Brain scans return 0 results
@@ -20,23 +21,23 @@
 // In services/twitter-brain.js — replace grokSearch() with:
 
 async function serperTwitterSearch(keyword) {
-  const response = await fetch('https://google.serper.dev/search', {
-    method: 'POST',
+  const response = await fetch("https://google.serper.dev/search", {
+    method: "POST",
     headers: {
-      'X-API-Key': process.env.SERPER_API_KEY,
-      'Content-Type': 'application/json'
+      "X-API-Key": process.env.SERPER_API_KEY,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       q: `site:x.com "${keyword}"`,
       num: 10,
-      tbs: 'qdr:d' // last 24 hours
-    })
+      tbs: "qdr:d", // last 24 hours
+    }),
   });
-  
+
   const data = await response.json();
-  
+
   // Parse Google results for Twitter/X posts
-  return (data.organic || []).map(result => ({
+  return (data.organic || []).map((result) => ({
     url: result.link,
     title: result.title,
     snippet: result.snippet,
@@ -44,7 +45,7 @@ async function serperTwitterSearch(keyword) {
     handle: extractHandleFromUrl(result.link),
     // Extract contract addresses from snippet
     contracts: extractContracts(result.snippet),
-    source: 'serper'
+    source: "serper",
   }));
 }
 
@@ -67,27 +68,27 @@ function extractContracts(text) {
 ```javascript
 async function xApiSearch(keyword) {
   if (!process.env.X_API_BEARER_TOKEN) return [];
-  
+
   const query = encodeURIComponent(`"${keyword}" -is:retweet lang:en`);
   const response = await fetch(
     `https://api.x.com/2/tweets/search/recent?query=${query}&max_results=10&tweet.fields=author_id,created_at,public_metrics&expansions=author_id&user.fields=public_metrics,username`,
     {
       headers: {
-        'Authorization': `Bearer ${process.env.X_API_BEARER_TOKEN}`
-      }
-    }
+        Authorization: `Bearer ${process.env.X_API_BEARER_TOKEN}`,
+      },
+    },
   );
-  
+
   const data = await response.json();
-  
-  return (data.data || []).map(tweet => ({
+
+  return (data.data || []).map((tweet) => ({
     url: `https://x.com/i/status/${tweet.id}`,
     text: tweet.text,
     author_id: tweet.author_id,
     handle: findHandle(data.includes?.users, tweet.author_id),
     followers: findFollowers(data.includes?.users, tweet.author_id),
     contracts: extractContracts(tweet.text),
-    source: 'x_api'
+    source: "x_api",
   }));
 }
 ```
@@ -97,43 +98,43 @@ async function xApiSearch(keyword) {
 ```javascript
 async function twitterBrainScan(keywords) {
   const allResults = [];
-  
+
   for (const keyword of keywords) {
     // Tier 1: Serper (FREE)
     let results = await serperTwitterSearch(keyword);
-    
+
     // Tier 2: X API fallback if Serper returns nothing
     if (results.length === 0 && process.env.X_API_BEARER_TOKEN) {
       results = await xApiSearch(keyword);
     }
-    
+
     allResults.push(...results);
   }
-  
+
   // Dedup by URL
-  const unique = [...new Map(allResults.map(r => [r.url, r])).values()];
-  
+  const unique = [...new Map(allResults.map((r) => [r.url, r])).values()];
+
   // Filter: must have handle, prefer posts with contracts
-  const filtered = unique.filter(r => r.handle);
-  
+  const filtered = unique.filter((r) => r.handle);
+
   // Extract contracts and route to 9-agent pipeline
-  const withContracts = filtered.filter(r => r.contracts.length > 0);
-  
+  const withContracts = filtered.filter((r) => r.contracts.length > 0);
+
   for (const result of withContracts) {
     for (const contract of result.contracts) {
       // Route to existing pipeline
       await routeToPipeline(contract, result);
     }
   }
-  
+
   // Queue replies for results without contracts (manual review)
-  const withoutContracts = filtered.filter(r => r.contracts.length === 0);
-  
+  const withoutContracts = filtered.filter((r) => r.contracts.length === 0);
+
   return {
     rawResults: allResults.length,
     afterFilter: filtered.length,
     contractsFound: withContracts.length,
-    replyQueue: withoutContracts.length
+    replyQueue: withoutContracts.length,
   };
 }
 ```
@@ -272,7 +273,7 @@ docker exec buzz-production openclaw browser list-pages
 async function discoverWebMCPTools(url) {
   // Navigate to page
   await browser.navigate(url);
-  
+
   // Query registered tools via navigator.modelContext
   const tools = await browser.evaluate(`
     navigator.modelContext.tools.map(t => ({
@@ -281,12 +282,12 @@ async function discoverWebMCPTools(url) {
       inputSchema: t.inputSchema
     }))
   `);
-  
+
   return tools;
 }
 
 // Example: If DexScreener adds WebMCP
-const tools = await discoverWebMCPTools('https://dexscreener.com');
+const tools = await discoverWebMCPTools("https://dexscreener.com");
 // tools = [{ name: "search_token", inputSchema: {...} }, ...]
 // Buzz can now call search_token directly!
 ```
@@ -344,15 +345,15 @@ apt-get install -y google-chrome-stable
 
 # TIMELINE
 
-| Task | Time | Priority |
-|------|------|----------|
-| Batch 1: Twitter Brain Serper fix | 30 min (Claude Code) | HIGH — unlocks deal hunting |
-| Batch 2a: Chrome install on Hetzner | 15 min | MEDIUM |
-| Batch 2b: OpenClaw browser config | 30 min | MEDIUM |
-| Batch 2c: Test browser automation | 30 min | MEDIUM |
-| WebMCP SolCex implementation | Day 28+ | LOW (Chrome 146 not stable) |
+| Task                                | Time                 | Priority                    |
+| ----------------------------------- | -------------------- | --------------------------- |
+| Batch 1: Twitter Brain Serper fix   | 30 min (Claude Code) | HIGH — unlocks deal hunting |
+| Batch 2a: Chrome install on Hetzner | 15 min               | MEDIUM                      |
+| Batch 2b: OpenClaw browser config   | 30 min               | MEDIUM                      |
+| Batch 2c: Test browser automation   | 30 min               | MEDIUM                      |
+| WebMCP SolCex implementation        | Day 28+              | LOW (Chrome 146 not stable) |
 
 ---
 
-*v7.4.1 — Twitter Brain Fix + Chrome MCP*
-*Sprint Day 26 | March 15, 2026*
+_v7.4.1 — Twitter Brain Fix + Chrome MCP_
+_Sprint Day 26 | March 15, 2026_

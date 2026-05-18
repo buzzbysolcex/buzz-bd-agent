@@ -8,6 +8,7 @@ description: Manage email-first BD outreach. Queue, send, follow-up, and track r
 Email-first BD outreach with trust-gated automation.
 
 ## Usage
+
 ```
 /outreach queue TOKEN_NAME      # Queue initial outreach email
 /outreach status                # Show outreach queue (pending/sent/replied)
@@ -16,6 +17,7 @@ Email-first BD outreach with trust-gated automation.
 ```
 
 ## Rules (Permanent)
+
 - Max 10 emails/day (spam prevention)
 - CC always: dino@solcex.cc + ogie.solcexexchange@gmail.com
 - Template-only — no LLM-generated email bodies

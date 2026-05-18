@@ -298,8 +298,13 @@ const SEED_PATTERNS = [
   {
     pattern_id: "cicd_supply_chain_cascade",
     name: "CI/CD Supply Chain Cascade",
-    description: "Compromised security scanner (e.g., Trivy) steals maintainer credentials, publishes backdoored packages targeting wallet files. Detection: .pth files in site-packages, unexpected postinstall hooks",
-    instruction_sequence: JSON.stringify(["postinstall", "exfiltrate_env", "download_rat"]),
+    description:
+      "Compromised security scanner (e.g., Trivy) steals maintainer credentials, publishes backdoored packages targeting wallet files. Detection: .pth files in site-packages, unexpected postinstall hooks",
+    instruction_sequence: JSON.stringify([
+      "postinstall",
+      "exfiltrate_env",
+      "download_rat",
+    ]),
     severity: "critical",
     source: "datadog_litellm_teampcp",
     confirmed: 1,
@@ -308,8 +313,13 @@ const SEED_PATTERNS = [
   {
     pattern_id: "steganographic_payload",
     name: "Steganographic Payload Delivery",
-    description: "Malware hidden in WAV/audio files with XOR-encrypted payloads in audio frames. Downloaded during package installation from non-CDN IPs",
-    instruction_sequence: JSON.stringify(["download_media", "xor_decrypt", "execute"]),
+    description:
+      "Malware hidden in WAV/audio files with XOR-encrypted payloads in audio frames. Downloaded during package installation from non-CDN IPs",
+    instruction_sequence: JSON.stringify([
+      "download_media",
+      "xor_decrypt",
+      "execute",
+    ]),
     severity: "high",
     source: "datadog_telnyx_campaign",
     confirmed: 1,
@@ -318,8 +328,13 @@ const SEED_PATTERNS = [
   {
     pattern_id: "ai_oracle_manipulation",
     name: "AI Agent Oracle Manipulation",
-    description: "Manipulated price feeds targeting AI trading agents that trust oracle data without validation. $45M+ losses from agents with shared API keys (45.6% of deployments)",
-    instruction_sequence: JSON.stringify(["feed_manipulation", "autonomous_trade", "drain"]),
+    description:
+      "Manipulated price feeds targeting AI trading agents that trust oracle data without validation. $45M+ losses from agents with shared API keys (45.6% of deployments)",
+    instruction_sequence: JSON.stringify([
+      "feed_manipulation",
+      "autonomous_trade",
+      "drain",
+    ]),
     severity: "critical",
     source: "slowmist_2025_report",
     confirmed: 1,
@@ -328,8 +343,13 @@ const SEED_PATTERNS = [
   {
     pattern_id: "post_fusaka_address_poisoning",
     name: "Post-Fusaka Address Poisoning Surge",
-    description: "Ethereum Fusaka upgrade reduced fees 6x, poisoning attempts spiked from 628K to 3.4M/month (5.5x). $62M lost in two months. Zero-value/dust transfers from vanity addresses matching user history",
-    instruction_sequence: JSON.stringify(["dust_transfer", "vanity_address", "clipboard_hijack"]),
+    description:
+      "Ethereum Fusaka upgrade reduced fees 6x, poisoning attempts spiked from 628K to 3.4M/month (5.5x). $62M lost in two months. Zero-value/dust transfers from vanity addresses matching user history",
+    instruction_sequence: JSON.stringify([
+      "dust_transfer",
+      "vanity_address",
+      "clipboard_hijack",
+    ]),
     severity: "critical",
     source: "chainalysis_2026",
     confirmed: 1,
@@ -338,8 +358,13 @@ const SEED_PATTERNS = [
   {
     pattern_id: "permit2_approval_drain",
     name: "Permit2/increaseAllowance Approval Drain",
-    description: "Malicious signatures granting long-term token access without further approval. Single incidents up to $3.02M. Targets permit/increaseAllowance calls to unverified contracts",
-    instruction_sequence: JSON.stringify(["permit2_sign", "increaseAllowance", "transferFrom"]),
+    description:
+      "Malicious signatures granting long-term token access without further approval. Single incidents up to $3.02M. Targets permit/increaseAllowance calls to unverified contracts",
+    instruction_sequence: JSON.stringify([
+      "permit2_sign",
+      "increaseAllowance",
+      "transferFrom",
+    ]),
     severity: "critical",
     source: "immunefi_access_control",
     confirmed: 1,
@@ -348,8 +373,13 @@ const SEED_PATTERNS = [
   {
     pattern_id: "deepfake_founder_impersonation",
     name: "AI Deepfake Founder Impersonation",
-    description: "148% surge in AI-generated voice/video impersonation of project founders and exchange executives. Triggers urgent fund-transfer requests via video/voice",
-    instruction_sequence: JSON.stringify(["social_engineer", "deepfake_verify", "transfer"]),
+    description:
+      "148% surge in AI-generated voice/video impersonation of project founders and exchange executives. Triggers urgent fund-transfer requests via video/voice",
+    instruction_sequence: JSON.stringify([
+      "social_engineer",
+      "deepfake_verify",
+      "transfer",
+    ]),
     severity: "high",
     source: "chainalysis_2026_scams",
     confirmed: 1,
@@ -358,8 +388,13 @@ const SEED_PATTERNS = [
   {
     pattern_id: "autonomous_exploit_agent",
     name: "Autonomous AI Exploit Agent",
-    description: "Frontier LLMs exploiting 55-65% of known smart contract bugs autonomously at ~$0.50/attempt. 10:1 offense-defense cost asymmetry. Rapid sequential probing from single addresses",
-    instruction_sequence: JSON.stringify(["enumerate_entry_points", "exploit_attempt", "drain"]),
+    description:
+      "Frontier LLMs exploiting 55-65% of known smart contract bugs autonomously at ~$0.50/attempt. 10:1 offense-defense cost asymmetry. Rapid sequential probing from single addresses",
+    instruction_sequence: JSON.stringify([
+      "enumerate_entry_points",
+      "exploit_attempt",
+      "drain",
+    ]),
     severity: "critical",
     source: "academic_research_2026",
     confirmed: 1,
@@ -368,8 +403,13 @@ const SEED_PATTERNS = [
   {
     pattern_id: "physical_phishing_hardware",
     name: "Physical Phishing — Hardware Wallet Letters",
-    description: "Official-looking Ledger/Trezor letters with QR codes linking to phishing sites requesting seed phrases. Social engineering via postal mail",
-    instruction_sequence: JSON.stringify(["physical_letter", "qr_phishing", "seed_capture"]),
+    description:
+      "Official-looking Ledger/Trezor letters with QR codes linking to phishing sites requesting seed phrases. Social engineering via postal mail",
+    instruction_sequence: JSON.stringify([
+      "physical_letter",
+      "qr_phishing",
+      "seed_capture",
+    ]),
     severity: "medium",
     source: "slowmist_2025_report",
     confirmed: 1,

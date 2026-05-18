@@ -15,6 +15,7 @@
 ### Task 1: WalletAgent Skeleton + Constructor Tests
 
 **Files:**
+
 - Create: `src/agents/wallet_agent.py`
 - Create: `src/agents/tests/test_wallet_agent.py`
 
@@ -119,6 +120,7 @@ git commit -m "feat: add WalletAgent skeleton inheriting BaseAgent"
 ### Task 2: Input Validation
 
 **Files:**
+
 - Modify: `src/agents/tests/test_wallet_agent.py`
 - Modify: `src/agents/wallet_agent.py`
 
@@ -290,9 +292,10 @@ git commit -m "feat: add WalletAgent input validation and execute skeleton"
 
 ---
 
-### Task 3: _analyze_liquidity with DexScreener
+### Task 3: \_analyze_liquidity with DexScreener
 
 **Files:**
+
 - Modify: `src/agents/tests/test_wallet_agent.py`
 - Modify: `src/agents/wallet_agent.py`
 
@@ -409,7 +412,7 @@ class TestAnalyzeLiquidity:
 Run: `python3 -m pytest src/agents/tests/test_wallet_agent.py::TestAnalyzeLiquidity -v`
 Expected: FAIL — results don't match expected structure
 
-**Step 3: Implement _analyze_liquidity**
+**Step 3: Implement \_analyze_liquidity**
 
 Replace `_analyze_liquidity` in `src/agents/wallet_agent.py`:
 
@@ -506,9 +509,10 @@ git commit -m "feat: add _analyze_liquidity with DexScreener integration"
 
 ---
 
-### Task 4: _analyze_holders with Helius
+### Task 4: \_analyze_holders with Helius
 
 **Files:**
+
 - Modify: `src/agents/tests/test_wallet_agent.py`
 - Modify: `src/agents/wallet_agent.py`
 
@@ -644,7 +648,7 @@ class TestAnalyzeHolders:
 Run: `python3 -m pytest src/agents/tests/test_wallet_agent.py::TestAnalyzeHolders -v`
 Expected: FAIL — results don't match expected structure
 
-**Step 3: Implement _analyze_holders**
+**Step 3: Implement \_analyze_holders**
 
 Replace `_analyze_holders` in `src/agents/wallet_agent.py`:
 
@@ -760,9 +764,10 @@ git commit -m "feat: add _analyze_holders with Helius holder distribution"
 
 ---
 
-### Task 5: _analyze_deployer with Helius
+### Task 5: \_analyze_deployer with Helius
 
 **Files:**
+
 - Modify: `src/agents/tests/test_wallet_agent.py`
 - Modify: `src/agents/wallet_agent.py`
 
@@ -864,7 +869,7 @@ class TestAnalyzeDeployer:
 Run: `python3 -m pytest src/agents/tests/test_wallet_agent.py::TestAnalyzeDeployer -v`
 Expected: FAIL
 
-**Step 3: Implement _analyze_deployer and _fetch_allium**
+**Step 3: Implement \_analyze_deployer and \_fetch_allium**
 
 Replace `_analyze_deployer` in `src/agents/wallet_agent.py` and add `_fetch_allium`:
 
@@ -991,9 +996,10 @@ git commit -m "feat: add _analyze_deployer with Helius tx history and Allium stu
 
 ---
 
-### Task 6: _analyze_tx_flow
+### Task 6: \_analyze_tx_flow
 
 **Files:**
+
 - Modify: `src/agents/tests/test_wallet_agent.py`
 - Modify: `src/agents/wallet_agent.py`
 
@@ -1079,7 +1085,7 @@ class TestAnalyzeTxFlow:
 Run: `python3 -m pytest src/agents/tests/test_wallet_agent.py::TestAnalyzeTxFlow -v`
 Expected: FAIL
 
-**Step 3: Implement _analyze_tx_flow**
+**Step 3: Implement \_analyze_tx_flow**
 
 Replace `_analyze_tx_flow` in `src/agents/wallet_agent.py`:
 
@@ -1196,9 +1202,10 @@ git commit -m "feat: add _analyze_tx_flow with organic trading detection"
 
 ---
 
-### Task 7: _run_forensics
+### Task 7: \_run_forensics
 
 **Files:**
+
 - Modify: `src/agents/tests/test_wallet_agent.py`
 - Modify: `src/agents/wallet_agent.py`
 
@@ -1291,7 +1298,7 @@ class TestRunForensics:
 Run: `python3 -m pytest src/agents/tests/test_wallet_agent.py::TestRunForensics -v`
 Expected: FAIL
 
-**Step 3: Implement _run_forensics**
+**Step 3: Implement \_run_forensics**
 
 Replace `_run_forensics` in `src/agents/wallet_agent.py`:
 
@@ -1398,9 +1405,10 @@ git commit -m "feat: add _run_forensics with bundled wallet detection"
 
 ---
 
-### Task 8: _compute_verdict + Scoring Engine
+### Task 8: \_compute_verdict + Scoring Engine
 
 **Files:**
+
 - Modify: `src/agents/tests/test_wallet_agent.py`
 - Modify: `src/agents/wallet_agent.py`
 
@@ -1501,7 +1509,7 @@ class TestComputeVerdict:
 Run: `python3 -m pytest src/agents/tests/test_wallet_agent.py::TestComputeVerdict -v`
 Expected: FAIL — returns empty result from stub
 
-**Step 3: Implement _compute_verdict**
+**Step 3: Implement \_compute_verdict**
 
 Replace `_compute_verdict` in `src/agents/wallet_agent.py`:
 
@@ -1645,6 +1653,7 @@ git commit -m "feat: add _compute_verdict with scoring engine and weight redistr
 ### Task 9: Depth Gating Logic
 
 **Files:**
+
 - Modify: `src/agents/tests/test_wallet_agent.py`
 - Modify: `src/agents/wallet_agent.py`
 
@@ -1776,6 +1785,7 @@ git commit -m "test: add depth gating integration tests"
 ### Task 10: Auto-Escalation
 
 **Files:**
+
 - Modify: `src/agents/tests/test_wallet_agent.py`
 
 **Step 1: Write the failing tests**
@@ -1851,6 +1861,7 @@ git commit -m "test: add auto-escalation tests for quick-to-standard depth"
 ### Task 11: Full execute() Integration Tests
 
 **Files:**
+
 - Modify: `src/agents/tests/test_wallet_agent.py`
 
 **Step 1: Write the integration tests**
@@ -2003,6 +2014,7 @@ src/agents/
 ```
 
 `src/agents/wallet_agent.py` contains:
+
 - Constants: `DEXSCREENER_TOKENS_URL`, `HELIUS_API_BASE`, `ALLIUM_API_URL`, `VALID_DEPTHS`, `DEPTH_TIMEOUTS`, `MAX_*`, `LP_LOCK_ADDRESSES`, `BURN_ADDRESSES`
 - `WalletAgent(BaseAgent)` with:
   - `execute(params)` — orchestrates 5 analyses + verdict + auto-escalation

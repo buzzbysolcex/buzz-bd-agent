@@ -17,7 +17,7 @@ const url = `https://www.dextools.io/app/en/${CHAIN}/pair-explorer/${ADDRESS}`;
 await page.goto(url);
 
 // Wait for page to load (DexTools is JS-heavy)
-await new Promise(r => setTimeout(r, 5000));
+await new Promise((r) => setTimeout(r, 5000));
 
 // Extract data from the page
 const data = await page.evaluate(() => {
@@ -27,7 +27,9 @@ const data = await page.evaluate(() => {
   };
 
   const getAll = (sel) => {
-    return Array.from(document.querySelectorAll(sel)).map(el => el.textContent.trim());
+    return Array.from(document.querySelectorAll(sel)).map((el) =>
+      el.textContent.trim(),
+    );
   };
 
   // Get page text for keyword extraction
@@ -35,7 +37,7 @@ const data = await page.evaluate(() => {
 
   // Extract key metrics by searching for patterns in the page
   const extractMetric = (label) => {
-    const regex = new RegExp(label + '[:\\s]*([\\d,.]+[KMB]?)', 'i');
+    const regex = new RegExp(label + "[:\\s]*([\\d,.]+[KMB]?)", "i");
     const match = bodyText.match(regex);
     return match ? match[1] : null;
   };
@@ -55,36 +57,49 @@ const data = await page.evaluate(() => {
     volume24h: null,
     liquidity: null,
     // Raw extraction attempts
-    allNumbers: []
+    allNumbers: [],
   };
 
   // DexTools score
-  const scoreEl = document.querySelector('[class*="score"]') || document.querySelector('[class*="dext"]');
+  const scoreEl =
+    document.querySelector('[class*="score"]') ||
+    document.querySelector('[class*="dext"]');
   if (scoreEl) result.dextScore = scoreEl.textContent.trim();
 
   // Market cap variations
-  result.marketCap = extractMetric('Market Cap') || extractMetric('MCap') || extractMetric('Mkt Cap');
-  result.circulatingSupply = extractMetric('Circ.*Supply') || extractMetric('Circulating');
-  result.totalSupply = extractMetric('Total Supply');
-  result.holders = extractMetric('Holders') || extractMetric('Holder');
-  result.price = extractMetric('Price');
-  result.volume24h = extractMetric('Volume') || extractMetric('Vol');
-  result.liquidity = extractMetric('Liquidity') || extractMetric('Liq');
+  result.marketCap =
+    extractMetric("Market Cap") ||
+    extractMetric("MCap") ||
+    extractMetric("Mkt Cap");
+  result.circulatingSupply =
+    extractMetric("Circ.*Supply") || extractMetric("Circulating");
+  result.totalSupply = extractMetric("Total Supply");
+  result.holders = extractMetric("Holders") || extractMetric("Holder");
+  result.price = extractMetric("Price");
+  result.volume24h = extractMetric("Volume") || extractMetric("Vol");
+  result.liquidity = extractMetric("Liquidity") || extractMetric("Liq");
 
   // Pool creation date
-  const dateRegex = /(?:Created|Pool Created|Pair Created)[:\s]*(\d{4}[-/]\d{2}[-/]\d{2}|\w+ \d+,?\s*\d{4})/i;
+  const dateRegex =
+    /(?:Created|Pool Created|Pair Created)[:\s]*(\d{4}[-/]\d{2}[-/]\d{2}|\w+ \d+,?\s*\d{4})/i;
   const dateMatch = bodyText.match(dateRegex);
   if (dateMatch) result.poolCreated = dateMatch[1];
 
   // Grab any structured data cards
-  const cards = document.querySelectorAll('[class*="stat"], [class*="info"], [class*="metric"]');
-  cards.forEach(card => {
-    const label = card.querySelector('[class*="label"], [class*="title"], small, span:first-child');
-    const value = card.querySelector('[class*="value"], [class*="amount"], strong, span:last-child');
+  const cards = document.querySelectorAll(
+    '[class*="stat"], [class*="info"], [class*="metric"]',
+  );
+  cards.forEach((card) => {
+    const label = card.querySelector(
+      '[class*="label"], [class*="title"], small, span:first-child',
+    );
+    const value = card.querySelector(
+      '[class*="value"], [class*="amount"], strong, span:last-child',
+    );
     if (label && value && label !== value) {
       result.allNumbers.push({
         label: label.textContent.trim(),
-        value: value.textContent.trim()
+        value: value.textContent.trim(),
       });
     }
   });

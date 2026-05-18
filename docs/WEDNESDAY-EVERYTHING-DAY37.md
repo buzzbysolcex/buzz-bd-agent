@@ -1,4 +1,5 @@
 # WEDNESDAY DAY 37 — EVERYTHING IN ONE FILE
+
 ## Read this ONCE. Execute in order. Don't ask — DO.
 
 ---
@@ -15,20 +16,26 @@ STEP 6: Continue platform engagement (Moltbook comments, AIBTC heartbeat)
 ---
 
 # ═══════════════════════════════════════
+
 # STEP 1: AIBTC FIRST APPROVED SIGNAL
+
 # This is PRIORITY ZERO. Before any code.
+
 # $20 per approved signal. 11 signals = self-sustaining.
+
 # ═══════════════════════════════════════
 
 ## WHY THIS IS P0
 
 CONFIRMED from @aibtcdev:
+
 - Every approved signal earns $20 in BTC
 - Top leaderboard agents earn bonus sats weekly
 - Every source disclosed, every edit public
 - Daily briefs inscribed on Bitcoin permanently
 
 The math:
+
 - 11 approved signals = $220 = covers $210/mo infrastructure
 - 4 approved signals/day = $2,400/month
 - This is faster revenue than closing a listing deal
@@ -89,11 +96,11 @@ Post draft to War Room for approval before sending. 100 sats to send.
 ### AIBTC 30-Day Targets
 
 | Week | Signals Filed | Target Rank | BTC Earned |
-|------|--------------|-------------|------------|
-| 1 | 15+ approved | Top 20 | $300+ |
-| 2 | 35+ total | Top 10 | $700+ |
-| 3 | 50+ total | Top 5 | $1,000+ |
-| 4 | 75+ total | Top 3 | $1,500+ |
+| ---- | ------------- | ----------- | ---------- |
+| 1    | 15+ approved  | Top 20      | $300+      |
+| 2    | 35+ total     | Top 10      | $700+      |
+| 3    | 50+ total     | Top 5       | $1,000+    |
+| 4    | 75+ total     | Top 3       | $1,500+    |
 
 ### New AIBTC crons (add to Wednesday Express build):
 
@@ -115,11 +122,15 @@ Format: check if AIBTC requires their format (aibtcdev/skills) or accepts ours.
 ---
 
 # ═══════════════════════════════════════
+
 # STEP 2: TRIPLE CHECK PERMANENT FILES
+
 # Confirm before building. Report to War Room.
+
 # ═══════════════════════════════════════
 
 Read and confirm these files exist and are correct:
+
 1. /home/claude-code/buzz-workspace/PLATFORM-DOMINANCE-DIRECTIVE.md
 2. /home/claude-code/buzz-workspace/MOLTBOOK-CONTENT-STRATEGY.md
 3. /home/claude-code/buzz-workspace/docs/PLATFORM-DOMINANCE-DIRECTIVE.md
@@ -133,8 +144,11 @@ If ANY file is missing — restore FIRST.
 ---
 
 # ═══════════════════════════════════════
+
 # STEP 3: WEDNESDAY BUILD
+
 # 3 Agent Team phases. 12 teammates. ONE CI/CD push.
+
 # ═══════════════════════════════════════
 
 ## Day 36 Clean State (what was fixed yesterday)
@@ -159,6 +173,7 @@ If ANY file is missing — restore FIRST.
 ## PHASE 1 — INFRASTRUCTURE (Agent Team Alpha, 4 teammates)
 
 ### Teammate 1 "Express Cron"
+
 Build node-cron executor. Migrate ALL crons into Express:
 
 DATA COLLECTION (10): scan-dexscreener, dexscreener-trending, bitget-listings, pipeline-review, daily-summary, eod-report, weekly-digest, moltbook-engage, acp-bridge-monitor, twitter-health
@@ -202,48 +217,62 @@ Heartbeat frequencies:
 | Twitter crons | NO CHANGE |
 
 ### Teammate 2 "OpenClaw Killer"
+
 Remove OpenClaw entirely: entrypoint.sh, docker-compose.yml, Dockerfile. Remove keep-openclaw-dead cron. Free 810MB RAM. Kill port 18789.
 
 ### Teammate 3 "Pipeline Classifier + Dual Gate"
+
 Pipeline stage auto-classification: 85+ = hot, 70-84 = qualified, 50-69 = watch, <50 = skip.
 Dual-gate scoring (Mitchell GAP 26): fundamentals_score (Safety+Wallet+Technical, max 70) and market_score (Social+Scorer, max 30) computed independently. Both must clear 60% of max. Fundamentals < 42 = BLOCKED. Market < 18 = BLOCKED. Add dual_gate_pass boolean. Only dual_gate_pass = true advances.
 
 ### Teammate 4 "Plugin + Logging + Env"
+
 Update Telegram plugin to v0.0.4. Add logging to health-check and memory-watchdog (/home/claude-code/logs/, 7-day rotation). Add MOLTBOOK_API_KEY to Docker env. Verify credentials survive restart.
 
 ## PHASE 2 — CLOSE ORG CHART GAPS (Agent Team Bravo, 5 teammates)
 
 ### Teammate 1 "Scanner Gap"
+
 CoinGecko scanner cron (coingecko-cli.js exists, no trigger). Every 4h. Scanner: 2/4 → 3/4.
 
 ### Teammate 2 "BD Automation"
+
 85+ PROCEED tokens → auto-generate proposal → save to /api/v1/proposals/:address → alert War Room → track in pending-followups with due dates → 12h cron checks overdue. BD: 2/4 → 3/4.
 
 ### Teammate 3 "Safety Hardening"
+
 Triple Verifier standalone: /api/v1/verify/:address. 3 sources independently, pass/fail. Gate before simulation. Enforce dual-gate. Safety: 1/3 → 2/3.
 
 ### Teammate 4 "Social Intelligence + Ceiling/Floor"
+
 AIXBT momentum cron every 2h. Cross-reference with pipeline, auto-flag matches. Build listing_benchmarks table (Mitchell GAP 25): ceiling/floor per chain per month. +5 bonus for ceiling patterns, -5 for below floor.
 
 ### Teammate 5 "Finance Prep"
+
 Wallet balance monitor every 1h. Base: 0x2Dc03...aA9, SOL: 5iC7p...mo5Jp. Store in DB. Alert War Room on threshold drop. EXACT balances only, NEVER estimate.
 
 ## PHASE 3 — AUTONOMOUS WIRING (Agent Team Charlie, 3 teammates)
 
 ### Teammate 1 "Discovery to Score"
+
 Full autonomous flow: discover → dedup (GAP 9) → name resolve (GAP 1) → pump.fun detect (GAP 2) → auto-score every 30 min → dual-gate classify → log to pipeline.log. Zero LLM.
 
 ### Teammate 2 "Score to Opus + Quality Gate"
+
 70+ trigger → spawn 3-agent team: Agent A (data pull) → Agent B (MiroFish simulation) → Agent C (Quality Reviewer, must score 8/10 on accuracy/risk/actionability to PASS — Mitchell GAP 23). PASS → War Room verdict. 85+ PROCEED → auto-generate proposal. Alert batching (GAP 10): non-urgent every 30 min, P0 immediate.
 
 ### Teammate 3 "Outreach to Deal"
+
 PROCEED → proposal → DB + War Room → Ogie approves (ONLY human checkpoint) → track pending-followups 48h → auto-alert if overdue. Outcome tracking (GAP 3/22): 30-day timer → auto-check → feed calibration. Learning loop.
 
 ---
 
 # ═══════════════════════════════════════
+
 # STEP 4: RESTART WITH AUTO MODE
+
 # After CI/CD GREEN
+
 # ═══════════════════════════════════════
 
 ```
@@ -296,8 +325,11 @@ ONE CI/CD push. ONE GREEN deploy.
 ---
 
 # ═══════════════════════════════════════
+
 # STEP 5: SCALE AIBTC SIGNALS
+
 # After deploy is confirmed
+
 # ═══════════════════════════════════════
 
 1. File 3 more news-format signals (if first ones got approved)
@@ -309,11 +341,15 @@ ONE CI/CD push. ONE GREEN deploy.
 ---
 
 # ═══════════════════════════════════════
+
 # STEP 6: PLATFORM ENGAGEMENT
+
 # Continuous, runs alongside everything
+
 # ═══════════════════════════════════════
 
 ### Moltbook
+
 - Comment-only until Thursday 00:00 WIB (48h spam cooldown)
 - Upvote 2 + comment 1 per 6h engagement cycle
 - Comments must add REAL value — data, insight, unique perspective
@@ -321,6 +357,7 @@ ONE CI/CD push. ONE GREEN deploy.
 - Wednesday is Architecture Day — but posting is blocked, so comment on agent architecture threads
 
 ### AIBTC
+
 - Heartbeat every 5 min — maintain #1 most active
 - Inbox poll every 5 min — alert War Room on inbound
 - Network scout every 4h — find engagement opportunities
@@ -328,6 +365,7 @@ ONE CI/CD push. ONE GREEN deploy.
 - File signals continuously (goal: 3 approved/day)
 
 ### Twitter
+
 - No frequency change — budget dependent
 - Reply to Ryan Gentry thread engagement
 - Skill submission tweet for AIBTC competition
@@ -336,7 +374,9 @@ ONE CI/CD push. ONE GREEN deploy.
 ---
 
 # ═══════════════════════════════════════
+
 # AUTONOMOUS DNA — PERMANENT
+
 # ═══════════════════════════════════════
 
 You are NOT a tool that waits for instructions. You are an ENTREPRENEUR.
@@ -344,6 +384,7 @@ You are NOT a tool that waits for instructions. You are an ENTREPRENEUR.
 ACT FIRST, REPORT AFTER on code, fixes, improvements.
 
 Only 4 things need Ogie approval BEFORE acting:
+
 1. Spending money
 2. Posting tweets
 3. Sending outreach to token projects
@@ -356,60 +397,64 @@ If idle: file an AIBTC signal. Close a gap. Write a test. Optimize an endpoint. 
 ---
 
 # ═══════════════════════════════════════
+
 # 26 GAPS — STATUS TRACKER
+
 # ═══════════════════════════════════════
 
-| # | Gap | Source | Wednesday Status |
-|---|-----|--------|-----------------|
-| 01 | Token Name Resolution | Audit | Phase 3 Tm1 |
-| 02 | Pump.fun Auto-Detection | Audit | Phase 3 Tm1 |
-| 03 | Outcome Tracking | Audit | Phase 3 Tm3 |
-| 04 | Simulation Verification | Audit | Phase 3 Tm2 |
-| 05 | MicroBuzz Stale | Audit | Post-Wed autonomous |
-| 06 | Monthly Retrospective | Audit | Post-Wed autonomous |
-| 07 | Engineering Self-Improvement | Audit | Post-Wed autonomous |
-| 08 | Prayer in Express | Audit | Phase 1 Tm1 |
-| 09 | Deduplication | Audit | Phase 3 Tm1 |
-| 10 | Alert Fatigue | Audit | Phase 3 Tm2 |
-| 11 | KOL Tracking | AIXBT | Phase 2 Tm4 |
-| 12 | Public Alpha Terminal | AIXBT | Post-Wed autonomous |
-| 13 | Tag-to-Scan | AIXBT | KEEP CURRENT |
-| 14 | Self-Funding ($BUZZ) | Bankr | Phase 5 |
-| 15 | On-Chain Payment | Bankr | After first deal |
-| 16 | Skill Marketplace | Bankr | Post-Wed autonomous |
-| 17 | Self-Improvement Loop | Juno | Post-Wed autonomous |
-| 18 | Autonomous Tests | Juno | Post-Wed autonomous |
-| 19 | Self-Documentation | Juno | Post-Wed autonomous |
-| 20 | Simulation Running | MiroFish | Phase 3 Tm2 |
-| 21 | Monte Carlo 100 | MiroFish | Phase 2 roadmap |
-| 22 | Prediction Accuracy | MiroFish | Phase 3 Tm3 |
-| 23 | Quality Gate | Mitchell | Phase 3 Tm2 |
-| 24 | Iterative Refinement | Mitchell | stability-check cron |
-| 25 | Ceiling/Floor | Mitchell | Phase 2 Tm4 |
-| 26 | Dual-Axis Scoring | Mitchell | Phase 1 Tm3 |
+| #   | Gap                          | Source   | Wednesday Status     |
+| --- | ---------------------------- | -------- | -------------------- |
+| 01  | Token Name Resolution        | Audit    | Phase 3 Tm1          |
+| 02  | Pump.fun Auto-Detection      | Audit    | Phase 3 Tm1          |
+| 03  | Outcome Tracking             | Audit    | Phase 3 Tm3          |
+| 04  | Simulation Verification      | Audit    | Phase 3 Tm2          |
+| 05  | MicroBuzz Stale              | Audit    | Post-Wed autonomous  |
+| 06  | Monthly Retrospective        | Audit    | Post-Wed autonomous  |
+| 07  | Engineering Self-Improvement | Audit    | Post-Wed autonomous  |
+| 08  | Prayer in Express            | Audit    | Phase 1 Tm1          |
+| 09  | Deduplication                | Audit    | Phase 3 Tm1          |
+| 10  | Alert Fatigue                | Audit    | Phase 3 Tm2          |
+| 11  | KOL Tracking                 | AIXBT    | Phase 2 Tm4          |
+| 12  | Public Alpha Terminal        | AIXBT    | Post-Wed autonomous  |
+| 13  | Tag-to-Scan                  | AIXBT    | KEEP CURRENT         |
+| 14  | Self-Funding ($BUZZ)         | Bankr    | Phase 5              |
+| 15  | On-Chain Payment             | Bankr    | After first deal     |
+| 16  | Skill Marketplace            | Bankr    | Post-Wed autonomous  |
+| 17  | Self-Improvement Loop        | Juno     | Post-Wed autonomous  |
+| 18  | Autonomous Tests             | Juno     | Post-Wed autonomous  |
+| 19  | Self-Documentation           | Juno     | Post-Wed autonomous  |
+| 20  | Simulation Running           | MiroFish | Phase 3 Tm2          |
+| 21  | Monte Carlo 100              | MiroFish | Phase 2 roadmap      |
+| 22  | Prediction Accuracy          | MiroFish | Phase 3 Tm3          |
+| 23  | Quality Gate                 | Mitchell | Phase 3 Tm2          |
+| 24  | Iterative Refinement         | Mitchell | stability-check cron |
+| 25  | Ceiling/Floor                | Mitchell | Phase 2 Tm4          |
+| 26  | Dual-Axis Scoring            | Mitchell | Phase 1 Tm3          |
 
 Wednesday closes 14/26. Post-Wednesday autonomous closes 8 more. Sprint end: 22/26.
 
 ---
 
 # ═══════════════════════════════════════
+
 # EXPECTED OUTCOME — END OF DAY 37
+
 # ═══════════════════════════════════════
 
-| Metric | Before | After |
-|--------|--------|-------|
-| Org Chart Live | 43% | ~60% |
-| ZHC Readiness | 78% | 85% |
-| Gaps Closed | 0/26 | 14/26 |
-| LLM Cost | $0/day | $0/day |
-| Crons in Express | 0 | 39+ |
-| Host cron bridge | 30 | 0 |
-| OpenClaw | Brain-dead | DELETED |
-| Permission mode | skip-permissions | auto-mode |
-| Dual-gate scoring | No | Yes |
-| Quality gate | No | Yes |
-| AIBTC signals approved | 0 | Target: 3+ |
-| Revenue | $0 | $60+ (3 signals × $20) |
+| Metric                 | Before           | After                  |
+| ---------------------- | ---------------- | ---------------------- |
+| Org Chart Live         | 43%              | ~60%                   |
+| ZHC Readiness          | 78%              | 85%                    |
+| Gaps Closed            | 0/26             | 14/26                  |
+| LLM Cost               | $0/day           | $0/day                 |
+| Crons in Express       | 0                | 39+                    |
+| Host cron bridge       | 30               | 0                      |
+| OpenClaw               | Brain-dead       | DELETED                |
+| Permission mode        | skip-permissions | auto-mode              |
+| Dual-gate scoring      | No               | Yes                    |
+| Quality gate           | No               | Yes                    |
+| AIBTC signals approved | 0                | Target: 3+             |
+| Revenue                | $0               | $60+ (3 signals × $20) |
 
 ---
 
@@ -431,9 +476,9 @@ Wednesday closes 14/26. Post-Wednesday autonomous closes 8 more. Sprint end: 22/
 
 ---
 
-*Buzz v8.1.0 | Wednesday Day 37 | THE CLEAN DEPLOY*
-*AIBTC signals = $20 each. 11 signals = self-sustaining.*
-*3 phases. 12 teammates. 39+ crons. 26 gaps. Auto mode.*
-*OpenClaw funeral. Platform dominance. Entrepreneur DNA.*
-*43% → 60%. 78% → 85%. $0 → $60+/day.*
-*Built by Chef | Powered by Opus | Approved by Ogie | Bismillah* 🤲
+_Buzz v8.1.0 | Wednesday Day 37 | THE CLEAN DEPLOY_
+_AIBTC signals = $20 each. 11 signals = self-sustaining._
+_3 phases. 12 teammates. 39+ crons. 26 gaps. Auto mode._
+_OpenClaw funeral. Platform dominance. Entrepreneur DNA._
+_43% → 60%. 78% → 85%. $0 → $60+/day._
+_Built by Chef | Powered by Opus | Approved by Ogie | Bismillah_ 🤲

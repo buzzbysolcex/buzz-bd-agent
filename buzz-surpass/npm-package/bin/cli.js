@@ -12,19 +12,19 @@
  * Built by a chef. Zero LLM cost.
  */
 
-const { scoreToken, fetchLeaderboard } = require('../lib/scorer');
+const { scoreToken, fetchLeaderboard } = require("../lib/scorer");
 
-const CYAN = '\x1b[36m';
-const GREEN = '\x1b[32m';
-const AMBER = '\x1b[33m';
-const RED = '\x1b[31m';
-const DIM = '\x1b[90m';
-const BOLD = '\x1b[1m';
-const NC = '\x1b[0m';
+const CYAN = "\x1b[36m";
+const GREEN = "\x1b[32m";
+const AMBER = "\x1b[33m";
+const RED = "\x1b[31m";
+const DIM = "\x1b[90m";
+const BOLD = "\x1b[1m";
+const NC = "\x1b[0m";
 
 const args = process.argv.slice(2);
 
-if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
+if (args.length === 0 || args.includes("--help") || args.includes("-h")) {
   console.log(`
 ${CYAN}╔══════════════════════════════════════════════════╗${NC}
 ${CYAN}║${NC}  ${BOLD}BUZZ TOKEN SCORER${NC} — v9.2                        ${CYAN}║${NC}
@@ -61,19 +61,19 @@ ${DIM}Built by a chef. Kitchen runs itself. Bismillah 🤲${NC}
 const opts = {
   token: null,
   chain: null,
-  json: args.includes('--json'),
-  leaderboard: args.includes('--leaderboard'),
+  json: args.includes("--json"),
+  leaderboard: args.includes("--leaderboard"),
   top: 20,
 };
 
 for (let i = 0; i < args.length; i++) {
-  if (args[i] === '--chain' && args[i + 1]) {
+  if (args[i] === "--chain" && args[i + 1]) {
     opts.chain = args[i + 1];
     i++;
-  } else if (args[i] === '--top' && args[i + 1]) {
+  } else if (args[i] === "--top" && args[i + 1]) {
     opts.top = parseInt(args[i + 1], 10);
     i++;
-  } else if (!args[i].startsWith('--')) {
+  } else if (!args[i].startsWith("--")) {
     opts.token = args[i];
   }
 }
@@ -118,68 +118,91 @@ function getScoreColor(score) {
 }
 
 function getClassification(score) {
-  if (score >= 85) return 'HOT';
-  if (score >= 70) return 'WARM';
-  if (score >= 50) return 'COLD';
-  return 'REJECTED';
+  if (score >= 85) return "HOT";
+  if (score >= 70) return "WARM";
+  if (score >= 50) return "COLD";
+  return "REJECTED";
 }
 
 function printScore(result) {
   const color = getScoreColor(result.score);
-  const classification = result.classification || getClassification(result.score);
+  const classification =
+    result.classification || getClassification(result.score);
 
-  console.log('');
+  console.log("");
   console.log(`${CYAN}═══════════════════════════════════════${NC}`);
-  console.log(`  ${BOLD}${result.token || result.name}${NC} ${DIM}(${result.chain || 'unknown'})${NC}`);
+  console.log(
+    `  ${BOLD}${result.token || result.name}${NC} ${DIM}(${result.chain || "unknown"})${NC}`,
+  );
   console.log(`${CYAN}═══════════════════════════════════════${NC}`);
-  console.log(`  Score:          ${color}${BOLD}${result.score}/100${NC} ${color}${classification}${NC}`);
+  console.log(
+    `  Score:          ${color}${BOLD}${result.score}/100${NC} ${color}${classification}${NC}`,
+  );
 
   if (result.breakdown) {
     const b = result.breakdown;
-    console.log(`  Liquidity:      ${b.liquidity?.value || 'N/A'} (${b.liquidity?.score || '-'}/100)`);
-    console.log(`  Volume 24h:     ${b.volume_24h?.value || 'N/A'} (${b.volume_24h?.score || '-'}/100)`);
-    console.log(`  Security:       ${b.security?.score || '-'}/100`);
-    console.log(`  Deployer:       ${b.deployer?.identity || 'ANON'} (${b.deployer?.score || '-'}/100)`);
-    console.log(`  Age:            ${b.age_days || 'N/A'} days`);
-    console.log(`  FDV Gap:        ${b.fdv_gap || 'N/A'}x`);
+    console.log(
+      `  Liquidity:      ${b.liquidity?.value || "N/A"} (${b.liquidity?.score || "-"}/100)`,
+    );
+    console.log(
+      `  Volume 24h:     ${b.volume_24h?.value || "N/A"} (${b.volume_24h?.score || "-"}/100)`,
+    );
+    console.log(`  Security:       ${b.security?.score || "-"}/100`);
+    console.log(
+      `  Deployer:       ${b.deployer?.identity || "ANON"} (${b.deployer?.score || "-"}/100)`,
+    );
+    console.log(`  Age:            ${b.age_days || "N/A"} days`);
+    console.log(`  FDV Gap:        ${b.fdv_gap || "N/A"}x`);
   }
 
   if (result.flags && result.flags.length > 0) {
-    console.log(`  ${RED}Flags:          ${result.flags.join(', ')}${NC}`);
+    console.log(`  ${RED}Flags:          ${result.flags.join(", ")}${NC}`);
   }
 
   if (result.rules_triggered && result.rules_triggered.length > 0) {
-    console.log(`  ${DIM}Rules:          ${result.rules_triggered.join(', ')}${NC}`);
+    console.log(
+      `  ${DIM}Rules:          ${result.rules_triggered.join(", ")}${NC}`,
+    );
   }
 
   console.log(`  ${DIM}LLM cost:       $0.00${NC}`);
-  console.log(`  ${DIM}Scored at:       ${result.scored_at || new Date().toISOString()}${NC}`);
+  console.log(
+    `  ${DIM}Scored at:       ${result.scored_at || new Date().toISOString()}${NC}`,
+  );
   console.log(`${CYAN}═══════════════════════════════════════${NC}`);
-  console.log('');
+  console.log("");
 }
 
 function printLeaderboard(data) {
-  console.log('');
-  console.log(`${CYAN}╔═══════════════════════════════════════════════════╗${NC}`);
-  console.log(`${CYAN}║${NC}  ${BOLD}BUZZ LEADERBOARD${NC} — Top ${data.length} Tokens               ${CYAN}║${NC}`);
-  console.log(`${CYAN}╚═══════════════════════════════════════════════════╝${NC}`);
-  console.log('');
+  console.log("");
+  console.log(
+    `${CYAN}╔═══════════════════════════════════════════════════╗${NC}`,
+  );
+  console.log(
+    `${CYAN}║${NC}  ${BOLD}BUZZ LEADERBOARD${NC} — Top ${data.length} Tokens               ${CYAN}║${NC}`,
+  );
+  console.log(
+    `${CYAN}╚═══════════════════════════════════════════════════╝${NC}`,
+  );
+  console.log("");
   console.log(`  ${DIM}#   Token            Chain     Score  Class${NC}`);
-  console.log(`  ${DIM}${'─'.repeat(50)}${NC}`);
+  console.log(`  ${DIM}${"─".repeat(50)}${NC}`);
 
   data.forEach((t, i) => {
     const color = getScoreColor(t.score);
     const rank = String(i + 1).padStart(3);
-    const name = (t.token || t.name || 'Unknown').padEnd(16);
-    const chain = (t.chain || '???').padEnd(9);
+    const name = (t.token || t.name || "Unknown").padEnd(16);
+    const chain = (t.chain || "???").padEnd(9);
     const score = String(t.score).padStart(3);
     const cls = getClassification(t.score);
-    console.log(`  ${rank}  ${name} ${chain} ${color}${score}${NC}    ${color}${cls}${NC}`);
+    console.log(
+      `  ${rank}  ${name} ${chain} ${color}${score}${NC}    ${color}${cls}${NC}`,
+    );
   });
 
-  console.log('');
+  console.log("");
   console.log(`  ${DIM}Full leaderboard: https://buzzbd.ai/scores${NC}`);
-  console.log('');
+  console.log("");
 }
 
 main();

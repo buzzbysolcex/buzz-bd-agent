@@ -1,6 +1,9 @@
 # 🐝 BUZZ v8.2.0 — CLAWTEAM PATTERN INTEGRATION
+
 # ALIGNED WITH DNA v2.0 (bcca37c, Mar 26, 2026)
+
 # EXECUTION PROMPT FOR CLAUDE CODE ON HETZNER WAR ROOM
+
 # Sprint Day 38 | Mar 26, 2026
 
 ---
@@ -11,6 +14,7 @@ This upgrade builds ON TOP of DNA v2.0. Do NOT overwrite any DNA v2.0 files.
 DNA v2.0 commit: bcca37c "feat: Buzz DNA v2.0" (19 files, 2,514 insertions)
 
 **DNA v2.0 already installed:**
+
 - 12 persistent agents in `.claude/agents/` (signal-writer, signal-reviewer, signal-editor, pipeline-scanner, pipeline-scorer, pipeline-verifier, bd-proposer, bd-follower, moltbook-commenter, twitter-drafter, system-auditor, war-room-reporter)
 - BUZZ-ZHC-HANDOVER-v2.md (the genome, replaces old Day 35 handover)
 - AIBTC-SIGNAL-FACTORY.md (revenue engine) + root copy
@@ -24,6 +28,7 @@ DNA v2.0 commit: bcca37c "feat: Buzz DNA v2.0" (19 files, 2,514 insertions)
 ClawTeam v0.2.0 patterns that give those 12 agents a FORMAL coordination layer — task chains, structured inbox, activity board, and templates. The 12 agents currently exist as spec files. This upgrade gives them infrastructure to COMMUNICATE and CHAIN.
 
 **Read order for this prompt:**
+
 1. Read BUZZ-ZHC-HANDOVER-v2.md first (the genome)
 2. Read AIBTC-SIGNAL-FACTORY.md (to understand signal pipeline flow)
 3. Then execute this prompt step by step
@@ -38,6 +43,7 @@ Zero external dependencies. Zero new npm packages. Zero added LLM cost.
 CI/CD only. NEVER hot-patch. Sentinel GREEN = only truth.
 
 **References (on server):**
+
 - Genome: /home/claude-code/buzz-workspace/docs/BUZZ-ZHC-HANDOVER-v2.md
 - Signal Factory: /home/claude-code/buzz-workspace/docs/AIBTC-SIGNAL-FACTORY.md
 - Agents: /home/claude-code/buzz-workspace/.claude/agents/ (12 files)
@@ -165,12 +171,14 @@ CREATE INDEX IF NOT EXISTS idx_al_agent ON activity_log(agent);
 Create these 3 files. Full source code in the companion spec document (buzz-clawteam-integration-spec-v8.2.0.docx). Key design:
 
 ### api/lib/activity-board.js
+
 - `log(eventType, agent, tokenAddress, tokenName, chainId, details)` — INSERT event
 - `getActivity({hours, agent, eventType, limit})` — query feed
 - `getSummary(hours)` — dashboard stats (pipeline/signals/chains/social/system + recent 10 events)
 - system-auditor and war-room-reporter agents consume this
 
-### api/lib/agent-inbox.js  
+### api/lib/agent-inbox.js
+
 - `send(from, to, type, {subject, body, priority, chain_id, token_address})` — send message
 - `getInbox(agent, {status, type, limit})` — sorted by priority then time
 - `updateStatus(id, status, actionedBy)` — mark read/actioned
@@ -179,12 +187,13 @@ Create these 3 files. Full source code in the companion spec document (buzz-claw
 - Valid agents = DNA v2.0's 12 agents + system agents (brain, sentinel, chain-executor, ogie, all)
 
 ### api/lib/task-chains.js
+
 - `startChain(templateName, tokenAddress, tokenName)` — loads TOML, creates chain
 - `getChainStatus(chainId)` — with dependency resolution + completion %
 - `updateTask(chainId, taskName, status, result, error)` — auto-unblocks downstream
 - `_unblockDownstream(chainId)` — checks all deps met, evaluates conditions
 - `_evalCondition(condition, allTasks)` — parses "scorer.result.score >= 70"
-- `listTemplates()` — reads team-templates/*.toml
+- `listTemplates()` — reads team-templates/\*.toml
 - Inline TOML parser (zero npm dependency)
 - agent_name field maps to DNA v2.0 .claude/agents/ filenames
 
@@ -193,6 +202,7 @@ Create these 3 files. Full source code in the companion spec document (buzz-claw
 ## STEP 5: CREATE 3 ROUTE FILES (9+ endpoints)
 
 ### api/routes/chains.js
+
 ```
 POST /api/v1/chains/start                        — Start chain from template
 GET  /api/v1/chains                              — List recent chains
@@ -201,6 +211,7 @@ PATCH /api/v1/chains/:chain_id/tasks/:task_name  — Update task status
 ```
 
 ### api/routes/inbox.js
+
 ```
 POST  /api/v1/inbox/send      — Send agent message
 GET   /api/v1/inbox           — Global inbox stats
@@ -209,6 +220,7 @@ PATCH /api/v1/inbox/:id       — Update message status
 ```
 
 ### api/routes/board.js
+
 ```
 GET /api/v1/board/activity    — Activity feed (filterable)
 GET /api/v1/board/summary     — Dashboard summary
@@ -224,18 +236,23 @@ All routes use existing authMiddleware (X-API-Key).
 Each template maps tasks to DNA v2.0 agent_name:
 
 ### bd-scan.toml (Token Pipeline)
+
 scan(pipeline-scanner) → safety(pipeline-verifier) → score(pipeline-scorer) → simulate(pipeline-scorer, condition: score>=70) → propose(bd-proposer, condition: decision=='PROCEED')
 
 ### bd-outreach.toml (BD Pipeline)
+
 proposal_draft(bd-proposer) → tweet_draft(twitter-drafter) + dm_draft(bd-follower) → war_room_approval(ogie, requires_human=true)
 
 ### aibtc-signal.toml (Signal Factory)
+
 detect(pipeline-scanner) → verify(pipeline-verifier) → write_signal(signal-writer, condition: score>=60) → review_signal(signal-reviewer) → edit_signal(signal-editor) → file_signal(signal-writer)
 
 ### twitter-campaign.toml (Platform)
+
 research(twitter-drafter) → draft(twitter-drafter) → war_room_review(ogie, requires_human) → post(twitter-drafter) → self_reply(twitter-drafter)
 
 ### hackathon-sprint.toml (Operations)
+
 research(system-auditor) → build(brain) → test(system-auditor) → document(war-room-reporter) → submit(ogie, requires_human)
 
 ---
@@ -246,18 +263,30 @@ Add to main Express app file:
 
 ```javascript
 // === v8.2.0: ClawTeam Patterns for DNA v2.0 ===
-const ActivityBoard = require('./lib/activity-board');
-const AgentInbox = require('./lib/agent-inbox');
-const TaskChainExecutor = require('./lib/task-chains');
+const ActivityBoard = require("./lib/activity-board");
+const AgentInbox = require("./lib/agent-inbox");
+const TaskChainExecutor = require("./lib/task-chains");
 
 const activityBoard = new ActivityBoard(db);
 const agentInbox = new AgentInbox(db, activityBoard, telegramNotify || null);
 const taskChainExecutor = new TaskChainExecutor(db, activityBoard, agentInbox);
 global.buzzModules = { activityBoard, agentInbox, taskChainExecutor };
 
-app.use('/api/v1/chains', authMiddleware, require('./routes/chains')(db, taskChainExecutor));
-app.use('/api/v1/inbox', authMiddleware, require('./routes/inbox')(db, agentInbox));
-app.use('/api/v1/board', authMiddleware, require('./routes/board')(db, activityBoard, taskChainExecutor));
+app.use(
+  "/api/v1/chains",
+  authMiddleware,
+  require("./routes/chains")(db, taskChainExecutor),
+);
+app.use(
+  "/api/v1/inbox",
+  authMiddleware,
+  require("./routes/inbox")(db, agentInbox),
+);
+app.use(
+  "/api/v1/board",
+  authMiddleware,
+  require("./routes/board")(db, activityBoard, taskChainExecutor),
+);
 ```
 
 ---

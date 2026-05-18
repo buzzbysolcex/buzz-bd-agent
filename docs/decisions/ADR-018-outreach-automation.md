@@ -10,6 +10,7 @@ closed DMs, wrong contacts). Gmail OAuth has ~60% success rate and has been
 reliable since Feb 4.
 
 **Decision:**
+
 - Gmail OAuth (buzzbysolcex@gmail.com) as primary outreach channel
 - gsd-browser + dev-browser for contact discovery
 - Trust gates control sending permissions (graduated autonomy)
@@ -20,6 +21,7 @@ reliable since Feb 4.
 - Twitter DM: officially DEAD — never invest further
 
 **Consequences:**
+
 - Outreach moves from manual to semi-autonomous immediately
 - Full autonomy earned through trust gates (50 clean sends = auto-send for 85+)
 - Reboot-safe: all state in SQLite with CREATE IF NOT EXISTS

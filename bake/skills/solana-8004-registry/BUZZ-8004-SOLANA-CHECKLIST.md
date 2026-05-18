@@ -1,4 +1,5 @@
 # Buzz BD Agent — Solana Agent Registry (8004) Registration
+
 ## Execution Checklist | Sprint Day 9 | March 3, 2026
 
 ---
@@ -46,6 +47,7 @@ npx ts-node buzz-solana-8004-register.ts
   - SATI Dashboard: `https://sati.cascade.fyi`
 
 - [ ] **Set env variable for cron:**
+
   ```bash
   export BUZZ_8004_AGENT_ASSET='<agent-asset-pubkey>'
   ```
@@ -76,13 +78,13 @@ npx ts-node buzz-solana-8004-register.ts
 
 ### CROSS-CHAIN IDENTITY (COMPLETE)
 
-| Chain      | Protocol      | ID      | Status |
-|------------|---------------|---------|--------|
-| Ethereum   | ERC-8004      | #25045  | ✅     |
-| Base       | ERC-8004      | #17483  | ✅     |
-| anet       | ERC-8004      | #18709  | ✅     |
-| Avalanche  | AgentProof    | #1718   | ✅     |
-| Solana     | Agent Registry | TBD    | 🔜     |
+| Chain     | Protocol       | ID     | Status |
+| --------- | -------------- | ------ | ------ |
+| Ethereum  | ERC-8004       | #25045 | ✅     |
+| Base      | ERC-8004       | #17483 | ✅     |
+| anet      | ERC-8004       | #18709 | ✅     |
+| Avalanche | AgentProof     | #1718  | ✅     |
+| Solana    | Agent Registry | TBD    | 🔜     |
 
 After registration: **5 chains verified** 🏆
 
@@ -91,12 +93,12 @@ After registration: **5 chains verified** 🏆
 ### REPUTATION BUILDING TIMELINE
 
 | Time     | Expected Tier | Feedbacks | Notes                    |
-|----------|---------------|-----------|--------------------------|
-| Day 1    | Unrated       | 0-4       | Just registered           |
+| -------- | ------------- | --------- | ------------------------ |
+| Day 1    | Unrated       | 0-4       | Just registered          |
 | Week 1   | Bronze        | 20-28     | 4 reports/day × 7 days   |
-| Week 2   | Silver        | 48-56     | Consistent uptime helps   |
-| Month 1  | Gold          | ~120      | Need high quality scores  |
-| Month 2+ | Platinum      | ~240+     | Sustained excellence      |
+| Week 2   | Silver        | 48-56     | Consistent uptime helps  |
+| Month 1  | Gold          | ~120      | Need high quality scores |
+| Month 2+ | Platinum      | ~240+     | Sustained excellence     |
 
 ---
 

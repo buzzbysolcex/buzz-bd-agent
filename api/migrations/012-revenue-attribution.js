@@ -26,13 +26,19 @@ function up(db) {
     )
   `);
 
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_attr_token ON pipeline_revenue_attribution(token_address, chain)`);
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_attr_source ON pipeline_revenue_attribution(discovery_source)`);
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_attr_stage ON pipeline_revenue_attribution(current_stage)`);
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_attr_token ON pipeline_revenue_attribution(token_address, chain)`,
+  );
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_attr_source ON pipeline_revenue_attribution(discovery_source)`,
+  );
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_attr_stage ON pipeline_revenue_attribution(current_stage)`,
+  );
 }
 
 function down(db) {
-  db.exec('DROP TABLE IF EXISTS pipeline_revenue_attribution');
+  db.exec("DROP TABLE IF EXISTS pipeline_revenue_attribution");
 }
 
 module.exports = { up, down };

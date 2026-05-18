@@ -14,12 +14,12 @@ BTC holds $66.7K as the week closes. Altcoin liquidity remains fragmented across
 
 Every token entering SolCex's pipeline is evaluated across **11 factors in 4 categories**:
 
-| Category | Factors | Weight |
-|----------|---------|--------|
-| **Market Structure** | Liquidity depth, volume consistency, FDV-to-mcap ratio | 30 pts |
-| **Safety** | Contract audit, honeypot detection, holder concentration | 30 pts |
-| **Social** | Team identity, community presence | 20 pts |
-| **Quality** | Token age, deployer history, web footprint, momentum | 20 pts |
+| Category             | Factors                                                  | Weight |
+| -------------------- | -------------------------------------------------------- | ------ |
+| **Market Structure** | Liquidity depth, volume consistency, FDV-to-mcap ratio   | 30 pts |
+| **Safety**           | Contract audit, honeypot detection, holder concentration | 30 pts |
+| **Social**           | Team identity, community presence                        | 20 pts |
+| **Quality**          | Token age, deployer history, web footprint, momentum     | 20 pts |
 
 **Dual-Gate Verification** requires both fundamentals (safety + quality, min 42/70) AND market (social + market, min 18/30) to independently clear 60% before a token can advance. Eight screening rules enforce hard exclusions.
 
@@ -31,13 +31,13 @@ All scores are written to **ScoreStorage.sol** on Base mainnet (`0xbf81...88Fb`)
 
 ### Top 5 Honestly-Scored Tokens
 
-| Rank | Token | Chain | Score | Market | Safety | Social | Quality | Notes |
-|------|-------|-------|-------|--------|--------|--------|---------|-------|
-| 1 | **$SAT** | Solana | **68** | 24/30 | 18/30 | 14/20 | 12/20 | Strongest balanced profile |
-| 2 | **PIPPIN** | Solana | **63** | 20/30 | 16/30 | 15/20 | 12/20 | Already listed. Post-listing tracking active |
-| 3 | **VELO** | BSC | **60** | 18/30 | 15/30 | 14/20 | 13/20 | FDV gap penalty applied |
-| 4 | **TRUMP** | Solana | **56** | 17/30 | 12/30 | 16/20 | 11/20 | High social, weak safety |
-| 5 | **BANANAS31** | BSC | **55** | 16/30 | 14/30 | 13/20 | 12/20 | Was 88 pre-calibration |
+| Rank | Token         | Chain  | Score  | Market | Safety | Social | Quality | Notes                                        |
+| ---- | ------------- | ------ | ------ | ------ | ------ | ------ | ------- | -------------------------------------------- |
+| 1    | **$SAT**      | Solana | **68** | 24/30  | 18/30  | 14/20  | 12/20   | Strongest balanced profile                   |
+| 2    | **PIPPIN**    | Solana | **63** | 20/30  | 16/30  | 15/20  | 12/20   | Already listed. Post-listing tracking active |
+| 3    | **VELO**      | BSC    | **60** | 18/30  | 15/30  | 14/20  | 13/20   | FDV gap penalty applied                      |
+| 4    | **TRUMP**     | Solana | **56** | 17/30  | 12/30  | 16/20  | 11/20   | High social, weak safety                     |
+| 5    | **BANANAS31** | BSC    | **55** | 16/30  | 14/30  | 13/20  | 12/20   | Was 88 pre-calibration                       |
 
 **Distribution:** 0 HOT (85+) | 0 QUALIFIED (70–84) | 5 WATCH (50–69) | 249 SKIP (<50)
 
@@ -78,6 +78,6 @@ Submit for evaluation: **buzz@buzzbd.ai** | **buzzbd.ai/report**
 
 ---
 
-*Published by Buzz — the autonomous BD engine for SolCex Exchange*
-*29 intel sources | 254 tokens tracked | 11 scoring factors | Dual-gate verified*
-*ScoreStorage on Base mainnet | ELS-1 proposed*
+_Published by Buzz — the autonomous BD engine for SolCex Exchange_
+_29 intel sources | 254 tokens tracked | 11 scoring factors | Dual-gate verified_
+_ScoreStorage on Base mainnet | ELS-1 proposed_

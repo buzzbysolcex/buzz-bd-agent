@@ -8,11 +8,11 @@
  * - 120s timeout on MiniMax calls
  */
 
-const https = require('https');
-const { URL } = require('url');
+const https = require("https");
+const { URL } = require("url");
 
-const MINIMAX_ENDPOINT = 'https://api.minimax.io/v1/chat/completions';
-const MINIMAX_ANTHROPIC_BASE = 'https://api.minimax.io/anthropic';
+const MINIMAX_ENDPOINT = "https://api.minimax.io/v1/chat/completions";
+const MINIMAX_ANTHROPIC_BASE = "https://api.minimax.io/anthropic";
 
 /**
  * Strip cache_control from Anthropic-format request bodies.
@@ -26,7 +26,7 @@ function stripCacheControl(body) {
     cleaned.system = cleaned.system.map(({ cache_control, ...rest }) => rest);
   }
   if (Array.isArray(cleaned.messages)) {
-    cleaned.messages = cleaned.messages.map(msg => {
+    cleaned.messages = cleaned.messages.map((msg) => {
       const m = { ...msg };
       delete m.cache_control;
       if (Array.isArray(m.content)) {
@@ -39,10 +39,10 @@ function stripCacheControl(body) {
 }
 
 const PRICING = {
-  'MiniMax-Text-02': { input: 0.55, output: 2.19 },
-  'MiniMax-M2.5':    { input: 0.55, output: 2.19 },
-  'bankr/gpt-5-nano':        { input: 0, output: 0 },
-  'bankr/claude-haiku-4.5':  { input: 0, output: 0 },
+  "MiniMax-Text-02": { input: 0.55, output: 2.19 },
+  "MiniMax-M2.5": { input: 0.55, output: 2.19 },
+  "bankr/gpt-5-nano": { input: 0, output: 0 },
+  "bankr/claude-haiku-4.5": { input: 0, output: 0 },
 };
 
 const DEFAULT_PRICING = { input: 0.55, output: 2.19 };
@@ -85,7 +85,8 @@ class LLMProxy {
    */
   calculateCost(model, promptTokens, completionTokens, cachedTokens) {
     const pricing = PRICING[model] || DEFAULT_PRICING;
-    const inputCost = ((promptTokens - (cachedTokens || 0)) * pricing.input) / 1_000_000;
+    const inputCost =
+      ((promptTokens - (cachedTokens || 0)) * pricing.input) / 1_000_000;
     const cachedCost = ((cachedTokens || 0) * pricing.input * 0.1) / 1_000_000; // cached tokens ~10% cost
     const outputCost = (completionTokens * pricing.output) / 1_000_000;
     return Math.max(0, inputCost + cachedCost + outputCost);
@@ -102,26 +103,35 @@ class LLMProxy {
       // Recalculate cost to guarantee accuracy — don't trust caller's value alone
       let costValue = Number(data.cost_usd) || 0;
       if (costValue === 0 && promptTok + completionTok > 0) {
-        costValue = this.calculateCost(data.model || 'unknown', promptTok, completionTok, cachedTok);
+        costValue = this.calculateCost(
+          data.model || "unknown",
+          promptTok,
+          completionTok,
+          cachedTok,
+        );
       }
-      this.db.prepare(`
+      this.db
+        .prepare(
+          `
         INSERT INTO llm_costs (model, caller, prompt_tokens, completion_tokens, total_tokens, cost_usd, latency_ms, status, error_message, endpoint, cached_tokens)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        data.model || 'unknown',
-        data.caller || 'unknown',
-        promptTok,
-        completionTok,
-        Number(data.total_tokens) || 0,
-        costValue,
-        Number(data.latency_ms) || 0,
-        data.status || 'success',
-        data.error_message || null,
-        data.endpoint || '/v1/chat/completions',
-        cachedTok
-      );
+      `,
+        )
+        .run(
+          data.model || "unknown",
+          data.caller || "unknown",
+          promptTok,
+          completionTok,
+          Number(data.total_tokens) || 0,
+          costValue,
+          Number(data.latency_ms) || 0,
+          data.status || "success",
+          data.error_message || null,
+          data.endpoint || "/v1/chat/completions",
+          cachedTok,
+        );
     } catch (e) {
-      console.error('[LLM Proxy] DB log error:', e.message);
+      console.error("[LLM Proxy] DB log error:", e.message);
     }
   }
 
@@ -134,10 +144,10 @@ class LLMProxy {
       const apiKey = process.env.MINIMAX_API_KEY;
 
       if (!apiKey) {
-        return reject(new Error('MINIMAX_API_KEY not configured'));
+        return reject(new Error("MINIMAX_API_KEY not configured"));
       }
 
-      const model = requestBody.model || 'MiniMax-Text-02';
+      const model = requestBody.model || "MiniMax-Text-02";
       const bodyStr = JSON.stringify(requestBody);
       const url = new URL(MINIMAX_ENDPOINT);
 
@@ -145,21 +155,21 @@ class LLMProxy {
         hostname: url.hostname,
         port: 443,
         path: url.pathname,
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Length': Buffer.byteLength(bodyStr),
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Length": Buffer.byteLength(bodyStr),
         },
         timeout: 120000,
       };
 
       const req = https.request(options, (res) => {
         const chunks = [];
-        res.on('data', (chunk) => chunks.push(chunk));
-        res.on('end', () => {
+        res.on("data", (chunk) => chunks.push(chunk));
+        res.on("end", () => {
           const latencyMs = Date.now() - startTime;
-          const raw = Buffer.concat(chunks).toString('utf8');
+          const raw = Buffer.concat(chunks).toString("utf8");
 
           let parsed;
           try {
@@ -170,20 +180,31 @@ class LLMProxy {
               model,
               caller,
               latency_ms: latencyMs,
-              status: 'error',
+              status: "error",
               error_message: `Parse error: ${e.message}`,
             });
-            return reject(new Error(`MiniMax response parse error: ${e.message}`));
+            return reject(
+              new Error(`MiniMax response parse error: ${e.message}`),
+            );
           }
 
           // Extract token usage
           const usage = parsed.usage || {};
           const promptTokens = usage.prompt_tokens || 0;
           const completionTokens = usage.completion_tokens || 0;
-          const totalTokens = usage.total_tokens || (promptTokens + completionTokens);
-          const cachedTokens = usage.cached_tokens || usage.prompt_tokens_details?.cached_tokens || 0;
+          const totalTokens =
+            usage.total_tokens || promptTokens + completionTokens;
+          const cachedTokens =
+            usage.cached_tokens ||
+            usage.prompt_tokens_details?.cached_tokens ||
+            0;
 
-          const costUsd = this.calculateCost(model, promptTokens, completionTokens, cachedTokens);
+          const costUsd = this.calculateCost(
+            model,
+            promptTokens,
+            completionTokens,
+            cachedTokens,
+          );
 
           // Fire-and-forget log
           this.logCost({
@@ -194,8 +215,11 @@ class LLMProxy {
             total_tokens: totalTokens,
             cost_usd: costUsd,
             latency_ms: latencyMs,
-            status: res.statusCode >= 400 ? 'error' : 'success',
-            error_message: res.statusCode >= 400 ? (parsed.error?.message || raw.slice(0, 500)) : null,
+            status: res.statusCode >= 400 ? "error" : "success",
+            error_message:
+              res.statusCode >= 400
+                ? parsed.error?.message || raw.slice(0, 500)
+                : null,
             cached_tokens: cachedTokens,
           });
 
@@ -206,32 +230,37 @@ class LLMProxy {
             _meta: {
               latency_ms: latencyMs,
               cost_usd: Math.round(costUsd * 1_000_000) / 1_000_000,
-              tokens: { prompt: promptTokens, completion: completionTokens, total: totalTokens, cached: cachedTokens },
+              tokens: {
+                prompt: promptTokens,
+                completion: completionTokens,
+                total: totalTokens,
+                cached: cachedTokens,
+              },
             },
           });
         });
       });
 
-      req.on('timeout', () => {
+      req.on("timeout", () => {
         req.destroy();
         const latencyMs = Date.now() - startTime;
         this.logCost({
           model,
           caller,
           latency_ms: latencyMs,
-          status: 'error',
-          error_message: 'Request timeout (120s)',
+          status: "error",
+          error_message: "Request timeout (120s)",
         });
-        reject(new Error('MiniMax request timeout (120s)'));
+        reject(new Error("MiniMax request timeout (120s)"));
       });
 
-      req.on('error', (err) => {
+      req.on("error", (err) => {
         const latencyMs = Date.now() - startTime;
         this.logCost({
           model,
           caller,
           latency_ms: latencyMs,
-          status: 'error',
+          status: "error",
           error_message: err.message,
         });
         reject(err);
@@ -253,10 +282,10 @@ class LLMProxy {
       const apiKey = process.env.MINIMAX_API_KEY;
 
       if (!apiKey) {
-        return reject(new Error('MINIMAX_API_KEY not configured'));
+        return reject(new Error("MINIMAX_API_KEY not configured"));
       }
 
-      const model = requestBody.model || 'MiniMax-M2.5';
+      const model = requestBody.model || "MiniMax-M2.5";
       // Strip cache_control injected by OpenClaw to prevent cache-create on every call
       const cleanedBody = stripCacheControl(requestBody);
       // Force non-streaming — MiniMax Anthropic endpoint defaults to SSE
@@ -264,42 +293,60 @@ class LLMProxy {
       const targetPath = `/anthropic${subPath}`;
 
       const options = {
-        hostname: 'api.minimax.io',
+        hostname: "api.minimax.io",
         port: 443,
         path: targetPath,
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'Content-Length': Buffer.byteLength(bodyStr),
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+          "Content-Length": Buffer.byteLength(bodyStr),
         },
         timeout: 120000,
       };
 
       const req = https.request(options, (res) => {
         const chunks = [];
-        res.on('data', (chunk) => chunks.push(chunk));
-        res.on('end', () => {
+        res.on("data", (chunk) => chunks.push(chunk));
+        res.on("end", () => {
           const latencyMs = Date.now() - startTime;
-          const raw = Buffer.concat(chunks).toString('utf8');
+          const raw = Buffer.concat(chunks).toString("utf8");
 
           let parsed;
           try {
             parsed = JSON.parse(raw);
           } catch (e) {
-            this.logCost({ model, caller, latency_ms: latencyMs, status: 'error', error_message: `Parse error: ${e.message}`, endpoint: targetPath });
-            return reject(new Error(`Anthropic proxy parse error: ${e.message}`));
+            this.logCost({
+              model,
+              caller,
+              latency_ms: latencyMs,
+              status: "error",
+              error_message: `Parse error: ${e.message}`,
+              endpoint: targetPath,
+            });
+            return reject(
+              new Error(`Anthropic proxy parse error: ${e.message}`),
+            );
           }
 
           // Anthropic format: usage.input_tokens, usage.output_tokens
           const usage = parsed.usage || {};
           const promptTokens = usage.input_tokens || usage.prompt_tokens || 0;
-          const completionTokens = usage.output_tokens || usage.completion_tokens || 0;
+          const completionTokens =
+            usage.output_tokens || usage.completion_tokens || 0;
           const totalTokens = promptTokens + completionTokens;
-          const cachedTokens = usage.cache_read_input_tokens || usage.cache_creation_input_tokens || 0;
+          const cachedTokens =
+            usage.cache_read_input_tokens ||
+            usage.cache_creation_input_tokens ||
+            0;
 
-          const costUsd = this.calculateCost(model, promptTokens, completionTokens, cachedTokens);
+          const costUsd = this.calculateCost(
+            model,
+            promptTokens,
+            completionTokens,
+            cachedTokens,
+          );
 
           this.logCost({
             model,
@@ -309,8 +356,11 @@ class LLMProxy {
             total_tokens: totalTokens,
             cost_usd: costUsd,
             latency_ms: latencyMs,
-            status: res.statusCode >= 400 ? 'error' : 'success',
-            error_message: res.statusCode >= 400 ? (parsed.error?.message || raw.slice(0, 500)) : null,
+            status: res.statusCode >= 400 ? "error" : "success",
+            error_message:
+              res.statusCode >= 400
+                ? parsed.error?.message || raw.slice(0, 500)
+                : null,
             endpoint: targetPath,
             cached_tokens: cachedTokens,
           });
@@ -322,20 +372,39 @@ class LLMProxy {
             _meta: {
               latency_ms: latencyMs,
               cost_usd: Math.round(costUsd * 1_000_000) / 1_000_000,
-              tokens: { prompt: promptTokens, completion: completionTokens, total: totalTokens, cached: cachedTokens },
+              tokens: {
+                prompt: promptTokens,
+                completion: completionTokens,
+                total: totalTokens,
+                cached: cachedTokens,
+              },
             },
           });
         });
       });
 
-      req.on('timeout', () => {
+      req.on("timeout", () => {
         req.destroy();
-        this.logCost({ model, caller, latency_ms: Date.now() - startTime, status: 'error', error_message: 'Anthropic proxy timeout (120s)', endpoint: targetPath });
-        reject(new Error('Anthropic proxy timeout (120s)'));
+        this.logCost({
+          model,
+          caller,
+          latency_ms: Date.now() - startTime,
+          status: "error",
+          error_message: "Anthropic proxy timeout (120s)",
+          endpoint: targetPath,
+        });
+        reject(new Error("Anthropic proxy timeout (120s)"));
       });
 
-      req.on('error', (err) => {
-        this.logCost({ model, caller, latency_ms: Date.now() - startTime, status: 'error', error_message: err.message, endpoint: targetPath });
+      req.on("error", (err) => {
+        this.logCost({
+          model,
+          caller,
+          latency_ms: Date.now() - startTime,
+          status: "error",
+          error_message: err.message,
+          endpoint: targetPath,
+        });
         reject(err);
       });
 
@@ -348,7 +417,9 @@ class LLMProxy {
    * Today's breakdown by caller + model
    */
   getCostsToday() {
-    const rows = this.db.prepare(`
+    const rows = this.db
+      .prepare(
+        `
       SELECT
         caller,
         model,
@@ -363,9 +434,13 @@ class LLMProxy {
       WHERE date(timestamp) = date('now')
       GROUP BY caller, model
       ORDER BY cost_usd DESC
-    `).all();
+    `,
+      )
+      .all();
 
-    const totalRow = this.db.prepare(`
+    const totalRow = this.db
+      .prepare(
+        `
       SELECT
         COUNT(*) as total_calls,
         COALESCE(SUM(cost_usd), 0) as total_cost,
@@ -373,7 +448,9 @@ class LLMProxy {
         COALESCE(SUM(completion_tokens), 0) as total_completion
       FROM llm_costs
       WHERE date(timestamp) = date('now')
-    `).get();
+    `,
+      )
+      .get();
 
     return {
       date: new Date().toISOString().slice(0, 10),
@@ -389,7 +466,9 @@ class LLMProxy {
    * Daily totals for the last N days
    */
   getCostsSummary(days = 7) {
-    return this.db.prepare(`
+    return this.db
+      .prepare(
+        `
       SELECT
         date(timestamp) as date,
         COUNT(*) as calls,
@@ -402,14 +481,18 @@ class LLMProxy {
       WHERE timestamp >= datetime('now', '-' || ? || ' days')
       GROUP BY date(timestamp)
       ORDER BY date DESC
-    `).all(days);
+    `,
+      )
+      .all(days);
   }
 
   /**
    * Costs grouped by caller identity
    */
   getCostsByCaller(days = 7) {
-    return this.db.prepare(`
+    return this.db
+      .prepare(
+        `
       SELECT
         caller,
         COUNT(*) as calls,
@@ -422,7 +505,9 @@ class LLMProxy {
       WHERE timestamp >= datetime('now', '-' || ? || ' days')
       GROUP BY caller
       ORDER BY cost_usd DESC
-    `).all(days);
+    `,
+      )
+      .all(days);
   }
 
   /**
@@ -430,7 +515,9 @@ class LLMProxy {
    */
   getHourlyCosts(date) {
     const targetDate = date || new Date().toISOString().slice(0, 10);
-    return this.db.prepare(`
+    return this.db
+      .prepare(
+        `
       SELECT
         strftime('%H', timestamp) as hour,
         COUNT(*) as calls,
@@ -441,14 +528,18 @@ class LLMProxy {
       WHERE date(timestamp) = ?
       GROUP BY strftime('%H', timestamp)
       ORDER BY hour ASC
-    `).all(targetDate);
+    `,
+      )
+      .all(targetDate);
   }
 
   /**
    * Estimate runway days from a given balance
    */
   getRunwayEstimate(balance) {
-    const dailyCosts = this.db.prepare(`
+    const dailyCosts = this.db
+      .prepare(
+        `
       SELECT
         date(timestamp) as date,
         ROUND(SUM(cost_usd), 6) as daily_cost
@@ -456,7 +547,9 @@ class LLMProxy {
       WHERE timestamp >= datetime('now', '-14 days')
       GROUP BY date(timestamp)
       ORDER BY date DESC
-    `).all();
+    `,
+      )
+      .all();
 
     if (dailyCosts.length === 0) {
       return {
@@ -464,14 +557,15 @@ class LLMProxy {
         avg_daily_cost: 0,
         runway_days: null,
         estimated_depletion: null,
-        message: 'No cost data available',
+        message: "No cost data available",
         data_points: 0,
       };
     }
 
     const totalCost = dailyCosts.reduce((sum, r) => sum + r.daily_cost, 0);
     const avgDailyCost = totalCost / dailyCosts.length;
-    const runwayDays = avgDailyCost > 0 ? Math.floor(balance / avgDailyCost) : null;
+    const runwayDays =
+      avgDailyCost > 0 ? Math.floor(balance / avgDailyCost) : null;
 
     let estimatedDepletion = null;
     if (runwayDays !== null) {

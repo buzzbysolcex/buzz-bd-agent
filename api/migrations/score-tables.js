@@ -1,7 +1,7 @@
 /**
  * Database Migration: token_scores + cost_log tables
  * Add to the existing db.js migrations array in ~/buzz-bd-agent/api/db.js
- * 
+ *
  * Run AFTER the existing 6 migrations from Day 8
  */
 
@@ -74,16 +74,16 @@ CREATE TABLE IF NOT EXISTS agentproof_telemetry (
 // Export for integration into existing db.js
 module.exports = {
   migrations: [
-    { version: 7, name: 'token_scores', sql: migration7_token_scores },
-    { version: 8, name: 'cost_log', sql: migration8_cost_log },
-    { version: 9, name: 'agentproof_telemetry', sql: migration9_agentproof }
-  ]
+    { version: 7, name: "token_scores", sql: migration7_token_scores },
+    { version: 8, name: "cost_log", sql: migration8_cost_log },
+    { version: 9, name: "agentproof_telemetry", sql: migration9_agentproof },
+  ],
 };
 
 // ═══════════════════════════════════════════════════
 // INTEGRATION INSTRUCTIONS
 // ═══════════════════════════════════════════════════
-// 
+//
 // Add these migrations to your existing ~/buzz-bd-agent/api/db.js:
 //
 // 1. Import at top of db.js:

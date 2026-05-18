@@ -19,7 +19,12 @@
       "timestamp": "2026-03-13T08:00:00Z",
       "action": "discovery_cron_execution",
       "decision": "Autonomous scan of 23 intel sources for trending tokens",
-      "tools": ["DexScreener API", "CoinGecko API", "AIXBT API", "OKX WebSocket"],
+      "tools": [
+        "DexScreener API",
+        "CoinGecko API",
+        "AIXBT API",
+        "OKX WebSocket"
+      ],
       "outcome": "47+ tokens discovered and added to pipeline"
     },
     {

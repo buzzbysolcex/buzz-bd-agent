@@ -6,7 +6,7 @@
 
 const migrations = [
   {
-    name: '022_whale_signal_cache',
+    name: "022_whale_signal_cache",
     sql: `
       CREATE TABLE IF NOT EXISTS whale_signal_cache (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

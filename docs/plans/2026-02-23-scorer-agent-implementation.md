@@ -15,6 +15,7 @@
 ### Task 1: ScorerAgent Skeleton
 
 **Files:**
+
 - Create: `src/agents/tests/test_scorer_agent.py`
 - Create: `src/agents/scorer_agent.py`
 
@@ -82,6 +83,7 @@ git commit -m "feat: add ScorerAgent skeleton inheriting BaseAgent"
 ### Task 2: Liquidity and Volume Scorers
 
 **Files:**
+
 - Modify: `src/agents/tests/test_scorer_agent.py`
 - Modify: `src/agents/scorer_agent.py`
 
@@ -161,7 +163,7 @@ class TestScoreVolume:
 Run: `python3 -m pytest src/agents/tests/test_scorer_agent.py::TestScoreLiquidity src/agents/tests/test_scorer_agent.py::TestScoreVolume -v`
 Expected: FAIL — `AttributeError: 'ScorerAgent' object has no attribute '_score_liquidity'`
 
-**Step 3: Implement _score_liquidity and _score_volume**
+**Step 3: Implement \_score_liquidity and \_score_volume**
 
 Add these constants at module level in `src/agents/scorer_agent.py`:
 
@@ -216,6 +218,7 @@ git commit -m "feat: add liquidity and volume threshold scorers"
 ### Task 3: Age Scorer
 
 **Files:**
+
 - Modify: `src/agents/tests/test_scorer_agent.py`
 - Modify: `src/agents/scorer_agent.py`
 
@@ -293,7 +296,7 @@ class TestScoreAge:
 Run: `python3 -m pytest src/agents/tests/test_scorer_agent.py::TestScoreAge -v`
 Expected: FAIL — `AttributeError: 'ScorerAgent' object has no attribute '_score_age'`
 
-**Step 3: Implement _score_age**
+**Step 3: Implement \_score_age**
 
 Add this method to `ScorerAgent`:
 
@@ -329,6 +332,7 @@ git commit -m "feat: add age range scorer"
 ### Task 4: Community and Safety Scorers
 
 **Files:**
+
 - Modify: `src/agents/tests/test_scorer_agent.py`
 - Modify: `src/agents/scorer_agent.py`
 
@@ -425,7 +429,7 @@ class TestScoreSafety:
 Run: `python3 -m pytest src/agents/tests/test_scorer_agent.py::TestScoreCommunity src/agents/tests/test_scorer_agent.py::TestScoreSafety -v`
 Expected: FAIL — `AttributeError`
 
-**Step 3: Implement _score_community and _score_safety**
+**Step 3: Implement \_score_community and \_score_safety**
 
 Add these constants at module level:
 
@@ -491,6 +495,7 @@ git commit -m "feat: add community and safety scorers"
 ### Task 5: Catalyst System
 
 **Files:**
+
 - Modify: `src/agents/tests/test_scorer_agent.py`
 - Modify: `src/agents/scorer_agent.py`
 
@@ -551,7 +556,7 @@ class TestApplyCatalysts:
 Run: `python3 -m pytest src/agents/tests/test_scorer_agent.py::TestApplyCatalysts -v`
 Expected: FAIL — `AttributeError`
 
-**Step 3: Implement _apply_catalysts**
+**Step 3: Implement \_apply_catalysts**
 
 Add this constant at module level:
 
@@ -606,6 +611,7 @@ git commit -m "feat: add catalyst bonus/penalty system"
 ### Task 6: DFlow Modifier, Auto-Reject, Status, and Recommendation
 
 **Files:**
+
 - Modify: `src/agents/tests/test_scorer_agent.py`
 - Modify: `src/agents/scorer_agent.py`
 
@@ -788,7 +794,7 @@ def _get_recommendation(self, status: str) -> str:
 **Step 4: Run tests to verify they pass**
 
 Run: `python3 -m pytest src/agents/tests/test_scorer_agent.py -v`
-Expected: 63 PASSED (42 + 6 + 5 + 4*2 + 4)
+Expected: 63 PASSED (42 + 6 + 5 + 4\*2 + 4)
 
 **Step 5: Commit**
 
@@ -802,6 +808,7 @@ git commit -m "feat: add DFlow modifier, auto-reject, status, and recommendation
 ### Task 7: execute() Orchestration
 
 **Files:**
+
 - Modify: `src/agents/tests/test_scorer_agent.py`
 - Modify: `src/agents/scorer_agent.py`
 
@@ -1033,7 +1040,7 @@ Expected: 11 PASSED
 
 Also run ALL scorer tests:
 Run: `python3 -m pytest src/agents/tests/test_scorer_agent.py -v`
-Expected: All tests PASSED (3 + 7 + 5 + 12 + 5 + 4 + 6 + 6 + 5 + 4*2 + 4 + 11 = ~74)
+Expected: All tests PASSED (3 + 7 + 5 + 12 + 5 + 4 + 6 + 6 + 5 + 4\*2 + 4 + 11 = ~74)
 
 **Step 5: Commit**
 

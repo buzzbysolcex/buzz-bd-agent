@@ -9,10 +9,11 @@
 function generateProposal(reportData) {
   const { token, scan, score, safety, simulation, ev } = reportData;
 
-  const ticker = token?.ticker || token?.symbol || 'UNKNOWN';
-  const chain = token?.chain || 'solana';
+  const ticker = token?.ticker || token?.symbol || "UNKNOWN";
+  const chain = token?.chain || "solana";
   const tokenScore = score?.score || token?.score || 0;
-  const recommendation = simulation?.recommendation || ev?.decision || 'PENDING';
+  const recommendation =
+    simulation?.recommendation || ev?.decision || "PENDING";
   const evValue = ev?.ev || 0;
   const probability = simulation?.probability || 0;
   const confidence = simulation?.confidence || 0;
@@ -132,7 +133,7 @@ function generateProposal(reportData) {
     <div style="color:#555;font-size:12px;">BUZZ BD AGENT v7.6.0 | MiroFish Stage 1</div>
     <h1>LISTING PROPOSAL<span class="cursor">_</span></h1>
     <div class="ticker">$${escapeHtml(ticker)}</div>
-    <div style="color:#888;margin-top:5px;">Chain: ${escapeHtml(chain.toUpperCase())} | Generated: ${new Date().toISOString().split('T')[0]}</div>
+    <div style="color:#888;margin-top:5px;">Chain: ${escapeHtml(chain.toUpperCase())} | Generated: ${new Date().toISOString().split("T")[0]}</div>
   </div>
 
   <div class="section">
@@ -148,7 +149,7 @@ function generateProposal(reportData) {
   <div class="section">
     <div class="section-title">BUZZ_SCORE</div>
     <div class="metric"><span class="metric-label">Composite Score</span><span class="metric-value">${tokenScore}/100</span></div>
-    <div class="metric"><span class="metric-label">Verdict</span><span class="metric-value">${tokenScore >= 85 ? 'HOT' : tokenScore >= 70 ? 'QUALIFIED' : tokenScore >= 50 ? 'WATCH' : 'SKIP'}</span></div>
+    <div class="metric"><span class="metric-label">Verdict</span><span class="metric-value">${tokenScore >= 85 ? "HOT" : tokenScore >= 70 ? "QUALIFIED" : tokenScore >= 50 ? "WATCH" : "SKIP"}</span></div>
   </div>
 
   <div class="section">
@@ -157,27 +158,31 @@ function generateProposal(reportData) {
     <div class="metric"><span class="metric-label">Probability</span><span class="metric-value">${Math.round((probability || 0) * 100)}%</span></div>
     <div class="metric"><span class="metric-label">Confidence</span><span class="metric-value">${Math.round((confidence || 0) * 100)}%</span></div>
     <div class="cluster-grid">
-      ${Object.entries(clusters).map(([name, c]) => `
+      ${Object.entries(clusters)
+        .map(
+          ([name, c]) => `
       <div class="cluster-card">
         <div class="cluster-name">${getClusterEmoji(name)} ${escapeHtml(name.toUpperCase())}</div>
-        <div class="metric"><span class="metric-label">Consensus</span><span class="metric-value ${(c.consensus || '').toLowerCase()}">${escapeHtml(c.consensus || 'N/A')}</span></div>
+        <div class="metric"><span class="metric-label">Consensus</span><span class="metric-value ${(c.consensus || "").toLowerCase()}">${escapeHtml(c.consensus || "N/A")}</span></div>
         <div class="metric"><span class="metric-label">Bullish</span><span class="metric-value">${c.bullish || 0}/${c.total || 0}</span></div>
-      </div>`).join('')}
+      </div>`,
+        )
+        .join("")}
     </div>
   </div>
 
   <div class="ev-display">
     <div style="color:#00d4ff;font-size:14px;">EXPECTED VALUE ANALYSIS</div>
-    <div class="ev-value ${evValue >= 0 ? 'ev-positive' : 'ev-negative'}">EV = ${evValue >= 0 ? '+' : ''}$${evValue}</div>
-    <div style="color:#888;font-size:12px;margin-top:5px;">${escapeHtml(ev?.formula || '')}</div>
+    <div class="ev-value ${evValue >= 0 ? "ev-positive" : "ev-negative"}">EV = ${evValue >= 0 ? "+" : ""}$${evValue}</div>
+    <div style="color:#888;font-size:12px;margin-top:5px;">${escapeHtml(ev?.formula || "")}</div>
   </div>
 
   <div class="recommendation ${escapeHtml(recommendation)}">
-    RECOMMENDATION: ${escapeHtml(recommendation)} ${recommendation === 'LIST' ? '&#10003;' : recommendation === 'MONITOR' ? '&#8987;' : recommendation === 'REJECT' ? '&#10007;' : '&#8230;'}
+    RECOMMENDATION: ${escapeHtml(recommendation)} ${recommendation === "LIST" ? "&#10003;" : recommendation === "MONITOR" ? "&#8987;" : recommendation === "REJECT" ? "&#10007;" : "&#8230;"}
   </div>
 
-  ${simulation?.key_risk ? `<div class="section"><div class="section-title">KEY_RISKS</div><div style="color:#ff4444;">${escapeHtml(simulation.key_risk)}</div></div>` : ''}
-  ${simulation?.key_signal ? `<div class="section"><div class="section-title">KEY_SIGNALS</div><div style="color:#00ff41;">${escapeHtml(simulation.key_signal)}</div></div>` : ''}
+  ${simulation?.key_risk ? `<div class="section"><div class="section-title">KEY_RISKS</div><div style="color:#ff4444;">${escapeHtml(simulation.key_risk)}</div></div>` : ""}
+  ${simulation?.key_signal ? `<div class="section"><div class="section-title">KEY_SIGNALS</div><div style="color:#00ff41;">${escapeHtml(simulation.key_signal)}</div></div>` : ""}
 
   <div class="cta">
     <div style="color:#ff00ff;font-size:18px;margin-bottom:10px;">INTERESTED IN LISTING?</div>
@@ -202,8 +207,8 @@ function generateProposal(reportData) {
       recommendation,
       probability,
       confidence,
-      generated_at: new Date().toISOString()
-    }
+      generated_at: new Date().toISOString(),
+    },
   };
 }
 
@@ -211,43 +216,44 @@ function generateProposal(reportData) {
  * Escape HTML special characters to prevent XSS
  */
 function escapeHtml(str) {
-  if (!str) return '';
+  if (!str) return "";
   return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 function getClusterEmoji(name) {
   const map = {
-    degen: '&#127920;',      // slot machine
-    whale: '&#128011;',      // whale
-    institutional: '&#127974;', // bank
-    community: '&#128101;'   // people
+    degen: "&#127920;", // slot machine
+    whale: "&#128011;", // whale
+    institutional: "&#127974;", // bank
+    community: "&#128101;", // people
   };
-  return map[name] || '&#128202;'; // chart
+  return map[name] || "&#128202;"; // chart
 }
 
 function buildScanSection(scan, token) {
-  if (!scan && !token) return '<div style="color:#888;">No scan data available</div>';
+  if (!scan && !token)
+    return '<div style="color:#888;">No scan data available</div>';
   const d = scan || token || {};
   return `
-    <div class="metric"><span class="metric-label">Name</span><span class="metric-value">${escapeHtml(d.name || d.ticker || 'N/A')}</span></div>
-    <div class="metric"><span class="metric-label">Market Cap</span><span class="metric-value">${d.market_cap ? '$' + Number(d.market_cap).toLocaleString() : 'N/A'}</span></div>
-    <div class="metric"><span class="metric-label">Liquidity</span><span class="metric-value">${d.liquidity_usd ? '$' + Number(d.liquidity_usd).toLocaleString() : 'N/A'}</span></div>
-    <div class="metric"><span class="metric-label">24h Volume</span><span class="metric-value">${d.volume_24h ? '$' + Number(d.volume_24h).toLocaleString() : 'N/A'}</span></div>
-    <div class="metric"><span class="metric-label">Price Change 24h</span><span class="metric-value">${d.price_change_24h ? d.price_change_24h + '%' : 'N/A'}</span></div>
+    <div class="metric"><span class="metric-label">Name</span><span class="metric-value">${escapeHtml(d.name || d.ticker || "N/A")}</span></div>
+    <div class="metric"><span class="metric-label">Market Cap</span><span class="metric-value">${d.market_cap ? "$" + Number(d.market_cap).toLocaleString() : "N/A"}</span></div>
+    <div class="metric"><span class="metric-label">Liquidity</span><span class="metric-value">${d.liquidity_usd ? "$" + Number(d.liquidity_usd).toLocaleString() : "N/A"}</span></div>
+    <div class="metric"><span class="metric-label">24h Volume</span><span class="metric-value">${d.volume_24h ? "$" + Number(d.volume_24h).toLocaleString() : "N/A"}</span></div>
+    <div class="metric"><span class="metric-label">Price Change 24h</span><span class="metric-value">${d.price_change_24h ? d.price_change_24h + "%" : "N/A"}</span></div>
   `;
 }
 
 function buildSafetySection(safety) {
   if (!safety) return '<div style="color:#888;">No safety data available</div>';
   return `
-    <div class="metric"><span class="metric-label">Safety Score</span><span class="metric-value">${safety.score || safety.safety_score || 'N/A'}/100</span></div>
-    <div class="metric"><span class="metric-label">Mint Authority</span><span class="metric-value">${safety.mint_revoked ? '&#10003; Disabled' : '&#9888; Active'}</span></div>
-    <div class="metric"><span class="metric-label">LP Lock</span><span class="metric-value">${safety.lp_locked ? '&#10003; Locked' : '&#9888; Not Locked'}</span></div>
+    <div class="metric"><span class="metric-label">Safety Score</span><span class="metric-value">${safety.score || safety.safety_score || "N/A"}/100</span></div>
+    <div class="metric"><span class="metric-label">Mint Authority</span><span class="metric-value">${safety.mint_revoked ? "&#10003; Disabled" : "&#9888; Active"}</span></div>
+    <div class="metric"><span class="metric-label">LP Lock</span><span class="metric-value">${safety.lp_locked ? "&#10003; Locked" : "&#9888; Not Locked"}</span></div>
   `;
 }
 

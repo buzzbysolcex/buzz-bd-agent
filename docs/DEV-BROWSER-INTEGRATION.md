@@ -53,13 +53,13 @@ Use `--connect` mode to attach to Chrome/146 on port 9222. Zero additional Chrom
 
 ## 3. WAR ROOM COMMANDS (Phase 2)
 
-| Command | Function |
-|---------|----------|
-| `/dbrun <script>` | Execute dev-browser script (headless), return output |
-| `/dbconnect <script>` | Execute against existing Chrome/146 session |
-| `/dbpage <name> <url>` | Create/navigate a persistent named page |
-| `/dbscrape <name>` | Run extraction script on named page |
-| `/dblist` | List all persistent pages |
+| Command                | Function                                             |
+| ---------------------- | ---------------------------------------------------- |
+| `/dbrun <script>`      | Execute dev-browser script (headless), return output |
+| `/dbconnect <script>`  | Execute against existing Chrome/146 session          |
+| `/dbpage <name> <url>` | Create/navigate a persistent named page              |
+| `/dbscrape <name>`     | Run extraction script on named page                  |
+| `/dblist`              | List all persistent pages                            |
 
 Coexist with existing `/browse`, `/scrape`, `/click`. No breaking changes.
 
@@ -77,12 +77,14 @@ await page.waitForTimeout(3000);
 
 const trending = await page.evaluate(() => {
   const rows = document.querySelectorAll('[data-testid="pair-row"]');
-  return Array.from(rows).slice(0, 20).map(row => ({
-    name: row.querySelector('.pair-name')?.textContent?.trim(),
-    price: row.querySelector('.price')?.textContent?.trim(),
-    change: row.querySelector('.change-24h')?.textContent?.trim(),
-    volume: row.querySelector('.volume')?.textContent?.trim()
-  }));
+  return Array.from(rows)
+    .slice(0, 20)
+    .map((row) => ({
+      name: row.querySelector(".pair-name")?.textContent?.trim(),
+      price: row.querySelector(".price")?.textContent?.trim(),
+      change: row.querySelector(".change-24h")?.textContent?.trim(),
+      volume: row.querySelector(".volume")?.textContent?.trim(),
+    }));
 });
 
 console.log(JSON.stringify(trending));
@@ -104,15 +106,18 @@ const siteData = await page.evaluate(() => ({
   hasTeamPage: !!document.querySelector('a[href*="team"]'),
   hasDocs: !!document.querySelector('a[href*="docs"]'),
   hasGitHub: !!document.querySelector('a[href*="github"]'),
-  socialLinks: Array.from(document.querySelectorAll('a[href*="twitter"], a[href*="telegram"], a[href*="discord"]'))
-    .map(a => a.href)
+  socialLinks: Array.from(
+    document.querySelectorAll(
+      'a[href*="twitter"], a[href*="telegram"], a[href*="discord"]',
+    ),
+  ).map((a) => a.href),
 }));
 
 // Step 2: Check Twitter (same session)
-await page.goto(siteData.socialLinks.find(l => l.includes('twitter')) || '');
+await page.goto(siteData.socialLinks.find((l) => l.includes("twitter")) || "");
 const twitterData = await page.evaluate(() => ({
   followers: document.querySelector('[data-testid="followers"]')?.textContent,
-  lastPost: document.querySelector('time')?.getAttribute('datetime')
+  lastPost: document.querySelector("time")?.getAttribute("datetime"),
 }));
 
 // Step 3: Return combined BD intel
@@ -125,12 +130,12 @@ Three pages, one script, zero screenshots. Structured JSON to bd-proposer.
 
 ## 6. RESOURCE IMPACT
 
-| Resource | Current | After dev-browser |
-|----------|---------|-------------------|
-| RAM (16GB) | ~1.2GB Chrome + Docker + Claude Code | +200-400MB (shared if `--connect`) |
-| CPU (8 vCPU) | Comfortable | QuickJS = lightweight |
-| Disk | ~40GB | +~500MB for Playwright/Chromium |
-| Monthly cost | $0 | $0 |
+| Resource     | Current                              | After dev-browser                  |
+| ------------ | ------------------------------------ | ---------------------------------- |
+| RAM (16GB)   | ~1.2GB Chrome + Docker + Claude Code | +200-400MB (shared if `--connect`) |
+| CPU (8 vCPU) | Comfortable                          | QuickJS = lightweight              |
+| Disk         | ~40GB                                | +~500MB for Playwright/Chromium    |
+| Monthly cost | $0                                   | $0                                 |
 
 CX43 handles both easily. `--connect` mode = zero additional Chrome memory.
 
@@ -138,11 +143,11 @@ CX43 handles both easily. `--connect` mode = zero additional Chrome memory.
 
 ## 7. SECURITY
 
-| Concern | Browser Use CLI | dev-browser |
-|---------|----------------|-------------|
+| Concern         | Browser Use CLI      | dev-browser              |
+| --------------- | -------------------- | ------------------------ |
 | Host filesystem | Full access (Python) | NO access (WASM sandbox) |
-| Host network | Full access | NO access |
-| File writes | Anywhere on host | ~/.dev-browser/tmp/ only |
+| Host network    | Full access          | NO access                |
+| File writes     | Anywhere on host     | ~/.dev-browser/tmp/ only |
 
 dev-browser is objectively more secure for autonomous browser tasks.
 
@@ -150,15 +155,15 @@ dev-browser is objectively more secure for autonomous browser tasks.
 
 ## 8. TIMELINE
 
-| When | Action | Effort |
-|------|--------|--------|
-| Now (Day 41) | Install + test on Hetzner | 30 min |
-| Post-Sprint Week 1 | Test --connect to Chrome/146 | 1 hour |
-| Post-Sprint Week 2 | Add /dbrun and /dblist War Room commands | 2-3 hours |
-| Post-Sprint Week 3 | Rewrite cron #29 (DexScreener) as dev-browser script | 2 hours |
-| Post-Sprint Week 3 | Rewrite cron #30 (Virtuals) as dev-browser script | 1 hour |
-| Post-Sprint Week 4 | BD Contact Screening automation (Phase 4) | 3-4 hours |
-| Month 2 | Deprecate Browser Use CLI commands | When ready |
+| When               | Action                                               | Effort     |
+| ------------------ | ---------------------------------------------------- | ---------- |
+| Now (Day 41)       | Install + test on Hetzner                            | 30 min     |
+| Post-Sprint Week 1 | Test --connect to Chrome/146                         | 1 hour     |
+| Post-Sprint Week 2 | Add /dbrun and /dblist War Room commands             | 2-3 hours  |
+| Post-Sprint Week 3 | Rewrite cron #29 (DexScreener) as dev-browser script | 2 hours    |
+| Post-Sprint Week 3 | Rewrite cron #30 (Virtuals) as dev-browser script    | 1 hour     |
+| Post-Sprint Week 4 | BD Contact Screening automation (Phase 4)            | 3-4 hours  |
+| Month 2            | Deprecate Browser Use CLI commands                   | When ready |
 
 Total: ~15 hours over 4-6 weeks.
 
@@ -174,6 +179,6 @@ Total: ~15 hours over 4-6 weeks.
 
 ---
 
-*Complement then migrate. No rushing. No breaking what works.*
-*This gives Buzz real hands and eyes — structured data, not screenshots.*
-*Built by Opus | For Ogie | Bismillah* 🤲
+_Complement then migrate. No rushing. No breaking what works._
+_This gives Buzz real hands and eyes — structured data, not screenshots._
+_Built by Opus | For Ogie | Bismillah_ 🤲

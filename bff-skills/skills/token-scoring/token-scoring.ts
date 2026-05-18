@@ -24,20 +24,20 @@ const HIRO_API = "https://api.mainnet.hiro.so";
 
 const SCORING_FACTORS = {
   // Market (30 pts)
-  market_cap:       { max: 10, category: "market" },
-  liquidity:        { max: 10, category: "market" },
-  volume:           { max: 10, category: "market" },
+  market_cap: { max: 10, category: "market" },
+  liquidity: { max: 10, category: "market" },
+  volume: { max: 10, category: "market" },
   // Safety (30 pts)
-  contract_safety:  { max: 15, category: "safety" },
-  holder_dist:      { max: 15, category: "safety" },
+  contract_safety: { max: 15, category: "safety" },
+  holder_dist: { max: 15, category: "safety" },
   // Social (20 pts)
-  team_identity:    { max: 10, category: "social" },
-  social_presence:  { max: 10, category: "social" },
+  team_identity: { max: 10, category: "social" },
+  social_presence: { max: 10, category: "social" },
   // Quality (20 pts)
-  token_age:        { max: 5, category: "quality" },
+  token_age: { max: 5, category: "quality" },
   deployer_history: { max: 5, category: "quality" },
-  web_footprint:    { max: 5, category: "quality" },
-  momentum:         { max: 5, category: "quality" }
+  web_footprint: { max: 5, category: "quality" },
+  momentum: { max: 5, category: "quality" },
 };
 
 // ═══════════════════════════════════════
@@ -59,7 +59,9 @@ async function fetchJSON(url: string, timeout = 10000): Promise<any> {
 }
 
 async function fetchDexScreener(address: string): Promise<any> {
-  const data = await fetchJSON(`${DEXSCREENER_API}/latest/dex/search?q=${address}`);
+  const data = await fetchJSON(
+    `${DEXSCREENER_API}/latest/dex/search?q=${address}`,
+  );
   if (!data?.pairs?.length) return null;
   const pair = data.pairs[0];
   return {
@@ -72,13 +74,15 @@ async function fetchDexScreener(address: string): Promise<any> {
     pair_created_at: pair.pairCreatedAt,
     chain: pair.chainId,
     token_name: pair.baseToken?.name,
-    token_symbol: pair.baseToken?.symbol
+    token_symbol: pair.baseToken?.symbol,
   };
 }
 
 async function fetchCoinGecko(address: string, chain: string): Promise<any> {
   const cgChain = chain === "bsc" ? "binance-smart-chain" : chain;
-  const data = await fetchJSON(`${COINGECKO_API}/coins/${cgChain}/contract/${address}`);
+  const data = await fetchJSON(
+    `${COINGECKO_API}/coins/${cgChain}/contract/${address}`,
+  );
   if (!data?.id) return null;
   return {
     found: true,
@@ -86,18 +90,20 @@ async function fetchCoinGecko(address: string, chain: string): Promise<any> {
     symbol: data.symbol,
     market_cap: data.market_data?.market_cap?.usd || 0,
     total_supply: data.market_data?.total_supply || 0,
-    circulating_supply: data.market_data?.circulating_supply || 0
+    circulating_supply: data.market_data?.circulating_supply || 0,
   };
 }
 
 async function fetchRugCheck(address: string): Promise<any> {
-  const data = await fetchJSON(`${RUGCHECK_API}/tokens/${address}/report/summary`);
+  const data = await fetchJSON(
+    `${RUGCHECK_API}/tokens/${address}/report/summary`,
+  );
   if (!data) return { found: false, score: 50, verdict: "unknown" };
   return {
     found: true,
     score: data.score || 50,
     verdict: data.verdict || "unknown",
-    risks: data.risks || []
+    risks: data.risks || [],
   };
 }
 
@@ -107,7 +113,9 @@ async function fetchRugCheck(address: string): Promise<any> {
 
 async function fetchStacksToken(contractId: string): Promise<any> {
   // contractId format: SP...address.token-name
-  const data = await fetchJSON(`${HIRO_API}/extended/v1/tokens/ft/metadata/${contractId}`);
+  const data = await fetchJSON(
+    `${HIRO_API}/extended/v1/tokens/ft/metadata/${contractId}`,
+  );
   if (!data) return null;
   return {
     found: true,
@@ -115,7 +123,7 @@ async function fetchStacksToken(contractId: string): Promise<any> {
     symbol: data.symbol || null,
     decimals: data.decimals || 0,
     total_supply: data.total_supply || "0",
-    description: data.description || null
+    description: data.description || null,
   };
 }
 
@@ -162,9 +170,10 @@ function scoreSafety(rugcheck: any): number {
 function scoreHolderDist(coingecko: any): number {
   // Without direct holder data, estimate from circulating/total supply ratio
   if (!coingecko?.found) return 7;
-  const ratio = coingecko.total_supply > 0
-    ? coingecko.circulating_supply / coingecko.total_supply
-    : 0;
+  const ratio =
+    coingecko.total_supply > 0
+      ? coingecko.circulating_supply / coingecko.total_supply
+      : 0;
   if (ratio >= 0.8) return 15;
   if (ratio >= 0.5) return 10;
   if (ratio >= 0.3) return 5;
@@ -194,15 +203,26 @@ function classifyToken(score: number): string {
 }
 
 function dualGateCheck(fundamentalsScore: number, marketScore: number) {
-  const fMax = 70, mMax = 30;
+  const fMax = 70,
+    mMax = 30;
   const fThreshold = Math.floor(fMax * 0.6); // 42
   const mThreshold = Math.floor(mMax * 0.6); // 18
   const fPass = fundamentalsScore >= fThreshold;
   const mPass = marketScore >= mThreshold;
   return {
     pass: fPass && mPass,
-    fundamentals: { score: fundamentalsScore, max: fMax, threshold: fThreshold, pass: fPass },
-    market: { score: marketScore, max: mMax, threshold: mThreshold, pass: mPass }
+    fundamentals: {
+      score: fundamentalsScore,
+      max: fMax,
+      threshold: fThreshold,
+      pass: fPass,
+    },
+    market: {
+      score: marketScore,
+      max: mMax,
+      threshold: mThreshold,
+      pass: mPass,
+    },
   };
 }
 
@@ -219,20 +239,26 @@ async function doctor() {
   const cg = await fetchJSON(`${COINGECKO_API}/ping`);
   checks.coingecko = cg?.gecko_says ? "ok" : "error";
 
-  const rc = await fetchJSON(`${RUGCHECK_API}/tokens/So11111111111111111111111111111111111111112/report/summary`);
+  const rc = await fetchJSON(
+    `${RUGCHECK_API}/tokens/So11111111111111111111111111111111111111112/report/summary`,
+  );
   checks.rugcheck = rc ? "ok" : "error";
 
   const hiro = await fetchJSON(`${HIRO_API}/v2/info`);
   checks.hiro_stacks = hiro?.stacks_tip_height ? "ok" : "error";
 
-  const allOk = Object.values(checks).every(v => v === "ok");
+  const allOk = Object.values(checks).every((v) => v === "ok");
 
-  console.log(JSON.stringify({
-    status: allOk ? "success" : "degraded",
-    action: allOk ? "all data sources reachable — ready to score" : "some sources degraded — scoring will use available data",
-    data: { sources: checks, ready: allOk },
-    error: null
-  }));
+  console.log(
+    JSON.stringify({
+      status: allOk ? "success" : "degraded",
+      action: allOk
+        ? "all data sources reachable — ready to score"
+        : "some sources degraded — scoring will use available data",
+      data: { sources: checks, ready: allOk },
+      error: null,
+    }),
+  );
 }
 
 async function run(address?: string, chain?: string) {
@@ -240,19 +266,23 @@ async function run(address?: string, chain?: string) {
   if (!address) {
     const trending = await fetchJSON(`${DEXSCREENER_API}/token-boosts/top/v1`);
     if (Array.isArray(trending) && trending.length > 0) {
-      const first = trending.find((t: any) => ["solana", "base", "bsc", "stacks"].includes(t.chainId));
+      const first = trending.find((t: any) =>
+        ["solana", "base", "bsc", "stacks"].includes(t.chainId),
+      );
       if (first) {
         address = first.tokenAddress;
         chain = first.chainId;
       }
     }
     if (!address) {
-      console.log(JSON.stringify({
-        status: "error",
-        action: "provide a token address with --address flag",
-        data: null,
-        error: "No address provided and no trending tokens found"
-      }));
+      console.log(
+        JSON.stringify({
+          status: "error",
+          action: "provide a token address with --address flag",
+          data: null,
+          error: "No address provided and no trending tokens found",
+        }),
+      );
       return;
     }
   }
@@ -273,16 +303,18 @@ async function run(address?: string, chain?: string) {
   const [dexData, cgData, rugData] = await Promise.all([
     fetchDexScreener(address),
     fetchCoinGecko(address, chain),
-    fetchRugCheck(address)
+    fetchRugCheck(address),
   ]);
 
   if (!dexData?.found) {
-    console.log(JSON.stringify({
-      status: "error",
-      action: "token not found on DexScreener — cannot score",
-      data: { address, chain },
-      error: "Token not found on primary data source"
-    }));
+    console.log(
+      JSON.stringify({
+        status: "error",
+        action: "token not found on DexScreener — cannot score",
+        data: { address, chain },
+        error: "Token not found on primary data source",
+      }),
+    );
     return;
   }
 
@@ -300,7 +332,8 @@ async function run(address?: string, chain?: string) {
   const ageScore = scoreTokenAge(dexData.pair_created_at);
   // deployer_history: pump.fun detection + pair age as proxy for deployer quality
   let deployerScore = 3;
-  if (isPumpFun(address)) deployerScore = 1; // pump.fun deployers are anonymous
+  if (isPumpFun(address))
+    deployerScore = 1; // pump.fun deployers are anonymous
   else if (ageScore >= 4) deployerScore = 4; // long-lived pairs suggest committed deployer
 
   // web_footprint: CoinGecko listing = project has website, docs, team page
@@ -309,10 +342,13 @@ async function run(address?: string, chain?: string) {
   // momentum: 24h price change magnitude (not just direction)
   let momentumScore = 2;
   const priceChange = Math.abs(dexData.price_change_24h || 0);
-  if (dexData.price_change_24h > 5) momentumScore = 5;      // strong positive
-  else if (dexData.price_change_24h > 0) momentumScore = 4;  // mild positive
-  else if (dexData.price_change_24h > -10) momentumScore = 3; // mild negative
-  else momentumScore = 1;                                      // heavy dump
+  if (dexData.price_change_24h > 5)
+    momentumScore = 5; // strong positive
+  else if (dexData.price_change_24h > 0)
+    momentumScore = 4; // mild positive
+  else if (dexData.price_change_24h > -10)
+    momentumScore = 3; // mild negative
+  else momentumScore = 1; // heavy dump
 
   // team_identity: CoinGecko listing as proxy (listed projects have verified team info)
   const teamScore = cgData?.found ? 6 : 3;
@@ -333,18 +369,38 @@ async function run(address?: string, chain?: string) {
   }
 
   // Compute composite
-  let composite = mcapScore + liqScore + volScore + safetyScore + holderScore +
-    ageScore + deployerScore + webScore + momentumScore + teamScore + socialScore - pumpPenalty;
+  let composite =
+    mcapScore +
+    liqScore +
+    volScore +
+    safetyScore +
+    holderScore +
+    ageScore +
+    deployerScore +
+    webScore +
+    momentumScore +
+    teamScore +
+    socialScore -
+    pumpPenalty;
   composite = Math.max(0, Math.min(100, composite));
 
   // Dual-gate
-  const fundamentals = safetyScore + holderScore + ageScore + deployerScore + webScore + momentumScore;
+  const fundamentals =
+    safetyScore +
+    holderScore +
+    ageScore +
+    deployerScore +
+    webScore +
+    momentumScore;
   const market = teamScore + socialScore + mcapScore + liqScore + volScore;
   const gate = dualGateCheck(fundamentals, market);
 
   // Classification
   const rawClass = classifyToken(composite);
-  const effectiveClass = (rawClass === "hot" || rawClass === "qualified") && !gate.pass ? "watch" : rawClass;
+  const effectiveClass =
+    (rawClass === "hot" || rawClass === "qualified") && !gate.pass
+      ? "watch"
+      : rawClass;
 
   // Verdict
   let verdict = "REJECT";
@@ -352,42 +408,44 @@ async function run(address?: string, chain?: string) {
   else if (effectiveClass === "qualified") verdict = "MONITOR";
   else if (effectiveClass === "watch") verdict = "MONITOR";
 
-  console.log(JSON.stringify({
-    status: "success",
-    action: `Token scored ${composite}/100 — ${verdict}. Classification: ${effectiveClass}.`,
-    data: {
-      address,
-      chain,
-      token_name: dexData.token_name,
-      token_symbol: dexData.token_symbol,
-      composite_score: composite,
-      classification: effectiveClass,
-      dual_gate: gate,
-      components: {
-        safety: { score: safetyScore, max: 15 },
-        holder_dist: { score: holderScore, max: 15 },
-        market_cap: { score: mcapScore, max: 10 },
-        liquidity: { score: liqScore, max: 10 },
-        volume: { score: volScore, max: 10 },
-        team_identity: { score: teamScore, max: 10 },
-        social_presence: { score: socialScore, max: 10 },
-        token_age: { score: ageScore, max: 5 },
-        deployer_history: { score: deployerScore, max: 5 },
-        web_footprint: { score: webScore, max: 5 },
-        momentum: { score: momentumScore, max: 5 }
+  console.log(
+    JSON.stringify({
+      status: "success",
+      action: `Token scored ${composite}/100 — ${verdict}. Classification: ${effectiveClass}.`,
+      data: {
+        address,
+        chain,
+        token_name: dexData.token_name,
+        token_symbol: dexData.token_symbol,
+        composite_score: composite,
+        classification: effectiveClass,
+        dual_gate: gate,
+        components: {
+          safety: { score: safetyScore, max: 15 },
+          holder_dist: { score: holderScore, max: 15 },
+          market_cap: { score: mcapScore, max: 10 },
+          liquidity: { score: liqScore, max: 10 },
+          volume: { score: volScore, max: 10 },
+          team_identity: { score: teamScore, max: 10 },
+          social_presence: { score: socialScore, max: 10 },
+          token_age: { score: ageScore, max: 5 },
+          deployer_history: { score: deployerScore, max: 5 },
+          web_footprint: { score: webScore, max: 5 },
+          momentum: { score: momentumScore, max: 5 },
+        },
+        market_data: {
+          price_usd: dexData.price_usd,
+          market_cap: dexData.market_cap,
+          liquidity_usd: dexData.liquidity_usd,
+          volume_24h: dexData.volume_24h,
+          price_change_24h: dexData.price_change_24h,
+        },
+        flags,
+        verdict,
       },
-      market_data: {
-        price_usd: dexData.price_usd,
-        market_cap: dexData.market_cap,
-        liquidity_usd: dexData.liquidity_usd,
-        volume_24h: dexData.volume_24h,
-        price_change_24h: dexData.price_change_24h
-      },
-      flags,
-      verdict
-    },
-    error: null
-  }));
+      error: null,
+    }),
+  );
 }
 
 // ═══════════════════════════════════════
@@ -407,10 +465,14 @@ if (command === "doctor") {
 } else if (command === "run") {
   run(getArg("address"), getArg("chain"));
 } else {
-  console.log(JSON.stringify({
-    status: "error",
-    action: "use 'doctor' or 'run' command",
-    data: { commands: ["doctor", "run --address <contract> --chain <chain>"] },
-    error: `Unknown command: ${command || "(none)"}`
-  }));
+  console.log(
+    JSON.stringify({
+      status: "error",
+      action: "use 'doctor' or 'run' command",
+      data: {
+        commands: ["doctor", "run --address <contract> --chain <chain>"],
+      },
+      error: `Unknown command: ${command || "(none)"}`,
+    }),
+  );
 }

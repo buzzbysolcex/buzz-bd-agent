@@ -51,10 +51,7 @@
       "description": "Score 70-84 but safety WARN = re-run safety + wallet with deeper scan, escalate",
       "auto_execute": false,
       "escalate_to_ogie": true,
-      "re_scan_agents": [
-        "safety-agent",
-        "wallet-agent"
-      ]
+      "re_scan_agents": ["safety-agent", "wallet-agent"]
     },
     {
       "id": "R004",
@@ -161,10 +158,7 @@
       "priority": 0,
       "condition": {
         "price_change_24h_max": -40,
-        "pipeline_stage": [
-          "prospect",
-          "contacted"
-        ]
+        "pipeline_stage": ["prospect", "contacted"]
       },
       "action": "PAUSE_OUTREACH",
       "playbook": null,
@@ -234,10 +228,6 @@
       "api_keys",
       "wallet_private_keys"
     ],
-    "chains_supported": [
-      "solana",
-      "base",
-      "bsc"
-    ]
+    "chains_supported": ["solana", "base", "bsc"]
   }
 }

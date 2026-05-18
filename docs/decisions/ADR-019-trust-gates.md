@@ -10,6 +10,7 @@ outreach execution. Binary human-approval is too slow. Fully autonomous
 is too risky. Graduated trust solves both.
 
 **Decision:**
+
 - 5 trust levels (0-4), stored in SQLite, survives reboots
 - Level 0: all approval required (default)
 - Level 4: auto-send for 85+ scores (after 50 clean, 0 complaints, 80% accuracy)
@@ -19,6 +20,7 @@ is too risky. Graduated trust solves both.
 - AION Wallet Guard: additional pre-execution check when enabled
 
 **Consequences:**
+
 - Buzz earns its own permissions over time
 - Single complaint resets everything (safety first)
 - Audit trail: every level change logged with reason

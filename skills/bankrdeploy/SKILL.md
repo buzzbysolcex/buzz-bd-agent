@@ -11,12 +11,12 @@
 
 ## Fee Recipient Types
 
-| type | value example | Resolves to |
-|------|---------------|-------------|
-| wallet | 0x4b36...282Ab | Direct EVM address |
-| x | 0xdeployer | Twitter handle → Bankr wallet |
-| farcaster | dwr.eth | Farcaster → verified EVM |
-| ens | vitalik.eth | ENS → address |
+| type      | value example  | Resolves to                   |
+| --------- | -------------- | ----------------------------- |
+| wallet    | 0x4b36...282Ab | Direct EVM address            |
+| x         | 0xdeployer     | Twitter handle → Bankr wallet |
+| farcaster | dwr.eth        | Farcaster → verified EVM      |
+| ens       | vitalik.eth    | ENS → address                 |
 
 ## Rules
 
@@ -28,13 +28,13 @@
 
 ## Fee Split
 
-| Role | Share |
-|------|-------|
-| Creator | 57% |
-| Partner (Buzz) | ~18% |
-| Bankr | ~18% |
-| Ecosystem | ~2% |
-| Protocol | 5% |
+| Role           | Share |
+| -------------- | ----- |
+| Creator        | 57%   |
+| Partner (Buzz) | ~18%  |
+| Bankr          | ~18%  |
+| Ecosystem      | ~2%   |
+| Protocol       | 5%    |
 
 ## Module Location
 
@@ -45,4 +45,5 @@
 `BANKR_PARTNER_KEY` — set in Akash SDL
 
 ---
-*BankrDeploy v1.0.0 — Feb 21, 2026*
+
+_BankrDeploy v1.0.0 — Feb 21, 2026_

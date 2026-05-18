@@ -6,14 +6,14 @@ ScorerAgent covers Layer 2 (Score & Qualify) of the 4-Layer Intelligence Archite
 
 ## Decisions
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| Architecture | Single class, private scorer methods | Direct port of score.js, matches ScannerAgent pattern |
-| Config source | Hardcoded Python constants | Simpler, testable, no file I/O. Same values as scoring.json |
-| Input | Full token_data dict from caller | Caller assembles data from all agents before scoring |
-| Missing data | Defaults to 0/empty | No exceptions for incomplete data |
-| Grade system | Status labels (HOT/QUALIFIED/WATCH/SKIP) | Matches existing v5.3.8 system |
-| DFlow | Separate method, not part of catalysts | Distinct concern with its own logic |
+| Decision      | Choice                                   | Rationale                                                   |
+| ------------- | ---------------------------------------- | ----------------------------------------------------------- |
+| Architecture  | Single class, private scorer methods     | Direct port of score.js, matches ScannerAgent pattern       |
+| Config source | Hardcoded Python constants               | Simpler, testable, no file I/O. Same values as scoring.json |
+| Input         | Full token_data dict from caller         | Caller assembles data from all agents before scoring        |
+| Missing data  | Defaults to 0/empty                      | No exceptions for incomplete data                           |
+| Grade system  | Status labels (HOT/QUALIFIED/WATCH/SKIP) | Matches existing v5.3.8 system                              |
+| DFlow         | Separate method, not part of catalysts   | Distinct concern with its own logic                         |
 
 ## Interface
 
@@ -114,38 +114,38 @@ ScorerAgent(BaseAgent)
 
 ### Liquidity (0-30 points)
 
-| Level | Min USD | Points |
-|-------|---------|--------|
-| Excellent | $500K | 30 |
-| Good | $250K | 22 |
-| Fair | $100K | 15 |
-| Poor | $50K | 8 |
-| None | $0 | 0 |
+| Level     | Min USD | Points |
+| --------- | ------- | ------ |
+| Excellent | $500K   | 30     |
+| Good      | $250K   | 22     |
+| Fair      | $100K   | 15     |
+| Poor      | $50K    | 8      |
+| None      | $0      | 0      |
 
 ### Volume 24h (0-25 points)
 
-| Level | Min USD | Points |
-|-------|---------|--------|
-| Excellent | $1M | 25 |
-| Good | $500K | 18 |
-| Fair | $100K | 12 |
-| Poor | $50K | 6 |
-| None | $0 | 0 |
+| Level     | Min USD | Points |
+| --------- | ------- | ------ |
+| Excellent | $1M     | 25     |
+| Good      | $500K   | 18     |
+| Fair      | $100K   | 12     |
+| Poor      | $50K    | 6      |
+| None      | $0      | 0      |
 
 ### Age (0-15 points)
 
-| Range | Points |
-|-------|--------|
-| 7-30 days (optimal) | 15 |
-| 3-7 days (new but stable) | 10 |
-| 30-90 days (mature) | 10 |
-| >90 days (too old) | 5 |
-| <2 days (too new) | 0 |
-| None/missing | 0 |
+| Range                     | Points |
+| ------------------------- | ------ |
+| 7-30 days (optimal)       | 15     |
+| 3-7 days (new but stable) | 10     |
+| 30-90 days (mature)       | 10     |
+| >90 days (too old)        | 5      |
+| <2 days (too new)         | 0      |
+| None/missing              | 0      |
 
 ### Community (0-15 points)
 
-Weighted sum: twitter(0.3) + telegram(0.3) + discord(0.2) + engagement(0.2). Each factor scores proportionally vs threshold (10K twitter, 5K telegram, 3K discord, 5% engagement), capped at its weight * 15.
+Weighted sum: twitter(0.3) + telegram(0.3) + discord(0.2) + engagement(0.2). Each factor scores proportionally vs threshold (10K twitter, 5K telegram, 3K discord, 5% engagement), capped at its weight \* 15.
 
 ### Contract Safety (0-15 points)
 
@@ -173,12 +173,12 @@ Auto-rejected tokens get score=0, status=SKIP, recommendation=SKIP.
 
 ### Status Thresholds
 
-| Score | Status | Recommendation |
-|-------|--------|----------------|
-| 85-100 | HOT | PIPELINE |
-| 70-84 | QUALIFIED | PIPELINE |
-| 50-69 | WATCH | WATCH |
-| 0-49 | SKIP | SKIP |
+| Score  | Status    | Recommendation |
+| ------ | --------- | -------------- |
+| 85-100 | HOT       | PIPELINE       |
+| 70-84  | QUALIFIED | PIPELINE       |
+| 50-69  | WATCH     | WATCH          |
+| 0-49   | SKIP      | SKIP           |
 
 ## Data Flow
 

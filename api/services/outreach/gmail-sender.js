@@ -5,12 +5,12 @@
 // Refresh token is PERMANENT — no expiry (proven over 2 months)
 // v9.1: HTML emails with professional signature
 
-const { google } = require('googleapis');
-const { feature } = require('../../lib/feature-flags');
+const { google } = require("googleapis");
+const { feature } = require("../../lib/feature-flags");
 
 const GMAIL_CONFIG = {
-  from: process.env.GMAIL_ADDRESS || 'buzzbysolcex@gmail.com',
-  cc: ['dino@solcex.cc', 'ogie.solcexexchange@gmail.com'],
+  from: process.env.GMAIL_ADDRESS || "buzzbysolcex@gmail.com",
+  cc: ["dino@solcex.cc", "ogie.solcexexchange@gmail.com"],
   clientId: process.env.GMAIL_CLIENT_ID,
   clientSecret: process.env.GMAIL_CLIENT_SECRET,
   refreshToken: process.env.GMAIL_REFRESH_TOKEN,
@@ -49,17 +49,23 @@ const SIGNATURE_HTML = `
 let oauth2Client = null;
 
 function initGmail() {
-  if (!GMAIL_CONFIG.clientId || !GMAIL_CONFIG.clientSecret || !GMAIL_CONFIG.refreshToken) {
-    console.warn('[gmail-sender] Gmail credentials not configured — email outreach disabled');
+  if (
+    !GMAIL_CONFIG.clientId ||
+    !GMAIL_CONFIG.clientSecret ||
+    !GMAIL_CONFIG.refreshToken
+  ) {
+    console.warn(
+      "[gmail-sender] Gmail credentials not configured — email outreach disabled",
+    );
     return false;
   }
   oauth2Client = new google.auth.OAuth2(
     GMAIL_CONFIG.clientId,
     GMAIL_CONFIG.clientSecret,
-    'http://localhost'
+    "http://localhost",
   );
   oauth2Client.setCredentials({ refresh_token: GMAIL_CONFIG.refreshToken });
-  console.log('[gmail-sender] Gmail OAuth initialized for', GMAIL_CONFIG.from);
+  console.log("[gmail-sender] Gmail OAuth initialized for", GMAIL_CONFIG.from);
   return true;
 }
 
@@ -67,7 +73,12 @@ function initGmail() {
 function buildRawEmail(to, subject, bodyText, cc = []) {
   const htmlBody = `
     <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
-      ${bodyText.split('\n').map(line => line.trim() ? `<p style="margin: 0 0 10px 0;">${line}</p>` : '').join('')}
+      ${bodyText
+        .split("\n")
+        .map((line) =>
+          line.trim() ? `<p style="margin: 0 0 10px 0;">${line}</p>` : "",
+        )
+        .join("")}
     </div>
     ${SIGNATURE_HTML}
   `;
@@ -75,46 +86,51 @@ function buildRawEmail(to, subject, bodyText, cc = []) {
   const lines = [
     `From: Buzz BD Agent <${GMAIL_CONFIG.from}>`,
     `To: ${to}`,
-    allCc.length > 0 ? `Cc: ${allCc.join(', ')}` : '',
-    `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
-    'MIME-Version: 1.0',
-    'Content-Type: text/html; charset=UTF-8',
-    '',
-    htmlBody
+    allCc.length > 0 ? `Cc: ${allCc.join(", ")}` : "",
+    `Subject: =?UTF-8?B?${Buffer.from(subject).toString("base64")}?=`,
+    "MIME-Version: 1.0",
+    "Content-Type: text/html; charset=UTF-8",
+    "",
+    htmlBody,
   ].filter(Boolean);
 
-  return Buffer.from(lines.join('\r\n'))
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+  return Buffer.from(lines.join("\r\n"))
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 }
 
 // Send an email via Gmail API
 // Set skipFlagCheck=true for direct test sends
-async function sendEmail(toOrOpts, subject, body, { skipFlagCheck = false } = {}) {
+async function sendEmail(
+  toOrOpts,
+  subject,
+  body,
+  { skipFlagCheck = false } = {},
+) {
   // Support both sendEmail(to, subject, body) and sendEmail({to, subject, body/html})
   let to = toOrOpts;
-  if (typeof toOrOpts === 'object' && toOrOpts !== null) {
+  if (typeof toOrOpts === "object" && toOrOpts !== null) {
     to = toOrOpts.to;
     subject = toOrOpts.subject || subject;
     body = toOrOpts.body || toOrOpts.html || body;
     skipFlagCheck = toOrOpts.skipFlagCheck || skipFlagCheck;
   }
-  if (!skipFlagCheck && !feature('AUTO_OUTREACH')) {
-    return { sent: false, error: 'AUTO_OUTREACH flag disabled' };
+  if (!skipFlagCheck && !feature("AUTO_OUTREACH")) {
+    return { sent: false, error: "AUTO_OUTREACH flag disabled" };
   }
   if (!oauth2Client) {
     const initialized = initGmail();
-    if (!initialized) return { sent: false, error: 'Gmail not configured' };
+    if (!initialized) return { sent: false, error: "Gmail not configured" };
   }
 
   try {
-    const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+    const gmail = google.gmail({ version: "v1", auth: oauth2Client });
     const raw = buildRawEmail(to, subject, body);
     const result = await gmail.users.messages.send({
-      userId: 'me',
-      requestBody: { raw }
+      userId: "me",
+      requestBody: { raw },
     });
     return { sent: true, messageId: result.data.id };
   } catch (error) {
@@ -122,15 +138,18 @@ async function sendEmail(toOrOpts, subject, body, { skipFlagCheck = false } = {}
     if (error.code === 401) {
       try {
         await oauth2Client.refreshAccessToken();
-        const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+        const gmail = google.gmail({ version: "v1", auth: oauth2Client });
         const raw = buildRawEmail(to, subject, body);
         const result = await gmail.users.messages.send({
-          userId: 'me',
-          requestBody: { raw }
+          userId: "me",
+          requestBody: { raw },
         });
         return { sent: true, messageId: result.data.id };
       } catch (retryError) {
-        return { sent: false, error: `Gmail auth retry failed: ${retryError.message}` };
+        return {
+          sent: false,
+          error: `Gmail auth retry failed: ${retryError.message}`,
+        };
       }
     }
     return { sent: false, error: `Gmail send failed: ${error.message}` };

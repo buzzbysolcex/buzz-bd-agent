@@ -8,6 +8,7 @@ description: Trigger or check autoDream nightly memory consolidation. Compresses
 Nightly cleanup and memory compression.
 
 ## Usage
+
 ```
 /dream status                   # Check last run + next scheduled
 /dream run                      # Trigger manual consolidation
@@ -15,6 +16,7 @@ Nightly cleanup and memory compression.
 ```
 
 ## What autoDream Does (02:00 UTC)
+
 1. Compress observation_log into daily summaries
 2. Archive dead tokens (no activity >30 days)
 3. Archive completed tasks (task-dag cleanup)

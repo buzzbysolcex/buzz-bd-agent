@@ -8,6 +8,7 @@ description: Check and protect AIBTC signal filing streak. Shows current streak 
 Track and protect the Ionic Nova signal filing streak.
 
 ## Usage
+
 ```
 /streak                         # Quick status
 /streak --history 7             # Last 7 days of signals
@@ -15,6 +16,7 @@ Track and protect the Ionic Nova signal filing streak.
 ```
 
 ## Current Status
+
 - Streak: ~Day 10-12 range
 - Revenue: $200 (8 brief inclusions × $25)
 - Identity: Ionic Nova

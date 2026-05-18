@@ -6,12 +6,12 @@
  * PATCH /api/v1/operator/profile
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { getProfile, updateProfile } = require('../services/operator-profile');
+const { getProfile, updateProfile } = require("../services/operator-profile");
 
 // ─── GET /operator/profile ──────────────────────────
-router.get('/profile', (req, res) => {
+router.get("/profile", (req, res) => {
   try {
     const result = getProfile();
     res.json(result);
@@ -21,11 +21,14 @@ router.get('/profile', (req, res) => {
 });
 
 // ─── PATCH /operator/profile ────────────────────────
-router.patch('/profile', (req, res) => {
+router.patch("/profile", (req, res) => {
   try {
     const patch = req.body;
     if (!patch || Object.keys(patch).length === 0) {
-      return res.status(400).json({ success: false, error: 'request body must contain fields to update' });
+      return res.status(400).json({
+        success: false,
+        error: "request body must contain fields to update",
+      });
     }
     const result = updateProfile(patch);
     if (result.success) res.json(result);

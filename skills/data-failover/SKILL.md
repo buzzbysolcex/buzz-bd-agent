@@ -11,10 +11,12 @@ description: >
 # Data Failover — Token Data Validation Cascade
 
 ## Principle
+
 Every piece of data that touches a business decision MUST be verified
 by at least 2 independent sources. Unverified data = no action.
 
 ## Cascade Order
+
 ```
 1. DexScreener API (FREE, primary)
    ↓ 404 / timeout / incomplete
@@ -29,16 +31,17 @@ by at least 2 independent sources. Unverified data = no action.
 
 ## Validation Rules
 
-| Data Point | Primary | Verification | Required Match |
-|------------|---------|-------------|----------------|
-| Contract Address | DexScreener | Helius on-chain | EXACT match |
-| Token Price | DexScreener | Bankr price query | Within 5% |
-| Market Cap | DexScreener | GeckoTerminal | Within 10% |
-| 24h Volume | DexScreener | GeckoTerminal | Within 15% |
-| LP Status | DexScreener | Helius on-chain LP | Both confirm |
-| Token Existence | DexScreener | Helius getAsset | Must exist |
+| Data Point       | Primary     | Verification       | Required Match |
+| ---------------- | ----------- | ------------------ | -------------- |
+| Contract Address | DexScreener | Helius on-chain    | EXACT match    |
+| Token Price      | DexScreener | Bankr price query  | Within 5%      |
+| Market Cap       | DexScreener | GeckoTerminal      | Within 10%     |
+| 24h Volume       | DexScreener | GeckoTerminal      | Within 15%     |
+| LP Status        | DexScreener | Helius on-chain LP | Both confirm   |
+| Token Existence  | DexScreener | Helius getAsset    | Must exist     |
 
 ## Rules
+
 - Minimum 2 sources required for VALID data
 - CA mismatch between sources → REJECT TOKEN (possible scam)
 - Price variance >5% → FLAG as DISCREPANCY, use DexScreener, alert Ogie
@@ -47,6 +50,7 @@ by at least 2 independent sources. Unverified data = no action.
 - Bankr price check: `bankr prompt "What's the price of $TOKEN on $CHAIN?"`
 
 ## Environment Variables
+
 ```
 DATA_FAILOVER_ENABLED=true
 TOKEN_DATA_PRIMARY=dexscreener

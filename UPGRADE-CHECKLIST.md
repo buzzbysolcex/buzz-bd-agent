@@ -13,21 +13,23 @@
 ## What's New in v2026.2.19 (vs v2026.2.17)
 
 ### Directly Impacts Buzz
-| Area | Fix | Why It Matters |
-|------|-----|----------------|
-| **Telegram/Cron** | Honors explicit topic targets in cron/heartbeat delivery | Cron jobs land in correct TG thread, not last active |
-| **Telegram** | Unified message + channel_post pipeline | Cleaner message handling, fewer edge-case failures |
-| **Telegram** | Tool-failure warnings gated behind verbose mode | Clean Telegram replies by default |
-| **Gateway/Auth** | Auto-generates `gateway.auth.token` on startup | Gateway no longer runs without auth by default |
-| **Security/ACP** | Hardened ACP sessions: idle reaping, burst rate limiting | Safer sub-agent delegation |
-| **Cron/Heartbeat** | Skips heartbeat when HEARTBEAT.md missing/empty | No wasted LLM calls on empty heartbeats |
-| **Streaming** | Keeps assistant streaming active during reasoning | Better response quality from MiniMax |
-| **Security/Cron** | SSRF-guarded cron webhook delivery | Cron webhooks can't be exploited |
-| **Security/Skills** | Rejects symlinks in skill packaging | ClawHub skill security |
-| **Security/Gateway** | Fails startup if hooks.token = gateway.auth.token | Prevents token reuse misconfiguration |
-| **Billing** | Shows active model in billing errors | Easier debugging when cascade fallback fires |
+
+| Area                 | Fix                                                      | Why It Matters                                       |
+| -------------------- | -------------------------------------------------------- | ---------------------------------------------------- |
+| **Telegram/Cron**    | Honors explicit topic targets in cron/heartbeat delivery | Cron jobs land in correct TG thread, not last active |
+| **Telegram**         | Unified message + channel_post pipeline                  | Cleaner message handling, fewer edge-case failures   |
+| **Telegram**         | Tool-failure warnings gated behind verbose mode          | Clean Telegram replies by default                    |
+| **Gateway/Auth**     | Auto-generates `gateway.auth.token` on startup           | Gateway no longer runs without auth by default       |
+| **Security/ACP**     | Hardened ACP sessions: idle reaping, burst rate limiting | Safer sub-agent delegation                           |
+| **Cron/Heartbeat**   | Skips heartbeat when HEARTBEAT.md missing/empty          | No wasted LLM calls on empty heartbeats              |
+| **Streaming**        | Keeps assistant streaming active during reasoning        | Better response quality from MiniMax                 |
+| **Security/Cron**    | SSRF-guarded cron webhook delivery                       | Cron webhooks can't be exploited                     |
+| **Security/Skills**  | Rejects symlinks in skill packaging                      | ClawHub skill security                               |
+| **Security/Gateway** | Fails startup if hooks.token = gateway.auth.token        | Prevents token reuse misconfiguration                |
+| **Billing**          | Shows active model in billing errors                     | Easier debugging when cascade fallback fires         |
 
 ### Post-Deploy Action Required
+
 - **Gateway auth token:** v2026.2.19 auto-generates `gateway.auth.token` on first boot. Verify Telegram bot and external connections work with this new auth.
 - **Run `openclaw doctor`:** New security audit checks added — will flag any misconfigurations.
 - **Check `gateway.auth.mode`:** If previously set to `"none"`, v2026.2.19 will flag this as a security finding.
@@ -42,6 +44,7 @@
 **File:** `deploy.yaml` (Akash SDL)
 
 Changes needed:
+
 - Update container image tag from v2026.2.2 → v2026.2.19
 - Verify resource allocation (CPU, memory, storage) is sufficient for multi-agent
 - Ensure persistent storage mount paths are unchanged:
@@ -49,6 +52,7 @@ Changes needed:
   - `/data/workspace` (workspace dir)
 
 **Verification:**
+
 - [ ] Image tag updated to v2026.2.19
 - [ ] All env vars match Section 3.6 of Ops v5.2.0
 - [ ] Storage mounts unchanged (critical: persistent data survives redeploy)
@@ -63,6 +67,7 @@ Changes needed:
 This is the critical boot script. Must set env vars BEFORE gateway starts or config is ignored.
 
 **Verification:**
+
 - [ ] OPENCLAW_STATE_DIR set before gateway start
 - [ ] OPENCLAW_WORKSPACE_DIR set before gateway start
 - [ ] NPM_CONFIG_PREFIX set for global npm packages
@@ -78,14 +83,17 @@ This is the critical boot script. Must set env vars BEFORE gateway starts or con
 ### Step 3: Include eliza-adapter + plugin-solcex-bd in Build
 
 **Option A: Install at runtime** (entrypoint.sh — already handled)
+
 - Pros: Simpler Dockerfile, always gets latest
 - Cons: Slower cold boot, depends on npm registry availability
 
 **Option B: Bake into Docker image** (recommended for Akash)
+
 - Pros: Fast cold boot, no external dependency at runtime
 - Cons: Needs image rebuild for plugin updates
 
 **Verification:**
+
 - [ ] Dockerfile uses v2026.2.19 base
 - [ ] eliza-adapter pre-installed
 - [ ] plugin-solcex-bd@1.0.0 pre-installed
@@ -99,6 +107,7 @@ This is the critical boot script. Must set env vars BEFORE gateway starts or con
 **File:** `/data/.openclaw/openclaw.json`
 
 Key changes for v2026.2.19:
+
 - Add `gateway.auth.mode: "token"` explicitly
 - Add scout agent alongside main
 - Ensure `hooks.token` ≠ `gateway.auth.token`
@@ -106,6 +115,7 @@ Key changes for v2026.2.19:
 > **⚠️ DO NOT commit API keys to GitHub.** Use environment variables or restore from backup on deploy.
 
 **Verification:**
+
 - [ ] Main agent configured with eliza-adapter + plugin
 - [ ] Scout agent configured for token discovery
 - [ ] MiniMax M2.5 as primary LLM for both agents
@@ -119,6 +129,7 @@ Key changes for v2026.2.19:
 ### Step 5: Test Locally on Mac
 
 **First:** Update your local Mac to v2026.2.19:
+
 ```bash
 npm install -g openclaw@2026.2.19
 # or if using beta:
@@ -160,6 +171,7 @@ openclaw doctor
 ```
 
 **Verification:**
+
 - [ ] v2026.2.19 installed locally
 - [ ] Gateway starts cleanly
 - [ ] Auth token auto-generated on first boot
@@ -201,6 +213,7 @@ git push origin main
 ```
 
 **Verification:**
+
 - [ ] No API keys in any committed files
 - [ ] No wallet private keys
 - [ ] No Firecrawl key
@@ -251,6 +264,7 @@ openclaw doctor
 ### Rollback Plan
 
 If anything fails:
+
 ```bash
 # 1. Close failed deployment
 akash tx deployment close --from=<wallet> --dseq=<new-dseq>
@@ -267,17 +281,17 @@ akash tx deployment create deploy-v2026.2.2-rollback.yaml --from=<wallet>
 
 ## Bangkok 64h Action Plan
 
-| Priority | Task | Time Est |
-|----------|------|----------|
-| 1 | Update local Mac to v2026.2.19 | 15 min |
-| 2 | Update SDL (deploy.yaml) | 30 min |
-| 3 | Update entrypoint.sh | 30 min |
-| 4 | Create/update Dockerfile | 30 min |
-| 5 | Update openclaw.json template | 30 min |
-| 6 | Test locally on Mac — all 12 checks | 2 hrs |
-| 7 | Push to GitHub | 15 min |
-| 8 | Document rollback SDL | 15 min |
-| **Total** | | **~5 hrs** |
+| Priority  | Task                                | Time Est   |
+| --------- | ----------------------------------- | ---------- |
+| 1         | Update local Mac to v2026.2.19      | 15 min     |
+| 2         | Update SDL (deploy.yaml)            | 30 min     |
+| 3         | Update entrypoint.sh                | 30 min     |
+| 4         | Create/update Dockerfile            | 30 min     |
+| 5         | Update openclaw.json template       | 30 min     |
+| 6         | Test locally on Mac — all 12 checks | 2 hrs      |
+| 7         | Push to GitHub                      | 15 min     |
+| 8         | Document rollback SDL               | 15 min     |
+| **Total** |                                     | **~5 hrs** |
 
 ---
 
@@ -299,17 +313,17 @@ buzz-bd-agent/
 
 ## Ops Master Update (Post-Deploy)
 
-| Field | Old Value | New Value |
-|-------|-----------|-----------|
-| Current on Buzz (Akash) | v2026.2.2 | **v2026.2.19** |
-| Current on Mac (local) | v2026.2.17 | **v2026.2.19** |
-| Target upgrade (Akash) | v2026.2.17 | **DONE** |
-| Release date | — | Feb 19, 2026 |
-| Key fixes | — | TG cron topic, ACP hardening, gateway auth, streaming |
+| Field                   | Old Value  | New Value                                             |
+| ----------------------- | ---------- | ----------------------------------------------------- |
+| Current on Buzz (Akash) | v2026.2.2  | **v2026.2.19**                                        |
+| Current on Mac (local)  | v2026.2.17 | **v2026.2.19**                                        |
+| Target upgrade (Akash)  | v2026.2.17 | **DONE**                                              |
+| Release date            | —          | Feb 19, 2026                                          |
+| Key fixes               | —          | TG cron topic, ACP hardening, gateway auth, streaming |
 
 ---
 
-*Prepared: Feb 19, 2026 — Claude Opus 4.6*
-*Target: v2026.2.19 (released Feb 19, 2026)*
-*For: Ogie @ SolCex Exchange*
-*Repo: github.com/buzzbysolcex/buzz-bd-agent*
+_Prepared: Feb 19, 2026 — Claude Opus 4.6_
+_Target: v2026.2.19 (released Feb 19, 2026)_
+_For: Ogie @ SolCex Exchange_
+_Repo: github.com/buzzbysolcex/buzz-bd-agent_

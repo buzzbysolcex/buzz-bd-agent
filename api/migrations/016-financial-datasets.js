@@ -7,7 +7,7 @@
 
 const migrations = [
   {
-    name: '018_financial_datasets',
+    name: "018_financial_datasets",
     sql: `
       CREATE TABLE IF NOT EXISTS financial_datasets_cache (
         ticker TEXT NOT NULL,
@@ -17,8 +17,8 @@ const migrations = [
         expires_at TEXT NOT NULL,
         PRIMARY KEY (ticker, data_type)
       );
-    `
-  }
+    `,
+  },
 ];
 
 module.exports = { migrations };

@@ -1,25 +1,26 @@
 PRIORITY TASK: Deploy Agent Skills Discovery at buzzbd.ai/.well-known/skills/
 
 CONTEXT:
-Agent Skills is an open standard (agentskills.io) adopted by 26+ platforms including 
-Claude Code, OpenAI Codex, Gemini CLI, GitHub Copilot, Cursor, and more. Publishing 
-a skill at buzzbd.ai/.well-known/skills/ makes Buzz auto-discoverable by ANY AI agent 
-on ANY of these platforms. Zero configuration needed — agents find Buzz, read the skill, 
+Agent Skills is an open standard (agentskills.io) adopted by 26+ platforms including
+Claude Code, OpenAI Codex, Gemini CLI, GitHub Copilot, Cursor, and more. Publishing
+a skill at buzzbd.ai/.well-known/skills/ makes Buzz auto-discoverable by ANY AI agent
+on ANY of these platforms. Zero configuration needed — agents find Buzz, read the skill,
 and start calling the API.
 
-This follows the Cloudflare Well-Known Discovery RFC (RFC 8615 pattern). Same as how 
+This follows the Cloudflare Well-Known Discovery RFC (RFC 8615 pattern). Same as how
 .well-known/security.txt and .well-known/acme-challenge/ work.
 
 WHY THIS MATTERS:
-Today Buzz intelligence is only accessible via War Room, Claude Code on Hetzner, 
+Today Buzz intelligence is only accessible via War Room, Claude Code on Hetzner,
 and buzzbd.ai dashboard. After this deploy, Buzz becomes accessible to:
+
 - Any developer's AI coding agent asking about token listing data
 - Other AI agents that discover Buzz and want to consume its intelligence
 - Machine-to-machine queries paid via x402 ($0.01-$0.05 per request)
-This is Buzz as a PLATFORM, not just an internal tool.
+  This is Buzz as a PLATFORM, not just an internal tool.
 
 REFERENCE: Lume (lume.top) already does this for prediction market trading.
-Their skill at lume.top/.well-known/skills/ lets any agent discover, onboard, 
+Their skill at lume.top/.well-known/skills/ lets any agent discover, onboard,
 and start trading autonomously. We're doing the same for listing intelligence.
 
 ═══════════════════════════════════════
@@ -30,13 +31,13 @@ mkdir -p /var/www/buzzbd.ai/.well-known/skills/buzz-bd-listing/references
 
 Final structure:
 /.well-known/skills/
-├── index.json                          ← Discovery index (required)
-└── buzz-bd-listing/                    ← Skill directory
-    ├── SKILL.md                        ← Main skill file (required)
-    └── references/                     ← Detailed docs (on-demand)
-        ├── API_REFERENCE.md
-        ├── EXAMPLES.md
-        └── SCORING.md
+├── index.json ← Discovery index (required)
+└── buzz-bd-listing/ ← Skill directory
+├── SKILL.md ← Main skill file (required)
+└── references/ ← Detailed docs (on-demand)
+├── API_REFERENCE.md
+├── EXAMPLES.md
+└── SCORING.md
 
 ═══════════════════════════════════════
 STEP 2: CREATE index.json
@@ -62,6 +63,7 @@ File: /var/www/buzzbd.ai/.well-known/skills/index.json
 ```
 
 Rules:
+
 - name: 1-64 chars, lowercase alphanumeric + hyphens only
 - description: 1-1024 chars (this is what agents see at discovery time ~50 tokens)
 - files: SKILL.md MUST be first entry
@@ -81,8 +83,8 @@ version: 1.0.0
 
 # Buzz BD Agent — Listing Intelligence Skill
 
-Buzz is an autonomous AI-powered BD (Business Development) agent that discovers, 
-scores, and evaluates crypto tokens for listing on SolCex Exchange — a Solana-native 
+Buzz is an autonomous AI-powered BD (Business Development) agent that discovers,
+scores, and evaluates crypto tokens for listing on SolCex Exchange — a Solana-native
 centralized exchange registered in Colorado (SOS + FinCEN MSB).
 
 ## What You Can Do
@@ -94,15 +96,18 @@ centralized exchange registered in Colorado (SOS + FinCEN MSB).
 5. **Check Competitive Landscape** — Colosseum Copilot integration (5,400+ Solana projects)
 
 ## API Base URL
-
 ```
+
 https://api.buzzbd.ai/api/v1
+
 ```
 
 All endpoints require an API key header:
 ```
+
 X-API-Key: <your-key>
-```
+
+````
 
 Or use x402 micropayments for keyless access (see references/API_REFERENCE.md).
 
@@ -112,15 +117,17 @@ Or use x402 micropayments for keyless access (see references/API_REFERENCE.md).
 ```bash
 curl https://api.buzzbd.ai/api/v1/pipeline \
   -H "X-API-Key: YOUR_KEY"
-```
+````
 
 ### Scan a Specific Token
+
 ```bash
 curl https://api.buzzbd.ai/api/v1/raw/scan/TOKEN_ADDRESS \
   -H "X-API-Key: YOUR_KEY"
 ```
 
 ### Get Token Score
+
 ```bash
 curl https://api.buzzbd.ai/api/v1/raw/scores/TOKEN_ADDRESS \
   -H "X-API-Key: YOUR_KEY"
@@ -129,6 +136,7 @@ curl https://api.buzzbd.ai/api/v1/raw/scores/TOKEN_ADDRESS \
 ## Scoring System
 
 Tokens are scored 0-100 across 5 dimensions:
+
 - **Safety** (25%): Token Sniffer, Go+ Security, honeypot detection
 - **Wallet** (25%): Holder distribution, FDV gap, circulating supply
 - **Technical** (20%): OHLCV, RSI, MACD, volume patterns
@@ -136,6 +144,7 @@ Tokens are scored 0-100 across 5 dimensions:
 - **Composite** (15%): Overall market positioning
 
 Classifications:
+
 - **HOT** (85+): Immediate BD outreach candidate
 - **QUALIFIED** (70-84): Queue for review
 - **WATCH** (50-69): Monitor
@@ -144,8 +153,9 @@ Classifications:
 ## x402 Micropayment Access
 
 Three premium endpoints available via x402 protocol (no API key needed):
+
 - Pipeline intelligence: $0.01/request
-- Token deep scan: $0.03/request  
+- Token deep scan: $0.03/request
 - Signal Factory report: $0.05/request
 
 Registered on 402index.io (IDs: 464fbecf, d5e01052, a9f75673).
@@ -159,13 +169,15 @@ Registered on 402index.io (IDs: 464fbecf, d5e01052, a9f75673).
 ## About SolCex Exchange
 
 SolCex is a Solana-native centralized exchange offering:
+
 - Free market making (3 months)
 - 450 whale wallet airdrop program
 - 10-14 day fast-track listing process
 
 Website: https://buzzbd.ai
 Twitter: @BuzzBySolCex
-```
+
+````
 
 ═══════════════════════════════════════
 STEP 4: CREATE references/API_REFERENCE.md
@@ -177,9 +189,11 @@ File: /var/www/buzzbd.ai/.well-known/skills/buzz-bd-listing/references/API_REFER
 # Buzz BD Agent — API Reference
 
 ## Base URL
-```
+````
+
 https://api.buzzbd.ai/api/v1
-```
+
+````
 
 ## Authentication
 All requests require: `X-API-Key: <key>` header
@@ -235,21 +249,25 @@ All endpoints return JSON:
   "data": { ... },
   "timestamp": "2026-03-28T10:00:00Z"
 }
-```
+````
 
 ## Rate Limits
+
 - Standard: 60 requests/minute
 - x402: 30 requests/minute
 - Burst: 10 requests/second
 
 ## x402 Endpoints (keyless)
+
 ```
 POST https://api.buzzbd.ai/x402/pipeline    ($0.01)
 POST https://api.buzzbd.ai/x402/scan         ($0.03)
 POST https://api.buzzbd.ai/x402/signal       ($0.05)
 ```
+
 Payment via Lightning Network or on-chain USDC.
-```
+
+````
 
 ═══════════════════════════════════════
 STEP 5: CREATE references/EXAMPLES.md
@@ -264,10 +282,12 @@ File: /var/www/buzzbd.ai/.well-known/skills/buzz-bd-listing/references/EXAMPLES.
 ```bash
 curl https://api.buzzbd.ai/api/v1/pipeline?status=HOT \
   -H "X-API-Key: YOUR_KEY"
-```
+````
+
 Returns tokens scoring 85+ — immediate BD outreach candidates.
 
 ## 2. Deep Scan a Specific Token
+
 ```bash
 # Get the full scan data
 curl https://api.buzzbd.ai/api/v1/raw/scan/So11111111111111111111111111111111111111112 \
@@ -279,13 +299,16 @@ curl https://api.buzzbd.ai/api/v1/raw/scores/So111111111111111111111111111111111
 ```
 
 ## 3. Check Security Before Listing
+
 ```bash
 curl https://api.buzzbd.ai/api/v1/raw/safety/TOKEN_ADDRESS \
   -H "X-API-Key: YOUR_KEY"
 ```
+
 Returns: Token Sniffer score, Go+ Security issues, honeypot detection, sell tax.
 
 ## 4. Search Hackathon Projects (via Colosseum Copilot)
+
 ```bash
 # Find related projects in 5,400+ Colosseum submissions
 curl "https://api.buzzbd.ai/api/v1/copilot/search?q=AI%20agent%20trading" \
@@ -297,10 +320,12 @@ curl https://api.buzzbd.ai/api/v1/copilot/enrich/PIPPIN \
 ```
 
 ## 5. Get Pipeline Activity Feed
+
 ```bash
 curl https://api.buzzbd.ai/api/v1/board/activity \
   -H "X-API-Key: YOUR_KEY"
 ```
+
 Returns recent pipeline events: discoveries, score changes, outreach status.
 
 ## 6. Workflow: Evaluate a Token for Listing
@@ -316,7 +341,8 @@ Step 5: Decide: HOT → outreach, QUALIFIED → queue, SKIP → archive
 curl https://api.buzzbd.ai/api/v1/raw/simulate/TOKEN_ADDRESS \
   -H "X-API-Key: YOUR_KEY"
 ```
-```
+
+````
 
 ═══════════════════════════════════════
 STEP 6: CREATE references/SCORING.md
@@ -330,7 +356,7 @@ File: /var/www/buzzbd.ai/.well-known/skills/buzz-bd-listing/references/SCORING.m
 ## 5-Layer Scoring Pipeline
 
 Every token is scored 0-100 using a weighted composite of 5 dimensions.
-All scoring is rule-based (zero LLM cost). Tokens scoring 70+ get a 
+All scoring is rule-based (zero LLM cost). Tokens scoring 70+ get a
 qualitative override from Claude Opus 4.6.
 
 ## Dimensions
@@ -399,7 +425,7 @@ qualitative override from Claude Opus 4.6.
 All public data must pass triple verification:
 DexScreener + DexTools + Internal validation.
 VERIFIED or blocked from pipeline.
-```
+````
 
 ═══════════════════════════════════════
 STEP 7: UPDATE CADDY CONFIGURATION
@@ -427,9 +453,9 @@ handle /.well-known/skills/* {
 ```
 
 Then reload Caddy:
-  systemctl reload caddy
-  OR
-  caddy reload --config /etc/caddy/Caddyfile
+systemctl reload caddy
+OR
+caddy reload --config /etc/caddy/Caddyfile
 
 ═══════════════════════════════════════
 STEP 8: VERIFY DEPLOYMENT
@@ -450,14 +476,17 @@ Run these verification checks:
 
 4. Content types:
    curl -I https://buzzbd.ai/.well-known/skills/index.json 2>/dev/null | grep Content-Type
+
    # Expected: application/json; charset=utf-8
 
    curl -I https://buzzbd.ai/.well-known/skills/buzz-bd-listing/SKILL.md 2>/dev/null | grep Content-Type
+
    # Expected: text/markdown; charset=utf-8
 
 5. CORS headers:
    curl -I https://buzzbd.ai/.well-known/skills/index.json 2>/dev/null | grep Access-Control
-   # Expected: Access-Control-Allow-Origin: *
+
+   # Expected: Access-Control-Allow-Origin: \*
 
 6. Skills CLI test (if npx available):
    npx skills add https://buzzbd.ai
@@ -468,6 +497,7 @@ SECURITY CHECKLIST (CRITICAL)
 ═══════════════════════════════════════
 
 Before deploying, verify NONE of these appear in ANY skill file:
+
 - ❌ Hetzner IP (api.buzzbd.ai) — use domain names only
 - ❌ Admin API keys or PATs
 - ❌ Listing fee details ($5K USDT, $1K commission)
@@ -477,6 +507,7 @@ Before deploying, verify NONE of these appear in ANY skill file:
 - ❌ Colosseum Copilot PAT
 
 Only expose:
+
 - ✅ Public domain names (api.buzzbd.ai, buzzbd.ai)
 - ✅ Read-only endpoint paths
 - ✅ x402 endpoint info (already public on 402index.io)

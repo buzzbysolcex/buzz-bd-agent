@@ -9,7 +9,7 @@
  * Buzz BD Agent v7.4.0 | Hedge Brain — Section 13
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
 module.exports = function createBacktestRoutes(db) {
@@ -18,10 +18,10 @@ module.exports = function createBacktestRoutes(db) {
     getLatestSummary,
     getSummaryHistory,
     getAgentAccuracy,
-  } = require('../services/backtester');
+  } = require("../services/backtester");
 
   // ─── POST /run — Trigger backtest ─────────────────────
-  router.post('/run', async (req, res) => {
+  router.post("/run", async (req, res) => {
     const daysBack = parseInt(req.body.days_back) || 7;
     const checkAfterDays = parseInt(req.body.check_after_days) || 3;
 
@@ -29,25 +29,25 @@ module.exports = function createBacktestRoutes(db) {
       const results = await runBacktest(db, { daysBack, checkAfterDays });
       res.json(results);
     } catch (err) {
-      res.status(500).json({ error: 'backtest_error', message: err.message });
+      res.status(500).json({ error: "backtest_error", message: err.message });
     }
   });
 
   // ─── GET /latest — Latest backtest summary ────────────
-  router.get('/latest', (req, res) => {
+  router.get("/latest", (req, res) => {
     try {
       const summary = getLatestSummary(db);
       if (!summary) {
-        return res.json({ message: 'No backtest runs yet', summary: null });
+        return res.json({ message: "No backtest runs yet", summary: null });
       }
       res.json({ summary });
     } catch (err) {
-      res.status(500).json({ error: 'query_error', message: err.message });
+      res.status(500).json({ error: "query_error", message: err.message });
     }
   });
 
   // ─── GET /history — All backtest runs ─────────────────
-  router.get('/history', (req, res) => {
+  router.get("/history", (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
 
     try {
@@ -57,12 +57,12 @@ module.exports = function createBacktestRoutes(db) {
         summaries,
       });
     } catch (err) {
-      res.status(500).json({ error: 'query_error', message: err.message });
+      res.status(500).json({ error: "query_error", message: err.message });
     }
   });
 
   // ─── GET /agent/:name — Agent/persona accuracy ───────
-  router.get('/agent/:name', (req, res) => {
+  router.get("/agent/:name", (req, res) => {
     const { name } = req.params;
     const limit = parseInt(req.query.limit) || 50;
 
@@ -70,7 +70,7 @@ module.exports = function createBacktestRoutes(db) {
       const accuracy = getAgentAccuracy(db, name, limit);
       res.json(accuracy);
     } catch (err) {
-      res.status(500).json({ error: 'query_error', message: err.message });
+      res.status(500).json({ error: "query_error", message: err.message });
     }
   });
 

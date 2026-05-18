@@ -349,8 +349,12 @@ router.post("/full", tierGate("free"), shieldPaidGate, async (req, res) => {
       // chain). Failure here is non-fatal — still return the V3 scan.
       let v5 = null;
       try {
-        const { detectExploitChains } = require("../services/shield/exploit-chain");
-        const { searchSimilarExploits } = require("../services/shield/writeup-rag");
+        const {
+          detectExploitChains,
+        } = require("../services/shield/exploit-chain");
+        const {
+          searchSimilarExploits,
+        } = require("../services/shield/writeup-rag");
         const findings = [];
         // pattern_matches → findings (V3 shape: { pattern_id, severity, … })
         for (const pm of scan.data?.pattern_matches || []) {
@@ -364,9 +368,13 @@ router.post("/full", tierGate("free"), shieldPaidGate, async (req, res) => {
         // flags → findings (V3 shape: each flag is a reason string)
         for (const flag of scan.data?.flags || []) {
           findings.push({
-            pattern_id: typeof flag === "string" ? flag.toLowerCase().replace(/\s+/g, "_") : "",
+            pattern_id:
+              typeof flag === "string"
+                ? flag.toLowerCase().replace(/\s+/g, "_")
+                : "",
             category: "flag",
-            description: typeof flag === "string" ? flag : (flag.description || ""),
+            description:
+              typeof flag === "string" ? flag : flag.description || "",
             chain: chainSlug,
           });
         }
@@ -377,11 +385,15 @@ router.post("/full", tierGate("free"), shieldPaidGate, async (req, res) => {
         v5 = {};
         if (exploit_chains.length > 0) {
           v5.exploit_chains = exploit_chains;
-          v5.chain_risk = exploit_chains.some((c) => c.verdict === "HIGH_CONFIDENCE")
+          v5.chain_risk = exploit_chains.some(
+            (c) => c.verdict === "HIGH_CONFIDENCE",
+          )
             ? "CRITICAL"
             : "WARNING";
           // Score penalty: 20 per HIGH_CONFIDENCE chain
-          const chainPenalty = exploit_chains.filter((c) => c.verdict === "HIGH_CONFIDENCE").length * 20;
+          const chainPenalty =
+            exploit_chains.filter((c) => c.verdict === "HIGH_CONFIDENCE")
+              .length * 20;
           if (chainPenalty > 0 && typeof scan.data?.score === "number") {
             v5.score_pre_chain_penalty = scan.data.score;
             v5.score = Math.max(0, scan.data.score - chainPenalty);
@@ -391,7 +403,9 @@ router.post("/full", tierGate("free"), shieldPaidGate, async (req, res) => {
         if (similar_exploits.length > 0) {
           v5.similar_exploits = similar_exploits;
           const totalLost = similar_exploits.reduce((sum, e) => {
-            const n = parseFloat(String(e.amount_lost || "").replace(/[^0-9.]/g, "")) || 0;
+            const n =
+              parseFloat(String(e.amount_lost || "").replace(/[^0-9.]/g, "")) ||
+              0;
             return sum + n;
           }, 0);
           v5.historical_warning = `This contract shares patterns with ${similar_exploits.length} past exploit(s) totaling $${totalLost.toLocaleString()} in losses.`;

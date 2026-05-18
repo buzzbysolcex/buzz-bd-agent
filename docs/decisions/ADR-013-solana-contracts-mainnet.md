@@ -18,6 +18,7 @@ Judges may view Base-only contracts as "not Solana-native enough." Additionally,
 Deploy ScoreStorage and ListingOracle to **Solana mainnet** using **Anchor framework (Rust)** — Path A (native Solana programs). Skip devnet — go mainnet directly, same pattern as Base contracts.
 
 ### Why mainnet direct:
+
 - Base contracts went straight to mainnet (Day 39-42). Same pattern.
 - Devnet scores mean nothing to Frontier judges — they check Solana Explorer for real TXs.
 - Cost is low: ~2-5 SOL for ScoreStorage (~$300-700, refundable on program close).
@@ -27,6 +28,7 @@ Deploy ScoreStorage and ListingOracle to **Solana mainnet** using **Anchor frame
 - Lobster wallet (5iC7p...mo5Jp) is DEAD — private key wiped. Do NOT reference.
 
 ### Why Anchor (Path A) over alternatives:
+
 - **Solang (Path B) rejected:** Compiles Solidity → Solana but judges won't view it as native. Compiler is newer, less battle-tested. Storage model mismatch requires restructuring anyway.
 - **Neon EVM (Path C) rejected:** Runs EVM inside Solana. Not native at all. Colosseum will not count this.
 - **Anchor is the standard:** Leading Solana framework. IDL generation. Verifiable builds. Full ecosystem composability.
@@ -34,6 +36,7 @@ Deploy ScoreStorage and ListingOracle to **Solana mainnet** using **Anchor frame
 ## Consequences
 
 ### Positive
+
 - Dual-chain proof: scores on Base AND Solana mainnet
 - Frontier judges see native Solana programs
 - HSaaS serves both EVM and Solana customers
@@ -41,12 +44,14 @@ Deploy ScoreStorage and ListingOracle to **Solana mainnet** using **Anchor frame
 - Transaction costs: ~$0.00025 per score write (cheaper than Base)
 
 ### Negative
+
 - Rust learning curve — Claude Code handles this, not a blocker
 - ~2-5 SOL deployment cost per program (refundable)
 - Maintain contracts on 2 chains — Buzz API writes to both
 - Keypair management for Solana deployer wallet
 
 ### Requirements
+
 - Install Rust + Solana CLI + Anchor on Hetzner CX43
 - Use HeyAnon SOL wallet (BNS48CGg2mgP7sdBY4VVTiDyK6jVqRBi9Y71jqhxZn9A) as deployer — export keypair from .env.heyanon
 - Lobster wallet (5iC7p...mo5Jp) is DEAD — private key wiped, do NOT reference
@@ -64,5 +69,5 @@ Deploy ScoreStorage and ListingOracle to **Solana mainnet** using **Anchor frame
 
 ---
 
-*ADR-009 | v8.3.0+ | Solana mainnet via Anchor | Frontier alignment*
-*Approved by Ogie | Bismillah* 🤲
+_ADR-009 | v8.3.0+ | Solana mainnet via Anchor | Frontier alignment_
+_Approved by Ogie | Bismillah_ 🤲

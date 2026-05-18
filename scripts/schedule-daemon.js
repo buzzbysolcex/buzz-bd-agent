@@ -182,10 +182,7 @@ async function goPlusCheckSolana(address) {
   if (t.default_account_state === "2") flags.push("FROZEN_BY_DEFAULT");
   if (t.metadata_mutable && t.metadata_mutable.status === "1")
     flags.push("METADATA_MUTABLE");
-  if (
-    t.balance_mutable_authority &&
-    t.balance_mutable_authority.status === "1"
-  )
+  if (t.balance_mutable_authority && t.balance_mutable_authority.status === "1")
     flags.push("BALANCE_MUTABLE");
   if (Array.isArray(t.transfer_hook) && t.transfer_hook.length > 0)
     flags.push("TRANSFER_HOOK");
@@ -266,7 +263,10 @@ async function goPlusCheck(chain, address) {
   // EVM path
   const cid = GOPLUS_CHAIN_ID[chain];
   if (!cid)
-    return { skipped: true, reason: `chain=${chain} not supported (EVM/Solana only)` };
+    return {
+      skipped: true,
+      reason: `chain=${chain} not supported (EVM/Solana only)`,
+    };
   const url = `https://api.gopluslabs.io/api/v1/token_security/${cid}?contract_addresses=${address}`;
   try {
     const j = await httpGetJson(url);

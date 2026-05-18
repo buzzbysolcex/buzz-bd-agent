@@ -8,40 +8,40 @@
  * Buzz BD Agent v7.4.0 | Hedge Brain — Section 12
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
 module.exports = function createPersonaRoutes(db) {
   // ─── GET /signals/:address — All persona signals for a token ───
-  router.get('/signals/:address', (req, res) => {
+  router.get("/signals/:address", (req, res) => {
     const { address } = req.params;
     const { chain } = req.query;
 
     try {
-      let query = 'SELECT * FROM persona_signals WHERE token_address = ?';
+      let query = "SELECT * FROM persona_signals WHERE token_address = ?";
       const params = [address];
 
       if (chain) {
-        query += ' AND chain = ?';
+        query += " AND chain = ?";
         params.push(chain);
       }
 
-      query += ' ORDER BY scored_at DESC';
+      query += " ORDER BY scored_at DESC";
 
       const signals = db.prepare(query).all(...params);
       res.json({
         token: address,
-        chain: chain || 'all',
+        chain: chain || "all",
         count: signals.length,
         signals,
       });
     } catch (err) {
-      res.status(500).json({ error: 'query_error', message: err.message });
+      res.status(500).json({ error: "query_error", message: err.message });
     }
   });
 
   // ─── GET /consensus/:address — Aggregated consensus ────────────
-  router.get('/consensus/:address', (req, res) => {
+  router.get("/consensus/:address", (req, res) => {
     const { address } = req.params;
     const { chain } = req.query;
 
@@ -53,12 +53,12 @@ module.exports = function createPersonaRoutes(db) {
       const params = [address];
 
       if (chain) {
-        query += ' AND chain = ?';
+        query += " AND chain = ?";
         params.push(chain);
       }
 
       // Get latest signal per persona
-      query += ' ORDER BY scored_at DESC';
+      query += " ORDER BY scored_at DESC";
 
       const allSignals = db.prepare(query).all(...params);
 
@@ -71,16 +71,16 @@ module.exports = function createPersonaRoutes(db) {
       }
 
       const personas = Object.values(latestByPersona);
-      const bullish = personas.filter(p => p.signal === 'bullish').length;
-      const bearish = personas.filter(p => p.signal === 'bearish').length;
-      const neutral = personas.filter(p => p.signal === 'neutral').length;
+      const bullish = personas.filter((p) => p.signal === "bullish").length;
+      const bearish = personas.filter((p) => p.signal === "bearish").length;
+      const neutral = personas.filter((p) => p.signal === "neutral").length;
 
       // Weighted consensus score
       const weights = {
-        'degen-agent': 0.15,
-        'whale-agent': 0.25,
-        'institutional-agent': 0.35,
-        'community-agent': 0.25,
+        "degen-agent": 0.15,
+        "whale-agent": 0.25,
+        "institutional-agent": 0.35,
+        "community-agent": 0.25,
       };
 
       let weightedScore = 0;
@@ -96,16 +96,16 @@ module.exports = function createPersonaRoutes(db) {
       weightedScore = Math.round(weightedScore * 100) / 100;
 
       // BD recommendation (consensus-driven)
-      let recommendation = 'skip';
+      let recommendation = "skip";
       if (bullish >= 3 && weightedScore >= 75) {
-        recommendation = 'outreach_now';
+        recommendation = "outreach_now";
       } else if (bullish >= 2 && weightedScore >= 60) {
-        recommendation = 'monitor';
+        recommendation = "monitor";
       }
 
       res.json({
         token: address,
-        chain: chain || 'all',
+        chain: chain || "all",
         consensus: {
           bullish,
           bearish,
@@ -114,7 +114,7 @@ module.exports = function createPersonaRoutes(db) {
           weighted_score: weightedScore,
           recommendation,
         },
-        personas: personas.map(p => ({
+        personas: personas.map((p) => ({
           name: p.persona_name,
           signal: p.signal,
           confidence: p.confidence,
@@ -125,39 +125,53 @@ module.exports = function createPersonaRoutes(db) {
         })),
       });
     } catch (err) {
-      res.status(500).json({ error: 'query_error', message: err.message });
+      res.status(500).json({ error: "query_error", message: err.message });
     }
   });
 
   // ─── GET /stats — Persona accuracy stats ──────────────────────
-  router.get('/stats', (req, res) => {
+  router.get("/stats", (req, res) => {
     try {
-      const personaNames = ['degen-agent', 'whale-agent', 'institutional-agent', 'community-agent'];
+      const personaNames = [
+        "degen-agent",
+        "whale-agent",
+        "institutional-agent",
+        "community-agent",
+      ];
       const stats = {};
 
       for (const name of personaNames) {
-        const total = db.prepare(
-          'SELECT COUNT(*) as count FROM persona_signals WHERE persona_name = ?'
-        ).get(name);
+        const total = db
+          .prepare(
+            "SELECT COUNT(*) as count FROM persona_signals WHERE persona_name = ?",
+          )
+          .get(name);
 
-        const bullish = db.prepare(
-          "SELECT COUNT(*) as count FROM persona_signals WHERE persona_name = ? AND signal = 'bullish'"
-        ).get(name);
+        const bullish = db
+          .prepare(
+            "SELECT COUNT(*) as count FROM persona_signals WHERE persona_name = ? AND signal = 'bullish'",
+          )
+          .get(name);
 
-        const avgConfidence = db.prepare(
-          'SELECT AVG(confidence) as avg FROM persona_signals WHERE persona_name = ?'
-        ).get(name);
+        const avgConfidence = db
+          .prepare(
+            "SELECT AVG(confidence) as avg FROM persona_signals WHERE persona_name = ?",
+          )
+          .get(name);
 
-        const avgScore = db.prepare(
-          'SELECT AVG(raw_score) as avg FROM persona_signals WHERE persona_name = ?'
-        ).get(name);
+        const avgScore = db
+          .prepare(
+            "SELECT AVG(raw_score) as avg FROM persona_signals WHERE persona_name = ?",
+          )
+          .get(name);
 
         stats[name] = {
           total_signals: total.count,
           bullish_count: bullish.count,
-          bullish_rate: total.count > 0
-            ? Math.round((bullish.count / total.count) * 10000) / 100
-            : 0,
+          bullish_rate:
+            total.count > 0
+              ? Math.round((bullish.count / total.count) * 10000) / 100
+              : 0,
           avg_confidence: Math.round((avgConfidence.avg || 0) * 1000) / 1000,
           avg_score: Math.round((avgScore.avg || 0) * 100) / 100,
         };
@@ -165,7 +179,7 @@ module.exports = function createPersonaRoutes(db) {
 
       res.json({ personas: stats });
     } catch (err) {
-      res.status(500).json({ error: 'query_error', message: err.message });
+      res.status(500).json({ error: "query_error", message: err.message });
     }
   });
 

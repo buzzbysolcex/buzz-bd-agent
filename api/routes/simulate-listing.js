@@ -10,11 +10,11 @@
  * Buzz BD Agent | SolCex
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const crypto = require('crypto');
-const { getDB } = require('../db');
-const { runSimulation } = require('../lib/simulation-engine');
+const crypto = require("crypto");
+const { getDB } = require("../db");
+const { runSimulation } = require("../lib/simulation-engine");
 
 // ─── In-Route Rate Limiter (20/hour per IP) ─────────────
 
@@ -45,23 +45,27 @@ function checkRateLimit(key) {
 
 // ─── POST /simulate-listing ─────────────────────────────
 
-router.post('/simulate-listing', async (req, res) => {
-  const clientKey = req.headers['x-api-key'] || req.ip || 'anonymous';
+router.post("/simulate-listing", async (req, res) => {
+  const clientKey = req.headers["x-api-key"] || req.ip || "anonymous";
   if (!checkRateLimit(clientKey)) {
     return res.status(429).json({
-      error: 'Rate limit exceeded. Max 5 simulation requests per hour.',
-      code: 'RATE_LIMIT_EXCEEDED',
+      error: "Rate limit exceeded. Max 5 simulation requests per hour.",
+      code: "RATE_LIMIT_EXCEEDED",
     });
   }
 
-  const { tokenAddress, chain, depth, iterations, includeReport } = req.body || {};
+  const { tokenAddress, chain, depth, iterations, includeReport } =
+    req.body || {};
 
   if (!tokenAddress) {
-    return res.status(400).json({ error: 'tokenAddress is required', code: 'MISSING_TOKEN_ADDRESS' });
+    return res.status(400).json({
+      error: "tokenAddress is required",
+      code: "MISSING_TOKEN_ADDRESS",
+    });
   }
 
-  const resolvedChain = chain || 'solana';
-  const resolvedDepth = depth || 'mvp';
+  const resolvedChain = chain || "solana";
+  const resolvedDepth = depth || "mvp";
 
   try {
     const result = await runSimulation(tokenAddress, resolvedChain, {
@@ -70,22 +74,33 @@ router.post('/simulate-listing', async (req, res) => {
       includeReport: includeReport || false,
     });
 
-    const simulationId = result.simulationId || `sim_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`;
+    const simulationId =
+      result.simulationId ||
+      `sim_${crypto.randomUUID().replace(/-/g, "").slice(0, 16)}`;
 
     // Map simulation-engine recommendation (PROCEED/CAUTION/REJECT) to
     // listing vocabulary (LIST/MONITOR/REJECT) used by proposal + report consumers
-    const recommendationMap = { PROCEED: 'LIST', CAUTION: 'MONITOR', REJECT: 'REJECT' };
-    const mappedRecommendation = recommendationMap[result.recommendation] || result.recommendation || 'MONITOR';
+    const recommendationMap = {
+      PROCEED: "LIST",
+      CAUTION: "MONITOR",
+      REJECT: "REJECT",
+    };
+    const mappedRecommendation =
+      recommendationMap[result.recommendation] ||
+      result.recommendation ||
+      "MONITOR";
 
     // Persist to simulation_results for interview system + reporting
     try {
       const db = getDB();
-      db.pragma('foreign_keys = OFF');
-      db.prepare(`INSERT OR REPLACE INTO simulation_results (
+      db.pragma("foreign_keys = OFF");
+      db.prepare(
+        `INSERT OR REPLACE INTO simulation_results (
         simulation_id, token_address, chain, depth, score, confidence,
         confidence_low, confidence_high, consensus, recommendation,
         verdicts_json, metrics_json, duration_ms, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ).run(
         simulationId,
         tokenAddress,
         resolvedChain,
@@ -99,12 +114,17 @@ router.post('/simulate-listing', async (req, res) => {
         JSON.stringify(result.verdicts),
         JSON.stringify({ ...result.metrics, debate: result.debate || null }),
         result.durationMs,
-        result.createdAt
+        result.createdAt,
       );
-      db.pragma('foreign_keys = ON');
+      db.pragma("foreign_keys = ON");
     } catch (persistErr) {
-      console.error('[SimulateListing] Persist failed (non-fatal):', persistErr.message);
-      try { getDB().pragma('foreign_keys = ON'); } catch {}
+      console.error(
+        "[SimulateListing] Persist failed (non-fatal):",
+        persistErr.message,
+      );
+      try {
+        getDB().pragma("foreign_keys = ON");
+      } catch {}
     }
 
     return res.json({
@@ -128,10 +148,10 @@ router.post('/simulate-listing', async (req, res) => {
       createdAt: result.createdAt,
     });
   } catch (err) {
-    console.error('[SimulateListing] Simulation failed:', err);
+    console.error("[SimulateListing] Simulation failed:", err);
     return res.status(500).json({
       error: `Simulation failed: ${err.message}`,
-      code: 'SIMULATION_ERROR',
+      code: "SIMULATION_ERROR",
     });
   }
 });

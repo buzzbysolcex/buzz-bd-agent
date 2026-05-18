@@ -3,7 +3,7 @@
  * v9.0 | Agent self-scheduling with auto-expiry
  */
 
-const { getDB } = require('../../db');
+const { getDB } = require("../../db");
 
 function initDynamicCrons() {
   const db = getDB();
@@ -27,14 +27,31 @@ function initDynamicCrons() {
 function createCron(agent, name, schedule, payload = {}, opts = {}) {
   const db = getDB();
   const { maxRuns, expiresAt } = opts;
-  if (!maxRuns && !expiresAt) return { error: 'maxRuns or expiresAt required' };
+  if (!maxRuns && !expiresAt) return { error: "maxRuns or expiresAt required" };
 
-  const active = db.prepare(`SELECT COUNT(*) as c FROM dynamic_crons WHERE agent = ? AND active = 1`).get(agent);
-  if (active.c >= 20) return { error: 'circuit_breaker', message: 'Max 20 active crons per agent' };
+  const active = db
+    .prepare(
+      `SELECT COUNT(*) as c FROM dynamic_crons WHERE agent = ? AND active = 1`,
+    )
+    .get(agent);
+  if (active.c >= 20)
+    return {
+      error: "circuit_breaker",
+      message: "Max 20 active crons per agent",
+    };
 
-  const result = db.prepare(
-    `INSERT INTO dynamic_crons (name, agent, schedule, payload, max_runs, expires_at) VALUES (?, ?, ?, ?, ?, ?)`
-  ).run(name, agent, schedule, JSON.stringify(payload), maxRuns || null, expiresAt || null);
+  const result = db
+    .prepare(
+      `INSERT INTO dynamic_crons (name, agent, schedule, payload, max_runs, expires_at) VALUES (?, ?, ?, ?, ?, ?)`,
+    )
+    .run(
+      name,
+      agent,
+      schedule,
+      JSON.stringify(payload),
+      maxRuns || null,
+      expiresAt || null,
+    );
   return { id: result.lastInsertRowid, name, agent };
 }
 
@@ -50,34 +67,50 @@ function parseScheduleMostRecent(schedule, now) {
     const n = parseInt(everyNMin[1], 10);
     if (!Number.isInteger(n) || n <= 0 || n > 59)
       throw new Error(`unsupported minute interval: ${schedule}`);
-    return new Date(Date.UTC(
-      now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
-      now.getUTCHours(), Math.floor(now.getUTCMinutes() / n) * n, 0, 0
-    ));
+    return new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        now.getUTCHours(),
+        Math.floor(now.getUTCMinutes() / n) * n,
+        0,
+        0,
+      ),
+    );
   }
   const everyNHour = schedule.match(/^0 \*\/(\d+) \* \* \*$/);
   if (everyNHour) {
     const n = parseInt(everyNHour[1], 10);
     if (!Number.isInteger(n) || n <= 0 || n > 23)
       throw new Error(`unsupported hour interval: ${schedule}`);
-    return new Date(Date.UTC(
-      now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
-      Math.floor(now.getUTCHours() / n) * n, 0, 0, 0
-    ));
+    return new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        Math.floor(now.getUTCHours() / n) * n,
+        0,
+        0,
+        0,
+      ),
+    );
   }
   throw new Error(`unknown_cron_pattern: ${schedule}`);
 }
 
 function sqliteUtcToDate(s) {
   if (!s) return null;
-  return new Date(s.replace(' ', 'T') + 'Z');
+  return new Date(s.replace(" ", "T") + "Z");
 }
 
 function getDueCrons() {
   const db = getDB();
-  const all = db.prepare(
-    `SELECT * FROM dynamic_crons WHERE active = 1 AND (expires_at IS NULL OR expires_at > datetime('now')) AND (max_runs IS NULL OR run_count < max_runs)`
-  ).all();
+  const all = db
+    .prepare(
+      `SELECT * FROM dynamic_crons WHERE active = 1 AND (expires_at IS NULL OR expires_at > datetime('now')) AND (max_runs IS NULL OR run_count < max_runs)`,
+    )
+    .all();
   const now = new Date();
   const due = [];
   for (const cron of all) {
@@ -88,16 +121,23 @@ function getDueCrons() {
       try {
         db.prepare(
           `INSERT INTO observation_log (tick, timestamp, decision, reason, action)
-           VALUES (-1, ?, 'ACT', ?, 'unknown_cron_pattern')`
+           VALUES (-1, ?, 'ACT', ?, 'unknown_cron_pattern')`,
         ).run(
           now.toISOString(),
-          `cronId=${cron.id} name=${cron.name} schedule='${cron.schedule}' err=${e.message}`
+          `cronId=${cron.id} name=${cron.name} schedule='${cron.schedule}' err=${e.message}`,
         );
       } catch (logErr) {
-        console.error('[dynamic-cron] unknown_cron_pattern AND log failed:',
-          cron.id, cron.schedule, e.message, logErr.message);
+        console.error(
+          "[dynamic-cron] unknown_cron_pattern AND log failed:",
+          cron.id,
+          cron.schedule,
+          e.message,
+          logErr.message,
+        );
       }
-      console.error(`[dynamic-cron] unknown_cron_pattern cronId=${cron.id} schedule='${cron.schedule}' — skipping`);
+      console.error(
+        `[dynamic-cron] unknown_cron_pattern cronId=${cron.id} schedule='${cron.schedule}' — skipping`,
+      );
       continue;
     }
     const lastRun = sqliteUtcToDate(cron.last_run);
@@ -108,9 +148,13 @@ function getDueCrons() {
 
 function recordRun(cronId) {
   const db = getDB();
-  db.prepare(`UPDATE dynamic_crons SET run_count = run_count + 1, last_run = datetime('now') WHERE id = ?`).run(cronId);
+  db.prepare(
+    `UPDATE dynamic_crons SET run_count = run_count + 1, last_run = datetime('now') WHERE id = ?`,
+  ).run(cronId);
   // Auto-deactivate if maxed
-  db.prepare(`UPDATE dynamic_crons SET active = 0 WHERE id = ? AND max_runs IS NOT NULL AND run_count >= max_runs`).run(cronId);
+  db.prepare(
+    `UPDATE dynamic_crons SET active = 0 WHERE id = ? AND max_runs IS NOT NULL AND run_count >= max_runs`,
+  ).run(cronId);
 }
 
 function deactivate(cronId) {
@@ -121,8 +165,19 @@ function deactivate(cronId) {
 
 function cleanupCrons() {
   const db = getDB();
-  const result = db.prepare(`UPDATE dynamic_crons SET active = 0 WHERE expires_at < datetime('now') AND active = 1`).run();
+  const result = db
+    .prepare(
+      `UPDATE dynamic_crons SET active = 0 WHERE expires_at < datetime('now') AND active = 1`,
+    )
+    .run();
   return { deactivated: result.changes };
 }
 
-module.exports = { initDynamicCrons, createCron, getDueCrons, recordRun, deactivate, cleanupCrons };
+module.exports = {
+  initDynamicCrons,
+  createCron,
+  getDueCrons,
+  recordRun,
+  deactivate,
+  cleanupCrons,
+};

@@ -60,35 +60,39 @@ function initContacts(db) {
   `);
 
   // Index for fast lookups
-  _db.exec(`CREATE INDEX IF NOT EXISTS idx_contacts_project ON contacts(project)`);
+  _db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_contacts_project ON contacts(project)`,
+  );
   _db.exec(`CREATE INDEX IF NOT EXISTS idx_contacts_chain ON contacts(chain)`);
-  _db.exec(`CREATE INDEX IF NOT EXISTS idx_contact_interactions_project ON contact_interactions(project)`);
+  _db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_contact_interactions_project ON contact_interactions(project)`,
+  );
 }
 
 // ─── Privacy Sanitizer ──────────────────────────────
 // Strips dollar amounts, fee references, commission info
 const FEE_PATTERNS = [
-  /\$[\d,]+(\.\d{1,2})?/g,                           // $1,000 or $5000.00
-  /\b\d+\s*(USDT|USDC|USD|usdt|usdc|usd)\b/g,        // 15000 USDT
+  /\$[\d,]+(\.\d{1,2})?/g, // $1,000 or $5000.00
+  /\b\d+\s*(USDT|USDC|USD|usdt|usdc|usd)\b/g, // 15000 USDT
   /\b(commission|listing\s*fee|fee|payment)\s*[:=]?\s*\$?[\d,]+/gi,
-  /\b(commission|listing\s*fee)\b[^.]*\./gi,          // full sentences about fees
-  /\$\d+[kK]\b/g,                                     // $5K, $10k
+  /\b(commission|listing\s*fee)\b[^.]*\./gi, // full sentences about fees
+  /\$\d+[kK]\b/g, // $5K, $10k
 ];
 
 function sanitize(text) {
-  if (!text || typeof text !== 'string') return text;
+  if (!text || typeof text !== "string") return text;
   let clean = text;
   for (const pattern of FEE_PATTERNS) {
-    clean = clean.replace(pattern, '[REDACTED]');
+    clean = clean.replace(pattern, "[REDACTED]");
   }
   return clean;
 }
 
 function sanitizeObject(obj) {
-  if (!obj || typeof obj !== 'object') return obj;
+  if (!obj || typeof obj !== "object") return obj;
   const sanitized = {};
   for (const [key, value] of Object.entries(obj)) {
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       sanitized[key] = sanitize(value);
     } else {
       sanitized[key] = value;
@@ -105,16 +109,22 @@ function sanitizeObject(obj) {
  * @returns {object}
  */
 function createContact(data) {
-  if (!_db) return { success: false, error: 'Contact DB not initialized' };
-  if (!data.project) return { success: false, error: 'project is required' };
+  if (!_db) return { success: false, error: "Contact DB not initialized" };
+  if (!data.project) return { success: false, error: "project is required" };
 
   const clean = sanitizeObject(data);
   const now = new Date().toISOString();
 
   try {
     // Check for existing
-    const existing = _db.prepare('SELECT id FROM contacts WHERE project = ?').get(clean.project);
-    if (existing) return { success: false, error: `Contact for "${clean.project}" already exists. Use updateContact.` };
+    const existing = _db
+      .prepare("SELECT id FROM contacts WHERE project = ?")
+      .get(clean.project);
+    if (existing)
+      return {
+        success: false,
+        error: `Contact for "${clean.project}" already exists. Use updateContact.`,
+      };
 
     const stmt = _db.prepare(`
       INSERT INTO contacts (project, chain, contact_name, contact_role, contact_channel,
@@ -125,18 +135,33 @@ function createContact(data) {
     `);
 
     const result = stmt.run(
-      clean.project, clean.chain || null, clean.contact_name || null,
-      clean.contact_role || null, clean.contact_channel || null,
-      clean.email || null, clean.telegram || null, clean.twitter || null,
-      clean.first_contact || now, clean.last_contact || now,
-      clean.response_style || null, clean.response_time_avg || null,
-      clean.objections || null, clean.decision_timeline || null,
-      clean.preferred_channel || null, clean.sentiment || 'neutral',
-      clean.notes || null, clean.pipeline_token_id || null,
-      now, now
+      clean.project,
+      clean.chain || null,
+      clean.contact_name || null,
+      clean.contact_role || null,
+      clean.contact_channel || null,
+      clean.email || null,
+      clean.telegram || null,
+      clean.twitter || null,
+      clean.first_contact || now,
+      clean.last_contact || now,
+      clean.response_style || null,
+      clean.response_time_avg || null,
+      clean.objections || null,
+      clean.decision_timeline || null,
+      clean.preferred_channel || null,
+      clean.sentiment || "neutral",
+      clean.notes || null,
+      clean.pipeline_token_id || null,
+      now,
+      now,
     );
 
-    return { success: true, id: result.lastInsertRowid, project: clean.project };
+    return {
+      success: true,
+      id: result.lastInsertRowid,
+      project: clean.project,
+    };
   } catch (err) {
     return { success: false, error: err.message };
   }
@@ -149,18 +174,30 @@ function createContact(data) {
  * @returns {object}
  */
 function updateContact(project, updates) {
-  if (!_db) return { success: false, error: 'Contact DB not initialized' };
-  if (!project) return { success: false, error: 'project is required' };
+  if (!_db) return { success: false, error: "Contact DB not initialized" };
+  if (!project) return { success: false, error: "project is required" };
 
   const clean = sanitizeObject(updates);
   const now = new Date().toISOString();
 
   // Allowlist of updatable columns
   const allowed = [
-    'chain', 'contact_name', 'contact_role', 'contact_channel',
-    'email', 'telegram', 'twitter', 'response_style', 'response_time_avg',
-    'objections', 'decision_timeline', 'preferred_channel', 'sentiment',
-    'notes', 'pipeline_token_id', 'last_outcome'
+    "chain",
+    "contact_name",
+    "contact_role",
+    "contact_channel",
+    "email",
+    "telegram",
+    "twitter",
+    "response_style",
+    "response_time_avg",
+    "objections",
+    "decision_timeline",
+    "preferred_channel",
+    "sentiment",
+    "notes",
+    "pipeline_token_id",
+    "last_outcome",
   ];
 
   const setClauses = [];
@@ -173,19 +210,21 @@ function updateContact(project, updates) {
     }
   }
 
-  if (setClauses.length === 0) return { success: false, error: 'No valid fields to update' };
+  if (setClauses.length === 0)
+    return { success: false, error: "No valid fields to update" };
 
-  setClauses.push('updated_at = ?');
+  setClauses.push("updated_at = ?");
   values.push(now);
-  setClauses.push('interaction_count = interaction_count + 1');
+  setClauses.push("interaction_count = interaction_count + 1");
   values.push(project);
 
   try {
-    const result = _db.prepare(
-      `UPDATE contacts SET ${setClauses.join(', ')} WHERE project = ?`
-    ).run(...values);
+    const result = _db
+      .prepare(`UPDATE contacts SET ${setClauses.join(", ")} WHERE project = ?`)
+      .run(...values);
 
-    if (result.changes === 0) return { success: false, error: `Contact "${project}" not found` };
+    if (result.changes === 0)
+      return { success: false, error: `Contact "${project}" not found` };
     return { success: true, project, updated_fields: setClauses.length - 2 };
   } catch (err) {
     return { success: false, error: err.message };
@@ -198,11 +237,14 @@ function updateContact(project, updates) {
  * @returns {object}
  */
 function getContact(project) {
-  if (!_db) return { success: false, error: 'Contact DB not initialized' };
+  if (!_db) return { success: false, error: "Contact DB not initialized" };
 
   try {
-    const contact = _db.prepare('SELECT * FROM contacts WHERE project = ?').get(project);
-    if (!contact) return { success: false, error: `Contact "${project}" not found` };
+    const contact = _db
+      .prepare("SELECT * FROM contacts WHERE project = ?")
+      .get(project);
+    if (!contact)
+      return { success: false, error: `Contact "${project}" not found` };
     return { success: true, contact };
   } catch (err) {
     return { success: false, error: err.message };
@@ -215,24 +257,32 @@ function getContact(project) {
  * @returns {object}
  */
 function listContacts(filters = {}) {
-  if (!_db) return { success: false, error: 'Contact DB not initialized' };
+  if (!_db) return { success: false, error: "Contact DB not initialized" };
 
   const where = [];
   const params = [];
 
-  if (filters.chain) { where.push('chain = ?'); params.push(filters.chain); }
-  if (filters.sentiment) { where.push('sentiment = ?'); params.push(filters.sentiment); }
+  if (filters.chain) {
+    where.push("chain = ?");
+    params.push(filters.chain);
+  }
+  if (filters.sentiment) {
+    where.push("sentiment = ?");
+    params.push(filters.sentiment);
+  }
 
   const limit = Math.min(parseInt(filters.limit) || 50, 200);
-  const whereClause = where.length > 0 ? `WHERE ${where.join(' AND ')}` : '';
+  const whereClause = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
 
   try {
-    const contacts = _db.prepare(
-      `SELECT id, project, chain, contact_name, contact_role, sentiment,
+    const contacts = _db
+      .prepare(
+        `SELECT id, project, chain, contact_name, contact_role, sentiment,
               interaction_count, last_contact, last_outcome, preferred_channel
        FROM contacts ${whereClause}
-       ORDER BY updated_at DESC LIMIT ?`
-    ).all(...params, limit);
+       ORDER BY updated_at DESC LIMIT ?`,
+      )
+      .all(...params, limit);
 
     return { success: true, count: contacts.length, contacts };
   } catch (err) {
@@ -249,8 +299,9 @@ function listContacts(filters = {}) {
  * @returns {object}
  */
 function recordInteraction(project, type, outcome, notes) {
-  if (!_db) return { success: false, error: 'Contact DB not initialized' };
-  if (!project || !type) return { success: false, error: 'project and type are required' };
+  if (!_db) return { success: false, error: "Contact DB not initialized" };
+  if (!project || !type)
+    return { success: false, error: "project and type are required" };
 
   const cleanNotes = sanitize(notes);
   const cleanOutcome = sanitize(outcome);
@@ -262,19 +313,35 @@ function recordInteraction(project, type, outcome, notes) {
       INSERT INTO contact_interactions (project, interaction_type, outcome, notes, channel, created_at)
       VALUES (?, ?, ?, ?, ?, ?)
     `);
-    const result = stmt.run(project, type, cleanOutcome || null, cleanNotes || null, type, now);
+    const result = stmt.run(
+      project,
+      type,
+      cleanOutcome || null,
+      cleanNotes || null,
+      type,
+      now,
+    );
 
     // Update contact's last_contact, last_outcome, interaction_count
-    _db.prepare(`
+    _db
+      .prepare(
+        `
       UPDATE contacts SET
         last_contact = ?,
         last_outcome = ?,
         interaction_count = interaction_count + 1,
         updated_at = ?
       WHERE project = ?
-    `).run(now, cleanOutcome || null, now, project);
+    `,
+      )
+      .run(now, cleanOutcome || null, now, project);
 
-    return { success: true, interaction_id: result.lastInsertRowid, project, type };
+    return {
+      success: true,
+      interaction_id: result.lastInsertRowid,
+      project,
+      type,
+    };
   } catch (err) {
     return { success: false, error: err.message };
   }
@@ -286,12 +353,14 @@ function recordInteraction(project, type, outcome, notes) {
  * @returns {object}
  */
 function getContactHistory(project) {
-  if (!_db) return { success: false, error: 'Contact DB not initialized' };
+  if (!_db) return { success: false, error: "Contact DB not initialized" };
 
   try {
-    const interactions = _db.prepare(
-      `SELECT * FROM contact_interactions WHERE project = ? ORDER BY created_at DESC`
-    ).all(project);
+    const interactions = _db
+      .prepare(
+        `SELECT * FROM contact_interactions WHERE project = ? ORDER BY created_at DESC`,
+      )
+      .all(project);
 
     return { success: true, project, count: interactions.length, interactions };
   } catch (err) {
@@ -305,28 +374,38 @@ function getContactHistory(project) {
  * @returns {object}
  */
 function enrichPipelineToken(ticker) {
-  if (!_db) return { success: false, error: 'Contact DB not initialized' };
+  if (!_db) return { success: false, error: "Contact DB not initialized" };
 
   try {
-    const token = _db.prepare(
-      `SELECT * FROM pipeline_tokens WHERE ticker = ? COLLATE NOCASE LIMIT 1`
-    ).get(ticker);
+    const token = _db
+      .prepare(
+        `SELECT * FROM pipeline_tokens WHERE ticker = ? COLLATE NOCASE LIMIT 1`,
+      )
+      .get(ticker);
 
-    if (!token) return { success: false, error: `Token "${ticker}" not found in pipeline` };
+    if (!token)
+      return {
+        success: false,
+        error: `Token "${ticker}" not found in pipeline`,
+      };
 
     // Find contact by project name matching ticker or pipeline_token_id
-    const contact = _db.prepare(
-      `SELECT * FROM contacts
+    const contact = _db
+      .prepare(
+        `SELECT * FROM contacts
        WHERE project = ? COLLATE NOCASE
        OR pipeline_token_id = ?
-       LIMIT 1`
-    ).get(ticker, token.id ? String(token.id) : '');
+       LIMIT 1`,
+      )
+      .get(ticker, token.id ? String(token.id) : "");
 
     const interactions = contact
-      ? _db.prepare(
-          `SELECT interaction_type, outcome, created_at FROM contact_interactions
-           WHERE project = ? ORDER BY created_at DESC LIMIT 10`
-        ).all(contact.project)
+      ? _db
+          .prepare(
+            `SELECT interaction_type, outcome, created_at FROM contact_interactions
+           WHERE project = ? ORDER BY created_at DESC LIMIT 10`,
+          )
+          .all(contact.project)
       : [];
 
     return {
@@ -336,11 +415,11 @@ function enrichPipelineToken(ticker) {
         chain: token.chain,
         score: token.score,
         stage: token.stage,
-        address: token.address
+        address: token.address,
       },
       contact: contact || null,
       recent_interactions: interactions,
-      has_contact: !!contact
+      has_contact: !!contact,
     };
   } catch (err) {
     return { success: false, error: err.message };
@@ -356,5 +435,5 @@ module.exports = {
   recordInteraction,
   getContactHistory,
   enrichPipelineToken,
-  sanitize
+  sanitize,
 };

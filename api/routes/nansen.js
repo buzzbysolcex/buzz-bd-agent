@@ -39,7 +39,11 @@ router.post("/enrich", async (req, res) => {
 router.get("/stats", (req, res) => {
   const { getDB } = require("../db");
   const db = getDB();
-  const stats = db.prepare("SELECT COUNT(*) as total, COUNT(CASE WHEN enriched_at > datetime(\'now\', \'-24 hours\') THEN 1 END) as last_24h, AVG(smart_money_count) as avg_smart_money, MAX(enriched_at) as last_enrichment FROM nansen_enrichments").get();
+  const stats = db
+    .prepare(
+      "SELECT COUNT(*) as total, COUNT(CASE WHEN enriched_at > datetime(\'now\', \'-24 hours\') THEN 1 END) as last_24h, AVG(smart_money_count) as avg_smart_money, MAX(enriched_at) as last_enrichment FROM nansen_enrichments",
+    )
+    .get();
   const status = nansen.getStatus();
   res.json({ ...stats, ...status });
 });

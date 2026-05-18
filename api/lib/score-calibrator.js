@@ -10,41 +10,54 @@
  * - Liquidity $100K-$500K: score penalty -10
  * - Pump.fun tokens (address ends in 'pump'): additional -10 penalty
  */
-const { getDB } = require('../db');
-const https = require('https');
+const { getDB } = require("../db");
+const https = require("https");
 
 function fetchDexScreener(address) {
   return new Promise((resolve) => {
     const url = `https://api.dexscreener.com/latest/dex/tokens/${address}`;
     const req = https.get(url, { timeout: 10000 }, (res) => {
-      let data = '';
-      res.on('data', c => data += c);
-      res.on('end', () => {
+      let data = "";
+      res.on("data", (c) => (data += c));
+      res.on("end", () => {
         try {
           const parsed = JSON.parse(data);
           const pairs = parsed.pairs || [];
           if (pairs.length === 0) return resolve(null);
           // Use highest liquidity pair
-          const best = pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
+          const best = pairs.sort(
+            (a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0),
+          )[0];
           resolve({
             mcap: best.fdv || best.marketCap || 0,
             liquidity: best.liquidity?.usd || 0,
             volume24h: best.volume?.h24 || 0,
             priceUsd: parseFloat(best.priceUsd || 0),
           });
-        } catch (e) { resolve(null); }
+        } catch (e) {
+          resolve(null);
+        }
       });
     });
-    req.on('error', () => resolve(null));
-    req.on('timeout', () => { req.destroy(); resolve(null); });
+    req.on("error", () => resolve(null));
+    req.on("timeout", () => {
+      req.destroy();
+      resolve(null);
+    });
   });
 }
 
 async function calibrateScores() {
   const db = getDB();
-  const tokens = db.prepare('SELECT id, address, chain, ticker, score FROM pipeline_tokens WHERE score IS NOT NULL AND score > 0').all();
+  const tokens = db
+    .prepare(
+      "SELECT id, address, chain, ticker, score FROM pipeline_tokens WHERE score IS NOT NULL AND score > 0",
+    )
+    .all();
 
-  console.log(`[calibrator] Starting calibration for ${tokens.length} tokens...`);
+  console.log(
+    `[calibrator] Starting calibration for ${tokens.length} tokens...`,
+  );
 
   let adjusted = 0;
   let unchanged = 0;
@@ -53,7 +66,7 @@ async function calibrateScores() {
   for (const token of tokens) {
     try {
       // Rate limit: 300ms between DexScreener calls
-      await new Promise(r => setTimeout(r, 300));
+      await new Promise((r) => setTimeout(r, 300));
 
       const data = await fetchDexScreener(token.address);
       if (!data) {
@@ -86,19 +99,23 @@ async function calibrateScores() {
       }
 
       // Pump.fun penalty
-      if (token.address.toLowerCase().endsWith('pump')) {
+      if (token.address.toLowerCase().endsWith("pump")) {
         newScore = Math.max(0, newScore - 10);
-        penalties.push('pumpfun_penalty_-10');
+        penalties.push("pumpfun_penalty_-10");
       }
 
       // RULE 9: Ghost volume penalty (tokens nobody trades have no BD value)
       if (data.volume24h !== undefined) {
         if (data.volume24h < 5000) {
           newScore = Math.max(0, newScore - 15);
-          penalties.push(`ghost_volume_-15 (vol=$${Math.round(data.volume24h)})`);
+          penalties.push(
+            `ghost_volume_-15 (vol=$${Math.round(data.volume24h)})`,
+          );
         } else if (data.volume24h < 10000) {
           newScore = Math.max(0, newScore - 10);
-          penalties.push(`ghost_volume_-10 (vol=$${Math.round(data.volume24h)})`);
+          penalties.push(
+            `ghost_volume_-10 (vol=$${Math.round(data.volume24h)})`,
+          );
         }
       }
       if (data.txns24h !== undefined && data.txns24h < 100) {
@@ -107,10 +124,17 @@ async function calibrateScores() {
       }
 
       // RULE 10: CTO flag (community takeover = post-rug shell pattern)
-      const desc = (token.name || '').toLowerCase() + ' ' + (token.notes || '').toLowerCase();
-      if (desc.includes('community takeover') || desc.includes('devs dumped') || desc.includes('abandoned by dev')) {
+      const desc =
+        (token.name || "").toLowerCase() +
+        " " +
+        (token.notes || "").toLowerCase();
+      if (
+        desc.includes("community takeover") ||
+        desc.includes("devs dumped") ||
+        desc.includes("abandoned by dev")
+      ) {
         newScore = Math.max(0, newScore - 15);
-        penalties.push('cto_shell_-15');
+        penalties.push("cto_shell_-15");
       }
 
       // RULE 11: Volume/liquidity ratio (dead utilization check)
@@ -126,12 +150,16 @@ async function calibrateScores() {
       newScore = Math.max(0, Math.min(100, Math.round(newScore)));
 
       if (newScore !== token.score) {
-        db.prepare("UPDATE pipeline_tokens SET score = ?, notes = COALESCE(notes, '') || ? WHERE id = ?").run(
+        db.prepare(
+          "UPDATE pipeline_tokens SET score = ?, notes = COALESCE(notes, '') || ? WHERE id = ?",
+        ).run(
           newScore,
-          ` | calibrated: ${token.score}->${newScore} [${penalties.join(', ')}]`,
-          token.id
+          ` | calibrated: ${token.score}->${newScore} [${penalties.join(", ")}]`,
+          token.id,
         );
-        console.log(`[calibrator] ${token.ticker}: ${token.score} -> ${newScore} [${penalties.join(', ')}]`);
+        console.log(
+          `[calibrator] ${token.ticker}: ${token.score} -> ${newScore} [${penalties.join(", ")}]`,
+        );
         adjusted++;
       } else {
         unchanged++;
@@ -142,7 +170,9 @@ async function calibrateScores() {
     }
   }
 
-  console.log(`[calibrator] Done: ${adjusted} adjusted, ${unchanged} unchanged, ${errors} errors`);
+  console.log(
+    `[calibrator] Done: ${adjusted} adjusted, ${unchanged} unchanged, ${errors} errors`,
+  );
   return { adjusted, unchanged, errors, total: tokens.length };
 }
 

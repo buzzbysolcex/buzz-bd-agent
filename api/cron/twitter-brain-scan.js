@@ -14,7 +14,11 @@
  * Buzz BD Agent v7.4.0 | Sprint Day 27
  */
 
-const { runTwitterBrainScan, postScanSummary, TWITTER_BRAIN_ENABLED } = require('../services/twitter-brain');
+const {
+  runTwitterBrainScan,
+  postScanSummary,
+  TWITTER_BRAIN_ENABLED,
+} = require("../services/twitter-brain");
 
 /**
  * Execute a single Twitter Brain scan cycle
@@ -26,8 +30,10 @@ async function executeTwitterBrainScan({ db, requestId } = {}) {
   console.log(`[${scanId}] 🧠 Twitter Brain cron firing...`);
 
   if (!TWITTER_BRAIN_ENABLED) {
-    console.log(`[${scanId}] ⏩ Twitter Brain disabled — TWITTER_BRAIN_ENABLED != true`);
-    return { status: 'disabled', scanId };
+    console.log(
+      `[${scanId}] ⏩ Twitter Brain disabled — TWITTER_BRAIN_ENABLED != true`,
+    );
+    return { status: "disabled", scanId };
   }
 
   try {
@@ -39,17 +45,20 @@ async function executeTwitterBrainScan({ db, requestId } = {}) {
       const tweetResult = await postScanSummary(results, scanId);
       if (tweetResult?.success) {
         results.summaryTweetId = tweetResult.tweetId;
-        console.log(`[${scanId}] 📢 Scan summary tweeted: ${tweetResult.tweetId}`);
+        console.log(
+          `[${scanId}] 📢 Scan summary tweeted: ${tweetResult.tweetId}`,
+        );
       }
     }
 
-    console.log(`[${scanId}] ✅ Twitter Brain cron complete: ${results.tokensRouted} routed, ${results.replyQueueSize} queued`);
+    console.log(
+      `[${scanId}] ✅ Twitter Brain cron complete: ${results.tokensRouted} routed, ${results.replyQueueSize} queued`,
+    );
     return results;
-
   } catch (err) {
     console.error(`[${scanId}] ❌ Twitter Brain cron error: ${err.message}`);
     return {
-      status: 'error',
+      status: "error",
       scanId,
       error: err.message,
     };
@@ -58,14 +67,14 @@ async function executeTwitterBrainScan({ db, requestId } = {}) {
 
 // ─── Standalone execution ───────────────────────────
 if (require.main === module) {
-  console.log('Twitter Brain Scan — standalone execution');
+  console.log("Twitter Brain Scan — standalone execution");
   executeTwitterBrainScan()
-    .then(results => {
-      console.log('Results:', JSON.stringify(results, null, 2));
+    .then((results) => {
+      console.log("Results:", JSON.stringify(results, null, 2));
       process.exit(0);
     })
-    .catch(err => {
-      console.error('Fatal error:', err);
+    .catch((err) => {
+      console.error("Fatal error:", err);
       process.exit(1);
     });
 }

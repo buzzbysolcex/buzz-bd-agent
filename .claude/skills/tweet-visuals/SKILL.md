@@ -1,9 +1,11 @@
 # Tweet Visual Generation
 
 ## Static Cards (Level 1 — NOW)
+
 Use dev-browser to render HTML templates as PNG images for tweets.
 
 ### Templates
+
 - **score-card**: Token score with 5-dimension breakdown
 - **weekly-report**: Sunday report summary stats
 - **milestone**: Deployment/achievement announcement
@@ -11,6 +13,7 @@ Use dev-browser to render HTML templates as PNG images for tweets.
 - **sprint-recap**: Sprint summary infographic
 
 ### Workflow
+
 1. Generate HTML with BuzzBD cyberpunk styling (dark #0a0a0f, neon green #00ff88, JetBrains Mono)
 2. Render in dev-browser: page.setContent(html) → page.screenshot()
 3. Save to /tmp/tweet-images/
@@ -18,11 +21,13 @@ Use dev-browser to render HTML templates as PNG images for tweets.
 5. Attach media_id to tweet POST
 
 ### Dimensions
+
 - Twitter card: 1200x675px (16:9)
 - Twitter square: 1080x1080px
 - Always include buzzbd.ai URL on the image
 
 ### Example
+
 ```javascript
 const page = await browser.getPage("tweet-card");
 await page.setViewportSize({ width: 1200, height: 675 });
@@ -41,6 +46,7 @@ await saveScreenshot(buf, "tweet-card.png");
 ```
 
 ### Twitter Media Upload
+
 ```python
 # OAuth 1.0a media upload (chunked for images)
 # POST https://upload.twitter.com/1.1/media/upload.json
@@ -50,6 +56,7 @@ await saveScreenshot(buf, "tweet-card.png");
 ```
 
 ### Styling Guide (BuzzBD Cyberpunk)
+
 - Background: #0a0a0f (near-black)
 - Primary text: #00ff88 (neon green)
 - Secondary text: #fff (white)
@@ -61,7 +68,9 @@ await saveScreenshot(buf, "tweet-card.png");
 - Card glow: box-shadow: 0 0 30px rgba(0,255,136,0.1)
 
 ## Video Clips (Level 2 — Post-Sprint Week 3)
+
 Remotion for programmatic video generation.
+
 - npm install remotion @remotion/cli
 - Reference: github.com/digitalsamba/claude-code-video-toolkit
 - Generate 15-30 second MP4 clips for milestones

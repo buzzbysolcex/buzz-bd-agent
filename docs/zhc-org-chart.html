@@ -1,341 +1,655 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buzz ZHC Company — Organization Chart</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #0a0a0f; color: #e0e0e0; font-family: 'Segoe UI', system-ui, sans-serif; padding: 40px 20px; min-height: 100vh; }
-  h1 { text-align: center; font-size: 28px; color: #00ff41; margin-bottom: 6px; letter-spacing: 2px; }
-  .subtitle { text-align: center; color: #888; font-size: 14px; margin-bottom: 40px; }
-  .subtitle span { color: #ffaa00; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Buzz ZHC Company — Organization Chart</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #0a0a0f;
+        color: #e0e0e0;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        padding: 40px 20px;
+        min-height: 100vh;
+      }
+      h1 {
+        text-align: center;
+        font-size: 28px;
+        color: #00ff41;
+        margin-bottom: 6px;
+        letter-spacing: 2px;
+      }
+      .subtitle {
+        text-align: center;
+        color: #888;
+        font-size: 14px;
+        margin-bottom: 40px;
+      }
+      .subtitle span {
+        color: #ffaa00;
+      }
 
-  .ceo-row { display: flex; justify-content: center; margin-bottom: 20px; }
-  .connector-v { width: 2px; height: 30px; background: #333; margin: 0 auto; }
-  .connector-h-wrap { display: flex; justify-content: center; margin-bottom: 20px; }
-  .connector-h { width: 85%; height: 2px; background: #333; }
+      .ceo-row {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+      .connector-v {
+        width: 2px;
+        height: 30px;
+        background: #333;
+        margin: 0 auto;
+      }
+      .connector-h-wrap {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+      .connector-h {
+        width: 85%;
+        height: 2px;
+        background: #333;
+      }
 
-  .divisions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 1100px; margin: 0 auto; }
-  @media (max-width: 900px) { .divisions { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 600px) { .divisions { grid-template-columns: 1fr; } }
+      .divisions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      @media (max-width: 900px) {
+        .divisions {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 600px) {
+        .divisions {
+          grid-template-columns: 1fr;
+        }
+      }
 
-  .card {
-    background: #111118;
-    border: 1px solid #222;
-    border-radius: 10px;
-    padding: 18px;
-    transition: border-color 0.2s;
-  }
-  .card:hover { border-color: #00ff41; }
-  .card.ceo {
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
-    border: 2px solid #ffaa00;
-    max-width: 340px;
-    text-align: center;
-  }
-  .card.brain {
-    background: linear-gradient(135deg, #0d1117, #161b22);
-    border: 2px solid #00ff41;
-    max-width: 340px;
-    text-align: center;
-  }
+      .card {
+        background: #111118;
+        border: 1px solid #222;
+        border-radius: 10px;
+        padding: 18px;
+        transition: border-color 0.2s;
+      }
+      .card:hover {
+        border-color: #00ff41;
+      }
+      .card.ceo {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        border: 2px solid #ffaa00;
+        max-width: 340px;
+        text-align: center;
+      }
+      .card.brain {
+        background: linear-gradient(135deg, #0d1117, #161b22);
+        border: 2px solid #00ff41;
+        max-width: 340px;
+        text-align: center;
+      }
 
-  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .card-icon { font-size: 22px; }
-  .card-title { font-size: 15px; font-weight: 700; color: #fff; }
-  .card-tag {
-    display: inline-block;
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-weight: 600;
-    margin-left: auto;
-  }
-  .tag-live { background: #003300; color: #00ff41; }
-  .tag-planned { background: #332200; color: #ffaa00; }
-  .tag-paperclip { background: #220033; color: #aa66ff; }
+      .card-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .card-icon {
+        font-size: 22px;
+      }
+      .card-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff;
+      }
+      .card-tag {
+        display: inline-block;
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+        margin-left: auto;
+      }
+      .tag-live {
+        background: #003300;
+        color: #00ff41;
+      }
+      .tag-planned {
+        background: #332200;
+        color: #ffaa00;
+      }
+      .tag-paperclip {
+        background: #220033;
+        color: #aa66ff;
+      }
 
-  .agents { list-style: none; }
-  .agents li {
-    font-size: 12px;
-    padding: 4px 0;
-    border-bottom: 1px solid #1a1a22;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .agents li:last-child { border-bottom: none; }
-  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-  .dot-green { background: #00ff41; }
-  .dot-yellow { background: #ffaa00; }
-  .dot-blue { background: #4488ff; }
-  .dot-purple { background: #aa66ff; }
+      .agents {
+        list-style: none;
+      }
+      .agents li {
+        font-size: 12px;
+        padding: 4px 0;
+        border-bottom: 1px solid #1a1a22;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .agents li:last-child {
+        border-bottom: none;
+      }
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .dot-green {
+        background: #00ff41;
+      }
+      .dot-yellow {
+        background: #ffaa00;
+      }
+      .dot-blue {
+        background: #4488ff;
+      }
+      .dot-purple {
+        background: #aa66ff;
+      }
 
-  .meta { font-size: 11px; color: #666; margin-top: 8px; }
-  .heartbeat { color: #00ff41; font-size: 11px; }
+      .meta {
+        font-size: 11px;
+        color: #666;
+        margin-top: 8px;
+      }
+      .heartbeat {
+        color: #00ff41;
+        font-size: 11px;
+      }
 
-  .footer { text-align: center; margin-top: 40px; color: #444; font-size: 12px; }
-  .footer a { color: #00ff41; text-decoration: none; }
+      .footer {
+        text-align: center;
+        margin-top: 40px;
+        color: #444;
+        font-size: 12px;
+      }
+      .footer a {
+        color: #00ff41;
+        text-decoration: none;
+      }
 
-  .stats-bar {
-    display: flex; justify-content: center; gap: 30px;
-    margin-bottom: 30px; flex-wrap: wrap;
-  }
-  .stat { text-align: center; }
-  .stat-num { font-size: 26px; font-weight: 700; color: #00ff41; }
-  .stat-label { font-size: 11px; color: #666; }
-</style>
-</head>
-<body>
+      .stats-bar {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+      .stat {
+        text-align: center;
+      }
+      .stat-num {
+        font-size: 26px;
+        font-weight: 700;
+        color: #00ff41;
+      }
+      .stat-label {
+        font-size: 11px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>BUZZ ZHC COMPANY</h1>
+    <p class="subtitle">
+      Zero-Human Exchange Listing Company &mdash; <span>v8.0.0</span> &mdash;
+      Powered by Claude Opus 4.6
+    </p>
 
-<h1>BUZZ ZHC COMPANY</h1>
-<p class="subtitle">Zero-Human Exchange Listing Company &mdash; <span>v8.0.0</span> &mdash; Powered by Claude Opus 4.6</p>
-
-<div class="stats-bar">
-  <div class="stat"><div class="stat-num">9</div><div class="stat-label">Divisions</div></div>
-  <div class="stat"><div class="stat-num">28</div><div class="stat-label">Agent Roles</div></div>
-  <div class="stat"><div class="stat-num">135+</div><div class="stat-label">Endpoints</div></div>
-  <div class="stat"><div class="stat-num">55</div><div class="stat-label">DB Tables</div></div>
-  <div class="stat"><div class="stat-num">25</div><div class="stat-label">Intel Sources</div></div>
-  <div class="stat"><div class="stat-num">$0</div><div class="stat-label">/day LLM</div></div>
-</div>
-
-<!-- CEO -->
-<div class="ceo-row">
-  <div class="card ceo">
-    <div class="card-header" style="justify-content:center;">
-      <span class="card-icon">👨‍🍳</span>
-      <span class="card-title">CEO OFFICE &mdash; Ogie</span>
+    <div class="stats-bar">
+      <div class="stat">
+        <div class="stat-num">9</div>
+        <div class="stat-label">Divisions</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">28</div>
+        <div class="stat-label">Agent Roles</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">135+</div>
+        <div class="stat-label">Endpoints</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">55</div>
+        <div class="stat-label">DB Tables</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">25</div>
+        <div class="stat-label">Intel Sources</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">$0</div>
+        <div class="stat-label">/day LLM</div>
+      </div>
     </div>
-    <div style="font-size:12px; color:#ccc;">
-      Approves: Tweets, Deals, Money<br>
-      Channel: Telegram War Room<br>
-      <span style="color:#ffaa00;">Human checkpoint = Step 7 only</span>
+
+    <!-- CEO -->
+    <div class="ceo-row">
+      <div class="card ceo">
+        <div class="card-header" style="justify-content: center">
+          <span class="card-icon">👨‍🍳</span>
+          <span class="card-title">CEO OFFICE &mdash; Ogie</span>
+        </div>
+        <div style="font-size: 12px; color: #ccc">
+          Approves: Tweets, Deals, Money<br />
+          Channel: Telegram War Room<br />
+          <span style="color: #ffaa00">Human checkpoint = Step 7 only</span>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<div class="connector-v"></div>
+    <div class="connector-v"></div>
 
-<!-- Brain -->
-<div class="ceo-row">
-  <div class="card brain">
-    <div class="card-header" style="justify-content:center;">
-      <span class="card-icon">🧠</span>
-      <span class="card-title">THE BRAIN &mdash; Claude Opus 4.6</span>
+    <!-- Brain -->
+    <div class="ceo-row">
+      <div class="card brain">
+        <div class="card-header" style="justify-content: center">
+          <span class="card-icon">🧠</span>
+          <span class="card-title">THE BRAIN &mdash; Claude Opus 4.6</span>
+        </div>
+        <div style="font-size: 12px; color: #ccc">
+          24/7 on Hetzner CX43 &bull; Pro Max Unlimited<br />
+          tmux session &bull; Claude Code CLI<br />
+          <span style="color: #00ff41">Orchestrates all 9 divisions</span>
+        </div>
+      </div>
     </div>
-    <div style="font-size:12px; color:#ccc;">
-      24/7 on Hetzner CX43 &bull; Pro Max Unlimited<br>
-      tmux session &bull; Claude Code CLI<br>
-      <span style="color:#00ff41;">Orchestrates all 9 divisions</span>
+
+    <div class="connector-v"></div>
+    <div class="connector-h-wrap"><div class="connector-h"></div></div>
+
+    <!-- Divisions Grid -->
+    <div class="divisions">
+      <!-- Scanner Division -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">🔍</span>
+          <span class="card-title">Scanner Division</span>
+          <span class="card-tag tag-live">LIVE</span>
+        </div>
+        <ul class="agents">
+          <li>
+            <span class="dot dot-green"></span> DexScreener Scanner (every 6h)
+          </li>
+          <li>
+            <span class="dot dot-green"></span> GeckoTerminal Scanner (every 6h)
+          </li>
+          <li><span class="dot dot-green"></span> AIXBT Momentum (periodic)</li>
+          <li>
+            <span class="dot dot-green"></span> Trending Detector (every 4h)
+          </li>
+        </ul>
+        <div class="meta">
+          4 agents &bull; <span class="heartbeat">&#9829; 6h heartbeat</span>
+        </div>
+      </div>
+
+      <!-- Safety Division -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">🛡️</span>
+          <span class="card-title">Safety Division</span>
+          <span class="card-tag tag-live">LIVE</span>
+        </div>
+        <ul class="agents">
+          <li><span class="dot dot-green"></span> RugCheck Agent</li>
+          <li><span class="dot dot-green"></span> Contract Auditor Agent</li>
+          <li><span class="dot dot-green"></span> Triple Verifier Agent</li>
+        </ul>
+        <div class="meta">
+          3 agents &bull; <span class="heartbeat">&#9829; on-demand</span>
+        </div>
+      </div>
+
+      <!-- Intelligence Division -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">📊</span>
+          <span class="card-title">Intelligence Division</span>
+          <span class="card-tag tag-live">LIVE</span>
+        </div>
+        <ul class="agents">
+          <li><span class="dot dot-green"></span> Helius Wallet Forensics</li>
+          <li><span class="dot dot-yellow"></span> Nansen Smart Money</li>
+          <li><span class="dot dot-green"></span> Social Sentiment (Serper)</li>
+          <li>
+            <span class="dot dot-green"></span> Technical Analyst (RSI/MACD)
+          </li>
+        </ul>
+        <div class="meta">
+          4 agents &bull; <span class="heartbeat">&#9829; 6h heartbeat</span>
+        </div>
+      </div>
+
+      <!-- BD Division -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">🤝</span>
+          <span class="card-title">BD Division</span>
+          <span class="card-tag tag-live">LIVE</span>
+        </div>
+        <ul class="agents">
+          <li><span class="dot dot-green"></span> Twitter Outreach Agent</li>
+          <li><span class="dot dot-green"></span> Proposal Generator Agent</li>
+          <li><span class="dot dot-blue"></span> Deal Pipeline Manager</li>
+          <li><span class="dot dot-blue"></span> Follow-up Agent</li>
+        </ul>
+        <div class="meta">
+          4 agents &bull; <span class="heartbeat">&#9829; 12h heartbeat</span>
+        </div>
+      </div>
+
+      <!-- Engineering Division -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">⚙️</span>
+          <span class="card-title">Engineering Division</span>
+          <span class="card-tag tag-live">LIVE</span>
+        </div>
+        <ul class="agents">
+          <li>
+            <span class="dot dot-green"></span> CI/CD Agent (GitHub Actions)
+          </li>
+          <li><span class="dot dot-green"></span> Bug Fixer Agent</li>
+          <li><span class="dot dot-blue"></span> Feature Builder Agent</li>
+          <li><span class="dot dot-blue"></span> Vercel Deploy Agent</li>
+        </ul>
+        <div class="meta">
+          4 agents &bull; <span class="heartbeat">&#9829; 1h heartbeat</span>
+        </div>
+      </div>
+
+      <!-- Finance Division -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">💰</span>
+          <span class="card-title">Finance Division</span>
+          <span class="card-tag tag-live">LIVE</span>
+        </div>
+        <ul class="agents">
+          <li><span class="dot dot-green"></span> Revenue Tracker</li>
+          <li><span class="dot dot-green"></span> Wallet Monitor</li>
+          <li><span class="dot dot-green"></span> x402 Payment Processor</li>
+          <li><span class="dot dot-blue"></span> Subscription Manager</li>
+        </ul>
+        <div class="meta">
+          4 agents &bull; <span class="heartbeat">&#9829; daily heartbeat</span>
+        </div>
+      </div>
+
+      <!-- Simulation Division -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">🐟</span>
+          <span class="card-title">Simulation Division</span>
+          <span class="card-tag tag-live">LIVE</span>
+        </div>
+        <ul class="agents">
+          <li>
+            <span class="dot dot-green"></span> MiroFish Engine (50 agents)
+          </li>
+          <li>
+            <span class="dot dot-purple"></span> Monte Carlo (100 iterations) —
+            Phase 2
+          </li>
+          <li>
+            <span class="dot dot-purple"></span> OASIS Engine (1K agents) —
+            Phase 3
+          </li>
+          <li>
+            <span class="dot dot-purple"></span> Million Agent Sim — Phase 5
+          </li>
+        </ul>
+        <div class="meta">
+          1 live + 3 planned &bull;
+          <span class="heartbeat">&#9829; event-driven</span>
+        </div>
+      </div>
+
+      <!-- Operations Division -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">🏗️</span>
+          <span class="card-title">Operations Division</span>
+          <span class="card-tag tag-live">LIVE</span>
+        </div>
+        <ul class="agents">
+          <li>
+            <span class="dot dot-green"></span> Sentinel v2.0 (immune system)
+          </li>
+          <li><span class="dot dot-green"></span> Cron Manager (22 active)</li>
+          <li>
+            <span class="dot dot-green"></span> Health Monitor (5-min check)
+          </li>
+          <li><span class="dot dot-green"></span> War Room Reporter</li>
+        </ul>
+        <div class="meta">
+          4 agents &bull; <span class="heartbeat">&#9829; continuous</span>
+        </div>
+      </div>
+
+      <!-- CEO Office (Buzz side) -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">📋</span>
+          <span class="card-title">CEO Office (Buzz)</span>
+          <span class="card-tag tag-live">LIVE</span>
+        </div>
+        <ul class="agents">
+          <li>
+            <span class="dot dot-green"></span> Morning Briefing (07:00 WIB)
+          </li>
+          <li>
+            <span class="dot dot-green"></span> Evening Review (21:00 WIB)
+          </li>
+          <li><span class="dot dot-green"></span> Weekly Strategy (Sunday)</li>
+          <li>
+            <span class="dot dot-green"></span> Prayer Reminders (5x daily)
+          </li>
+          <li><span class="dot dot-blue"></span> Monthly Retrospective</li>
+        </ul>
+        <div class="meta">
+          5 agents &bull; <span class="heartbeat">&#9829; scheduled</span>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<div class="connector-v"></div>
-<div class="connector-h-wrap"><div class="connector-h"></div></div>
-
-<!-- Divisions Grid -->
-<div class="divisions">
-
-  <!-- Scanner Division -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-icon">🔍</span>
-      <span class="card-title">Scanner Division</span>
-      <span class="card-tag tag-live">LIVE</span>
+    <!-- Legend -->
+    <div
+      style="
+        max-width: 1100px;
+        margin: 30px auto 0;
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+        justify-content: center;
+      "
+    >
+      <div
+        style="display: flex; align-items: center; gap: 6px; font-size: 12px"
+      >
+        <span class="dot dot-green"></span> Live &amp; Active
+      </div>
+      <div
+        style="display: flex; align-items: center; gap: 6px; font-size: 12px"
+      >
+        <span class="dot dot-blue"></span> Built, Activating
+      </div>
+      <div
+        style="display: flex; align-items: center; gap: 6px; font-size: 12px"
+      >
+        <span class="dot dot-yellow"></span> Degraded
+      </div>
+      <div
+        style="display: flex; align-items: center; gap: 6px; font-size: 12px"
+      >
+        <span class="dot dot-purple"></span> Planned (Paperclip)
+      </div>
     </div>
-    <ul class="agents">
-      <li><span class="dot dot-green"></span> DexScreener Scanner (every 6h)</li>
-      <li><span class="dot dot-green"></span> GeckoTerminal Scanner (every 6h)</li>
-      <li><span class="dot dot-green"></span> AIXBT Momentum (periodic)</li>
-      <li><span class="dot dot-green"></span> Trending Detector (every 4h)</li>
-    </ul>
-    <div class="meta">4 agents &bull; <span class="heartbeat">&#9829; 6h heartbeat</span></div>
-  </div>
 
-  <!-- Safety Division -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-icon">🛡️</span>
-      <span class="card-title">Safety Division</span>
-      <span class="card-tag tag-live">LIVE</span>
+    <!-- Paperclip Migration -->
+    <div
+      style="
+        max-width: 1100px;
+        margin: 30px auto;
+        background: #111118;
+        border: 1px solid #220033;
+        border-radius: 10px;
+        padding: 20px;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 12px;
+        "
+      >
+        <span style="font-size: 20px">📎</span>
+        <span style="font-size: 15px; font-weight: 700; color: #aa66ff"
+          >Paperclip Integration Roadmap</span
+        >
+      </div>
+      <div
+        style="
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+          font-size: 12px;
+        "
+      >
+        <div
+          style="
+            background: #1a1a2e;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 3px solid #00ff41;
+          "
+        >
+          <div style="color: #00ff41; font-weight: 700">Week 1-2</div>
+          Build claude_code adapter<br />Migrate Eng + Ops divisions<br />Dual-run
+          with OpenClaw
+        </div>
+        <div
+          style="
+            background: #1a1a2e;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 3px solid #4488ff;
+          "
+        >
+          <div style="color: #4488ff; font-weight: 700">Week 3-4</div>
+          Migrate Scanner + Intel<br />Event-driven triggers<br />Finance +
+          Dashboard
+        </div>
+        <div
+          style="
+            background: #1a1a2e;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 3px solid #ffaa00;
+          "
+        >
+          <div style="color: #ffaa00; font-weight: 700">Month 2</div>
+          BD + CEO Office<br />Self-improvement loop<br />Stage 2: 100 agents
+        </div>
+        <div
+          style="
+            background: #1a1a2e;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 3px solid #aa66ff;
+          "
+        >
+          <div style="color: #aa66ff; font-weight: 700">Month 3</div>
+          OASIS integration<br />Stage 3: 1K agents<br />BaaS via x402
+        </div>
+      </div>
     </div>
-    <ul class="agents">
-      <li><span class="dot dot-green"></span> RugCheck Agent</li>
-      <li><span class="dot dot-green"></span> Contract Auditor Agent</li>
-      <li><span class="dot dot-green"></span> Triple Verifier Agent</li>
-    </ul>
-    <div class="meta">3 agents &bull; <span class="heartbeat">&#9829; on-demand</span></div>
-  </div>
 
-  <!-- Intelligence Division -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-icon">📊</span>
-      <span class="card-title">Intelligence Division</span>
-      <span class="card-tag tag-live">LIVE</span>
+    <!-- Infrastructure -->
+    <div
+      style="
+        max-width: 1100px;
+        margin: 20px auto;
+        background: #111118;
+        border: 1px solid #222;
+        border-radius: 10px;
+        padding: 20px;
+      "
+    >
+      <div
+        style="
+          font-size: 13px;
+          font-weight: 700;
+          color: #fff;
+          margin-bottom: 10px;
+        "
+      >
+        Infrastructure
+      </div>
+      <div
+        style="
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 12px;
+          font-size: 12px;
+          color: #999;
+        "
+      >
+        <div>
+          <span style="color: #00ff41">&#9679;</span> Hetzner CX43 &mdash; 8
+          vCPU, 16GB RAM, $9.99/mo
+        </div>
+        <div>
+          <span style="color: #00ff41">&#9679;</span> Pro Max &mdash; Unlimited
+          Opus 4.6, ~$200/mo
+        </div>
+        <div>
+          <span style="color: #00ff41">&#9679;</span> Docker &mdash;
+          buzz-production + sentinel-v2
+        </div>
+        <div>
+          <span style="color: #00ff41">&#9679;</span> Caddy HTTPS &mdash;
+          api/sentinel/dash.buzzbd.ai
+        </div>
+        <div>
+          <span style="color: #00ff41">&#9679;</span> GitHub Actions CI/CD
+          &mdash; push-to-deploy
+        </div>
+        <div>
+          <span style="color: #00ff41">&#9679;</span> ERC-8004 &mdash; ETH
+          #25045, Base #17483, Anet #18709
+        </div>
+      </div>
     </div>
-    <ul class="agents">
-      <li><span class="dot dot-green"></span> Helius Wallet Forensics</li>
-      <li><span class="dot dot-yellow"></span> Nansen Smart Money</li>
-      <li><span class="dot dot-green"></span> Social Sentiment (Serper)</li>
-      <li><span class="dot dot-green"></span> Technical Analyst (RSI/MACD)</li>
-    </ul>
-    <div class="meta">4 agents &bull; <span class="heartbeat">&#9829; 6h heartbeat</span></div>
-  </div>
 
-  <!-- BD Division -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-icon">🤝</span>
-      <span class="card-title">BD Division</span>
-      <span class="card-tag tag-live">LIVE</span>
+    <div class="footer">
+      Buzz BD Agent v8.0.0 &mdash;
+      <a href="https://buzzbd.ai">buzzbd.ai</a> &mdash;
+      <a href="https://x.com/BuzzBySolCex">@BuzzBySolCex</a> &mdash; SolCex
+      Exchange<br />
+      Built by a chef with Claude AI. The kitchen taught me mise en place. Buzz
+      is mise en place for exchange listings.
     </div>
-    <ul class="agents">
-      <li><span class="dot dot-green"></span> Twitter Outreach Agent</li>
-      <li><span class="dot dot-green"></span> Proposal Generator Agent</li>
-      <li><span class="dot dot-blue"></span> Deal Pipeline Manager</li>
-      <li><span class="dot dot-blue"></span> Follow-up Agent</li>
-    </ul>
-    <div class="meta">4 agents &bull; <span class="heartbeat">&#9829; 12h heartbeat</span></div>
-  </div>
-
-  <!-- Engineering Division -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-icon">⚙️</span>
-      <span class="card-title">Engineering Division</span>
-      <span class="card-tag tag-live">LIVE</span>
-    </div>
-    <ul class="agents">
-      <li><span class="dot dot-green"></span> CI/CD Agent (GitHub Actions)</li>
-      <li><span class="dot dot-green"></span> Bug Fixer Agent</li>
-      <li><span class="dot dot-blue"></span> Feature Builder Agent</li>
-      <li><span class="dot dot-blue"></span> Vercel Deploy Agent</li>
-    </ul>
-    <div class="meta">4 agents &bull; <span class="heartbeat">&#9829; 1h heartbeat</span></div>
-  </div>
-
-  <!-- Finance Division -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-icon">💰</span>
-      <span class="card-title">Finance Division</span>
-      <span class="card-tag tag-live">LIVE</span>
-    </div>
-    <ul class="agents">
-      <li><span class="dot dot-green"></span> Revenue Tracker</li>
-      <li><span class="dot dot-green"></span> Wallet Monitor</li>
-      <li><span class="dot dot-green"></span> x402 Payment Processor</li>
-      <li><span class="dot dot-blue"></span> Subscription Manager</li>
-    </ul>
-    <div class="meta">4 agents &bull; <span class="heartbeat">&#9829; daily heartbeat</span></div>
-  </div>
-
-  <!-- Simulation Division -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-icon">🐟</span>
-      <span class="card-title">Simulation Division</span>
-      <span class="card-tag tag-live">LIVE</span>
-    </div>
-    <ul class="agents">
-      <li><span class="dot dot-green"></span> MiroFish Engine (50 agents)</li>
-      <li><span class="dot dot-purple"></span> Monte Carlo (100 iterations) — Phase 2</li>
-      <li><span class="dot dot-purple"></span> OASIS Engine (1K agents) — Phase 3</li>
-      <li><span class="dot dot-purple"></span> Million Agent Sim — Phase 5</li>
-    </ul>
-    <div class="meta">1 live + 3 planned &bull; <span class="heartbeat">&#9829; event-driven</span></div>
-  </div>
-
-  <!-- Operations Division -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-icon">🏗️</span>
-      <span class="card-title">Operations Division</span>
-      <span class="card-tag tag-live">LIVE</span>
-    </div>
-    <ul class="agents">
-      <li><span class="dot dot-green"></span> Sentinel v2.0 (immune system)</li>
-      <li><span class="dot dot-green"></span> Cron Manager (22 active)</li>
-      <li><span class="dot dot-green"></span> Health Monitor (5-min check)</li>
-      <li><span class="dot dot-green"></span> War Room Reporter</li>
-    </ul>
-    <div class="meta">4 agents &bull; <span class="heartbeat">&#9829; continuous</span></div>
-  </div>
-
-  <!-- CEO Office (Buzz side) -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-icon">📋</span>
-      <span class="card-title">CEO Office (Buzz)</span>
-      <span class="card-tag tag-live">LIVE</span>
-    </div>
-    <ul class="agents">
-      <li><span class="dot dot-green"></span> Morning Briefing (07:00 WIB)</li>
-      <li><span class="dot dot-green"></span> Evening Review (21:00 WIB)</li>
-      <li><span class="dot dot-green"></span> Weekly Strategy (Sunday)</li>
-      <li><span class="dot dot-green"></span> Prayer Reminders (5x daily)</li>
-      <li><span class="dot dot-blue"></span> Monthly Retrospective</li>
-    </ul>
-    <div class="meta">5 agents &bull; <span class="heartbeat">&#9829; scheduled</span></div>
-  </div>
-
-</div>
-
-<!-- Legend -->
-<div style="max-width:1100px; margin: 30px auto 0; display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;">
-  <div style="display:flex; align-items:center; gap:6px; font-size:12px;"><span class="dot dot-green"></span> Live &amp; Active</div>
-  <div style="display:flex; align-items:center; gap:6px; font-size:12px;"><span class="dot dot-blue"></span> Built, Activating</div>
-  <div style="display:flex; align-items:center; gap:6px; font-size:12px;"><span class="dot dot-yellow"></span> Degraded</div>
-  <div style="display:flex; align-items:center; gap:6px; font-size:12px;"><span class="dot dot-purple"></span> Planned (Paperclip)</div>
-</div>
-
-<!-- Paperclip Migration -->
-<div style="max-width:1100px; margin: 30px auto; background:#111118; border:1px solid #220033; border-radius:10px; padding:20px;">
-  <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-    <span style="font-size:20px;">📎</span>
-    <span style="font-size:15px; font-weight:700; color:#aa66ff;">Paperclip Integration Roadmap</span>
-  </div>
-  <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; font-size:12px;">
-    <div style="background:#1a1a2e; padding:10px; border-radius:6px; border-left:3px solid #00ff41;">
-      <div style="color:#00ff41; font-weight:700;">Week 1-2</div>
-      Build claude_code adapter<br>Migrate Eng + Ops divisions<br>Dual-run with OpenClaw
-    </div>
-    <div style="background:#1a1a2e; padding:10px; border-radius:6px; border-left:3px solid #4488ff;">
-      <div style="color:#4488ff; font-weight:700;">Week 3-4</div>
-      Migrate Scanner + Intel<br>Event-driven triggers<br>Finance + Dashboard
-    </div>
-    <div style="background:#1a1a2e; padding:10px; border-radius:6px; border-left:3px solid #ffaa00;">
-      <div style="color:#ffaa00; font-weight:700;">Month 2</div>
-      BD + CEO Office<br>Self-improvement loop<br>Stage 2: 100 agents
-    </div>
-    <div style="background:#1a1a2e; padding:10px; border-radius:6px; border-left:3px solid #aa66ff;">
-      <div style="color:#aa66ff; font-weight:700;">Month 3</div>
-      OASIS integration<br>Stage 3: 1K agents<br>BaaS via x402
-    </div>
-  </div>
-</div>
-
-<!-- Infrastructure -->
-<div style="max-width:1100px; margin: 20px auto; background:#111118; border:1px solid #222; border-radius:10px; padding:20px;">
-  <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:10px;">Infrastructure</div>
-  <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; font-size:12px; color:#999;">
-    <div><span style="color:#00ff41;">&#9679;</span> Hetzner CX43 &mdash; 8 vCPU, 16GB RAM, $9.99/mo</div>
-    <div><span style="color:#00ff41;">&#9679;</span> Pro Max &mdash; Unlimited Opus 4.6, ~$200/mo</div>
-    <div><span style="color:#00ff41;">&#9679;</span> Docker &mdash; buzz-production + sentinel-v2</div>
-    <div><span style="color:#00ff41;">&#9679;</span> Caddy HTTPS &mdash; api/sentinel/dash.buzzbd.ai</div>
-    <div><span style="color:#00ff41;">&#9679;</span> GitHub Actions CI/CD &mdash; push-to-deploy</div>
-    <div><span style="color:#00ff41;">&#9679;</span> ERC-8004 &mdash; ETH #25045, Base #17483, Anet #18709</div>
-  </div>
-</div>
-
-<div class="footer">
-  Buzz BD Agent v8.0.0 &mdash; <a href="https://buzzbd.ai">buzzbd.ai</a> &mdash; <a href="https://x.com/BuzzBySolCex">@BuzzBySolCex</a> &mdash; SolCex Exchange<br>
-  Built by a chef with Claude AI. The kitchen taught me mise en place. Buzz is mise en place for exchange listings.
-</div>
-
-</body>
+  </body>
 </html>

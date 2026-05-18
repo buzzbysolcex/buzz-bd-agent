@@ -4,21 +4,33 @@
  * Stores live tickers in okx_live_tickers SQLite table
  */
 
-const WebSocket = require('ws');
+const WebSocket = require("ws");
 
-const OKX_WS_URL = 'wss://ws.okx.com:8443/ws/v5/public';
+const OKX_WS_URL = "wss://ws.okx.com:8443/ws/v5/public";
 const PING_INTERVAL = 25000; // OKX requires ping < 30s
-const BASE_INSTRUMENTS = ['BTC-USDT', 'ETH-USDT', 'SOL-USDT', 'BNB-USDT', 'XRP-USDT'];
+const BASE_INSTRUMENTS = [
+  "BTC-USDT",
+  "ETH-USDT",
+  "SOL-USDT",
+  "BNB-USDT",
+  "XRP-USDT",
+];
 
 let ws = null;
 let pingTimer = null;
 let reconnectAttempts = 0;
 let subscribedInstruments = [...BASE_INSTRUMENTS];
-let status = { connected: false, lastMessage: null, messageCount: 0, reconnects: 0, subscribedCount: 0 };
+let status = {
+  connected: false,
+  lastMessage: null,
+  messageCount: 0,
+  reconnects: 0,
+  subscribedCount: 0,
+};
 
 function getDb() {
   // Lazy require to avoid circular deps — server.js initializes DB first
-  return require('../db').getDB();
+  return require("../db").getDB();
 }
 
 function ensureTable() {
@@ -44,34 +56,38 @@ function ensureTable() {
 }
 
 function connect() {
-  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+  if (
+    ws &&
+    (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)
+  )
+    return;
 
   console.log(`[okx-ws] Connecting to ${OKX_WS_URL}...`);
   ws = new WebSocket(OKX_WS_URL);
 
-  ws.on('open', () => {
-    console.log('[okx-ws] Connected');
+  ws.on("open", () => {
+    console.log("[okx-ws] Connected");
     status.connected = true;
     reconnectAttempts = 0;
     startPing();
     subscribe(subscribedInstruments);
   });
 
-  ws.on('message', (raw) => {
+  ws.on("message", (raw) => {
     try {
       const msg = JSON.parse(raw.toString());
 
       // Handle subscription confirmations
-      if (msg.event === 'subscribe') {
+      if (msg.event === "subscribe") {
         status.subscribedCount++;
         return;
       }
 
       // Handle pong
-      if (msg.op === 'pong' || raw.toString() === 'pong') return;
+      if (msg.op === "pong" || raw.toString() === "pong") return;
 
       // Handle ticker data
-      if (msg.data && msg.arg && msg.arg.channel === 'tickers') {
+      if (msg.data && msg.arg && msg.arg.channel === "tickers") {
         const db = getDb();
         const upsert = db.prepare(`
           INSERT INTO okx_live_tickers (inst_id, last_price, bid_px, ask_px, bid_sz, ask_sz, vol_24h, vol_ccy_24h, high_24h, low_24h, open_24h, ts, updated_at)
@@ -97,7 +113,7 @@ function connect() {
             parseFloat(d.high24h) || 0,
             parseFloat(d.low24h) || 0,
             parseFloat(d.open24h) || 0,
-            parseInt(d.ts) || 0
+            parseInt(d.ts) || 0,
           );
           status.messageCount++;
           status.lastMessage = new Date().toISOString();
@@ -108,14 +124,14 @@ function connect() {
     }
   });
 
-  ws.on('close', (code, reason) => {
+  ws.on("close", (code, reason) => {
     console.log(`[okx-ws] Disconnected (${code}). Reconnecting...`);
     status.connected = false;
     stopPing();
     scheduleReconnect();
   });
 
-  ws.on('error', (err) => {
+  ws.on("error", (err) => {
     console.error(`[okx-ws] Error: ${err.message}`);
     status.connected = false;
   });
@@ -126,11 +142,11 @@ function subscribe(instruments) {
 
   // OKX allows max 240 subscriptions per connection
   // Subscribe in batches of 20
-  const args = instruments.map(id => ({ channel: 'tickers', instId: id }));
+  const args = instruments.map((id) => ({ channel: "tickers", instId: id }));
 
   for (let i = 0; i < args.length; i += 20) {
     const batch = args.slice(i, i + 20);
-    ws.send(JSON.stringify({ op: 'subscribe', args: batch }));
+    ws.send(JSON.stringify({ op: "subscribe", args: batch }));
   }
 
   console.log(`[okx-ws] Subscribed to ${instruments.length} instruments`);
@@ -141,7 +157,12 @@ function addInstrument(instId) {
   if (!subscribedInstruments.includes(instId)) {
     subscribedInstruments.push(instId);
     if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ op: 'subscribe', args: [{ channel: 'tickers', instId }] }));
+      ws.send(
+        JSON.stringify({
+          op: "subscribe",
+          args: [{ channel: "tickers", instId }],
+        }),
+      );
     }
   }
 }
@@ -150,36 +171,43 @@ function startPing() {
   stopPing();
   pingTimer = setInterval(() => {
     if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send('ping');
+      ws.send("ping");
     }
   }, PING_INTERVAL);
 }
 
 function stopPing() {
-  if (pingTimer) { clearInterval(pingTimer); pingTimer = null; }
+  if (pingTimer) {
+    clearInterval(pingTimer);
+    pingTimer = null;
+  }
 }
 
 function scheduleReconnect() {
   const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 60000); // max 60s
   reconnectAttempts++;
   status.reconnects++;
-  console.log(`[okx-ws] Reconnecting in ${delay / 1000}s (attempt ${reconnectAttempts})`);
+  console.log(
+    `[okx-ws] Reconnecting in ${delay / 1000}s (attempt ${reconnectAttempts})`,
+  );
   setTimeout(connect, delay);
 }
 
 function getStatus() {
   return {
     ...status,
-    wsState: ws ? ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'][ws.readyState] : 'NOT_INITIALIZED',
+    wsState: ws
+      ? ["CONNECTING", "OPEN", "CLOSING", "CLOSED"][ws.readyState]
+      : "NOT_INITIALIZED",
     subscribedInstruments: subscribedInstruments.length,
-    reconnectAttempts
+    reconnectAttempts,
   };
 }
 
 function init() {
   ensureTable();
   connect();
-  console.log('[okx-ws] Service initialized');
+  console.log("[okx-ws] Service initialized");
 }
 
 module.exports = { init, connect, subscribe, addInstrument, getStatus };

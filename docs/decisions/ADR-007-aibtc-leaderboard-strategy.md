@@ -1,7 +1,9 @@
 # ADR-007: AIBTC Leaderboard — Hybrid Beat Strategy
 
 ## Status: ACCEPTED
+
 ## Date: March 30, 2026
+
 ## Context
 
 We're #8 (325 pts) on the AIBTC leaderboard. #1 Secret Mars has 527 pts.

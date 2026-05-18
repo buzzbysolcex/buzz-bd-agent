@@ -7,16 +7,26 @@
  * GET  /api/v1/memory/stats
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { searchMemory, indexMemory, getStats } = require('../services/memory-search');
+const {
+  searchMemory,
+  indexMemory,
+  getStats,
+} = require("../services/memory-search");
 
 // ─── GET /memory/search ─────────────────────────────
-router.get('/search', (req, res) => {
+router.get("/search", (req, res) => {
   try {
     const { q, source, limit } = req.query;
-    if (!q) return res.status(400).json({ success: false, error: 'query parameter "q" is required' });
-    const result = searchMemory(q, { source, limit: limit ? parseInt(limit) : 10 });
+    if (!q)
+      return res
+        .status(400)
+        .json({ success: false, error: 'query parameter "q" is required' });
+    const result = searchMemory(q, {
+      source,
+      limit: limit ? parseInt(limit) : 10,
+    });
     if (result.success) res.json(result);
     else res.status(500).json(result);
   } catch (err) {
@@ -25,10 +35,13 @@ router.get('/search', (req, res) => {
 });
 
 // ─── POST /memory/index ─────────────────────────────
-router.post('/index', (req, res) => {
+router.post("/index", (req, res) => {
   try {
     const { content, source } = req.body;
-    if (!content) return res.status(400).json({ success: false, error: 'content is required in body' });
+    if (!content)
+      return res
+        .status(400)
+        .json({ success: false, error: "content is required in body" });
     const result = indexMemory(content, source);
     if (result.success) res.status(201).json(result);
     else res.status(400).json(result);
@@ -38,7 +51,7 @@ router.post('/index', (req, res) => {
 });
 
 // ─── GET /memory/stats ──────────────────────────────
-router.get('/stats', (req, res) => {
+router.get("/stats", (req, res) => {
   try {
     const result = getStats();
     res.json(result);

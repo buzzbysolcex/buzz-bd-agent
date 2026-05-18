@@ -10,7 +10,7 @@
  * GET    /api/v1/contacts/:project/history     — get interaction history
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const {
   createContact,
@@ -18,11 +18,11 @@ const {
   getContact,
   listContacts,
   recordInteraction,
-  getContactHistory
-} = require('../services/contact-intelligence');
+  getContactHistory,
+} = require("../services/contact-intelligence");
 
 // ─── GET /contacts ──────────────────────────────────
-router.get('/', (req, res) => {
+router.get("/", (req, res) => {
   try {
     const { chain, sentiment, limit } = req.query;
     const result = listContacts({ chain, sentiment, limit });
@@ -33,7 +33,7 @@ router.get('/', (req, res) => {
 });
 
 // ─── POST /contacts ─────────────────────────────────
-router.post('/', (req, res) => {
+router.post("/", (req, res) => {
   try {
     const result = createContact(req.body);
     if (result.success) res.status(201).json(result);
@@ -44,7 +44,7 @@ router.post('/', (req, res) => {
 });
 
 // ─── GET /contacts/:project ─────────────────────────
-router.get('/:project', (req, res) => {
+router.get("/:project", (req, res) => {
   try {
     const result = getContact(req.params.project);
     if (result.success) res.json(result);
@@ -55,7 +55,7 @@ router.get('/:project', (req, res) => {
 });
 
 // ─── PATCH /contacts/:project ───────────────────────
-router.patch('/:project', (req, res) => {
+router.patch("/:project", (req, res) => {
   try {
     const result = updateContact(req.params.project, req.body);
     if (result.success) res.json(result);
@@ -66,10 +66,13 @@ router.patch('/:project', (req, res) => {
 });
 
 // ─── POST /contacts/:project/interaction ────────────
-router.post('/:project/interaction', (req, res) => {
+router.post("/:project/interaction", (req, res) => {
   try {
     const { type, outcome, notes } = req.body;
-    if (!type) return res.status(400).json({ success: false, error: 'type is required' });
+    if (!type)
+      return res
+        .status(400)
+        .json({ success: false, error: "type is required" });
     const result = recordInteraction(req.params.project, type, outcome, notes);
     if (result.success) res.status(201).json(result);
     else res.status(400).json(result);
@@ -79,7 +82,7 @@ router.post('/:project/interaction', (req, res) => {
 });
 
 // ─── GET /contacts/:project/history ─────────────────
-router.get('/:project/history', (req, res) => {
+router.get("/:project/history", (req, res) => {
   try {
     const result = getContactHistory(req.params.project);
     if (result.success) res.json(result);

@@ -4,7 +4,7 @@
 
 **Goal:** Build ScannerAgent — the Layer 1 (Cast the Net) sub-agent that queries DexScreener, CoinGecko, and AIXBT in parallel and returns deduplicated token candidates.
 
-**Architecture:** ScannerAgent inherits BaseAgent. Three private async fetcher methods run via asyncio.gather(). Each fetcher normalizes results to a common token schema. A _deduplicate method merges by (chain, contract_address) and tracks which sources found each token.
+**Architecture:** ScannerAgent inherits BaseAgent. Three private async fetcher methods run via asyncio.gather(). Each fetcher normalizes results to a common token schema. A \_deduplicate method merges by (chain, contract_address) and tracks which sources found each token.
 
 **Tech Stack:** Python 3.9+, aiohttp (HTTP client), aioresponses (test mocking), BaseAgent from src/agents/base_agent.py.
 
@@ -15,17 +15,20 @@
 ### Task 1: Add aiohttp and aioresponses Dependencies
 
 **Files:**
+
 - Modify: `requirements-dev.txt`
 
 **Step 1: Add aiohttp and aioresponses to requirements-dev.txt**
 
 The file currently contains:
+
 ```
 pytest>=7.0
 pytest-asyncio>=0.21
 ```
 
 Update it to:
+
 ```
 pytest>=7.0
 pytest-asyncio>=0.21
@@ -55,6 +58,7 @@ git commit -m "chore: add aiohttp and aioresponses dependencies"
 ### Task 2: Test — ScannerAgent Inherits BaseAgent
 
 **Files:**
+
 - Create: `src/agents/tests/test_scanner_agent.py`
 - Create: `src/agents/scanner_agent.py`
 
@@ -135,6 +139,7 @@ git commit -m "feat: add ScannerAgent skeleton inheriting BaseAgent"
 ### Task 3: Test — DexScreener Fetcher
 
 **Files:**
+
 - Modify: `src/agents/tests/test_scanner_agent.py`
 - Modify: `src/agents/scanner_agent.py`
 
@@ -275,7 +280,7 @@ class TestFetchDexscreener:
 Run: `python3 -m pytest src/agents/tests/test_scanner_agent.py::TestFetchDexscreener -v`
 Expected: FAIL — `AttributeError: 'ScannerAgent' object has no attribute '_fetch_dexscreener'`
 
-**Step 3: Implement _fetch_dexscreener**
+**Step 3: Implement \_fetch_dexscreener**
 
 Add to `src/agents/scanner_agent.py`:
 
@@ -356,6 +361,7 @@ git commit -m "feat: add DexScreener fetcher with chain filtering"
 ### Task 4: Test — CoinGecko Fetcher
 
 **Files:**
+
 - Modify: `src/agents/tests/test_scanner_agent.py`
 - Modify: `src/agents/scanner_agent.py`
 
@@ -468,7 +474,7 @@ class TestFetchCoingecko:
 Run: `python3 -m pytest src/agents/tests/test_scanner_agent.py::TestFetchCoingecko -v`
 Expected: FAIL — `AttributeError: 'ScannerAgent' object has no attribute '_fetch_coingecko'`
 
-**Step 3: Implement _fetch_coingecko**
+**Step 3: Implement \_fetch_coingecko**
 
 Add this constant at module level in `src/agents/scanner_agent.py`:
 
@@ -554,6 +560,7 @@ git commit -m "feat: add CoinGecko trending fetcher"
 ### Task 5: Test — AIXBT Stub Fetcher
 
 **Files:**
+
 - Modify: `src/agents/tests/test_scanner_agent.py`
 - Modify: `src/agents/scanner_agent.py`
 
@@ -583,7 +590,7 @@ class TestFetchAixbt:
 Run: `python3 -m pytest src/agents/tests/test_scanner_agent.py::TestFetchAixbt -v`
 Expected: FAIL — `AttributeError: 'ScannerAgent' object has no attribute '_fetch_aixbt'`
 
-**Step 3: Implement _fetch_aixbt**
+**Step 3: Implement \_fetch_aixbt**
 
 Add this method to `ScannerAgent`:
 
@@ -610,6 +617,7 @@ git commit -m "feat: add AIXBT stub fetcher with decision event"
 ### Task 6: Test — Deduplication
 
 **Files:**
+
 - Modify: `src/agents/tests/test_scanner_agent.py`
 - Modify: `src/agents/scanner_agent.py`
 
@@ -700,7 +708,7 @@ class TestDeduplicate:
 Run: `python3 -m pytest src/agents/tests/test_scanner_agent.py::TestDeduplicate -v`
 Expected: FAIL — `AttributeError: 'ScannerAgent' object has no attribute '_deduplicate'`
 
-**Step 3: Implement _deduplicate**
+**Step 3: Implement \_deduplicate**
 
 Add this method to `ScannerAgent`:
 
@@ -739,6 +747,7 @@ git commit -m "feat: add deduplication by (chain, contract_address)"
 ### Task 7: Test — execute() Orchestrates Everything
 
 **Files:**
+
 - Modify: `src/agents/tests/test_scanner_agent.py`
 - Modify: `src/agents/scanner_agent.py`
 

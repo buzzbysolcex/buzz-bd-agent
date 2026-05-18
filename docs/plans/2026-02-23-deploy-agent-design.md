@@ -4,15 +4,15 @@ Layer 2 agent for deployer cross-chain intelligence and reputation analysis. Run
 
 ## Decisions
 
-| Decision | Answer |
-|----------|--------|
-| Pipeline position | Layer 2, parallel with SafetyAgent + WalletAgent + SocialAgent |
-| Architecture | Monolithic single-file agent (matches existing pattern) |
-| Allium API | Stub with detailed SQL contracts (async query+poll), plug-and-play later |
-| Helius scope | getAssetsByOwner (DAS) + enhanced transactions (deployment patterns) |
-| Methods | 3: _analyze_deployments, _analyze_portfolio, _analyze_cross_chain (stub) |
-| Depth modes | 3: quick (deployments), standard (+portfolio), deep (+cross-chain stub) |
-| Scoring | Keep spec (30+30+20+20), weight redistribution handles stub unavailability |
+| Decision          | Answer                                                                      |
+| ----------------- | --------------------------------------------------------------------------- |
+| Pipeline position | Layer 2, parallel with SafetyAgent + WalletAgent + SocialAgent              |
+| Architecture      | Monolithic single-file agent (matches existing pattern)                     |
+| Allium API        | Stub with detailed SQL contracts (async query+poll), plug-and-play later    |
+| Helius scope      | getAssetsByOwner (DAS) + enhanced transactions (deployment patterns)        |
+| Methods           | 3: \_analyze_deployments, \_analyze_portfolio, \_analyze_cross_chain (stub) |
+| Depth modes       | 3: quick (deployments), standard (+portfolio), deep (+cross-chain stub)     |
+| Scoring           | Keep spec (30+30+20+20), weight redistribution handles stub unavailability  |
 
 ## Input
 
@@ -70,76 +70,76 @@ params = {
 
 ## Verdict Mapping
 
-| Score | Risk Level | Reputation |
-|-------|-----------|------------|
-| 80-100 | low | established |
-| 60-79 | medium | moderate |
-| 30-59 | high | new |
-| 0-29 | critical | unknown |
+| Score  | Risk Level | Reputation  |
+| ------ | ---------- | ----------- |
+| 80-100 | low        | established |
+| 60-79  | medium     | moderate    |
+| 30-59  | high       | new         |
+| 0-29   | critical   | unknown     |
 
 ## Depth Mode Gating
 
-| Method | Quick (<5s) | Standard (<15s) | Deep (<30s) |
-|--------|:-----------:|:---------------:|:-----------:|
-| _analyze_deployments | Helius txns | Helius txns | Helius txns |
-| _analyze_portfolio | skip | Helius DAS | Helius DAS |
-| _analyze_cross_chain | skip | skip | Allium (stub) |
+| Method                | Quick (<5s) | Standard (<15s) |  Deep (<30s)  |
+| --------------------- | :---------: | :-------------: | :-----------: |
+| \_analyze_deployments | Helius txns |   Helius txns   |  Helius txns  |
+| \_analyze_portfolio   |    skip     |   Helius DAS    |  Helius DAS   |
+| \_analyze_cross_chain |    skip     |      skip       | Allium (stub) |
 
 Skipped methods return `{"available": False, "score": 0}`. Their weight redistributes proportionally to methods that ran.
 
 ### Timeouts
 
-| Depth | Per-source timeout | Total budget |
-|-------|-------------------|-------------|
-| quick | 3s | 5s |
-| standard | 8s | 15s |
-| deep | 15s | 30s |
+| Depth    | Per-source timeout | Total budget |
+| -------- | ------------------ | ------------ |
+| quick    | 3s                 | 5s           |
+| standard | 8s                 | 15s          |
+| deep     | 15s                | 30s          |
 
 ## Scoring Engine
 
 ### Deployment History (0-30 pts) -- from Helius txns
 
-| Condition | Points |
-|-----------|--------|
-| total_deployments >= 10 | +10 |
-| total_deployments >= 5 | +7 |
-| total_deployments >= 2 | +4 |
-| wallet_age_days >= 365 | +10 |
-| wallet_age_days >= 180 | +7 |
-| wallet_age_days >= 30 | +4 |
-| deployment_frequency in ("prolific", "moderate") | +5 |
-| deployment_frequency == "occasional" | +3 |
+| Condition                                        | Points |
+| ------------------------------------------------ | ------ |
+| total_deployments >= 10                          | +10    |
+| total_deployments >= 5                           | +7     |
+| total_deployments >= 2                           | +4     |
+| wallet_age_days >= 365                           | +10    |
+| wallet_age_days >= 180                           | +7     |
+| wallet_age_days >= 30                            | +4     |
+| deployment_frequency in ("prolific", "moderate") | +5     |
+| deployment_frequency == "occasional"             | +3     |
 
 ### Financial Health (0-20 pts) -- from Helius DAS
 
-| Condition | Points |
-|-----------|--------|
-| total_tokens_held >= 10 | +5 |
-| total_tokens_held >= 3 | +3 |
-| estimated_value_usd >= 10000 | +8 |
-| estimated_value_usd >= 1000 | +5 |
-| estimated_value_usd >= 100 | +3 |
-| has_significant_holdings == True | +7 |
+| Condition                        | Points |
+| -------------------------------- | ------ |
+| total_tokens_held >= 10          | +5     |
+| total_tokens_held >= 3           | +3     |
+| estimated_value_usd >= 10000     | +8     |
+| estimated_value_usd >= 1000      | +5     |
+| estimated_value_usd >= 100       | +3     |
+| has_significant_holdings == True | +7     |
 
 ### Cross-Chain Activity (0-30 pts) -- from Allium (stubbed)
 
-| Condition | Points |
-|-----------|--------|
-| chains_detected >= 5 | +15 |
-| chains_detected >= 3 | +10 |
-| chains_detected >= 2 | +6 |
-| total_cross_chain_txns >= 100 | +8 |
-| total_cross_chain_txns >= 20 | +5 |
-| cross_chain_pnl_usd > 0 | +7 |
+| Condition                     | Points |
+| ----------------------------- | ------ |
+| chains_detected >= 5          | +15    |
+| chains_detected >= 3          | +10    |
+| chains_detected >= 2          | +6     |
+| total_cross_chain_txns >= 100 | +8     |
+| total_cross_chain_txns >= 20  | +5     |
+| cross_chain_pnl_usd > 0       | +7     |
 
 ### Reputation (0-20 pts) -- derived from deployment + portfolio
 
-| Condition | Points |
-|-----------|--------|
-| wallet_age_days >= 365 AND total_deployments >= 5 | +10 |
-| wallet_age_days >= 180 AND total_deployments >= 2 | +6 |
-| No failed/rugged tokens detected | +5 |
-| has_significant_holdings == True | +5 |
+| Condition                                         | Points |
+| ------------------------------------------------- | ------ |
+| wallet_age_days >= 365 AND total_deployments >= 5 | +10    |
+| wallet_age_days >= 180 AND total_deployments >= 2 | +6     |
+| No failed/rugged tokens detected                  | +5     |
+| has_significant_holdings == True                  | +5     |
 
 ### Weight Redistribution
 
@@ -189,6 +189,7 @@ When methods are skipped: `deploy_score = round((raw_score / available_points) *
 Planned SQL queries (defined in stub docstrings):
 
 Query 1 -- Cross-chain activity:
+
 ```sql
 SELECT chain, COUNT(*) as tx_count, SUM(value_usd) as total_value
 FROM crosschain.transactions
@@ -198,6 +199,7 @@ ORDER BY tx_count DESC
 ```
 
 Query 2 -- Deployer PnL:
+
 ```sql
 SELECT SUM(CASE WHEN direction='in' THEN value_usd ELSE -value_usd END) as pnl_usd
 FROM crosschain.token_transfers
@@ -207,7 +209,7 @@ AND block_timestamp > NOW() - INTERVAL '1 year'
 
 ## Error Handling
 
-1. Per-source isolation -- each _analyze_* has own try/except
+1. Per-source isolation -- each _analyze_\* has own try/except
 2. Graceful degradation -- failed source returns `{"available": False}`
 3. All-sources-failed -- deploy_score: 0, risk_level: "critical", cross_chain_reputation: "unknown", red_flags: ["all_sources_failed"]
 4. Event logging -- action/observation/error at every step
@@ -215,16 +217,16 @@ AND block_timestamp > NOW() - INTERVAL '1 year'
 
 ## Testing (42 tests)
 
-| Category | Count |
-|----------|-------|
-| Constructor & init | 3 |
-| Input validation | 4 |
-| Depth gating | 5 |
-| _analyze_deployments | 7 |
-| _analyze_portfolio | 6 |
-| _analyze_cross_chain (stub) | 4 |
-| _compute_verdict | 5 |
-| Red/green flag detection | 4 |
-| Full execute() integration | 4 |
+| Category                     | Count |
+| ---------------------------- | ----- |
+| Constructor & init           | 3     |
+| Input validation             | 4     |
+| Depth gating                 | 5     |
+| \_analyze_deployments        | 7     |
+| \_analyze_portfolio          | 6     |
+| \_analyze_cross_chain (stub) | 4     |
+| \_compute_verdict            | 5     |
+| Red/green flag detection     | 4     |
+| Full execute() integration   | 4     |
 
 All tests use pytest + pytest-asyncio + aioresponses + monkeypatch.

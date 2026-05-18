@@ -9,10 +9,21 @@
  * ~27 min per simulation (30 LLM × 3 rounds × ~18s + instant heuristics)
  */
 
-const { createMarket, getPrice, agentTrade, getLLMSummary, recordRoundPrice, settlePrediction } = require('./microbuzz-amm');
-const { generateLLMAgents, buildUserPrompt } = require('./microbuzz-agents');
-const { executeAllHeuristics } = require('./microbuzz-heuristics');
-const { queryAgent, checkOllamaHealth, stopModel } = require('./microbuzz-ollama');
+const {
+  createMarket,
+  getPrice,
+  agentTrade,
+  getLLMSummary,
+  recordRoundPrice,
+  settlePrediction,
+} = require("./microbuzz-amm");
+const { generateLLMAgents, buildUserPrompt } = require("./microbuzz-agents");
+const { executeAllHeuristics } = require("./microbuzz-heuristics");
+const {
+  queryAgent,
+  checkOllamaHealth,
+  stopModel,
+} = require("./microbuzz-ollama");
 
 /**
  * Run a full 500-agent 3-round simulation for a token
@@ -26,10 +37,13 @@ async function runSimulation(tokenData) {
   // Pre-flight checks
   const health = await checkOllamaHealth();
   if (!health.ready) {
-    return { success: false, error: 'Ollama not ready: ' + JSON.stringify(health) };
+    return {
+      success: false,
+      error: "Ollama not ready: " + JSON.stringify(health),
+    };
   }
 
-  const market = createMarket(tokenData.symbol || tokenData.name || 'UNKNOWN');
+  const market = createMarket(tokenData.symbol || tokenData.name || "UNKNOWN");
   const llmAgents = generateLLMAgents();
   const priorResults = {};
 
@@ -38,14 +52,21 @@ async function runSimulation(tokenData) {
   // ─── 3 ROUNDS ────────────────────────────────────
   for (let round = 1; round <= 3; round++) {
     const roundStart = Date.now();
-    const roundData = await runRound(round, market, llmAgents, tokenData, priorResults, simulationSeed);
+    const roundData = await runRound(
+      round,
+      market,
+      llmAgents,
+      tokenData,
+      priorResults,
+      simulationSeed,
+    );
     roundData.duration_ms = Date.now() - roundStart;
     roundResults.push(roundData);
 
     // Store for next round's context
     priorResults[`round${round}`] = {
       price: getPrice(market),
-      llm_summary: getLLMSummary(market, round)
+      llm_summary: getLLMSummary(market, round),
     };
 
     recordRoundPrice(market, round);
@@ -57,8 +78,8 @@ async function runSimulation(tokenData) {
 
   // EV calculation: p × W − (1−p) × L
   const p = settlement.amm_final_price;
-  const W = 5000;  // listing fee revenue
-  const L = 200;   // BD cost
+  const W = 5000; // listing fee revenue
+  const L = 200; // BD cost
   const ev = p * W - (1 - p) * L;
 
   return {
@@ -82,9 +103,12 @@ async function runSimulation(tokenData) {
     total_trades: settlement.total_trades,
 
     // LLM consensus per round
-    llm_consensus_r1: priorResults.round1?.llm_summary?.consensus_strength || null,
-    llm_consensus_r2: priorResults.round2?.llm_summary?.consensus_strength || null,
-    llm_consensus_r3: priorResults.round3?.llm_summary?.consensus_strength || null,
+    llm_consensus_r1:
+      priorResults.round1?.llm_summary?.consensus_strength || null,
+    llm_consensus_r2:
+      priorResults.round2?.llm_summary?.consensus_strength || null,
+    llm_consensus_r3:
+      priorResults.round3?.llm_summary?.consensus_strength || null,
 
     // Round details
     rounds: roundResults,
@@ -96,14 +120,21 @@ async function runSimulation(tokenData) {
     // Timing
     simulation_time_ms: totalTime,
     simulation_seed: simulationSeed,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   };
 }
 
 /**
  * Run a single round: Phase A (LLM) then Phase B (heuristic)
  */
-async function runRound(roundNumber, market, llmAgents, tokenData, priorResults, seed) {
+async function runRound(
+  roundNumber,
+  market,
+  llmAgents,
+  tokenData,
+  priorResults,
+  seed,
+) {
   const userPrompt = buildUserPrompt(tokenData, roundNumber, priorResults);
 
   // ─── Phase A: 30 LLM agents (sequential, ~18s each) ───
@@ -116,22 +147,22 @@ async function runRound(roundNumber, market, llmAgents, tokenData, priorResults,
   for (const agent of llmAgents) {
     const decision = await queryAgent(agent, userPrompt);
 
-    if (decision.direction === 'YES' || decision.direction === 'NO') {
+    if (decision.direction === "YES" || decision.direction === "NO") {
       const tradeResult = agentTrade(
         market,
         agent.id,
-        'llm',
+        "llm",
         decision.direction,
         decision.amount,
         {
           round: roundNumber,
           persona: agent.persona,
           risk: agent.risk_tolerance,
-          reasoning: decision.reasoning
-        }
+          reasoning: decision.reasoning,
+        },
       );
       llmTraded++;
-      if (decision.direction === 'YES') llmYes++;
+      if (decision.direction === "YES") llmYes++;
       else llmNo++;
     } else {
       llmNothing++;
@@ -147,7 +178,7 @@ async function runRound(roundNumber, market, llmAgents, tokenData, priorResults,
       amount: decision.amount,
       reasoning: decision.reasoning,
       duration_ms: decision.duration_ms,
-      success: decision.success
+      success: decision.success,
     });
   }
 
@@ -155,7 +186,12 @@ async function runRound(roundNumber, market, llmAgents, tokenData, priorResults,
   const llmSummary = getLLMSummary(market, roundNumber);
 
   // ─── Phase B: 470 heuristic agents (instant) ───
-  const heuristicResult = executeAllHeuristics(market, llmSummary, roundNumber, seed);
+  const heuristicResult = executeAllHeuristics(
+    market,
+    llmSummary,
+    roundNumber,
+    seed,
+  );
   const priceAfterHeuristics = getPrice(market);
 
   return {
@@ -167,14 +203,14 @@ async function runRound(roundNumber, market, llmAgents, tokenData, priorResults,
       no: llmNo,
       nothing: llmNothing,
       price_after: priceAfterLLM,
-      consensus: llmSummary
+      consensus: llmSummary,
     },
     phase_b: {
       ...heuristicResult,
-      price_after: priceAfterHeuristics
+      price_after: priceAfterHeuristics,
     },
     price_start: roundNumber === 1 ? 0.5 : null,
-    price_end: priceAfterHeuristics
+    price_end: priceAfterHeuristics,
   };
 }
 
@@ -184,15 +220,18 @@ async function runRound(roundNumber, market, llmAgents, tokenData, priorResults,
  */
 async function getTokenContext(address, chain) {
   const ADMIN_KEY = process.env.BUZZ_API_ADMIN_KEY;
-  const BASE = 'http://localhost:3000';
+  const BASE = "http://localhost:3000";
 
   const tokenData = { address, chain };
 
   // Try pipeline data
   try {
-    const resp = await fetch(`${BASE}/api/v1/pipeline/tokens/${address}?chain=${chain || 'solana'}`, {
-      headers: { 'X-API-Key': ADMIN_KEY }
-    });
+    const resp = await fetch(
+      `${BASE}/api/v1/pipeline/tokens/${address}?chain=${chain || "solana"}`,
+      {
+        headers: { "X-API-Key": ADMIN_KEY },
+      },
+    );
     if (resp.ok) {
       const data = await resp.json();
       const t = data.token || data;
@@ -200,16 +239,19 @@ async function getTokenContext(address, chain) {
         symbol: t.ticker || t.symbol,
         name: t.name,
         score: t.score,
-        chain: t.chain || chain
+        chain: t.chain || chain,
       });
     }
   } catch {}
 
   // Try DexScreener
   try {
-    const resp = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${address}`, {
-      signal: AbortSignal.timeout(10000)
-    });
+    const resp = await fetch(
+      `https://api.dexscreener.com/latest/dex/tokens/${address}`,
+      {
+        signal: AbortSignal.timeout(10000),
+      },
+    );
     if (resp.ok) {
       const data = await resp.json();
       const pair = data.pairs?.[0];
@@ -222,21 +264,22 @@ async function getTokenContext(address, chain) {
           fdv: pair.fdv,
           liquidity: pair.liquidity?.usd,
           volume_24h: pair.volume?.h24,
-          price_change_24h: pair.priceChange?.h24
+          price_change_24h: pair.priceChange?.h24,
         });
 
         // Social data (Round 2+)
         const socials = pair.info?.socials || [];
-        const twitter = socials.find(s => s.type === 'twitter');
-        if (twitter) tokenData.twitter_handle = twitter.url?.split('/').pop();
-        if (pair.info?.websites?.[0]) tokenData.website = pair.info.websites[0].url;
+        const twitter = socials.find((s) => s.type === "twitter");
+        if (twitter) tokenData.twitter_handle = twitter.url?.split("/").pop();
+        if (pair.info?.websites?.[0])
+          tokenData.website = pair.info.websites[0].url;
       }
     }
   } catch {}
 
   // HeyAnon cross-chain data (Round 3)
   try {
-    const defi = require('./heyanon-defi');
+    const defi = require("./heyanon-defi");
     if (tokenData.symbol) {
       const hl = await defi.getHyperliquidOI(tokenData.symbol);
       if (hl.found) {
@@ -252,5 +295,5 @@ async function getTokenContext(address, chain) {
 module.exports = {
   runSimulation,
   runRound,
-  getTokenContext
+  getTokenContext,
 };

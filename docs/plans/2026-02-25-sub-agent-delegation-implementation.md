@@ -13,6 +13,7 @@
 ### Task 1: Add AgentOutcome and DelegationResult dataclasses
 
 **Files:**
+
 - Modify: `src/agents/orchestrator.py:1-15` (imports + new dataclasses before class)
 - Test: `src/agents/tests/test_orchestrator.py`
 
@@ -132,11 +133,12 @@ git commit -m "feat(orchestrator): add AgentOutcome and DelegationResult datacla
 
 ---
 
-### Task 2: Add DEPTH_TIMEOUTS constant and update _run_agents_parallel
+### Task 2: Add DEPTH_TIMEOUTS constant and update \_run_agents_parallel
 
 **Files:**
+
 - Modify: `src/agents/orchestrator.py:33` (replace AGENT_TIMEOUT)
-- Modify: `src/agents/orchestrator.py:233-265` (_run_agents_parallel signature)
+- Modify: `src/agents/orchestrator.py:233-265` (\_run_agents_parallel signature)
 - Test: `src/agents/tests/test_orchestrator.py`
 
 **Step 1: Write the failing test**
@@ -176,10 +178,13 @@ Expected: FAIL
 **Step 3: Write minimal implementation**
 
 In `orchestrator.py`, replace:
+
 ```python
     AGENT_TIMEOUT = 30  # seconds
 ```
+
 with:
+
 ```python
     AGENT_TIMEOUT = 30  # seconds (legacy, used as fallback)
 
@@ -187,28 +192,37 @@ with:
 ```
 
 Update `_run_agents_parallel` signature from:
+
 ```python
     async def _run_agents_parallel(self, agent_params: Dict[str, Dict]) -> Dict[str, Optional[Dict]]:
 ```
+
 to:
+
 ```python
     async def _run_agents_parallel(self, agent_params: Dict[str, Dict], timeout: Optional[int] = None) -> Dict[str, Optional[Dict]]:
 ```
 
 Inside `_run_with_timeout`, change:
+
 ```python
                     timeout=self.AGENT_TIMEOUT,
 ```
+
 to:
+
 ```python
                     timeout=timeout if timeout is not None else self.AGENT_TIMEOUT,
 ```
 
 And update the timeout error messages similarly:
+
 ```python
                 self.log_event("error", f"{name} timed out after {timeout if timeout is not None else self.AGENT_TIMEOUT}s")
 ```
+
 and:
+
 ```python
                     self._task_registry.update_status(
                         task_ids[name], "failed", error=f"Timed out after {timeout if timeout is not None else self.AGENT_TIMEOUT}s"
@@ -237,6 +251,7 @@ git commit -m "feat(orchestrator): add DEPTH_TIMEOUTS and timeout param to _run_
 ### Task 3: Add the public delegate() method
 
 **Files:**
+
 - Modify: `src/agents/orchestrator.py` (add delegate method after `_build_agent_params`)
 - Test: `src/agents/tests/test_orchestrator.py`
 
@@ -451,10 +466,11 @@ git commit -m "feat(orchestrator): add public delegate() method with per-depth t
 
 ---
 
-### Task 4: Refactor _evaluate_single_token to use delegate() with escalation tracking
+### Task 4: Refactor \_evaluate_single_token to use delegate() with escalation tracking
 
 **Files:**
-- Modify: `src/agents/orchestrator.py:303-321` (_evaluate_single_token)
+
+- Modify: `src/agents/orchestrator.py:303-321` (\_evaluate_single_token)
 - Test: `src/agents/tests/test_orchestrator.py`
 
 **Step 1: Write the failing tests**
@@ -595,15 +611,19 @@ git commit -m "feat(orchestrator): refactor _evaluate_single_token to use delega
 ### Task 5: Update existing test that checks AGENT_TIMEOUT constant
 
 **Files:**
+
 - Modify: `src/agents/tests/test_orchestrator.py:42` (update constant assertion)
 
 **Step 1: Update the constant test**
 
 In `TestOrchestratorInit.test_class_constants`, the line:
+
 ```python
         assert OrchestratorAgent.AGENT_TIMEOUT == 30
 ```
+
 should remain (it's still there as legacy fallback). But add:
+
 ```python
         assert OrchestratorAgent.DEPTH_TIMEOUTS == {"quick": 10, "standard": 20, "deep": 45}
 ```

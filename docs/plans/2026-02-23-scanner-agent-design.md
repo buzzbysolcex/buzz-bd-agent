@@ -6,15 +6,15 @@ ScannerAgent covers Layer 1 (Cast the Net) of the 4-Layer Intelligence Architect
 
 ## Decisions
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| Architecture | Single class, parallel private fetchers | Simple, testable, matches Manus pattern |
-| HTTP client | aiohttp | Production async HTTP, connection pooling, timeouts |
-| Sources (v1) | DexScreener (trending+boosts), CoinGecko, AIXBT (stub) | Confirmed free APIs. Clawpump deferred. |
-| Dedup key | (chain, contract_address) | Handles multi-chain correctly |
-| AIXBT | Stub returning [] | Endpoint not verified as JSON API |
-| Default chains | ["solana", "ethereum", "base"] | Matches existing v5.3.8 scanner |
-| Timeout per source | 10 seconds | Fail fast, don't block other sources |
+| Decision           | Choice                                                 | Rationale                                           |
+| ------------------ | ------------------------------------------------------ | --------------------------------------------------- |
+| Architecture       | Single class, parallel private fetchers                | Simple, testable, matches Manus pattern             |
+| HTTP client        | aiohttp                                                | Production async HTTP, connection pooling, timeouts |
+| Sources (v1)       | DexScreener (trending+boosts), CoinGecko, AIXBT (stub) | Confirmed free APIs. Clawpump deferred.             |
+| Dedup key          | (chain, contract_address)                              | Handles multi-chain correctly                       |
+| AIXBT              | Stub returning []                                      | Endpoint not verified as JSON API                   |
+| Default chains     | ["solana", "ethereum", "base"]                         | Matches existing v5.3.8 scanner                     |
+| Timeout per source | 10 seconds                                             | Fail fast, don't block other sources                |
 
 ## Interface
 
@@ -63,19 +63,19 @@ execute(params={chains: ["solana", "ethereum", "base"]})
 
 ## Error Handling
 
-- Each _fetch method catches its own exceptions
+- Each \_fetch method catches its own exceptions
 - On failure: logs error event, returns empty list
 - Other sources continue (Manus: error isolation)
 - execute() always returns a result, even if all sources fail
 
 ## API Endpoints
 
-| Source | Endpoint | Auth |
-|--------|----------|------|
-| DexScreener boosts | `https://api.dexscreener.com/token-boosts/latest/v1` | None |
+| Source             | Endpoint                                                   | Auth |
+| ------------------ | ---------------------------------------------------------- | ---- |
+| DexScreener boosts | `https://api.dexscreener.com/token-boosts/latest/v1`       | None |
 | DexScreener search | `https://api.dexscreener.com/latest/dex/search/?q={query}` | None |
-| CoinGecko trending | `https://api.coingecko.com/api/v3/search/trending` | None |
-| AIXBT | Stubbed | N/A |
+| CoinGecko trending | `https://api.coingecko.com/api/v3/search/trending`         | None |
+| AIXBT              | Stubbed                                                    | N/A  |
 
 ## What's Not Included (YAGNI)
 

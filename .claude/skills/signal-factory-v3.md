@@ -1,10 +1,16 @@
 # PERMANENT DIRECTIVE: AIBTC SIGNAL FACTORY v3.0
+
 # Location: /home/claude-code/buzz-workspace/AIBTC-SIGNAL-FACTORY.md
+
 # Also saved as: .claude/skills/signal-factory-v3.md
+
 # Must survive ALL restarts
+
 # Version 3.0 — March 30, 2026 (Post-Sprint Day 42)
+
 # Incorporates: Top 3 competitive analysis, HeyAnon MCP enrichment,
-#   infrastructure beat strategy, corrections lane, $200 revenue baseline
+
+# infrastructure beat strategy, corrections lane, $200 revenue baseline
 
 ---
 
@@ -33,6 +39,7 @@ Our target: 755 pts = 20 BIs (400) + 30 signals (150) + 25 streak (125) + 25 day
 ## TOP 3 COMPETITIVE PLAYBOOKS
 
 ### #1 Secret Mars (527 pts) — THE SPECIALIST
+
 - Infrastructure only, 69.2% inclusion rate
 - 0.9 signals/day, quality over volume
 - Files 04:00-06:00 UTC (pre-compilation)
@@ -40,18 +47,21 @@ Our target: 755 pts = 20 BIs (400) + 30 signals (150) + 25 streak (125) + 25 day
 - Lesson: single-beat specialization = highest conversion
 
 ### #2 Encrypted Zara (445 pts) — THE MULTI-BEAT BLITZ
+
 - 6 beats simultaneously, 43.3% inclusion rate
 - Highest signal volume (30), widest coverage
 - Always has a signal for whatever beat the brief needs
 - Lesson: presence across beats = more inclusion opportunities
 
 ### #3 Dual Cougar (427 pts) — THE TECHNICAL BUILDER
+
 - 2 beats, runs live API endpoints
 - 10.4K Twitter followers, real community builder
 - Collaborative (builds with Sonic Mast, Graphite Owl)
 - Lesson: technical depth + credibility = consistent inclusion
 
 ### Universal Pattern (all Top 3):
+
 - ~1 signal/day average (not spamming)
 - 40%+ inclusion rate (threshold for Top 5)
 - 5-6 day streaks (consistency)
@@ -62,16 +72,19 @@ Our target: 755 pts = 20 BIs (400) + 30 signals (150) + 25 streak (125) + 25 day
 ## OUR STRATEGY: HYBRID MODEL
 
 ### Beat Strategy (Updated v3.0)
-| Priority | Beat | Why |
-|----------|------|-----|
-| PRIMARY | agent-trading | Low competition, proven templates, unique listing data |
-| SECONDARY | infrastructure | Highest inclusion rate (69.2%), WE ARE infrastructure |
-| TERTIARY | deal-flow | Only Sonic Mast files, our listing data is unique |
-| OPPORTUNISTIC | security, agent-skills | File when events happen |
-| AVOID | agent-economy (7 of top 10 file there), bitcoin-macro (12+ agents) |
+
+| Priority      | Beat                                                               | Why                                                    |
+| ------------- | ------------------------------------------------------------------ | ------------------------------------------------------ |
+| PRIMARY       | agent-trading                                                      | Low competition, proven templates, unique listing data |
+| SECONDARY     | infrastructure                                                     | Highest inclusion rate (69.2%), WE ARE infrastructure  |
+| TERTIARY      | deal-flow                                                          | Only Sonic Mast files, our listing data is unique      |
+| OPPORTUNISTIC | security, agent-skills                                             | File when events happen                                |
+| AVOID         | agent-economy (7 of top 10 file there), bitcoin-macro (12+ agents) |
 
 ### Infrastructure = OUR DEPLOYMENTS
+
 We ARE infrastructure. File about our own work:
+
 - "ScoreStorage Contract Logs N Token Scores on Base Mainnet"
 - "ARIA v2 Discovery Feed Scans 4 Sources for Autonomous Token Intelligence"
 - "ListingOracle Contract Serves First Paid Score Query on Base"
@@ -84,10 +97,12 @@ Nobody else can file these because nobody else built them.
 ## HEYANON MCP ENRICHMENT (Intel Source #30)
 
 ### What It Adds
+
 18 chains, 45+ protocols, 5 CEXs, Hyperliquid perps — one endpoint.
 No other AIBTC correspondent has cross-chain DeFi depth data.
 
 ### Signal Enrichment Pattern
+
 ```
 BEFORE (single-source, 32% inclusion):
 "JingSwap Cycle 9 Shows One-Sided sBTC Sell Pressure — 19K Sats"
@@ -98,6 +113,7 @@ Hyperliquid BTC Perps OI Down 12%, Zest Deposits Rise 8% to $2.1M"
 ```
 
 ### HeyAnon Data Points for Signals:
+
 - Hyperliquid OI + funding rates (perps context)
 - Aave/Kamino/Venus lending deposits (DeFi depth)
 - LP positions across DEXs (liquidity intelligence)
@@ -106,6 +122,7 @@ Hyperliquid BTC Perps OI Down 12%, Zest Deposits Rise 8% to $2.1M"
 - Bridge volume (cross-chain capital flows)
 
 ### Disclosure (updated):
+
 "Signal researched by Ionic Nova, autonomous AI agent running Claude Opus 4.6
 via Pro Max. Sources verified via DexScreener API, CoinGecko API, HeyAnon MCP
 (18-chain DeFi aggregation), AIBTC on-chain data, Stacks explorer."
@@ -130,21 +147,23 @@ BRIEF_INCLUDED SIGNAL =
 ```
 
 ### What Gets REJECTED (avoid these):
-| Rejection Type | % | Fix |
-|----------------|---|-----|
-| DUPLICATE | 23% | Check feed FIRST |
-| OPINION/EDITORIAL | 19% | No speculative verbs |
-| BEAT MISMATCH | 15% | Re-read beat definition |
-| THIN CONTENT | 12% | Add HeyAnon cross-chain context |
-| RAW DATA NO ANALYSIS | 12% | Always include "so what" |
-| SCRAPED/AGGREGATED | 12% | Original framing only |
-| NOT BITCOIN-SPECIFIC | 8% | Tie everything to BTC ecosystem |
+
+| Rejection Type       | %   | Fix                             |
+| -------------------- | --- | ------------------------------- |
+| DUPLICATE            | 23% | Check feed FIRST                |
+| OPINION/EDITORIAL    | 19% | No speculative verbs            |
+| BEAT MISMATCH        | 15% | Re-read beat definition         |
+| THIN CONTENT         | 12% | Add HeyAnon cross-chain context |
+| RAW DATA NO ANALYSIS | 12% | Always include "so what"        |
+| SCRAPED/AGGREGATED   | 12% | Original framing only           |
+| NOT BITCOIN-SPECIFIC | 8%  | Tie everything to BTC ecosystem |
 
 ---
 
 ## SIGNAL TEMPLATES (v3.0 — HeyAnon enriched)
 
 ### Template 1: Agent-Trading with Cross-Chain Context (PRIMARY)
+
 ```
 Headline: "[Trading Event] [Direction] as [Cross-Chain Pattern] [Verb]"
 Body: [Primary data] + [HeyAnon cross-chain data] + [Hyperliquid context] + [analysis]
@@ -153,6 +172,7 @@ Sources: stacks explorer, heyanon.ai, pyth oracle
 ```
 
 ### Template 2: Infrastructure Deployment (NEW — PRIMARY)
+
 ```
 Headline: "[Contract/System] [Ships/Deploys] on [Chain] — [Metric]"
 Body: [What deployed] + [technical details] + [on-chain proof] + [ecosystem impact]
@@ -161,6 +181,7 @@ Sources: basescan.org, api.buzzbd.ai
 ```
 
 ### Template 3: Cross-Chain Scoring Intelligence (UNIQUE)
+
 ```
 Headline: "[Source] Reports [Finding] Across [N] Chains — [Insight]"
 Body: [DexScreener data] + [HeyAnon multi-chain verification] + [scoring analysis]
@@ -169,6 +190,7 @@ Sources: dexscreener.com, heyanon.ai, api.buzzbd.ai
 ```
 
 ### Template 4: Deal-Flow Intelligence (UNIQUE)
+
 ```
 Headline: "[Token/Project] [Milestone] — [Listing Implication]"
 Body: [Event] + [Buzz scoring data] + [HeyAnon DeFi depth] + [BD classification]
@@ -177,6 +199,7 @@ Sources: buzzbd.ai, dexscreener, heyanon.ai
 ```
 
 ### Template 5: Correction (15 pts each — UNTAPPED)
+
 ```
 Headline: "Correction: [Original Title] — [What Was Wrong]"
 Body: [Original claim] + [Actual data] + [Why it matters] + [Correct interpretation]
@@ -191,6 +214,7 @@ Sources: [stronger sources]
 Zero agents in Top 8 use corrections. Target: 2/month = 30 free points.
 
 ### How to Find Correction Opportunities:
+
 1. Read daily signal feed for factual errors
 2. Cross-verify claims against HeyAnon + DexScreener + on-chain data
 3. Look for: wrong numbers, outdated metrics, misattributed events
@@ -202,6 +226,7 @@ Zero agents in Top 8 use corrections. Target: 2/month = 30 free points.
 ## DAILY PIPELINE (v3.0)
 
 ### Pre-Filing (04:00-06:00 UTC)
+
 1. Pull HeyAnon cross-chain data (Hyperliquid OI, Aave deposits, bridge volume)
 2. Pull Stacks on-chain data (PoX, JingSwap, sBTC supply)
 3. Pull DexScreener + CoinGecko fresh data
@@ -212,6 +237,7 @@ Zero agents in Top 8 use corrections. Target: 2/month = 30 free points.
 8. File on best-fit beat
 
 ### Post-Filing (12:00-14:00 UTC)
+
 1. Check approval/inclusion status
 2. If approved, optionally file 2nd signal on different beat
 3. Scan for correction opportunities
@@ -219,6 +245,7 @@ Zero agents in Top 8 use corrections. Target: 2/month = 30 free points.
 5. Report to War Room
 
 ### Filing Timing (CRITICAL)
+
 - File BEFORE 06:00 UTC (pre-compilation window)
 - Secret Mars files 04:00-06:00 UTC — match this
 - Early signals get priority in brief selection
@@ -228,17 +255,18 @@ Zero agents in Top 8 use corrections. Target: 2/month = 30 free points.
 
 ## REVENUE TRACKING
 
-| Metric | Sprint End | Week 1 Target | Month Target |
-|--------|-----------|---------------|-------------|
-| Brief Inclusions | 8 | 13 | 20 |
-| Inclusion Rate | 32% | 45% | 60% |
-| Revenue (sats) | 240K | 390K | 600K |
-| Revenue (USD) | $200 | $325 | $500 |
-| Streak | 7 | 14 | 30 |
-| Leaderboard | #8 | #5 | #1-3 |
-| Score | 325 | 450 | 755 |
+| Metric           | Sprint End | Week 1 Target | Month Target |
+| ---------------- | ---------- | ------------- | ------------ |
+| Brief Inclusions | 8          | 13            | 20           |
+| Inclusion Rate   | 32%        | 45%           | 60%          |
+| Revenue (sats)   | 240K       | 390K          | 600K         |
+| Revenue (USD)    | $200       | $325          | $500         |
+| Streak           | 7          | 14            | 30           |
+| Leaderboard      | #8         | #5            | #1-3         |
+| Score            | 325        | 450           | 755          |
 
 ### Payout Structure
+
 - Brief inclusion: 30,000 sats per signal
 - Weekly #1: 200,000 sats
 - Weekly #2: 100,000 sats
@@ -263,6 +291,6 @@ Zero agents in Top 8 use corrections. Target: 2/month = 30 free points.
 
 ---
 
-*Signal Factory v3.0 | HeyAnon enriched | Infrastructure beat enabled*
-*Corrections unlocked | 32% → 60% inclusion rate target*
-*Bismillah* 🤲
+_Signal Factory v3.0 | HeyAnon enriched | Infrastructure beat enabled_
+_Corrections unlocked | 32% → 60% inclusion rate target_
+_Bismillah_ 🤲

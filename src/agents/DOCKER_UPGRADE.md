@@ -31,11 +31,13 @@ All files go into `/opt/buzz-agents/` in the Docker image and get synced to
 ## 2. Python Dependencies
 
 ### Production (requirements.txt)
+
 ```
 aiohttp>=3.9
 ```
 
 ### Dev Only (requirements-dev.txt — NOT in Docker image)
+
 ```
 pytest>=7.0
 pytest-asyncio>=0.21
@@ -44,6 +46,7 @@ aioresponses>=0.7
 ```
 
 ### Dockerfile additions
+
 ```dockerfile
 # Add Python 3.11 runtime (node:22-slim is Debian-based)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -147,6 +150,7 @@ fi
 ```
 
 Update the banner:
+
 ```bash
 echo "  v6.0 — Multi-Agent Intelligence Layer"
 ```
@@ -190,6 +194,6 @@ akash tx deployment update ... --image ghcr.io/buzzbysolcex/buzz-bd-agent:5.3.8
 ```yaml
 services:
   buzz:
-    image: ghcr.io/buzzbysolcex/buzz-bd-agent:6.0.0  # was 5.3.8
+    image: ghcr.io/buzzbysolcex/buzz-bd-agent:6.0.0 # was 5.3.8
     # ... rest unchanged
 ```

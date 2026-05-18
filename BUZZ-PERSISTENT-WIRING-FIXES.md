@@ -1,5 +1,7 @@
 # BUZZ — PERSISTENT WIRING FIXES
+
 ## All Audit Findings → Permanent Infrastructure
+
 ### April 5, 2026 | RULE: Nothing survives if it's not in code, DB migration, or git.
 
 ---

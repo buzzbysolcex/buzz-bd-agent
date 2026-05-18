@@ -14,9 +14,11 @@
  * Feature-flagged: AUTODREAM_HILLCLIMB
  */
 
-const { feature } = require('../../lib/feature-flags');
-const { getDB } = require('../../db');
-function db() { return getDB(); }
+const { feature } = require("../../lib/feature-flags");
+const { getDB } = require("../../db");
+function db() {
+  return getDB();
+}
 
 // Default scoring rules (v2_8rules + 3 new)
 const DEFAULT_RULES = {
@@ -31,10 +33,10 @@ const DEFAULT_RULES = {
   GHOST_VOLUME: { min_volume: 5000, penalty: -15 },
   CTO_FLAG: { penalty: -15 },
   VOLUME_LIQUIDITY_RATIO: { min_ratio: 0.05, penalty: -5 },
-  BLACKLIST_WALLET_MATCH: { penalty: -30 }
+  BLACKLIST_WALLET_MATCH: { penalty: -30 },
 };
 
-const MUTATION_TYPES = ['weight_adjust', 'threshold_shift'];
+const MUTATION_TYPES = ["weight_adjust", "threshold_shift"];
 
 /**
  * Initialize hill-climber tables (idempotent)
@@ -86,15 +88,20 @@ function initHillClimberTables() {
  * Load current active rules
  */
 function loadActiveRules() {
-  const active = db().prepare(
-    'SELECT * FROM scoring_rule_versions WHERE is_active = 1 ORDER BY id DESC LIMIT 1'
-  ).get();
+  const active = db()
+    .prepare(
+      "SELECT * FROM scoring_rule_versions WHERE is_active = 1 ORDER BY id DESC LIMIT 1",
+    )
+    .get();
 
   if (active) {
-    return { version: active.version_tag, rules: JSON.parse(active.rules_config) };
+    return {
+      version: active.version_tag,
+      rules: JSON.parse(active.rules_config),
+    };
   }
 
-  return { version: 'v2_8rules_default', rules: { ...DEFAULT_RULES } };
+  return { version: "v2_8rules_default", rules: { ...DEFAULT_RULES } };
 }
 
 /**
@@ -102,27 +109,32 @@ function loadActiveRules() {
  */
 function proposeMutation(currentRules) {
   const rules = JSON.parse(JSON.stringify(currentRules.rules));
-  const mutationType = MUTATION_TYPES[Math.floor(Math.random() * MUTATION_TYPES.length)];
-  const ruleNames = Object.keys(rules).filter(r => r !== 'STABLECOIN_EXCLUSION');
+  const mutationType =
+    MUTATION_TYPES[Math.floor(Math.random() * MUTATION_TYPES.length)];
+  const ruleNames = Object.keys(rules).filter(
+    (r) => r !== "STABLECOIN_EXCLUSION",
+  );
   const targetRule = ruleNames[Math.floor(Math.random() * ruleNames.length)];
   const rule = rules[targetRule];
 
-  let description = '';
+  let description = "";
 
-  if (mutationType === 'weight_adjust' && rule.penalty !== undefined) {
+  if (mutationType === "weight_adjust" && rule.penalty !== undefined) {
     const delta = Math.floor(Math.random() * 11) - 5; // -5 to +5
     if (delta === 0) return proposeMutation(currentRules); // retry
     const oldPenalty = rule.penalty;
     rule.penalty = Math.max(-50, Math.min(0, rule.penalty + delta));
     description = `${targetRule}: penalty ${oldPenalty} → ${rule.penalty}`;
-  } else if (mutationType === 'weight_adjust' && rule.bonus !== undefined) {
+  } else if (mutationType === "weight_adjust" && rule.bonus !== undefined) {
     const delta = Math.floor(Math.random() * 11) - 5;
     if (delta === 0) return proposeMutation(currentRules);
     const oldBonus = rule.bonus;
     rule.bonus = Math.max(0, Math.min(30, rule.bonus + delta));
     description = `${targetRule}: bonus ${oldBonus} → ${rule.bonus}`;
-  } else if (mutationType === 'threshold_shift') {
-    const thresholdKeys = Object.keys(rule).filter(k => k.startsWith('min_') || k.startsWith('max_') || k === 'threshold');
+  } else if (mutationType === "threshold_shift") {
+    const thresholdKeys = Object.keys(rule).filter(
+      (k) => k.startsWith("min_") || k.startsWith("max_") || k === "threshold",
+    );
     if (thresholdKeys.length === 0) return proposeMutation(currentRules);
     const key = thresholdKeys[Math.floor(Math.random() * thresholdKeys.length)];
     const multiplier = 0.5 + Math.random() * 1.5; // 0.5x to 2.0x
@@ -140,7 +152,7 @@ function proposeMutation(currentRules) {
     diff: { type: mutationType, target: targetRule, description },
     description,
     reasoning: `Testing ${mutationType} on ${targetRule}`,
-    isSimpler: false
+    isSimpler: false,
   };
 }
 
@@ -166,23 +178,30 @@ function scoreWithRules(contractAddress, chain, rules) {
  * Run benchmark against ground truth
  */
 function runBenchmark(rules) {
-  const groundTruth = db().prepare('SELECT * FROM scoring_ground_truth').all();
+  const groundTruth = db().prepare("SELECT * FROM scoring_ground_truth").all();
   if (groundTruth.length === 0) {
-    return { passed: 0, total: 0, accuracy: 0, message: 'No ground truth data' };
+    return {
+      passed: 0,
+      total: 0,
+      accuracy: 0,
+      message: "No ground truth data",
+    };
   }
 
   let passed = 0;
   for (const token of groundTruth) {
     const score = scoreWithRules(token.contract_address, token.chain, rules);
-    const predicted = score >= 70 ? 'legitimate' : 'risky';
-    const actual = ['legitimate', 'success'].includes(token.actual_outcome) ? 'legitimate' : 'risky';
+    const predicted = score >= 70 ? "legitimate" : "risky";
+    const actual = ["legitimate", "success"].includes(token.actual_outcome)
+      ? "legitimate"
+      : "risky";
     if (predicted === actual) passed++;
   }
 
   return {
     passed,
     total: groundTruth.length,
-    accuracy: groundTruth.length > 0 ? passed / groundTruth.length : 0
+    accuracy: groundTruth.length > 0 ? passed / groundTruth.length : 0,
   };
 }
 
@@ -190,18 +209,27 @@ function runBenchmark(rules) {
  * Log an experiment result
  */
 function logExperiment(exp) {
-  return db().prepare(`
+  return db()
+    .prepare(
+      `
     INSERT INTO autodream_experiments
     (run_date, experiment_name, rule_changes, baseline_score, experiment_score,
      baseline_passed, experiment_passed, verdict, reasoning, duration_ms)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    new Date().toISOString().split('T')[0],
-    exp.name, JSON.stringify(exp.ruleChanges),
-    exp.baselineScore, exp.experimentScore,
-    exp.baselinePassed, exp.experimentPassed,
-    exp.verdict, exp.reasoning, exp.durationMs
-  );
+  `,
+    )
+    .run(
+      new Date().toISOString().split("T")[0],
+      exp.name,
+      JSON.stringify(exp.ruleChanges),
+      exp.baselineScore,
+      exp.experimentScore,
+      exp.baselinePassed,
+      exp.experimentPassed,
+      exp.verdict,
+      exp.reasoning,
+      exp.durationMs,
+    );
 }
 
 /**
@@ -209,16 +237,27 @@ function logExperiment(exp) {
  */
 function saveRuleVersion(rules, benchmarkResult, experimentId) {
   // Deactivate all current versions
-  db().prepare('UPDATE scoring_rule_versions SET is_active = 0').run();
+  db().prepare("UPDATE scoring_rule_versions SET is_active = 0").run();
 
-  const count = db().prepare('SELECT COUNT(*) as c FROM scoring_rule_versions').get();
-  const versionTag = `v3_auto_${String(count.c + 1).padStart(3, '0')}`;
+  const count = db()
+    .prepare("SELECT COUNT(*) as c FROM scoring_rule_versions")
+    .get();
+  const versionTag = `v3_auto_${String(count.c + 1).padStart(3, "0")}`;
 
-  db().prepare(`
+  db()
+    .prepare(
+      `
     INSERT INTO scoring_rule_versions
     (version_tag, rules_config, performance_score, is_active, experiment_id)
     VALUES (?, ?, ?, 1, ?)
-  `).run(versionTag, JSON.stringify(rules), benchmarkResult.accuracy, experimentId || null);
+  `,
+    )
+    .run(
+      versionTag,
+      JSON.stringify(rules),
+      benchmarkResult.accuracy,
+      experimentId || null,
+    );
 
   return versionTag;
 }
@@ -228,9 +267,12 @@ function saveRuleVersion(rules, benchmarkResult, experimentId) {
  * @param {number} maxIterations - max experiments per run (default 5)
  * @param {number} maxDurationMs - time budget in ms (default 4 hours)
  */
-async function hillClimbLoop(maxIterations = 5, maxDurationMs = 4 * 60 * 60 * 1000) {
-  if (!feature('AUTODREAM_HILLCLIMB')) {
-    return { skipped: true, reason: 'AUTODREAM_HILLCLIMB=false' };
+async function hillClimbLoop(
+  maxIterations = 5,
+  maxDurationMs = 4 * 60 * 60 * 1000,
+) {
+  if (!feature("AUTODREAM_HILLCLIMB")) {
+    return { skipped: true, reason: "AUTODREAM_HILLCLIMB=false" };
   }
 
   const startTime = Date.now();
@@ -240,7 +282,10 @@ async function hillClimbLoop(maxIterations = 5, maxDurationMs = 4 * 60 * 60 * 10
   let currentBenchmark = runBenchmark(current.rules);
 
   if (currentBenchmark.total === 0) {
-    return { skipped: true, reason: 'No ground truth data — seed scoring_ground_truth first' };
+    return {
+      skipped: true,
+      reason: "No ground truth data — seed scoring_ground_truth first",
+    };
   }
 
   const results = [];
@@ -252,9 +297,13 @@ async function hillClimbLoop(maxIterations = 5, maxDurationMs = 4 * 60 * 60 * 10
     const mutation = proposeMutation(current);
     const experimentBenchmark = runBenchmark(mutation.rules);
 
-    const verdict = experimentBenchmark.passed > currentBenchmark.passed ? 'keep'
-      : experimentBenchmark.passed === currentBenchmark.passed && mutation.isSimpler ? 'keep'
-      : 'discard';
+    const verdict =
+      experimentBenchmark.passed > currentBenchmark.passed
+        ? "keep"
+        : experimentBenchmark.passed === currentBenchmark.passed &&
+            mutation.isSimpler
+          ? "keep"
+          : "discard";
 
     const expResult = logExperiment({
       name: mutation.name,
@@ -264,12 +313,16 @@ async function hillClimbLoop(maxIterations = 5, maxDurationMs = 4 * 60 * 60 * 10
       baselinePassed: currentBenchmark.passed,
       experimentPassed: experimentBenchmark.passed,
       verdict,
-      reasoning: `${mutation.description} — ${verdict === 'keep' ? 'improved' : 'no improvement'}`,
-      durationMs: Date.now() - iterStart
+      reasoning: `${mutation.description} — ${verdict === "keep" ? "improved" : "no improvement"}`,
+      durationMs: Date.now() - iterStart,
     });
 
-    if (verdict === 'keep') {
-      const newVersion = saveRuleVersion(mutation.rules, experimentBenchmark, expResult.lastInsertRowid);
+    if (verdict === "keep") {
+      const newVersion = saveRuleVersion(
+        mutation.rules,
+        experimentBenchmark,
+        expResult.lastInsertRowid,
+      );
       current = { version: newVersion, rules: mutation.rules };
       currentBenchmark = experimentBenchmark;
       keepCount++;
@@ -281,7 +334,7 @@ async function hillClimbLoop(maxIterations = 5, maxDurationMs = 4 * 60 * 60 * 10
       iteration: i + 1,
       mutation: mutation.description,
       verdict,
-      accuracy: experimentBenchmark.accuracy
+      accuracy: experimentBenchmark.accuracy,
     });
   }
 
@@ -292,7 +345,7 @@ async function hillClimbLoop(maxIterations = 5, maxDurationMs = 4 * 60 * 60 * 10
     active_version: current.version,
     best_accuracy: currentBenchmark.accuracy,
     duration_ms: Date.now() - startTime,
-    results
+    results,
   };
 }
 
@@ -304,27 +357,39 @@ function seedGroundTruth() {
 
   // Dead tokens (score < 30, older than 14 days)
   try {
-    const result = db().prepare(`
+    const result = db()
+      .prepare(
+        `
       INSERT OR IGNORE INTO scoring_ground_truth (contract_address, chain, token_name, actual_outcome, source, buzz_score_at_time)
       SELECT address, chain, name, 'dead', 'pipeline_dead', score
       FROM pipeline_tokens
       WHERE score IS NOT NULL AND score < 30 AND address IS NOT NULL AND address != 'unknown'
       AND updated_at < datetime('now', '-14 days')
-    `).run();
+    `,
+      )
+      .run();
     seeded += result.changes;
-  } catch (e) { /* skip */ }
+  } catch (e) {
+    /* skip */
+  }
 
   // Legitimate tokens (score >= 70, older than 30 days, still has liquidity)
   try {
-    const result = db().prepare(`
+    const result = db()
+      .prepare(
+        `
       INSERT OR IGNORE INTO scoring_ground_truth (contract_address, chain, token_name, actual_outcome, source, buzz_score_at_time)
       SELECT address, chain, name, 'legitimate', 'pipeline_stable', score
       FROM pipeline_tokens
       WHERE score IS NOT NULL AND score >= 70 AND address IS NOT NULL AND address != 'unknown'
       AND updated_at < datetime('now', '-30 days')
-    `).run();
+    `,
+      )
+      .run();
     seeded += result.changes;
-  } catch (e) { /* skip */ }
+  } catch (e) {
+    /* skip */
+  }
 
   return seeded;
 }
@@ -337,5 +402,5 @@ module.exports = {
   hillClimbLoop,
   seedGroundTruth,
   saveRuleVersion,
-  DEFAULT_RULES
+  DEFAULT_RULES,
 };

@@ -6,15 +6,15 @@ Foundation class for the Buzz v6.0 sub-agent architecture. Six sub-agents (Scann
 
 ## Decisions
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| Inheritance model | ABC with `@abstractmethod` | Enforces execute() at class definition time |
-| Status management | `run()` lifecycle wrapper | Sub-agents don't touch status directly |
-| Event persistence | In-memory list + auto-append JSONL | Survives crashes, enables audit trail |
-| Scratchpad path | `BUZZ_SCRATCHPAD_DIR` env var, fallback `data/scratchpad` | Works local + Akash production |
-| Timestamp format | `time.time()` (Unix float) | Simple, sortable |
-| Scratchpad format | JSON files (one per key) | Human-readable, matches existing memory/ pattern |
-| LLM context | `context()` method returns recent state | Manus "pin plan in recency" pattern |
+| Decision          | Choice                                                    | Rationale                                        |
+| ----------------- | --------------------------------------------------------- | ------------------------------------------------ |
+| Inheritance model | ABC with `@abstractmethod`                                | Enforces execute() at class definition time      |
+| Status management | `run()` lifecycle wrapper                                 | Sub-agents don't touch status directly           |
+| Event persistence | In-memory list + auto-append JSONL                        | Survives crashes, enables audit trail            |
+| Scratchpad path   | `BUZZ_SCRATCHPAD_DIR` env var, fallback `data/scratchpad` | Works local + Akash production                   |
+| Timestamp format  | `time.time()` (Unix float)                                | Simple, sortable                                 |
+| Scratchpad format | JSON files (one per key)                                  | Human-readable, matches existing memory/ pattern |
+| LLM context       | `context()` method returns recent state                   | Manus "pin plan in recency" pattern              |
 
 ## Interface
 

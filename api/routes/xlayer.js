@@ -13,12 +13,14 @@ const xlayer = require("../services/xlayer-x402");
 router.post("/score", xlayer.x402Middleware, async (req, res) => {
   const { address } = req.body;
   if (!address) return res.status(400).json({ error: "address required" });
-  
+
   const verification = await xlayer.verifyPayment(req.paymentTx);
   if (!verification.verified) {
-    return res.status(402).json({ error: "payment_not_verified", details: verification });
+    return res
+      .status(402)
+      .json({ error: "payment_not_verified", details: verification });
   }
-  
+
   const result = await xlayer.runPaidScore(address, req.paymentTx);
   res.json({ payment_verified: true, tx_hash: req.paymentTx, score: result });
 });
@@ -31,7 +33,11 @@ router.get("/transactions", (req, res) => {
   const { getDB } = require("../db");
   const db = getDB();
   const limit = parseInt(req.query.limit) || 50;
-  const rows = db.prepare("SELECT * FROM xlayer_transactions ORDER BY created_at DESC LIMIT ?").all(limit);
+  const rows = db
+    .prepare(
+      "SELECT * FROM xlayer_transactions ORDER BY created_at DESC LIMIT ?",
+    )
+    .all(limit);
   res.json({ count: rows.length, transactions: rows });
 });
 
@@ -43,19 +49,23 @@ router.get("/verify/:txHash", async (req, res) => {
 router.get("/stats", (req, res) => {
   const { getDB } = require("../db");
   const db = getDB();
-  const stats = db.prepare(`
+  const stats = db
+    .prepare(
+      `
     SELECT COUNT(*) as total_tx, 
       SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) as completed,
       SUM(amount_usdc) as total_revenue,
       MAX(created_at) as last_tx
     FROM xlayer_transactions
-  `).get();
+  `,
+    )
+    .get();
   res.json({
     ...stats,
     chain: "xlayer",
     chain_id: xlayer.CHAIN_ID,
     wallet: xlayer.BUZZ_WALLET,
-    price_per_score: 0.50
+    price_per_score: 0.5,
   });
 });
 

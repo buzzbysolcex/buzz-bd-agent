@@ -1,6 +1,9 @@
 # BUZZ SHIELD — FULL BUILD PLAN
+
 ## AI Agent Security Intelligence
+
 ## "Security before performance. Intelligence before execution."
+
 ## April 4, 2026
 
 ---
@@ -26,6 +29,7 @@ WITH BUZZ SHIELD:
 ```
 
 **The market context:**
+
 - 250,000+ daily active AI agents on-chain (400% YoY growth)
 - $45M+ lost to AI agent security incidents in 2026
 - $7.84B → $52.62B market by 2030 (46.3% CAGR)
@@ -35,6 +39,7 @@ WITH BUZZ SHIELD:
 - NOBODY is building the intelligence layer between agent and action
 
 **Buzz's position:**
+
 - Blockaid = firewall for humans
 - Blowfish = firewall for wallets
 - Claw Wallet = secure wallet for agents
@@ -637,6 +642,7 @@ SHIELD_ON_CHAIN: false,             // Store receipts on-chain (ShieldStorage)
 # PART 9: BUILD PHASES
 
 ## PHASE 1: FOUNDATION (Week 1-2, Apr 7-18)
+
 **Goal: Core engine + free tier + first drain patterns**
 
 ```
@@ -665,6 +671,7 @@ Dependencies:
 ```
 
 ## PHASE 1.5: P0 PATTERN EXPANSION (COMPLETED Apr 5, 2026)
+
 **Goal: 3 critical patterns from ADR-025 gap analysis**
 
 ```
@@ -685,6 +692,7 @@ See ADR-025 for full gap analysis (15 vectors, 5 structural findings)
 ```
 
 ## PHASE 2: INSTRUCTION SCANNER (Week 2-3, Apr 14-25)
+
 **Goal: Parse unsigned Solana transactions, flag dangerous instructions**
 
 ```
@@ -715,6 +723,7 @@ Dependencies:
 ```
 
 ## PHASE 3: INTELLIGENCE LAYER (Week 3-4, Apr 21 - May 2)
+
 **Goal: Connect to deployer forensics, MiroFish, Wallet Guard**
 
 ```
@@ -744,6 +753,7 @@ Dependencies:
 ```
 
 ## PHASE 4: FRONTIER DEMO (Week 4-5, May 2-11)
+
 **Goal: Full demo flow for Colosseum Frontier submission**
 
 ```
@@ -770,6 +780,7 @@ Narrative:
 ```
 
 ## PHASE 5: SCALE (Post-Frontier, May-June)
+
 **Goal: Enterprise tier, Claw Wallet integration, continuous monitoring**
 
 ```
@@ -908,17 +919,17 @@ AFTER SHIELD:
    250,000 AI agents are on-chain. $45M was drained this year.
    Google DeepMind identified 6 categories of agent attacks.
    We built defenses for all 6.
-   
+
    Free tier: any agent, any framework, install with one command.
    Paid tier: $0.01 per scan, USDC on Base, no API keys.
-   
+
    Token intelligence + agent security = complete trust layer.
    Built by a chef. Used by agents. Verified on-chain."
 
 JUDGE PERSPECTIVE:
   Other submissions: "We built a trading bot" or "We built a DeFi tool"
   Buzz: "We built the safety layer that every other agent needs"
-  
+
   That's infrastructure. That wins hackathons.
 ```
 
@@ -932,6 +943,7 @@ JUDGE PERSPECTIVE:
 ## Status: PROPOSED
 
 ## Context
+
 250,000+ AI agents on-chain. $45M+ drained in 2026.
 Google DeepMind published 6 attack categories.
 Anthropic warned agents can exploit contracts autonomously.
@@ -939,7 +951,9 @@ Claw Wallet launched Apr 2 as first "B2A" wallet.
 Nobody builds the intelligence layer between agent and action.
 
 ## Decision
+
 Build Buzz Shield as a new module:
+
 - Program risk scorer (0-100)
 - Instruction scanner (parse unsigned Solana transactions)
 - Drain pattern library (20 initial patterns)
@@ -949,10 +963,12 @@ Build Buzz Shield as a new module:
 - Integration with Wallet Guard, MiroFish, scoring engine
 
 ## Architecture
+
 5 new tables, 7 new endpoints (3 free + 3 x402 + 1 stats),
 10 feature flags, wired to PULSE + autoDream.
 
 ## Consequences
+
 - Buzz becomes agent security infrastructure (not just token scoring)
 - New revenue stream ($0.01-$0.10 per scan + enterprise $500/mo)
 - Frontier differentiator (only submission protecting OTHER agents)
@@ -962,9 +978,9 @@ Build Buzz Shield as a new module:
 
 ---
 
-*Buzz Shield Build Plan | April 4, 2026*
-*AI Agent Security Intelligence*
-*Security before performance. Intelligence before execution.*
-*250,000 agents need this. $45M says they need it now.*
-*Free for the community. Paid for the power users.*
-*Built by a chef. Protecting agents. Bismillah 🤲*
+_Buzz Shield Build Plan | April 4, 2026_
+_AI Agent Security Intelligence_
+_Security before performance. Intelligence before execution._
+_250,000 agents need this. $45M says they need it now._
+_Free for the community. Paid for the power users._
+_Built by a chef. Protecting agents. Bismillah 🤲_

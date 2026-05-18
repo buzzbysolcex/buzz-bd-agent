@@ -55,5 +55,7 @@ module.exports = function migrate(db) {
     )
   `);
 
-  console.log('[Migration 025] Created listing_benchmarks, proposals, wallet_balances tables');
+  console.log(
+    "[Migration 025] Created listing_benchmarks, proposals, wallet_balances tables",
+  );
 };

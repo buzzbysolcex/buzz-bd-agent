@@ -1,20 +1,21 @@
 # 🐝 DEPLOYMENT GUIDE — v6.2.0-acp
+
 ## Sprint Day 9 | March 3, 2026
 
 ---
 
 ## WHAT'S NEW IN v6.2.0-acp
 
-| Feature | Previous (v6.1.1) | New (v6.2.0-acp) |
-|---------|-------------------|-------------------|
-| REST API | Local scaffold only | **Baked in, auto-starts on port 3000** |
-| ACP Marketplace | Manual patch on container | **Baked in, auto-starts after 30s** |
-| AgentProof SDK | Not installed | **`@agentproof/sdk` globally installed** |
-| tsx runtime | Manual install | **Globally installed** |
-| Bankr CLI | Manual install | **Globally installed** |
-| OpenClaw | v2026.2.26 | **v2026.3.1** |
-| Ports exposed | 18789 only | **18789 + 3000** |
-| ACP env vars | None | **6 new ACP env vars** |
+| Feature         | Previous (v6.1.1)         | New (v6.2.0-acp)                         |
+| --------------- | ------------------------- | ---------------------------------------- |
+| REST API        | Local scaffold only       | **Baked in, auto-starts on port 3000**   |
+| ACP Marketplace | Manual patch on container | **Baked in, auto-starts after 30s**      |
+| AgentProof SDK  | Not installed             | **`@agentproof/sdk` globally installed** |
+| tsx runtime     | Manual install            | **Globally installed**                   |
+| Bankr CLI       | Manual install            | **Globally installed**                   |
+| OpenClaw        | v2026.2.26                | **v2026.3.1**                            |
+| Ports exposed   | 18789 only                | **18789 + 3000**                         |
+| ACP env vars    | None                      | **6 new ACP env vars**                   |
 
 ---
 
@@ -195,15 +196,15 @@ curl -s -X POST http://localhost:3000/api/v1/score-token \
 
 Add these to your SDL (in addition to existing vars):
 
-| Var | Value | Purpose |
-|-----|-------|---------|
-| `BUZZ_API_ADMIN_KEY` | Generate a strong key | REST API authentication |
-| `AGENTPROOF_API_KEY` | `ap_live_9d36bbc...` | AgentProof telemetry |
-| `ACP_API_KEY` | `acp-300feee455111d5117dc` | ACP authentication |
-| `ACP_AUTH_TOKEN` | From ACP login session | ACP session token |
-| `ACP_AGENT_ID` | `17681` | ACP Agent ID |
-| `ACP_WALLET_ADDRESS` | `0x01aBCA1E...` | ACP wallet (Base) |
-| `ACP_OWNER_ADDRESS` | `0x2Dc031...` | Owner wallet (Base) |
+| Var                  | Value                      | Purpose                 |
+| -------------------- | -------------------------- | ----------------------- |
+| `BUZZ_API_ADMIN_KEY` | Generate a strong key      | REST API authentication |
+| `AGENTPROOF_API_KEY` | `ap_live_9d36bbc...`       | AgentProof telemetry    |
+| `ACP_API_KEY`        | `acp-300feee455111d5117dc` | ACP authentication      |
+| `ACP_AUTH_TOKEN`     | From ACP login session     | ACP session token       |
+| `ACP_AGENT_ID`       | `17681`                    | ACP Agent ID            |
+| `ACP_WALLET_ADDRESS` | `0x01aBCA1E...`            | ACP wallet (Base)       |
+| `ACP_OWNER_ADDRESS`  | `0x2Dc031...`              | Owner wallet (Base)     |
 
 ---
 
@@ -258,5 +259,5 @@ tar czf /data/acp-offerings-backup.tar.gz .
 
 ---
 
-*Sprint Day 9 | v6.2.0-acp deployment guide*
-*"Ship from anywhere. Docker + Akash + Telegram." 🐝*
+_Sprint Day 9 | v6.2.0-acp deployment guide_
+_"Ship from anywhere. Docker + Akash + Telegram." 🐝_

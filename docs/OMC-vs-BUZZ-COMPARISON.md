@@ -1,5 +1,7 @@
 # OH-MY-CLAUDECODE vs BUZZ CLAWTEAM — Deep Comparison
+
 ## What to cherry-pick, what to skip, what to build
+
 ## March 26, 2026 | Sprint Day 38
 
 ---
@@ -15,29 +17,34 @@ A Claude Code plugin that transforms single-Claude into multi-agent orchestratio
 ## THE 5 EXECUTION MODES
 
 ### 1. AUTOPILOT — Fully autonomous, single-threaded
+
 - User gives high-level goal
 - OMC handles: plan → code → review → test → iterate
 - Won't give up until verified complete ("Ralph mode" variant)
 - Single agent, sequential execution
 
 ### 2. ULTRAPILOT — 3-5x parallel, up to 5 concurrent workers
+
 - Decomposes tasks into parallelizable sub-tasks
 - Spawns up to 5 workers simultaneously
 - Conflict detection between workers
 - Best for: fullstack apps, large refactoring
 
 ### 3. SWARM — Coordinated agents from shared task pool
+
 - N agents spawned, pull from shared atomic task pool
 - Each claims a task, executes, marks complete
 - Prevents duplicate work
 - Mimics sprint backlog pattern
 
 ### 4. PIPELINE — Sequential chains with stage passing
+
 - Agents chained: output of Stage N → input of Stage N+1
 - Built-in presets: review → implement → debug
 - For workflows requiring strict order
 
 ### 5. ECOMODE — Token-efficient parallel execution
+
 - Smart model routing: Haiku (simple) → Sonnet (standard) → Opus (complex)
 - Saves 30-50% on tokens
 - Same parallel execution as Ultrapilot but cost-optimized
@@ -46,17 +53,17 @@ A Claude Code plugin that transforms single-Claude into multi-agent orchestratio
 
 ## THE 32 SPECIALIZED AGENTS
 
-| Category | Agents |
-|----------|--------|
-| Architecture | architect, planner |
-| Research | researcher, analyst, explorer |
-| Design | designer, frontend-ui-ux |
-| Development | executor, build-fixer |
-| Review | code-reviewer, security-reviewer, critic |
-| Testing | qa-tester, tdd-guide |
-| Documentation | document-specialist, writer |
-| Operations | git-master |
-| Vision | vision |
+| Category      | Agents                                   |
+| ------------- | ---------------------------------------- |
+| Architecture  | architect, planner                       |
+| Research      | researcher, analyst, explorer            |
+| Design        | designer, frontend-ui-ux                 |
+| Development   | executor, build-fixer                    |
+| Review        | code-reviewer, security-reviewer, critic |
+| Testing       | qa-tester, tdd-guide                     |
+| Documentation | document-specialist, writer              |
+| Operations    | git-master                               |
+| Vision        | vision                                   |
 
 Each agent has a markdown definition file in `.claude/agents/` with role description, capabilities, and constraints.
 
@@ -73,6 +80,7 @@ Key skills: autopilot, ultrawork, ralph, ultrapilot, plan, ralplan, deepsearch, 
 ### Buzz's Current Multi-Agent Pattern:
 
 **Agent Teams (Anthropic official, Feb 5 2026):**
+
 - Lead agent (Opus) + Teammate agents (Sonnet or Opus)
 - Lead handles SSH/deploy, teammates handle local code
 - Team composition decided by LLM on the fly
@@ -80,6 +88,7 @@ Key skills: autopilot, ultrawork, ralph, ultrapilot, plan, ralplan, deepsearch, 
 - Different models assignable per teammate
 
 **ClawTeam (Buzz custom, pre-Agent Teams):**
+
 - Defined in the handover as 6 parallel agents
 - Scanner Division, Safety Division, Intelligence Division, BD Division, Engineering Division, Finance Division
 - Each "agent" is a conceptual division, not a separate Claude instance
@@ -87,12 +96,14 @@ Key skills: autopilot, ultrawork, ralph, ultrapilot, plan, ralplan, deepsearch, 
 - Agent Teams replaced ClawTeam on Day 26-27 of the sprint
 
 **Wednesday Deploy (Day 37) Agent Teams:**
+
 - Phase 1: Agent Team Alpha (4 teammates) — Express Cron, OpenClaw Killer, Pipeline Classifier, Plugin/Logging
 - Phase 2: Agent Team Bravo (5 teammates) — Scanner, BD, Safety, Social Intel, Finance
 - Phase 3: Agent Team Charlie (3 teammates) — Discovery→Score, Score→Opus, Outreach→Deal
 - Total: 12 teammates across 3 phases
 
 **Mitchell Quality Patterns (integrated Day 37):**
+
 - Quality Gate: Agent A (writer) → Agent B (reviewer) → Agent C (quality manager)
 - Dual-gate scoring
 - Iterative refinement
@@ -101,23 +112,23 @@ Key skills: autopilot, ultrawork, ralph, ultrapilot, plan, ralplan, deepsearch, 
 
 ## SIDE-BY-SIDE COMPARISON
 
-| Feature | OMC | Buzz Current | Gap | Action |
-|---------|-----|-------------|-----|--------|
-| **Execution Modes** | 5 modes (Autopilot, Ultrapilot, Swarm, Pipeline, Ecomode) | 1 mode (Agent Teams, sequential phases) | BIG | Cherry-pick Swarm + Ecomode concepts |
-| **Parallel Execution** | Up to 5 concurrent workers | Agent Teams supports parallel but Buzz uses it sequentially | MEDIUM | Wire Ultrapilot pattern for signal filing + pipeline scoring |
-| **Specialized Agents** | 32 pre-defined agents with markdown configs | 12 teammates defined per-task, not persistent | MEDIUM | Create persistent agent definitions in .claude/agents/ |
-| **Skills** | 37+ slash-command skills | 7 startup directive files + ad-hoc prompts | MEDIUM | Package Buzz capabilities as OMC-compatible skills |
-| **Model Routing** | Haiku (simple) → Sonnet (standard) → Opus (complex) | ALL Opus ALL the time (Pro Max unlimited) | N/A | Buzz has UNLIMITED Opus. No need for model routing. This is our ADVANTAGE. |
-| **Token Optimization** | Ecomode saves 30-50% | No optimization needed ($0/day) | N/A | Not applicable — Pro Max = unlimited |
-| **Verification** | Ralph mode — won't mark complete until verified | Quality Gate pattern (8/10 threshold) | SMALL | Buzz already has this via Mitchell patterns |
-| **Task Decomposition** | Automatic decomposition for parallel work | Manual task lists in directives | MEDIUM | Auto-decompose signal drafting + pipeline operations |
-| **Shared Task Pool** | Swarm mode — atomic task claiming, no duplicates | No equivalent — tasks assigned top-down | BIG | Apply to AIBTC signal production (6 signal slots = shared pool) |
-| **Pipeline Chains** | Stage N output → Stage N+1 input | Discovery → Score → Opus → Outreach (designed, partially wired) | SMALL | Already similar architecture — just formalize it |
-| **Hooks** | 31 lifecycle hooks (conversationStart, etc.) | Telegram plugin + CLAUDE.md startup | MEDIUM | Add hooks for quality gate triggers |
-| **HUD** | Real-time phase progress display | War Room text reports | SMALL | Nice to have, not critical |
-| **Auto-skill Learning** | Detect patterns in conversations → surface reusable skills | HANDOVER.md + CLAUDE.md manual updates | MEDIUM | Add auto-learning from signal approval/rejection patterns |
-| **Cost Tracking** | Built-in transcript analysis + token usage | N/A ($0/day) | N/A | Not needed |
-| **Git Integration** | git-master agent, atomic commits per task | CI/CD pipeline, GitHub Actions | EQUAL | Both good |
+| Feature                 | OMC                                                        | Buzz Current                                                    | Gap    | Action                                                                     |
+| ----------------------- | ---------------------------------------------------------- | --------------------------------------------------------------- | ------ | -------------------------------------------------------------------------- |
+| **Execution Modes**     | 5 modes (Autopilot, Ultrapilot, Swarm, Pipeline, Ecomode)  | 1 mode (Agent Teams, sequential phases)                         | BIG    | Cherry-pick Swarm + Ecomode concepts                                       |
+| **Parallel Execution**  | Up to 5 concurrent workers                                 | Agent Teams supports parallel but Buzz uses it sequentially     | MEDIUM | Wire Ultrapilot pattern for signal filing + pipeline scoring               |
+| **Specialized Agents**  | 32 pre-defined agents with markdown configs                | 12 teammates defined per-task, not persistent                   | MEDIUM | Create persistent agent definitions in .claude/agents/                     |
+| **Skills**              | 37+ slash-command skills                                   | 7 startup directive files + ad-hoc prompts                      | MEDIUM | Package Buzz capabilities as OMC-compatible skills                         |
+| **Model Routing**       | Haiku (simple) → Sonnet (standard) → Opus (complex)        | ALL Opus ALL the time (Pro Max unlimited)                       | N/A    | Buzz has UNLIMITED Opus. No need for model routing. This is our ADVANTAGE. |
+| **Token Optimization**  | Ecomode saves 30-50%                                       | No optimization needed ($0/day)                                 | N/A    | Not applicable — Pro Max = unlimited                                       |
+| **Verification**        | Ralph mode — won't mark complete until verified            | Quality Gate pattern (8/10 threshold)                           | SMALL  | Buzz already has this via Mitchell patterns                                |
+| **Task Decomposition**  | Automatic decomposition for parallel work                  | Manual task lists in directives                                 | MEDIUM | Auto-decompose signal drafting + pipeline operations                       |
+| **Shared Task Pool**    | Swarm mode — atomic task claiming, no duplicates           | No equivalent — tasks assigned top-down                         | BIG    | Apply to AIBTC signal production (6 signal slots = shared pool)            |
+| **Pipeline Chains**     | Stage N output → Stage N+1 input                           | Discovery → Score → Opus → Outreach (designed, partially wired) | SMALL  | Already similar architecture — just formalize it                           |
+| **Hooks**               | 31 lifecycle hooks (conversationStart, etc.)               | Telegram plugin + CLAUDE.md startup                             | MEDIUM | Add hooks for quality gate triggers                                        |
+| **HUD**                 | Real-time phase progress display                           | War Room text reports                                           | SMALL  | Nice to have, not critical                                                 |
+| **Auto-skill Learning** | Detect patterns in conversations → surface reusable skills | HANDOVER.md + CLAUDE.md manual updates                          | MEDIUM | Add auto-learning from signal approval/rejection patterns                  |
+| **Cost Tracking**       | Built-in transcript analysis + token usage                 | N/A ($0/day)                                                    | N/A    | Not needed                                                                 |
+| **Git Integration**     | git-master agent, atomic commits per task                  | CI/CD pipeline, GitHub Actions                                  | EQUAL  | Both good                                                                  |
 
 ---
 
@@ -128,6 +139,7 @@ Key skills: autopilot, ultrawork, ralph, ultrapilot, plan, ralplan, deepsearch, 
 **OMC pattern:** N agents pull from shared task pool. Each claims a task, executes, marks complete. No duplicates.
 
 **Buzz application:** Apply to daily signal production:
+
 - 10 signal candidates generated from data pull
 - 6 filing slots available (daily max)
 - Each "agent" claims a slot, drafts the signal, runs MiroFish scoring (60+), files it
@@ -165,6 +177,7 @@ Each file defines the agent's personality, data sources, quality standards, and 
 **OMC pattern:** Stage N output → Stage N+1 input. Built-in presets.
 
 **Buzz application — Signal Pipeline:**
+
 ```
 Stage 1: DATA PULL (scanner agent)
     ↓ output: raw data from 6+ sources
@@ -187,6 +200,7 @@ This is the Signal Factory playbook formalized as an OMC Pipeline.
 **OMC pattern:** Detect patterns in conversations, surface reusable skills.
 
 **Buzz application:** After each daily brief, analyze:
+
 - Which signal templates produced approvals?
 - Which got rejected and why?
 - Auto-adjust template scoring weights
@@ -200,6 +214,7 @@ This is the self-improvement loop (GAP 17) implemented via OMC's pattern.
 **OMC pattern:** Ralph mode — won't mark task complete until Architect verification passes.
 
 **Buzz application:** Already have this via Mitchell Quality Gate. Formalize it:
+
 - No signal filed without MiroFish score ≥ 60
 - No deal proposal sent without Opus verdict PROCEED
 - No CI/CD push without syntax check pass
@@ -210,18 +225,23 @@ This is the self-improvement loop (GAP 17) implemented via OMC's pattern.
 ## WHAT BUZZ SHOULD SKIP FROM OMC
 
 ### 1. MODEL ROUTING (Haiku/Sonnet/Opus) — SKIP ENTIRELY
+
 Buzz has Pro Max unlimited Opus 4.6. Every agent runs on Opus. This is the ADVANTAGE — no need to compromise with cheaper models. OMC optimizes for cost. Buzz optimizes for quality. Different game.
 
 ### 2. TOKEN OPTIMIZATION / ECOMODE — SKIP ENTIRELY
+
 $0/day LLM cost. No token budget concerns. Ecomode solves a problem Buzz doesn't have.
 
 ### 3. COST TRACKING — SKIP ENTIRELY
+
 Same reason. Buzz's compute is flat-rate. Tracking tokens is wasted effort.
 
 ### 4. FRONTEND-UI-UX AGENT — SKIP FOR NOW
+
 Buzz is a backend BD agent. Frontend design isn't the priority until buzzbd.ai v2 or mobile app (Phase 4).
 
 ### 5. OMC PLUGIN INSTALLATION — SKIP
+
 OMC installs as a Claude Code plugin. Buzz already has its own orchestration via CLAUDE.md + directives. Installing OMC would conflict with existing setup. Cherry-pick the PATTERNS, don't install the TOOL.
 
 ---
@@ -268,16 +288,16 @@ BUZZ BRAIN (Opus 4.6 Pro Max, 24/7 Hetzner)
 
 ## IMPLEMENTATION PRIORITY
 
-| Priority | What | From | Effort | Impact |
-|----------|------|------|--------|--------|
-| P0 | Signal Swarm Pool (6 slots, 10 candidates) | OMC Swarm mode | 2-3 hours | $20/signal × approval rate improvement |
-| P1 | 12 Persistent Agent Definitions | OMC Agent pattern | 3-4 hours | Consistent quality across all operations |
-| P1 | Signal Pipeline Chain (6 stages) | OMC Pipeline mode | 2-3 hours | Formalized Signal Factory execution |
-| P2 | Auto-Skill Learning from rejections | OMC learner skill | 4-6 hours | Long-term approval rate improvement |
-| P2 | Verification Gates formalized | OMC Ralph mode | 1-2 hours | Already exists, just formalize |
-| SKIP | Model routing | OMC Ecomode | — | Not needed (Pro Max unlimited) |
-| SKIP | Token optimization | OMC cost tracking | — | Not needed ($0/day) |
-| SKIP | Plugin installation | OMC plugin | — | Would conflict with existing setup |
+| Priority | What                                       | From              | Effort    | Impact                                   |
+| -------- | ------------------------------------------ | ----------------- | --------- | ---------------------------------------- |
+| P0       | Signal Swarm Pool (6 slots, 10 candidates) | OMC Swarm mode    | 2-3 hours | $20/signal × approval rate improvement   |
+| P1       | 12 Persistent Agent Definitions            | OMC Agent pattern | 3-4 hours | Consistent quality across all operations |
+| P1       | Signal Pipeline Chain (6 stages)           | OMC Pipeline mode | 2-3 hours | Formalized Signal Factory execution      |
+| P2       | Auto-Skill Learning from rejections        | OMC learner skill | 4-6 hours | Long-term approval rate improvement      |
+| P2       | Verification Gates formalized              | OMC Ralph mode    | 1-2 hours | Already exists, just formalize           |
+| SKIP     | Model routing                              | OMC Ecomode       | —         | Not needed (Pro Max unlimited)           |
+| SKIP     | Token optimization                         | OMC cost tracking | —         | Not needed ($0/day)                      |
+| SKIP     | Plugin installation                        | OMC plugin        | —         | Would conflict with existing setup       |
 
 ---
 
@@ -301,20 +321,20 @@ OMC is a tool for developers. Buzz IS the company.
 
 For context, here's the blog post insight — OMC was partially the INSPIRATION for Anthropic's official Agent Teams feature:
 
-| Feature | OMC | Anthropic Agent Teams | Buzz Uses |
-|---------|-----|----------------------|-----------|
-| Multi-agent | 5 modes | Lead + Teammates | Agent Teams (official) |
-| Agent definitions | 32 pre-built | Custom .claude/agents/*.md | Custom (12 proposed) |
-| Model routing | Haiku/Sonnet/Opus | Different models per teammate | ALL Opus (advantage) |
-| Parallel execution | Ultrapilot (5 workers) | Teammates run in parallel | Yes (CI/CD phases) |
-| Quality verification | Ralph mode | Hook events (TeammateIdle, TaskCompleted) | Mitchell Quality Gate |
-| Shared task pool | Swarm mode | Not natively supported | SHOULD ADD (for signals) |
+| Feature              | OMC                    | Anthropic Agent Teams                     | Buzz Uses                |
+| -------------------- | ---------------------- | ----------------------------------------- | ------------------------ |
+| Multi-agent          | 5 modes                | Lead + Teammates                          | Agent Teams (official)   |
+| Agent definitions    | 32 pre-built           | Custom .claude/agents/\*.md               | Custom (12 proposed)     |
+| Model routing        | Haiku/Sonnet/Opus      | Different models per teammate             | ALL Opus (advantage)     |
+| Parallel execution   | Ultrapilot (5 workers) | Teammates run in parallel                 | Yes (CI/CD phases)       |
+| Quality verification | Ralph mode             | Hook events (TeammateIdle, TaskCompleted) | Mitchell Quality Gate    |
+| Shared task pool     | Swarm mode             | Not natively supported                    | SHOULD ADD (for signals) |
 
 Buzz should use Anthropic's native Agent Teams as the execution layer, enhanced with OMC's Swarm and Pipeline CONCEPTS (not code). The patterns are platform-agnostic.
 
 ---
 
-*Cherry-pick the patterns. Skip the tool. Absorb the DNA.*
-*OMC is a coding orchestrator. Buzz is a company.*
-*The orchestration patterns are universal. The application is unique.*
-*Bismillah* 🤲
+_Cherry-pick the patterns. Skip the tool. Absorb the DNA._
+_OMC is a coding orchestrator. Buzz is a company._
+_The orchestration patterns are universal. The application is unique._
+_Bismillah_ 🤲

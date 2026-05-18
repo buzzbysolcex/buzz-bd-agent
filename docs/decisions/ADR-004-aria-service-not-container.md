@@ -10,12 +10,14 @@ SOL-Agent, each feeding ARIA as central aggregator. This was overkill because De
 API covers all chains and dev-browser replaces chain-specific data extraction.
 
 **Decision:**
+
 - ARIA = 4 JS modules in api/services/aria/
 - 5 REST endpoints behind existing apiKeyAuth
 - aria_tokens table in existing SQLite database
 - Zero additional infrastructure cost
 
 **Consequences:**
+
 - Cost: $0 additional (was ~$15-20/mo for 4 additional containers)
 - Maintenance: one codebase, one deploy (was 4 separate SDLs)
 - Data sources: 29 API + 10 browser-scraped (more than the original 5 chain feeds)

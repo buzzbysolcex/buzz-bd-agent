@@ -8,7 +8,7 @@
  * Buzz BD Agent | MiroFish Integration
  */
 
-const { getDB } = require('../db');
+const { getDB } = require("../db");
 
 /**
  * Exponential Moving Average helper
@@ -89,15 +89,16 @@ function computeMACD(prices) {
   if (isNaN(signal[lastIdx]) || lastIdx < 1) return null;
 
   const histogram = macdLine[lastIdx] - signal[lastIdx];
-  const prevHistogram = prevIdx >= 0 && !isNaN(signal[prevIdx])
-    ? macdLine[prevIdx] - signal[prevIdx]
-    : 0;
+  const prevHistogram =
+    prevIdx >= 0 && !isNaN(signal[prevIdx])
+      ? macdLine[prevIdx] - signal[prevIdx]
+      : 0;
 
-  let trend = 'neutral';
-  if (prevHistogram <= 0 && histogram > 0) trend = 'bullish_crossover';
-  else if (prevHistogram >= 0 && histogram < 0) trend = 'bearish_crossover';
-  else if (histogram > 0) trend = 'bullish';
-  else if (histogram < 0) trend = 'bearish';
+  let trend = "neutral";
+  if (prevHistogram <= 0 && histogram > 0) trend = "bullish_crossover";
+  else if (prevHistogram >= 0 && histogram < 0) trend = "bearish_crossover";
+  else if (histogram > 0) trend = "bullish";
+  else if (histogram < 0) trend = "bearish";
 
   return {
     macdLine: Math.round(macdLine[lastIdx] * 1e8) / 1e8,
@@ -113,21 +114,26 @@ function computeMACD(prices) {
  * @returns {{ trend: string, avgRecent: number, avgPrior: number }}
  */
 function computeVolumeTrend(volumes) {
-  if (!volumes || volumes.length < 7) return { trend: 'unknown', avgRecent: 0, avgPrior: 0 };
+  if (!volumes || volumes.length < 7)
+    return { trend: "unknown", avgRecent: 0, avgPrior: 0 };
 
   const recent = volumes.slice(-3);
   const prior = volumes.slice(-7, -3);
   const avgRecent = recent.reduce((a, b) => a + b, 0) / recent.length;
   const avgPrior = prior.reduce((a, b) => a + b, 0) / prior.length;
 
-  if (avgPrior === 0) return { trend: 'unknown', avgRecent, avgPrior };
+  if (avgPrior === 0) return { trend: "unknown", avgRecent, avgPrior };
   const change = (avgRecent - avgPrior) / avgPrior;
 
-  let trend = 'stable';
-  if (change > 0.15) trend = 'increasing';
-  else if (change < -0.15) trend = 'decreasing';
+  let trend = "stable";
+  if (change > 0.15) trend = "increasing";
+  else if (change < -0.15) trend = "decreasing";
 
-  return { trend, avgRecent: Math.round(avgRecent), avgPrior: Math.round(avgPrior) };
+  return {
+    trend,
+    avgRecent: Math.round(avgRecent),
+    avgPrior: Math.round(avgPrior),
+  };
 }
 
 /**
@@ -136,7 +142,8 @@ function computeVolumeTrend(volumes) {
  * @returns {{ pct7d: number|null, pct14d: number|null, pct30d: number|null }}
  */
 function computeMomentum(prices) {
-  if (!prices || prices.length < 2) return { pct7d: null, pct14d: null, pct30d: null };
+  if (!prices || prices.length < 2)
+    return { pct7d: null, pct14d: null, pct30d: null };
   const last = prices[prices.length - 1];
   const pct = (idx) => {
     if (idx < 0 || idx >= prices.length) return null;
@@ -158,23 +165,24 @@ function scoreTechnicals(rsiResult, macdResult, volumeResult, momentum) {
 
   // RSI scoring
   if (rsiResult) {
-    if (rsiResult.rsi < 30) score += 20;       // oversold → bullish
-    else if (rsiResult.rsi > 70) score -= 20;   // overbought → bearish
+    if (rsiResult.rsi < 30)
+      score += 20; // oversold → bullish
+    else if (rsiResult.rsi > 70) score -= 20; // overbought → bearish
     // 30-70 is healthy, no adjustment
   }
 
   // MACD scoring
   if (macdResult) {
-    if (macdResult.trend === 'bullish_crossover') score += 15;
-    else if (macdResult.trend === 'bearish_crossover') score -= 15;
-    else if (macdResult.trend === 'bullish') score += 8;
-    else if (macdResult.trend === 'bearish') score -= 8;
+    if (macdResult.trend === "bullish_crossover") score += 15;
+    else if (macdResult.trend === "bearish_crossover") score -= 15;
+    else if (macdResult.trend === "bullish") score += 8;
+    else if (macdResult.trend === "bearish") score -= 8;
   }
 
   // Volume scoring
   if (volumeResult) {
-    if (volumeResult.trend === 'increasing') score += 10;
-    else if (volumeResult.trend === 'decreasing') score -= 10;
+    if (volumeResult.trend === "increasing") score += 10;
+    else if (volumeResult.trend === "decreasing") score -= 10;
   }
 
   // 7d momentum scoring
@@ -192,34 +200,42 @@ function scoreTechnicals(rsiResult, macdResult, volumeResult, momentum) {
  * @param {string} chain - blockchain (default 'solana')
  * @returns {Promise<Object>} analysis result
  */
-async function analyzeTechnical(tokenAddress, chain = 'solana') {
+async function analyzeTechnical(tokenAddress, chain = "solana") {
   let closePrices = null;
   let volumes = null;
 
   // Try Financial Datasets MCP for historical data
   try {
-    const { getHistoricalCryptoPrices } = require('../intel/financial-datasets-mcp');
+    const {
+      getHistoricalCryptoPrices,
+    } = require("../intel/financial-datasets-mcp");
 
     // Look up ticker from pipeline_tokens
     let ticker = null;
     try {
       const db = getDB();
-      const row = db.prepare('SELECT ticker FROM pipeline_tokens WHERE address = ?').get(tokenAddress);
+      const row = db
+        .prepare("SELECT ticker FROM pipeline_tokens WHERE address = ?")
+        .get(tokenAddress);
       if (row) ticker = row.ticker;
-    } catch { /* ignore DB lookup failure */ }
+    } catch {
+      /* ignore DB lookup failure */
+    }
 
     if (ticker) {
-      const end = new Date().toISOString().split('T')[0];
-      const start = new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-      const data = await getHistoricalCryptoPrices(ticker, start, end, 'day');
+      const end = new Date().toISOString().split("T")[0];
+      const start = new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0];
+      const data = await getHistoricalCryptoPrices(ticker, start, end, "day");
 
       if (data && Array.isArray(data) && data.length >= 15) {
-        closePrices = data.map(d => d.close || d.price || 0);
-        volumes = data.map(d => d.volume || 0);
+        closePrices = data.map((d) => d.close || d.price || 0);
+        volumes = data.map((d) => d.volume || 0);
       }
     }
   } catch (err) {
-    console.warn('[TechAnalyst] Financial Datasets fetch failed:', err.message);
+    console.warn("[TechAnalyst] Financial Datasets fetch failed:", err.message);
   }
 
   // Fallback: return neutral score
@@ -228,10 +244,13 @@ async function analyzeTechnical(tokenAddress, chain = 'solana') {
       technical_score: 50,
       rsi: null,
       macd: null,
-      volumeTrend: { trend: 'unknown' },
+      volumeTrend: { trend: "unknown" },
       momentum: { pct7d: null, pct14d: null, pct30d: null },
-      indicators_json: JSON.stringify({ fallback: true, reason: 'insufficient_data' }),
-      source: 'fallback',
+      indicators_json: JSON.stringify({
+        fallback: true,
+        reason: "insufficient_data",
+      }),
+      source: "fallback",
     };
   }
 
@@ -240,9 +259,19 @@ async function analyzeTechnical(tokenAddress, chain = 'solana') {
   const macdResult = computeMACD(closePrices);
   const volumeResult = computeVolumeTrend(volumes);
   const momentum = computeMomentum(closePrices);
-  const technical_score = scoreTechnicals(rsiResult, macdResult, volumeResult, momentum);
+  const technical_score = scoreTechnicals(
+    rsiResult,
+    macdResult,
+    volumeResult,
+    momentum,
+  );
 
-  const indicators = { rsi: rsiResult, macd: macdResult, volume: volumeResult, momentum };
+  const indicators = {
+    rsi: rsiResult,
+    macd: macdResult,
+    volume: volumeResult,
+    momentum,
+  };
 
   return {
     technical_score,
@@ -251,7 +280,7 @@ async function analyzeTechnical(tokenAddress, chain = 'solana') {
     volumeTrend: volumeResult,
     momentum,
     indicators_json: JSON.stringify(indicators),
-    source: 'financial-datasets',
+    source: "financial-datasets",
   };
 }
 

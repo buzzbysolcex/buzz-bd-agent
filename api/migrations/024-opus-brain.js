@@ -35,7 +35,7 @@ function up(db) {
     CREATE INDEX IF NOT EXISTS idx_calibration_runs_id ON calibration_runs(run_id);
   `);
 
-  console.log('[Migration 024] Project Opus Brain tables created');
+  console.log("[Migration 024] Project Opus Brain tables created");
 }
 
 function down(db) {

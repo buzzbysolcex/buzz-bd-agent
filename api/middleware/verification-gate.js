@@ -5,13 +5,22 @@
  * Use: app.use('/api/v1/simulate', verificationGate, simulateRoutes)
  */
 
-const { isVerified, isQuarantined, verifyToken, VERIFICATION_STATUS } = require('../lib/data-verifier');
+const {
+  isVerified,
+  isQuarantined,
+  verifyToken,
+  VERIFICATION_STATUS,
+} = require("../lib/data-verifier");
 
 function requireVerified(req, res, next) {
-  const contractAddress = req.body?.token_address || req.body?.contract_address ||
-                          req.params?.contractAddress || req.params?.address ||
-                          req.query?.address || req.query?.contract;
-  const chain = req.body?.chain || req.query?.chain || 'solana';
+  const contractAddress =
+    req.body?.token_address ||
+    req.body?.contract_address ||
+    req.params?.contractAddress ||
+    req.params?.address ||
+    req.query?.address ||
+    req.query?.contract;
+  const chain = req.body?.chain || req.query?.chain || "solana";
 
   if (!contractAddress) return next(); // No token context — pass through
 
@@ -19,11 +28,12 @@ function requireVerified(req, res, next) {
   const q = isQuarantined(contractAddress, chain);
   if (q.quarantined) {
     return res.status(422).json({
-      error: 'TOKEN_QUARANTINED',
-      code: 'QUARANTINED',
+      error: "TOKEN_QUARANTINED",
+      code: "QUARANTINED",
       reason: q.reason,
-      message: `Token ${contractAddress} is quarantined. Reason: ${q.reason}. ` +
-               `Resolve via POST /api/v1/verify/resolve/${contractAddress}`
+      message:
+        `Token ${contractAddress} is quarantined. Reason: ${q.reason}. ` +
+        `Resolve via POST /api/v1/verify/resolve/${contractAddress}`,
     });
   }
 
@@ -31,10 +41,11 @@ function requireVerified(req, res, next) {
   const v = isVerified(contractAddress, chain);
   if (!v.verified) {
     return res.status(422).json({
-      error: 'TOKEN_NOT_VERIFIED',
-      code: 'NOT_VERIFIED',
-      message: `Token must pass triple verification before use. ` +
-               `Run GET /api/v1/verify/${contractAddress}?chain=${chain} first.`
+      error: "TOKEN_NOT_VERIFIED",
+      code: "NOT_VERIFIED",
+      message:
+        `Token must pass triple verification before use. ` +
+        `Run GET /api/v1/verify/${contractAddress}?chain=${chain} first.`,
     });
   }
 
@@ -45,18 +56,24 @@ function requireVerified(req, res, next) {
 
 // Async version that auto-verifies if not yet checked
 async function requireVerifiedAutoCheck(req, res, next) {
-  const contractAddress = req.body?.token_address || req.body?.contract_address ||
-                          req.params?.contractAddress || req.params?.address ||
-                          req.query?.address || req.query?.contract;
-  const chain = req.body?.chain || req.query?.chain || 'solana';
+  const contractAddress =
+    req.body?.token_address ||
+    req.body?.contract_address ||
+    req.params?.contractAddress ||
+    req.params?.address ||
+    req.query?.address ||
+    req.query?.contract;
+  const chain = req.body?.chain || req.query?.chain || "solana";
 
   if (!contractAddress) return next();
 
   const q = isQuarantined(contractAddress, chain);
   if (q.quarantined) {
     return res.status(422).json({
-      error: 'TOKEN_QUARANTINED', code: 'QUARANTINED', reason: q.reason,
-      message: `Token ${contractAddress} is quarantined: ${q.reason}`
+      error: "TOKEN_QUARANTINED",
+      code: "QUARANTINED",
+      reason: q.reason,
+      message: `Token ${contractAddress} is quarantined: ${q.reason}`,
     });
   }
 
@@ -74,12 +91,15 @@ async function requireVerifiedAutoCheck(req, res, next) {
       return next();
     }
     return res.status(422).json({
-      error: 'TOKEN_NOT_VERIFIED', code: result.overall,
+      error: "TOKEN_NOT_VERIFIED",
+      code: result.overall,
       mismatches: result.mismatches,
-      message: `Triple verification failed: ${result.mismatches.join('; ')}`
+      message: `Triple verification failed: ${result.mismatches.join("; ")}`,
     });
   } catch (e) {
-    return res.status(500).json({ error: e.message, code: 'VERIFICATION_ERROR' });
+    return res
+      .status(500)
+      .json({ error: e.message, code: "VERIFICATION_ERROR" });
   }
 }
 

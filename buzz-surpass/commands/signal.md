@@ -8,6 +8,7 @@ description: File AIBTC signal as Ionic Nova identity. Signal Factory v4.0 Genom
 File signals to AIBTC as Ionic Nova identity.
 
 ## Usage
+
 ```
 /signal file TOPIC              # File a signal for today
 /signal status                  # Check today's signal count + streak
@@ -16,10 +17,12 @@ File signals to AIBTC as Ionic Nova identity.
 ```
 
 ## Beats
+
 agent-security, agent-infrastructure, defi, agent-governance,
 agent-commerce, market-intelligence, protocol-analysis
 
 ## Rules
+
 - Signals MUST connect data to agent activity (not self-referential)
 - Duplicate check mandatory before filing
 - Streak protection: emergency file by 16:00 UTC if signals_today = 0

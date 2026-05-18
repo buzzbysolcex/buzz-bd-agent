@@ -10,6 +10,11 @@
  *   console.log(result.score, result.classification);
  */
 
-const { scoreToken, fetchLeaderboard, calculateScore, RULES } = require('./lib/scorer');
+const {
+  scoreToken,
+  fetchLeaderboard,
+  calculateScore,
+  RULES,
+} = require("./lib/scorer");
 
 module.exports = { scoreToken, fetchLeaderboard, calculateScore, RULES };

@@ -10,6 +10,7 @@ merge, and optimize memory. Buzz's 68+ SQLite tables accumulate stale data.
 Without cleanup, DB grows indefinitely and agent context degrades.
 
 **Decision:**
+
 - 4-phase cycle: scan → identify → consolidate → optimize
 - Archive before delete (tokens_archive, tasks_archive)
 - Compress observations to daily summaries after 7 days
@@ -18,6 +19,7 @@ Without cleanup, DB grows indefinitely and agent context degrades.
 - VACUUM skipped when CPU > 70% (MiroFish protection)
 
 **Consequences:**
+
 - DB stays lean: dead tokens archived, expired messages purged
 - VACUUM reclaims disk space after deletions
 - No data loss: archives preserve address + score for historical analysis

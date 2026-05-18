@@ -10,24 +10,52 @@
  * Cost: $0 (Ollama local)
  */
 
-const OLLAMA_URL = 'http://localhost:11434';
-const MODEL = 'qwen3:8b';
+const OLLAMA_URL = "http://localhost:11434";
+const MODEL = "qwen3:8b";
 
 // ─── Agent Persona Templates ─────────────────────────
 
 const PERSONA_TEMPLATES = [
-  { cluster: 'degen', count: 10, prompt: 'You are a degen trader who loves high-risk high-reward plays. You get excited by narrative and momentum. You size positions aggressively.' },
-  { cluster: 'whale', count: 10, prompt: 'You are a whale with deep pockets. You focus on liquidity, market cap, and whether you can enter/exit without moving the price. You are patient and methodical.' },
-  { cluster: 'institutional', count: 10, prompt: 'You are an institutional analyst. You demand audited contracts, doxxed teams, regulatory clarity, and proven revenue. You reject most tokens.' },
-  { cluster: 'community', count: 10, prompt: 'You are a community-focused analyst. You evaluate social presence, developer activity, holder growth, and community engagement. A dead community = dead token.' },
-  { cluster: 'market_dynamics', count: 10, prompt: 'You are a market microstructure analyst. You focus on order flow, spread, depth, MEV risk, and cross-exchange arbitrage. You care about HOW the token trades, not just what it is.' }
+  {
+    cluster: "degen",
+    count: 10,
+    prompt:
+      "You are a degen trader who loves high-risk high-reward plays. You get excited by narrative and momentum. You size positions aggressively.",
+  },
+  {
+    cluster: "whale",
+    count: 10,
+    prompt:
+      "You are a whale with deep pockets. You focus on liquidity, market cap, and whether you can enter/exit without moving the price. You are patient and methodical.",
+  },
+  {
+    cluster: "institutional",
+    count: 10,
+    prompt:
+      "You are an institutional analyst. You demand audited contracts, doxxed teams, regulatory clarity, and proven revenue. You reject most tokens.",
+  },
+  {
+    cluster: "community",
+    count: 10,
+    prompt:
+      "You are a community-focused analyst. You evaluate social presence, developer activity, holder growth, and community engagement. A dead community = dead token.",
+  },
+  {
+    cluster: "market_dynamics",
+    count: 10,
+    prompt:
+      "You are a market microstructure analyst. You focus on order flow, spread, depth, MEV risk, and cross-exchange arbitrage. You care about HOW the token trades, not just what it is.",
+  },
 ];
 
 function generateAgents(count = 50) {
   const agents = [];
   let id = 0;
   for (const template of PERSONA_TEMPLATES) {
-    const n = Math.min(template.count, Math.ceil(count / PERSONA_TEMPLATES.length));
+    const n = Math.min(
+      template.count,
+      Math.ceil(count / PERSONA_TEMPLATES.length),
+    );
     for (let i = 0; i < n && agents.length < count; i++) {
       agents.push({
         id: `${template.cluster}_${++id}`,
@@ -35,7 +63,7 @@ function generateAgents(count = 50) {
         persona: template.prompt,
         belief: 0.5, // starts neutral (0=bearish, 1=bullish)
         posts: [],
-        trades: []
+        trades: [],
       });
     }
   }
@@ -45,27 +73,33 @@ function generateAgents(count = 50) {
 // ─── Single Agent Turn ───────────────────────────────
 
 async function agentTurn(agent, tokenData, socialFeed, round, totalRounds) {
-  const prompt = buildAgentPrompt(agent, tokenData, socialFeed, round, totalRounds);
+  const prompt = buildAgentPrompt(
+    agent,
+    tokenData,
+    socialFeed,
+    round,
+    totalRounds,
+  );
 
   try {
     const resp = await fetch(`${OLLAMA_URL}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: MODEL,
         messages: [
-          { role: 'system', content: agent.persona },
-          { role: 'user', content: prompt }
+          { role: "system", content: agent.persona },
+          { role: "user", content: prompt },
         ],
         stream: false,
         think: false,
-        options: { temperature: 0.8, num_predict: 150 }
+        options: { temperature: 0.8, num_predict: 150 },
       }),
-      signal: AbortSignal.timeout(30000)
+      signal: AbortSignal.timeout(30000),
     });
 
     const data = await resp.json();
-    const raw = data.message?.content || '';
+    const raw = data.message?.content || "";
     const parsed = parseAgentResponse(raw);
 
     // Update agent belief
@@ -74,7 +108,7 @@ async function agentTurn(agent, tokenData, socialFeed, round, totalRounds) {
       round,
       post: parsed.post,
       belief: parsed.belief,
-      action: parsed.action
+      action: parsed.action,
     });
 
     return {
@@ -84,7 +118,7 @@ async function agentTurn(agent, tokenData, socialFeed, round, totalRounds) {
       belief: parsed.belief,
       action: parsed.action,
       post: parsed.post,
-      raw: raw.slice(0, 300)
+      raw: raw.slice(0, 300),
     };
   } catch (e) {
     return {
@@ -92,20 +126,22 @@ async function agentTurn(agent, tokenData, socialFeed, round, totalRounds) {
       cluster: agent.cluster,
       round,
       belief: agent.belief,
-      action: 'HOLD',
+      action: "HOLD",
       post: `[Error: ${e.message}]`,
-      error: true
+      error: true,
     };
   }
 }
 
 function buildAgentPrompt(agent, tokenData, socialFeed, round, totalRounds) {
   let prompt = `ROUND ${round}/${totalRounds} — Token Evaluation\n\n`;
-  prompt += `TOKEN: ${tokenData.symbol || 'Unknown'}\n`;
-  prompt += `Chain: ${tokenData.chain || 'unknown'}\n`;
+  prompt += `TOKEN: ${tokenData.symbol || "Unknown"}\n`;
+  prompt += `Chain: ${tokenData.chain || "unknown"}\n`;
   if (tokenData.price) prompt += `Price: $${tokenData.price}\n`;
-  if (tokenData.mcap) prompt += `MCap: $${Number(tokenData.mcap).toLocaleString()}\n`;
-  if (tokenData.liquidity) prompt += `Liquidity: $${Number(tokenData.liquidity).toLocaleString()}\n`;
+  if (tokenData.mcap)
+    prompt += `MCap: $${Number(tokenData.mcap).toLocaleString()}\n`;
+  if (tokenData.liquidity)
+    prompt += `Liquidity: $${Number(tokenData.liquidity).toLocaleString()}\n`;
   if (tokenData.score) prompt += `Safety Score: ${tokenData.score}/100\n`;
   prompt += `Your current belief: ${(agent.belief * 100).toFixed(0)}% bullish\n\n`;
 
@@ -116,7 +152,7 @@ function buildAgentPrompt(agent, tokenData, socialFeed, round, totalRounds) {
     for (const post of recent) {
       prompt += `  [${post.cluster}] ${post.post}\n`;
     }
-    prompt += '\n';
+    prompt += "\n";
   }
 
   prompt += `Based on the token data and social feed, respond with EXACTLY this JSON:\n`;
@@ -132,18 +168,21 @@ function buildAgentPrompt(agent, tokenData, socialFeed, round, totalRounds) {
 function parseAgentResponse(raw) {
   const jsonMatch = raw.match(/\{[\s\S]*?\}/);
   if (!jsonMatch) {
-    return { belief: 0.5, action: 'HOLD', post: 'No clear signal.' };
+    return { belief: 0.5, action: "HOLD", post: "No clear signal." };
   }
   try {
     const parsed = JSON.parse(jsonMatch[0]);
     return {
       belief: Math.max(0, Math.min(1, parseFloat(parsed.belief) || 0.5)),
-      action: ['BUY', 'SELL', 'HOLD'].includes((parsed.action || '').toUpperCase())
-        ? parsed.action.toUpperCase() : 'HOLD',
-      post: (parsed.post || 'No comment.').slice(0, 200)
+      action: ["BUY", "SELL", "HOLD"].includes(
+        (parsed.action || "").toUpperCase(),
+      )
+        ? parsed.action.toUpperCase()
+        : "HOLD",
+      post: (parsed.post || "No comment.").slice(0, 200),
     };
   } catch {
-    return { belief: 0.5, action: 'HOLD', post: 'Parse error.' };
+    return { belief: 0.5, action: "HOLD", post: "Parse error." };
   }
 }
 
@@ -153,7 +192,7 @@ async function runOASISSimulation(tokenData, options = {}) {
   const {
     agentCount = 50,
     rounds = 20,
-    onRoundComplete = null // callback for progress reporting
+    onRoundComplete = null, // callback for progress reporting
   } = options;
 
   const startTime = Date.now();
@@ -169,7 +208,13 @@ async function runOASISSimulation(tokenData, options = {}) {
     const shuffled = [...agents].sort(() => Math.random() - 0.5);
 
     for (const agent of shuffled) {
-      const result = await agentTurn(agent, tokenData, socialFeed, round, rounds);
+      const result = await agentTurn(
+        agent,
+        tokenData,
+        socialFeed,
+        round,
+        rounds,
+      );
       roundActions.push(result);
 
       // Add to shared social feed (other agents see this next round)
@@ -178,37 +223,44 @@ async function runOASISSimulation(tokenData, options = {}) {
           cluster: result.cluster,
           post: result.post,
           belief: result.belief,
-          round
+          round,
         });
       }
     }
 
     // Compute round summary
-    const beliefs = roundActions.map(a => a.belief);
-    const buys = roundActions.filter(a => a.action === 'BUY').length;
-    const sells = roundActions.filter(a => a.action === 'SELL').length;
-    const holds = roundActions.filter(a => a.action === 'HOLD').length;
-    const errors = roundActions.filter(a => a.error).length;
+    const beliefs = roundActions.map((a) => a.belief);
+    const buys = roundActions.filter((a) => a.action === "BUY").length;
+    const sells = roundActions.filter((a) => a.action === "SELL").length;
+    const holds = roundActions.filter((a) => a.action === "HOLD").length;
+    const errors = roundActions.filter((a) => a.error).length;
 
     const roundSummary = {
       round,
       mean_belief: avg(beliefs),
-      median_belief: beliefs.sort((a, b) => a - b)[Math.floor(beliefs.length / 2)],
+      median_belief: beliefs.sort((a, b) => a - b)[
+        Math.floor(beliefs.length / 2)
+      ],
       stddev_belief: stddev(beliefs),
-      buys, sells, holds, errors,
+      buys,
+      sells,
+      holds,
+      errors,
       duration_ms: Date.now() - roundStart,
       // Per-cluster breakdown
-      clusters: {}
+      clusters: {},
     };
 
     for (const template of PERSONA_TEMPLATES) {
-      const clusterActions = roundActions.filter(a => a.cluster === template.cluster);
-      const clusterBeliefs = clusterActions.map(a => a.belief);
+      const clusterActions = roundActions.filter(
+        (a) => a.cluster === template.cluster,
+      );
+      const clusterBeliefs = clusterActions.map((a) => a.belief);
       roundSummary.clusters[template.cluster] = {
         mean_belief: avg(clusterBeliefs),
-        buys: clusterActions.filter(a => a.action === 'BUY').length,
-        sells: clusterActions.filter(a => a.action === 'SELL').length,
-        holds: clusterActions.filter(a => a.action === 'HOLD').length
+        buys: clusterActions.filter((a) => a.action === "BUY").length,
+        sells: clusterActions.filter((a) => a.action === "SELL").length,
+        holds: clusterActions.filter((a) => a.action === "HOLD").length,
       };
     }
 
@@ -220,9 +272,13 @@ async function runOASISSimulation(tokenData, options = {}) {
   }
 
   // Final consensus
-  const finalBeliefs = agents.map(a => a.belief);
-  const finalBuys = agents.filter(a => a.posts[a.posts.length - 1]?.action === 'BUY').length;
-  const finalSells = agents.filter(a => a.posts[a.posts.length - 1]?.action === 'SELL').length;
+  const finalBeliefs = agents.map((a) => a.belief);
+  const finalBuys = agents.filter(
+    (a) => a.posts[a.posts.length - 1]?.action === "BUY",
+  ).length;
+  const finalSells = agents.filter(
+    (a) => a.posts[a.posts.length - 1]?.action === "SELL",
+  ).length;
 
   return {
     success: true,
@@ -239,33 +295,43 @@ async function runOASISSimulation(tokenData, options = {}) {
     final_buys: finalBuys,
     final_sells: finalSells,
     final_holds: agentCount - finalBuys - finalSells,
-    consensus: finalBuys > finalSells ? 'BULLISH' : finalSells > finalBuys ? 'BEARISH' : 'NEUTRAL',
+    consensus:
+      finalBuys > finalSells
+        ? "BULLISH"
+        : finalSells > finalBuys
+          ? "BEARISH"
+          : "NEUTRAL",
     consensus_strength: Math.abs(finalBuys - finalSells) / agentCount,
 
     // Belief trajectory (how consensus evolved)
-    trajectory: roundResults.map(r => ({
+    trajectory: roundResults.map((r) => ({
       round: r.round,
       mean_belief: r.mean_belief,
       buys: r.buys,
       sells: r.sells,
-      duration_ms: r.duration_ms
+      duration_ms: r.duration_ms,
     })),
 
     // Per-cluster final beliefs
     cluster_beliefs: Object.fromEntries(
-      PERSONA_TEMPLATES.map(t => {
-        const clusterAgents = agents.filter(a => a.cluster === t.cluster);
-        return [t.cluster, avg(clusterAgents.map(a => a.belief))];
-      })
+      PERSONA_TEMPLATES.map((t) => {
+        const clusterAgents = agents.filter((a) => a.cluster === t.cluster);
+        return [t.cluster, avg(clusterAgents.map((a) => a.belief))];
+      }),
     ),
 
     // Top posts (most decisive)
     top_posts: socialFeed
-      .filter(p => Math.abs(p.belief - 0.5) > 0.3)
+      .filter((p) => Math.abs(p.belief - 0.5) > 0.3)
       .slice(-10)
-      .map(p => ({ cluster: p.cluster, belief: p.belief, post: p.post, round: p.round })),
+      .map((p) => ({
+        cluster: p.cluster,
+        belief: p.belief,
+        post: p.post,
+        round: p.round,
+      })),
 
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   };
 }
 
@@ -284,5 +350,5 @@ function stddev(arr) {
 module.exports = {
   runOASISSimulation,
   generateAgents,
-  PERSONA_TEMPLATES
+  PERSONA_TEMPLATES,
 };

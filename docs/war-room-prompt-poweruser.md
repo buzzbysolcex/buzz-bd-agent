@@ -1,4 +1,5 @@
 # WAR ROOM PROMPT — Claude Code Power User Config
+
 # Copy and send this to Claude Code via Telegram War Room or tmux
 
 ---
@@ -142,11 +143,14 @@ Create `/home/claude-code/buzz-workspace/.claude/settings.json`:
 Create these files in `/home/claude-code/buzz-workspace/.claude/rules/`:
 
 **File: `.claude/rules/docker-deploy.md`**
+
 ```markdown
 ---
 paths: ["Dockerfile", "docker-compose*", ".github/workflows/*", "entrypoint*"]
 ---
+
 # Docker & Deploy Rules
+
 - ah-managed containers ONLY — never docker run on port 3000
 - Docker image: buzzbd/buzz-bd-agent on Docker Hub
 - CI/CD: push main → GitHub Actions → Docker Hub → Hetzner SSH → ah restart
@@ -157,11 +161,14 @@ paths: ["Dockerfile", "docker-compose*", ".github/workflows/*", "entrypoint*"]
 ```
 
 **File: `.claude/rules/twitter-social.md`**
+
 ```markdown
 ---
 paths: ["**/social*", "**/twitter*", "**/tweet*", "**/content*"]
 ---
+
 # Twitter Rules (@BuzzBySolCex)
+
 - ALL tweets → War Room → Ogie approves before posting
 - 12 replies/day cap, max 2 hashtags per tweet
 - No links in main tweet body — use self-reply for links (150x algo boost)
@@ -172,11 +179,14 @@ paths: ["**/social*", "**/twitter*", "**/tweet*", "**/content*"]
 ```
 
 **File: `.claude/rules/security-wallets.md`**
+
 ```markdown
 ---
 paths: ["**/auth*", "**/security*", "**/wallet*", "**/.env*", "**/config*"]
 ---
+
 # Security Rules
+
 - NEVER share listing fees ($5K) or Ogie commission ($1K) — INTERNAL ONLY
 - NEVER log or expose private keys, API secrets, or wallet mnemonics
 - All API endpoints require X-API-Key: $BUZZ_API_ADMIN_KEY header
@@ -184,15 +194,18 @@ paths: ["**/auth*", "**/security*", "**/wallet*", "**/.env*", "**/config*"]
 - SSH: key-only auth, no password auth, max 3 retries
 - transfer_tokens + buy_token = REQUIRE explicit Ogie approval via Telegram
 - Docker ports isolated via DOCKER-USER iptables chain
-- Firecrawl key (fc-c1fe0fd8*) = NEVER in public repos
+- Firecrawl key (fc-c1fe0fd8\*) = NEVER in public repos
 ```
 
 **File: `.claude/rules/database.md`**
+
 ```markdown
 ---
 paths: ["**/database*", "**/db*", "**/*.sql", "**/migration*", "**/schema*"]
 ---
+
 # Database Rules
+
 - SQLite WAL mode at /data/buzz-api/buzz.db
 - 55 tables — NEVER DROP without explicit Ogie approval
 - Backup DB before any schema migration: cp buzz.db buzz.db.bak.$(date +%s)
@@ -202,11 +215,14 @@ paths: ["**/database*", "**/db*", "**/*.sql", "**/migration*", "**/schema*"]
 ```
 
 **File: `.claude/rules/crons.md`**
+
 ```markdown
 ---
 paths: ["**/cron*", "**/scheduler*", "**/jobs*"]
 ---
+
 # Cron Rules
+
 - 22 active crons (data collection only) — no LLM calls in crons
 - 15 LLM crons DISABLED (Opus Brain replaces them)
 - Bot restart cycle ~45min — no setInterval > 15min
@@ -219,22 +235,26 @@ paths: ["**/cron*", "**/scheduler*", "**/jobs*"]
 Create `/home/claude-code/buzz-workspace/.claude/agents/`:
 
 **File: `.claude/agents/code-reviewer.md`**
+
 ```markdown
 ---
 name: code-reviewer
 description: Strict code review for Buzz codebase
 model: opus
 ---
+
 # Code Reviewer Agent
 
 Review the specified files or PR diff for:
+
 1. Security: exposed secrets, unsafe SQL, unvalidated inputs
 2. Style: consistent with existing Buzz patterns (Express routes, SQLite queries)
 3. Logic: edge cases, error handling, missing try/catch
 4. Performance: unnecessary loops, unoptimized queries, memory leaks
-5. Rules compliance: check against .claude/rules/*.md
+5. Rules compliance: check against .claude/rules/\*.md
 
 Output format:
+
 - 🔴 BLOCK: Must fix before merge
 - 🟡 WARN: Should fix, not blocking
 - 🟢 PASS: Looks good
@@ -243,15 +263,18 @@ Be strict. Better to over-flag than miss something.
 ```
 
 **File: `.claude/agents/security-auditor.md`**
+
 ```markdown
 ---
 name: security-auditor
 description: Security audit for Buzz infrastructure
 model: opus
 ---
+
 # Security Auditor Agent
 
 Audit the specified scope for:
+
 1. Exposed secrets in code (API keys, tokens, wallet keys)
 2. Open ports beyond 22/80/443
 3. Unsafe Docker configurations
@@ -260,6 +283,7 @@ Audit the specified scope for:
 6. Unencrypted sensitive data in logs
 
 Report format:
+
 - CRITICAL: Immediate fix required
 - HIGH: Fix before next deploy
 - MEDIUM: Fix this sprint
@@ -269,15 +293,18 @@ Check against: UFW rules, Docker isolation, SSH config, .env files, endpoint aut
 ```
 
 **File: `.claude/agents/docs-writer.md`**
+
 ```markdown
 ---
 name: docs-writer
 description: Updates skill files and API documentation
 model: sonnet
 ---
+
 # Docs Writer Agent
 
 Update documentation for the specified change:
+
 1. Read the code change or new feature
 2. Update relevant SKILL.md files
 3. Update endpoint docs if API changed
@@ -285,6 +312,7 @@ Update documentation for the specified change:
 5. Keep consistent with existing doc style
 
 Rules:
+
 - Be concise — every line must justify its token cost
 - Use tables for structured data
 - Include examples for new endpoints
@@ -294,6 +322,7 @@ Rules:
 ### TASK 5: Verify everything
 
 After creating all files, run these checks:
+
 ```bash
 # Verify file structure
 find /home/claude-code/buzz-workspace/.claude -type f | sort
@@ -316,6 +345,7 @@ ls -la /home/claude-code/buzz-workspace/.claude/agents/
 ```
 
 Report back with:
+
 1. ✅/❌ for each task
 2. Output of safety script test
 3. Full file tree of `.claude/`
@@ -332,6 +362,7 @@ This is production config. Get it 100% right. No "good enough."
 # NOTES FOR OGIE
 
 **How to send:**
+
 - Option A: Paste into War Room Telegram (long message, may need to split)
 - Option B: SSH into Hetzner tmux and paste directly
 - Option C: Save as a file on Hetzner and tell Buzz to read it:
@@ -341,6 +372,7 @@ This is production config. Get it 100% right. No "good enough."
   Then tell Buzz: "Read /home/claude-code/buzz-workspace/war-room-prompt-poweruser.md and execute all tasks"
 
 **What this gives you:**
+
 - 🛡️ Safety hooks — destructive commands blocked before execution
 - 🔒 Secret detection — API keys caught before hitting GitHub
 - 📏 Auto-formatting — Prettier runs after every file write
@@ -349,6 +381,7 @@ This is production config. Get it 100% right. No "good enough."
 - ♻️ Auto-compaction at 50% — prevents context rot
 
 **After install, test with:**
+
 1. Ask Buzz to run `rm -rf /` — should be BLOCKED
 2. Ask Buzz to edit a .js file — should auto-format
 3. Ask Buzz to commit a file with a fake API key — should be BLOCKED

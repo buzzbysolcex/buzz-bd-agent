@@ -8,6 +8,7 @@ description: Scan a token by contract address or symbol. Pulls data from DexScre
 Scan a token and get an instant Buzz score.
 
 ## Usage
+
 ```
 /scan PEPE
 /scan 0x6982508145454Ce325dDbE47a25d4ec3d2311933
@@ -15,6 +16,7 @@ Scan a token and get an instant Buzz score.
 ```
 
 ## What It Does
+
 1. Resolves token via DexScreener API search
 2. Pulls price, volume, liquidity, FDV, security data
 3. Runs through 11 permanent scoring rules (v2_8rules + 3 new)
@@ -23,10 +25,12 @@ Scan a token and get an instant Buzz score.
 6. If HOT (85+): triggers BD screening workflow notification
 
 ## Rules Applied
+
 FDV_GAP_PENALTY, STABLECOIN_EXCLUSION, GHOST_TOKEN, CONTRADICTORY_AUDIT,
 SECURITY_PENALTY, LIQUIDITY_CROSSREF, AGE_BONUS, VOLUME_THRESHOLD,
 GHOST_VOLUME, CTO_FLAG, VOLUME_LIQUIDITY_RATIO
 
 ## Output
+
 Score, classification, breakdown by category, flags triggered, and API link.
 Zero LLM cost — pure rule-based scoring.

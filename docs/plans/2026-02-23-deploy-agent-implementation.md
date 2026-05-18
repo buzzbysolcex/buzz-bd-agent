@@ -42,6 +42,7 @@ MAX_REPUTATION = 20
 ### Task 1: Skeleton + Constructor (3 tests)
 
 **Files:**
+
 - Create: `src/agents/deploy_agent.py`
 - Create: `src/agents/tests/test_deploy_agent.py`
 
@@ -185,6 +186,7 @@ git commit -m "feat: add DeployAgent skeleton with constructor and empty result"
 ### Task 2: Input Validation (4 tests)
 
 **Files:**
+
 - Modify: `src/agents/deploy_agent.py`
 - Modify: `src/agents/tests/test_deploy_agent.py`
 
@@ -268,9 +270,10 @@ git commit -m "feat: add input validation for DeployAgent"
 
 ---
 
-### Task 3: _analyze_deployments (7 tests)
+### Task 3: \_analyze_deployments (7 tests)
 
 **Files:**
+
 - Modify: `src/agents/deploy_agent.py`
 - Modify: `src/agents/tests/test_deploy_agent.py`
 
@@ -398,7 +401,7 @@ class TestAnalyzeDeployments:
 Run: `pytest src/agents/tests/test_deploy_agent.py::TestAnalyzeDeployments -v`
 Expected: FAIL with `AttributeError: 'DeployAgent' object has no attribute '_analyze_deployments'`
 
-**Step 3: Write _analyze_deployments implementation**
+**Step 3: Write \_analyze_deployments implementation**
 
 Add to `DeployAgent` class:
 
@@ -503,9 +506,10 @@ git commit -m "feat: add _analyze_deployments with Helius enhanced transactions"
 
 ---
 
-### Task 4: _analyze_portfolio (6 tests)
+### Task 4: \_analyze_portfolio (6 tests)
 
 **Files:**
+
 - Modify: `src/agents/deploy_agent.py`
 - Modify: `src/agents/tests/test_deploy_agent.py`
 
@@ -614,7 +618,7 @@ class TestAnalyzePortfolio:
 Run: `pytest src/agents/tests/test_deploy_agent.py::TestAnalyzePortfolio -v`
 Expected: FAIL with `AttributeError: 'DeployAgent' object has no attribute '_analyze_portfolio'`
 
-**Step 3: Write _analyze_portfolio implementation**
+**Step 3: Write \_analyze_portfolio implementation**
 
 Add to `DeployAgent` class:
 
@@ -712,9 +716,10 @@ git commit -m "feat: add _analyze_portfolio with Helius DAS API"
 
 ---
 
-### Task 5: _analyze_cross_chain Stub (4 tests)
+### Task 5: \_analyze_cross_chain Stub (4 tests)
 
 **Files:**
+
 - Modify: `src/agents/deploy_agent.py`
 - Modify: `src/agents/tests/test_deploy_agent.py`
 
@@ -764,7 +769,7 @@ class TestAnalyzeCrossChain:
 Run: `pytest src/agents/tests/test_deploy_agent.py::TestAnalyzeCrossChain -v`
 Expected: FAIL with `AttributeError`
 
-**Step 3: Write _analyze_cross_chain stub**
+**Step 3: Write \_analyze_cross_chain stub**
 
 Add to `DeployAgent` class:
 
@@ -822,9 +827,10 @@ git commit -m "feat: add _analyze_cross_chain Allium stub with SQL contracts"
 
 ---
 
-### Task 6: _compute_verdict (5 tests)
+### Task 6: \_compute_verdict (5 tests)
 
 **Files:**
+
 - Modify: `src/agents/deploy_agent.py`
 - Modify: `src/agents/tests/test_deploy_agent.py`
 
@@ -943,7 +949,7 @@ class TestComputeVerdict:
 Run: `pytest src/agents/tests/test_deploy_agent.py::TestComputeVerdict -v`
 Expected: FAIL with `AttributeError`
 
-**Step 3: Write _compute_verdict implementation**
+**Step 3: Write \_compute_verdict implementation**
 
 Add to `DeployAgent` class:
 
@@ -1129,6 +1135,7 @@ git commit -m "feat: add _compute_verdict with weight redistribution and flag de
 ### Task 7: Red/Green Flag Detection (4 tests)
 
 **Files:**
+
 - Modify: `src/agents/tests/test_deploy_agent.py`
 
 **Step 1: Write the failing tests**
@@ -1200,6 +1207,7 @@ git commit -m "test: add red/green flag detection tests for DeployAgent"
 ### Task 8: Depth Gating (5 tests)
 
 **Files:**
+
 - Modify: `src/agents/deploy_agent.py` (wire up execute with asyncio.gather)
 - Modify: `src/agents/tests/test_deploy_agent.py`
 
@@ -1352,6 +1360,7 @@ git commit -m "feat: wire up execute() with asyncio.gather and depth gating"
 ### Task 9: Full execute() Integration (4 tests)
 
 **Files:**
+
 - Modify: `src/agents/tests/test_deploy_agent.py`
 
 **Step 1: Write the failing tests**

@@ -1,6 +1,9 @@
 # SOLCEX MASTER OPS — BD SCREENING WORKFLOW
+
 ## From HOT Token → Verified Lead → Outreach Ready
+
 ## Permanent Process Document | v1.0 | Day 39
+
 ## Bismillah 🤲
 
 ---
@@ -16,6 +19,7 @@ This workflow activates when pipeline-scorer classifies a token as HOT (85+) or 
 ## PHASE 1: DUAL-SOURCE VERIFICATION (pipeline-verifier)
 
 ### Step 1.1: DexScreener Pull
+
 ```
 API: https://api.dexscreener.com/latest/dex/search?q={TOKEN}
      https://api.dexscreener.com/token-pairs/v1/{chainId}/{tokenAddress}
@@ -36,6 +40,7 @@ Extract:
 ```
 
 ### Step 1.2: DexTools Pull
+
 ```
 URL: https://www.dextools.io/app/en/{chain}/pair-explorer/{pairAddress}
 
@@ -55,6 +60,7 @@ Extract:
 ```
 
 ### Step 1.3: FDV Gap Check (NEW PERMANENT RULE)
+
 ```
 FDV Gap = 1 - (Circulating MCap / FDV)
 
@@ -71,6 +77,7 @@ Data source priority:
 ```
 
 ### Step 1.4: Auto-Exclusion Rules (NEW)
+
 ```
 AUTO-EXCLUDE from pipeline (no manual review needed):
 - Known stablecoins: USDC, USDT, EURC, DAI, FRAX, TUSD, BUSD
@@ -92,28 +99,30 @@ AUTO-FLAG for manual review:
 
 ### Step 2.1: Security Score Matrix
 
-| Check | Source | Pass | Caution | Fail |
-|-------|--------|------|---------|------|
-| Token Sniffer | DexScreener | ≥ 70/100 | 30-69 | < 30 |
-| Go+ Security | DexScreener | 0 issues | 1-2 issues | 3+ issues |
-| Quick Intel | DexScreener | 0 issues | 1-2 issues | 3+ issues |
-| Honeypot | Honeypot.is | No | — | Yes (auto-exclude) |
-| Sell Tax | Go+ / DexTools | 0% | 0.1-2% | > 2% |
-| DEXTscore | DexTools | ≥ 70 | 50-69 | < 50 |
+| Check         | Source         | Pass     | Caution    | Fail               |
+| ------------- | -------------- | -------- | ---------- | ------------------ |
+| Token Sniffer | DexScreener    | ≥ 70/100 | 30-69      | < 30               |
+| Go+ Security  | DexScreener    | 0 issues | 1-2 issues | 3+ issues          |
+| Quick Intel   | DexScreener    | 0 issues | 1-2 issues | 3+ issues          |
+| Honeypot      | Honeypot.is    | No       | —          | Yes (auto-exclude) |
+| Sell Tax      | Go+ / DexTools | 0%       | 0.1-2%     | > 2%               |
+| DEXTscore     | DexTools       | ≥ 70     | 50-69      | < 50               |
 
 ### Step 2.2: Scoring Penalties
 
-| Condition | Penalty | Example |
-|-----------|---------|---------|
+| Condition           | Penalty       | Example                   |
+| ------------------- | ------------- | ------------------------- |
 | Token Sniffer 0/100 | -25 composite | BANANAS31, VELO, MEMECARD |
-| Go+ issues > 3 | -30 composite | wkeyDAO2 (5 issues) |
-| Sell tax > 2% | -20 composite | wkeyDAO2 (3.99%) |
-| DEXTscore < 50 | -15 composite | wkeyDAO2 (47) |
-| < 10 holders | AUTO-EXCLUDE | MEMECARD (2 holders) |
-| < $100 daily volume | AUTO-EXCLUDE | MEMECARD ($0 volume) |
+| Go+ issues > 3      | -30 composite | wkeyDAO2 (5 issues)       |
+| Sell tax > 2%       | -20 composite | wkeyDAO2 (3.99%)          |
+| DEXTscore < 50      | -15 composite | wkeyDAO2 (47)             |
+| < 10 holders        | AUTO-EXCLUDE  | MEMECARD (2 holders)      |
+| < $100 daily volume | AUTO-EXCLUDE  | MEMECARD ($0 volume)      |
 
 ### Step 2.3: Contradictory Audit Resolution
+
 When audit sources disagree (e.g., VELO: Token Sniffer 0/100 but DEXTscore 99):
+
 1. Flag the contradiction in pipeline notes
 2. Use the LOWER (more cautious) assessment
 3. Require manual investigation before BD outreach
@@ -125,28 +134,28 @@ When audit sources disagree (e.g., VELO: Token Sniffer 0/100 but DEXTscore 99):
 
 ### Step 3.1: Classification Matrix
 
-| Classification | Criteria | Action |
-|---------------|----------|--------|
-| **BD SWEET SPOT** | Circ MCap $500K-$50M, 2-8 exchanges, Liquidity >$100K, Security clean, Active community | IMMEDIATE OUTREACH |
-| **POTENTIAL** | Meets most criteria but 1-2 concerns (e.g., low liq, some security flags) | INVESTIGATE THEN OUTREACH |
-| **TOO BIG** | MCap >$100M OR on 10+ exchanges OR on Binance/Coinbase | MONITOR ONLY (unless they approach us) |
-| **TOO RISKY** | Security fails, ghost token, honeypot, <10 holders | EXCLUDE FROM BD |
-| **DATA MISSING** | Not found on DexScreener/DexTools | REQUIRE CONTRACT ADDRESS, verify before adding |
+| Classification    | Criteria                                                                                | Action                                         |
+| ----------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **BD SWEET SPOT** | Circ MCap $500K-$50M, 2-8 exchanges, Liquidity >$100K, Security clean, Active community | IMMEDIATE OUTREACH                             |
+| **POTENTIAL**     | Meets most criteria but 1-2 concerns (e.g., low liq, some security flags)               | INVESTIGATE THEN OUTREACH                      |
+| **TOO BIG**       | MCap >$100M OR on 10+ exchanges OR on Binance/Coinbase                                  | MONITOR ONLY (unless they approach us)         |
+| **TOO RISKY**     | Security fails, ghost token, honeypot, <10 holders                                      | EXCLUDE FROM BD                                |
+| **DATA MISSING**  | Not found on DexScreener/DexTools                                                       | REQUIRE CONTRACT ADDRESS, verify before adding |
 
 ### Step 3.2: Audit Results Applied to Current Top 10
 
-| Token | Chain | Classification | Rationale |
-|-------|-------|---------------|-----------|
-| BANANAS31 | BSC | POTENTIAL* | Real circ $1.37M = sweet spot range, BUT Token Sniffer 0/100, 1% circ |
-| TRUMP | SOL | TOO BIG | $629M, 19+ exchanges, celebrity token |
-| VELO | BSC | TOO BIG / LOW LIQ | $64M, 8+ exchanges, $55K pair liq, TS 0/100 |
-| EURC | SOL | EXCLUDE | Stablecoin, not a BD target |
-| PIPPIN | SOL | **BD SWEET SPOT** | $54M, $5.2M liq, 45K holders, clean audits, 100% circ |
-| Max | SOL | DATA MISSING | Not found on any DEX. Verify contract. |
-| BANANA | SOL | DATA MISSING | No Solana pairs found. Verify. |
-| wkeyDAO2 | BSC | TOO BIG + RISKY | $676M, Go+ 5 issues, 3.99% sell tax |
-| POOPALIEN | ? | DATA MISSING | Not found anywhere. Remove or verify. |
-| MEMECARD | ETH | TOO RISKY | 2 holders, zero volume, ghost token |
+| Token     | Chain | Classification    | Rationale                                                             |
+| --------- | ----- | ----------------- | --------------------------------------------------------------------- |
+| BANANAS31 | BSC   | POTENTIAL\*       | Real circ $1.37M = sweet spot range, BUT Token Sniffer 0/100, 1% circ |
+| TRUMP     | SOL   | TOO BIG           | $629M, 19+ exchanges, celebrity token                                 |
+| VELO      | BSC   | TOO BIG / LOW LIQ | $64M, 8+ exchanges, $55K pair liq, TS 0/100                           |
+| EURC      | SOL   | EXCLUDE           | Stablecoin, not a BD target                                           |
+| PIPPIN    | SOL   | **BD SWEET SPOT** | $54M, $5.2M liq, 45K holders, clean audits, 100% circ                 |
+| Max       | SOL   | DATA MISSING      | Not found on any DEX. Verify contract.                                |
+| BANANA    | SOL   | DATA MISSING      | No Solana pairs found. Verify.                                        |
+| wkeyDAO2  | BSC   | TOO BIG + RISKY   | $676M, Go+ 5 issues, 3.99% sell tax                                   |
+| POOPALIEN | ?     | DATA MISSING      | Not found anywhere. Remove or verify.                                 |
+| MEMECARD  | ETH   | TOO RISKY         | 2 holders, zero volume, ghost token                                   |
 
 ---
 
@@ -217,6 +226,7 @@ For each BD-ready token, populate:
 ```
 
 ### Step 4.3: Outreach Channel Priority
+
 1. **Twitter DM** — highest response rate in crypto
 2. **Telegram group** — public message or admin DM
 3. **Discord** — find BD or partnerships channel
@@ -230,12 +240,13 @@ For each BD-ready token, populate:
 ### Step 5.1: Message Templates by Classification
 
 **BD Sweet Spot — First Contact:**
+
 ```
 Hi [TOKEN] team 👋
 
 Buzz BD Agent here — autonomous listing intelligence for SolCex Exchange.
 
-Your token scored [SCORE]/100 in our pipeline — [CLASSIFICATION] across 
+Your token scored [SCORE]/100 in our pipeline — [CLASSIFICATION] across
 [TOTAL] tokens on [N] chains. [1-SENTENCE SPECIFIC STRENGTH].
 
 We're featuring the Top 20 in our Listing Intelligence Report [this Sunday / weekly].
@@ -249,14 +260,15 @@ Interested? Full scoring breakdown at buzzbd.ai
 ```
 
 **Potential — Cautious First Contact:**
+
 ```
 Hi [TOKEN] team 👋
 
-Buzz BD Agent — SolCex Exchange. Your token scored [SCORE]/100 in our 
+Buzz BD Agent — SolCex Exchange. Your token scored [SCORE]/100 in our
 autonomous pipeline. [SPECIFIC STRENGTH].
 
-We noticed [SPECIFIC CONCERN — e.g., "low DEX liquidity" or "supply 
-concentration"]. Would be happy to discuss how a SolCex listing could 
+We noticed [SPECIFIC CONCERN — e.g., "low DEX liquidity" or "supply
+concentration"]. Would be happy to discuss how a SolCex listing could
 address this.
 
 Details at buzzbd.ai
@@ -319,6 +331,7 @@ REVENUE:
 ## PHASE 7: CONTINUOUS IMPROVEMENT (Auto-Learning)
 
 ### Track These Metrics
+
 1. **Response rate by channel:** Which outreach channel gets most responses?
 2. **Response rate by message type:** Which template works best?
 3. **Score-to-deal correlation:** Do higher-scored tokens convert better?
@@ -327,6 +340,7 @@ REVENUE:
 6. **Classification accuracy:** Did "BD Sweet Spot" tokens actually engage?
 
 ### Monthly Calibration
+
 - Review all predictions vs outcomes
 - Adjust scoring weights based on conversion data
 - Update templates based on response analysis
@@ -395,13 +409,13 @@ MASTER OPS UPDATE — BD SCREENING WORKFLOW v1.0
 6. Begin Phase 4 (Contact Screening) for PIPPIN immediately
 7. Report corrected pipeline stats to War Room
 
-This workflow is PERMANENT. Every HOT token and every Top 20 entry 
+This workflow is PERMANENT. Every HOT token and every Top 20 entry
 goes through Phases 1-5 before outreach. No exceptions.
 ```
 
 ---
 
-*Bismillah* 🤲
-*Master Ops BD Screening Workflow v1.0*
-*Sprint Day 39 | March 28, 2026*
-*Based on Cowork Pipeline Audit (DexScreener + DexTools deep scrape)*
+_Bismillah_ 🤲
+_Master Ops BD Screening Workflow v1.0_
+_Sprint Day 39 | March 28, 2026_
+_Based on Cowork Pipeline Audit (DexScreener + DexTools deep scrape)_

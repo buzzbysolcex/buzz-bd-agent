@@ -28,29 +28,78 @@ When composing the email HTML body, concatenate this signature block AFTER the e
 
 ```html
 <div style="margin-top:30px;"></div>
-<div style="font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #333; border-top: 2px solid #F5A623; padding-top: 14px; max-width: 520px;">
+<div
+  style="font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #333; border-top: 2px solid #F5A623; padding-top: 14px; max-width: 520px;"
+>
   <table cellpadding="0" cellspacing="0" border="0">
     <tr>
       <td style="padding-right: 14px; vertical-align: middle;">
-        <div style="background:#1a1a1a; color:#F5A623; font-weight:bold; font-size:13px; padding:8px 12px; border-radius:6px; display:inline-block;">🐝 BUZZ</div>
+        <div
+          style="background:#1a1a1a; color:#F5A623; font-weight:bold; font-size:13px; padding:8px 12px; border-radius:6px; display:inline-block;"
+        >
+          🐝 BUZZ
+        </div>
       </td>
       <td style="vertical-align: middle;">
         <div style="font-weight:bold; font-size:15px; color:#111;">Ogie</div>
-        <div style="color:#F5A623; font-weight:600; font-size:12px;">Business Development Lead</div>
-        <div style="color:#666; font-size:12px;">SolCex Exchange &mdash; Solana-Native CEX</div>
+        <div style="color:#F5A623; font-weight:600; font-size:12px;">
+          Business Development Lead
+        </div>
+        <div style="color:#666; font-size:12px;">
+          SolCex Exchange &mdash; Solana-Native CEX
+        </div>
       </td>
     </tr>
   </table>
-  <div style="margin-top:10px; border-top:1px solid #eee; padding-top:8px; font-size:11px; color:#555; line-height:1.9;">
-    🌐 <a href="https://solcex.cc" style="color:#F5A623; text-decoration:none;">solcex.cc</a>&nbsp; | &nbsp;✉️ <a href="mailto:buzzbysolcex@gmail.com" style="color:#333; text-decoration:none;">buzzbysolcex@gmail.com</a>&nbsp; | &nbsp;💬 Telegram: <a href="https://t.me/Ogie2" style="color:#333; text-decoration:none;">@Ogie2</a><br>
-    𝕏 <a href="https://x.com/SolCex_Exchange" style="color:#333; text-decoration:none;">@SolCex_Exchange</a>&nbsp; | &nbsp;<a href="https://x.com/BuzzBySolCex" style="color:#333; text-decoration:none;">@BuzzBySolCex</a>
+  <div
+    style="margin-top:10px; border-top:1px solid #eee; padding-top:8px; font-size:11px; color:#555; line-height:1.9;"
+  >
+    🌐
+    <a href="https://solcex.cc" style="color:#F5A623; text-decoration:none;"
+      >solcex.cc</a
+    >&nbsp; | &nbsp;✉️
+    <a
+      href="mailto:buzzbysolcex@gmail.com"
+      style="color:#333; text-decoration:none;"
+      >buzzbysolcex@gmail.com</a
+    >&nbsp; | &nbsp;💬 Telegram:
+    <a href="https://t.me/Ogie2" style="color:#333; text-decoration:none;"
+      >@Ogie2</a
+    ><br />
+    𝕏
+    <a
+      href="https://x.com/SolCex_Exchange"
+      style="color:#333; text-decoration:none;"
+      >@SolCex_Exchange</a
+    >&nbsp; | &nbsp;<a
+      href="https://x.com/BuzzBySolCex"
+      style="color:#333; text-decoration:none;"
+      >@BuzzBySolCex</a
+    >
   </div>
-  <div style="margin-top:10px; background:#f9f9f9; border-left:3px solid #F5A623; padding:8px 12px; font-size:10px; color:#777; line-height:1.8;">
-    <strong style="color:#1a1a1a;">ON-CHAIN VERIFIED</strong><br>
-    🐝 Powered by Buzz BD Agent &mdash; <a href="https://www.8004scan.io/agents/ethereum/25045" style="color:#F5A623; text-decoration:none;">ERC-8004 #25045</a><br>
-    ⛓️ Ethereum #25045 &nbsp;|&nbsp; Base #17483 &nbsp;|&nbsp; <a href="https://www.npmjs.com/package/@buzzbd/plugin-solcex-bd" style="color:#777; text-decoration:none;">npm: @buzzbd/plugin-solcex-bd</a><br>
-    📊 19 Intelligence Sources &nbsp;|&nbsp; 100-Point Scoring Algorithm &nbsp;|&nbsp; 60+ Chains<br>
-    🚀 Running on <a href="https://akash.network" style="color:#777; text-decoration:none;">Akash Network</a> Decentralized Infrastructure
+  <div
+    style="margin-top:10px; background:#f9f9f9; border-left:3px solid #F5A623; padding:8px 12px; font-size:10px; color:#777; line-height:1.8;"
+  >
+    <strong style="color:#1a1a1a;">ON-CHAIN VERIFIED</strong><br />
+    🐝 Powered by Buzz BD Agent &mdash;
+    <a
+      href="https://www.8004scan.io/agents/ethereum/25045"
+      style="color:#F5A623; text-decoration:none;"
+      >ERC-8004 #25045</a
+    ><br />
+    ⛓️ Ethereum #25045 &nbsp;|&nbsp; Base #17483 &nbsp;|&nbsp;
+    <a
+      href="https://www.npmjs.com/package/@buzzbd/plugin-solcex-bd"
+      style="color:#777; text-decoration:none;"
+      >npm: @buzzbd/plugin-solcex-bd</a
+    ><br />
+    📊 19 Intelligence Sources &nbsp;|&nbsp; 100-Point Scoring Algorithm
+    &nbsp;|&nbsp; 60+ Chains<br />
+    🚀 Running on
+    <a href="https://akash.network" style="color:#777; text-decoration:none;"
+      >Akash Network</a
+    >
+    Decentralized Infrastructure
   </div>
 </div>
 ```

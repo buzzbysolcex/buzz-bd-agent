@@ -1,10 +1,16 @@
 # SKILL: Phantom MCP — Wallet Operations + ARIA Data Source
+
 # Location: .claude/skills/phantom-mcp.md
+
 # Intel Source #31 | 4 chains | 5 wallet tools | Buzz-controlled wallet
+
 # Created: March 30, 2026 (Post-Sprint)
+
 # History: Registered Feb 18, 2026 (Conway research session)
-#          Integration planned Mar 10-11, 2026 (Sprint Day 22)
-#          Never wired into Hetzner — completing now
+
+# Integration planned Mar 10-11, 2026 (Sprint Day 22)
+
+# Never wired into Hetzner — completing now
 
 ---
 
@@ -34,22 +40,22 @@ Env vars needed:
 
 ## 5 MCP TOOLS
 
-| Tool | Function | ARIA Use | BD Use |
-|------|----------|----------|--------|
-| `get_wallet_addresses` | View addresses across chains | Portfolio data source | Proof of holdings |
-| `sign_transaction` | Sign arbitrary TX | — | On-chain BD actions |
-| `transfer_tokens` | Build + sign + submit transfers | — | Listing fee collection |
-| `buy_token` | Fetch swap quote + optional execute | Token price verification | Due diligence positions |
-| `sign_message` | Sign UTF-8 messages | — | Identity verification |
+| Tool                   | Function                            | ARIA Use                 | BD Use                  |
+| ---------------------- | ----------------------------------- | ------------------------ | ----------------------- |
+| `get_wallet_addresses` | View addresses across chains        | Portfolio data source    | Proof of holdings       |
+| `sign_transaction`     | Sign arbitrary TX                   | —                        | On-chain BD actions     |
+| `transfer_tokens`      | Build + sign + submit transfers     | —                        | Listing fee collection  |
+| `buy_token`            | Fetch swap quote + optional execute | Token price verification | Due diligence positions |
+| `sign_message`         | Sign UTF-8 messages                 | —                        | Identity verification   |
 
 ## SUPPORTED NETWORKS (CAIP-2 format)
 
-| Chain | Network ID | ARIA Relevance |
-|-------|-----------|----------------|
-| Solana Mainnet | solana:mainnet | PRIMARY — SolCex native chain |
-| Ethereum Mainnet | eip155:1 | ERC-8004 identity chain |
-| Bitcoin | bip122:000000000019d6689c085ae165831e93 | AIBTC signal context |
-| Sui | sui:mainnet | Emerging chain coverage |
+| Chain            | Network ID                              | ARIA Relevance                |
+| ---------------- | --------------------------------------- | ----------------------------- |
+| Solana Mainnet   | solana:mainnet                          | PRIMARY — SolCex native chain |
+| Ethereum Mainnet | eip155:1                                | ERC-8004 identity chain       |
+| Bitcoin          | bip122:000000000019d6689c085ae165831e93 | AIBTC signal context          |
+| Sui              | sui:mainnet                             | Emerging chain coverage       |
 
 ## ARIA INTEGRATION — DATA SOURCE
 
@@ -72,6 +78,7 @@ ARIA Layer 3: ENRICHMENT
 ```
 
 ### Phantom as Price Verification Source:
+
 ```javascript
 // Use buy_token with execute=false to get LIVE swap quotes
 // This gives Buzz real-time Solana DEX pricing from Phantom's aggregator
@@ -81,18 +88,20 @@ const quote = await phantom.getSwapQuote(tokenAddress, 0.01);
 ```
 
 ### Phantom as Balance Verification:
+
 ```javascript
 // Verify token holder claims during BD outreach
-const wallets = await phantom.getWalletAddresses('solana:mainnet');
+const wallets = await phantom.getWalletAddresses("solana:mainnet");
 // Check if token project's claimed treasury actually holds what they say
 ```
 
 ### Phantom as Identity Proof:
+
 ```javascript
 // Sign messages to prove Buzz controls the wallet
 const signature = await phantom.signMessage(
-  'Buzz BD Agent verifying wallet ownership for SolCex Exchange listing',
-  'solana:mainnet'
+  "Buzz BD Agent verifying wallet ownership for SolCex Exchange listing",
+  "solana:mainnet",
 );
 // Use in BD proposals: "Wallet verified via Phantom-signed message"
 ```
@@ -160,6 +169,7 @@ CREATE TABLE IF NOT EXISTS phantom_transactions (
 ## SETUP SEQUENCE
 
 ### Phase 1: Auth (requires Ogie's Mac — one time)
+
 ```bash
 # On Ogie's Mac (has browser for SSO):
 npx @phantom/mcp-server
@@ -169,6 +179,7 @@ npx @phantom/mcp-server
 ```
 
 ### Phase 2: Server Integration
+
 ```bash
 # On Hetzner:
 cd /opt/buzz-api
@@ -181,6 +192,7 @@ npm install @phantom/mcp-server
 ```
 
 ### Phase 3: ARIA Wiring
+
 ```bash
 # Add Phantom as price verification source in aria-enricher.js
 # Add swap quote comparison to tri-source verification
@@ -189,14 +201,14 @@ npm install @phantom/mcp-server
 
 ## COMBINED INTEL SOURCES (Post-Integration)
 
-| # | Source | Type | Chains | Role |
-|---|--------|------|--------|------|
-| 1-22 | Existing sources | Various | Various | Current pipeline |
-| 23 | CoinGecko | REST | Multi | Price, MCap |
-| 24-28 | Jupiter, DexScreener, etc | REST | Various | DEX data |
-| 29 | Colosseum Copilot | REST | N/A | Hackathon projects |
-| **30** | **HeyAnon MCP** | **MCP** | **18 chains** | **DeFi + CeFi aggregation** |
-| **31** | **Phantom MCP** | **MCP** | **4 chains** | **Wallet ops + price verification** |
+| #      | Source                    | Type    | Chains        | Role                                |
+| ------ | ------------------------- | ------- | ------------- | ----------------------------------- |
+| 1-22   | Existing sources          | Various | Various       | Current pipeline                    |
+| 23     | CoinGecko                 | REST    | Multi         | Price, MCap                         |
+| 24-28  | Jupiter, DexScreener, etc | REST    | Various       | DEX data                            |
+| 29     | Colosseum Copilot         | REST    | N/A           | Hackathon projects                  |
+| **30** | **HeyAnon MCP**           | **MCP** | **18 chains** | **DeFi + CeFi aggregation**         |
+| **31** | **Phantom MCP**           | **MCP** | **4 chains**  | **Wallet ops + price verification** |
 
 Total: 31 intel sources. Two MCP connections.
 Combined chain coverage: 18+ chains (HeyAnon) + wallet control (Phantom).
@@ -231,7 +243,7 @@ Together: Complete picture — DeFi depth (HeyAnon) + execution price (Phantom)
 
 ---
 
-*Intel Source #31 | Phantom MCP | Wallet + Data + Execution*
-*App ID: be4a0179-1113-416b-a6e6-45a09191f407*
-*Registered Feb 18 | Completing integration post-sprint*
-*Safety first: every transfer needs Ogie's thumbs up* 🐝
+_Intel Source #31 | Phantom MCP | Wallet + Data + Execution_
+_App ID: be4a0179-1113-416b-a6e6-45a09191f407_
+_Registered Feb 18 | Completing integration post-sprint_
+_Safety first: every transfer needs Ogie's thumbs up_ 🐝

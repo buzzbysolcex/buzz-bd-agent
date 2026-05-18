@@ -19,13 +19,19 @@ function up(db) {
     )
   `);
 
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_provider_log_provider ON llm_provider_log(provider, created_at)`);
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_provider_log_agent ON llm_provider_log(agent)`);
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_provider_log_date ON llm_provider_log(created_at)`);
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_provider_log_provider ON llm_provider_log(provider, created_at)`,
+  );
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_provider_log_agent ON llm_provider_log(agent)`,
+  );
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_provider_log_date ON llm_provider_log(created_at)`,
+  );
 }
 
 function down(db) {
-  db.exec('DROP TABLE IF EXISTS llm_provider_log');
+  db.exec("DROP TABLE IF EXISTS llm_provider_log");
 }
 
 module.exports = { up, down };

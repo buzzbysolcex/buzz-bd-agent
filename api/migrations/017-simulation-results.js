@@ -5,7 +5,7 @@
 
 const migrations = [
   {
-    name: '019_simulation_results',
+    name: "019_simulation_results",
     sql: `
       CREATE TABLE IF NOT EXISTS simulation_results (
         simulation_id TEXT PRIMARY KEY,

@@ -2,51 +2,56 @@
  * buzz-scan-formatter.js — Standard Scan Report Formatter
  * Formats Buzz's 100-point token scores into tweets and threads
  * Matches Bankr's verified data quality standard
- * 
+ *
  * Buzz BD Agent | SolCex Exchange
  */
 
 // ─── NUMBER FORMATTING ─────────────────────────────────
 function formatNum(n) {
-  if (n === null || n === undefined) return '?';
-  if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
-  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
-  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+  if (n === null || n === undefined) return "?";
+  if (n >= 1e9) return (n / 1e9).toFixed(1) + "B";
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + "M";
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + "K";
   return n.toFixed(2);
 }
 
 function formatPercent(n) {
-  if (n === null || n === undefined) return '?';
-  return (n > 0 ? '+' : '') + n.toFixed(1) + '%';
+  if (n === null || n === undefined) return "?";
+  return (n > 0 ? "+" : "") + n.toFixed(1) + "%";
 }
 
 function truncateAddress(addr) {
-  if (!addr) return '?';
+  if (!addr) return "?";
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
 // ─── VERDICT EMOJI ──────────────────────────────────────
 function verdictEmoji(verdict) {
   switch (verdict?.toUpperCase()) {
-    case 'HOT': return '🔥';
-    case 'WARM': return '🟡';
-    case 'COLD': return '❄️';
-    case 'PASS': return '⛔';
-    default: return '📊';
+    case "HOT":
+      return "🔥";
+    case "WARM":
+      return "🟡";
+    case "COLD":
+      return "❄️";
+    case "PASS":
+      return "⛔";
+    default:
+      return "📊";
   }
 }
 
 function verdictTag(score) {
-  if (score >= 80) return 'HOT';
-  if (score >= 60) return 'WARM';
-  if (score >= 40) return 'COLD';
-  return 'PASS';
+  if (score >= 80) return "HOT";
+  if (score >= 60) return "WARM";
+  if (score >= 40) return "COLD";
+  return "PASS";
 }
 
 // ─── SINGLE TWEET FORMAT ────────────────────────────────
 /**
  * Format a scan as a single tweet (≤280 chars)
- * 
+ *
  * @param {Object} scan - Scan data
  * @param {string} scan.symbol - Token symbol
  * @param {string} scan.name - Token name
@@ -74,7 +79,7 @@ function formatSingleTweet(scan) {
     `#${scan.symbol} #SolCex #${scan.chain} #CryptoListings`,
   ];
 
-  const tweet = lines.join('\n');
+  const tweet = lines.join("\n");
 
   // Safety: ensure under 280 chars
   if (tweet.length > 280) {
@@ -84,7 +89,7 @@ function formatSingleTweet(scan) {
       `MC:$${formatNum(scan.mcap)} Liq:$${formatNum(scan.liquidity)} Vol:$${formatNum(scan.volume24h)}`,
       `${scan.chain} ${truncateAddress(scan.contract)}`,
       `#${scan.symbol} #SolCex`,
-    ].join('\n');
+    ].join("\n");
   }
 
   return tweet;
@@ -93,7 +98,7 @@ function formatSingleTweet(scan) {
 // ─── THREAD FORMAT ──────────────────────────────────────
 /**
  * Format a scan as a detailed thread (3-4 tweets)
- * 
+ *
  * @param {Object} scan - Full scan data including subscores and intel
  * @returns {string[]} Array of tweet texts for thread posting
  */
@@ -104,74 +109,90 @@ function formatScanThread(scan) {
   const tweets = [];
 
   // Tweet 1: Overview + metrics
-  tweets.push([
-    `🐝 BUZZ SCAN: $${scan.symbol}`,
-    ``,
-    `Score: ${scan.score}/100 ${emoji} ${verdict}`,
-    `Chain: ${scan.chain}`,
-    ``,
-    `💰 MC: $${formatNum(scan.mcap)}`,
-    `💧 Liq: $${formatNum(scan.liquidity)}`,
-    `📊 Vol 24h: $${formatNum(scan.volume24h)} (${formatPercent(scan.change24h)})`,
-    `⏰ Age: ${scan.tokenAge || '?'}`,
-    ``,
-    `#${scan.symbol} #SolCex #${scan.chain}`,
-  ].join('\n'));
+  tweets.push(
+    [
+      `🐝 BUZZ SCAN: $${scan.symbol}`,
+      ``,
+      `Score: ${scan.score}/100 ${emoji} ${verdict}`,
+      `Chain: ${scan.chain}`,
+      ``,
+      `💰 MC: $${formatNum(scan.mcap)}`,
+      `💧 Liq: $${formatNum(scan.liquidity)}`,
+      `📊 Vol 24h: $${formatNum(scan.volume24h)} (${formatPercent(scan.change24h)})`,
+      `⏰ Age: ${scan.tokenAge || "?"}`,
+      ``,
+      `#${scan.symbol} #SolCex #${scan.chain}`,
+    ].join("\n"),
+  );
 
   // Tweet 2: Score breakdown
   const scores = scan.scores || {};
-  tweets.push([
-    `📋 Score Breakdown — $${scan.symbol}`,
-    ``,
-    `├ Liquidity: ${scores.liquidity || '?'}/25`,
-    `├ Volume: ${scores.volume || '?'}/20`,
-    `├ Market Cap: ${scores.mcap || '?'}/20`,
-    `├ Social: ${scores.social || '?'}/15`,
-    `├ Token Age: ${scores.age || '?'}/10`,
-    `└ Team: ${scores.team || '?'}/10`,
-    ``,
-    `Total: ${scan.score}/100 ${emoji}`,
-    scan.catalystBonus ? `Catalyst Bonus: +${scan.catalystBonus}` : '',
-  ].filter(Boolean).join('\n'));
+  tweets.push(
+    [
+      `📋 Score Breakdown — $${scan.symbol}`,
+      ``,
+      `├ Liquidity: ${scores.liquidity || "?"}/25`,
+      `├ Volume: ${scores.volume || "?"}/20`,
+      `├ Market Cap: ${scores.mcap || "?"}/20`,
+      `├ Social: ${scores.social || "?"}/15`,
+      `├ Token Age: ${scores.age || "?"}/10`,
+      `└ Team: ${scores.team || "?"}/10`,
+      ``,
+      `Total: ${scan.score}/100 ${emoji}`,
+      scan.catalystBonus ? `Catalyst Bonus: +${scan.catalystBonus}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n"),
+  );
 
   // Tweet 3: Intelligence sources + verdict
   const intel = scan.intel || {};
-  tweets.push([
-    `🔍 Intel — $${scan.symbol}`,
-    ``,
-    `├ DexScreener: ${intel.dex || 'verified ✅'}`,
-    `├ Grok Sentiment: ${intel.grok || 'pending'}`,
-    `├ AIXBT: ${intel.aixbt || 'no signal'}`,
-    `└ Helius: ${intel.helius || 'clean'}`,
-    ``,
-    scan.catalysts?.length ? `Catalysts: ${scan.catalysts.join(', ')}` : '',
-    scan.redFlags?.length ? `⚠️ Flags: ${scan.redFlags.join(', ')}` : '',
-    ``,
-    `CA: ${scan.contract}`,
-  ].filter(Boolean).join('\n'));
+  tweets.push(
+    [
+      `🔍 Intel — $${scan.symbol}`,
+      ``,
+      `├ DexScreener: ${intel.dex || "verified ✅"}`,
+      `├ Grok Sentiment: ${intel.grok || "pending"}`,
+      `├ AIXBT: ${intel.aixbt || "no signal"}`,
+      `└ Helius: ${intel.helius || "clean"}`,
+      ``,
+      scan.catalysts?.length ? `Catalysts: ${scan.catalysts.join(", ")}` : "",
+      scan.redFlags?.length ? `⚠️ Flags: ${scan.redFlags.join(", ")}` : "",
+      ``,
+      `CA: ${scan.contract}`,
+    ]
+      .filter(Boolean)
+      .join("\n"),
+  );
 
   // Tweet 4: Links + CTA (optional, if needed)
   if (scan.dexUrl || scan.website) {
-    tweets.push([
-      `🔗 $${scan.symbol} Links`,
-      ``,
-      scan.dexUrl ? `📊 Chart: ${scan.dexUrl}` : '',
-      scan.website ? `🌐 Site: ${scan.website}` : '',
-      scan.explorer ? `🔎 Explorer: ${scan.explorer}` : '',
-      ``,
-      `Source: Buzz BD Agent | @SolCex_Exchange`,
-      `Data: DexScreener + Grok + Helius + AIXBT`,
-      ``,
-      `DM for listing inquiries`,
-      `#SolCex #AIAgents #CryptoListings`,
-    ].filter(Boolean).join('\n'));
+    tweets.push(
+      [
+        `🔗 $${scan.symbol} Links`,
+        ``,
+        scan.dexUrl ? `📊 Chart: ${scan.dexUrl}` : "",
+        scan.website ? `🌐 Site: ${scan.website}` : "",
+        scan.explorer ? `🔎 Explorer: ${scan.explorer}` : "",
+        ``,
+        `Source: Buzz BD Agent | @SolCex_Exchange`,
+        `Data: DexScreener + Grok + Helius + AIXBT`,
+        ``,
+        `DM for listing inquiries`,
+        `#SolCex #AIAgents #CryptoListings`,
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    );
   }
 
   // Validate all tweets are under 280 chars
   return tweets.map((tweet, i) => {
     if (tweet.length > 280) {
-      console.warn(`[SCAN-FORMAT] Tweet ${i + 1} is ${tweet.length} chars, truncating`);
-      return tweet.slice(0, 277) + '...';
+      console.warn(
+        `[SCAN-FORMAT] Tweet ${i + 1} is ${tweet.length} chars, truncating`,
+      );
+      return tweet.slice(0, 277) + "...";
     }
     return tweet;
   });
@@ -190,50 +211,54 @@ function formatTelegramReport(scan) {
 
   return [
     `🐝 BUZZ SCAN REPORT — ${scan.symbol}`,
-    `${'═'.repeat(35)}`,
+    `${"═".repeat(35)}`,
     ``,
     `Token: ${scan.name} (${scan.symbol})`,
     `Chain: ${scan.chain}`,
     `Contract: ${scan.contract}`,
-    scan.deployer ? `Deployer: ${scan.deployer}` : '',
+    scan.deployer ? `Deployer: ${scan.deployer}` : "",
     ``,
     `📊 Metrics:`,
-    `├─ Price: $${scan.price || '?'}`,
+    `├─ Price: $${scan.price || "?"}`,
     `├─ Market Cap: $${formatNum(scan.mcap)}`,
     `├─ Liquidity: $${formatNum(scan.liquidity)}`,
     `├─ 24h Volume: $${formatNum(scan.volume24h)}`,
     `├─ 24h Change: ${formatPercent(scan.change24h)}`,
-    `└─ Token Age: ${scan.tokenAge || '?'}`,
+    `└─ Token Age: ${scan.tokenAge || "?"}`,
     ``,
     `🎯 Buzz Score: ${scan.score}/100 ${emoji} ${verdict}`,
-    `├─ Liquidity (25%): ${scores.liquidity || '?'}/25`,
-    `├─ Volume (20%): ${scores.volume || '?'}/20`,
-    `├─ Market Cap (20%): ${scores.mcap || '?'}/20`,
-    `├─ Social (15%): ${scores.social || '?'}/15`,
-    `├─ Token Age (10%): ${scores.age || '?'}/10`,
-    `└─ Team (10%): ${scores.team || '?'}/10`,
-    scan.catalystBonus ? `   Catalyst Bonus: +${scan.catalystBonus}` : '',
+    `├─ Liquidity (25%): ${scores.liquidity || "?"}/25`,
+    `├─ Volume (20%): ${scores.volume || "?"}/20`,
+    `├─ Market Cap (20%): ${scores.mcap || "?"}/20`,
+    `├─ Social (15%): ${scores.social || "?"}/15`,
+    `├─ Token Age (10%): ${scores.age || "?"}/10`,
+    `└─ Team (10%): ${scores.team || "?"}/10`,
+    scan.catalystBonus ? `   Catalyst Bonus: +${scan.catalystBonus}` : "",
     ``,
     `🔍 Intelligence:`,
-    `├─ DexScreener: ${intel.dex || 'verified ✅'}`,
-    `├─ Grok Sentiment: ${intel.grok || 'pending'}`,
-    `├─ AIXBT Signal: ${intel.aixbt || 'no signal'}`,
-    `└─ Helius Forensics: ${intel.helius || 'clean'}`,
+    `├─ DexScreener: ${intel.dex || "verified ✅"}`,
+    `├─ Grok Sentiment: ${intel.grok || "pending"}`,
+    `├─ AIXBT Signal: ${intel.aixbt || "no signal"}`,
+    `└─ Helius Forensics: ${intel.helius || "clean"}`,
     ``,
     `📋 Verdict: ${verdict}`,
-    scan.catalysts?.length ? `├─ Catalysts: ${scan.catalysts.join(', ')}` : '',
-    scan.redFlags?.length ? `├─ Red Flags: ${scan.redFlags.join(', ')}` : '├─ Red Flags: none',
-    `└─ Outreach: ${scan.outreachRecommendation || 'pending review'}`,
+    scan.catalysts?.length ? `├─ Catalysts: ${scan.catalysts.join(", ")}` : "",
+    scan.redFlags?.length
+      ? `├─ Red Flags: ${scan.redFlags.join(", ")}`
+      : "├─ Red Flags: none",
+    `└─ Outreach: ${scan.outreachRecommendation || "pending review"}`,
     ``,
     `🔗 Links:`,
-    scan.dexUrl ? `├─ DexScreener: ${scan.dexUrl}` : '',
-    scan.explorer ? `├─ Explorer: ${scan.explorer}` : '',
-    scan.website ? `└─ Project: ${scan.website}` : '',
+    scan.dexUrl ? `├─ DexScreener: ${scan.dexUrl}` : "",
+    scan.explorer ? `├─ Explorer: ${scan.explorer}` : "",
+    scan.website ? `└─ Project: ${scan.website}` : "",
     ``,
-    `${'─'.repeat(35)}`,
+    `${"─".repeat(35)}`,
     `Source: Buzz BD Agent | SolCex Exchange`,
     `Timestamp: ${new Date().toISOString()}`,
-  ].filter(Boolean).join('\n');
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 // ─── BATCH SCAN SUMMARY ─────────────────────────────────
@@ -241,8 +266,10 @@ function formatTelegramReport(scan) {
  * Format multiple scans as a daily summary tweet
  */
 function formatDailySummaryTweet(scans) {
-  const hot = scans.filter(s => (s.verdict || verdictTag(s.score)) === 'HOT');
-  const warm = scans.filter(s => (s.verdict || verdictTag(s.score)) === 'WARM');
+  const hot = scans.filter((s) => (s.verdict || verdictTag(s.score)) === "HOT");
+  const warm = scans.filter(
+    (s) => (s.verdict || verdictTag(s.score)) === "WARM",
+  );
 
   return [
     `🐝 BUZZ DAILY SCAN`,
@@ -251,12 +278,15 @@ function formatDailySummaryTweet(scans) {
     `🔥 HOT: ${hot.length}`,
     `🟡 WARM: ${warm.length}`,
     ``,
-    hot.slice(0, 3).map(s => `$${s.symbol} ${s.score}/100`).join(' | '),
+    hot
+      .slice(0, 3)
+      .map((s) => `$${s.symbol} ${s.score}/100`)
+      .join(" | "),
     ``,
     `Full reports via @BuzzBySolCex_bot on Telegram`,
     ``,
     `#SolCex #AIAgents #Solana #CryptoListings`,
-  ].join('\n');
+  ].join("\n");
 }
 
 // ─── EXPORTS ────────────────────────────────────────────

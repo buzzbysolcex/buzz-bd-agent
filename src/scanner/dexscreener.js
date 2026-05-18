@@ -3,7 +3,7 @@
  * Fetches token data from DexScreener for multi-chain scanning
  */
 
-const DEXSCREENER_API = 'https://api.dexscreener.com/latest/dex';
+const DEXSCREENER_API = "https://api.dexscreener.com/latest/dex";
 
 /**
  * Fetch top tokens by chain
@@ -14,25 +14,23 @@ const DEXSCREENER_API = 'https://api.dexscreener.com/latest/dex';
 async function fetchTopTokens(chain, limit = 100) {
   const response = await fetch(`${DEXSCREENER_API}/tokens/${chain}`);
   const data = await response.json();
-  
-  return data.pairs
-    .slice(0, limit)
-    .map(pair => ({
-      address: pair.baseToken.address,
-      name: pair.baseToken.name,
-      symbol: pair.baseToken.symbol,
-      chain: chain,
-      price: parseFloat(pair.priceUsd) || 0,
-      marketCap: parseFloat(pair.marketCap) || 0,
-      liquidity: parseFloat(pair.liquidity?.usd) || 0,
-      volume24h: parseFloat(pair.volume?.h24) || 0,
-      priceChange24h: parseFloat(pair.priceChange?.h24) || 0,
-      txns24h: (pair.txns?.h24?.buys || 0) + (pair.txns?.h24?.sells || 0),
-      pairAddress: pair.pairAddress,
-      dexId: pair.dexId,
-      url: pair.url,
-      createdAt: pair.pairCreatedAt
-    }));
+
+  return data.pairs.slice(0, limit).map((pair) => ({
+    address: pair.baseToken.address,
+    name: pair.baseToken.name,
+    symbol: pair.baseToken.symbol,
+    chain: chain,
+    price: parseFloat(pair.priceUsd) || 0,
+    marketCap: parseFloat(pair.marketCap) || 0,
+    liquidity: parseFloat(pair.liquidity?.usd) || 0,
+    volume24h: parseFloat(pair.volume?.h24) || 0,
+    priceChange24h: parseFloat(pair.priceChange?.h24) || 0,
+    txns24h: (pair.txns?.h24?.buys || 0) + (pair.txns?.h24?.sells || 0),
+    pairAddress: pair.pairAddress,
+    dexId: pair.dexId,
+    url: pair.url,
+    createdAt: pair.pairCreatedAt,
+  }));
 }
 
 /**
@@ -41,7 +39,9 @@ async function fetchTopTokens(chain, limit = 100) {
  * @returns {Promise<Array>} Matching tokens
  */
 async function searchToken(query) {
-  const response = await fetch(`${DEXSCREENER_API}/search?q=${encodeURIComponent(query)}`);
+  const response = await fetch(
+    `${DEXSCREENER_API}/search?q=${encodeURIComponent(query)}`,
+  );
   const data = await response.json();
   return data.pairs || [];
 }
@@ -55,22 +55,24 @@ async function searchToken(query) {
 async function getTokenByAddress(chain, address) {
   const response = await fetch(`${DEXSCREENER_API}/tokens/${address}`);
   const data = await response.json();
-  
-  const pair = data.pairs?.find(p => 
-    p.chainId === chain || p.baseToken.address === address
+
+  const pair = data.pairs?.find(
+    (p) => p.chainId === chain || p.baseToken.address === address,
   );
-  
-  return pair ? {
-    address: pair.baseToken.address,
-    name: pair.baseToken.name,
-    symbol: pair.baseToken.symbol,
-    chain: pair.chainId,
-    marketCap: parseFloat(pair.marketCap) || 0,
-    liquidity: parseFloat(pair.liquidity?.usd) || 0,
-    volume24h: parseFloat(pair.volume?.h24) || 0,
-    holders: pair.holders || null,
-    url: pair.url
-  } : null;
+
+  return pair
+    ? {
+        address: pair.baseToken.address,
+        name: pair.baseToken.name,
+        symbol: pair.baseToken.symbol,
+        chain: pair.chainId,
+        marketCap: parseFloat(pair.marketCap) || 0,
+        liquidity: parseFloat(pair.liquidity?.usd) || 0,
+        volume24h: parseFloat(pair.volume?.h24) || 0,
+        holders: pair.holders || null,
+        url: pair.url,
+      }
+    : null;
 }
 
 /**
@@ -80,18 +82,16 @@ async function getTokenByAddress(chain, address) {
 async function getTrending() {
   // DexScreener trending is visible on their site
   // For now, we sort by volume and recent creation
-  const chains = ['solana', 'ethereum', 'bsc'];
+  const chains = ["solana", "ethereum", "bsc"];
   const allTokens = [];
-  
+
   for (const chain of chains) {
     const tokens = await fetchTopTokens(chain, 50);
     allTokens.push(...tokens);
   }
-  
+
   // Sort by 24h volume
-  return allTokens
-    .sort((a, b) => b.volume24h - a.volume24h)
-    .slice(0, 20);
+  return allTokens.sort((a, b) => b.volume24h - a.volume24h).slice(0, 20);
 }
 
 /**
@@ -112,5 +112,5 @@ module.exports = {
   getTokenByAddress,
   getTrending,
   calculateAge,
-  DEXSCREENER_API
+  DEXSCREENER_API,
 };

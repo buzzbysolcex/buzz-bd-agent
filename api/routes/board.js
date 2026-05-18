@@ -5,32 +5,32 @@
  * GET /api/v1/board/templates — List TOML templates
  */
 
-const express = require('express');
+const express = require("express");
 
-module.exports = function(db, activityBoard, taskChainExecutor) {
+module.exports = function (db, activityBoard, taskChainExecutor) {
   const router = express.Router();
 
   // Activity feed
-  router.get('/activity', (req, res) => {
+  router.get("/activity", (req, res) => {
     const { hours, agent, type, limit } = req.query;
     const events = activityBoard.getActivity({
       hours: parseInt(hours) || 24,
       agent: agent || undefined,
       eventType: type || undefined,
-      limit: parseInt(limit) || 50
+      limit: parseInt(limit) || 50,
     });
     res.json({ events, count: events.length });
   });
 
   // Dashboard summary
-  router.get('/summary', (req, res) => {
+  router.get("/summary", (req, res) => {
     const hours = parseInt(req.query.hours) || 24;
     const summary = activityBoard.getSummary(hours);
     res.json(summary);
   });
 
   // List templates
-  router.get('/templates', (req, res) => {
+  router.get("/templates", (req, res) => {
     const templates = taskChainExecutor.listTemplates();
     res.json({ templates, count: templates.length });
   });

@@ -30,9 +30,15 @@ function up(db) {
     )
   `);
 
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_vlog_contract ON verification_log(contract_address, chain)`);
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_vlog_status ON verification_log(overall_status)`);
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_vlog_date ON verification_log(created_at)`);
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_vlog_contract ON verification_log(contract_address, chain)`,
+  );
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_vlog_status ON verification_log(overall_status)`,
+  );
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_vlog_date ON verification_log(created_at)`,
+  );
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS quarantined_tokens (
@@ -49,7 +55,9 @@ function up(db) {
     )
   `);
 
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_quarantine_status ON quarantined_tokens(resolved_at)`);
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_quarantine_status ON quarantined_tokens(resolved_at)`,
+  );
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS verified_snapshots (
@@ -76,13 +84,15 @@ function up(db) {
     )
   `);
 
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_snapshot_expires ON verified_snapshots(expires_at)`);
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_snapshot_expires ON verified_snapshots(expires_at)`,
+  );
 }
 
 function down(db) {
-  db.exec('DROP TABLE IF EXISTS verified_snapshots');
-  db.exec('DROP TABLE IF EXISTS quarantined_tokens');
-  db.exec('DROP TABLE IF EXISTS verification_log');
+  db.exec("DROP TABLE IF EXISTS verified_snapshots");
+  db.exec("DROP TABLE IF EXISTS quarantined_tokens");
+  db.exec("DROP TABLE IF EXISTS verification_log");
 }
 
 module.exports = { up, down };

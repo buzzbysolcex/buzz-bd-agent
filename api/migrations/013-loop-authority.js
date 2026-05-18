@@ -20,8 +20,12 @@ function up(db) {
     )
   `);
 
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_loop_runs_type ON loop_cron_runs(loop_type, started_at)`);
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_loop_runs_status ON loop_cron_runs(status)`);
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_loop_runs_type ON loop_cron_runs(loop_type, started_at)`,
+  );
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_loop_runs_status ON loop_cron_runs(status)`,
+  );
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS loop_cron_outputs (
@@ -36,7 +40,9 @@ function up(db) {
     )
   `);
 
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_loop_outputs_run ON loop_cron_outputs(run_id)`);
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_loop_outputs_run ON loop_cron_outputs(run_id)`,
+  );
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS agent_authority_matrix (
@@ -55,7 +61,9 @@ function up(db) {
     )
   `);
 
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_authority_agent ON agent_authority_matrix(agent_name)`);
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_authority_agent ON agent_authority_matrix(agent_name)`,
+  );
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS authority_audit_log (
@@ -70,8 +78,12 @@ function up(db) {
     )
   `);
 
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_audit_agent ON authority_audit_log(agent_name, created_at)`);
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_audit_action ON authority_audit_log(action)`);
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_audit_agent ON authority_audit_log(agent_name, created_at)`,
+  );
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_audit_action ON authority_audit_log(action)`,
+  );
 
   // Seed default authority matrix
   const seed = db.prepare(`
@@ -80,22 +92,22 @@ function up(db) {
   `);
 
   const defaults = [
-    ['scanner-agent', 'scan_token', 'execute', 500, 0],
-    ['scanner-agent', 'add_pipeline', 'execute', 100, 0],
-    ['safety-agent', 'flag_token', 'execute', 200, 0],
-    ['safety-agent', 'reject_token', 'execute', 50, 1],
-    ['wallet-agent', 'check_wallet', 'read', 300, 0],
-    ['social-agent', 'scan_social', 'read', 200, 0],
-    ['social-agent', 'send_outreach', 'execute', 20, 1],
-    ['scorer-agent', 'score_token', 'execute', 200, 0],
-    ['orchestrator', 'promote_stage', 'execute', 100, 0],
-    ['orchestrator', 'send_email', 'execute', 10, 1],
-    ['orchestrator', 'approve_listing', 'admin', 5, 1],
-    ['twitter-brain', 'post_tweet', 'execute', 12, 0],
-    ['twitter-brain', 'reply_tweet', 'execute', 50, 0],
-    ['loop-morning', 'generate_brief', 'execute', 1, 0],
-    ['loop-discovery', 'send_alert', 'execute', 6, 0],
-    ['loop-evening', 'generate_recap', 'execute', 1, 0],
+    ["scanner-agent", "scan_token", "execute", 500, 0],
+    ["scanner-agent", "add_pipeline", "execute", 100, 0],
+    ["safety-agent", "flag_token", "execute", 200, 0],
+    ["safety-agent", "reject_token", "execute", 50, 1],
+    ["wallet-agent", "check_wallet", "read", 300, 0],
+    ["social-agent", "scan_social", "read", 200, 0],
+    ["social-agent", "send_outreach", "execute", 20, 1],
+    ["scorer-agent", "score_token", "execute", 200, 0],
+    ["orchestrator", "promote_stage", "execute", 100, 0],
+    ["orchestrator", "send_email", "execute", 10, 1],
+    ["orchestrator", "approve_listing", "admin", 5, 1],
+    ["twitter-brain", "post_tweet", "execute", 12, 0],
+    ["twitter-brain", "reply_tweet", "execute", 50, 0],
+    ["loop-morning", "generate_brief", "execute", 1, 0],
+    ["loop-discovery", "send_alert", "execute", 6, 0],
+    ["loop-evening", "generate_recap", "execute", 1, 0],
   ];
 
   for (const [agent, action, level, max, approval] of defaults) {
@@ -104,10 +116,10 @@ function up(db) {
 }
 
 function down(db) {
-  db.exec('DROP TABLE IF EXISTS authority_audit_log');
-  db.exec('DROP TABLE IF EXISTS agent_authority_matrix');
-  db.exec('DROP TABLE IF EXISTS loop_cron_outputs');
-  db.exec('DROP TABLE IF EXISTS loop_cron_runs');
+  db.exec("DROP TABLE IF EXISTS authority_audit_log");
+  db.exec("DROP TABLE IF EXISTS agent_authority_matrix");
+  db.exec("DROP TABLE IF EXISTS loop_cron_outputs");
+  db.exec("DROP TABLE IF EXISTS loop_cron_runs");
 }
 
 module.exports = { up, down };

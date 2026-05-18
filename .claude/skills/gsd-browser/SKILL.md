@@ -20,6 +20,7 @@ allowed-tools: Bash(gsd-browser:*), Bash(gsd-browser *)
 **Use `--json` when parsing output.** Use text mode when reading output yourself. Use `--json` when you need to extract values programmatically.
 
 **Positional args have no flag prefix.** Commands like `click`, `type`, `hover` take positional args. Do NOT add `--selector`:
+
 - `gsd-browser click "button.submit"` (correct)
 - `gsd-browser click --selector "button.submit"` (WRONG)
 
@@ -39,11 +40,11 @@ gsd-browser snapshot  # REQUIRED - old refs are now stale
 
 **Global options** available on all commands:
 
-| Flag | Purpose |
-|------|---------|
-| `--json` | Structured JSON output |
-| `--browser-path <path>` | Path to Chrome/Chromium |
-| `--session <name>` | Named session for parallel instances |
+| Flag                    | Purpose                              |
+| ----------------------- | ------------------------------------ |
+| `--json`                | Structured JSON output               |
+| `--browser-path <path>` | Path to Chrome/Chromium              |
+| `--session <name>`      | Named session for parallel instances |
 
 </essential_principles>
 
@@ -51,13 +52,13 @@ gsd-browser snapshot  # REQUIRED - old refs are now stale
 
 Based on what the user needs, read the appropriate workflow:
 
-| User intent | Workflow |
-|-------------|----------|
-| Navigate, click, type, fill forms, interact with pages | `workflows/navigate-and-interact.md` |
-| Scrape data, extract content, read page structure | `workflows/scrape-and-extract.md` |
-| Test pages, run assertions, visual regression, mock network | `workflows/test-and-assert.md` |
-| Debug issues, check logs, diagnose problems | `workflows/debug-and-diagnose.md` |
-| Install, configure, set up sessions | `workflows/setup-and-configure.md` |
+| User intent                                                 | Workflow                             |
+| ----------------------------------------------------------- | ------------------------------------ |
+| Navigate, click, type, fill forms, interact with pages      | `workflows/navigate-and-interact.md` |
+| Scrape data, extract content, read page structure           | `workflows/scrape-and-extract.md`    |
+| Test pages, run assertions, visual regression, mock network | `workflows/test-and-assert.md`       |
+| Debug issues, check logs, diagnose problems                 | `workflows/debug-and-diagnose.md`    |
+| Install, configure, set up sessions                         | `workflows/setup-and-configure.md`   |
 
 **After reading the workflow, follow it. Load references only when the workflow directs you to.**
 
@@ -77,19 +78,20 @@ All domain knowledge in `references/`:
 
 <workflows_index>
 
-| Workflow | Purpose |
-|----------|---------|
-| navigate-and-interact.md | Page navigation, clicking, typing, forms, intents |
-| scrape-and-extract.md | Data extraction, accessibility tree, page source |
-| test-and-assert.md | Assertions, visual regression, network mocking, test generation |
-| debug-and-diagnose.md | Console/network logs, timeline, debug bundles |
-| setup-and-configure.md | Installation, configuration, sessions, daemon management |
+| Workflow                 | Purpose                                                         |
+| ------------------------ | --------------------------------------------------------------- |
+| navigate-and-interact.md | Page navigation, clicking, typing, forms, intents               |
+| scrape-and-extract.md    | Data extraction, accessibility tree, page source                |
+| test-and-assert.md       | Assertions, visual regression, network mocking, test generation |
+| debug-and-diagnose.md    | Console/network logs, timeline, debug bundles                   |
+| setup-and-configure.md   | Installation, configuration, sessions, daemon management        |
 
 </workflows_index>
 
 <success_criteria>
 
 Browser automation task is complete when:
+
 - Target page state is achieved and verified (via assertions or visual confirmation)
 - Daemon is stopped if no further browser work is needed (`gsd-browser daemon stop`)
 - Extracted data is returned in the expected format

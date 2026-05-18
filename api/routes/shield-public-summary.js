@@ -273,12 +273,7 @@ function computePatternsSummary() {
     total_active: sevRow?.total || 0,
     categories: cats.length
       ? cats
-      : [
-          "reentrancy",
-          "access_control",
-          "oracle_manipulation",
-          "flash_loan",
-        ],
+      : ["reentrancy", "access_control", "oracle_manipulation", "flash_loan"],
   };
 }
 
@@ -296,7 +291,9 @@ router.get("/patterns/summary", (req, res) => {
     _patternsCache = { at: now, body };
     res.json(body);
   } catch (err) {
-    res.status(500).json({ error: "patterns_unavailable", message: err.message });
+    res
+      .status(500)
+      .json({ error: "patterns_unavailable", message: err.message });
   }
 });
 
@@ -317,7 +314,13 @@ function computeGuardDistribution() {
   try {
     db = new Database(DB_PATH, { readonly: true });
   } catch {
-    return { allow: 0, warn: 0, block: 0, total_processed: 0, _note: "db unavailable" };
+    return {
+      allow: 0,
+      warn: 0,
+      block: 0,
+      total_processed: 0,
+      _note: "db unavailable",
+    };
   }
   const row = db
     .prepare(
@@ -426,7 +429,9 @@ router.get("/audit/sample", (req, res) => {
     _auditSampleCache = { at: now, body };
     res.json(body);
   } catch (err) {
-    res.status(500).json({ error: "audit_sample_unavailable", message: err.message });
+    res
+      .status(500)
+      .json({ error: "audit_sample_unavailable", message: err.message });
   }
 });
 

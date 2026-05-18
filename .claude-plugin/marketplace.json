@@ -4,7 +4,16 @@
       "name": "Buzz Crypto BD Agent",
       "description": "Production-grade crypto BD intelligence — token scoring (11 rules, $0 LLM cost), wallet guard (3-state BLOCK/WARN/ALLOW), BD screening (7-phase pipeline), swarm simulation (1000-10K agents), and BuzzShield security scanner. Built by a chef, powered by 32 intel sources across 19 chains.",
       "version": "9.2.0",
-      "tags": ["crypto", "defi", "token-scoring", "security", "agent", "bd", "web3", "exchange"],
+      "tags": [
+        "crypto",
+        "defi",
+        "token-scoring",
+        "security",
+        "agent",
+        "bd",
+        "web3",
+        "exchange"
+      ],
       "author": "SolCex Exchange (@BuzzBySolCex)",
       "homepage": "https://buzzbd.ai",
       "stats": {

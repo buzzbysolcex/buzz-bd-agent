@@ -4,15 +4,15 @@ Layer 2 agent for on-chain wallet forensics and holder analysis. Runs in paralle
 
 ## Decisions
 
-| Decision | Answer |
-|----------|--------|
-| Pipeline position | Layer 2, parallel with SafetyAgent |
-| Architecture | Monolithic single-file agent (matches existing pattern) |
-| Depth control | Orchestrator passes hint, WalletAgent can auto-escalate |
-| Allium API | Stubbed with detailed contract |
-| LLM usage | None -- pure algorithmic |
-| Verdict flow | 5 analyses parallel, then _compute_verdict sequential |
-| Forensics | Basic heuristics (bundled wallets, funding source) + stub advanced (sybil, wash) |
+| Decision          | Answer                                                                           |
+| ----------------- | -------------------------------------------------------------------------------- |
+| Pipeline position | Layer 2, parallel with SafetyAgent                                               |
+| Architecture      | Monolithic single-file agent (matches existing pattern)                          |
+| Depth control     | Orchestrator passes hint, WalletAgent can auto-escalate                          |
+| Allium API        | Stubbed with detailed contract                                                   |
+| LLM usage         | None -- pure algorithmic                                                         |
+| Verdict flow      | 5 analyses parallel, then \_compute_verdict sequential                           |
+| Forensics         | Basic heuristics (bundled wallets, funding source) + stub advanced (sybil, wash) |
 
 ## Input
 
@@ -87,22 +87,22 @@ params = {
 
 ## Risk Level Thresholds
 
-| Score | Risk Level | Verdict |
-|-------|-----------|---------|
-| 80-100 | low | CLEAN |
-| 60-79 | medium | CAUTION |
-| 35-59 | high | SUSPICIOUS |
-| 0-34 | critical | RUG_RISK |
+| Score  | Risk Level | Verdict    |
+| ------ | ---------- | ---------- |
+| 80-100 | low        | CLEAN      |
+| 60-79  | medium     | CAUTION    |
+| 35-59  | high       | SUSPICIOUS |
+| 0-34   | critical   | RUG_RISK   |
 
 ## Depth Mode Gating
 
-| Method | Quick (<5s) | Standard (<15s) | Deep (<30s) |
-|--------|:-----------:|:---------------:|:-----------:|
-| _analyze_liquidity | DexScreener | DexScreener | DexScreener |
-| _analyze_holders | skip | Helius | Helius |
-| _analyze_deployer | skip | Helius (basic) | Helius + Allium |
-| _analyze_tx_flow | DexScreener (basic) | Helius enhanced txs | Helius enhanced txs |
-| _run_forensics | skip | Helius (bundled only) | Helius (bundled + funding source) |
+| Method              |     Quick (<5s)     |    Standard (<15s)    |            Deep (<30s)            |
+| ------------------- | :-----------------: | :-------------------: | :-------------------------------: |
+| \_analyze_liquidity |     DexScreener     |      DexScreener      |            DexScreener            |
+| \_analyze_holders   |        skip         |        Helius         |              Helius               |
+| \_analyze_deployer  |        skip         |    Helius (basic)     |          Helius + Allium          |
+| \_analyze_tx_flow   | DexScreener (basic) |  Helius enhanced txs  |        Helius enhanced txs        |
+| \_run_forensics     |        skip         | Helius (bundled only) | Helius (bundled + funding source) |
 
 Skipped methods return `{"available": False, "score": 0}`. Their weight redistributes proportionally to methods that ran.
 
@@ -112,68 +112,68 @@ Quick mode auto-escalates to standard if 2+ red flags detected after initial ana
 
 ### Timeouts
 
-| Depth | Per-source timeout | Total budget |
-|-------|-------------------|-------------|
-| quick | 3s | 5s |
-| standard | 8s | 15s |
-| deep | 15s | 30s |
+| Depth    | Per-source timeout | Total budget |
+| -------- | ------------------ | ------------ |
+| quick    | 3s                 | 5s           |
+| standard | 8s                 | 15s          |
+| deep     | 15s                | 30s          |
 
 ## Scoring Engine
 
 ### Liquidity (0-25 pts)
 
-| Condition | Points |
-|-----------|--------|
-| Total liquidity >= $500k | +8 |
-| Total liquidity >= $100k | +5 |
-| Total liquidity >= $50k | +3 |
-| LP locked >= 6 months | +7 |
-| LP burned | +5 (or +7 if also locked) |
-| Buy/sell ratio 0.7-1.5 | +5 |
+| Condition                | Points                    |
+| ------------------------ | ------------------------- |
+| Total liquidity >= $500k | +8                        |
+| Total liquidity >= $100k | +5                        |
+| Total liquidity >= $50k  | +3                        |
+| LP locked >= 6 months    | +7                        |
+| LP burned                | +5 (or +7 if also locked) |
+| Buy/sell ratio 0.7-1.5   | +5                        |
 
 ### Holder Distribution (0-25 pts)
 
-| Condition | Points |
-|-----------|--------|
-| Top 10 holders < 20% | +10 |
-| Top 10 holders < 30% | +7 |
-| Top 10 holders < 50% | +4 |
-| Deployer holds < 5% | +5 |
-| Deployer holds < 10% | +3 |
-| Unique holders >= 1000 | +5 |
-| Unique holders >= 500 | +3 |
-| No single whale > 5% | +5 |
+| Condition              | Points |
+| ---------------------- | ------ |
+| Top 10 holders < 20%   | +10    |
+| Top 10 holders < 30%   | +7     |
+| Top 10 holders < 50%   | +4     |
+| Deployer holds < 5%    | +5     |
+| Deployer holds < 10%   | +3     |
+| Unique holders >= 1000 | +5     |
+| Unique holders >= 500  | +3     |
+| No single whale > 5%   | +5     |
 
 ### Deployer Reputation (0-20 pts)
 
-| Condition | Points |
-|-----------|--------|
-| Account age > 1 year | +8 |
-| Account age > 6 months | +5 |
-| Account age > 3 months | +3 |
-| No prior rugs (rug_count == 0) | +7 |
-| Cross-chain activity | +5 |
-| Serial rugger (rug_count >= 2) | -10 |
+| Condition                      | Points |
+| ------------------------------ | ------ |
+| Account age > 1 year           | +8     |
+| Account age > 6 months         | +5     |
+| Account age > 3 months         | +3     |
+| No prior rugs (rug_count == 0) | +7     |
+| Cross-chain activity           | +5     |
+| Serial rugger (rug_count >= 2) | -10    |
 
 ### TX Flow (0-15 pts)
 
-| Condition | Points |
-|-----------|--------|
-| Organic score > 0.8 | +8 |
-| Organic score > 0.5 | +5 |
-| Unique buyers 24h > 100 | +4 |
-| Unique buyers 24h > 50 | +2 |
-| Reasonable avg tx size | +3 |
+| Condition               | Points |
+| ----------------------- | ------ |
+| Organic score > 0.8     | +8     |
+| Organic score > 0.5     | +5     |
+| Unique buyers 24h > 100 | +4     |
+| Unique buyers 24h > 50  | +2     |
+| Reasonable avg tx size  | +3     |
 
 ### Forensics Clean (0-15 pts)
 
-| Condition | Points |
-|-----------|--------|
-| No bundled wallets | +5 |
-| No sybil clusters | +5 |
-| No wash trading | +5 |
-| Bundled wallets found | -5 |
-| Same funding source | -3 |
+| Condition             | Points |
+| --------------------- | ------ |
+| No bundled wallets    | +5     |
+| No sybil clusters     | +5     |
+| No wash trading       | +5     |
+| Bundled wallets found | -5     |
+| Same funding source   | -3     |
 
 ### Weight Redistribution
 
@@ -238,7 +238,7 @@ async def _fetch_allium(self, deployer_address: str) -> Dict:
 
 ## Error Handling
 
-1. Per-source isolation -- each _analyze_* has own try/except
+1. Per-source isolation -- each _analyze_\* has own try/except
 2. Graceful degradation -- failed source returns `{"available": False}`
 3. All-sources-failed -- wallet_score: 0, verdict: RUG_RISK, red_flags: ["all_sources_failed"]
 4. Event logging -- action/observation/error at every step
@@ -246,18 +246,18 @@ async def _fetch_allium(self, deployer_address: str) -> Dict:
 
 ## Testing (58 tests)
 
-| Category | Count |
-|----------|-------|
-| Constructor & init | 3 |
-| Input validation | 4 |
-| Depth gating | 6 |
-| _analyze_liquidity | 8 |
-| _analyze_holders | 7 |
-| _analyze_deployer | 6 |
-| _analyze_tx_flow | 5 |
-| _run_forensics | 5 |
-| _compute_verdict | 6 |
-| Full execute() | 5 |
-| Auto-escalation | 3 |
+| Category            | Count |
+| ------------------- | ----- |
+| Constructor & init  | 3     |
+| Input validation    | 4     |
+| Depth gating        | 6     |
+| \_analyze_liquidity | 8     |
+| \_analyze_holders   | 7     |
+| \_analyze_deployer  | 6     |
+| \_analyze_tx_flow   | 5     |
+| \_run_forensics     | 5     |
+| \_compute_verdict   | 6     |
+| Full execute()      | 5     |
+| Auto-escalation     | 3     |
 
 All tests use pytest + pytest-asyncio + aioresponses + monkeypatch.

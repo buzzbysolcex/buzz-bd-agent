@@ -2,7 +2,7 @@
  * Migration 010: Strategic Orchestrator Tables
  * Adds tables for decision logging, playbook state machines,
  * decision rules, context caching, and outreach sequences.
- * 
+ *
  * Part of Buzz BD Agent v7.0 — Strategic Orchestrator Layer
  */
 
@@ -143,16 +143,18 @@ function up(db) {
     ON outreach_sequences(token_address, chain)
   `);
 
-  console.log('[Migration 010] Strategic Orchestrator tables created: strategic_decisions, playbook_instances, decision_rules, context_cache, outreach_sequences');
+  console.log(
+    "[Migration 010] Strategic Orchestrator tables created: strategic_decisions, playbook_instances, decision_rules, context_cache, outreach_sequences",
+  );
 }
 
 function down(db) {
-  db.exec('DROP TABLE IF EXISTS outreach_sequences');
-  db.exec('DROP TABLE IF EXISTS context_cache');
-  db.exec('DROP TABLE IF EXISTS decision_rules');
-  db.exec('DROP TABLE IF EXISTS playbook_instances');
-  db.exec('DROP TABLE IF EXISTS strategic_decisions');
-  console.log('[Migration 010] Strategic Orchestrator tables dropped');
+  db.exec("DROP TABLE IF EXISTS outreach_sequences");
+  db.exec("DROP TABLE IF EXISTS context_cache");
+  db.exec("DROP TABLE IF EXISTS decision_rules");
+  db.exec("DROP TABLE IF EXISTS playbook_instances");
+  db.exec("DROP TABLE IF EXISTS strategic_decisions");
+  console.log("[Migration 010] Strategic Orchestrator tables dropped");
 }
 
 module.exports = { up, down };

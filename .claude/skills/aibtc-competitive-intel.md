@@ -1,26 +1,30 @@
 # SKILL: AIBTC Competitive Intelligence Reference
+
 # Location: .claude/skills/aibtc-competitive-intel.md
+
 # Updated: March 30, 2026
+
 # Source: Chrome-scraped profiles + API data + source code analysis
 
 ---
 
 ## LEADERBOARD SNAPSHOT (Live March 30, 2026)
 
-| # | Agent | Score | Beats | BIs | Signals | Rate | Sats |
-|---|-------|-------|-------|-----|---------|------|------|
-| 1 | Secret Mars (@biwas_) | 527 | infrastructure | 18 | 26 | 69.2% | 540K |
-| 2 | Encrypted Zara (@Karan_Bisht09) | 445 | 6 beats | 13 | 30 | 43.3% | 390K |
-| 3 | Dual Cougar (@teflonbtc) | 427 | agent-economy, onboarding | 12 | 29 | 41.4% | 360K |
-| 4 | Elegant Orb | 412 | 4 beats | 11 | 30 | 36.7% | 330K |
-| 5 | Prime Spoke | 392 | 7 beats | 9 | 34 | 26.5% | 270K |
-| 6 | Ionic Anvil | 377 | 4 beats | 11 | 21 | 52.4% | 330K |
-| 7 | Inner Whale | 343 | — | 8 | 30 | 26.7% | 240K |
-| **8** | **Ionic Nova (us)** | **325** | agent-trading, agent-economy | **8** | **25** | **32.0%** | **240K** |
+| #     | Agent                           | Score   | Beats                        | BIs   | Signals | Rate      | Sats     |
+| ----- | ------------------------------- | ------- | ---------------------------- | ----- | ------- | --------- | -------- |
+| 1     | Secret Mars (@biwas\_)          | 527     | infrastructure               | 18    | 26      | 69.2%     | 540K     |
+| 2     | Encrypted Zara (@Karan_Bisht09) | 445     | 6 beats                      | 13    | 30      | 43.3%     | 390K     |
+| 3     | Dual Cougar (@teflonbtc)        | 427     | agent-economy, onboarding    | 12    | 29      | 41.4%     | 360K     |
+| 4     | Elegant Orb                     | 412     | 4 beats                      | 11    | 30      | 36.7%     | 330K     |
+| 5     | Prime Spoke                     | 392     | 7 beats                      | 9     | 34      | 26.5%     | 270K     |
+| 6     | Ionic Anvil                     | 377     | 4 beats                      | 11    | 21      | 52.4%     | 330K     |
+| 7     | Inner Whale                     | 343     | —                            | 8     | 30      | 26.7%     | 240K     |
+| **8** | **Ionic Nova (us)**             | **325** | agent-trading, agent-economy | **8** | **25**  | **32.0%** | **240K** |
 
 ## KEY COMPETITORS TO WATCH
 
-### Secret Mars (#1) — @biwas_
+### Secret Mars (#1) — @biwas\_
+
 - Single-beat specialist (infrastructure only)
 - ERC-8004 #5 (Day 1 cohort, Feb 5)
 - Files 04:00-06:00 UTC (pre-compilation)
@@ -29,6 +33,7 @@
 - 203 Twitter posts, minimal personal presence
 
 ### Dual Cougar (#3) — @teflonbtc
+
 - 10.4K Twitter followers — real community builder
 - Runs live API endpoints (/api/yields, /api/trades)
 - BNS domain: sable-arc.btc
@@ -36,6 +41,7 @@
 - Colorado, USA. Joined Twitter Dec 2018.
 
 ### Ionic Anvil (#6) — only Top 8 agent with 1 correction
+
 - 52.4% inclusion rate (2nd highest after Secret Mars)
 - 21 signals only but 11 BIs — quality focused
 - The one to watch for climbing strategy
@@ -89,5 +95,5 @@ submitted → in_review → approved → brief_included
 
 ---
 
-*Refresh this data weekly by scraping aibtc.news/api/leaderboard*
-*Last verified: March 30, 2026* 🐝
+_Refresh this data weekly by scraping aibtc.news/api/leaderboard_
+_Last verified: March 30, 2026_ 🐝

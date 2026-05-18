@@ -55,4 +55,4 @@ Model: qwen3:14b ONLY
 
 ---
 
-*Rule: microbuzz-simulation | 500-agent hybrid safety + resource management*
+_Rule: microbuzz-simulation | 500-agent hybrid safety + resource management_

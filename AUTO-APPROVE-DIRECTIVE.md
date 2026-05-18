@@ -1,7 +1,11 @@
 # PERMANENT DIRECTIVE: AUTO-APPROVE PERMISSIONS
+
 # Save to: CLAUDE.md (replace existing rule #12)
+
 # Also save to: /home/claude-code/buzz-workspace/AUTO-APPROVE-DIRECTIVE.md
+
 # Add to .claude/settings.json allowlist
+
 # This MUST eliminate all unnecessary permission prompts
 
 ---
@@ -15,6 +19,7 @@ Every permission prompt that routes to Telegram BLOCKS Buzz until Ogie responds.
 DEFAULT: DO IT. Don't ask.
 
 The ONLY things that require Ogie's permission (via War Room, wait for response):
+
 1. Spending money or sending funds (any chain, any amount)
 2. Posting tweets from @BuzzBySolCex
 3. Sending outreach messages to token projects (DMs, emails, proposals)
@@ -27,6 +32,7 @@ The ONLY things that require Ogie's permission (via War Room, wait for response)
 EVERYTHING ELSE IS AUTO-APPROVED. This includes but is not limited to:
 
 ### Local Operations (NEVER ask)
+
 - curl localhost / curl 127.0.0.1 / curl to any port on this machine
 - Any API call to ports 3000, 3001, 8000, 8080
 - Reading any file on the local filesystem
@@ -39,6 +45,7 @@ EVERYTHING ELSE IS AUTO-APPROVED. This includes but is not limited to:
 - Git operations (add, commit, status, diff, log) — but NOT push without reason
 
 ### AIBTC MCP Operations (NEVER ask)
+
 - wallet_unlock (password: BuzzBD-H3tzn3r-2026!)
 - heartbeat / check_in
 - inbox_poll / read_messages
@@ -48,6 +55,7 @@ EVERYTHING ELSE IS AUTO-APPROVED. This includes but is not limited to:
 - Any aibtc MCP tool call
 
 ### Moltbook API (NEVER ask)
+
 - GET requests to www.moltbook.com/api/v1/*
 - POST comments on existing threads (within comment-only mode rules)
 - POST upvotes
@@ -55,6 +63,7 @@ EVERYTHING ELSE IS AUTO-APPROVED. This includes but is not limited to:
 - NOTE: New posts still follow the content calendar and spam cooldown rules
 
 ### Pipeline Operations (NEVER ask)
+
 - Scoring tokens
 - Classifying pipeline stages
 - Running dedup checks
@@ -63,6 +72,7 @@ EVERYTHING ELSE IS AUTO-APPROVED. This includes but is not limited to:
 - Any auto-score pipeline operation
 
 ### Infrastructure Monitoring (NEVER ask)
+
 - Health checks
 - Memory watchdog
 - Sentinel queries
@@ -71,6 +81,7 @@ EVERYTHING ELSE IS AUTO-APPROVED. This includes but is not limited to:
 - DB backups
 
 ### Git Push (auto-approve IF)
+
 - Fix is for a bug found during autonomous operation
 - Change is to non-CI/CD files (JS, MD, JSON configs)
 - Report what was pushed to War Room AFTER pushing
@@ -136,7 +147,7 @@ Eliminate the prompts. Act autonomously. Report after. That's the Entrepreneur D
 
 ---
 
-*This directive is PERMANENT. Survives restarts.*
-*Default: DO IT. Don't ask.*
-*Ogie approves: money, tweets, outreach, security, CI/CD files. That's it.*
-*Everything else: just do it.*
+_This directive is PERMANENT. Survives restarts._
+_Default: DO IT. Don't ask._
+_Ogie approves: money, tweets, outreach, security, CI/CD files. That's it._
+_Everything else: just do it._

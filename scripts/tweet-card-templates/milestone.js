@@ -6,7 +6,7 @@ const MILESTONE_DETAILS = [
   "4 service modules: discovery, normalizer, filter, enricher",
   "5 REST endpoints behind apiKeyAuth",
   "Multi-source parallel scan (DexScreener + Jupiter + CoinGecko)",
-  "BD Sweet Spot filter: $500K-$50M MCap, >$100K liquidity"
+  "BD Sweet Spot filter: $500K-$50M MCap, >$100K liquidity",
 ];
 const MILESTONE_TAG = "SHIPPED";
 const MILESTONE_DATE = "March 29, 2026";
@@ -23,12 +23,12 @@ await page.setContent(`<html><head><link href="https://fonts.googleapis.com/css2
   <h1>${MILESTONE_TITLE}</h1>
   <div class="subtitle">${MILESTONE_DATE}</div>
   <div class="details">
-    ${MILESTONE_DETAILS.map(d => `<div class="detail-item">${d}</div>`).join('')}
+    ${MILESTONE_DETAILS.map((d) => `<div class="detail-item">${d}</div>`).join("")}
   </div>
 </div>
 <div class="footer"><span>Zero-Human Exchange Listing Company</span><span>🐝 buzzbd.ai/report | @BuzzBySolCex</span></div>
 </body></html>`);
-await new Promise(r => setTimeout(r, 2000));
+await new Promise((r) => setTimeout(r, 2000));
 const buf = await page.screenshot();
 const path = await saveScreenshot(buf, "milestone-card.png");
 console.log("Saved: " + path);

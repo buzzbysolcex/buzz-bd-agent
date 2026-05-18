@@ -5,7 +5,7 @@
  * Buzz decides WHAT. HeyAnon decides HOW.
  */
 
-const { feature } = require('../../lib/feature-flags');
+const { feature } = require("../../lib/feature-flags");
 
 let connected = false;
 let cachedProjects = null;
@@ -14,12 +14,16 @@ let cachedProjects = null;
  * Parse SSE response text — extract result.content[0].text from `data: {...}` lines
  */
 function parseSSE(text) {
-  const lines = text.split('\n');
+  const lines = text.split("\n");
   for (const line of lines) {
-    if (line.startsWith('data: ')) {
+    if (line.startsWith("data: ")) {
       try {
         const payload = JSON.parse(line.slice(6));
-        if (payload.result && payload.result.content && payload.result.content[0]) {
+        if (
+          payload.result &&
+          payload.result.content &&
+          payload.result.content[0]
+        ) {
           return payload.result.content[0].text;
         }
       } catch (_) {
@@ -38,22 +42,22 @@ async function mcpCall(toolName, args = {}) {
   const apiKey = process.env.HEYANON_API_KEY;
 
   const res = await fetch(endpoint, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': apiKey,
-      'Accept': 'application/json, text/event-stream'
+      "Content-Type": "application/json",
+      "X-API-Key": apiKey,
+      Accept: "application/json, text/event-stream",
     },
     body: JSON.stringify({
-      jsonrpc: '2.0',
+      jsonrpc: "2.0",
       id: Date.now(),
-      method: 'tools/call',
+      method: "tools/call",
       params: {
         name: toolName,
-        arguments: args
-      }
+        arguments: args,
+      },
     }),
-    signal: AbortSignal.timeout(15000)
+    signal: AbortSignal.timeout(15000),
   });
 
   const text = await res.text();
@@ -68,36 +72,36 @@ async function mcpCall(toolName, args = {}) {
 async function initHeyAnon() {
   try {
     if (!process.env.HEYANON_API_KEY) {
-      console.warn('[HeyAnon] ⚠️ HEYANON_API_KEY not set — skipping init');
+      console.warn("[HeyAnon] ⚠️ HEYANON_API_KEY not set — skipping init");
       return false;
     }
     if (!process.env.HEYANON_ENDPOINT) {
-      console.warn('[HeyAnon] ⚠️ HEYANON_ENDPOINT not set — skipping init');
+      console.warn("[HeyAnon] ⚠️ HEYANON_ENDPOINT not set — skipping init");
       return false;
     }
 
     // Ping endpoint
     const pong = await pingHeyAnon();
     if (!pong) {
-      console.warn('[HeyAnon] ⚠️ Ping failed — endpoint unreachable');
+      console.warn("[HeyAnon] ⚠️ Ping failed — endpoint unreachable");
       return false;
     }
 
     // Cache protocol list
     try {
-      const projectsResult = await mcpCall('projects');
+      const projectsResult = await mcpCall("projects");
       if (projectsResult) {
         cachedProjects = projectsResult;
       }
     } catch (e) {
-      console.warn('[HeyAnon] ⚠️ Failed to cache projects:', e.message);
+      console.warn("[HeyAnon] ⚠️ Failed to cache projects:", e.message);
     }
 
     connected = true;
-    console.log('[HeyAnon] ✓ MCP connected — 51 protocols available');
+    console.log("[HeyAnon] ✓ MCP connected — 51 protocols available");
     return true;
   } catch (e) {
-    console.warn('[HeyAnon] ⚠️ Init failed:', e.message);
+    console.warn("[HeyAnon] ⚠️ Init failed:", e.message);
     connected = false;
     return false;
   }
@@ -108,14 +112,14 @@ async function initHeyAnon() {
  * Feature-gated behind HEYANON_MCP.
  */
 async function askHeyAnon(message) {
-  if (!feature('HEYANON_MCP')) {
-    throw new Error('HEYANON_MCP feature flag is disabled');
+  if (!feature("HEYANON_MCP")) {
+    throw new Error("HEYANON_MCP feature flag is disabled");
   }
-  if (!message || typeof message !== 'string') {
-    throw new Error('message must be a non-empty string');
+  if (!message || typeof message !== "string") {
+    throw new Error("message must be a non-empty string");
   }
 
-  const result = await mcpCall('ask', { text: message });
+  const result = await mcpCall("ask", { text: message });
   if (result) {
     connected = true;
   }
@@ -129,7 +133,7 @@ async function askHeyAnon(message) {
 async function getProjects() {
   if (cachedProjects) return cachedProjects;
 
-  const result = await mcpCall('projects');
+  const result = await mcpCall("projects");
   if (result) {
     cachedProjects = result;
   }
@@ -141,7 +145,7 @@ async function getProjects() {
  */
 async function pingHeyAnon() {
   try {
-    const result = await mcpCall('ping');
+    const result = await mcpCall("ping");
     const ok = result !== null;
     connected = ok;
     return ok;
@@ -158,4 +162,10 @@ function isConnected() {
   return connected;
 }
 
-module.exports = { initHeyAnon, askHeyAnon, getProjects, pingHeyAnon, isConnected };
+module.exports = {
+  initHeyAnon,
+  askHeyAnon,
+  getProjects,
+  pingHeyAnon,
+  isConnected,
+};

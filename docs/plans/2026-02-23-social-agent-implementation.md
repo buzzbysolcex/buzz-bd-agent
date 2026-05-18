@@ -17,6 +17,7 @@
 ### Task 1: SocialAgent Skeleton + Constructor Tests
 
 **Files:**
+
 - Create: `src/agents/social_agent.py`
 - Create: `src/agents/tests/test_social_agent.py`
 
@@ -163,6 +164,7 @@ git commit -m "feat: add SocialAgent skeleton inheriting BaseAgent"
 ### Task 2: Input Validation + Execute Skeleton
 
 **Files:**
+
 - Modify: `src/agents/tests/test_social_agent.py`
 - Modify: `src/agents/social_agent.py`
 
@@ -287,9 +289,10 @@ git commit -m "feat: add SocialAgent input validation and execute skeleton"
 
 ---
 
-### Task 3: _search_atv (ATV Web3 Identity)
+### Task 3: \_search_atv (ATV Web3 Identity)
 
 **Files:**
+
 - Modify: `src/agents/tests/test_social_agent.py`
 - Modify: `src/agents/social_agent.py`
 
@@ -433,7 +436,7 @@ class TestSearchAtv:
 Run: `python3 -m pytest src/agents/tests/test_social_agent.py::TestSearchAtv -v`
 Expected: FAIL (stub returns unavailable)
 
-**Step 3: Implement _search_atv**
+**Step 3: Implement \_search_atv**
 
 Replace `_search_atv` in `src/agents/social_agent.py`:
 
@@ -523,9 +526,10 @@ git commit -m "feat: add _search_atv with ATV Web3 Identity integration"
 
 ---
 
-### Task 4: _search_serper (Serper Web Search)
+### Task 4: \_search_serper (Serper Web Search)
 
 **Files:**
+
 - Modify: `src/agents/tests/test_social_agent.py`
 - Modify: `src/agents/social_agent.py`
 
@@ -637,7 +641,7 @@ class TestSearchSerper:
 Run: `python3 -m pytest src/agents/tests/test_social_agent.py::TestSearchSerper -v`
 Expected: FAIL
 
-**Step 3: Implement _search_serper**
+**Step 3: Implement \_search_serper**
 
 Replace `_search_serper` in `src/agents/social_agent.py`:
 
@@ -751,9 +755,10 @@ git commit -m "feat: add _search_serper with web reputation analysis"
 
 ---
 
-### Task 5: _search_grok (Grok/xAI Sentiment Analysis)
+### Task 5: \_search_grok (Grok/xAI Sentiment Analysis)
 
 **Files:**
+
 - Modify: `src/agents/tests/test_social_agent.py`
 - Modify: `src/agents/social_agent.py`
 
@@ -888,7 +893,7 @@ Note: You need to add `import json` at the top of the test file.
 Run: `python3 -m pytest src/agents/tests/test_social_agent.py::TestSearchGrok -v`
 Expected: FAIL
 
-**Step 3: Implement _search_grok**
+**Step 3: Implement \_search_grok**
 
 Replace `_search_grok` in `src/agents/social_agent.py`:
 
@@ -1030,9 +1035,10 @@ git commit -m "feat: add _search_grok with xAI sentiment analysis"
 
 ---
 
-### Task 6: _compute_verdict + Scoring Engine
+### Task 6: \_compute_verdict + Scoring Engine
 
 **Files:**
+
 - Modify: `src/agents/tests/test_social_agent.py`
 - Modify: `src/agents/social_agent.py`
 
@@ -1148,7 +1154,7 @@ class TestComputeVerdict:
 Run: `python3 -m pytest src/agents/tests/test_social_agent.py::TestComputeVerdict -v`
 Expected: FAIL
 
-**Step 3: Implement _compute_verdict**
+**Step 3: Implement \_compute_verdict**
 
 Replace `_compute_verdict` in `src/agents/social_agent.py`:
 
@@ -1304,6 +1310,7 @@ git commit -m "feat: add _compute_verdict with scoring engine and weight redistr
 ### Task 7: Depth Gating Integration Tests
 
 **Files:**
+
 - Modify: `src/agents/tests/test_social_agent.py`
 
 **Step 1: Write the tests**
@@ -1427,6 +1434,7 @@ git commit -m "test: add depth gating integration tests for SocialAgent"
 ### Task 8: Red/Green Flag Detection Tests
 
 **Files:**
+
 - Modify: `src/agents/tests/test_social_agent.py`
 
 **Step 1: Write the tests**
@@ -1534,6 +1542,7 @@ git commit -m "test: add red/green flag detection tests for SocialAgent"
 ### Task 9: Sentiment & Community Health Mapping Tests
 
 **Files:**
+
 - Modify: `src/agents/tests/test_social_agent.py`
 
 **Step 1: Write the tests**
@@ -1621,6 +1630,7 @@ git commit -m "test: add sentiment and community health mapping tests"
 ### Task 10: Full execute() Integration Tests
 
 **Files:**
+
 - Modify: `src/agents/tests/test_social_agent.py`
 
 **Step 1: Write the tests**
@@ -1754,16 +1764,16 @@ docs/plans/2026-02-23-social-agent-implementation.md
 
 Test count by class:
 
-| Class | Tests |
-|-------|-------|
-| TestSocialAgentInit | 3 |
-| TestInputValidation | 4 |
-| TestSearchAtv | 7 |
-| TestSearchSerper | 7 |
-| TestSearchGrok | 7 |
-| TestComputeVerdict | 6 |
-| TestDepthGating | 6 |
-| TestFlagDetection | 4 |
-| TestSentimentMapping | 3 |
-| TestExecuteIntegration | 5 |
-| **Total** | **52** |
+| Class                  | Tests  |
+| ---------------------- | ------ |
+| TestSocialAgentInit    | 3      |
+| TestInputValidation    | 4      |
+| TestSearchAtv          | 7      |
+| TestSearchSerper       | 7      |
+| TestSearchGrok         | 7      |
+| TestComputeVerdict     | 6      |
+| TestDepthGating        | 6      |
+| TestFlagDetection      | 4      |
+| TestSentimentMapping   | 3      |
+| TestExecuteIntegration | 5      |
+| **Total**              | **52** |

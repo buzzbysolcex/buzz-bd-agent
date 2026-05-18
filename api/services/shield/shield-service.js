@@ -6,8 +6,8 @@
  * Phase 2 P0: Address poisoning, temporal analysis, cross-chain bridge verification
  */
 
-const crypto = require('crypto');
-const { feature } = require('../../lib/feature-flags');
+const crypto = require("crypto");
+const { feature } = require("../../lib/feature-flags");
 
 /**
  * P0-A: Address Poisoning Detection
@@ -15,15 +15,19 @@ const { feature } = require('../../lib/feature-flags');
  * 65.4M poisoning txs flagged since Jan 2025, single loss $12.4M.
  */
 function checkAddressPoisoning(db, destinationAddr, walletAddress) {
-  if (!feature('SHIELD_ADDRESS_POISONING')) return null;
+  if (!feature("SHIELD_ADDRESS_POISONING")) return null;
 
   // Get recent scan history for this wallet to build trusted address list
-  const recentScans = db.prepare(`
+  const recentScans = db
+    .prepare(
+      `
     SELECT DISTINCT target FROM shield_scans
     WHERE requester = ? AND verdict = 'SAFE' AND created_at > datetime('now', '-30 days')
-  `).all(walletAddress);
+  `,
+    )
+    .all(walletAddress);
 
-  const trustedAddresses = recentScans.map(s => s.target);
+  const trustedAddresses = recentScans.map((s) => s.target);
 
   for (const trusted of trustedAddresses) {
     if (trusted === destinationAddr) continue; // exact match = fine
@@ -39,7 +43,7 @@ function checkAddressPoisoning(db, destinationAddr, walletAddress) {
         confidence: 0.9,
         similar_to: trusted,
         destination: destinationAddr,
-        pattern: 'address_poisoning_lookalike'
+        pattern: "address_poisoning_lookalike",
       };
     }
   }
@@ -52,7 +56,7 @@ function checkAddressPoisoning(db, destinationAddr, walletAddress) {
  * Drift Protocol lost $270M via temporal separation attack (Apr 2, 2026)
  */
 function checkTemporalAnomaly(db, nonceAccount, executeTime) {
-  if (!feature('SHIELD_TEMPORAL_ANALYSIS')) return null;
+  if (!feature("SHIELD_TEMPORAL_ANALYSIS")) return null;
 
   // Create tracking table if needed
   db.exec(`
@@ -71,20 +75,24 @@ function checkTemporalAnomaly(db, nonceAccount, executeTime) {
   `);
 
   // Check for rapid sequential submissions (Drift-style)
-  const recentSubmissions = db.prepare(`
+  const recentSubmissions = db
+    .prepare(
+      `
     SELECT COUNT(*) as cnt FROM shield_presigned_txs
     WHERE nonce_account = ? AND executed_at > datetime('now', '-10 minutes')
-  `).get(nonceAccount);
+  `,
+    )
+    .get(nonceAccount);
 
-  const result = { anomaly: false, severity: 'none', details: {} };
+  const result = { anomaly: false, severity: "none", details: {} };
 
   if (recentSubmissions && recentSubmissions.cnt >= 2) {
     result.anomaly = true;
-    result.severity = 'critical';
+    result.severity = "critical";
     result.details = {
-      pattern: 'rapid_sequential_nonce_submit',
+      pattern: "rapid_sequential_nonce_submit",
       count: recentSubmissions.cnt,
-      nonce_account: nonceAccount
+      nonce_account: nonceAccount,
     };
   }
 
@@ -96,7 +104,7 @@ function checkTemporalAnomaly(db, nonceAccount, executeTime) {
  * Bridges account for 69% of DeFi theft. CrossCurve lost $3M Feb 2026.
  */
 function checkBridgeVerification(db, programAddress) {
-  if (!feature('SHIELD_CROSS_CHAIN')) return null;
+  if (!feature("SHIELD_CROSS_CHAIN")) return null;
 
   // Create bridge registry table if needed
   db.exec(`
@@ -115,40 +123,66 @@ function checkBridgeVerification(db, programAddress) {
   `);
 
   // Check against registry
-  const bridge = db.prepare(
-    'SELECT * FROM bridge_registry WHERE program_address = ?'
-  ).get(programAddress);
+  const bridge = db
+    .prepare("SELECT * FROM bridge_registry WHERE program_address = ?")
+    .get(programAddress);
 
   if (!bridge) {
-    return { known: false, status: 'unknown', risk: 'WARNING', reason: 'Unregistered bridge contract' };
+    return {
+      known: false,
+      status: "unknown",
+      risk: "WARNING",
+      reason: "Unregistered bridge contract",
+    };
   }
 
-  if (bridge.status === 'exploited') {
-    return { known: true, status: 'exploited', risk: 'DANGER', reason: `Bridge exploited on ${bridge.exploit_date}`, details: bridge.exploit_details };
+  if (bridge.status === "exploited") {
+    return {
+      known: true,
+      status: "exploited",
+      risk: "DANGER",
+      reason: `Bridge exploited on ${bridge.exploit_date}`,
+      details: bridge.exploit_details,
+    };
   }
 
-  if (bridge.status === 'safe') {
-    return { known: true, status: 'safe', risk: 'SAFE', reason: 'Verified bridge' };
+  if (bridge.status === "safe") {
+    return {
+      known: true,
+      status: "safe",
+      risk: "SAFE",
+      reason: "Verified bridge",
+    };
   }
 
-  return { known: true, status: bridge.status, risk: 'CAUTION', reason: 'Bridge registered but not fully verified' };
+  return {
+    known: true,
+    status: bridge.status,
+    risk: "CAUTION",
+    reason: "Bridge registered but not fully verified",
+  };
 }
 
 /**
  * Score a Solana program's risk (0-100, 100 = safest)
  */
-function scoreProgramRisk(db, programAddress, chain = 'solana') {
-  if (!feature('SHIELD_PROGRAM_SCORER')) return null;
+function scoreProgramRisk(db, programAddress, chain = "solana") {
+  if (!feature("SHIELD_PROGRAM_SCORER")) return null;
 
   // Check cache first
-  const cached = db.prepare(
-    'SELECT * FROM program_risk_cache WHERE program_address = ? AND chain = ?'
-  ).get(programAddress, chain);
+  const cached = db
+    .prepare(
+      "SELECT * FROM program_risk_cache WHERE program_address = ? AND chain = ?",
+    )
+    .get(programAddress, chain);
 
   if (cached && cached.last_checked) {
     const age = Date.now() - new Date(cached.last_checked).getTime();
-    if (age < 3600000) { // 1 hour cache
-      db.prepare('UPDATE program_risk_cache SET check_count = check_count + 1 WHERE id = ?').run(cached.id);
+    if (age < 3600000) {
+      // 1 hour cache
+      db.prepare(
+        "UPDATE program_risk_cache SET check_count = check_count + 1 WHERE id = ?",
+      ).run(cached.id);
       return cached;
     }
   }
@@ -162,24 +196,28 @@ function scoreProgramRisk(db, programAddress, chain = 'solana') {
  * Match transaction/program against known drain patterns
  */
 function matchDrainPatterns(db, target) {
-  if (!feature('SHIELD_PATTERN_MATCHER')) return [];
+  if (!feature("SHIELD_PATTERN_MATCHER")) return [];
 
-  const patterns = db.prepare(
-    'SELECT * FROM drain_patterns WHERE active = 1'
-  ).all();
+  const patterns = db
+    .prepare("SELECT * FROM drain_patterns WHERE active = 1")
+    .all();
 
   const matches = [];
   for (const pattern of patterns) {
-    const addrs = pattern.program_addresses ? JSON.parse(pattern.program_addresses) : [];
+    const addrs = pattern.program_addresses
+      ? JSON.parse(pattern.program_addresses)
+      : [];
     if (addrs.includes(target)) {
       matches.push({
         pattern_id: pattern.pattern_id,
         name: pattern.name,
         severity: pattern.severity,
         confidence: 1.0,
-        description: pattern.description
+        description: pattern.description,
       });
-      db.prepare('UPDATE drain_patterns SET match_count = match_count + 1, last_seen = datetime(\'now\') WHERE id = ?').run(pattern.id);
+      db.prepare(
+        "UPDATE drain_patterns SET match_count = match_count + 1, last_seen = datetime('now') WHERE id = ?",
+      ).run(pattern.id);
     }
   }
 
@@ -191,17 +229,17 @@ function matchDrainPatterns(db, target) {
  */
 function generateVerdict(programScore, patternMatches, deployerTrust) {
   // Any critical pattern match = DANGER
-  if (patternMatches.some(m => m.severity === 'critical')) return 'DANGER';
-  if (patternMatches.some(m => m.severity === 'high')) return 'WARNING';
+  if (patternMatches.some((m) => m.severity === "critical")) return "DANGER";
+  if (patternMatches.some((m) => m.severity === "high")) return "WARNING";
 
   if (programScore !== null) {
-    if (programScore >= 80) return 'SAFE';
-    if (programScore >= 60) return 'CAUTION';
-    if (programScore >= 40) return 'WARNING';
-    return 'DANGER';
+    if (programScore >= 80) return "SAFE";
+    if (programScore >= 60) return "CAUTION";
+    if (programScore >= 40) return "WARNING";
+    return "DANGER";
   }
 
-  return 'CAUTION'; // Unknown = caution
+  return "CAUTION"; // Unknown = caution
 }
 
 /**
@@ -209,34 +247,50 @@ function generateVerdict(programScore, patternMatches, deployerTrust) {
  */
 function generateReceipt(scanId, verdict, target, timestamp) {
   const data = `${scanId}:${verdict}:${target}:${timestamp}`;
-  return crypto.createHash('sha256').update(data).digest('hex');
+  return crypto.createHash("sha256").update(data).digest("hex");
 }
 
 /**
  * Record a scan in the database
  */
 function recordScan(db, scan) {
-  const receiptHash = generateReceipt(scan.scan_id, scan.verdict, scan.target, scan.created_at);
+  const receiptHash = generateReceipt(
+    scan.scan_id,
+    scan.verdict,
+    scan.target,
+    scan.created_at,
+  );
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO shield_scans
     (scan_id, scan_type, requester, target, chain, verdict, program_score,
      instruction_flags, pattern_matches, deployer_trust, context_risk,
      explanation, receipt_hash, scan_duration_ms, paid)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    scan.scan_id, scan.scan_type, scan.requester, scan.target,
-    scan.chain || 'solana', scan.verdict, scan.program_score,
+  `,
+  ).run(
+    scan.scan_id,
+    scan.scan_type,
+    scan.requester,
+    scan.target,
+    scan.chain || "solana",
+    scan.verdict,
+    scan.program_score,
     JSON.stringify(scan.instruction_flags || []),
     JSON.stringify(scan.pattern_matches || []),
-    scan.deployer_trust, scan.context_risk,
-    scan.explanation, receiptHash, scan.scan_duration_ms,
-    scan.paid ? 1 : 0
+    scan.deployer_trust,
+    scan.context_risk,
+    scan.explanation,
+    receiptHash,
+    scan.scan_duration_ms,
+    scan.paid ? 1 : 0,
   );
 
   // Update daily stats
-  const today = new Date().toISOString().split('T')[0];
-  db.prepare(`
+  const today = new Date().toISOString().split("T")[0];
+  db.prepare(
+    `
     INSERT INTO shield_stats (date, total_scans, free_scans, paid_scans,
       safe_count, caution_count, warning_count, danger_count, patterns_matched, unique_agents)
     VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?, 1)
@@ -249,14 +303,16 @@ function recordScan(db, scan) {
       warning_count = warning_count + excluded.warning_count,
       danger_count = danger_count + excluded.danger_count,
       patterns_matched = patterns_matched + excluded.patterns_matched
-  `).run(
+  `,
+  ).run(
     today,
-    scan.paid ? 0 : 1, scan.paid ? 1 : 0,
-    scan.verdict === 'SAFE' ? 1 : 0,
-    scan.verdict === 'CAUTION' ? 1 : 0,
-    scan.verdict === 'WARNING' ? 1 : 0,
-    scan.verdict === 'DANGER' ? 1 : 0,
-    (scan.pattern_matches || []).length
+    scan.paid ? 0 : 1,
+    scan.paid ? 1 : 0,
+    scan.verdict === "SAFE" ? 1 : 0,
+    scan.verdict === "CAUTION" ? 1 : 0,
+    scan.verdict === "WARNING" ? 1 : 0,
+    scan.verdict === "DANGER" ? 1 : 0,
+    (scan.pattern_matches || []).length,
   );
 
   return receiptHash;
@@ -266,16 +322,22 @@ function recordScan(db, scan) {
  * Get aggregate shield stats
  */
 function getShieldStats(db) {
-  const totals = db.prepare(`
+  const totals = db
+    .prepare(
+      `
     SELECT
       COALESCE(SUM(total_scans), 0) as total_scans,
       COALESCE(SUM(danger_count), 0) as dangers_blocked,
       COALESCE(SUM(patterns_matched), 0) as patterns_matched,
       COALESCE(SUM(unique_agents), 0) as agents_served
     FROM shield_stats
-  `).get();
+  `,
+    )
+    .get();
 
-  const patternCount = db.prepare('SELECT COUNT(*) as count FROM drain_patterns WHERE active = 1').get();
+  const patternCount = db
+    .prepare("SELECT COUNT(*) as count FROM drain_patterns WHERE active = 1")
+    .get();
 
   return {
     total_scans: totals.total_scans,
@@ -283,8 +345,8 @@ function getShieldStats(db) {
     patterns_known: patternCount.count,
     agents_served: totals.agents_served,
     patterns_matched: totals.patterns_matched,
-    oracle_verification: feature('SHIELD_PYTH_ORACLE'),
-    intel_sources: 33
+    oracle_verification: feature("SHIELD_PYTH_ORACLE"),
+    intel_sources: 33,
   };
 }
 
@@ -297,5 +359,5 @@ module.exports = {
   getShieldStats,
   checkAddressPoisoning,
   checkTemporalAnomaly,
-  checkBridgeVerification
+  checkBridgeVerification,
 };

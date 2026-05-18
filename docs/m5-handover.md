@@ -12,24 +12,24 @@ This was a marathon research + planning session. Here's everything we covered an
 
 ## Research Completed
 
-| Topic | Finding | Action |
-|-------|---------|--------|
-| **Ampere.sh** | Managed OpenClaw hosting — too restrictive for Buzz. No custom Docker, no REST API control. | REJECTED for Buzz. Only useful for simple agents. |
-| **gstack (Garry Tan/YC)** | 6 Claude Code workflow skills (/plan, /review, /ship, /browse, /retro). | BOOKMARKED for post-sprint. /browse useful for QA. |
-| **OpenClaw-RL paper** | RL framework for training agents from interaction signals. Proposes PRM Judge + OPD patterns. | Cherry-pick PRM Judge pattern for Buzz scoring (Phase 2-3). |
-| **Robot Money** | Autonomous treasury protocol on Base. Bankr + OpenClaw + Moltbook stack. Generative Ventures + ZHC Institute. | BD TARGET scored 73/100 QUALIFIED. Outreach package created. |
-| **AIXBT portfolio.aixbt.sh** | AIXBT autonomously codes, pushes to GitHub, auto-deploys website. Full autonomous operator loop. | BENCHMARK for Buzz v7.5+. Identified all missing capabilities. |
-| **Hyperspace Autoskill** | 90 agents producing 1,251 skill commits in 24h via P2P gossip. Darwinian evolution for code. WASM sandbox. | Validates our skill-evolve.js approach. Consider joining network post-sprint. |
-| **Circle Skills** | Official USDC skills for Claude Code. Wallet management, CCTP bridge, smart contracts. MCP server available. | Install on M5 for Phase 1-3 payment infrastructure. |
-| **OpenClaw v2026.3.12** | Major release: sessions_yield, cron dedup fix, security patches, Dashboard v2. | UPGRADE in v7.4.0 Docker build. Critical for Twitter Brain two-phase reply. |
-| **X API Pay-Per-Use** | Legacy Basic/Pro deprecated Feb 6, 2026. Now credit-based. Deduplication. xAI credit bonus. $100/mo cap. | SWITCH from Basic. Saves $100+/mo. Update Twitter Brain doc. |
-| **AI Hedge Fund** | 18-agent pipeline with investor personas, backtester, SSE streaming. 45.7K GitHub stars. | INTEGRATE 4 persona agents + backtester into Buzz v7.4.0. |
+| Topic                        | Finding                                                                                                       | Action                                                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **Ampere.sh**                | Managed OpenClaw hosting — too restrictive for Buzz. No custom Docker, no REST API control.                   | REJECTED for Buzz. Only useful for simple agents.                             |
+| **gstack (Garry Tan/YC)**    | 6 Claude Code workflow skills (/plan, /review, /ship, /browse, /retro).                                       | BOOKMARKED for post-sprint. /browse useful for QA.                            |
+| **OpenClaw-RL paper**        | RL framework for training agents from interaction signals. Proposes PRM Judge + OPD patterns.                 | Cherry-pick PRM Judge pattern for Buzz scoring (Phase 2-3).                   |
+| **Robot Money**              | Autonomous treasury protocol on Base. Bankr + OpenClaw + Moltbook stack. Generative Ventures + ZHC Institute. | BD TARGET scored 73/100 QUALIFIED. Outreach package created.                  |
+| **AIXBT portfolio.aixbt.sh** | AIXBT autonomously codes, pushes to GitHub, auto-deploys website. Full autonomous operator loop.              | BENCHMARK for Buzz v7.5+. Identified all missing capabilities.                |
+| **Hyperspace Autoskill**     | 90 agents producing 1,251 skill commits in 24h via P2P gossip. Darwinian evolution for code. WASM sandbox.    | Validates our skill-evolve.js approach. Consider joining network post-sprint. |
+| **Circle Skills**            | Official USDC skills for Claude Code. Wallet management, CCTP bridge, smart contracts. MCP server available.  | Install on M5 for Phase 1-3 payment infrastructure.                           |
+| **OpenClaw v2026.3.12**      | Major release: sessions_yield, cron dedup fix, security patches, Dashboard v2.                                | UPGRADE in v7.4.0 Docker build. Critical for Twitter Brain two-phase reply.   |
+| **X API Pay-Per-Use**        | Legacy Basic/Pro deprecated Feb 6, 2026. Now credit-based. Deduplication. xAI credit bonus. $100/mo cap.      | SWITCH from Basic. Saves $100+/mo. Update Twitter Brain doc.                  |
+| **AI Hedge Fund**            | 18-agent pipeline with investor personas, backtester, SSE streaming. 45.7K GitHub stars.                      | INTEGRATE 4 persona agents + backtester into Buzz v7.4.0.                     |
 
 ## Documents Created
 
-| Document | File | Purpose |
-|----------|------|---------|
-| Robot Money BD Package | `robot-money-bd-package.md` | Pipeline entry + 3 outreach templates + tweet drafts + follow-up sequence |
+| Document                 | File                         | Purpose                                                                                                      |
+| ------------------------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Robot Money BD Package   | `robot-money-bd-package.md`  | Pipeline entry + 3 outreach templates + tweet drafts + follow-up sequence                                    |
 | **v7.4.0 Complete Spec** | `BUZZ-v740-COMPLETE-SPEC.md` | **THE MASTER DOCUMENT** — 1,017 lines, 16 sections. Twitter Brain + Hedge Brain + Agentic.hosting migration. |
 
 ## Key Decisions Made
@@ -48,45 +48,45 @@ This was a marathon research + planning session. Here's everything we covered an
 
 ## Production (Akash — boogle.cloud)
 
-| Component | Value |
-|-----------|-------|
-| Image | ghcr.io/buzzbysolcex/buzz-bd-agent:v7.4.0a |
-| Ports | API :32120 / OpenClaw :30731 |
-| Telegram | @BuzzBySolCex_bot |
-| Status | RUNNING — 48h autonomous test passed |
-| Cost | $9.49/mo |
-| Action | MIGRATE TO HETZNER → then close |
+| Component | Value                                      |
+| --------- | ------------------------------------------ |
+| Image     | ghcr.io/buzzbysolcex/buzz-bd-agent:v7.4.0a |
+| Ports     | API :32120 / OpenClaw :30731               |
+| Telegram  | @BuzzBySolCex_bot                          |
+| Status    | RUNNING — 48h autonomous test passed       |
+| Cost      | $9.49/mo                                   |
+| Action    | MIGRATE TO HETZNER → then close            |
 
 ## Test Instance (Hetzner — Agentic.hosting)
 
-| Component | Value |
-|-----------|-------|
-| Server | Hetzner CX23, Helsinki |
-| IP | api.buzzbd.ai |
-| Image | buzzbd/buzz-bd-agent:v7.4.0a |
-| Telegram | @BuzzTestAgent_bot (token: 8705181842:AAEGy4FAHJyA99VmOAtY0tw2gnNfC2_tcB4) |
-| Status | RUNNING — 48h test PASSED (15 tokens tracked, 6 qualified) |
-| Cost | $4.09/mo |
-| Action | BECOMES PRODUCTION after migration |
+| Component | Value                                                                      |
+| --------- | -------------------------------------------------------------------------- |
+| Server    | Hetzner CX23, Helsinki                                                     |
+| IP        | api.buzzbd.ai                                                              |
+| Image     | buzzbd/buzz-bd-agent:v7.4.0a                                               |
+| Telegram  | @BuzzTestAgent_bot (token: 8705181842:AAEGy4FAHJyA99VmOAtY0tw2gnNfC2_tcB4) |
+| Status    | RUNNING — 48h test PASSED (15 tokens tracked, 6 qualified)                 |
+| Cost      | $4.09/mo                                                                   |
+| Action    | BECOMES PRODUCTION after migration                                         |
 
 ## Sentinel (Akash — akashprovid.com)
 
-| Component | Value |
-|-----------|-------|
-| Image | ghcr.io/buzzbysolcex/buzz-sentinel:v1.1.0 |
-| Ports | API :30941 / OpenClaw :31578 |
-| Telegram | @BuzzSentinel_bot |
-| Cost | $1.42/mo |
-| Action | Retarget to Hetzner IP after migration |
+| Component | Value                                     |
+| --------- | ----------------------------------------- |
+| Image     | ghcr.io/buzzbysolcex/buzz-sentinel:v1.1.0 |
+| Ports     | API :30941 / OpenClaw :31578              |
+| Telegram  | @BuzzSentinel_bot                         |
+| Cost      | $1.42/mo                                  |
+| Action    | Retarget to Hetzner IP after migration    |
 
 ## LLM Budget
 
-| Provider | Balance | Purpose | Daily Rate |
-|----------|---------|---------|------------|
-| MiniMax M2.5 | **$112.11** | Buzz primary brain | $6.18/day (normal) |
+| Provider                  | Balance     | Purpose                                     | Daily Rate            |
+| ------------------------- | ----------- | ------------------------------------------- | --------------------- |
+| MiniMax M2.5              | **$112.11** | Buzz primary brain                          | $6.18/day (normal)    |
 | Anthropic API (dedicated) | **$129.17** | Buzz Haiku fallback + institutional persona | ~$1-2/day when active |
-| Claude.ai Max | Unlimited | You + me (strategy/planning) | Subscription |
-| bankr/gpt-5-nano | FREE | All sub-agents + 3 persona agents | $0 |
+| Claude.ai Max             | Unlimited   | You + me (strategy/planning)                | Subscription          |
+| bankr/gpt-5-nano          | FREE        | All sub-agents + 3 persona agents           | $0                    |
 
 **Combined LLM runway: ~$241 = 40-50 days at normal rate**
 
@@ -169,24 +169,24 @@ cp ~/Downloads/BUZZ-v740-COMPLETE-SPEC.md ~/buzz-bd-agent/docs/v740-spec.md
 
 **The SDL file with ALL production API keys was shared in this chat session. The following keys are exposed and should be rotated:**
 
-| Key | Service | Priority |
-|-----|---------|----------|
-| MiniMax API Key | LLM primary | HIGH |
-| Anthropic API Key (old) | LLM fallback | HIGH — rotate immediately |
-| Anthropic API Key (new dedicated) | Buzz Hetzner | HIGH — was shared in chat |
-| Telegram Bot Token | @BuzzBySolCex_bot | HIGH |
-| X API Key + Secret | Twitter Bot | HIGH |
-| X Bearer Token | Twitter read | HIGH |
-| X Access Token + Secret | Twitter write | HIGH |
-| BNB Private Key | Wallet (funds at risk) | **CRITICAL** |
-| Nansen x402 Wallet Key | Wallet (funds at risk) | **CRITICAL** |
-| Helius API Key | Solana RPC | MEDIUM |
-| Grok API Key | xAI scanning | MEDIUM |
-| Gmail OAuth tokens | Email outreach | MEDIUM |
-| Serper API Key | Search | MEDIUM |
-| Firecrawl API Key | Scraping | MEDIUM |
-| Bankr keys (3) | Token deploy + LLM | MEDIUM |
-| All other keys in SDL | Various | MEDIUM |
+| Key                               | Service                | Priority                  |
+| --------------------------------- | ---------------------- | ------------------------- |
+| MiniMax API Key                   | LLM primary            | HIGH                      |
+| Anthropic API Key (old)           | LLM fallback           | HIGH — rotate immediately |
+| Anthropic API Key (new dedicated) | Buzz Hetzner           | HIGH — was shared in chat |
+| Telegram Bot Token                | @BuzzBySolCex_bot      | HIGH                      |
+| X API Key + Secret                | Twitter Bot            | HIGH                      |
+| X Bearer Token                    | Twitter read           | HIGH                      |
+| X Access Token + Secret           | Twitter write          | HIGH                      |
+| BNB Private Key                   | Wallet (funds at risk) | **CRITICAL**              |
+| Nansen x402 Wallet Key            | Wallet (funds at risk) | **CRITICAL**              |
+| Helius API Key                    | Solana RPC             | MEDIUM                    |
+| Grok API Key                      | xAI scanning           | MEDIUM                    |
+| Gmail OAuth tokens                | Email outreach         | MEDIUM                    |
+| Serper API Key                    | Search                 | MEDIUM                    |
+| Firecrawl API Key                 | Scraping               | MEDIUM                    |
+| Bankr keys (3)                    | Token deploy + LLM     | MEDIUM                    |
+| All other keys in SDL             | Various                | MEDIUM                    |
 
 **Priority: Rotate BNB + Nansen private keys FIRST — those control actual funds.**
 
@@ -201,6 +201,7 @@ The master document is `BUZZ-v740-COMPLETE-SPEC.md` (1,017 lines, 16 sections). 
 ## What v7.4.0 Contains
 
 ### Twitter Brain (Sections 2-7 of spec)
+
 - Twitter keyword scanning via Grok x_search (FREE, every 2h)
 - 12 autonomous BD outreach replies/day
 - Bankr token deploy offers from Twitter
@@ -209,6 +210,7 @@ The master document is `BUZZ-v740-COMPLETE-SPEC.md` (1,017 lines, 16 sections). 
 - Deep scan response through full 9-agent Buzz Brain (5-10 min)
 
 ### Hedge Brain (Sections 12-16 of spec)
+
 - 4 persona agents (degen, whale, institutional, community)
 - Per-agent model selection (3 free nano + 1 haiku)
 - Weekly backtester (proves scoring accuracy vs real price outcomes)
@@ -216,6 +218,7 @@ The master document is `BUZZ-v740-COMPLETE-SPEC.md` (1,017 lines, 16 sections). 
 - Weighted consensus scoring (70% sub-agents + 30% personas)
 
 ### Infrastructure
+
 - OpenClaw v2026.3.7 → v2026.3.12 upgrade
 - Agentic.hosting on Hetzner (migrate from Akash)
 - Anthropic Haiku fallback chain
@@ -285,40 +288,40 @@ docker run -d --name buzz-agent \
 
 # 6. TIMELINE — REMAINING SPRINT
 
-| Day | Date | Action |
-|-----|------|--------|
-| 25 | Mar 14 (TODAY) | M5 setup. Clone repos. SSH key. Rotate exposed keys. |
-| 26 | Mar 15 | Migrate production to Hetzner. Close Akash. Retarget Sentinel. |
-| 27 | Mar 16 | Claude Code: Build twitter-brain.js + 4 persona agents. |
-| 28 | Mar 17 | Claude Code: Build backtester + SSE streaming. Docker build v7.4.0. |
-| 29 | Mar 18 | Deploy v7.4.0. Flip TWEET_AUTO=true. Switch X API pay-per-use. |
-| 30 | Mar 19 | Monitor first full autonomous day. Tune caps. First backtest. |
-| 31 | Mar 20 | Sprint ends. 9 parallel agents. Autonomous Twitter. Backtested alpha. |
-| +7 | Mar 27 | GitHub PAT + CI/CD → self-deploy pipeline (AIXBT parity). |
-| +14 | Apr 3 | First autonomous skill-evolve → auto-deploy cycle. |
+| Day | Date           | Action                                                                |
+| --- | -------------- | --------------------------------------------------------------------- |
+| 25  | Mar 14 (TODAY) | M5 setup. Clone repos. SSH key. Rotate exposed keys.                  |
+| 26  | Mar 15         | Migrate production to Hetzner. Close Akash. Retarget Sentinel.        |
+| 27  | Mar 16         | Claude Code: Build twitter-brain.js + 4 persona agents.               |
+| 28  | Mar 17         | Claude Code: Build backtester + SSE streaming. Docker build v7.4.0.   |
+| 29  | Mar 18         | Deploy v7.4.0. Flip TWEET_AUTO=true. Switch X API pay-per-use.        |
+| 30  | Mar 19         | Monitor first full autonomous day. Tune caps. First backtest.         |
+| 31  | Mar 20         | Sprint ends. 9 parallel agents. Autonomous Twitter. Backtested alpha. |
+| +7  | Mar 27         | GitHub PAT + CI/CD → self-deploy pipeline (AIXBT parity).             |
+| +14 | Apr 3          | First autonomous skill-evolve → auto-deploy cycle.                    |
 
 ---
 
 # 7. GITHUB REPOS (Both Safe)
 
-| Repo | URL | Status |
-|------|-----|--------|
-| buzz-bd-agent | github.com/buzzbysolcex/buzz-bd-agent | ✅ All versions pushed |
+| Repo              | URL                                                 | Status                                          |
+| ----------------- | --------------------------------------------------- | ----------------------------------------------- |
+| buzz-bd-agent     | github.com/buzzbysolcex/buzz-bd-agent               | ✅ All versions pushed                          |
 | buzz-alpha-mobile | github.com/buzzbysolcex/buzz-alpha-mobile (PRIVATE) | ✅ Just pushed today — 8,480 lines, Expo SDK 54 |
-| Docker (GHCR) | ghcr.io/buzzbysolcex/buzz-bd-agent:v7.4.0a | ✅ Latest image |
-| Docker (Hub) | buzzbd/buzz-bd-agent:v7.4.0a | ✅ Mirror for Hetzner |
+| Docker (GHCR)     | ghcr.io/buzzbysolcex/buzz-bd-agent:v7.4.0a          | ✅ Latest image                                 |
+| Docker (Hub)      | buzzbd/buzz-bd-agent:v7.4.0a                        | ✅ Mirror for Hetzner                           |
 
 ---
 
 # 8. BD PIPELINE STATUS (from 48h test)
 
-| Category | Count | Details |
-|----------|-------|---------|
-| Total tracked | 15 | Active pipeline |
-| Qualified (70-84) | 6 | WAR, JOY, SAORI, Mogging, World Peace, SOS |
-| Watch list | 9 | Below 70, monitoring |
-| Hot (85+) | 0 | None currently |
-| New BD target | 1 | Robot Money (scored 73, outreach package ready) |
+| Category          | Count | Details                                         |
+| ----------------- | ----- | ----------------------------------------------- |
+| Total tracked     | 15    | Active pipeline                                 |
+| Qualified (70-84) | 6     | WAR, JOY, SAORI, Mogging, World Peace, SOS      |
+| Watch list        | 9     | Below 70, monitoring                            |
+| Hot (85+)         | 0     | None currently                                  |
+| New BD target     | 1     | Robot Money (scored 73, outreach package ready) |
 
 ---
 
@@ -332,26 +335,26 @@ docker run -d --name buzz-agent \
 
 ## Revenue Model (v7.4.0)
 
-| Stream | Per Deal | Monthly Target |
-|--------|----------|----------------|
-| CEX Listing fees | $5,000 USDT | 2 deals = $10,000 |
-| Bankr Deploy commissions | ~$100-200 | 5 deploys = $500-1,000 |
-| BaaS subscriptions (Phase 3) | $29-99/mo | 50 users = $2,500 |
-| x402 data API (Phase 3) | Micropayments | $500-1,000 |
-| **Total target** | | **$13,000-14,500/mo** |
+| Stream                       | Per Deal      | Monthly Target         |
+| ---------------------------- | ------------- | ---------------------- |
+| CEX Listing fees             | $5,000 USDT   | 2 deals = $10,000      |
+| Bankr Deploy commissions     | ~$100-200     | 5 deploys = $500-1,000 |
+| BaaS subscriptions (Phase 3) | $29-99/mo     | 50 users = $2,500      |
+| x402 data API (Phase 3)      | Micropayments | $500-1,000             |
+| **Total target**             |               | **$13,000-14,500/mo**  |
 
 ## Cost (v7.4.0)
 
-| Expense | Monthly |
-|---------|---------|
-| Hetzner CX23 | $4.09 |
-| MiniMax M2.5 | ~$60-80 |
-| Anthropic Haiku fallback | ~$30-60 |
-| X API pay-per-use (capped) | ~$70-100 |
-| Institutional persona (haiku) | ~$3 |
-| Free APIs (Grok, Serper, DexScreener, bankr/nano) | $0 |
-| **Total** | **~$138-188/mo** |
-| **ROI** | **69-94x** |
+| Expense                                           | Monthly          |
+| ------------------------------------------------- | ---------------- |
+| Hetzner CX23                                      | $4.09            |
+| MiniMax M2.5                                      | ~$60-80          |
+| Anthropic Haiku fallback                          | ~$30-60          |
+| X API pay-per-use (capped)                        | ~$70-100         |
+| Institutional persona (haiku)                     | ~$3              |
+| Free APIs (Grok, Serper, DexScreener, bankr/nano) | $0               |
+| **Total**                                         | **~$138-188/mo** |
+| **ROI**                                           | **69-94x**       |
 
 ---
 
@@ -403,9 +406,9 @@ THESIS: AIXBT finds alpha. Bankr deploys tokens. Buzz closes deals.
 
 ---
 
-*🐝 "From a flight kitchen to the M5 MacBook. From v5 to v7.4.0.*
-*Same chef. Same Claude. New machine. Bigger vision.*
-*The deal-making agent of crypto is about to be unleashed."*
+_🐝 "From a flight kitchen to the M5 MacBook. From v5 to v7.4.0._
+_Same chef. Same Claude. New machine. Bigger vision._
+_The deal-making agent of crypto is about to be unleashed."_
 
-*Handover complete | Sprint Day 25 | March 14, 2026 | Jakarta, Indonesia*
-*Bismillah.* 🐝🇮🇩
+_Handover complete | Sprint Day 25 | March 14, 2026 | Jakarta, Indonesia_
+_Bismillah._ 🐝🇮🇩

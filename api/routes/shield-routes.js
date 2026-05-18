@@ -1058,9 +1058,10 @@ router.get(
       }
       for (const f of flags || []) {
         findings.push({
-          pattern_id: typeof f === "string"
-            ? f.toLowerCase().replace(/\s+/g, "_")
-            : (f.type || "").toLowerCase(),
+          pattern_id:
+            typeof f === "string"
+              ? f.toLowerCase().replace(/\s+/g, "_")
+              : (f.type || "").toLowerCase(),
           category: "flag",
           description: typeof f === "string" ? f : f.description || "",
           chain,
@@ -1079,8 +1080,8 @@ router.get(
           ? "CRITICAL"
           : "WARNING";
         const chainPenalty =
-          exploit_chains.filter((c) => c.verdict === "HIGH_CONFIDENCE")
-            .length * 20;
+          exploit_chains.filter((c) => c.verdict === "HIGH_CONFIDENCE").length *
+          20;
         if (chainPenalty > 0 && typeof responseObj.score === "number") {
           v5.score_pre_chain_penalty = responseObj.score;
           v5.score = Math.max(0, responseObj.score - chainPenalty);

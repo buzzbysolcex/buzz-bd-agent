@@ -8,13 +8,13 @@
  * Check 3: Internal consistency (DB + chain + format)
  */
 
-const { getDB } = require('../db');
+const { getDB } = require("../db");
 
 const VERIFICATION_STATUS = {
-  VERIFIED: 'VERIFIED',
-  QUARANTINED: 'QUARANTINED',
-  UNVERIFIED: 'UNVERIFIED',
-  STALE: 'STALE'
+  VERIFIED: "VERIFIED",
+  QUARANTINED: "QUARANTINED",
+  UNVERIFIED: "UNVERIFIED",
+  STALE: "STALE",
 };
 
 // Hard-coded rules — non-negotiable
@@ -25,13 +25,13 @@ const CONTRACT_FORMAT = {
   ethereum: /^0x[a-fA-F0-9]{40}$/,
 };
 
-const MCAP_TOLERANCE = 0.20;
+const MCAP_TOLERANCE = 0.2;
 const MCAP_LIQUIDITY_SUSPICIOUS_RATIO = 25;
 const MAX_AGE_SECONDS = 3600;
 const NEW_TOKEN_MIN_HOURS = 24;
 
 function isPumpFun(address) {
-  return typeof address === 'string' && address.toLowerCase().endsWith('pump');
+  return typeof address === "string" && address.toLowerCase().endsWith("pump");
 }
 
 async function fetchJSON(url, timeout = 10000) {
@@ -41,7 +41,11 @@ async function fetchJSON(url, timeout = 10000) {
     const res = await fetch(url, { signal: controller.signal });
     if (!res.ok) return null;
     return await res.json();
-  } catch { return null; } finally { clearTimeout(timer); }
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 // ═══════ CHECK 1: DexScreener (source of truth) ═══════
@@ -49,17 +53,24 @@ async function verifyViaDexScreener(contractAddress, chain) {
   const result = { pass: false, data: null, warnings: [] };
 
   const data = await fetchJSON(
-    `https://api.dexscreener.com/latest/dex/tokens/${contractAddress}`
+    `https://api.dexscreener.com/latest/dex/tokens/${contractAddress}`,
   );
 
   if (!data || !data.pairs || data.pairs.length === 0) {
-    result.warnings.push('NOT_FOUND_ON_DEXSCREENER');
+    result.warnings.push("NOT_FOUND_ON_DEXSCREENER");
     return result;
   }
 
   // Filter pairs to requested chain
-  const chainMap = { solana: 'solana', base: 'base', bsc: 'bsc', ethereum: 'ethereum' };
-  const chainPairs = data.pairs.filter(p => p.chainId === (chainMap[chain] || chain));
+  const chainMap = {
+    solana: "solana",
+    base: "base",
+    bsc: "bsc",
+    ethereum: "ethereum",
+  };
+  const chainPairs = data.pairs.filter(
+    (p) => p.chainId === (chainMap[chain] || chain),
+  );
 
   if (chainPairs.length === 0) {
     result.warnings.push(`NO_PAIRS_ON_CHAIN_${chain.toUpperCase()}`);
@@ -67,15 +78,18 @@ async function verifyViaDexScreener(contractAddress, chain) {
   }
 
   // Use pair with highest liquidity as primary
-  const primary = chainPairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
+  const primary = chainPairs.sort(
+    (a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0),
+  )[0];
 
   const pairAge = primary.pairCreatedAt
     ? (Date.now() - primary.pairCreatedAt) / 3600000
     : null;
 
-  const mcapLiqRatio = primary.liquidity?.usd > 0
-    ? (primary.marketCap || 0) / primary.liquidity.usd
-    : Infinity;
+  const mcapLiqRatio =
+    primary.liquidity?.usd > 0
+      ? (primary.marketCap || 0) / primary.liquidity.usd
+      : Infinity;
 
   result.data = {
     name: primary.baseToken?.name || null,
@@ -90,7 +104,8 @@ async function verifyViaDexScreener(contractAddress, chain) {
     pairAgeHours: pairAge ? Math.round(pairAge * 10) / 10 : null,
     mcapLiquidityRatio: Math.round(mcapLiqRatio * 10) / 10,
     pairAddress: primary.pairAddress,
-    url: primary.url || `https://dexscreener.com/${chain}/${primary.pairAddress}`,
+    url:
+      primary.url || `https://dexscreener.com/${chain}/${primary.pairAddress}`,
   };
 
   // Warnings
@@ -98,13 +113,15 @@ async function verifyViaDexScreener(contractAddress, chain) {
     result.warnings.push(`NEW_TOKEN_${Math.round(pairAge)}H_OLD`);
   }
   if (mcapLiqRatio > MCAP_LIQUIDITY_SUSPICIOUS_RATIO) {
-    result.warnings.push(`SUSPICIOUS_MCAP_LIQ_RATIO_${mcapLiqRatio.toFixed(1)}x`);
+    result.warnings.push(
+      `SUSPICIOUS_MCAP_LIQ_RATIO_${mcapLiqRatio.toFixed(1)}x`,
+    );
   }
   if (isPumpFun(contractAddress)) {
-    result.warnings.push('PUMP_FUN_TOKEN');
+    result.warnings.push("PUMP_FUN_TOKEN");
   }
   if (primary.liquidity?.usd < 10000) {
-    result.warnings.push('LOW_LIQUIDITY_UNDER_10K');
+    result.warnings.push("LOW_LIQUIDITY_UNDER_10K");
   }
 
   // Pass if we got data (warnings don't block check1, they inform check3)
@@ -116,35 +133,40 @@ async function verifyViaDexScreener(contractAddress, chain) {
 async function verifyViaCoinGecko(contractAddress, chain, dexData) {
   const result = { pass: false, data: null, warnings: [] };
 
-  const platformMap = { solana: 'solana', base: 'base', bsc: 'binance-smart-chain', ethereum: 'ethereum' };
+  const platformMap = {
+    solana: "solana",
+    base: "base",
+    bsc: "binance-smart-chain",
+    ethereum: "ethereum",
+  };
   const platform = platformMap[chain];
   if (!platform) {
-    result.warnings.push('UNSUPPORTED_CHAIN_FOR_COINGECKO');
+    result.warnings.push("UNSUPPORTED_CHAIN_FOR_COINGECKO");
     return result;
   }
 
   // Try 1: Exact contract address lookup
   let data = await fetchJSON(
-    `https://api.coingecko.com/api/v3/coins/${platform}/contract/${contractAddress}`
+    `https://api.coingecko.com/api/v3/coins/${platform}/contract/${contractAddress}`,
   );
 
   // Try 2: If contract lookup fails, search by symbol/name (flexible matching)
   if ((!data || data.error) && dexData?.data?.symbol) {
-    const symbol = (dexData.data.symbol || '').toLowerCase();
+    const symbol = (dexData.data.symbol || "").toLowerCase();
     const searchData = await fetchJSON(
-      `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(symbol)}`
+      `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(symbol)}`,
     );
 
     if (searchData?.coins?.length > 0) {
       // Find matching coin by symbol, preferring exact symbol match
-      const match = searchData.coins.find(c =>
-        c.symbol?.toLowerCase() === symbol
+      const match = searchData.coins.find(
+        (c) => c.symbol?.toLowerCase() === symbol,
       );
 
       if (match) {
         // Fetch full coin data to get mcap for comparison
         const coinData = await fetchJSON(
-          `https://api.coingecko.com/api/v3/coins/${match.id}?localization=false&tickers=false&community_data=false&developer_data=false`
+          `https://api.coingecko.com/api/v3/coins/${match.id}?localization=false&tickers=false&community_data=false&developer_data=false`,
         );
 
         if (coinData && !coinData.error) {
@@ -152,15 +174,18 @@ async function verifyViaCoinGecko(contractAddress, chain, dexData) {
           const dexMcap = dexData?.data?.mcap || 0;
 
           // Verify mcap within 30% tolerance (wider for symbol-based match)
-          const mcapMatch = dexMcap > 0 && cgMcap > 0
-            ? Math.abs(cgMcap - dexMcap) / Math.max(cgMcap, dexMcap) < 0.30
-            : false;
+          const mcapMatch =
+            dexMcap > 0 && cgMcap > 0
+              ? Math.abs(cgMcap - dexMcap) / Math.max(cgMcap, dexMcap) < 0.3
+              : false;
 
           if (mcapMatch) {
             data = coinData;
-            result.warnings.push('VERIFIED_BY_SYMBOL_MATCH');
+            result.warnings.push("VERIFIED_BY_SYMBOL_MATCH");
           } else if (cgMcap > 0) {
-            result.warnings.push(`SYMBOL_MATCH_MCAP_MISMATCH: cg=$${Math.round(cgMcap)} dex=$${Math.round(dexMcap)}`);
+            result.warnings.push(
+              `SYMBOL_MATCH_MCAP_MISMATCH: cg=$${Math.round(cgMcap)} dex=$${Math.round(dexMcap)}`,
+            );
           }
         }
       }
@@ -168,13 +193,13 @@ async function verifyViaCoinGecko(contractAddress, chain, dexData) {
   }
 
   if (!data || data.error) {
-    result.warnings.push('NOT_ON_COINGECKO');
+    result.warnings.push("NOT_ON_COINGECKO");
     return result;
   }
 
   result.data = {
     name: data.name || null,
-    symbol: (data.symbol || '').toUpperCase(),
+    symbol: (data.symbol || "").toUpperCase(),
     mcap: data.market_data?.market_cap?.usd || null,
     totalVolume: data.market_data?.total_volume?.usd || null,
     coingeckoId: data.id,
@@ -186,7 +211,12 @@ async function verifyViaCoinGecko(contractAddress, chain, dexData) {
 }
 
 // ═══════ CHECK 3: Internal consistency ═══════
-async function verifyInternalConsistency(contractAddress, chain, dexData, cgData) {
+async function verifyInternalConsistency(
+  contractAddress,
+  chain,
+  dexData,
+  cgData,
+) {
   const db = getDB();
   const result = { pass: true, data: null, warnings: [] };
 
@@ -200,60 +230,79 @@ async function verifyInternalConsistency(contractAddress, chain, dexData, cgData
 
   // 3b: Cross-reference names between DexScreener and CoinGecko
   if (dexData?.data?.name && cgData?.data?.name) {
-    const dexName = (dexData.data.name || '').toLowerCase().trim();
-    const cgName = (cgData.data.name || '').toLowerCase().trim();
+    const dexName = (dexData.data.name || "").toLowerCase().trim();
+    const cgName = (cgData.data.name || "").toLowerCase().trim();
     if (dexName !== cgName) {
       // Allow partial match (one contains the other)
       if (!dexName.includes(cgName) && !cgName.includes(dexName)) {
         result.pass = false;
-        result.warnings.push(`NAME_MISMATCH: dexscreener="${dexData.data.name}" coingecko="${cgData.data.name}"`);
+        result.warnings.push(
+          `NAME_MISMATCH: dexscreener="${dexData.data.name}" coingecko="${cgData.data.name}"`,
+        );
       }
     }
   }
 
   // 3c: Cross-reference mcap between sources
   if (dexData?.data?.mcap && cgData?.data?.mcap) {
-    const ratio = Math.abs(dexData.data.mcap - cgData.data.mcap) / Math.max(dexData.data.mcap, cgData.data.mcap);
+    const ratio =
+      Math.abs(dexData.data.mcap - cgData.data.mcap) /
+      Math.max(dexData.data.mcap, cgData.data.mcap);
     if (ratio > MCAP_TOLERANCE) {
       result.pass = false;
-      result.warnings.push(`MCAP_DIVERGENCE_${Math.round(ratio * 100)}%: dex=$${Math.round(dexData.data.mcap)} cg=$${Math.round(cgData.data.mcap)}`);
+      result.warnings.push(
+        `MCAP_DIVERGENCE_${Math.round(ratio * 100)}%: dex=$${Math.round(dexData.data.mcap)} cg=$${Math.round(cgData.data.mcap)}`,
+      );
     }
   }
 
   // 3d: Check internal DB for existing data
   let existing = null;
   try {
-    existing = db.prepare(
-      'SELECT * FROM verified_snapshots WHERE contract_address = ? AND chain = ?'
-    ).get(contractAddress, chain);
-  } catch { /* table may not exist yet */ }
+    existing = db
+      .prepare(
+        "SELECT * FROM verified_snapshots WHERE contract_address = ? AND chain = ?",
+      )
+      .get(contractAddress, chain);
+  } catch {
+    /* table may not exist yet */
+  }
 
   if (existing) {
     result.data = { previousSnapshot: existing };
     // Check if mcap changed >50% since last verification
     if (existing.mcap && dexData?.data?.mcap) {
-      const change = Math.abs(dexData.data.mcap - existing.mcap) / existing.mcap;
-      if (change > 0.50) {
-        result.warnings.push(`MCAP_CHANGED_${Math.round(change * 100)}%_SINCE_LAST_VERIFY`);
+      const change =
+        Math.abs(dexData.data.mcap - existing.mcap) / existing.mcap;
+      if (change > 0.5) {
+        result.warnings.push(
+          `MCAP_CHANGED_${Math.round(change * 100)}%_SINCE_LAST_VERIFY`,
+        );
       }
     }
     // Check if name changed
     if (existing.token_name && dexData?.data?.name) {
-      if (existing.token_name.toLowerCase() !== dexData.data.name.toLowerCase()) {
+      if (
+        existing.token_name.toLowerCase() !== dexData.data.name.toLowerCase()
+      ) {
         result.pass = false;
-        result.warnings.push(`NAME_CHANGED: was="${existing.token_name}" now="${dexData.data.name}"`);
+        result.warnings.push(
+          `NAME_CHANGED: was="${existing.token_name}" now="${dexData.data.name}"`,
+        );
       }
     }
   }
 
   // 3e: Pump.fun flag
   if (isPumpFun(contractAddress)) {
-    result.warnings.push('PUMP_FUN_TOKEN_DETECTED');
+    result.warnings.push("PUMP_FUN_TOKEN_DETECTED");
   }
 
   // 3f: Suspicious mcap/liquidity ratio
   if (dexData?.data?.mcapLiquidityRatio > MCAP_LIQUIDITY_SUSPICIOUS_RATIO) {
-    result.warnings.push(`MCAP_LIQ_RATIO_SUSPICIOUS_${dexData.data.mcapLiquidityRatio}x`);
+    result.warnings.push(
+      `MCAP_LIQ_RATIO_SUSPICIOUS_${dexData.data.mcapLiquidityRatio}x`,
+    );
   }
 
   return result;
@@ -272,20 +321,30 @@ async function verifyToken(contractAddress, chain) {
     overall: VERIFICATION_STATUS.QUARANTINED,
     mismatches: [],
     verified_at: now,
-    evidence: {}
+    evidence: {},
   };
 
   // CHECK 1: DexScreener
-  results.check1_dexscreener = await verifyViaDexScreener(contractAddress, chain);
+  results.check1_dexscreener = await verifyViaDexScreener(
+    contractAddress,
+    chain,
+  );
   results.evidence.dexscreener = results.check1_dexscreener.data;
 
   // CHECK 2: CoinGecko (pass dexData for symbol-based fallback)
-  results.check2_crossref = await verifyViaCoinGecko(contractAddress, chain, results.check1_dexscreener);
+  results.check2_crossref = await verifyViaCoinGecko(
+    contractAddress,
+    chain,
+    results.check1_dexscreener,
+  );
   results.evidence.coingecko = results.check2_crossref.data;
 
   // CHECK 3: Internal consistency (needs check1 + check2 data)
   results.check3_consistency = await verifyInternalConsistency(
-    contractAddress, chain, results.check1_dexscreener, results.check2_crossref
+    contractAddress,
+    chain,
+    results.check1_dexscreener,
+    results.check2_crossref,
   );
 
   // Collect all mismatches
@@ -315,16 +374,22 @@ async function verifyToken(contractAddress, chain) {
   await logVerification(results);
 
   // If VERIFIED, save snapshot
-  if (results.overall === VERIFICATION_STATUS.VERIFIED && results.check1_dexscreener.data) {
+  if (
+    results.overall === VERIFICATION_STATUS.VERIFIED &&
+    results.check1_dexscreener.data
+  ) {
     await saveSnapshot(contractAddress, chain, results);
   }
 
   // If QUARANTINED, add to quarantine table
   if (results.overall === VERIFICATION_STATUS.QUARANTINED) {
-    await quarantineToken(contractAddress, chain,
+    await quarantineToken(
+      contractAddress,
+      chain,
       results.check1_dexscreener.data?.name,
       results.check1_dexscreener.data?.symbol,
-      allWarnings.join('; '));
+      allWarnings.join("; "),
+    );
   }
 
   return results;
@@ -333,15 +398,18 @@ async function verifyToken(contractAddress, chain) {
 async function logVerification(results) {
   try {
     const db = getDB();
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO verification_log (
         contract_address, chain, token_name, token_symbol,
         check1_pass, check1_data, check2_pass, check2_data,
         check3_pass, check3_data, overall_status, mismatches,
         evidence, verified_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      results.contract_address, results.chain,
+    `,
+    ).run(
+      results.contract_address,
+      results.chain,
       results.check1_dexscreener?.data?.name || null,
       results.check1_dexscreener?.data?.symbol || null,
       results.check1_dexscreener?.pass ? 1 : 0,
@@ -353,10 +421,10 @@ async function logVerification(results) {
       results.overall,
       JSON.stringify(results.mismatches),
       JSON.stringify(results.evidence),
-      results.verified_at
+      results.verified_at,
     );
   } catch (e) {
-    console.error('[data-verifier] Failed to log verification:', e.message);
+    console.error("[data-verifier] Failed to log verification:", e.message);
   }
 }
 
@@ -364,9 +432,13 @@ async function saveSnapshot(contractAddress, chain, results) {
   try {
     const db = getDB();
     const d = results.check1_dexscreener.data;
-    const expiresAt = new Date(Date.now() + MAX_AGE_SECONDS * 1000).toISOString().replace('T', ' ').replace('Z', '');
+    const expiresAt = new Date(Date.now() + MAX_AGE_SECONDS * 1000)
+      .toISOString()
+      .replace("T", " ")
+      .replace("Z", "");
 
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO verified_snapshots (
         contract_address, chain, token_name, token_symbol,
         mcap, liquidity, dex_count, pair_age_hours, price_usd,
@@ -382,31 +454,44 @@ async function saveSnapshot(contractAddress, chain, results) {
         dexscreener_url = excluded.dexscreener_url,
         coingecko_url = excluded.coingecko_url,
         verified_at = excluded.verified_at, expires_at = excluded.expires_at
-    `).run(
-      contractAddress, chain, d.name, d.symbol,
-      d.mcap, d.liquidity, d.pairCount, d.pairAgeHours,
-      d.price, d.volume24h, d.mcapLiquidityRatio,
+    `,
+    ).run(
+      contractAddress,
+      chain,
+      d.name,
+      d.symbol,
+      d.mcap,
+      d.liquidity,
+      d.pairCount,
+      d.pairAgeHours,
+      d.price,
+      d.volume24h,
+      d.mcapLiquidityRatio,
       isPumpFun(contractAddress) ? 1 : 0,
-      d.url, results.check2_crossref?.data?.url || null,
-      results.verified_at.replace('T', ' ').replace('Z', ''), expiresAt
+      d.url,
+      results.check2_crossref?.data?.url || null,
+      results.verified_at.replace("T", " ").replace("Z", ""),
+      expiresAt,
     );
   } catch (e) {
-    console.error('[data-verifier] Failed to save snapshot:', e.message);
+    console.error("[data-verifier] Failed to save snapshot:", e.message);
   }
 }
 
 async function quarantineToken(contractAddress, chain, name, symbol, reason) {
   try {
     const db = getDB();
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO quarantined_tokens (contract_address, chain, token_name, token_symbol, reason, quarantined_at)
       VALUES (?, ?, ?, ?, ?, datetime('now'))
       ON CONFLICT(contract_address, chain) DO UPDATE SET
         reason = excluded.reason, quarantined_at = excluded.quarantined_at,
         resolved_at = NULL, resolved_by = NULL
-    `).run(contractAddress, chain, name || null, symbol || null, reason);
+    `,
+    ).run(contractAddress, chain, name || null, symbol || null, reason);
   } catch (e) {
-    console.error('[data-verifier] Failed to quarantine:', e.message);
+    console.error("[data-verifier] Failed to quarantine:", e.message);
   }
 }
 
@@ -414,49 +499,96 @@ async function quarantineToken(contractAddress, chain, name, symbol, reason) {
 function isVerified(contractAddress, chain) {
   try {
     const db = getDB();
-    const snapshot = db.prepare(
-      'SELECT * FROM verified_snapshots WHERE contract_address = ? AND chain = ? AND expires_at > datetime(\'now\')'
-    ).get(contractAddress, chain);
+    const snapshot = db
+      .prepare(
+        "SELECT * FROM verified_snapshots WHERE contract_address = ? AND chain = ? AND expires_at > datetime('now')",
+      )
+      .get(contractAddress, chain);
     return snapshot ? { verified: true, snapshot } : { verified: false };
-  } catch { return { verified: false }; }
+  } catch {
+    return { verified: false };
+  }
 }
 
 // Check if a token is quarantined
 function isQuarantined(contractAddress, chain) {
   try {
     const db = getDB();
-    const q = db.prepare(
-      'SELECT * FROM quarantined_tokens WHERE contract_address = ? AND chain = ? AND resolved_at IS NULL'
-    ).get(contractAddress, chain);
+    const q = db
+      .prepare(
+        "SELECT * FROM quarantined_tokens WHERE contract_address = ? AND chain = ? AND resolved_at IS NULL",
+      )
+      .get(contractAddress, chain);
     return q ? { quarantined: true, reason: q.reason } : { quarantined: false };
-  } catch { return { quarantined: false }; }
+  } catch {
+    return { quarantined: false };
+  }
 }
 
 // Resolve a quarantine (admin action)
 function resolveQuarantine(contractAddress, chain, resolvedBy) {
   const db = getDB();
-  return db.prepare(
-    "UPDATE quarantined_tokens SET resolved_at = datetime('now'), resolved_by = ? WHERE contract_address = ? AND chain = ? AND resolved_at IS NULL"
-  ).run(resolvedBy, contractAddress, chain);
+  return db
+    .prepare(
+      "UPDATE quarantined_tokens SET resolved_at = datetime('now'), resolved_by = ? WHERE contract_address = ? AND chain = ? AND resolved_at IS NULL",
+    )
+    .run(resolvedBy, contractAddress, chain);
 }
 
 // Get verification stats
 function getVerificationStats() {
   const db = getDB();
-  const total = db.prepare('SELECT COUNT(*) as c FROM verification_log').get().c;
-  const verified = db.prepare("SELECT COUNT(*) as c FROM verification_log WHERE overall_status = 'VERIFIED'").get().c;
-  const quarantined = db.prepare("SELECT COUNT(*) as c FROM verification_log WHERE overall_status = 'QUARANTINED'").get().c;
-  const unverified = db.prepare("SELECT COUNT(*) as c FROM verification_log WHERE overall_status = 'UNVERIFIED'").get().c;
-  const activeQuarantines = db.prepare('SELECT COUNT(*) as c FROM quarantined_tokens WHERE resolved_at IS NULL').get().c;
-  const activeSnapshots = db.prepare("SELECT COUNT(*) as c FROM verified_snapshots WHERE expires_at > datetime('now')").get().c;
+  const total = db
+    .prepare("SELECT COUNT(*) as c FROM verification_log")
+    .get().c;
+  const verified = db
+    .prepare(
+      "SELECT COUNT(*) as c FROM verification_log WHERE overall_status = 'VERIFIED'",
+    )
+    .get().c;
+  const quarantined = db
+    .prepare(
+      "SELECT COUNT(*) as c FROM verification_log WHERE overall_status = 'QUARANTINED'",
+    )
+    .get().c;
+  const unverified = db
+    .prepare(
+      "SELECT COUNT(*) as c FROM verification_log WHERE overall_status = 'UNVERIFIED'",
+    )
+    .get().c;
+  const activeQuarantines = db
+    .prepare(
+      "SELECT COUNT(*) as c FROM quarantined_tokens WHERE resolved_at IS NULL",
+    )
+    .get().c;
+  const activeSnapshots = db
+    .prepare(
+      "SELECT COUNT(*) as c FROM verified_snapshots WHERE expires_at > datetime('now')",
+    )
+    .get().c;
 
-  return { total_checks: total, verified, quarantined, unverified, active_quarantines: activeQuarantines, active_snapshots: activeSnapshots, pass_rate: total > 0 ? Math.round((verified / total) * 100) : 0 };
+  return {
+    total_checks: total,
+    verified,
+    quarantined,
+    unverified,
+    active_quarantines: activeQuarantines,
+    active_snapshots: activeSnapshots,
+    pass_rate: total > 0 ? Math.round((verified / total) * 100) : 0,
+  };
 }
 
 module.exports = {
-  verifyToken, isVerified, isQuarantined, resolveQuarantine,
-  getVerificationStats, isPumpFun,
-  VERIFICATION_STATUS, MAX_AGE_SECONDS,
+  verifyToken,
+  isVerified,
+  isQuarantined,
+  resolveQuarantine,
+  getVerificationStats,
+  isPumpFun,
+  VERIFICATION_STATUS,
+  MAX_AGE_SECONDS,
   // Exposed for testing
-  verifyViaDexScreener, verifyViaCoinGecko, verifyInternalConsistency,
+  verifyViaDexScreener,
+  verifyViaCoinGecko,
+  verifyInternalConsistency,
 };

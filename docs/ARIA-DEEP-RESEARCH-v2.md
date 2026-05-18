@@ -13,9 +13,13 @@ license: Internal — SolCex Exchange
 ---
 
 # ARIA — Deep Research & Analysis
+
 ## Autonomous Relay Intelligence Agent
+
 ## Post-Sprint Implementation Plan
+
 ## Day 41 | Mar 29, 2026
+
 ## Bismillah 🤲
 
 ---
@@ -25,12 +29,14 @@ license: Internal — SolCex Exchange
 From the Sprint Day 8 roadmap (Mar 6, 2026):
 
 **ARIA** = Autonomous Relay Intelligence Agent
+
 - A dedicated Akash docker (#3) acting as the "data spine"
 - Aggregates on-chain data from chain-specific agents
 - Feeds enriched intel into Buzz's scoring pipeline
 - "Think of it as Buzz's Bloomberg terminal"
 
 **The Fleet Vision:**
+
 ```
 Chain Agents (each a separate Akash docker):
 ├── EVM-Agent (Akash #4) — ETH, Base, Arbitrum
@@ -53,6 +59,7 @@ Sentinel (Akash #2 → now Hetzner) — Health monitoring
 ```
 
 **Original ARIA Filter Criteria (SolCex):**
+
 - 24h volume > $500K
 - Liquidity > $200K
 - Age > 7 days
@@ -71,14 +78,17 @@ deprioritized because revenue and honest scoring were more urgent.
 ## 2. WHAT CHANGED SINCE THE ORIGINAL VISION
 
 ### Infrastructure Migration
+
 - **Akash → Hetzner CX43**: All services now on single Hetzner server
 - No more multi-docker fleet — everything runs under `ah` management
 - Claude Code Opus 4.6 running 24/7 in tmux as Buzz's brain
 - Cost: $9.99/mo Hetzner (was ~$10/mo across multiple Akash deployments)
 
 ### Intelligence Sources Expanded (13 → 29)
+
 The original vision assumed ARIA would ADD chain-specific data.
 But Buzz already pulls from 29 sources WITHOUT ARIA:
+
 - DexScreener (all chains via API)
 - DexTools (now via dev-browser)
 - Jupiter (Solana — 3 endpoints: search, /recent, /cooking)
@@ -89,14 +99,16 @@ But Buzz already pulls from 29 sources WITHOUT ARIA:
 - Bags.fm (168K Solana tokens)
 - Colosseum Copilot (5,400 hackathon projects)
 - RugCheck (Solana safety)
-- + 19 more sources
+- - 19 more sources
 
 ### Browser Tools Added
+
 - **dev-browser**: Structured extraction, persistent pages, scriptable
 - **Browser Use CLI**: Screenshots, visual verification
 - Together they cover sites with NO APIs (DexTools, project websites, social profiles)
 
 ### Scoring Engine Calibrated
+
 - 8 BD Screening rules in code
 - Honest re-score complete (254 tokens, 0 HOT — correct)
 - ScoreStorage v2 on Base mainnet (3 corrected scores on-chain)
@@ -111,6 +123,7 @@ a central aggregator. That architecture is OVERKILL for current Buzz.
 **ARIA v2 is not a separate container. It's a SERVICE LAYER inside Buzz.**
 
 ### ARIA v2 Architecture
+
 ```
 DISCOVERY SOURCES (the "chain agents" reimagined):
 ├── DexScreener API — all chains (already live)
@@ -162,16 +175,16 @@ BD SCREENING WORKFLOW (already live — 7 phases):
 
 ### Why This Is Better Than the Original Vision
 
-| Factor | Original ARIA | ARIA v2 |
-|--------|--------------|---------|
-| Infrastructure | 4-6 separate Akash dockers | 1 service module in existing Buzz |
-| Cost | ~$15-20/mo additional | $0 additional |
-| Data sources | 5 chain feeds | 29 sources + 10 browser-scraped |
-| Maintenance | Manage multiple containers | One codebase |
-| Deployment | Multiple SDL files, separate CI/CD | Single `ah restart` |
-| Chain coverage | ETH/BSC/SOL/BASE/TRON | All chains via DexScreener + specific feeds |
-| Browser enrichment | None (API only) | dev-browser for DexTools, socials, projects |
-| Compute | Multiple small containers | Hetzner CX43 (16GB RAM, 8 vCPU) |
+| Factor             | Original ARIA                      | ARIA v2                                     |
+| ------------------ | ---------------------------------- | ------------------------------------------- |
+| Infrastructure     | 4-6 separate Akash dockers         | 1 service module in existing Buzz           |
+| Cost               | ~$15-20/mo additional              | $0 additional                               |
+| Data sources       | 5 chain feeds                      | 29 sources + 10 browser-scraped             |
+| Maintenance        | Manage multiple containers         | One codebase                                |
+| Deployment         | Multiple SDL files, separate CI/CD | Single `ah restart`                         |
+| Chain coverage     | ETH/BSC/SOL/BASE/TRON              | All chains via DexScreener + specific feeds |
+| Browser enrichment | None (API only)                    | dev-browser for DexTools, socials, projects |
+| Compute            | Multiple small containers          | Hetzner CX43 (16GB RAM, 8 vCPU)             |
 
 ---
 
@@ -185,14 +198,14 @@ Every token from every source gets normalized into this schema:
   "chain": "solana",
   "symbol": "TOKEN",
   "name": "Token Name",
-  
+
   "discovery": {
     "source": "bags.fm",
     "discovered_at": "2026-03-29T06:00:00Z",
     "discovery_type": "graduated",
     "raw_data": {}
   },
-  
+
   "market": {
     "price_usd": 0.0123,
     "mcap_circulating": 5200000,
@@ -206,7 +219,7 @@ Every token from every source gets normalized into this schema:
     "exchanges": ["Raydium", "Orca", "Jupiter"],
     "source": "dexscreener+dextools"
   },
-  
+
   "safety": {
     "token_sniffer": 85,
     "token_sniffer_issues": [],
@@ -218,7 +231,7 @@ Every token from every source gets normalized into this schema:
     "contract_verified": true,
     "source": "dexscreener+dev-browser"
   },
-  
+
   "social": {
     "twitter_handle": "@tokenproject",
     "twitter_followers": 12500,
@@ -229,7 +242,7 @@ Every token from every source gets normalized into this schema:
     "github": "https://github.com/tokenproject",
     "source": "dev-browser"
   },
-  
+
   "team": {
     "doxxed": true,
     "founder": "@founder_handle",
@@ -238,7 +251,7 @@ Every token from every source gets normalized into this schema:
     "email": "team@tokenproject.io",
     "source": "dev-browser"
   },
-  
+
   "technical": {
     "github_stars": 45,
     "github_last_commit": "2026-03-25",
@@ -247,7 +260,7 @@ Every token from every source gets normalized into this schema:
     "has_documentation": true,
     "source": "dev-browser+github-api"
   },
-  
+
   "classification": {
     "bd_class": "BD_SWEET_SPOT",
     "composite_score": 74,
@@ -259,7 +272,7 @@ Every token from every source gets normalized into this schema:
     "dual_gate": "PASS",
     "outreach_ready": true
   },
-  
+
   "metadata": {
     "bags_fm": { "status": "graduated", "holders": 450 },
     "colosseum": { "hackathon": "Frontier Spring", "result": "2nd place" },
@@ -274,40 +287,44 @@ Every token from every source gets normalized into this schema:
 ## 5. IMPLEMENTATION PLAN — POST-SPRINT
 
 ### Week 1 (Apr 1-7): ARIA Service Foundation
-| Task | Effort | Output |
-|------|--------|--------|
-| Create `/services/aria/` module in Buzz API | 2h | Service scaffold |
-| Build unified token schema (above) | 1h | aria_candidates table |
-| Build `/api/v1/aria/discover` endpoint | 3h | Multi-source discovery trigger |
-| Wire DexScreener + Jupiter + CoinGecko + Bags.fm | 2h | 4 sources feeding ARIA |
-| Build `/api/v1/aria/filter` with BD Sweet Spot criteria | 1h | Automated filtering |
-| Add ARIA discovery cron (06:00 UTC daily) | 30min | Automated daily scan |
+
+| Task                                                    | Effort | Output                         |
+| ------------------------------------------------------- | ------ | ------------------------------ |
+| Create `/services/aria/` module in Buzz API             | 2h     | Service scaffold               |
+| Build unified token schema (above)                      | 1h     | aria_candidates table          |
+| Build `/api/v1/aria/discover` endpoint                  | 3h     | Multi-source discovery trigger |
+| Wire DexScreener + Jupiter + CoinGecko + Bags.fm        | 2h     | 4 sources feeding ARIA         |
+| Build `/api/v1/aria/filter` with BD Sweet Spot criteria | 1h     | Automated filtering            |
+| Add ARIA discovery cron (06:00 UTC daily)               | 30min  | Automated daily scan           |
 
 ### Week 2 (Apr 8-14): Browser Enrichment Layer
-| Task | Effort | Output |
-|------|--------|--------|
-| DexTools scraper script (dev-browser) | 2h | Circulating MCap, DEXTscore |
-| Contact screening script (dev-browser) | 2h | Team, socials, email extraction |
-| CoinGecko recently added scraper | 1h | Quality discovery source |
-| DexScreener boosts scraper | 1h | Projects spending money |
-| Wire all browser scripts into ARIA enrich pipeline | 2h | Full enrichment flow |
-| Build `/api/v1/aria/enrich/:address` endpoint | 1h | On-demand deep enrichment |
+
+| Task                                               | Effort | Output                          |
+| -------------------------------------------------- | ------ | ------------------------------- |
+| DexTools scraper script (dev-browser)              | 2h     | Circulating MCap, DEXTscore     |
+| Contact screening script (dev-browser)             | 2h     | Team, socials, email extraction |
+| CoinGecko recently added scraper                   | 1h     | Quality discovery source        |
+| DexScreener boosts scraper                         | 1h     | Projects spending money         |
+| Wire all browser scripts into ARIA enrich pipeline | 2h     | Full enrichment flow            |
+| Build `/api/v1/aria/enrich/:address` endpoint      | 1h     | On-demand deep enrichment       |
 
 ### Week 3 (Apr 15-21): Scoring Integration
-| Task | Effort | Output |
-|------|--------|--------|
-| Wire ARIA candidates → scoring pipeline auto-trigger | 2h | Discover → Score automated |
-| Replace hardcoded stubs with browser-extracted data | 3h | Real deployer, social, tech scores |
-| Build ARIA feed dashboard on buzzbd.ai | 3h | Visual feed for Ogie |
-| Add War Room commands (/aria-scan, /aria-feed, /aria-enrich) | 2h | War Room control |
+
+| Task                                                         | Effort | Output                             |
+| ------------------------------------------------------------ | ------ | ---------------------------------- |
+| Wire ARIA candidates → scoring pipeline auto-trigger         | 2h     | Discover → Score automated         |
+| Replace hardcoded stubs with browser-extracted data          | 3h     | Real deployer, social, tech scores |
+| Build ARIA feed dashboard on buzzbd.ai                       | 3h     | Visual feed for Ogie               |
+| Add War Room commands (/aria-scan, /aria-feed, /aria-enrich) | 2h     | War Room control                   |
 
 ### Week 4 (Apr 22-28): Full Pipeline
-| Task | Effort | Output |
-|------|--------|--------|
-| End-to-end test: discover → enrich → score → classify → contact | 2h | Full flow validated |
-| Wire to BD Screening Workflow Phase 4 auto-trigger | 1h | Contact screening automated |
-| Build Sunday Report auto-generation from ARIA feed | 2h | Weekly report from data |
-| Performance optimization (caching, dedup, rate limits) | 2h | Stable at scale |
+
+| Task                                                            | Effort | Output                      |
+| --------------------------------------------------------------- | ------ | --------------------------- |
+| End-to-end test: discover → enrich → score → classify → contact | 2h     | Full flow validated         |
+| Wire to BD Screening Workflow Phase 4 auto-trigger              | 1h     | Contact screening automated |
+| Build Sunday Report auto-generation from ARIA feed              | 2h     | Weekly report from data     |
+| Performance optimization (caching, dedup, rate limits)          | 2h     | Stable at scale             |
 
 **Total: ~32 hours over 4 weeks**
 
@@ -316,6 +333,7 @@ Every token from every source gets normalized into this schema:
 ## 6. ARIA v2 vs ORIGINAL — WHAT WE KEEP, WHAT WE DROP
 
 ### KEEP (from original vision):
+
 - ✅ Cross-chain data normalization
 - ✅ SolCex filter criteria (updated with BD Screening rules)
 - ✅ Unified feed into scoring pipeline
@@ -324,6 +342,7 @@ Every token from every source gets normalized into this schema:
 - ✅ POST to pipeline/add pattern
 
 ### DROP (no longer needed):
+
 - ❌ Separate Akash dockers per chain (DexScreener API covers all chains)
 - ❌ EVM-Agent, BNB-Agent, SOL-Agent containers (dev-browser replaces)
 - ❌ ARIA as separate container (becomes service module in Buzz)
@@ -331,6 +350,7 @@ Every token from every source gets normalized into this schema:
 - ❌ Multi-container orchestration complexity
 
 ### ADD (new capabilities):
+
 - ✅ dev-browser enrichment (DexTools, socials, project websites)
 - ✅ Bags.fm as early warning (168K tokens, pre-graduation tracking)
 - ✅ Colosseum Copilot (5,400 hackathon projects with real teams)
@@ -364,6 +384,7 @@ Together: autonomous end-to-end listing pipeline.
 ## 8. COMPETITIVE EDGE — WHY THIS MATTERS
 
 ### What Nobody Else Has:
+
 1. **29 API sources + 10 browser-scraped sources** = deepest data coverage
 2. **dev-browser for DexTools** = circulating MCap data nobody else extracts
 3. **Bags.fm 168K tokens** = early warning system for pre-graduation projects
@@ -374,7 +395,9 @@ Together: autonomous end-to-end listing pipeline.
 8. **Pro Max unlimited compute** = no cost constraint per agent or per query
 
 ### The IZHC Benchmark:
+
 ARIA v2 moves Buzz's ZHC readiness from 51.3% toward 65%+:
+
 - Revenue: signals earning, oracle queries coming
 - Agent autonomy: ARIA runs discovery without Ogie
 - Machine-readable: /agent endpoint + ARIA API
@@ -391,8 +414,8 @@ triggers honest scoring, and feeds the Listing Protocol oracle.**
 
 ---
 
-*ARIA was designed as a fleet of containers.*
-*ARIA v2 is a service layer that leverages everything we've already built.*
-*The infrastructure is here. The sources are connected. The scoring is honest.*
-*Now we wire them together into a single, unified intelligence feed.*
-*Built by Chef | Powered by Opus | Bismillah* 🤲
+_ARIA was designed as a fleet of containers._
+_ARIA v2 is a service layer that leverages everything we've already built._
+_The infrastructure is here. The sources are connected. The scoring is honest._
+_Now we wire them together into a single, unified intelligence feed._
+_Built by Chef | Powered by Opus | Bismillah_ 🤲

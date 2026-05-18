@@ -15,6 +15,7 @@
 ### Task 1: Python Project Scaffolding
 
 **Files:**
+
 - Create: `pyproject.toml`
 - Create: `requirements-dev.txt`
 
@@ -60,6 +61,7 @@ git commit -m "chore: add Python project config and test dependencies"
 ### Task 2: Test — BaseAgent Cannot Be Instantiated Directly
 
 **Files:**
+
 - Create: `src/agents/tests/test_base_agent.py`
 
 **Step 1: Write the failing test**
@@ -116,6 +118,7 @@ git commit -m "feat: add BaseAgent ABC — cannot instantiate directly"
 ### Task 3: Test — Constructor Sets Name and Idle Status
 
 **Files:**
+
 - Modify: `src/agents/tests/test_base_agent.py`
 - Modify: `src/agents/base_agent.py`
 
@@ -157,7 +160,7 @@ from typing import Dict
 Run: `python3 -m pytest src/agents/tests/test_base_agent.py::TestBaseAgentInit -v`
 Expected: FAIL — `AttributeError: 'StubAgent' object has no attribute 'status'`
 
-**Step 3: Add status and events to __init__**
+**Step 3: Add status and events to **init\*\*\*\*
 
 Update `BaseAgent.__init__` in `src/agents/base_agent.py`:
 
@@ -185,6 +188,7 @@ git commit -m "feat: BaseAgent init with name, status, events"
 ### Task 4: Test — Event Logging with Typed Events
 
 **Files:**
+
 - Modify: `src/agents/tests/test_base_agent.py`
 - Modify: `src/agents/base_agent.py`
 
@@ -288,6 +292,7 @@ git commit -m "feat: add typed event logging (action/observation/error/decision)
 ### Task 5: Test — JSONL Event Persistence
 
 **Files:**
+
 - Modify: `src/agents/tests/test_base_agent.py`
 - Modify: `src/agents/base_agent.py`
 
@@ -378,6 +383,7 @@ git commit -m "feat: auto-persist events to JSONL on disk"
 ### Task 6: Test — Scratchpad Read/Write
 
 **Files:**
+
 - Modify: `src/agents/tests/test_base_agent.py`
 - Modify: `src/agents/base_agent.py`
 
@@ -456,6 +462,7 @@ git commit -m "feat: add file-based scratchpad read/write"
 ### Task 7: Test — run() Lifecycle Wrapper
 
 **Files:**
+
 - Modify: `src/agents/tests/test_base_agent.py`
 - Modify: `src/agents/base_agent.py`
 
@@ -555,6 +562,7 @@ git commit -m "feat: add run() lifecycle wrapper with status transitions"
 ### Task 8: Test — context() Method
 
 **Files:**
+
 - Modify: `src/agents/tests/test_base_agent.py`
 - Modify: `src/agents/base_agent.py`
 
@@ -616,7 +624,7 @@ class TestContext:
 Run: `python3 -m pytest src/agents/tests/test_base_agent.py::TestContext -v`
 Expected: FAIL — `AttributeError: 'StubAgent' object has no attribute 'context'`
 
-**Step 3: Implement context() and _list_scratchpad_keys()**
+**Step 3: Implement context() and \_list_scratchpad_keys()**
 
 Add to `BaseAgent` in `src/agents/base_agent.py`:
 

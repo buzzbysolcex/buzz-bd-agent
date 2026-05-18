@@ -15,12 +15,12 @@ Sub-Agents → Context Engine → [Supermemory Recall] → Decision Engine → [
 
 ### Components Modified
 
-| File | Change |
-|------|--------|
-| `entrypoint.sh` | Block 11e: installs OpenClaw plugin, sets env vars |
-| `api/lib/context-engine.js` | `_recallFromSupermemory()`, `captureToSupermemory()`, `assemble()` made async |
-| `api/lib/decision-engine.js` | Captures decisions after SQLite write, awaits async `assemble()` |
-| `api/routes/strategy.js` | `/context/:token` route awaits async `assemble()` |
+| File                         | Change                                                                        |
+| ---------------------------- | ----------------------------------------------------------------------------- |
+| `entrypoint.sh`              | Block 11e: installs OpenClaw plugin, sets env vars                            |
+| `api/lib/context-engine.js`  | `_recallFromSupermemory()`, `captureToSupermemory()`, `assemble()` made async |
+| `api/lib/decision-engine.js` | Captures decisions after SQLite write, awaits async `assemble()`              |
+| `api/routes/strategy.js`     | `/context/:token` route awaits async `assemble()`                             |
 
 ### Data Flow
 
@@ -40,14 +40,14 @@ This single key enables both the OpenClaw plugin (auto-recall/capture in chat se
 
 ### Auto-set Variables (by entrypoint.sh)
 
-| Variable | Value | Purpose |
-|----------|-------|---------|
-| `SUPERMEMORY_CONTAINER_TAG` | `buzz_bd_agent` | Namespace for all memories |
-| `AUTO_RECALL` | `true` | OpenClaw plugin auto-recalls in chat |
-| `AUTO_CAPTURE` | `true` | OpenClaw plugin auto-captures in chat |
-| `MAX_RECALL_RESULTS` | `5` | Limit recall to 5 results |
-| `PROFILE_FREQUENCY` | `25` | Profile update every 25 interactions |
-| `CAPTURE_MODE` | `all` | Capture all interactions |
+| Variable                    | Value           | Purpose                               |
+| --------------------------- | --------------- | ------------------------------------- |
+| `SUPERMEMORY_CONTAINER_TAG` | `buzz_bd_agent` | Namespace for all memories            |
+| `AUTO_RECALL`               | `true`          | OpenClaw plugin auto-recalls in chat  |
+| `AUTO_CAPTURE`              | `true`          | OpenClaw plugin auto-captures in chat |
+| `MAX_RECALL_RESULTS`        | `5`             | Limit recall to 5 results             |
+| `PROFILE_FREQUENCY`         | `25`            | Profile update every 25 interactions  |
+| `CAPTURE_MODE`              | `all`           | Capture all interactions              |
 
 ## Privacy & Security Rules
 
@@ -61,6 +61,7 @@ The following data is **NEVER** captured to Supermemory:
 - Any secret values (`secret=...`)
 
 When sensitive data is detected, the capture is silently skipped with a log line:
+
 ```
 [Supermemory] BLOCKED: Sensitive data
 ```
@@ -78,10 +79,13 @@ All Supermemory calls use try/catch with timing logs for observability.
 ## Boot Banner
 
 The boot banner includes a Supermemory status line:
+
 ```
 Supermemory:   ✅ ACTIVE (container: buzz_bd_agent)
 ```
+
 or
+
 ```
 Supermemory:   ❌ DISABLED (SUPERMEMORY_OPENCLAW_API_KEY not set)
 ```

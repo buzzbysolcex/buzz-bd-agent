@@ -10,10 +10,10 @@
  * Buzz BD Agent | SolCex Exchange
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const crypto = require('crypto');
-const { getDB } = require('../db');
+const crypto = require("crypto");
+const { getDB } = require("../db");
 
 // ─── Create rate limit table (lazy init on first request) ─────────────────
 let tableReady = false;
@@ -41,80 +41,96 @@ function ensureTable() {
  * Classify token by score
  */
 function classify(score) {
-  if (score >= 80) return 'HOT';
-  if (score >= 70) return 'WARM';
-  if (score >= 40) return 'WATCH';
-  return 'SKIP';
+  if (score >= 80) return "HOT";
+  if (score >= 70) return "WARM";
+  if (score >= 40) return "WATCH";
+  return "SKIP";
 }
 
 /**
  * Risk level from score
  */
 function riskLevel(score) {
-  if (score >= 70) return 'LOW';
-  if (score >= 50) return 'MEDIUM';
-  if (score >= 30) return 'HIGH';
-  return 'CRITICAL';
+  if (score >= 70) return "LOW";
+  if (score >= 50) return "MEDIUM";
+  if (score >= 30) return "HIGH";
+  return "CRITICAL";
 }
 
 /**
  * Summary line from score range
  */
 function summary(score) {
-  if (score >= 80) return 'Strong fundamentals across all scoring dimensions. Rare.';
-  if (score >= 70) return 'Solid token with minor weaknesses. Worth deeper analysis.';
-  if (score >= 50) return 'Mixed signals. Some red flags detected in scoring pipeline.';
-  if (score >= 30) return 'Multiple risk factors identified. Proceed with extreme caution.';
-  return 'Failed majority of scoring criteria. High probability of loss.';
+  if (score >= 80)
+    return "Strong fundamentals across all scoring dimensions. Rare.";
+  if (score >= 70)
+    return "Solid token with minor weaknesses. Worth deeper analysis.";
+  if (score >= 50)
+    return "Mixed signals. Some red flags detected in scoring pipeline.";
+  if (score >= 30)
+    return "Multiple risk factors identified. Proceed with extreme caution.";
+  return "Failed majority of scoring criteria. High probability of loss.";
 }
 
 /**
  * Hash IP for privacy-preserving rate limiting
  */
 function hashIP(ip) {
-  return crypto.createHash('sha256').update(ip || 'unknown').digest('hex').slice(0, 16);
+  return crypto
+    .createHash("sha256")
+    .update(ip || "unknown")
+    .digest("hex")
+    .slice(0, 16);
 }
 
 // ─── GET /free/:address — Public free score lookup ───
-router.get('/free/:address', (req, res) => {
+router.get("/free/:address", (req, res) => {
   try {
     ensureTable();
     const db = getDB();
     const { address } = req.params;
-    const clientIp = req.headers['x-forwarded-for'] || req.ip || req.connection?.remoteAddress || '';
+    const clientIp =
+      req.headers["x-forwarded-for"] ||
+      req.ip ||
+      req.connection?.remoteAddress ||
+      "";
     const ipHash = hashIP(clientIp);
 
     // Rate limit: max 10 per IP per day
-    const today = new Date().toISOString().split('T')[0];
-    const count = db.prepare(
-      `SELECT COUNT(*) as cnt FROM free_score_requests
-       WHERE ip_hash = ? AND created_at >= ?`
-    ).get(ipHash, today + 'T00:00:00');
+    const today = new Date().toISOString().split("T")[0];
+    const count = db
+      .prepare(
+        `SELECT COUNT(*) as cnt FROM free_score_requests
+       WHERE ip_hash = ? AND created_at >= ?`,
+      )
+      .get(ipHash, today + "T00:00:00");
 
     if (count && count.cnt >= 10) {
       return res.status(429).json({
-        error: 'Rate limit exceeded',
-        limit: '10 free scores per day',
-        upgrade: 'API key access at buzzbd.ai removes limits'
+        error: "Rate limit exceeded",
+        limit: "10 free scores per day",
+        upgrade: "API key access at buzzbd.ai removes limits",
       });
     }
 
     // Log the request
     db.prepare(
-      `INSERT INTO free_score_requests (ip_hash, address) VALUES (?, ?)`
+      `INSERT INTO free_score_requests (ip_hash, address) VALUES (?, ?)`,
     ).run(ipHash, address);
 
     // Look up token
-    const token = db.prepare(
-      `SELECT address, ticker, name, chain, score, stage, updated_at
-       FROM pipeline_tokens WHERE address = ?`
-    ).get(address);
+    const token = db
+      .prepare(
+        `SELECT address, ticker, name, chain, score, stage, updated_at
+       FROM pipeline_tokens WHERE address = ?`,
+      )
+      .get(address);
 
     if (!token || token.score == null) {
       return res.status(404).json({
-        error: 'Token not in pipeline',
-        hint: 'Submit at buzzbd.ai/score',
-        address
+        error: "Token not in pipeline",
+        hint: "Submit at buzzbd.ai/score",
+        address,
       });
     }
 
@@ -130,12 +146,12 @@ router.get('/free/:address', (req, res) => {
       risk_level: riskLevel(score),
       summary: summary(score),
       scored_at: token.updated_at,
-      upgrade: 'Full 11-factor analysis + 1000-agent simulation at buzzbd.ai',
-      provider: 'Buzz BD Agent | SolCex Exchange'
+      upgrade: "Full 11-factor analysis + 1000-agent simulation at buzzbd.ai",
+      provider: "Buzz BD Agent | SolCex Exchange",
     });
   } catch (err) {
-    console.error('[free-score] Error:', err.message);
-    res.status(500).json({ error: 'Internal error', message: err.message });
+    console.error("[free-score] Error:", err.message);
+    res.status(500).json({ error: "Internal error", message: err.message });
   }
 });
 
@@ -143,13 +159,13 @@ router.get('/free/:address', (req, res) => {
 let scoresCache = null;
 let scoresCacheTime = 0;
 
-router.get('/scores', (req, res) => {
+router.get("/scores", (req, res) => {
   try {
     const db = getDB();
     const now = Date.now();
 
     // 5-minute cache
-    if (scoresCache && (now - scoresCacheTime) < 300000) {
+    if (scoresCache && now - scoresCacheTime < 300000) {
       return res.json(scoresCache);
     }
 
@@ -159,58 +175,68 @@ router.get('/scores', (req, res) => {
     const params = [];
 
     if (chain) {
-      query += ' AND chain = ?';
+      query += " AND chain = ?";
       params.push(chain);
     }
 
-    query += ' ORDER BY score DESC LIMIT 100';
+    query += " ORDER BY score DESC LIMIT 100";
     const tokens = db.prepare(query).all(...params);
-    const total = db.prepare('SELECT COUNT(*) as c FROM pipeline_tokens WHERE score IS NOT NULL').get();
+    const total = db
+      .prepare(
+        "SELECT COUNT(*) as c FROM pipeline_tokens WHERE score IS NOT NULL",
+      )
+      .get();
 
     const result = {
-      tokens: tokens.map(t => ({
+      tokens: tokens.map((t) => ({
         address: t.address,
         ticker: t.ticker,
         name: t.name,
         chain: t.chain,
         score: t.score,
         classification: classify(t.score),
-        stage: t.stage
+        stage: t.stage,
       })),
       total: total.c,
       updated: new Date().toISOString(),
-      provider: 'Buzz BD Agent | SolCex Exchange'
+      provider: "Buzz BD Agent | SolCex Exchange",
     };
 
     scoresCache = result;
     scoresCacheTime = now;
     res.json(result);
   } catch (err) {
-    console.error('[scores] Error:', err.message);
-    res.status(500).json({ error: 'Internal error', message: err.message });
+    console.error("[scores] Error:", err.message);
+    res.status(500).json({ error: "Internal error", message: err.message });
   }
 });
 
 // ─── GET /scores/top/:n — Top N tokens ───
-router.get('/scores/top/:n', (req, res) => {
+router.get("/scores/top/:n", (req, res) => {
   try {
     const db = getDB();
     const n = Math.min(parseInt(req.params.n) || 10, 50);
-    const tokens = db.prepare(
-      `SELECT address, ticker, name, chain, score, stage, updated_at
+    const tokens = db
+      .prepare(
+        `SELECT address, ticker, name, chain, score, stage, updated_at
        FROM pipeline_tokens WHERE score IS NOT NULL
-       ORDER BY score DESC LIMIT ?`
-    ).all(n);
+       ORDER BY score DESC LIMIT ?`,
+      )
+      .all(n);
 
     res.json({
-      tokens: tokens.map(t => ({
-        address: t.address, ticker: t.ticker, name: t.name,
-        chain: t.chain, score: t.score, classification: classify(t.score)
+      tokens: tokens.map((t) => ({
+        address: t.address,
+        ticker: t.ticker,
+        name: t.name,
+        chain: t.chain,
+        score: t.score,
+        classification: classify(t.score),
       })),
-      count: tokens.length
+      count: tokens.length,
     });
   } catch (err) {
-    res.status(500).json({ error: 'Internal error', message: err.message });
+    res.status(500).json({ error: "Internal error", message: err.message });
   }
 });
 

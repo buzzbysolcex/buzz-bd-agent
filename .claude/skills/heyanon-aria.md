@@ -1,6 +1,9 @@
 # SKILL: HeyAnon MCP × ARIA Integration
+
 # Location: .claude/skills/heyanon-aria.md
+
 # Intel Source #30 | 18 chains | 45+ protocols | 128 DeFi tools
+
 # Created: March 30, 2026 (Post-Sprint)
 
 ---
@@ -52,14 +55,14 @@ Layer 4: EXECUTION (future, CEO-approved only)
 
 ## KEY MCP TOOLS FOR BUZZ (READ-ONLY)
 
-| Tool | Use Case |
-|------|----------|
-| `ask` | Natural language → any DeFi query (128 operations) |
-| `portfolio_tokens` | Token balances across wallets |
-| `portfolio_defi` | LP, staking, lending positions |
-| `portfolio_cex` | CEX balances and positions |
-| `projects` | List all 45+ supported protocols |
-| `ping` | Health check |
+| Tool               | Use Case                                           |
+| ------------------ | -------------------------------------------------- |
+| `ask`              | Natural language → any DeFi query (128 operations) |
+| `portfolio_tokens` | Token balances across wallets                      |
+| `portfolio_defi`   | LP, staking, lending positions                     |
+| `portfolio_cex`    | CEX balances and positions                         |
+| `projects`         | List all 45+ supported protocols                   |
+| `ping`             | Health check                                       |
 
 **CRITICAL: READ-ONLY ONLY. Never use execution tools (swap, bridge, stake)
 without explicit Ogie approval. Same rule as Colosseum PAT.**
@@ -120,6 +123,7 @@ GET /api/v1/heyanon/status — Connection health
 ## WIRING INTO EXISTING PIPELINE
 
 ### aria-enricher.js (add HeyAnon as enrichment source)
+
 ```javascript
 // After existing 6 enrichment calls, add:
 const heyAnonDepth = await calculateARIADepth(tokenAddress);
@@ -127,6 +131,7 @@ const heyAnonDepth = await calculateARIADepth(tokenAddress);
 ```
 
 ### pipeline-scorer.js (add ARIA Depth metadata)
+
 ```javascript
 // After base score calculation, add enrichment:
 const ariaDepth = await getARIADepthFromDB(tokenAddress);
@@ -135,19 +140,20 @@ const ariaDepth = await getARIADepthFromDB(tokenAddress);
 ```
 
 ### Signal Factory (enrich signals with cross-chain data)
+
 ```javascript
 // Before filing signal, query HeyAnon for context:
-const perpsData = await getHyperliquidOI('BTC');
+const perpsData = await getHyperliquidOI("BTC");
 const defiData = await getDeFiDepth(tokenAddress);
 // Include in signal body for higher inclusion rate
 ```
 
 ## IMPLEMENTATION TIMELINE
 
-| Phase | Tasks | Effort |
-|-------|-------|--------|
-| A (today) | Sign up, get key, test ping + ask | 40 min |
-| B (Week 1) | Build module + endpoints + crons | 7 hours |
+| Phase        | Tasks                             | Effort  |
+| ------------ | --------------------------------- | ------- |
+| A (today)    | Sign up, get key, test ping + ask | 40 min  |
+| B (Week 1)   | Build module + endpoints + crons  | 7 hours |
 | C (Week 1-2) | Wire into ARIA + scorer + signals | 8 hours |
 
 ## SECURITY RULES
@@ -160,5 +166,5 @@ const defiData = await getDeFiDepth(tokenAddress);
 
 ---
 
-*Intel Source #30 | One endpoint. 18 chains. 45+ protocols.*
-*The multi-chain bridge ARIA needs.* 🐝
+_Intel Source #30 | One endpoint. 18 chains. 45+ protocols._
+_The multi-chain bridge ARIA needs._ 🐝

@@ -10,26 +10,26 @@ Every day, check progress against the buzzbd.ai/proposal build plan
 and post a tracker to War Room.
 
 The build plan from the proposal (6 weeks to Frontier May 11):
-  Week 1 (Apr 7): ScoreStorage — ✅ DONE Mar 28 (10 days early)
-  Week 2 (Apr 14): ListingOracle — deploying now
-  Week 3 (Apr 21): ListingEscrow — deploying now
-  Week 4 (Apr 28): Frontend buzzbd.ai/list — not started
-  Week 5 (May 5): ELS-1 Spec — not started
-  Week 6 (May 11): Frontier Submission — not started
-  Extra: BuzzReputation — deploying now
-  Extra: Pipeline wiring — deploying now
-  Extra: Basescan verification — pending
-  Extra: Proposal page update — pending
+Week 1 (Apr 7): ScoreStorage — ✅ DONE Mar 28 (10 days early)
+Week 2 (Apr 14): ListingOracle — deploying now
+Week 3 (Apr 21): ListingEscrow — deploying now
+Week 4 (Apr 28): Frontend buzzbd.ai/list — not started
+Week 5 (May 5): ELS-1 Spec — not started
+Week 6 (May 11): Frontier Submission — not started
+Extra: BuzzReputation — deploying now
+Extra: Pipeline wiring — deploying now
+Extra: Basescan verification — pending
+Extra: Proposal page update — pending
 
 Daily tracker format for War Room:
 
 📊 FRONTIER TRACKER — Day [N] | [days remaining] to May 11
 
 CONTRACTS: [N/4] deployed
-  ScoreStorage: 0x43B28F... ✅
-  ListingOracle: [status]
-  ListingEscrow: [status]
-  BuzzReputation: [status]
+ScoreStorage: 0x43B28F... ✅
+ListingOracle: [status]
+ListingEscrow: [status]
+BuzzReputation: [status]
 
 PIPELINE: [N] scores on-chain | [N] HOT tokens
 REVENUE: $[N] / [N] sats
@@ -40,6 +40,7 @@ TODAY'S PRIORITY: [what to work on]
 BLOCKERS: [any blockers or "none"]
 
 Also check:
+
 - All deployed contracts responding (cast call)
 - Deployer wallet balance
 - Any new pipeline scores to push on-chain
@@ -59,6 +60,7 @@ After EVERY contract deployment or major milestone, IMMEDIATELY:
 7. Use #BuildInPublic #Base
 
 Milestones that MUST trigger tweet drafts:
+
 - ✅ ScoreStorage deployed (DONE — thread posted)
 - ListingOracle deployed
 - ListingEscrow deployed
@@ -73,6 +75,7 @@ Milestones that MUST trigger tweet drafts:
 - Weekly progress update (every Friday)
 
 Each tweet must include:
+
 - Contract address (in self-reply, not main)
 - Basescan link (in self-reply)
 - "Built by an AI agent" angle
@@ -90,8 +93,8 @@ Update buzzbd.ai/proposal with current reality:
    - Signal Revenue: $40 → $80+
 
 2. Section 04 (Proof of Work) — Buzz BD Agent:
-   Update to: "29 intel sources. ScoreStorage.sol deployed to Base 
-   mainnet (Mar 28, 2026). Colosseum Copilot integration. Browser Use 
+   Update to: "29 intel sources. ScoreStorage.sol deployed to Base
+   mainnet (Mar 28, 2026). Colosseum Copilot integration. Browser Use
    CLI. Agent Skills Discovery on 26+ platforms."
 
 3. Section 05 (Competitive table):
@@ -105,6 +108,7 @@ Update buzzbd.ai/proposal with current reality:
    but the tone shifts from "we NEED them" to "we CAN do it alone"
 
 After updating, report to War Room:
+
 - Which sections updated
 - New stats reflected
 - Screenshot of updated page if possible (/browse buzzbd.ai/proposal)

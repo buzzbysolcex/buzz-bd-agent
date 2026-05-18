@@ -283,7 +283,11 @@ function decideAction(ctx) {
   }
 
   // Priority 9: Telegram intel intake poll (every 360 ticks ~6 hours, offset by 90)
-  if (feature("TELEGRAM_CHANNEL_INTEL") && ctx.tick > 0 && ctx.tick % 360 === 90) {
+  if (
+    feature("TELEGRAM_CHANNEL_INTEL") &&
+    ctx.tick > 0 &&
+    ctx.tick % 360 === 90
+  ) {
     return {
       type: "ACT",
       reason: `Telegram intel intake poll (tick ${ctx.tick}, every 360 ticks ~6hr)`,
@@ -485,17 +489,26 @@ async function executeAction(action) {
 
       case "telegram-intel-poll": {
         try {
-          const { pollIntakeChannel, syncBlacklistToGroundTruth } = require("../intel/telegram-channel");
+          const {
+            pollIntakeChannel,
+            syncBlacklistToGroundTruth,
+          } = require("../intel/telegram-channel");
           const pollResult = await pollIntakeChannel("-1003638619023");
           const syncResult = syncBlacklistToGroundTruth();
           setState("intel_last_poll", new Date().toISOString());
           if (pollResult.ingested > 0) {
             mailbox.send("pulse-engine", "war-room-reporter", "INFO", {
-              type: "INTEL_INGESTED", messages: pollResult.ingested, wallets: pollResult.wallets_extracted,
+              type: "INTEL_INGESTED",
+              messages: pollResult.ingested,
+              wallets: pollResult.wallets_extracted,
               message: `Telegram intel: ${pollResult.ingested} new messages, ${pollResult.wallets_extracted} wallets extracted`,
             });
           }
-          return { triggered: "telegram-intel-poll", poll: pollResult, ground_truth_sync: syncResult };
+          return {
+            triggered: "telegram-intel-poll",
+            poll: pollResult,
+            ground_truth_sync: syncResult,
+          };
         } catch (e) {
           return { triggered: "telegram-intel-poll", error: e.message };
         }

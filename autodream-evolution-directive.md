@@ -1,5 +1,7 @@
 # WAR ROOM DIRECTIVE — MIROFISH AUTODREAM EVOLUTION
+
 # Phase 2: Hill-Climbing Loop + Telegram Intel + Overnight Autonomous Optimization
+
 # Priority: HIGH | Ultrathink: YES | Subagents: YES for schema + regex + simulation code
 
 ---
@@ -21,10 +23,12 @@ threat intel from Telegram channels. Zero human intervention overnight.
 ## PART 1: TELEGRAM CHANNEL INTEL (Intel Source #33)
 
 ### Overview
+
 Integrate public Telegram channels as threat intelligence feeds, starting with
 ZachXBT's investigations channel (https://t.me/investigations).
 
 ### Critical Constraints
+
 1. **READ-ONLY** — Buzz NEVER posts, reacts, or joins. Passive consumer only.
 2. **Public channels only** — never scrape private/invite-only.
 3. **Rate limit** — poll max once per 5 minutes (300s minimum).
@@ -34,6 +38,7 @@ ZachXBT's investigations channel (https://t.me/investigations).
 6. **Feature-flagged** — TELEGRAM_CHANNEL_INTEL = FALSE until Ogie approves.
 
 ### Method: Forward-to-Intake Pattern
+
 Ogie will create a private "Buzz Intel Intake" channel and forward ZachXBT
 messages to it. Buzz bot (@buzz_claude_code_bot) is admin of intake channel.
 Buzz polls intake channel via getUpdates (already wired for War Room).
@@ -97,22 +102,26 @@ CREATE TABLE IF NOT EXISTS intel_blacklist_wallets (
 ```
 
 ### New Scoring Rule #12: BLACKLIST_WALLET_MATCH
+
 - Token deployer/owner/top-holder matches intel_blacklist_wallets → -30 points
 - Auto-flag SCAM_ALERT in scoring_audit with source attribution
 - Runs during scoring pipeline after DexScreener data pull
 
 ### Dynamic Cron
+
 - Name: 'telegram-intel-poll'
 - Interval: 300 seconds
 - Feature flag gate: TELEGRAM_CHANNEL_INTEL
 - On tick: poll active channels → parse → update blacklist
 
 ### Event Bus
+
 - Emit: `intel.telegram.new` on new entry
 - Emit: `intel.blacklist.match` when pipeline token matches blacklist
 - Subscribe: scoring pipeline listens for `intel.blacklist.match`
 
 ### War Room Alert Format
+
 ```
 🔴 INTEL ALERT — Source: @zachxbt
 Type: [entry_type]
@@ -126,7 +135,9 @@ Pipeline impact: [X tokens affected / none]
 ## PART 2: HILL-CLIMBING LOOP (AutoAgent Pattern for Scoring Rules)
 
 ### Overview
+
 Extend autoDream from "cleanup only" to "cleanup + optimize". Each nightly run:
+
 1. Clean data (existing behavior — keep this)
 2. Propose a scoring rule modification
 3. Run MiroFish simulation as benchmark
@@ -186,30 +197,35 @@ CREATE TABLE IF NOT EXISTS scoring_rule_versions (
 ```javascript
 // Core loop (runs inside autoDream after cleanup phase):
 
-async function hillClimbLoop(maxIterations = 5, maxDurationMs = 4 * 60 * 60 * 1000) {
+async function hillClimbLoop(
+  maxIterations = 5,
+  maxDurationMs = 4 * 60 * 60 * 1000,
+) {
   const startTime = Date.now();
-  
+
   // 1. Load current active rules as baseline
   const baseline = await loadActiveRules();
   const baselineScore = await runBenchmark(baseline);
-  
+
   for (let i = 0; i < maxIterations; i++) {
     // Time budget check
     if (Date.now() - startTime > maxDurationMs) break;
-    
+
     // 2. Propose a mutation
     //    Types: weight_adjust, threshold_shift, new_penalty, rule_combine
     const mutation = proposeMutation(baseline);
-    
+
     // 3. Run MiroFish benchmark with mutated rules
     const experimentScore = await runBenchmark(mutation.rules);
-    
+
     // 4. Keep/Discard decision
-    const verdict = experimentScore.passed > baselineScore.passed ? 'keep' 
-                  : experimentScore.passed === baselineScore.passed 
-                    && mutation.isSimpler ? 'keep' 
-                  : 'discard';
-    
+    const verdict =
+      experimentScore.passed > baselineScore.passed
+        ? "keep"
+        : experimentScore.passed === baselineScore.passed && mutation.isSimpler
+          ? "keep"
+          : "discard";
+
     // 5. Log experiment
     await logExperiment({
       name: mutation.name,
@@ -222,22 +238,22 @@ async function hillClimbLoop(maxIterations = 5, maxDurationMs = 4 * 60 * 60 * 10
       reasoning: mutation.reasoning,
       durationMs: Date.now() - iterationStart,
     });
-    
+
     // 6. If keep, update baseline for next iteration
-    if (verdict === 'keep') {
+    if (verdict === "keep") {
       await saveRuleVersion(mutation.rules, experimentScore);
       baseline = mutation.rules;
       baselineScore = experimentScore;
-      
+
       // War Room notification
-      await sendWarRoom(`✅ AUTODREAM OPTIMIZATION — Experiment ${i+1}
+      await sendWarRoom(`✅ AUTODREAM OPTIMIZATION — Experiment ${i + 1}
 Rule: ${mutation.name}
 Change: ${mutation.description}
 Improvement: ${baselineScore.passed} → ${experimentScore.passed} passed
 Verdict: KEEP`);
     }
   }
-  
+
   // Summary report
   await sendWarRoom(`📊 AUTODREAM OVERNIGHT SUMMARY
 Experiments run: ${i}
@@ -254,23 +270,36 @@ Duration: ${formatDuration(Date.now() - startTime)}`);
 const MUTATION_TYPES = {
   // Adjust existing rule weights (±1 to ±5 points)
   weight_adjust: {
-    targets: ['FDV_GAP', 'GHOST_VOLUME', 'CTO_FLAG', 'VOLUME_LIQUIDITY_RATIO',
-              'SECURITY_PENALTY', 'LIQUIDITY_CROSSREF', 'AGE_BONUS', 'VOLUME_THRESHOLD',
-              'BLACKLIST_WALLET_MATCH'],
+    targets: [
+      "FDV_GAP",
+      "GHOST_VOLUME",
+      "CTO_FLAG",
+      "VOLUME_LIQUIDITY_RATIO",
+      "SECURITY_PENALTY",
+      "LIQUIDITY_CROSSREF",
+      "AGE_BONUS",
+      "VOLUME_THRESHOLD",
+      "BLACKLIST_WALLET_MATCH",
+    ],
     range: [-5, +5],
   },
-  
+
   // Shift thresholds (e.g., volume minimum from 10K to 15K)
   threshold_shift: {
-    targets: ['min_volume', 'min_liquidity', 'fdv_gap_ratio', 'vol_liq_ratio_max'],
+    targets: [
+      "min_volume",
+      "min_liquidity",
+      "fdv_gap_ratio",
+      "vol_liq_ratio_max",
+    ],
     range: [0.5, 2.0], // multiplier
   },
-  
+
   // Combine two rules into compound rule
   rule_combine: {
     // e.g., GHOST_VOLUME + VOLUME_LIQUIDITY_RATIO → FAKE_MARKET_PENALTY
   },
-  
+
   // Add new derived penalty from existing signals
   new_penalty: {
     // e.g., holder_concentration > 80% AND age < 7d → WHALE_DUMP_RISK
@@ -283,30 +312,35 @@ const MUTATION_TYPES = {
 ```javascript
 async function runBenchmark(rules) {
   // 1. Load ground truth tokens (known outcomes)
-  const groundTruth = await db.all('SELECT * FROM scoring_ground_truth');
-  
+  const groundTruth = await db.all("SELECT * FROM scoring_ground_truth");
+
   // 2. Score each token with the candidate rules
   let passed = 0;
   let total = groundTruth.length;
-  
+
   for (const token of groundTruth) {
-    const score = await scoreWithRules(token.contract_address, token.chain, rules);
-    
+    const score = await scoreWithRules(
+      token.contract_address,
+      token.chain,
+      rules,
+    );
+
     // Did the score correctly predict the outcome?
-    const predicted = score >= 70 ? 'legitimate' : 'risky';
-    const actual = ['legitimate', 'success'].includes(token.actual_outcome) 
-                   ? 'legitimate' : 'risky';
-    
+    const predicted = score >= 70 ? "legitimate" : "risky";
+    const actual = ["legitimate", "success"].includes(token.actual_outcome)
+      ? "legitimate"
+      : "risky";
+
     if (predicted === actual) passed++;
   }
-  
+
   // 3. Run MiroFish 1K sim for belief convergence metric
-  const simResult = await fetch('http://localhost:5000/simulate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  const simResult = await fetch("http://localhost:5000/simulate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ agents: 1000, rules }),
-  }).then(r => r.json());
-  
+  }).then((r) => r.json());
+
   return {
     passed,
     total,
@@ -318,6 +352,7 @@ async function runBenchmark(rules) {
 ```
 
 ### Feature Flags (2 new → 33 total)
+
 - `AUTODREAM_HILLCLIMB` = FALSE (flip when ground truth seeded)
 - `TELEGRAM_CHANNEL_INTEL` = FALSE (flip when intake channel created)
 
@@ -372,24 +407,26 @@ async function runBenchmark(rules) {
 The hill-climber needs known outcomes to benchmark against. Seed from:
 
 ### Immediate Sources (can populate today)
+
 1. **Pipeline tokens scored < 30 that got delisted** → actual_outcome = 'dead'
 2. **Tokens flagged by ZachXBT** → actual_outcome = 'scam' or 'rug_pull'
 3. **Tokens that survived 90+ days with stable liquidity** → actual_outcome = 'legitimate'
 4. **Known rug pulls from DexScreener delisted data** → actual_outcome = 'rug_pull'
 
 ### Bootstrap Script
+
 ```sql
 -- Seed from existing pipeline data
 INSERT INTO scoring_ground_truth (contract_address, chain, token_name, actual_outcome, source, buzz_score_at_time)
-SELECT contract_address, chain, name, 
-  CASE 
+SELECT contract_address, chain, name,
+  CASE
     WHEN status = 'DEAD' OR liquidity_usd < 1000 THEN 'dead'
     WHEN age_days > 90 AND liquidity_usd > 50000 THEN 'legitimate'
     ELSE 'unknown'
   END,
   'pipeline_history',
   final_score
-FROM token_scores 
+FROM token_scores
 WHERE final_score IS NOT NULL
 AND contract_address IS NOT NULL;
 
@@ -401,7 +438,7 @@ DELETE FROM scoring_ground_truth WHERE actual_outcome = 'unknown';
 
 ## IMPLEMENTATION ORDER
 
-1. Create 6 new tables (84 + 6 = 87* total)
+1. Create 6 new tables (84 + 6 = 87\* total)
    - intel_telegram_channels, intel_telegram_entries, intel_blacklist_wallets
    - autodream_experiments, scoring_ground_truth, scoring_rule_versions
 2. Create api/services/intel/telegram-channel.js
@@ -416,12 +453,14 @@ DELETE FROM scoring_ground_truth WHERE actual_outcome = 'unknown';
 11. Test with manual message forward to intake channel
 12. Test single hill-climb iteration manually
 
-*Note: verify current table count before adding. Skills say 81, 
-may have changed since last count. Use: 
-SELECT COUNT(*) FROM sqlite_master WHERE type='table';
+_Note: verify current table count before adding. Skills say 81,
+may have changed since last count. Use:
+SELECT COUNT(_) FROM sqlite_master WHERE type='table';
 
 ## DO NOT FLIP FLAGS
+
 Report when scaffolded. Ogie will:
+
 1. Create private Telegram intake channel
 2. Add @buzz_claude_code_bot as admin
 3. Forward first ZachXBT messages
@@ -431,6 +470,7 @@ Report when scaffolded. Ogie will:
 7. Monitor first overnight run
 
 ## SAFETY CHECKLIST
+
 - [ ] Bot never posts to external channels
 - [ ] No full message text stored (summary only)
 - [ ] Attribution on every downstream use
@@ -445,7 +485,9 @@ Report when scaffolded. Ogie will:
 - [ ] PULSE load-aware throttling still respected during optimization
 
 ## ULTRATHINK: YES (architecture + scoring + security)
+
 ## SUBAGENT: YES for schema design, wallet regex, simulation wiring, ground truth seeding
+
 ## SESSION NAME: feature-autodream-evolution
 
 Bismillah. The kitchen learns to cook better overnight.

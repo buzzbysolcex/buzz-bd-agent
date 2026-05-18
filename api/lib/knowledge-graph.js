@@ -8,8 +8,8 @@
  * Used by: /api/v1/kg/* routes, cron sweeps, on-demand scoring
  */
 
-const crypto = require('crypto');
-const { getDB } = require('../db');
+const crypto = require("crypto");
+const { getDB } = require("../db");
 
 // ─── Helpers ──────────────────────────────────────────
 
@@ -20,7 +20,11 @@ const { getDB } = require('../db');
  * @returns {string} 16-char hex hash
  */
 function makeEntityId(type, name) {
-  return crypto.createHash('sha256').update(type + ':' + name).digest('hex').slice(0, 16);
+  return crypto
+    .createHash("sha256")
+    .update(type + ":" + name)
+    .digest("hex")
+    .slice(0, 16);
 }
 
 /**
@@ -30,7 +34,11 @@ function makeEntityId(type, name) {
  * @returns {*}
  */
 function safeParse(str, fallback = {}) {
-  try { return JSON.parse(str); } catch { return fallback; }
+  try {
+    return JSON.parse(str);
+  } catch {
+    return fallback;
+  }
 }
 
 // ─── Entity Extraction ────────────────────────────────
@@ -45,10 +53,10 @@ function extractEntities(tokenData) {
 
   // 1. Project entity (from ticker/name)
   const projectName = tokenData.ticker || tokenData.name || tokenData.address;
-  const projectId = makeEntityId('project', projectName);
+  const projectId = makeEntityId("project", projectName);
   entities.push({
     entity_id: projectId,
-    entity_type: 'project',
+    entity_type: "project",
     name: projectName,
     metadata_json: JSON.stringify({
       address: tokenData.address,
@@ -63,10 +71,10 @@ function extractEntities(tokenData) {
 
   // 2. Chain entity
   if (tokenData.chain) {
-    const chainId = makeEntityId('chain', tokenData.chain.toLowerCase());
+    const chainId = makeEntityId("chain", tokenData.chain.toLowerCase());
     entities.push({
       entity_id: chainId,
-      entity_type: 'chain',
+      entity_type: "chain",
       name: tokenData.chain.toLowerCase(),
       metadata_json: JSON.stringify({ chain: tokenData.chain.toLowerCase() }),
     });
@@ -76,10 +84,10 @@ function extractEntities(tokenData) {
   const breakdown = safeParse(tokenData.score_breakdown, null);
   const deployer = breakdown?.deployer || breakdown?.deployer_address || null;
   if (deployer) {
-    const deployerId = makeEntityId('deployer', deployer);
+    const deployerId = makeEntityId("deployer", deployer);
     entities.push({
       entity_id: deployerId,
-      entity_type: 'deployer',
+      entity_type: "deployer",
       name: deployer,
       metadata_json: JSON.stringify({
         address: deployer,
@@ -92,12 +100,12 @@ function extractEntities(tokenData) {
   const backers = breakdown?.backers || breakdown?.investors || [];
   if (Array.isArray(backers)) {
     for (const backer of backers) {
-      const backerName = typeof backer === 'string' ? backer : backer.name;
+      const backerName = typeof backer === "string" ? backer : backer.name;
       if (!backerName) continue;
-      const backerId = makeEntityId('vc', backerName);
+      const backerId = makeEntityId("vc", backerName);
       entities.push({
         entity_id: backerId,
-        entity_type: 'vc',
+        entity_type: "vc",
         name: backerName,
         metadata_json: JSON.stringify({ vc_name: backerName }),
       });
@@ -120,19 +128,19 @@ function buildRelationships(entities, tokenAddress) {
   const db = getDB();
   const relationships = [];
 
-  const project = entities.find(e => e.entity_type === 'project');
+  const project = entities.find((e) => e.entity_type === "project");
   if (!project) return relationships;
 
-  const chain = entities.find(e => e.entity_type === 'chain');
-  const deployer = entities.find(e => e.entity_type === 'deployer');
-  const vcs = entities.filter(e => e.entity_type === 'vc');
+  const chain = entities.find((e) => e.entity_type === "chain");
+  const deployer = entities.find((e) => e.entity_type === "deployer");
+  const vcs = entities.filter((e) => e.entity_type === "vc");
 
   // Project -> Chain (same_chain)
   if (chain) {
     relationships.push({
       source_entity_id: project.entity_id,
       target_entity_id: chain.entity_id,
-      relationship_type: 'same_chain',
+      relationship_type: "same_chain",
       confidence: 1.0,
       evidence_json: JSON.stringify({ token_address: tokenAddress }),
     });
@@ -143,27 +151,31 @@ function buildRelationships(entities, tokenAddress) {
     relationships.push({
       source_entity_id: project.entity_id,
       target_entity_id: deployer.entity_id,
-      relationship_type: 'deployed_by',
+      relationship_type: "deployed_by",
       confidence: 0.95,
       evidence_json: JSON.stringify({ token_address: tokenAddress }),
     });
 
     // Check for shared deployers — other projects with the same deployer
     try {
-      const existingProjects = db.prepare(`
+      const existingProjects = db
+        .prepare(
+          `
         SELECT r.source_entity_id, e.name
         FROM kg_relationships r
         JOIN kg_entities e ON e.entity_id = r.source_entity_id
         WHERE r.target_entity_id = ?
           AND r.relationship_type = 'deployed_by'
           AND r.source_entity_id != ?
-      `).all(deployer.entity_id, project.entity_id);
+      `,
+        )
+        .all(deployer.entity_id, project.entity_id);
 
       for (const other of existingProjects) {
         relationships.push({
           source_entity_id: project.entity_id,
           target_entity_id: other.source_entity_id,
-          relationship_type: 'shares_deployer',
+          relationship_type: "shares_deployer",
           confidence: 0.9,
           evidence_json: JSON.stringify({
             deployer: deployer.name,
@@ -171,7 +183,9 @@ function buildRelationships(entities, tokenAddress) {
           }),
         });
       }
-    } catch (e) { /* table may not exist yet during first run */ }
+    } catch (e) {
+      /* table may not exist yet during first run */
+    }
   }
 
   // Project -> VC (backed_by)
@@ -179,7 +193,7 @@ function buildRelationships(entities, tokenAddress) {
     relationships.push({
       source_entity_id: project.entity_id,
       target_entity_id: vc.entity_id,
-      relationship_type: 'backed_by',
+      relationship_type: "backed_by",
       confidence: 0.8,
       evidence_json: JSON.stringify({ token_address: tokenAddress }),
     });
@@ -203,7 +217,7 @@ function upsertEntities(entities) {
 
   const tx = db.transaction((items) => {
     for (const e of items) {
-      stmt.run(e.entity_id, e.entity_type, e.name, e.metadata_json || '{}');
+      stmt.run(e.entity_id, e.entity_type, e.name, e.metadata_json || "{}");
     }
   });
   tx(entities);
@@ -229,7 +243,7 @@ function upsertRelationships(relationships) {
         r.target_entity_id,
         r.relationship_type,
         r.confidence || 0.8,
-        r.evidence_json || '{}'
+        r.evidence_json || "{}",
       );
     }
   });
@@ -257,16 +271,21 @@ function queryConnections(entityId, depth = 2) {
       visitedEntities.add(nodeId);
 
       // Find all relationships where this entity is source or target
-      const rels = db.prepare(`
+      const rels = db
+        .prepare(
+          `
         SELECT * FROM kg_relationships
         WHERE source_entity_id = ? OR target_entity_id = ?
-      `).all(nodeId, nodeId);
+      `,
+        )
+        .all(nodeId, nodeId);
 
       for (const rel of rels) {
         collectedRels.push(rel);
-        const neighbor = rel.source_entity_id === nodeId
-          ? rel.target_entity_id
-          : rel.source_entity_id;
+        const neighbor =
+          rel.source_entity_id === nodeId
+            ? rel.target_entity_id
+            : rel.source_entity_id;
         if (!visitedEntities.has(neighbor)) {
           nextFrontier.push(neighbor);
         }
@@ -283,7 +302,9 @@ function queryConnections(entityId, depth = 2) {
   // Fetch full entity records
   const entityIds = [...visitedEntities];
   const entities = [];
-  const entityStmt = db.prepare('SELECT * FROM kg_entities WHERE entity_id = ?');
+  const entityStmt = db.prepare(
+    "SELECT * FROM kg_entities WHERE entity_id = ?",
+  );
   for (const eid of entityIds) {
     const entity = entityStmt.get(eid);
     if (entity) entities.push(entity);
@@ -312,45 +333,62 @@ function getRelationshipScore(tokenAddress) {
   const db = getDB();
 
   // Find the project entity for this token
-  const entities = db.prepare(`
+  const entities = db
+    .prepare(
+      `
     SELECT * FROM kg_entities
     WHERE entity_type = 'project'
       AND metadata_json LIKE ?
-  `).all(`%${tokenAddress}%`);
+  `,
+    )
+    .all(`%${tokenAddress}%`);
 
   if (!entities.length) {
-    return { graph_score: 50, connections: [], risk_flags: ['no_graph_data'] };
+    return { graph_score: 50, connections: [], risk_flags: ["no_graph_data"] };
   }
 
   const project = entities[0];
-  const { entities: connected, relationships } = queryConnections(project.entity_id, 2);
+  const { entities: connected, relationships } = queryConnections(
+    project.entity_id,
+    2,
+  );
 
   let score = 50; // Base score
   const connections = [];
   const riskFlags = [];
 
   // Analyze deployer connections
-  const deployerRels = relationships.filter(r => r.relationship_type === 'deployed_by');
+  const deployerRels = relationships.filter(
+    (r) => r.relationship_type === "deployed_by",
+  );
   for (const rel of deployerRels) {
     const deployerId = rel.target_entity_id;
 
     // Check if deployer has other successful listings (stage = listed or approved)
-    const deployerProjects = db.prepare(`
+    const deployerProjects = db
+      .prepare(
+        `
       SELECT r.source_entity_id, e.metadata_json
       FROM kg_relationships r
       JOIN kg_entities e ON e.entity_id = r.source_entity_id
       WHERE r.target_entity_id = ?
         AND r.relationship_type = 'deployed_by'
         AND r.source_entity_id != ?
-    `).all(deployerId, project.entity_id);
+    `,
+      )
+      .all(deployerId, project.entity_id);
 
     for (const dp of deployerProjects) {
       const meta = safeParse(dp.metadata_json);
-      if (meta.stage === 'listed' || meta.stage === 'approved') {
+      if (meta.stage === "listed" || meta.stage === "approved") {
         score += 15;
-        connections.push({ type: 'deployer_success', entity: dp.source_entity_id, stage: meta.stage });
+        connections.push({
+          type: "deployer_success",
+          entity: dp.source_entity_id,
+          stage: meta.stage,
+        });
       }
-      if (meta.stage === 'rejected') {
+      if (meta.stage === "rejected") {
         score -= 30;
         riskFlags.push(`deployer_rugged:${meta.ticker || dp.source_entity_id}`);
       }
@@ -358,19 +396,27 @@ function getRelationshipScore(tokenAddress) {
   }
 
   // Analyze VC backing
-  const vcRels = relationships.filter(r => r.relationship_type === 'backed_by');
+  const vcRels = relationships.filter(
+    (r) => r.relationship_type === "backed_by",
+  );
   for (const rel of vcRels) {
-    const vc = connected.find(e => e.entity_id === rel.target_entity_id);
+    const vc = connected.find((e) => e.entity_id === rel.target_entity_id);
     if (vc) {
       score += 10;
-      connections.push({ type: 'vc_backing', entity: vc.entity_id, name: vc.name });
+      connections.push({
+        type: "vc_backing",
+        entity: vc.entity_id,
+        name: vc.name,
+      });
     }
   }
 
   // Analyze shared deployer risk
-  const sharedDeployerRels = relationships.filter(r => r.relationship_type === 'shares_deployer');
+  const sharedDeployerRels = relationships.filter(
+    (r) => r.relationship_type === "shares_deployer",
+  );
   if (sharedDeployerRels.length > 3) {
-    riskFlags.push('serial_deployer');
+    riskFlags.push("serial_deployer");
     score -= 5;
   }
 
@@ -393,26 +439,44 @@ function getRelationshipScore(tokenAddress) {
 function getStats() {
   const db = getDB();
 
-  const entityCounts = db.prepare(`
+  const entityCounts = db
+    .prepare(
+      `
     SELECT entity_type, COUNT(*) as count
     FROM kg_entities
     GROUP BY entity_type
-  `).all();
+  `,
+    )
+    .all();
 
-  const relCounts = db.prepare(`
+  const relCounts = db
+    .prepare(
+      `
     SELECT relationship_type, COUNT(*) as count
     FROM kg_relationships
     GROUP BY relationship_type
-  `).all();
+  `,
+    )
+    .all();
 
-  const totalEntities = db.prepare('SELECT COUNT(*) as count FROM kg_entities').get();
-  const totalRels = db.prepare('SELECT COUNT(*) as count FROM kg_relationships').get();
+  const totalEntities = db
+    .prepare("SELECT COUNT(*) as count FROM kg_entities")
+    .get();
+  const totalRels = db
+    .prepare("SELECT COUNT(*) as count FROM kg_relationships")
+    .get();
 
   return {
     total_entities: totalEntities.count,
     total_relationships: totalRels.count,
-    entity_counts: entityCounts.reduce((acc, r) => { acc[r.entity_type] = r.count; return acc; }, {}),
-    relationship_counts: relCounts.reduce((acc, r) => { acc[r.relationship_type] = r.count; return acc; }, {}),
+    entity_counts: entityCounts.reduce((acc, r) => {
+      acc[r.entity_type] = r.count;
+      return acc;
+    }, {}),
+    relationship_counts: relCounts.reduce((acc, r) => {
+      acc[r.relationship_type] = r.count;
+      return acc;
+    }, {}),
   };
 }
 
@@ -428,12 +492,21 @@ function buildGraphForToken(tokenAddress) {
   const db = getDB();
 
   // Look up token in pipeline
-  const token = db.prepare(`
+  const token = db
+    .prepare(
+      `
     SELECT * FROM pipeline_tokens WHERE address = ?
-  `).get(tokenAddress);
+  `,
+    )
+    .get(tokenAddress);
 
   if (!token) {
-    return { entities_count: 0, relationships_count: 0, entity_ids: [], error: 'Token not found in pipeline' };
+    return {
+      entities_count: 0,
+      relationships_count: 0,
+      entity_ids: [],
+      error: "Token not found in pipeline",
+    };
   }
 
   // Extract entities from token data
@@ -449,7 +522,7 @@ function buildGraphForToken(tokenAddress) {
   return {
     entities_count: entities.length,
     relationships_count: relationships.length,
-    entity_ids: entities.map(e => e.entity_id),
+    entity_ids: entities.map((e) => e.entity_id),
   };
 }
 

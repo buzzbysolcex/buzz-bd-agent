@@ -6,7 +6,7 @@
  * BM25 ranking for relevance scoring
  */
 
-const path = require('path');
+const path = require("path");
 
 let _db = null;
 let _initialized = false;
@@ -39,15 +39,28 @@ function initFTS(db) {
  * @returns {object}
  */
 function indexMemory(content, source) {
-  if (!_initialized) return { success: false, error: 'FTS not initialized — call initFTS(db) first' };
-  if (!content) return { success: false, error: 'content is required' };
+  if (!_initialized)
+    return {
+      success: false,
+      error: "FTS not initialized — call initFTS(db) first",
+    };
+  if (!content) return { success: false, error: "content is required" };
 
   const timestamp = new Date().toISOString();
-  const src = source || 'manual';
+  const src = source || "manual";
 
   try {
-    _db.prepare('INSERT INTO memory_fts (content, source, timestamp) VALUES (?, ?, ?)').run(content, src, timestamp);
-    return { success: true, source: src, timestamp, content_length: content.length };
+    _db
+      .prepare(
+        "INSERT INTO memory_fts (content, source, timestamp) VALUES (?, ?, ?)",
+      )
+      .run(content, src, timestamp);
+    return {
+      success: true,
+      source: src,
+      timestamp,
+      content_length: content.length,
+    };
   } catch (err) {
     return { success: false, error: err.message };
   }
@@ -62,8 +75,12 @@ function indexMemory(content, source) {
  * @returns {object}
  */
 function searchMemory(query, options = {}) {
-  if (!_initialized) return { success: false, error: 'FTS not initialized — call initFTS(db) first' };
-  if (!query) return { success: false, error: 'query is required' };
+  if (!_initialized)
+    return {
+      success: false,
+      error: "FTS not initialized — call initFTS(db) first",
+    };
+  if (!query) return { success: false, error: "query is required" };
 
   const limit = Math.min(options.limit || 10, 50);
 
@@ -97,12 +114,12 @@ function searchMemory(query, options = {}) {
       success: true,
       query,
       count: results.length,
-      results: results.map(r => ({
+      results: results.map((r) => ({
         content: r.content.substring(0, 500),
         source: r.source,
         timestamp: r.timestamp,
-        bm25_score: r.rank
-      }))
+        bm25_score: r.rank,
+      })),
     };
   } catch (err) {
     return { success: false, error: err.message };
@@ -114,18 +131,31 @@ function searchMemory(query, options = {}) {
  * @returns {object}
  */
 function getStats() {
-  if (!_initialized) return { success: false, error: 'FTS not initialized — call initFTS(db) first' };
+  if (!_initialized)
+    return {
+      success: false,
+      error: "FTS not initialized — call initFTS(db) first",
+    };
 
   try {
-    const total = _db.prepare('SELECT COUNT(*) as count FROM memory_fts').get();
-    const bySrc = _db.prepare('SELECT source, COUNT(*) as count FROM memory_fts GROUP BY source ORDER BY count DESC').all();
-    const latest = _db.prepare('SELECT timestamp FROM memory_fts ORDER BY rowid DESC LIMIT 1').get();
+    const total = _db.prepare("SELECT COUNT(*) as count FROM memory_fts").get();
+    const bySrc = _db
+      .prepare(
+        "SELECT source, COUNT(*) as count FROM memory_fts GROUP BY source ORDER BY count DESC",
+      )
+      .all();
+    const latest = _db
+      .prepare("SELECT timestamp FROM memory_fts ORDER BY rowid DESC LIMIT 1")
+      .get();
 
     return {
       success: true,
       total_documents: total.count,
-      by_source: bySrc.reduce((acc, r) => { acc[r.source] = r.count; return acc; }, {}),
-      latest_indexed: latest?.timestamp || null
+      by_source: bySrc.reduce((acc, r) => {
+        acc[r.source] = r.count;
+        return acc;
+      }, {}),
+      latest_indexed: latest?.timestamp || null,
     };
   } catch (err) {
     return { success: false, error: err.message };

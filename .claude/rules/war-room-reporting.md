@@ -1,7 +1,9 @@
 ---
 paths: ["**/*"]
 ---
+
 # War Room Reporting Rules (ALWAYS ACTIVE)
+
 - After completing ANY task: report result to War Room immediately
 - After ANY git commit: report commit hash + summary
 - After ANY error: report error + what you tried + what failed

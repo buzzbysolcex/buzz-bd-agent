@@ -24,10 +24,10 @@ Make it useful — push real HOT token scores on-chain.
 
    Under the hood:
    cast send 0x43B28FAfdC342c6F8Ed8252B38254531d9A919eb \
-     "updateScore(address,uint256,uint8,uint8,bool,uint8,uint8,uint8,uint8)" \
-     <args> \
-     --rpc-url https://mainnet.base.org \
-     --account buzz-deployer
+    "updateScore(address,uint256,uint8,uint8,bool,uint8,uint8,uint8,uint8)" \
+    <args> \
+    --rpc-url https://mainnet.base.org \
+    --account buzz-deployer
 
 2. Push the current 4 HOT tokens from pipeline on-chain NOW.
    Pull their scores from localhost:3000/api/v1/pipeline?status=HOT
@@ -58,6 +58,7 @@ Anyone can query, but they pay per call.
 Write src/ListingOracle.sol:
 
 Key features:
+
 - getListingScore(address token) — same interface as ScoreStorage
 - Requires msg.value >= queryFee (start at 0.000005 ETH ≈ $0.01)
 - Owner can update queryFee
@@ -67,10 +68,12 @@ Key features:
 - Free queries for owner (Buzz doesn't pay itself)
 
 Constructor params:
-- address _scoreStorage (0x43B28FAfdC342c6F8Ed8252B38254531d9A919eb)
-- uint256 _queryFee (5000000000000 wei = 0.000005 ETH ≈ $0.01)
+
+- address \_scoreStorage (0x43B28FAfdC342c6F8Ed8252B38254531d9A919eb)
+- uint256 \_queryFee (5000000000000 wei = 0.000005 ETH ≈ $0.01)
 
 Write tests in test/ListingOracle.t.sol:
+
 - testQueryWithPayment (send enough ETH, get score back)
 - testQueryWithoutPayment (should revert)
 - testQueryUnderpayment (should revert)
@@ -94,6 +97,7 @@ SolCex confirms listing → escrow releases payment.
 Write src/ListingEscrow.sol:
 
 Key features:
+
 - deposit(address token) payable — project deposits listing fee
 - confirmListing(address token) — only owner (SolCex) confirms
 - refund(address token) — only owner can refund if listing rejected
@@ -104,14 +108,15 @@ Key features:
 - Timeout: if not confirmed within 30 days, depositor can claim refund
 
 Struct:
-  ListingDeposit {
-    address depositor;
-    uint256 amount;
-    uint256 depositedAt;
-    Status status; // PENDING, CONFIRMED, RELEASED, REFUNDED
-  }
+ListingDeposit {
+address depositor;
+uint256 amount;
+uint256 depositedAt;
+Status status; // PENDING, CONFIRMED, RELEASED, REFUNDED
+}
 
 Write tests in test/ListingEscrow.t.sol:
+
 - testDeposit (deposit and verify state)
 - testConfirmAndRelease (owner confirms, funds released)
 - testRefund (owner refunds, depositor gets money back)
@@ -135,6 +140,7 @@ The trust contract. Tracks prediction accuracy on-chain.
 Write src/BuzzReputation.sol:
 
 Key features:
+
 - recordPrediction(address token, uint256 score, string outcome)
   — owner records "we scored token X at 85 on date Y"
 - recordOutcome(address token, bool listed, string exchange)
@@ -146,6 +152,7 @@ Key features:
   OR score < 50 AND token did NOT get listed
 
 Write tests in test/BuzzReputation.t.sol:
+
 - testRecordPrediction
 - testRecordOutcome
 - testAccuracyCalculation
@@ -163,17 +170,18 @@ TASK 5: UPDATE WAR ROOM + DOCS
 ═══════════════════════════════════════
 
 After all deploys, add War Room commands:
-  /onchain <addr>        — push score on-chain
-  /onchain-status        — total on-chain scores + last update
-  /oracle-stats          — ListingOracle query count + revenue
-  /escrow-status         — active escrow deposits
-  /reputation            — accuracy stats
+/onchain <addr> — push score on-chain
+/onchain-status — total on-chain scores + last update
+/oracle-stats — ListingOracle query count + revenue
+/escrow-status — active escrow deposits
+/reputation — accuracy stats
 
 Update docs/BUZZ-SMART-CONTRACTS.md with:
-  - All 4 contract addresses
-  - Deploy TX hashes
-  - Gas costs
-  - ABI locations
+
+- All 4 contract addresses
+- Deploy TX hashes
+- Gas costs
+- ABI locations
 
 ═══════════════════════════════════════
 SAFETY RULES
@@ -212,6 +220,6 @@ FINAL REPORT (after all 4 tasks complete)
 - ✅ All tests passing
 - ✅ War Room commands added
 - ✅ Docs updated
-- Deployer balance remaining: ___ ETH
+- Deployer balance remaining: \_\_\_ ETH
 - Total contracts on Base: 4
-- Total gas spent today: $___
+- Total gas spent today: $\_\_\_

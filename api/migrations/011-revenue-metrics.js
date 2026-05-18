@@ -21,9 +21,15 @@ function up(db) {
     )
   `);
 
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_revenue_events_token ON revenue_events(token_address, chain)`);
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_revenue_events_type ON revenue_events(event_type, created_at)`);
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_revenue_events_date ON revenue_events(created_at)`);
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_revenue_events_token ON revenue_events(token_address, chain)`,
+  );
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_revenue_events_type ON revenue_events(event_type, created_at)`,
+  );
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_revenue_events_date ON revenue_events(created_at)`,
+  );
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS listing_fees (
@@ -40,8 +46,12 @@ function up(db) {
     )
   `);
 
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_listing_fees_status ON listing_fees(status)`);
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_listing_fees_token ON listing_fees(token_address, chain)`);
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_listing_fees_status ON listing_fees(status)`,
+  );
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_listing_fees_token ON listing_fees(token_address, chain)`,
+  );
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS monthly_revenue_summary (
@@ -60,9 +70,9 @@ function up(db) {
 }
 
 function down(db) {
-  db.exec('DROP TABLE IF EXISTS monthly_revenue_summary');
-  db.exec('DROP TABLE IF EXISTS listing_fees');
-  db.exec('DROP TABLE IF EXISTS revenue_events');
+  db.exec("DROP TABLE IF EXISTS monthly_revenue_summary");
+  db.exec("DROP TABLE IF EXISTS listing_fees");
+  db.exec("DROP TABLE IF EXISTS revenue_events");
 }
 
 module.exports = { up, down };

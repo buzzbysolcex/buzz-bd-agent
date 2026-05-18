@@ -46,7 +46,9 @@ try {
   // Signal tracker table is created on demand inside recordSignalFiled,
   // but explicitly initializing keeps logs clean.
   try {
-    const { initSignalTracker } = require("../api/services/signals/signal-tracker");
+    const {
+      initSignalTracker,
+    } = require("../api/services/signals/signal-tracker");
     if (typeof initSignalTracker === "function") initSignalTracker();
   } catch {}
 } catch (e) {

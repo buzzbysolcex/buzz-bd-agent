@@ -9,13 +9,13 @@
  * 4. Track in pending-followups with due dates
  */
 
-const { getDB } = require('../db');
-const fs = require('fs');
-const path = require('path');
+const { getDB } = require("../db");
+const fs = require("fs");
+const path = require("path");
 
 function generateProposal(token, scoreData) {
-  const ticker = token.ticker || 'UNKNOWN';
-  const chain = token.chain || 'solana';
+  const ticker = token.ticker || "UNKNOWN";
+  const chain = token.chain || "solana";
   const score = token.score || 0;
 
   return {
@@ -23,7 +23,7 @@ function generateProposal(token, scoreData) {
     chain,
     ticker,
     score,
-    status: 'draft',
+    status: "draft",
     created_at: new Date().toISOString(),
     proposal_text: `SolCex Exchange Listing Proposal — $${ticker} (${chain.toUpperCase()})
 
@@ -43,8 +43,8 @@ Next steps:
 
 Contact: @hidayahanka1 on X | @Ogie2 on Telegram
 SolCex Exchange | buzzbd.ai`,
-    outreach_channels: ['twitter_dm', 'telegram'],
-    followup_due: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+    outreach_channels: ["twitter_dm", "telegram"],
+    followup_due: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
   };
 }
 
@@ -73,14 +73,16 @@ function saveProposal(proposal) {
   `);
 
   try {
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO proposals (address, chain, ticker, score, status, proposal_text, outreach_channels, followup_due, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(address, chain) DO UPDATE SET
         score = excluded.score,
         proposal_text = excluded.proposal_text,
         updated_at = datetime('now')
-    `).run(
+    `,
+    ).run(
       proposal.address,
       proposal.chain,
       proposal.ticker,
@@ -89,11 +91,11 @@ function saveProposal(proposal) {
       proposal.proposal_text,
       JSON.stringify(proposal.outreach_channels),
       proposal.followup_due,
-      proposal.created_at
+      proposal.created_at,
     );
     return true;
   } catch (e) {
-    console.error('[bd-automation] Failed to save proposal:', e.message);
+    console.error("[bd-automation] Failed to save proposal:", e.message);
     return false;
   }
 }
@@ -108,12 +110,18 @@ function getOverdueFollowups() {
       followup_due TEXT, sent_at TEXT, response_at TEXT, outcome TEXT,
       created_at TEXT, updated_at TEXT, UNIQUE(address, chain)
     )`);
-    return db.prepare(`
+    return db
+      .prepare(
+        `
       SELECT * FROM proposals
       WHERE status IN ('sent', 'draft') AND followup_due < datetime('now')
       ORDER BY followup_due ASC
-    `).all();
-  } catch { return []; }
+    `,
+      )
+      .all();
+  } catch {
+    return [];
+  }
 }
 
 module.exports = { generateProposal, saveProposal, getOverdueFollowups };

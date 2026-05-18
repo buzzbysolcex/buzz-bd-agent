@@ -6,15 +6,15 @@ SafetyAgent covers Layer 2 (Filter) of the 4-Layer Intelligence Architecture. It
 
 ## Decisions
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| Architecture | Flat agent with private methods | Matches ScannerAgent/ScorerAgent pattern, simplest for 3 sources |
-| RugCheck | Real API (Solana-first) | RugCheck.xyz REST API available, other chains can be added later |
-| QuillShield | Python module import | Extracted to src/scorers/quillshield.py, reusable across agents |
-| DFlow | Stubbed with correct interface | MCP integration deferred; modifier logic implemented now |
-| Scoring | Weighted average + additive modifier | RugCheck 30%, QuillShield 50%, remaining 20% redistributed if source unavailable; DFlow is additive |
-| Error handling | Graceful degradation | Failed sources excluded from weighted average, not scored as 0 |
-| Config | Hardcoded constants | Matches codebase convention, testable, no file I/O |
+| Decision       | Choice                               | Rationale                                                                                           |
+| -------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Architecture   | Flat agent with private methods      | Matches ScannerAgent/ScorerAgent pattern, simplest for 3 sources                                    |
+| RugCheck       | Real API (Solana-first)              | RugCheck.xyz REST API available, other chains can be added later                                    |
+| QuillShield    | Python module import                 | Extracted to src/scorers/quillshield.py, reusable across agents                                     |
+| DFlow          | Stubbed with correct interface       | MCP integration deferred; modifier logic implemented now                                            |
+| Scoring        | Weighted average + additive modifier | RugCheck 30%, QuillShield 50%, remaining 20% redistributed if source unavailable; DFlow is additive |
+| Error handling | Graceful degradation                 | Failed sources excluded from weighted average, not scored as 0                                      |
+| Config         | Hardcoded constants                  | Matches codebase convention, testable, no file I/O                                                  |
 
 ## Interface
 
@@ -153,18 +153,18 @@ execute(params={"contract_address": str, "chain": str})
 
 ## Risk Flag Collection
 
-| Source | Flag | Condition |
-|--------|------|-----------|
-| RugCheck | `honeypot_detected` | `is_honeypot == True` |
-| RugCheck | `mint_authority_active` | Mint authority not revoked |
-| RugCheck | `freeze_authority_active` | Freeze authority not revoked |
+| Source      | Flag                       | Condition                      |
+| ----------- | -------------------------- | ------------------------------ |
+| RugCheck    | `honeypot_detected`        | `is_honeypot == True`          |
+| RugCheck    | `mint_authority_active`    | Mint authority not revoked     |
+| RugCheck    | `freeze_authority_active`  | Freeze authority not revoked   |
 | QuillShield | `top_holders_concentrated` | Holders score < 13 (50% of 25) |
-| QuillShield | `lp_not_locked` | Liquidity score < 13 |
-| QuillShield | `high_tax` | Contract score < 13 |
-| QuillShield | `unverified_contract` | Contract score < 13 |
-| DFlow | `no_swap_routes` | `routes_found == 0` |
-| DFlow | `high_slippage` | `best_slippage > 5.0` |
-| DFlow | `low_orderbook_depth` | `orderbook_depth < 10000` |
+| QuillShield | `lp_not_locked`            | Liquidity score < 13           |
+| QuillShield | `high_tax`                 | Contract score < 13            |
+| QuillShield | `unverified_contract`      | Contract score < 13            |
+| DFlow       | `no_swap_routes`           | `routes_found == 0`            |
+| DFlow       | `high_slippage`            | `best_slippage > 5.0`          |
+| DFlow       | `low_orderbook_depth`      | `orderbook_depth < 10000`      |
 
 ## Error Handling
 
@@ -176,24 +176,24 @@ execute(params={"contract_address": str, "chain": str})
 
 ## Event Logging
 
-| Phase | Event Type | Example |
-|-------|-----------|---------|
-| Start | action | "Starting safety check for {address} on {chain}" |
-| Per source | action | "Calling RugCheck API" |
-| Per source result | observation | "RugCheck score: 85, no honeypot" |
-| Source failure | error | "RugCheck API failed: timeout" |
-| Aggregation | decision | "Safety score: 72 (SAFE), 2 risk flags" |
+| Phase             | Event Type  | Example                                          |
+| ----------------- | ----------- | ------------------------------------------------ |
+| Start             | action      | "Starting safety check for {address} on {chain}" |
+| Per source        | action      | "Calling RugCheck API"                           |
+| Per source result | observation | "RugCheck score: 85, no honeypot"                |
+| Source failure    | error       | "RugCheck API failed: timeout"                   |
+| Aggregation       | decision    | "Safety score: 72 (SAFE), 2 risk flags"          |
 
 ## Files
 
-| File | Purpose |
-|------|---------|
-| `src/agents/safety_agent.py` | SafetyAgent class |
-| `src/scorers/__init__.py` | Scorers package init |
-| `src/scorers/quillshield.py` | QuillShield scoring module |
-| `src/agents/tests/test_safety_agent.py` | SafetyAgent tests |
-| `src/scorers/tests/__init__.py` | Scorers tests package init |
-| `src/scorers/tests/test_quillshield.py` | QuillShield module tests |
+| File                                    | Purpose                    |
+| --------------------------------------- | -------------------------- |
+| `src/agents/safety_agent.py`            | SafetyAgent class          |
+| `src/scorers/__init__.py`               | Scorers package init       |
+| `src/scorers/quillshield.py`            | QuillShield scoring module |
+| `src/agents/tests/test_safety_agent.py` | SafetyAgent tests          |
+| `src/scorers/tests/__init__.py`         | Scorers tests package init |
+| `src/scorers/tests/test_quillshield.py` | QuillShield module tests   |
 
 ## What's Not Included (YAGNI)
 

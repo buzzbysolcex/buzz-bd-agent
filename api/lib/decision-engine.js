@@ -1,16 +1,16 @@
 /**
  * Decision Engine — Rules-based + LLM-augmented strategic decision maker
- * 
+ *
  * Evaluates sub-agent outputs against decision rules, then optionally
  * calls MiniMax M2.5 for edge cases not covered by rules.
- * 
+ *
  * Part of Buzz BD Agent v7.0 — Strategic Orchestrator Layer
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const CONFIG_BASE = process.env.BUZZ_CONFIG_DIR || '/opt/buzz-config';
+const CONFIG_BASE = process.env.BUZZ_CONFIG_DIR || "/opt/buzz-config";
 
 class DecisionEngine {
   constructor(db, contextEngine, options = {}) {
@@ -27,11 +27,13 @@ class DecisionEngine {
    */
   _loadRules() {
     try {
-      const configPath = path.join(CONFIG_BASE, 'decision-rules.json');
-      const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-      this.rules = config.rules.filter(r => r.id); // Ensure valid rules
+      const configPath = path.join(CONFIG_BASE, "decision-rules.json");
+      const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+      this.rules = config.rules.filter((r) => r.id); // Ensure valid rules
       this.globalConstraints = config.global_constraints || {};
-      console.log(`[DecisionEngine] Loaded ${this.rules.length} rules, ${Object.keys(this.globalConstraints).length} constraints`);
+      console.log(
+        `[DecisionEngine] Loaded ${this.rules.length} rules, ${Object.keys(this.globalConstraints).length} constraints`,
+      );
     } catch (err) {
       console.error(`[DecisionEngine] Failed to load rules: ${err.message}`);
       this.rules = [];
@@ -43,9 +45,16 @@ class DecisionEngine {
    * Returns the highest-priority matching rule
    */
   _matchRules(evaluation) {
-    const { score, safetyStatus, pipelineStage, hoursSinceContact, replyReceived, priceChange24h } = evaluation;
+    const {
+      score,
+      safetyStatus,
+      pipelineStage,
+      hoursSinceContact,
+      replyReceived,
+      priceChange24h,
+    } = evaluation;
 
-    const matches = this.rules.filter(rule => {
+    const matches = this.rules.filter((rule) => {
       const c = rule.condition;
 
       // Score range check
@@ -53,11 +62,16 @@ class DecisionEngine {
       if (c.score_max !== undefined && score > c.score_max) return false;
 
       // Safety status check
-      if (c.safety_status && c.safety_status !== '*' && c.safety_status !== safetyStatus) return false;
+      if (
+        c.safety_status &&
+        c.safety_status !== "*" &&
+        c.safety_status !== safetyStatus
+      )
+        return false;
 
       // Pipeline stage check
       if (c.pipeline_stage) {
-        if (c.pipeline_stage !== '*') {
+        if (c.pipeline_stage !== "*") {
           if (Array.isArray(c.pipeline_stage)) {
             if (!c.pipeline_stage.includes(pipelineStage)) return false;
           } else if (c.pipeline_stage !== pipelineStage) {
@@ -68,7 +82,8 @@ class DecisionEngine {
 
       // Time-based checks (for outreach follow-ups)
       if (c.hours_since_contact_min !== undefined) {
-        if (!hoursSinceContact || hoursSinceContact < c.hours_since_contact_min) return false;
+        if (!hoursSinceContact || hoursSinceContact < c.hours_since_contact_min)
+          return false;
       }
       if (c.hours_since_contact_max !== undefined) {
         if (hoursSinceContact > c.hours_since_contact_max) return false;
@@ -81,7 +96,8 @@ class DecisionEngine {
 
       // Price change check
       if (c.price_change_24h_max !== undefined) {
-        if (!priceChange24h || priceChange24h > c.price_change_24h_max) return false;
+        if (!priceChange24h || priceChange24h > c.price_change_24h_max)
+          return false;
       }
 
       // Terms agreed check
@@ -105,25 +121,39 @@ class DecisionEngine {
     const constraints = this.globalConstraints;
     const violations = [];
 
-    if (action === 'IMMEDIATE_OUTREACH' || action === 'QUEUE_PRIORITY' || action === 'FOLLOW_UP') {
+    if (
+      action === "IMMEDIATE_OUTREACH" ||
+      action === "QUEUE_PRIORITY" ||
+      action === "FOLLOW_UP"
+    ) {
       // Check max active outreach
       try {
-        const row = this.db.prepare(
-          'SELECT COUNT(*) as count FROM outreach_sequences WHERE is_active = 1'
-        ).get();
+        const row = this.db
+          .prepare(
+            "SELECT COUNT(*) as count FROM outreach_sequences WHERE is_active = 1",
+          )
+          .get();
         if (row.count >= (constraints.max_active_outreach || 10)) {
-          violations.push(`Active outreach at capacity (${row.count}/${constraints.max_active_outreach})`);
+          violations.push(
+            `Active outreach at capacity (${row.count}/${constraints.max_active_outreach})`,
+          );
         }
       } catch {}
 
       // Check max emails per day
       try {
-        const row = this.db.prepare(`
+        const row = this.db
+          .prepare(
+            `
           SELECT COUNT(*) as count FROM outreach_sequences 
           WHERE last_sent_at > datetime('now', '-1 day')
-        `).get();
+        `,
+          )
+          .get();
         if (row.count >= (constraints.max_emails_per_day || 5)) {
-          violations.push(`Daily email limit reached (${row.count}/${constraints.max_emails_per_day})`);
+          violations.push(
+            `Daily email limit reached (${row.count}/${constraints.max_emails_per_day})`,
+          );
         }
       } catch {}
     }
@@ -133,7 +163,7 @@ class DecisionEngine {
 
   /**
    * MAIN METHOD: Make a strategic decision
-   * 
+   *
    * @param {Object} evaluation - Token evaluation data
    * @param {string} evaluation.tokenAddress - Contract address
    * @param {string} evaluation.chain - Chain (solana, base, bsc)
@@ -162,16 +192,16 @@ class DecisionEngine {
       if (constraintViolations.length > 0) {
         // Constraints violated — queue instead of executing
         decision = {
-          type: matchedRule.action + '_QUEUED',
+          type: matchedRule.action + "_QUEUED",
           ruleId: matchedRule.id,
           ruleName: matchedRule.name,
-          reasoning: `Rule ${matchedRule.id} matched (${matchedRule.description}) but constraints violated: ${constraintViolations.join('; ')}. Queued for later execution.`,
-          action: 'QUEUE',
+          reasoning: `Rule ${matchedRule.id} matched (${matchedRule.description}) but constraints violated: ${constraintViolations.join("; ")}. Queued for later execution.`,
+          action: "QUEUE",
           playbook: matchedRule.playbook,
           autoExecute: false,
           escalateToOgie: true,
           confidence: 70,
-          constraintViolations
+          constraintViolations,
         };
       } else {
         // All clear — execute
@@ -185,7 +215,7 @@ class DecisionEngine {
           autoExecute: matchedRule.auto_execute,
           escalateToOgie: matchedRule.escalate_to_ogie,
           confidence: 90,
-          constraintViolations: []
+          constraintViolations: [],
         };
       }
     } else {
@@ -195,22 +225,27 @@ class DecisionEngine {
       } else {
         // No LLM available — escalate to Ogie
         decision = {
-          type: 'ESCALATE_UNKNOWN',
+          type: "ESCALATE_UNKNOWN",
           ruleId: null,
           ruleName: null,
-          reasoning: 'No matching rule found and LLM caller not available. Escalating to Ogie.',
-          action: 'ESCALATE',
+          reasoning:
+            "No matching rule found and LLM caller not available. Escalating to Ogie.",
+          action: "ESCALATE",
           playbook: null,
           autoExecute: false,
           escalateToOgie: true,
           confidence: 30,
-          constraintViolations: []
+          constraintViolations: [],
         };
       }
     }
 
     // Step 3: Log the decision
-    const logEntry = this._logDecision(evaluation, decision, Date.now() - startTime);
+    const logEntry = this._logDecision(
+      evaluation,
+      decision,
+      Date.now() - startTime,
+    );
 
     return {
       ...decision,
@@ -220,7 +255,7 @@ class DecisionEngine {
       chain: evaluation.chain,
       tokenTicker: evaluation.tokenTicker,
       score: evaluation.score,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -235,7 +270,7 @@ class DecisionEngine {
         chain: evaluation.chain,
         pipelineStage: evaluation.pipelineStage,
         score: evaluation.score,
-        subAgentOutputs: evaluation.subAgentOutputs
+        subAgentOutputs: evaluation.subAgentOutputs,
       });
 
       // Call MiniMax M2.5 via the provided llmCaller function
@@ -246,7 +281,7 @@ ${context.contextBlock}
 ## Token Under Evaluation
 - Address: ${evaluation.tokenAddress}
 - Chain: ${evaluation.chain}
-- Ticker: ${evaluation.tokenTicker || 'UNKNOWN'}
+- Ticker: ${evaluation.tokenTicker || "UNKNOWN"}
 - Score: ${evaluation.score}/100
 - Safety: ${evaluation.safetyStatus}
 - Pipeline Stage: ${evaluation.pipelineStage}
@@ -261,38 +296,38 @@ No existing rule matches this case. Analyze the sub-agent outputs and provide yo
 }`;
 
       const response = await this.llmCaller(context.systemPrompt, prompt);
-      
+
       // Parse LLM response
       const parsed = JSON.parse(response);
 
       return {
-        type: parsed.decision || 'ESCALATE',
+        type: parsed.decision || "ESCALATE",
         ruleId: null,
-        ruleName: 'LLM_REASONING',
-        reasoning: parsed.reasoning || 'LLM decision (no rule matched)',
-        action: parsed.next_action || parsed.decision || 'ESCALATE',
+        ruleName: "LLM_REASONING",
+        reasoning: parsed.reasoning || "LLM decision (no rule matched)",
+        action: parsed.next_action || parsed.decision || "ESCALATE",
         playbook: null,
         autoExecute: false, // LLM decisions always require confirmation
         escalateToOgie: parsed.escalate !== false, // Default to escalate
         confidence: parsed.confidence || 50,
         constraintViolations: [],
-        llmGenerated: true
+        llmGenerated: true,
       };
     } catch (err) {
       console.error(`[DecisionEngine] LLM decision failed: ${err.message}`);
       return {
-        type: 'ESCALATE_LLM_ERROR',
+        type: "ESCALATE_LLM_ERROR",
         ruleId: null,
         ruleName: null,
         reasoning: `LLM reasoning failed (${err.message}). Escalating to Ogie.`,
-        action: 'ESCALATE',
+        action: "ESCALATE",
         playbook: null,
         autoExecute: false,
         escalateToOgie: true,
         confidence: 20,
         constraintViolations: [],
         llmGenerated: false,
-        error: err.message
+        error: err.message,
       };
     }
   }
@@ -321,19 +356,23 @@ No existing rule matches this case. Analyze the sub-agent outputs and provide yo
         decision.playbook || null,
         decision.confidence,
         decision.escalateToOgie ? 1 : 0,
-        evaluation.subAgentOutputs ? JSON.stringify(evaluation.subAgentOutputs) : null,
+        evaluation.subAgentOutputs
+          ? JSON.stringify(evaluation.subAgentOutputs)
+          : null,
         evaluation.score,
-        evaluation.safetyStatus
+        evaluation.safetyStatus,
       );
 
       // Capture decision to Supermemory (fire-and-forget, non-blocking)
       const captureText = `Decision: ${decision.type} for ${evaluation.tokenTicker || evaluation.tokenAddress} on ${evaluation.chain}. Score: ${evaluation.score}. Safety: ${evaluation.safetyStatus}. Reasoning: ${decision.reasoning}`;
-      this.contextEngine.captureToSupermemory(captureText, {
-        token_address: evaluation.tokenAddress,
-        chain: evaluation.chain,
-        decision_type: decision.type,
-        score: evaluation.score
-      }).catch(() => {}); // Swallow errors — non-critical
+      this.contextEngine
+        .captureToSupermemory(captureText, {
+          token_address: evaluation.tokenAddress,
+          chain: evaluation.chain,
+          decision_type: decision.type,
+          score: evaluation.score,
+        })
+        .catch(() => {}); // Swallow errors — non-critical
 
       return { id: result.lastInsertRowid };
     } catch (err) {
@@ -347,11 +386,15 @@ No existing rule matches this case. Analyze the sub-agent outputs and provide yo
    */
   getHistory(limit = 50, offset = 0) {
     try {
-      return this.db.prepare(`
+      return this.db
+        .prepare(
+          `
         SELECT * FROM strategic_decisions 
         ORDER BY created_at DESC 
         LIMIT ? OFFSET ?
-      `).all(limit, offset);
+      `,
+        )
+        .all(limit, offset);
     } catch {
       return [];
     }
@@ -362,25 +405,40 @@ No existing rule matches this case. Analyze the sub-agent outputs and provide yo
    */
   getAnalytics() {
     try {
-      const total = this.db.prepare('SELECT COUNT(*) as count FROM strategic_decisions').get();
-      const byType = this.db.prepare(`
+      const total = this.db
+        .prepare("SELECT COUNT(*) as count FROM strategic_decisions")
+        .get();
+      const byType = this.db
+        .prepare(
+          `
         SELECT decision_type, COUNT(*) as count, AVG(confidence) as avg_confidence
         FROM strategic_decisions GROUP BY decision_type ORDER BY count DESC
-      `).all();
-      const escalated = this.db.prepare(
-        'SELECT COUNT(*) as count FROM strategic_decisions WHERE escalated_to_ogie = 1'
-      ).get();
-      const rulesUsed = this.db.prepare(`
+      `,
+        )
+        .all();
+      const escalated = this.db
+        .prepare(
+          "SELECT COUNT(*) as count FROM strategic_decisions WHERE escalated_to_ogie = 1",
+        )
+        .get();
+      const rulesUsed = this.db
+        .prepare(
+          `
         SELECT rule_id, COUNT(*) as times_used FROM strategic_decisions 
         WHERE rule_id IS NOT NULL GROUP BY rule_id ORDER BY times_used DESC
-      `).all();
+      `,
+        )
+        .all();
 
       return {
         total_decisions: total.count,
         by_type: byType,
-        escalation_rate: total.count > 0 ? (escalated.count / total.count * 100).toFixed(1) + '%' : '0%',
+        escalation_rate:
+          total.count > 0
+            ? ((escalated.count / total.count) * 100).toFixed(1) + "%"
+            : "0%",
         rules_usage: rulesUsed,
-        generated_at: new Date().toISOString()
+        generated_at: new Date().toISOString(),
       };
     } catch (err) {
       return { error: err.message };

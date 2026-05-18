@@ -10,26 +10,30 @@
  * Buzz BD Agent | MiroFish MVP
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const path = require('path');
-const { getDB } = require('../db');
+const path = require("path");
+const { getDB } = require("../db");
 const {
   calculateEV,
   calculateConfidence,
   calculateProbability,
   buildClusterBreakdown,
-  identifySignals
-} = require('../services/ev-calculator');
+  identifySignals,
+} = require("../services/ev-calculator");
 
 // Persona agent paths — use relative require so it works both locally and in Docker
-const PERSONA_DIR = path.resolve(__dirname, '../services/agents/personas');
+const PERSONA_DIR = path.resolve(__dirname, "../services/agents/personas");
 
 const PERSONA_CONFIGS = [
-  { name: 'degen-agent', file: 'degen-agent', baseWeight: 0.15 },
-  { name: 'whale-agent', file: 'whale-agent', baseWeight: 0.25 },
-  { name: 'institutional-agent', file: 'institutional-agent', baseWeight: 0.35 },
-  { name: 'community-agent', file: 'community-agent', baseWeight: 0.25 },
+  { name: "degen-agent", file: "degen-agent", baseWeight: 0.15 },
+  { name: "whale-agent", file: "whale-agent", baseWeight: 0.25 },
+  {
+    name: "institutional-agent",
+    file: "institutional-agent",
+    baseWeight: 0.35,
+  },
+  { name: "community-agent", file: "community-agent", baseWeight: 0.25 },
 ];
 
 // 5 weight offsets per persona to create 20 distinct evaluations
@@ -43,14 +47,22 @@ function lookupToken(db, tokenAddress, ticker, chain) {
 
   if (tokenAddress) {
     try {
-      token = db.prepare('SELECT * FROM pipeline_tokens WHERE address = ?').get(tokenAddress);
-    } catch (e) { /* table may not exist */ }
+      token = db
+        .prepare("SELECT * FROM pipeline_tokens WHERE address = ?")
+        .get(tokenAddress);
+    } catch (e) {
+      /* table may not exist */
+    }
   }
 
   if (!token && ticker) {
     try {
-      token = db.prepare('SELECT * FROM pipeline_tokens WHERE UPPER(ticker) = UPPER(?)').get(ticker);
-    } catch (e) { /* table may not exist */ }
+      token = db
+        .prepare("SELECT * FROM pipeline_tokens WHERE UPPER(ticker) = UPPER(?)")
+        .get(ticker);
+    } catch (e) {
+      /* table may not exist */
+    }
   }
 
   // Also pull token_scores if available
@@ -58,8 +70,12 @@ function lookupToken(db, tokenAddress, ticker, chain) {
   const addr = token?.address || tokenAddress;
   if (addr) {
     try {
-      scores = db.prepare('SELECT * FROM token_scores WHERE address = ?').get(addr);
-    } catch (e) { /* table may not exist */ }
+      scores = db
+        .prepare("SELECT * FROM token_scores WHERE address = ?")
+        .get(addr);
+    } catch (e) {
+      /* table may not exist */
+    }
   }
 
   return { token, scores };
@@ -81,7 +97,7 @@ function buildContext(token, scores, scenario) {
 
   if (scores) {
     try {
-      const sd = JSON.parse(scores.scanner_data || '{}');
+      const sd = JSON.parse(scores.scanner_data || "{}");
       scannerData = sd.data || sd;
       // Merge top-level scanner fields
       if (sd.tokenName) scannerData.name = sd.tokenName;
@@ -90,16 +106,28 @@ function buildContext(token, scores, scenario) {
       if (sd.liquidity) scannerData.liquidity_usd = sd.liquidity;
       if (sd.priceUsd) scannerData.price_usd = sd.priceUsd;
     } catch {}
-    try { const s = JSON.parse(scores.safety_data || '{}'); safetyData = s.data || s; safetyScore = s.score || 50; } catch {}
-    try { const w = JSON.parse(scores.wallet_data || '{}'); walletData = w.data || w; walletScore = w.score || 50; } catch {}
-    try { const so = JSON.parse(scores.social_data || '{}'); socialData = so.data || so; socialScore = so.score || 50; } catch {}
+    try {
+      const s = JSON.parse(scores.safety_data || "{}");
+      safetyData = s.data || s;
+      safetyScore = s.score || 50;
+    } catch {}
+    try {
+      const w = JSON.parse(scores.wallet_data || "{}");
+      walletData = w.data || w;
+      walletScore = w.score || 50;
+    } catch {}
+    try {
+      const so = JSON.parse(scores.social_data || "{}");
+      socialData = so.data || so;
+      socialScore = so.score || 50;
+    } catch {}
   }
 
   // Fallback: generate synthetic data from pipeline_score when no token_scores exist
   if (!scores && token && token.score) {
     const pScore = token.score;
     scannerData = {
-      name: token.name || token.ticker || 'Unknown',
+      name: token.name || token.ticker || "Unknown",
       symbol: token.ticker,
       market_cap: pScore >= 85 ? 50000000 : pScore >= 70 ? 5000000 : 500000,
       liquidity_usd: pScore >= 85 ? 2000000 : pScore >= 70 ? 500000 : 50000,
@@ -108,13 +136,18 @@ function buildContext(token, scores, scenario) {
       holders: pScore >= 85 ? 10000 : pScore >= 70 ? 3000 : 500,
       pair_age_hours: pScore >= 85 ? 2160 : pScore >= 70 ? 720 : 168,
       boosted: pScore >= 80,
-      txns: { h24: { buys: pScore >= 70 ? 500 : 100, sells: pScore >= 70 ? 300 : 150 } }
+      txns: {
+        h24: {
+          buys: pScore >= 70 ? 500 : 100,
+          sells: pScore >= 70 ? 300 : 150,
+        },
+      },
     };
     safetyScore = pScore >= 85 ? 90 : pScore >= 70 ? 75 : 50;
     walletScore = pScore >= 85 ? 80 : pScore >= 70 ? 65 : 45;
     socialScore = pScore >= 85 ? 75 : pScore >= 70 ? 60 : 40;
     safetyData = {
-      verdict: pScore >= 85 ? 'SAFE' : pScore >= 70 ? 'CAUTION' : 'RISKY',
+      verdict: pScore >= 85 ? "SAFE" : pScore >= 70 ? "CAUTION" : "RISKY",
       lp_locked: pScore >= 75,
       ownership_renounced: pScore >= 80,
       audited: pScore >= 85,
@@ -127,7 +160,8 @@ function buildContext(token, scores, scenario) {
     socialData = {
       twitter_followers: pScore >= 85 ? 25000 : pScore >= 70 ? 5000 : 500,
       engagement_rate: pScore >= 85 ? 4 : pScore >= 70 ? 2 : 0.5,
-      sentiment: pScore >= 85 ? 'positive' : pScore >= 70 ? 'neutral' : 'negative',
+      sentiment:
+        pScore >= 85 ? "positive" : pScore >= 70 ? "neutral" : "negative",
       has_discord: pScore >= 70,
       has_telegram: pScore >= 70,
     };
@@ -151,37 +185,45 @@ function buildContext(token, scores, scenario) {
     walletScore,
     socialScore,
     pipelineScore,
-    scenario: scenario || 'listing_evaluation',
-    timestamp: new Date().toISOString()
+    scenario: scenario || "listing_evaluation",
+    timestamp: new Date().toISOString(),
   };
 }
 
 // POST /api/v1/simulate/simulate-listing
-router.post('/simulate-listing', async (req, res) => {
+router.post("/simulate-listing", async (req, res) => {
   try {
     const { tokenAddress, address, ticker, chain, depth } = req.body;
     const resolvedAddress = tokenAddress || address;
 
     if (!resolvedAddress && !ticker) {
-      return res.json({ success: false, error: 'tokenAddress or ticker required' });
+      return res.json({
+        success: false,
+        error: "tokenAddress or ticker required",
+      });
     }
 
     const db = getDB();
 
     // 1. Look up token
-    const { token, scores } = lookupToken(db, resolvedAddress, ticker, chain || 'solana');
+    const { token, scores } = lookupToken(
+      db,
+      resolvedAddress,
+      ticker,
+      chain || "solana",
+    );
 
     if (!token && !resolvedAddress) {
       return res.json({
         success: false,
-        error: 'Token not found in pipeline — scan first'
+        error: "Token not found in pipeline — scan first",
       });
     }
 
     const tokenAddr = token?.address || resolvedAddress;
     const tokenTicker = token?.ticker || ticker || null;
-    const tokenChain = token?.chain || chain || 'solana';
-    const scenario = req.body.scenario || 'listing_evaluation';
+    const tokenChain = token?.chain || chain || "solana";
+    const scenario = req.body.scenario || "listing_evaluation";
 
     // 2. Build context
     const context = buildContext(token, scores, scenario);
@@ -196,7 +238,9 @@ router.post('/simulate-listing', async (req, res) => {
       } catch (e) {
         // Try Docker path as fallback
         try {
-          agentModule = require(`/opt/buzz-api/services/agents/personas/${persona.file}`);
+          agentModule = require(
+            `/opt/buzz-api/services/agents/personas/${persona.file}`,
+          );
         } catch (e2) {
           console.error(`[simulate] Cannot load ${persona.name}: ${e.message}`);
           continue;
@@ -204,14 +248,17 @@ router.post('/simulate-listing', async (req, res) => {
       }
 
       for (const offset of WEIGHT_OFFSETS) {
-        const adjustedWeight = Math.max(0.05, Math.min(0.50, persona.baseWeight + offset));
+        const adjustedWeight = Math.max(
+          0.05,
+          Math.min(0.5, persona.baseWeight + offset),
+        );
         agentPromises.push(
-          agentModule.analyzeToken(context, null).then(result => ({
+          agentModule.analyzeToken(context, null).then((result) => ({
             ...result,
             persona: persona.name,
             weight: adjustedWeight,
-            variation: offset
-          }))
+            variation: offset,
+          })),
         );
       }
     }
@@ -220,19 +267,20 @@ router.post('/simulate-listing', async (req, res) => {
 
     // 4. Collect valid verdicts
     const verdicts = results
-      .filter(r => r.status === 'fulfilled' && r.value)
-      .map(r => r.value);
+      .filter((r) => r.status === "fulfilled" && r.value)
+      .map((r) => r.value);
 
     if (verdicts.length < 10) {
       return res.json({
         success: false,
-        error: `Only ${verdicts.length} valid verdicts — need at least 10. Check persona agents.`
+        error: `Only ${verdicts.length} valid verdicts — need at least 10. Check persona agents.`,
       });
     }
 
-    const partialNote = verdicts.length < 15
-      ? `Partial simulation: ${verdicts.length}/20 agents responded`
-      : null;
+    const partialNote =
+      verdicts.length < 15
+        ? `Partial simulation: ${verdicts.length}/20 agents responded`
+        : null;
 
     // 5. Calculate EV metrics
     const probability = calculateProbability(verdicts);
@@ -242,34 +290,58 @@ router.post('/simulate-listing', async (req, res) => {
     const { key_risk, key_signal } = identifySignals(clusters);
 
     // 6. Aggregate counts
-    const bullish = verdicts.filter(v => v.signal === 'bullish').length;
-    const neutral = verdicts.filter(v => v.signal === 'neutral').length;
-    const bearish = verdicts.filter(v => v.signal === 'bearish').length;
+    const bullish = verdicts.filter((v) => v.signal === "bullish").length;
+    const neutral = verdicts.filter((v) => v.signal === "neutral").length;
+    const bearish = verdicts.filter((v) => v.signal === "bearish").length;
 
     const consensus = {
-      overall: bullish > bearish + neutral ? 'bullish' : bearish > bullish ? 'bearish' : 'mixed',
+      overall:
+        bullish > bearish + neutral
+          ? "bullish"
+          : bearish > bullish
+            ? "bearish"
+            : "mixed",
       bullish_count: bullish,
       neutral_count: neutral,
       bearish_count: bearish,
       total_agents: verdicts.length,
-      expected_impact: bullish >= 14 ? '+15-25% in 24h' : bullish >= 8 ? '+5-15% in 24h' : 'minimal',
+      expected_impact:
+        bullish >= 14
+          ? "+15-25% in 24h"
+          : bullish >= 8
+            ? "+5-15% in 24h"
+            : "minimal",
     };
 
     // 7. Store in DB
     const now = new Date().toISOString();
     try {
-      db.prepare(`INSERT INTO listing_simulations
+      db.prepare(
+        `INSERT INTO listing_simulations
         (token_address, chain, scenario, persona_results, consensus,
          bullish_count, neutral_count, bearish_count, expected_impact,
          ticker, score, agents_count, probability, confidence, ev, recommendation,
          cluster_degen, cluster_whale, cluster_institutional, cluster_community,
          key_risk, key_signal, raw_verdicts, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        tokenAddr, tokenChain, scenario,
-        JSON.stringify(verdicts.map(v => ({ persona: v.persona, signal: v.signal, confidence: v.confidence, score: v.score, weight: v.weight }))),
+      `,
+      ).run(
+        tokenAddr,
+        tokenChain,
+        scenario,
+        JSON.stringify(
+          verdicts.map((v) => ({
+            persona: v.persona,
+            signal: v.signal,
+            confidence: v.confidence,
+            score: v.score,
+            weight: v.weight,
+          })),
+        ),
         JSON.stringify(consensus),
-        bullish, neutral, bearish,
+        bullish,
+        neutral,
+        bearish,
         consensus.expected_impact,
         tokenTicker,
         token?.score || scores?.score_total || null,
@@ -285,10 +357,10 @@ router.post('/simulate-listing', async (req, res) => {
         key_risk,
         key_signal,
         JSON.stringify(verdicts),
-        now
+        now,
       );
     } catch (e) {
-      console.error('[simulate] DB insert error:', e.message);
+      console.error("[simulate] DB insert error:", e.message);
     }
 
     // 8. Return response
@@ -310,21 +382,23 @@ router.post('/simulate-listing', async (req, res) => {
         key_signal,
         partial_note: partialNote,
         persona_results: verdicts,
-        simulated_at: now
-      }
+        simulated_at: now,
+      },
     });
   } catch (err) {
-    console.error('[simulate] Error:', err.message);
+    console.error("[simulate] Error:", err.message);
     res.json({ success: false, error: err.message });
   }
 });
 
 // GET /api/v1/simulate/history — recent simulations
-router.get('/history', (req, res) => {
+router.get("/history", (req, res) => {
   try {
     const db = getDB();
     const limit = Math.min(parseInt(req.query.limit) || 20, 100);
-    const rows = db.prepare('SELECT * FROM listing_simulations ORDER BY id DESC LIMIT ?').all(limit);
+    const rows = db
+      .prepare("SELECT * FROM listing_simulations ORDER BY id DESC LIMIT ?")
+      .all(limit);
     res.json({ success: true, count: rows.length, simulations: rows });
   } catch (err) {
     res.json({ success: false, error: err.message });
@@ -332,11 +406,13 @@ router.get('/history', (req, res) => {
 });
 
 // GET /api/v1/simulate/simulations — alias for history
-router.get('/simulations', (req, res) => {
+router.get("/simulations", (req, res) => {
   try {
     const db = getDB();
     const limit = Math.min(parseInt(req.query.limit) || 20, 100);
-    const rows = db.prepare('SELECT * FROM listing_simulations ORDER BY id DESC LIMIT ?').all(limit);
+    const rows = db
+      .prepare("SELECT * FROM listing_simulations ORDER BY id DESC LIMIT ?")
+      .all(limit);
     res.json({ success: true, count: rows.length, simulations: rows });
   } catch (err) {
     res.json({ success: false, error: err.message });

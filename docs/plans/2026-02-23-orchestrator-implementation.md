@@ -13,6 +13,7 @@
 ### Task 1: Constructor & Setup Tests
 
 **Files:**
+
 - Create: `src/agents/tests/test_orchestrator.py`
 - Create: `src/agents/orchestrator.py`
 
@@ -128,6 +129,7 @@ git commit -m "feat(orchestrator): add constructor with sub-agent wiring and con
 ### Task 2: Weight Redistribution Tests & Implementation
 
 **Files:**
+
 - Modify: `src/agents/tests/test_orchestrator.py`
 - Modify: `src/agents/orchestrator.py`
 
@@ -222,6 +224,7 @@ git commit -m "feat(orchestrator): add proportional weight redistribution"
 ### Task 3: Verdict Logic Tests & Implementation
 
 **Files:**
+
 - Modify: `src/agents/tests/test_orchestrator.py`
 - Modify: `src/agents/orchestrator.py`
 
@@ -321,6 +324,7 @@ git commit -m "feat(orchestrator): add unified verdict with critical flag overri
 ### Task 4: Result Merging Tests & Implementation
 
 **Files:**
+
 - Modify: `src/agents/tests/test_orchestrator.py`
 - Modify: `src/agents/orchestrator.py`
 
@@ -550,6 +554,7 @@ git commit -m "feat(orchestrator): add result merging with namespaced flags"
 ### Task 5: Parallel Execution Tests & Implementation
 
 **Files:**
+
 - Modify: `src/agents/tests/test_orchestrator.py`
 - Modify: `src/agents/orchestrator.py`
 
@@ -709,6 +714,7 @@ git commit -m "feat(orchestrator): add parallel agent execution with timeouts"
 ### Task 6: Build Agent Params & Evaluate Single Token Tests
 
 **Files:**
+
 - Modify: `src/agents/tests/test_orchestrator.py`
 - Modify: `src/agents/orchestrator.py`
 
@@ -875,6 +881,7 @@ git commit -m "feat(orchestrator): add _build_agent_params and _evaluate_single_
 ### Task 7: Depth Escalation Tests
 
 **Files:**
+
 - Modify: `src/agents/tests/test_orchestrator.py`
 
 **Step 1: Write the failing tests**
@@ -988,6 +995,7 @@ git commit -m "test(orchestrator): add depth escalation tests"
 ### Task 8: Pipeline / execute() Tests & Implementation
 
 **Files:**
+
 - Modify: `src/agents/tests/test_orchestrator.py`
 - Modify: `src/agents/orchestrator.py`
 
@@ -1186,6 +1194,7 @@ git commit -m "feat(orchestrator): add execute() with scan/evaluate modes and su
 ### Task 9: Telegram Formatting Tests & Implementation
 
 **Files:**
+
 - Modify: `src/agents/tests/test_orchestrator.py`
 - Modify: `src/agents/orchestrator.py`
 
@@ -1372,6 +1381,7 @@ git commit -m "feat(orchestrator): add Telegram formatting for scan and evaluate
 ### Task 10: Run Full Test Suite & Final Verification
 
 **Files:**
+
 - No new files
 
 **Step 1: Run the complete test file**
@@ -1395,15 +1405,15 @@ git commit -m "test(orchestrator): full test suite passing - 47+ tests"
 
 ## Test Count Summary
 
-| Category | Tests |
-|---|---|
-| Constructor & Setup | 4 |
-| Weight Redistribution | 6 |
-| Verdict Logic | 11 |
-| Result Merging | 8 |
-| Parallel Execution | 7 |
-| Build Params + Evaluate | 8 |
-| Depth Escalation | 6 |
-| Pipeline / execute() | 6 |
-| Telegram Formatting | 5 |
-| **Total** | **61** |
+| Category                | Tests  |
+| ----------------------- | ------ |
+| Constructor & Setup     | 4      |
+| Weight Redistribution   | 6      |
+| Verdict Logic           | 11     |
+| Result Merging          | 8      |
+| Parallel Execution      | 7      |
+| Build Params + Evaluate | 8      |
+| Depth Escalation        | 6      |
+| Pipeline / execute()    | 6      |
+| Telegram Formatting     | 5      |
+| **Total**               | **61** |

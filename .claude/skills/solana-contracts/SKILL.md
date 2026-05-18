@@ -19,10 +19,10 @@ Explorer: solana.fm or explorer.solana.com
 
 ## WALLET REGISTRY (Solana)
 
-| Wallet | Purpose | Key Location |
-|--------|---------|-------------|
+| Wallet      | Purpose                                                            | Key Location |
+| ----------- | ------------------------------------------------------------------ | ------------ |
 | HeyAnon SOL | BNS48CGg2mgP7sdBY4VVTiDyK6jVqRBi9Y71jqhxZn9A — Deployer + DeFi ops | .env.heyanon |
-| 8004 SOL | 9pQ6K...XUBS — Agent identity | existing |
+| 8004 SOL    | 9pQ6K...XUBS — Agent identity                                      | existing     |
 
 **Lobster (5iC7p...mo5Jp) is DEAD — private key wiped. Do NOT use.**
 
@@ -30,12 +30,12 @@ Explorer: solana.fm or explorer.solana.com
 
 ## SMART CONTRACTS (Solana Mainnet)
 
-| Program | Status | Function |
-|---------|--------|----------|
-| buzz_score_storage | **BUILD** | PDA per token. Store score/safety/liquidity/social/timestamp. Owner-gated write. |
-| buzz_listing_oracle | **BUILD** | CPI read from ScoreStorage. SOL payment gate. Stateless query layer. |
-| buzz_listing_escrow | PHASE 2 | SPL Token deposits. Deposit/confirm/refund. Time-locked release. |
-| buzz_reputation | PHASE 2 | PDA per agent. Prediction accuracy tracking. Tied to 8004 identity. |
+| Program             | Status    | Function                                                                         |
+| ------------------- | --------- | -------------------------------------------------------------------------------- |
+| buzz_score_storage  | **BUILD** | PDA per token. Store score/safety/liquidity/social/timestamp. Owner-gated write. |
+| buzz_listing_oracle | **BUILD** | CPI read from ScoreStorage. SOL payment gate. Stateless query layer.             |
+| buzz_listing_escrow | PHASE 2   | SPL Token deposits. Deposit/confirm/refund. Time-locked release.                 |
+| buzz_reputation     | PHASE 2   | PDA per agent. Prediction accuracy tracking. Tied to 8004 identity.              |
 
 ## SCORESTORAGE PDA DESIGN
 
@@ -120,6 +120,7 @@ When Buzz scores a token, write to BOTH chains:
 ```
 
 API endpoint update:
+
 ```
 POST /api/v1/score-token
   → existing Base write (0xbf81...88Fb)
@@ -129,15 +130,15 @@ POST /api/v1/score-token
 
 ## KEY DIFFERENCES FROM BASE
 
-| Concept | Base (Foundry) | Solana (Anchor) |
-|---------|---------------|-----------------|
-| State | Inside contract | Separate PDA accounts |
-| Deploy | forge script | anchor deploy |
-| Test | forge test | anchor test (TypeScript) |
-| Cost/TX | ~$0.01 | ~$0.00025 |
-| Deploy cost | ~$0.025 | ~2-5 SOL (refundable rent) |
-| Client | ethers.js | @solana/web3.js + @coral-xyz/anchor |
-| Upgrade | Proxy pattern | Built-in upgrade authority |
+| Concept     | Base (Foundry)  | Solana (Anchor)                     |
+| ----------- | --------------- | ----------------------------------- |
+| State       | Inside contract | Separate PDA accounts               |
+| Deploy      | forge script    | anchor deploy                       |
+| Test        | forge test      | anchor test (TypeScript)            |
+| Cost/TX     | ~$0.01          | ~$0.00025                           |
+| Deploy cost | ~$0.025         | ~2-5 SOL (refundable rent)          |
+| Client      | ethers.js       | @solana/web3.js + @coral-xyz/anchor |
+| Upgrade     | Proxy pattern   | Built-in upgrade authority          |
 
 ## SECURITY RULES
 
@@ -159,6 +160,6 @@ POST /api/v1/score-token
 
 ---
 
-*Skill: solana-contracts | ADR-009 | Anchor + Rust | Mainnet direct*
-*Priority: ScoreStorage → ListingOracle → Escrow → Reputation*
-*Bismillah* 🤲
+_Skill: solana-contracts | ADR-009 | Anchor + Rust | Mainnet direct_
+_Priority: ScoreStorage → ListingOracle → Escrow → Reputation_
+_Bismillah_ 🤲

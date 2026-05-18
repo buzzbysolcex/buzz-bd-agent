@@ -37,9 +37,7 @@
             "description": "Payment required \u2014 x402 challenge returned"
           }
         },
-        "x-payment-protocols": [
-          "exact"
-        ]
+        "x-payment-protocols": ["exact"]
       }
     },
     "/premium/score": {
@@ -58,10 +56,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "contractAddress",
-                  "chain"
-                ],
+                "required": ["contractAddress", "chain"],
                 "properties": {
                   "contractAddress": {
                     "type": "string",
@@ -84,9 +79,7 @@
             "description": "Payment required \u2014 x402 challenge returned"
           }
         },
-        "x-payment-protocols": [
-          "exact"
-        ]
+        "x-payment-protocols": ["exact"]
       }
     },
     "/premium/sim": {
@@ -105,10 +98,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "contractAddress",
-                  "chain"
-                ],
+                "required": ["contractAddress", "chain"],
                 "properties": {
                   "contractAddress": {
                     "type": "string"
@@ -129,9 +119,7 @@
             "description": "Payment required"
           }
         },
-        "x-payment-protocols": [
-          "exact"
-        ]
+        "x-payment-protocols": ["exact"]
       }
     },
     "/premium/mining": {
@@ -153,9 +141,7 @@
             "description": "Payment required"
           }
         },
-        "x-payment-protocols": [
-          "exact"
-        ]
+        "x-payment-protocols": ["exact"]
       }
     },
     "/shield/scan": {
@@ -174,10 +160,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "contractAddress",
-                  "chain"
-                ],
+                "required": ["contractAddress", "chain"],
                 "properties": {
                   "contractAddress": {
                     "type": "string"
@@ -198,9 +181,7 @@
             "description": "Payment required"
           }
         },
-        "x-payment-protocols": [
-          "exact"
-        ]
+        "x-payment-protocols": ["exact"]
       }
     },
     "/shield/audit/full": {
@@ -219,10 +200,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "contractAddress",
-                  "chain"
-                ],
+                "required": ["contractAddress", "chain"],
                 "properties": {
                   "contractAddress": {
                     "type": "string"
@@ -243,9 +221,7 @@
             "description": "Payment required"
           }
         },
-        "x-payment-protocols": [
-          "exact"
-        ]
+        "x-payment-protocols": ["exact"]
       }
     }
   }

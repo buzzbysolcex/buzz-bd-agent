@@ -8,6 +8,7 @@ description: Run the full 7-phase BD screening pipeline on a HOT token. Dual-sou
 Full 7-phase screening for exchange listing candidates.
 
 ## Usage
+
 ```
 /screen PEPE                    # Full 7-phase screen
 /screen 0x... --phase 1-2       # Verification + security only
@@ -16,6 +17,7 @@ Full 7-phase screening for exchange listing candidates.
 ```
 
 ## Phases
+
 1. Dual-Source Verification (DexScreener + DexTools)
 2. Security Deep Dive (Go+, Quick Intel, Token Sniffer, Honeypot.is)
 3. BD Readiness Classification (Sweet Spot / Watch / Pass)
@@ -25,5 +27,6 @@ Full 7-phase screening for exchange listing candidates.
 7. Auto-Learning (failed patterns → new scoring rules)
 
 ## Requires
+
 Score 85+ (HOT classification) to activate full pipeline.
 Tokens scoring 70-84 (WARM) enter Watch mode with 7-day re-screen.

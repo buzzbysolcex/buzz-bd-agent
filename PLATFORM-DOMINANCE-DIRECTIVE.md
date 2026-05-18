@@ -1,6 +1,9 @@
 # PERMANENT DIRECTIVE: MOLTBOOK DOMINANCE + AIBTC NETWORK PRESENCE
+
 # Save to: /home/claude-code/buzz-workspace/PLATFORM-DOMINANCE-DIRECTIVE.md
+
 # Add to CLAUDE.md startup read order
+
 # Must survive ALL restarts, deploys, and migrations
 
 ---
@@ -24,6 +27,7 @@ Store in BOTH locations. Redundancy. Must survive restart.
 - Profile: https://moltbook.com/u/BuzzBD
 
 Store in:
+
 - Environment variable: MOLTBOOK_API_KEY=moltbook_sk_zMehEPpryApvazWlEx2CBhkTcMp8kolr
 - Credentials file: /home/claude-code/.config/moltbook/credentials.json
 - Docker image env vars (Wednesday CI/CD push)
@@ -33,6 +37,7 @@ Store in:
 Schedule: every 6h (05:00, 11:00, 17:00, 23:00 UTC)
 
 Each run:
+
 1. Read feed: GET https://www.moltbook.com/api/v1/feed
 2. Upvote 2 relevant posts (agents, crypto, builds, security)
 3. Comment on 1 post with genuine insight — NOT generic. Use pipeline data, scoring intelligence, or technical knowledge to add REAL value. Every comment should make the reader think "this agent actually knows what it's talking about."
@@ -77,6 +82,7 @@ Top 5 tokens of the week, market trends, prediction accuracy. Sunday creative ou
 ### COMMENT QUALITY RULES
 
 Every comment must meet ALL of these criteria:
+
 1. Adds information the original post didn't have
 2. References real data (from pipeline, scoring, or intel sources)
 3. Is at least 2-3 sentences — not one-liners
@@ -97,17 +103,18 @@ Tier 3 (engage only): introductions, announcements, openclaw-explorers
 
 ### SUCCESS METRICS — MOLTBOOK
 
-| Metric | Current | 30-Day Target | 90-Day Target |
-|--------|---------|---------------|---------------|
-| Karma | 100 | 250 | 500 |
-| Followers | 24 | 50 | 100 |
-| Posts | 62 | 120 | 250 |
-| Comments | 174 | 350 | 700 |
-| Rank | Unknown | Top 5 active | #1 most active |
+| Metric    | Current | 30-Day Target | 90-Day Target  |
+| --------- | ------- | ------------- | -------------- |
+| Karma     | 100     | 250           | 500            |
+| Followers | 24      | 50            | 100            |
+| Posts     | 62      | 120           | 250            |
+| Comments  | 174     | 350           | 700            |
+| Rank      | Unknown | Top 5 active  | #1 most active |
 
 ### MOLTBOOK ALERTS — WAR ROOM
 
 Same pattern as AIBTC:
+
 - Someone replies to a Buzz post: alert War Room within 5 min with message + draft reply
 - Someone DMs Buzz: alert War Room immediately
 - Someone mentions BuzzBD: alert War Room
@@ -128,6 +135,7 @@ The AIBTC profile showing "Last active 2 hours ago" is like a LinkedIn profile s
 ### INBOX: Check every 5 minutes. Same frequency as heartbeat.
 
 When a new message arrives:
+
 1. Read it immediately
 2. Analyze: who sent it, what they want, is it legit, is it a security risk
 3. Draft a reply based on context
@@ -149,8 +157,8 @@ Target: 1-2 genuine agent conversations per week.
 
 ### AIBTC CRONS (3):
 
-- */5 — heartbeat (check-in)
-- */5 — inbox poll (message detection + War Room alert)
+- \*/5 — heartbeat (check-in)
+- \*/5 — inbox poll (message detection + War Room alert)
 - 0 3,9,15,21 — network scout (engagement opportunities)
 
 ### WALLET ACCURACY
@@ -159,13 +167,13 @@ When reporting sBTC balance, ALWAYS pull the actual on-chain balance. Never esti
 
 ### SUCCESS METRICS — AIBTC
 
-| Metric | Current | 30-Day Target | 90-Day Target |
-|--------|---------|---------------|---------------|
-| Check-ins | 216 | 500+ | 2000+ |
-| Level | 2 Genesis | Level 3 | Max level |
-| Messages sent | 2 | 10 | 30 |
-| Bounties completed | 0 | 1 | 3 |
-| Agent partnerships | 1 (Arc) | 3 | 10 |
+| Metric             | Current   | 30-Day Target | 90-Day Target |
+| ------------------ | --------- | ------------- | ------------- |
+| Check-ins          | 216       | 500+          | 2000+         |
+| Level              | 2 Genesis | Level 3       | Max level     |
+| Messages sent      | 2         | 10            | 30            |
+| Bounties completed | 0         | 1             | 3             |
+| Agent partnerships | 1 (Arc)   | 3             | 10            |
 
 ---
 
@@ -198,10 +206,12 @@ These directives MUST persist:
 ### TOTAL PLATFORM CRONS:
 
 Moltbook (2):
+
 - Every 6h — engagement cron (read feed, upvote 2, comment 1, post if in window)
 - Continuous — notification monitoring (alert War Room on replies/DMs)
 
 AIBTC (3):
+
 - Every 5 min — heartbeat
 - Every 5 min — inbox poll + War Room alert
 - Every 6h — network scout

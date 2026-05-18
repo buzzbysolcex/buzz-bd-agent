@@ -32,4 +32,4 @@ Before every `anchor deploy --provider.cluster mainnet`:
 
 ---
 
-*Rule: solana-deploy | Security + deployment safety*
+_Rule: solana-deploy | Security + deployment safety_

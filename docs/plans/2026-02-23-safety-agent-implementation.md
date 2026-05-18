@@ -15,6 +15,7 @@
 ### Task 1: QuillShield Module Skeleton + Authority Scorer
 
 **Files:**
+
 - Create: `src/scorers/__init__.py`
 - Create: `src/scorers/tests/__init__.py`
 - Create: `src/scorers/tests/test_quillshield.py`
@@ -54,7 +55,7 @@ class TestScoreAuthority:
 Run: `python3 -m pytest src/scorers/tests/test_quillshield.py::TestScoreAuthority -v`
 Expected: FAIL — `ModuleNotFoundError: No module named 'src.scorers'`
 
-**Step 3: Create package files and implement _score_authority**
+**Step 3: Create package files and implement \_score_authority**
 
 ```python
 # src/scorers/__init__.py
@@ -111,6 +112,7 @@ git commit -m "feat: add QuillShield module skeleton with authority scorer"
 ### Task 2: QuillShield Liquidity, Holders, and Contract Scorers
 
 **Files:**
+
 - Modify: `src/scorers/tests/test_quillshield.py`
 - Modify: `src/scorers/quillshield.py`
 
@@ -245,6 +247,7 @@ git commit -m "feat: add QuillShield liquidity, holders, and contract scorers"
 ### Task 3: QuillShield score() Async Orchestrator
 
 **Files:**
+
 - Modify: `src/scorers/tests/test_quillshield.py`
 - Modify: `src/scorers/quillshield.py`
 
@@ -540,6 +543,7 @@ git commit -m "feat: add QuillShield score() orchestrator with API fetchers"
 ### Task 4: SafetyAgent Skeleton
 
 **Files:**
+
 - Create: `src/agents/tests/test_safety_agent.py`
 - Create: `src/agents/safety_agent.py`
 
@@ -614,9 +618,10 @@ git commit -m "feat: add SafetyAgent skeleton inheriting BaseAgent"
 
 ---
 
-### Task 5: _fetch_rugcheck + _map_rugcheck_score
+### Task 5: \_fetch_rugcheck + \_map_rugcheck_score
 
 **Files:**
+
 - Modify: `src/agents/tests/test_safety_agent.py`
 - Modify: `src/agents/safety_agent.py`
 
@@ -748,7 +753,7 @@ class TestFetchRugcheck:
 Run: `python3 -m pytest src/agents/tests/test_safety_agent.py::TestMapRugcheckScore src/agents/tests/test_safety_agent.py::TestFetchRugcheck -v`
 Expected: FAIL — `AttributeError: 'SafetyAgent' object has no attribute '_map_rugcheck_score'`
 
-**Step 3: Implement _map_rugcheck_score and _fetch_rugcheck**
+**Step 3: Implement \_map_rugcheck_score and \_fetch_rugcheck**
 
 Add to `SafetyAgent` class in `src/agents/safety_agent.py`:
 
@@ -812,9 +817,10 @@ git commit -m "feat: add RugCheck API fetch with score mapping"
 
 ---
 
-### Task 6: _fetch_dflow Stub + _calculate_dflow_modifier
+### Task 6: \_fetch_dflow Stub + \_calculate_dflow_modifier
 
 **Files:**
+
 - Modify: `src/agents/tests/test_safety_agent.py`
 - Modify: `src/agents/safety_agent.py`
 
@@ -905,7 +911,7 @@ class TestCalculateDflowModifier:
 Run: `python3 -m pytest src/agents/tests/test_safety_agent.py::TestFetchDflow src/agents/tests/test_safety_agent.py::TestCalculateDflowModifier -v`
 Expected: FAIL — `AttributeError: 'SafetyAgent' object has no attribute '_fetch_dflow'`
 
-**Step 3: Implement _fetch_dflow and _calculate_dflow_modifier**
+**Step 3: Implement \_fetch_dflow and \_calculate_dflow_modifier**
 
 Add to `SafetyAgent` class:
 
@@ -963,9 +969,10 @@ git commit -m "feat: add DFlow stub and modifier calculation with 6 rules"
 
 ---
 
-### Task 7: _collect_risk_flags + _aggregate_score
+### Task 7: \_collect_risk_flags + \_aggregate_score
 
 **Files:**
+
 - Modify: `src/agents/tests/test_safety_agent.py`
 - Modify: `src/agents/safety_agent.py`
 
@@ -1089,7 +1096,7 @@ class TestAggregateScore:
 Run: `python3 -m pytest src/agents/tests/test_safety_agent.py::TestCollectRiskFlags src/agents/tests/test_safety_agent.py::TestAggregateScore -v`
 Expected: FAIL — `AttributeError`
 
-**Step 3: Implement _collect_risk_flags and _aggregate_score**
+**Step 3: Implement \_collect_risk_flags and \_aggregate_score**
 
 Add to `SafetyAgent` class:
 
@@ -1156,6 +1163,7 @@ git commit -m "feat: add risk flag collection and weighted score aggregation"
 ### Task 8: execute() with Full Pipeline
 
 **Files:**
+
 - Modify: `src/agents/tests/test_safety_agent.py`
 - Modify: `src/agents/safety_agent.py`
 
@@ -1310,7 +1318,7 @@ class TestExecute:
 Run: `python3 -m pytest src/agents/tests/test_safety_agent.py::TestExecute -v`
 Expected: FAIL — `NotImplementedError: TODO`
 
-**Step 3: Implement _fetch_quillshield and execute()**
+**Step 3: Implement \_fetch_quillshield and execute()**
 
 Add `_fetch_quillshield` and replace `execute()` in `SafetyAgent`:
 
@@ -1444,6 +1452,7 @@ src/
 ```
 
 `src/scorers/quillshield.py` exports:
+
 - `score(address, chain) -> Dict` (async, main entry point)
 - `_score_authority(token_info) -> int`
 - `_score_liquidity(pair_data) -> int`
@@ -1455,6 +1464,7 @@ src/
 - `_collect_flags(authority, liquidity, holders, contract) -> List[str]`
 
 `src/agents/safety_agent.py` contains:
+
 - Constants: `RUGCHECK_API_URL`, `SOURCE_TIMEOUT`, `TIER_1_DEXES`, `RUGCHECK_WEIGHT`, `QUILLSHIELD_WEIGHT`
 - `SafetyAgent(BaseAgent)` with:
   - `execute(params)` — orchestrates all sources via asyncio.gather

@@ -10,70 +10,76 @@
  * Buzz BD Agent | MiroFish MVP
  */
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { getDB } = require('../db');
+const { getDB } = require("../db");
 
 /**
  * Verdict label from pipeline score
  */
 function scoreVerdict(score) {
-  if (score >= 85) return 'HOT';
-  if (score >= 70) return 'QUALIFIED';
-  if (score >= 50) return 'WATCH';
-  return 'SKIP';
+  if (score >= 85) return "HOT";
+  if (score >= 70) return "QUALIFIED";
+  if (score >= 50) return "WATCH";
+  return "SKIP";
 }
 
 /**
  * Decision color helper
  */
 function decisionColor(decision) {
-  const d = (decision || '').toUpperCase();
-  if (d === 'LIST') return '#00ff41';
-  if (d === 'MONITOR') return '#ffff00';
-  return '#ff0040';
+  const d = (decision || "").toUpperCase();
+  if (d === "LIST") return "#00ff41";
+  if (d === "MONITOR") return "#ffff00";
+  return "#ff0040";
 }
 
 /**
  * Build the cyberpunk HTML report
  */
 function buildReport(sim) {
-  const ticker = sim.ticker || 'UNKNOWN';
-  const chain = sim.chain || 'solana';
+  const ticker = sim.ticker || "UNKNOWN";
+  const chain = sim.chain || "solana";
   const score = sim.score || 0;
   const verdict = scoreVerdict(score);
   const agentsCount = sim.agents_count || 0;
   const probability = sim.probability || 0;
   const confidence = sim.confidence || 0;
   const ev = sim.ev || 0;
-  const recommendation = (sim.recommendation || 'REJECT').toUpperCase();
+  const recommendation = (sim.recommendation || "REJECT").toUpperCase();
   const recColor = decisionColor(recommendation);
   const bullish = sim.bullish_count || 0;
   const neutral = sim.neutral_count || 0;
   const bearish = sim.bearish_count || 0;
-  const keyRisk = sim.key_risk || 'None identified';
-  const keySignal = sim.key_signal || 'None identified';
+  const keyRisk = sim.key_risk || "None identified";
+  const keySignal = sim.key_signal || "None identified";
   const createdAt = sim.created_at || new Date().toISOString();
 
   // Parse cluster data
   let clusters = {};
   try {
     clusters = {
-      degen: JSON.parse(sim.cluster_degen || 'null'),
-      whale: JSON.parse(sim.cluster_whale || 'null'),
-      institutional: JSON.parse(sim.cluster_institutional || 'null'),
-      community: JSON.parse(sim.cluster_community || 'null'),
+      degen: JSON.parse(sim.cluster_degen || "null"),
+      whale: JSON.parse(sim.cluster_whale || "null"),
+      institutional: JSON.parse(sim.cluster_institutional || "null"),
+      community: JSON.parse(sim.cluster_community || "null"),
     };
   } catch {}
 
   function clusterHTML(name, data) {
-    if (!data) return '';
+    if (!data) return "";
     const b = data.bullish || 0;
     const n = data.neutral || 0;
     const be = data.bearish || 0;
     const total = b + n + be || 1;
-    const consensus = data.consensus || (b > be ? 'bullish' : be > b ? 'bearish' : 'mixed');
-    const consColor = consensus === 'bullish' ? '#00ff41' : consensus === 'bearish' ? '#ff0040' : '#ffff00';
+    const consensus =
+      data.consensus || (b > be ? "bullish" : be > b ? "bearish" : "mixed");
+    const consColor =
+      consensus === "bullish"
+        ? "#00ff41"
+        : consensus === "bearish"
+          ? "#ff0040"
+          : "#ffff00";
     const bPct = Math.round((b / total) * 100);
     const nPct = Math.round((n / total) * 100);
     const bePct = 100 - bPct - nPct;
@@ -293,7 +299,7 @@ function buildReport(sim) {
       </div>
       <div class="metric">
         <div class="label">Verdict</div>
-        <div class="value" style="color:${score >= 85 ? '#00ff41' : score >= 70 ? '#00d4ff' : score >= 50 ? '#ffff00' : '#ff0040'}">${verdict}</div>
+        <div class="value" style="color:${score >= 85 ? "#00ff41" : score >= 70 ? "#00d4ff" : score >= 50 ? "#ffff00" : "#ff0040"}">${verdict}</div>
       </div>
     </div>
   </div>
@@ -321,18 +327,18 @@ function buildReport(sim) {
     <div class="ev-formula">
       <code>EV = P(success) &times; reward &minus; P(failure) &times; cost = ${(probability * 100).toFixed(1)}% &times; gain &minus; ${((1 - probability) * 100).toFixed(1)}% &times; loss</code>
     </div>
-    <div class="ev-value ${ev >= 0 ? 'ev-positive' : 'ev-negative'}">
-      EV: ${ev >= 0 ? '+' : ''}${typeof ev === 'number' ? ev.toFixed(2) : ev}
+    <div class="ev-value ${ev >= 0 ? "ev-positive" : "ev-negative"}">
+      EV: ${ev >= 0 ? "+" : ""}${typeof ev === "number" ? ev.toFixed(2) : ev}
     </div>
   </div>
 
   <div class="section">
     <h2>// Cluster Breakdown</h2>
     <div class="clusters">
-      ${clusterHTML('degen', clusters.degen)}
-      ${clusterHTML('whale', clusters.whale)}
-      ${clusterHTML('institutional', clusters.institutional)}
-      ${clusterHTML('community', clusters.community)}
+      ${clusterHTML("degen", clusters.degen)}
+      ${clusterHTML("whale", clusters.whale)}
+      ${clusterHTML("institutional", clusters.institutional)}
+      ${clusterHTML("community", clusters.community)}
     </div>
   </div>
 
@@ -385,35 +391,39 @@ function buildReport(sim) {
 }
 
 // GET /api/v1/simulation-report/:token
-router.get('/:token', (req, res) => {
+router.get("/:token", (req, res) => {
   try {
     const db = getDB();
     const token = req.params.token;
 
     // Look up by ticker or address (case-insensitive for ticker)
-    let sim = db.prepare(
-      'SELECT * FROM listing_simulations WHERE UPPER(ticker) = UPPER(?) ORDER BY id DESC LIMIT 1'
-    ).get(token);
+    let sim = db
+      .prepare(
+        "SELECT * FROM listing_simulations WHERE UPPER(ticker) = UPPER(?) ORDER BY id DESC LIMIT 1",
+      )
+      .get(token);
 
     if (!sim) {
-      sim = db.prepare(
-        'SELECT * FROM listing_simulations WHERE token_address = ? ORDER BY id DESC LIMIT 1'
-      ).get(token);
+      sim = db
+        .prepare(
+          "SELECT * FROM listing_simulations WHERE token_address = ? ORDER BY id DESC LIMIT 1",
+        )
+        .get(token);
     }
 
     if (!sim) {
       return res.status(404).json({
         success: false,
-        error: 'No simulation found for this token',
+        error: "No simulation found for this token",
         token,
-        hint: 'Run POST /api/v1/simulate/simulate-listing first'
+        hint: "Run POST /api/v1/simulate/simulate-listing first",
       });
     }
 
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.send(buildReport(sim));
   } catch (err) {
-    console.error('[simulation-report] Error:', err.message);
+    console.error("[simulation-report] Error:", err.message);
     res.status(500).json({ success: false, error: err.message });
   }
 });

@@ -6,7 +6,7 @@
 
 const migrations = [
   {
-    name: '023_knowledge_graph',
+    name: "023_knowledge_graph",
     sql: `
       CREATE TABLE IF NOT EXISTS kg_entities (
         entity_id TEXT PRIMARY KEY,

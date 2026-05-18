@@ -1,6 +1,9 @@
 # MASTER OPS UPDATE — JUPITER INTEGRATION + PIPELINE CORRECTIONS
+
 ## Merges: Cowork Pipeline Audit + Jupiter Deep Scrape + BD Screening Workflow
+
 ## For Buzz Claude Code — Execute all tasks
+
 ## Day 39 | March 28, 2026 | Bismillah 🤲
 
 ---
@@ -8,6 +11,7 @@
 ## HEADLINE: Jupiter Recovered 2 Lost Tokens. Pipeline Needs Major Correction.
 
 The Cowork audits exposed critical issues AND opportunities:
+
 - **3 data sources** now confirmed (DexScreener + DexTools + Jupiter)
 - **2 phantom tokens recovered** (Max at $524.09, BANANA at $0.096 — both on Solana via Jupiter)
 - **PIPPIN already listed on SolCex** — validates our scoring (it identified a real listing target)
@@ -50,6 +54,7 @@ CHAIN-SPECIFIC RULES:
 ## TASK 2: INTEGRATE JUPITER API INTO BUZZ (5 Actions — P0)
 
 ### Action 1: Register API Key
+
 ```
 URL: https://portal.jup.ag
 Register for API key (x-api-key header)
@@ -58,6 +63,7 @@ DO NOT commit key to git — .env only
 ```
 
 ### Action 2: Install `integrating-jupiter` Skill
+
 ```bash
 # Check if jup-ag/agent-skills has an installable package
 # The skill is MIT licensed — can be imported directly
@@ -65,12 +71,13 @@ DO NOT commit key to git — .env only
 ```
 
 ### Action 3: Add Jupiter Token Search to pipeline-scanner
+
 ```javascript
 // New intel source: Jupiter Token Search
 // Endpoint: GET https://api.jup.ag/tokens/v1/search?query={tokenName}
 // Headers: { "x-api-key": process.env.JUPITER_API_KEY }
 // Returns: token metadata, mint address, organic score
-// 
+//
 // USE CASE: When DexScreener returns "not found" for Solana tokens,
 // fall back to Jupiter. This catches Token2022 tokens and new launches.
 
@@ -83,6 +90,7 @@ DO NOT commit key to git — .env only
 ```
 
 ### Action 4: Add Jupiter Price API to pipeline-verifier
+
 ```javascript
 // Cross-verification price check
 // Endpoint: GET https://api.jup.ag/price/v3?ids={mintAddress}
@@ -96,6 +104,7 @@ DO NOT commit key to git — .env only
 ```
 
 ### Action 5: Add Jupiter Organic Score to Scoring
+
 ```
 Jupiter provides an "organic score" per token:
 - PIPPIN scored 87 (high quality signal)
@@ -115,6 +124,7 @@ INTEGRATION:
 ## TASK 3: PIPELINE CORRECTIONS (Execute Now)
 
 ### 3A: Remove from Pipeline
+
 ```
 REMOVE (auto-exclude rules triggered):
 - EURC: Stablecoin (new rule: auto-exclude known stablecoins)
@@ -123,6 +133,7 @@ REMOVE (auto-exclude rules triggered):
 ```
 
 ### 3B: Re-Score with Corrected Data
+
 ```
 BANANAS31 (BSC):
   OLD: Score 95 (using $137M FDV as MCap)
@@ -190,7 +201,7 @@ AFTER corrections:
   Tokens recovered: 2 (Max, BANANA via Jupiter)
   Actual HOT (85+): TBD after re-scoring
   PIPPIN: Confirmed BD SWEET SPOT (already on SolCex — validates pipeline)
-  
+
   HONEST ASSESSMENT: Our "10 HOT tokens" list was inflated.
   After corrections, true HOT count may be 3-5.
   This is better for credibility — quality over quantity.
@@ -217,6 +228,7 @@ Step 1.5: Auto-Exclusion Rules
 ```
 
 Update pipeline-scanner intel sources:
+
 ```
 INTEL SOURCES: 25 → 28 (add 3 Jupiter sources)
   #26: Jupiter Token Search (Solana token verification)
@@ -245,10 +257,11 @@ Actions for Sunday report:
 ```
 
 Update the Twitter thread drafts:
+
 ```
 ORIGINAL hook: "Top 20 tokens ranked. BANANAS31 is #1 at 95/100"
 CORRECTED hook: "We scored 192 tokens. Then we audited our own scores.
-Here's what tri-source verification revealed — and why most 
+Here's what tri-source verification revealed — and why most
 'market cap' numbers are wrong. Thread 🧵"
 
 The correction IS the story. Honesty > inflated numbers.
@@ -260,6 +273,7 @@ This positions Buzz as more rigorous than competitors.
 ## TASK 6: UPDATE BD OUTREACH
 
 ### BANANAS31 Follow-Up — PAUSE
+
 ```
 STATUS: PAUSED pending security investigation
 REASON: Token Sniffer 0/100 needs resolution before we feature
@@ -269,6 +283,7 @@ we can resume. But need to investigate first.
 ```
 
 ### VELO, Max, BANANA Outreach — HOLD
+
 ```
 VELO: Hold until TS vs DEXTscore contradiction resolved
 Max: Hold until full 5-layer scoring complete with Jupiter data
@@ -276,6 +291,7 @@ BANANA (SOL): Hold until full scoring + verify distinct from BANANAS31
 ```
 
 ### PIPPIN — Already on SolCex
+
 ```
 Not a BD target (already listed). But USE as case study:
 "PIPPIN scored 85/100 in our pipeline and is now listed on SolCex.
@@ -284,6 +300,7 @@ This goes in the Sunday report as validation.
 ```
 
 ### New BD Targets Needed
+
 ```
 After corrections, we need to find NEW tokens that pass the
 updated screening workflow. Actions:
@@ -370,18 +387,18 @@ Bismillah 🤲
 
 ## SUMMARY: What Changed
 
-| Before Audit | After Audit |
-|-------------|-------------|
-| 2 data sources (DS + DT) | 3 data sources (DS + DT + Jupiter) |
-| 10 HOT tokens at 85+ | ~3-5 after corrections |
-| BANANAS31 #1 at 95 | BANANAS31 ~55 (security + FDV) |
-| 3 "lost" Solana tokens | 2 recovered via Jupiter |
-| No FDV gap checking | Permanent penalty system |
-| No security scoring | 6 security penalty rules |
-| No auto-exclusions | Stablecoins, ghosts, phantoms auto-removed |
-| Pipeline inflated | Pipeline honest |
+| Before Audit             | After Audit                                |
+| ------------------------ | ------------------------------------------ |
+| 2 data sources (DS + DT) | 3 data sources (DS + DT + Jupiter)         |
+| 10 HOT tokens at 85+     | ~3-5 after corrections                     |
+| BANANAS31 #1 at 95       | BANANAS31 ~55 (security + FDV)             |
+| 3 "lost" Solana tokens   | 2 recovered via Jupiter                    |
+| No FDV gap checking      | Permanent penalty system                   |
+| No security scoring      | 6 security penalty rules                   |
+| No auto-exclusions       | Stablecoins, ghosts, phantoms auto-removed |
+| Pipeline inflated        | Pipeline honest                            |
 
 **The pipeline is now MORE credible, not less.**
 Fewer HOT tokens, but the ones that remain are REAL.
 
-*Bismillah* 🤲
+_Bismillah_ 🤲

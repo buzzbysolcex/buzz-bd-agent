@@ -1,20 +1,26 @@
 # PERMANENT DIRECTIVE: AIBTC SIGNAL FACTORY v4.0
+
 # Location: docs/AIBTC-SIGNAL-FACTORY.md (startup read order #3)
+
 # Conditional rule: .claude/rules/aibtc-signals.md
+
 # Must survive ALL restarts. Read on EVERY boot.
+
 # Version 4.0 — Deployed April 1, 2026
+
 # Supersedes: v1.0 (Mar 26), v2.0 (Mar 28), v3.0 (Mar 30)
+
 # Bismillah 🤲
 
 ---
 
 ## 1. MISSION — THE ONLY REVENUE. MAXIMIZE IT.
 
-AIBTC signals are Buzz's primary revenue source. $200 earned. 
+AIBTC signals are Buzz's primary revenue source. $200 earned.
 This is not a side project. This is THE business.
 
 Revenue math:
-  6 signals/day × 50% inclusion × 30,000 sats = 90,000 sats/day ≈ $75/day ≈ $2,250/month.
+6 signals/day × 50% inclusion × 30,000 sats = 90,000 sats/day ≈ $75/day ≈ $2,250/month.
 
 ---
 
@@ -77,15 +83,15 @@ CYCLE TIME: ~30 min/signal. 6 signals = ~3 hours active + 6 hours cooldown.
 
 ## 4. BEAT STRATEGY (2 → 7+)
 
-| Beat | Templates | Unique Data | Competition |
-|------|-----------|-------------|-------------|
-| Agent Trading | T1, T2 | Cross-chain scoring pipeline | LOW (4 agents) |
-| Agent Economy | T3, T4 | Agent commerce, x402 data | HIGH but data-rich |
-| Infrastructure | T6 | 4 Base contracts, ARIA, 31 intel | Medium |
-| Security | T5 | HeyAnon Rug-O-Meter, 5-Layer L1 | LOW (3 agents) |
-| Deal Flow | T7 | Listing intelligence (unique) | LOW (3 agents) |
-| Agent Skills | T9 | MCP launches, Colosseum Copilot | LOW (3 agents) |
-| Governance | T10 | HeyAnon DAO data | Near-empty |
+| Beat           | Templates | Unique Data                      | Competition        |
+| -------------- | --------- | -------------------------------- | ------------------ |
+| Agent Trading  | T1, T2    | Cross-chain scoring pipeline     | LOW (4 agents)     |
+| Agent Economy  | T3, T4    | Agent commerce, x402 data        | HIGH but data-rich |
+| Infrastructure | T6        | 4 Base contracts, ARIA, 31 intel | Medium             |
+| Security       | T5        | HeyAnon Rug-O-Meter, 5-Layer L1  | LOW (3 agents)     |
+| Deal Flow      | T7        | Listing intelligence (unique)    | LOW (3 agents)     |
+| Agent Skills   | T9        | MCP launches, Colosseum Copilot  | LOW (3 agents)     |
+| Governance     | T10       | HeyAnon DAO data                 | Near-empty         |
 
 Daily rotation: never file 2 signals on same beat in one day.
 
@@ -94,32 +100,36 @@ Daily rotation: never file 2 signals on same beat in one day.
 ## 5. SIGNAL QUALITY FORMULA
 
 ### Headline
+
 Structure: [Entity] [Action Verb] [Specific Thing] — [Key Number]
 APPROVED verbs: Ships, Launches, Hits, Reaches, Surges, Logs, Crosses, Reports, Flags
 REJECTED verbs: Is becoming, Could, May, Eyes, Should, Might
 Specs: 8-20 words. Under 120 chars. At least one number. At least one entity.
 
 ### Body (100-250 words)
+
 P1 — THE LEAD: State the event. Who did what, when, with what numbers.
 P2 — THE CONTEXT: Why does this matter? What changed?
 P3 — THE DATA: Specific verifiable metrics (HeyAnon cross-chain enrichment here).
 P4 — THE IMPLICATION: What does this mean for the ecosystem?
 
 ### Disclosure (mandatory)
+
 "Signal researched and written by Ionic Nova, an autonomous AI agent running
 Claude Opus 4.6 via Pro Max. Sources verified via [list Genome Stack layers used]."
 
 ### What gets REJECTED
-| Type | % | Prevention |
-|------|---|-----------|
-| DUPLICATE | 23% | Check feed BEFORE filing. NEVER skip. |
-| OPINION/EDITORIAL | 19% | No "could/may/is becoming" — events only |
-| BEAT MISMATCH | 15% | Re-read beat definition every time |
-| THIN CONTENT | 12% | 100-250 words, context + data + implication |
-| SCRAPED/AGGREGATED | 12% | Original analysis only |
-| NOT BITCOIN-SPECIFIC | 8% | Must tie to BTC/Stacks ecosystem |
-| SELF-REFERENTIAL | 4% | Never file about AIBTC platform itself |
-| SPECULATIVE | 4% | Event-driven, not future-looking |
+
+| Type                 | %   | Prevention                                  |
+| -------------------- | --- | ------------------------------------------- |
+| DUPLICATE            | 23% | Check feed BEFORE filing. NEVER skip.       |
+| OPINION/EDITORIAL    | 19% | No "could/may/is becoming" — events only    |
+| BEAT MISMATCH        | 15% | Re-read beat definition every time          |
+| THIN CONTENT         | 12% | 100-250 words, context + data + implication |
+| SCRAPED/AGGREGATED   | 12% | Original analysis only                      |
+| NOT BITCOIN-SPECIFIC | 8%  | Must tie to BTC/Stacks ecosystem            |
+| SELF-REFERENTIAL     | 4%  | Never file about AIBTC platform itself      |
+| SPECULATIVE          | 4%  | Event-driven, not future-looking            |
 
 ---
 
@@ -170,7 +180,7 @@ APPROVED ≠ INCLUDED. Inclusion rate is the money metric.
 - [ ] Disclosure with model + Genome Stack layers used
 - [ ] NOT duplicate (checked feed), NOT opinion, NOT self-referential, NOT scraped
 - [ ] HeyAnon cross-chain context included where relevant
-- [ ] MiroShark score ___/80 (60+ to file, 55+ streak emergency only)
+- [ ] MiroShark score \_\_\_/80 (60+ to file, 55+ streak emergency only)
 - [ ] Adversarial review passed
 
 ---
@@ -178,16 +188,16 @@ APPROVED ≠ INCLUDED. Inclusion rate is the money metric.
 ## 10. DAILY REPORTING
 
 After every filing:
-  "Signal [N]/6: [headline] | [beat] | MiroShark [score]/80 | Layers: [list]"
+"Signal [N]/6: [headline] | [beat] | MiroShark [score]/80 | Layers: [list]"
 
 After every result:
-  "Signal [ID]: [APPROVED/REJECTED/BRIEF_INCLUDED] | Reason: [feedback] | Lesson: [adjustment]"
+"Signal [ID]: [APPROVED/REJECTED/BRIEF_INCLUDED] | Reason: [feedback] | Lesson: [adjustment]"
 
 Daily summary at 18:00 UTC:
-  Signals: _/6 | Approved: _ | Included: _ | Rejected: _
-  Revenue: _ sats today | _ total | Streak: _ days | Rank: #_
+Signals: _/6 | Approved: _ | Included: _ | Rejected: _
+Revenue: _ sats today | _ total | Streak: _ days | Rank: #_
 
 ---
 
-*v4.0 Genome Stack Edition — DEPLOYED not PLANNED.*
-*Built by Chef | Powered by Opus | Bismillah* 🤲
+_v4.0 Genome Stack Edition — DEPLOYED not PLANNED._
+_Built by Chef | Powered by Opus | Bismillah_ 🤲

@@ -1,5 +1,7 @@
 # Cost Guard — Daily Budget Enforcement Skill
+
 # Drop into: /opt/buzz-workspace-skills/cost-guard/skill.md
+
 # Wired to: orchestrator pre-dispatch hook
 
 ---
@@ -82,32 +84,39 @@ ALERT_TELEGRAM_CHAT=950395553
 Wire cost-tracker.json data into existing REST API endpoints:
 
 ### PATCH: /api/v1/costs/summary
+
 ```javascript
 // In costs.js route handler:
-app.get('/api/v1/costs/summary', auth, (req, res) => {
-  const tracker = JSON.parse(fs.readFileSync('/data/workspace/memory/cost-tracker.json', 'utf8'));
+app.get("/api/v1/costs/summary", auth, (req, res) => {
+  const tracker = JSON.parse(
+    fs.readFileSync("/data/workspace/memory/cost-tracker.json", "utf8"),
+  );
   res.json({
     date: tracker.date,
     daily_total: tracker.daily_total,
-    daily_cap: 10.00,
-    remaining: Math.max(0, 10.00 - tracker.daily_total),
-    pct_used: ((tracker.daily_total / 10.00) * 100).toFixed(1),
-    throttled: tracker.daily_total >= 10.00,
+    daily_cap: 10.0,
+    remaining: Math.max(0, 10.0 - tracker.daily_total),
+    pct_used: ((tracker.daily_total / 10.0) * 100).toFixed(1),
+    throttled: tracker.daily_total >= 10.0,
     calls_minimax: tracker.calls_minimax,
-    calls_bankr: tracker.calls_bankr_fallback
+    calls_bankr: tracker.calls_bankr_fallback,
   });
 });
 ```
 
 ### PATCH: /api/v1/costs/by-agent
+
 ```javascript
-app.get('/api/v1/costs/by-agent', auth, (req, res) => {
-  const tracker = JSON.parse(fs.readFileSync('/data/workspace/memory/cost-tracker.json', 'utf8'));
+app.get("/api/v1/costs/by-agent", auth, (req, res) => {
+  const tracker = JSON.parse(
+    fs.readFileSync("/data/workspace/memory/cost-tracker.json", "utf8"),
+  );
   res.json({
     period: tracker.date,
     agents: Object.entries(tracker.by_agent || {}).map(([name, cost]) => ({
-      name, cost: cost.toFixed(4)
-    }))
+      name,
+      cost: cost.toFixed(4),
+    })),
   });
 });
 ```
@@ -115,6 +124,7 @@ app.get('/api/v1/costs/by-agent', auth, (req, res) => {
 ## Sentinel Integration
 
 Add to Sentinel's sweep:
+
 ```
 GET /api/v1/costs/summary
 → If pct_used > 90%: MEDIUM alert
@@ -125,6 +135,7 @@ GET /api/v1/costs/summary
 ## JVR Receipt
 
 Every time cost guard triggers throttle:
+
 ```
 Category: system
 Action: cost_guard_throttle
@@ -146,14 +157,14 @@ cost savings — sub-agents don't need a 229B param model).
 
 ### Priority Routing After Cost Guard
 
-| Agent | Default Model | After Cap |
-|-------|--------------|-----------|
-| Orchestrator | MiniMax M2.5 | bankr/gpt-5-nano |
+| Agent         | Default Model    | After Cap                    |
+| ------------- | ---------------- | ---------------------------- |
+| Orchestrator  | MiniMax M2.5     | bankr/gpt-5-nano             |
 | scanner-agent | bankr/gpt-5-nano | bankr/gpt-5-nano (no change) |
-| safety-agent | bankr/gpt-5-nano | bankr/gpt-5-nano (no change) |
-| wallet-agent | bankr/gpt-5-nano | bankr/gpt-5-nano (no change) |
-| social-agent | bankr/gpt-5-nano | bankr/gpt-5-nano (no change) |
-| scorer-agent | bankr/gpt-5-nano | bankr/gpt-5-nano (no change) |
+| safety-agent  | bankr/gpt-5-nano | bankr/gpt-5-nano (no change) |
+| wallet-agent  | bankr/gpt-5-nano | bankr/gpt-5-nano (no change) |
+| social-agent  | bankr/gpt-5-nano | bankr/gpt-5-nano (no change) |
+| scorer-agent  | bankr/gpt-5-nano | bankr/gpt-5-nano (no change) |
 
 **Key insight:** If sub-agents already route through Bankr, the ONLY MiniMax
 consumer is the orchestrator itself. This means the $10/day cap primarily
@@ -161,4 +172,4 @@ governs orchestrator reasoning calls.
 
 ---
 
-*Cost Guard Skill v1.0 | Sprint Day 13 | "Cost Disciplined."*
+_Cost Guard Skill v1.0 | Sprint Day 13 | "Cost Disciplined."_

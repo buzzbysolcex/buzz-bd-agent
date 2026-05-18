@@ -1,5 +1,7 @@
 # BUZZ RESTART — MASTER PROMPT v9.2
+
 ## Post-Axios Security Rotation + Full Operational Recovery
+
 ### April 5, 2026 | Ogie in Jeddah | UTC+3
 
 ---
@@ -14,18 +16,18 @@ Buzz tmux session is DEAD (`tmux ls` = "no server running"). This restart follow
 
 ## CREDENTIALS ROTATED (Buzz must pick up new values)
 
-| Credential | Status | Location |
-|---|---|---|
-| HETZNER_SSH_KEY | ✅ ROTATED | GitHub secret + server authorized_keys |
-| DOCKER_PASSWORD | ✅ ROTATED | GitHub secret (new access token `buzz-ci-apr2026`) |
-| GH_PAT | ✅ ROTATED | GitHub secret (regenerated, 90-day expiry) |
-| TELEGRAM_BOT_TOKEN | ✅ ROTATED | GitHub secret + /home/claude-code/.env |
-| SENTINEL_BOT_TOKEN | ✅ ROTATED | GitHub secret + /home/claude-code/.hermes/.env |
-| NANSEN_API_KEY | ⚠️ PENDING | Needs rotation in Nansen dashboard + GitHub secret + server .env |
-| X_ACCESS_TOKEN | ⚠️ PENDING | Needs rotation at developer.x.com + GitHub secret + server .env |
-| X_ACCESS_TOKEN_SECRET | ⚠️ PENDING | Same |
-| X_CONSUMER_KEY | ⚠️ PENDING | Same |
-| X_CONSUMER_SECRET | ⚠️ PENDING | Same |
+| Credential            | Status     | Location                                                         |
+| --------------------- | ---------- | ---------------------------------------------------------------- |
+| HETZNER_SSH_KEY       | ✅ ROTATED | GitHub secret + server authorized_keys                           |
+| DOCKER_PASSWORD       | ✅ ROTATED | GitHub secret (new access token `buzz-ci-apr2026`)               |
+| GH_PAT                | ✅ ROTATED | GitHub secret (regenerated, 90-day expiry)                       |
+| TELEGRAM_BOT_TOKEN    | ✅ ROTATED | GitHub secret + /home/claude-code/.env                           |
+| SENTINEL_BOT_TOKEN    | ✅ ROTATED | GitHub secret + /home/claude-code/.hermes/.env                   |
+| NANSEN_API_KEY        | ⚠️ PENDING | Needs rotation in Nansen dashboard + GitHub secret + server .env |
+| X_ACCESS_TOKEN        | ⚠️ PENDING | Needs rotation at developer.x.com + GitHub secret + server .env  |
+| X_ACCESS_TOKEN_SECRET | ⚠️ PENDING | Same                                                             |
+| X_CONSUMER_KEY        | ⚠️ PENDING | Same                                                             |
+| X_CONSUMER_SECRET     | ⚠️ PENDING | Same                                                             |
 
 **FIRST THING AFTER STARTUP:** Verify Telegram War Room two-way is working with the new bot token. If silent, check /home/claude-code/.env has the new TELEGRAM_BOT_TOKEN.
 
@@ -53,6 +55,7 @@ If "duplicate session" → `tmux kill-session -t buzz` then retry
 ## STEP 2: VERIFY TELEGRAM TWO-WAY
 
 From Ogie's phone, send "Buzz status" in War Room.
+
 - If Buzz responds → two-way works ✅
 - If silent → check access.json:
 
@@ -151,6 +154,7 @@ After Buzz reports, verify these are all GREEN:
 ## STEP 5: CRITICAL TASKS (in order of priority)
 
 ### TASK A: AIBTC STREAK PROTECTION (URGENT)
+
 **The streak is the #1 priority. File BEFORE anything else.**
 
 ```
@@ -174,6 +178,7 @@ Streak must not drop. File on EXISTING beats only until new beats claimed.
 ```
 
 ### TASK B: AIBTC BEAT EXPANSION (after signal filed)
+
 **This was blocked since Apr 1 by stale MCP server (pre-v1.46.2). Restart should fix it.**
 
 ```
@@ -244,7 +249,7 @@ PENDING ROTATIONS (Ogie does these manually):
 1. NANSEN_API_KEY — Ogie rotates at nansen.ai dashboard, provides new key
 2. X_ACCESS_TOKEN — Ogie rotates at developer.x.com
 3. X_ACCESS_TOKEN_SECRET — same
-4. X_CONSUMER_KEY — same  
+4. X_CONSUMER_KEY — same
 5. X_CONSUMER_SECRET — same
 
 After Ogie provides new values:
@@ -370,6 +375,7 @@ This detaches without killing the session. Buzz continues running 24/7.
 ## SUCCESS CRITERIA
 
 End of session, Buzz should report:
+
 - [ ] Telegram two-way: WORKING
 - [ ] Containers: ALL HEALTHY
 - [ ] AIBTC streak: PROTECTED (signal filed today)

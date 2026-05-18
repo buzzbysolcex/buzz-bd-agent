@@ -92,31 +92,31 @@ buzz-crypto-bd/
 
 ## The 7 Moves (vs Everything Claude Code)
 
-| Move | What | Status |
-|------|------|--------|
-| 1. Plugin Packaging | .claude-plugin/ + install.sh + marketplace | ✅ Built |
-| 2. BuzzShield | 47-rule crypto security scanner | ✅ Built |
-| 3. hooks.json | Auto-recovery, bash guard, lint, state save | ✅ Built |
-| 4. Slash Commands | 15 commands for all Buzz operations | ✅ Built |
-| 5. npm Package | @buzzbd/scorer CLI + library | ✅ Built |
-| 6. autoDream v2 | Pattern extraction + instinct system | ✅ Built |
-| 7. Framework | Open-source reactive layer for crypto agents | ✅ Built |
+| Move                | What                                         | Status   |
+| ------------------- | -------------------------------------------- | -------- |
+| 1. Plugin Packaging | .claude-plugin/ + install.sh + marketplace   | ✅ Built |
+| 2. BuzzShield       | 47-rule crypto security scanner              | ✅ Built |
+| 3. hooks.json       | Auto-recovery, bash guard, lint, state save  | ✅ Built |
+| 4. Slash Commands   | 15 commands for all Buzz operations          | ✅ Built |
+| 5. npm Package      | @buzzbd/scorer CLI + library                 | ✅ Built |
+| 6. autoDream v2     | Pattern extraction + instinct system         | ✅ Built |
+| 7. Framework        | Open-source reactive layer for crypto agents | ✅ Built |
 
 ---
 
 ## Why Buzz > ECC
 
-| Dimension | Everything Claude Code | Buzz Crypto BD |
-|-----------|----------------------|----------------|
-| Nature | Toolkit (meta-tooling) | Product (live system) |
-| Revenue | GitHub Sponsors | $200+ AIBTC + x402 micropayments |
-| On-chain | None | 5 contracts (4 Base + 1 Solana) |
-| Simulation | None | MiroFish 1000-10K agent swarm |
-| Intel | MCP configs | 32 live connectors across 19 chains |
-| Scoring | None | 11 rules, $0 LLM cost |
-| Trust | Full trust assumed | 5-level graduated autonomy |
-| Cost | User pays Claude API | $0/day LLM (qwen3:8b + Pro Max) |
-| Narrative | Dev built by a dev | **Agent built by a chef** |
+| Dimension  | Everything Claude Code | Buzz Crypto BD                      |
+| ---------- | ---------------------- | ----------------------------------- |
+| Nature     | Toolkit (meta-tooling) | Product (live system)               |
+| Revenue    | GitHub Sponsors        | $200+ AIBTC + x402 micropayments    |
+| On-chain   | None                   | 5 contracts (4 Base + 1 Solana)     |
+| Simulation | None                   | MiroFish 1000-10K agent swarm       |
+| Intel      | MCP configs            | 32 live connectors across 19 chains |
+| Scoring    | None                   | 11 rules, $0 LLM cost               |
+| Trust      | Full trust assumed     | 5-level graduated autonomy          |
+| Cost       | User pays Claude API   | $0/day LLM (qwen3:8b + Pro Max)     |
+| Narrative  | Dev built by a dev     | **Agent built by a chef**           |
 
 ---
 
@@ -131,5 +131,5 @@ buzz-crypto-bd/
 
 ---
 
-*v9.2 | 81 tables | 200+ endpoints | 12 agents | 32 intel sources | $200+ revenue*
-*Built by a chef. Kitchen runs itself. Bismillah 🤲*
+_v9.2 | 81 tables | 200+ endpoints | 12 agents | 32 intel sources | $200+ revenue_
+_Built by a chef. Kitchen runs itself. Bismillah 🤲_

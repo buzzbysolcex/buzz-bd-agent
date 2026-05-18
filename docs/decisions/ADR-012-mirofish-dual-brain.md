@@ -12,6 +12,7 @@ Initial implementation used 100% Ollama. This underutilized the
 $200/month Pro Max subscription.
 
 **Decision:**
+
 - 90% of LLM calls → Opus 4.6 via `claude -p` subprocess (Pro Max, $0)
 - 10% of LLM calls → Ollama qwen3:8b (degen agents rounds 1-4 only)
 - Default routing: Opus. Ollama is the exception, not the rule.
@@ -20,6 +21,7 @@ $200/month Pro Max subscription.
 - Ollama handles: degen R1-4 only (simple FOMO reactions)
 
 **Rationale:**
+
 - Pro Max is already paid ($200/month) — unused capacity = wasted money
 - Opus reasoning is dramatically deeper than qwen3:8b
 - Simulation output quality = product quality = revenue
@@ -27,6 +29,7 @@ $200/month Pro Max subscription.
 - 90% Opus makes total sim ~1.2 hours vs ~2.5 hours all-Ollama
 
 **Consequences:**
+
 - llm_router.py created with 90/10 routing logic
 - server.py uses router for all simulation calls
 - Better persona generation (Opus creates richer, more unique personas)

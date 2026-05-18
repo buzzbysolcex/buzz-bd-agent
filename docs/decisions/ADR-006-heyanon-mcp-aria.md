@@ -1,7 +1,9 @@
 # ADR-006: HeyAnon MCP as ARIA Multi-Chain Backbone
 
 ## Status: ACCEPTED
+
 ## Date: March 30, 2026
+
 ## Context
 
 ARIA v2 is deployed with 4 sources (DexScreener, CoinGecko, Bags.fm, Colosseum).
@@ -31,6 +33,6 @@ One endpoint delivers 18 chains, 45+ protocols, 5 CEXs, 128 DeFi tools.
 - Chains covered: ~3 → 18+
 - New ARIA Depth Score (0-20 bonus points)
 - New crons: #31 (price sync), #32 (perps scan), #33 (depth enrich)
-- New endpoints: 6 (/api/v1/heyanon/*)
+- New endpoints: 6 (/api/v1/heyanon/\*)
 - SECURITY: READ-ONLY tools only. Never execute without CEO approval.
 - API key stored in .env (HEYANON_API_KEY), never committed to GitHub
