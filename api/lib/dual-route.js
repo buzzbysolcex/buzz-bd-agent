@@ -40,7 +40,7 @@ const EVENT_ROUTES = {
 const TG_BOT_TOKEN =
   process.env.WAR_ROOM_BOT_TOKEN ||
   process.env.TG_BOT_TOKEN ||
-  "8488299788:AAGKSW8EcXMg3H4za6zYs-Ed4imypi8cLZc";
+  process.env.TELEGRAM_BOT_TOKEN;
 const TG_CHAT_ID = process.env.WAR_ROOM_CHAT_ID || "-1003701758077";
 
 async function tgSend(text) {

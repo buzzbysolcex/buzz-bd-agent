@@ -29,7 +29,7 @@ const https = require("https");
 
 // Host path — container's /data/buzz-api maps here on host.
 const LOG_PATH = "/data/buzz/persistent/buzz-api/signal-filing.log";
-const TG_BOT = "8488299788:AAGKSW8EcXMg3H4za6zYs-Ed4imypi8cLZc";
+const TG_BOT = process.env.TELEGRAM_BOT_TOKEN;
 const TG_CHAT = "-1003701758077";
 
 // Apr 30 2026 (Ogie msg 5285 → 5387): initDB() so every CLI-filed signal
@@ -46,7 +46,9 @@ try {
   // Signal tracker table is created on demand inside recordSignalFiled,
   // but explicitly initializing keeps logs clean.
   try {
-    const { initSignalTracker } = require("../api/services/signals/signal-tracker");
+    const {
+      initSignalTracker,
+    } = require("../api/services/signals/signal-tracker");
     if (typeof initSignalTracker === "function") initSignalTracker();
   } catch {}
 } catch (e) {
@@ -154,8 +156,17 @@ async function main() {
 
   // dry-run short circuit
   if (dryRun) {
-    const filer = require("../api/services/signals/aibtc-direct-filer");
-    const ready = filer.checkFilerReady();
+    // Production filer is the x402-stacks-filer (sponsored sBTC payment via
+    // facilitator). aibtc-direct-filer pre-dates the x402 enforcement and now
+    // returns HTTP 402 Payment Required from the server.
+    const filer = require("../api/services/signals/aibtc-x402-stacks-filer");
+    const ready =
+      typeof filer.checkFilerReady === "function"
+        ? filer.checkFilerReady()
+        : {
+            ready: !!filer.fileSignal,
+            reason: "x402-stacks-filer (no checkFilerReady export)",
+          };
     logLine(`DRY_RUN ${draftPath} :: ready=${JSON.stringify(ready)}`);
     console.log("DRY_RUN_OK");
     console.log(`  beat: ${draft.beat_slug}`);
@@ -165,10 +176,10 @@ async function main() {
     process.exit(0);
   }
 
-  // actual file
+  // actual file — use x402-stacks-filer (sponsored sBTC payment).
   let filer;
   try {
-    filer = require("../api/services/signals/aibtc-direct-filer");
+    filer = require("../api/services/signals/aibtc-x402-stacks-filer");
   } catch (e) {
     logLine(`FILER_LOAD_FAIL: ${e.message}`);
     await tgSend(
@@ -177,14 +188,33 @@ async function main() {
     process.exit(1);
   }
 
-  const result = await filer.fileSignalDirect({
+  // x402-stacks-filer's fileSignal() takes the raw draft (beat_slug, headline,
+  // body, sources, tags, disclosure) and returns {status, body, paymentResponse}.
+  // Adapt the response shape to the {success, signal_id, error} contract.
+  const draftPayload = {
     beat_slug: draft.beat_slug,
     headline: draft.headline,
     body: draft.body || "",
     sources: draft.sources || [],
     tags: draft.tags || [],
     disclosure: draft.disclosure,
-  });
+  };
+  const raw = await filer.fileSignal(draftPayload);
+  let result;
+  try {
+    const parsed = JSON.parse(raw.body || "{}");
+    if (raw.status === 200 || raw.status === 201 || raw.status === 202) {
+      result = { success: true, signal_id: parsed.signalId || parsed.id, raw };
+    } else {
+      result = {
+        success: false,
+        error: parsed.error || parsed.message || `HTTP ${raw.status}`,
+        raw,
+      };
+    }
+  } catch (e) {
+    result = { success: false, error: `non-JSON body @ ${raw.status}`, raw };
+  }
 
   const draftIdx = draft.draft_index || "?";
 

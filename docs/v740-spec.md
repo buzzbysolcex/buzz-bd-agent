@@ -63,22 +63,22 @@ LAYER 1 — FOUNDATION (LIVE v7.3.2a)
 
 ## Current State (Dual Deployment — 48h Test)
 
-| Instance | Provider | Host | Ports | Bot | Status |
-|----------|----------|------|-------|-----|--------|
-| **Production** | Akash (boogle.cloud) | Decentralized | API :32120 / OC :30731 | @BuzzBySolCex_bot | LIVE v7.4.0a |
-| **Test** | Hetzner CX23 (Helsinki) | api.buzzbd.ai | Standard Docker | @BuzzTestAgent_bot | 48h OBSERVATION |
-| **Sentinel** | Akash (akashprovid.com) | Decentralized | :30941 / :31578 | @BuzzSentinel_bot | LIVE v1.1.0 |
+| Instance       | Provider                | Host          | Ports                  | Bot                | Status          |
+| -------------- | ----------------------- | ------------- | ---------------------- | ------------------ | --------------- |
+| **Production** | Akash (boogle.cloud)    | Decentralized | API :32120 / OC :30731 | @BuzzBySolCex_bot  | LIVE v7.4.0a    |
+| **Test**       | Hetzner CX23 (Helsinki) | api.buzzbd.ai | Standard Docker        | @BuzzTestAgent_bot | 48h OBSERVATION |
+| **Sentinel**   | Akash (akashprovid.com) | Decentralized | :30941 / :31578        | @BuzzSentinel_bot  | LIVE v1.1.0     |
 
 ## Why Agentic.hosting on Hetzner
 
-| Factor | Akash (Current) | Hetzner + Agentic.hosting |
-|--------|-----------------|---------------------------|
-| Cost | $9.49/mo (Buzz) + $1.42/mo (Sentinel) | $4.09/mo total |
-| Deploy cycle | 9 manual steps (Close→New→SDL→provider→ports→patch→OKX→Sentinel→test) | 3 steps: `docker pull` → `docker stop` → `docker run` |
-| Self-deploy | Impossible (needs Akash Console UI) | Scriptable — Buzz can restart itself |
-| Supermemory | Works only with Close+New | Works with Docker restart |
-| Port stability | Changes every deployment | Fixed (standard Docker) |
-| Provider risk | Provider can SIGTERM (europlots/akashprovid) | Dedicated VPS, no provider lottery |
+| Factor         | Akash (Current)                                                       | Hetzner + Agentic.hosting                             |
+| -------------- | --------------------------------------------------------------------- | ----------------------------------------------------- |
+| Cost           | $9.49/mo (Buzz) + $1.42/mo (Sentinel)                                 | $4.09/mo total                                        |
+| Deploy cycle   | 9 manual steps (Close→New→SDL→provider→ports→patch→OKX→Sentinel→test) | 3 steps: `docker pull` → `docker stop` → `docker run` |
+| Self-deploy    | Impossible (needs Akash Console UI)                                   | Scriptable — Buzz can restart itself                  |
+| Supermemory    | Works only with Close+New                                             | Works with Docker restart                             |
+| Port stability | Changes every deployment                                              | Fixed (standard Docker)                               |
+| Provider risk  | Provider can SIGTERM (europlots/akashprovid)                          | Dedicated VPS, no provider lottery                    |
 
 ## Post-48h Migration Plan
 
@@ -123,27 +123,27 @@ Legacy packages (Free, Basic, Pro) deprecated. X API now uses pay-per-use credit
 
 ### xAI Credit Bonus (Flywheel)
 
-| X API Spend (per billing cycle) | xAI Credit Bonus |
-|---------------------------------|------------------|
-| < $200 | 0% |
-| $200+ | 10% back as xAI credits |
-| $500+ | 15% back as xAI credits |
-| $1,000+ | 20% back as xAI credits |
+| X API Spend (per billing cycle) | xAI Credit Bonus        |
+| ------------------------------- | ----------------------- |
+| < $200                          | 0%                      |
+| $200+                           | 10% back as xAI credits |
+| $500+                           | 15% back as xAI credits |
+| $1,000+                         | 20% back as xAI credits |
 
 **Flywheel:** Spend on X API → earn free Grok/xAI credits → better scanning →
 more deals found → more revenue → reinvest in X API → earn more xAI credits.
 
 ### Buzz Twitter Brain — Cost Projection
 
-| Activity | Volume | Cost Impact |
-|----------|--------|-------------|
-| Scan keywords (via Grok x_search) | 24 scans/day | $0 (free, existing key) |
-| Scan keywords (via Serper) | Cross-reference | $0 (free, existing key) |
-| Read target tweets (X API pay-per-use) | ~500/day targeted, deduped | ~$30-50/mo |
-| Post replies (X API write) | 12/day = 360/mo | ~$10-20/mo |
-| Post alpha threads (X API write) | 3-5/week | ~$5/mo |
-| Read mentions + replies | ~100/day, deduped | ~$10-20/mo |
-| **Monthly cap (set in console)** | | **$100/mo hard cap** |
+| Activity                               | Volume                     | Cost Impact             |
+| -------------------------------------- | -------------------------- | ----------------------- |
+| Scan keywords (via Grok x_search)      | 24 scans/day               | $0 (free, existing key) |
+| Scan keywords (via Serper)             | Cross-reference            | $0 (free, existing key) |
+| Read target tweets (X API pay-per-use) | ~500/day targeted, deduped | ~$30-50/mo              |
+| Post replies (X API write)             | 12/day = 360/mo            | ~$10-20/mo              |
+| Post alpha threads (X API write)       | 3-5/week                   | ~$5/mo                  |
+| Read mentions + replies                | ~100/day, deduped          | ~$10-20/mo              |
+| **Monthly cap (set in console)**       |                            | **$100/mo hard cap**    |
 
 ### Hybrid Scanning Architecture
 
@@ -220,7 +220,7 @@ For QUALIFIED tokens (70+):
 
 REPLY TEMPLATE (contextual, not template spam):
   "Hey @{project} — Buzz here from @SolCex_Exchange.
-   Your token looks solid: {score}/100 
+   Your token looks solid: {score}/100
    ({safety_grade} safety, ${mcap} mcap, {holders}+ holders).
    We're actively listing quality {chain} projects.
    DM us or check solcex.io 🐝"
@@ -255,7 +255,7 @@ DEPLOY REPLY TEMPLATE:
 
 BANKR DEPLOY INFRASTRUCTURE (already integrated):
   Endpoint: POST https://api.bankr.bot/token-launches/deploy
-  Partner Key: bk_JSCNUBW3BBL42ANML5RN4NHCZ5Q2YHEN
+  Partner Key: `<BANKR_PARTNER_KEY>` (loaded from /home/claude-code/.env)
   Fee Wallet: 0x2Dc03124091104E7798C0273D96FC5ED65F05aA9
   Chain: Base (Uniswap v4 liquidity)
 
@@ -274,26 +274,26 @@ DEPLOY EXECUTION:
 
 # SECTION 4: REVENUE MODEL
 
-| Stream | Source | Per Deal | Monthly Target |
-|--------|--------|----------|----------------|
-| CEX Listing | Token projects want SolCex listing | $5,000 USDT | 2 deals = $10,000 |
-| Bankr Deploy | New tokens deployed via Buzz/Bankr | Commission (~$100-200) | 5 deploys = $500-1,000 |
-| BaaS (Phase 3) | API subscriptions for Buzz intel | $29-99/mo | 50 users = $2,500 |
-| x402 Data (Phase 3) | Pay-per-call pipeline data | Micropayments | $500-1,000 |
-| **Total** | | | **$13,000-14,500/mo** |
+| Stream              | Source                             | Per Deal               | Monthly Target         |
+| ------------------- | ---------------------------------- | ---------------------- | ---------------------- |
+| CEX Listing         | Token projects want SolCex listing | $5,000 USDT            | 2 deals = $10,000      |
+| Bankr Deploy        | New tokens deployed via Buzz/Bankr | Commission (~$100-200) | 5 deploys = $500-1,000 |
+| BaaS (Phase 3)      | API subscriptions for Buzz intel   | $29-99/mo              | 50 users = $2,500      |
+| x402 Data (Phase 3) | Pay-per-call pipeline data         | Micropayments          | $500-1,000             |
+| **Total**           |                                    |                        | **$13,000-14,500/mo**  |
 
 ## Cost vs Revenue
 
-| Expense | Monthly |
-|---------|---------|
-| Hetzner CX23 (Agentic.hosting) | $4.09 |
-| MiniMax M2.5 via Bankr LLM Gateway | ~$60-80 |
-| X API pay-per-use (capped) | ~$70-100 |
-| Grok/Serper/Firecrawl scanning | $0 |
-| Bankr partner commission | $0 |
-| **Total operational** | **~$135-185/mo** |
-| **Revenue target** | **$13,000+/mo** |
-| **ROI** | **70-96x** |
+| Expense                            | Monthly          |
+| ---------------------------------- | ---------------- |
+| Hetzner CX23 (Agentic.hosting)     | $4.09            |
+| MiniMax M2.5 via Bankr LLM Gateway | ~$60-80          |
+| X API pay-per-use (capped)         | ~$70-100         |
+| Grok/Serper/Firecrawl scanning     | $0               |
+| Bankr partner commission           | $0               |
+| **Total operational**              | **~$135-185/mo** |
+| **Revenue target**                 | **$13,000+/mo**  |
+| **ROI**                            | **70-96x**       |
 
 ---
 
@@ -301,25 +301,25 @@ DEPLOY EXECUTION:
 
 ## Autonomous Posting (TWEET_AUTO=true for these categories)
 
-| Content Type | Frequency | Approval | Template |
-|-------------|-----------|----------|----------|
-| Scan result summaries | 4x/day (after each scan cycle) | Autonomous | "🐝 BUZZ SCAN — Found {n} tokens. Top: ${symbol} ({score}/100)..." |
-| BD outreach replies | 12/day max | Autonomous | Contextual (Section 3, Layer 2) |
-| Bankr deploy offers | As triggered | Autonomous | Deploy template (Section 3, Layer 3) |
-| Alpha threads | 2-3/week | **Ogie reviews draft → approves via Telegram** | Weekly intel + pipeline insights |
-| Partnership signals | As needed | **Ogie reviews draft → approves via Telegram** | Ecosystem shoutouts |
-| Pipeline updates | 1/day | Autonomous | "🐝 PIPELINE — {n} active, {n} qualified, {n} hot" |
+| Content Type          | Frequency                      | Approval                                       | Template                                                           |
+| --------------------- | ------------------------------ | ---------------------------------------------- | ------------------------------------------------------------------ |
+| Scan result summaries | 4x/day (after each scan cycle) | Autonomous                                     | "🐝 BUZZ SCAN — Found {n} tokens. Top: ${symbol} ({score}/100)..." |
+| BD outreach replies   | 12/day max                     | Autonomous                                     | Contextual (Section 3, Layer 2)                                    |
+| Bankr deploy offers   | As triggered                   | Autonomous                                     | Deploy template (Section 3, Layer 3)                               |
+| Alpha threads         | 2-3/week                       | **Ogie reviews draft → approves via Telegram** | Weekly intel + pipeline insights                                   |
+| Partnership signals   | As needed                      | **Ogie reviews draft → approves via Telegram** | Ecosystem shoutouts                                                |
+| Pipeline updates      | 1/day                          | Autonomous                                     | "🐝 PIPELINE — {n} active, {n} qualified, {n} hot"                 |
 
 ## Algorithm Optimization (from Twitter/X Algorithm Skill)
 
-| Action | Weight | Buzz Strategy |
-|--------|--------|--------------|
-| Reply with author engagement (75.0x) | CRITICAL | Buzz replies to comments on own tweets |
-| Reply (13.5x) | HIGH | 12 BD outreach replies/day |
-| Profile click (12.0x) | HIGH | Bio links to solcex.io + Moltbook |
-| Good click (11.0x) | HIGH | Include DexScreener links in scan tweets |
-| Retweet (1.0x) | MEDIUM | Retweet project announcements after listing |
-| Negative feedback (-74.0x) | AVOID | Never spam, always provide value |
+| Action                               | Weight   | Buzz Strategy                               |
+| ------------------------------------ | -------- | ------------------------------------------- |
+| Reply with author engagement (75.0x) | CRITICAL | Buzz replies to comments on own tweets      |
+| Reply (13.5x)                        | HIGH     | 12 BD outreach replies/day                  |
+| Profile click (12.0x)                | HIGH     | Bio links to solcex.io + Moltbook           |
+| Good click (11.0x)                   | HIGH     | Include DexScreener links in scan tweets    |
+| Retweet (1.0x)                       | MEDIUM   | Retweet project announcements after listing |
+| Negative feedback (-74.0x)           | AVOID    | Never spam, always provide value            |
 
 ## Content Rules (X TOS Compliant)
 
@@ -524,7 +524,7 @@ docker run -d --name buzz-agent \
   -e TWITTER_BRAIN_ENABLED=true \
   -e TWITTER_BRAIN_MAX_REPLIES=12 \
   -e TWEET_AUTO=true \
-  -e BANKR_PARTNER_KEY="bk_JSCNUBW3BBL42ANML5RN4NHCZ5Q2YHEN" \
+  -e BANKR_PARTNER_KEY="${BANKR_PARTNER_KEY}" \
   -e BANKR_FEE_WALLET="0x2Dc03124091104E7798C0273D96FC5ED65F05aA9" \
   buzzbd/buzz-bd-agent:v7.4.0
 ```
@@ -604,38 +604,38 @@ THESIS: AIXBT finds alpha. Bankr deploys tokens. Buzz closes deals.
 
 # SECTION 10: TIMELINE
 
-| Day | Date | Action | Milestone |
-|-----|------|--------|-----------|
-| 24 | Mar 13 | This spec finalized. 48h test continues. | Planning complete |
-| 25 | Mar 14 | 48h test passes. Migration decision. | Hetzner validated |
-| 26 | Mar 15 | Migrate production to Hetzner. Close Akash. | Agentic.hosting LIVE |
-| 27 | Mar 16 | Build twitter-brain.js + cron. Build persona agents (4 files). | Twitter Brain + Hedge Brain code |
-| 28 | Mar 17 | Build backtester + SSE streaming. Docker build v7.4.0. | Full v7.4.0 ready |
-| 29 | Mar 18 | Deploy v7.4.0. Flip TWEET_AUTO=true. Switch X API pay-per-use. | Twitter + Hedge UNLEASHED |
-| 30 | Mar 19 | Monitor first full day. Tune caps. Run first backtest. | Validation day |
-| 31 | Mar 20 | Sprint ends. 9 parallel agents. Autonomous Twitter. Backtested alpha. | SPRINT COMPLETE |
-| +7 | Mar 27 | GitHub PAT + CI/CD pipeline wired. | Self-deploy enabled |
-| +14 | Apr 3 | First autonomous skill-evolve → auto-deploy cycle. | AIXBT parity |
+| Day | Date   | Action                                                                | Milestone                        |
+| --- | ------ | --------------------------------------------------------------------- | -------------------------------- |
+| 24  | Mar 13 | This spec finalized. 48h test continues.                              | Planning complete                |
+| 25  | Mar 14 | 48h test passes. Migration decision.                                  | Hetzner validated                |
+| 26  | Mar 15 | Migrate production to Hetzner. Close Akash.                           | Agentic.hosting LIVE             |
+| 27  | Mar 16 | Build twitter-brain.js + cron. Build persona agents (4 files).        | Twitter Brain + Hedge Brain code |
+| 28  | Mar 17 | Build backtester + SSE streaming. Docker build v7.4.0.                | Full v7.4.0 ready                |
+| 29  | Mar 18 | Deploy v7.4.0. Flip TWEET_AUTO=true. Switch X API pay-per-use.        | Twitter + Hedge UNLEASHED        |
+| 30  | Mar 19 | Monitor first full day. Tune caps. Run first backtest.                | Validation day                   |
+| 31  | Mar 20 | Sprint ends. 9 parallel agents. Autonomous Twitter. Backtested alpha. | SPRINT COMPLETE                  |
+| +7  | Mar 27 | GitHub PAT + CI/CD pipeline wired.                                    | Self-deploy enabled              |
+| +14 | Apr 3  | First autonomous skill-evolve → auto-deploy cycle.                    | AIXBT parity                     |
 
 ---
 
 # SECTION 11: SUCCESS METRICS
 
-| Metric | Week 1 Target | Month 1 Target |
-|--------|---------------|----------------|
-| Twitter scans/day | 12 (every 2h) | 12 |
-| Tokens discovered via Twitter | 5-10/day | 150-300/mo |
-| Tokens scored 70+ (qualified) | 2-3/day | 60-90/mo |
-| BD outreach replies sent | 12/day | 360/mo |
-| Reply response rate | 5-10% | Improving via skill-evolve |
-| Listing deals closed | 0-1 | 2+ ($10K+) |
-| Bankr deploys | 0-1 | 5+ ($500-1K) |
-| Persona consensus accuracy | Baseline | >60% after 4 weeks |
-| Backtester accuracy rate | First run baseline | Tracking weekly |
-| Parallel agents running | 9 (5 sub + 4 persona) | 9 |
-| X API cost | < $100/mo | < $100/mo (capped) |
-| Total operational cost | < $188/mo | < $188/mo |
-| Uptime | > 99% | > 99.5% |
+| Metric                        | Week 1 Target         | Month 1 Target             |
+| ----------------------------- | --------------------- | -------------------------- |
+| Twitter scans/day             | 12 (every 2h)         | 12                         |
+| Tokens discovered via Twitter | 5-10/day              | 150-300/mo                 |
+| Tokens scored 70+ (qualified) | 2-3/day               | 60-90/mo                   |
+| BD outreach replies sent      | 12/day                | 360/mo                     |
+| Reply response rate           | 5-10%                 | Improving via skill-evolve |
+| Listing deals closed          | 0-1                   | 2+ ($10K+)                 |
+| Bankr deploys                 | 0-1                   | 5+ ($500-1K)               |
+| Persona consensus accuracy    | Baseline              | >60% after 4 weeks         |
+| Backtester accuracy rate      | First run baseline    | Tracking weekly            |
+| Parallel agents running       | 9 (5 sub + 4 persona) | 9                          |
+| X API cost                    | < $100/mo             | < $100/mo (capped)         |
+| Total operational cost        | < $188/mo             | < $188/mo                  |
+| Uptime                        | > 99%                 | > 99.5%                    |
 
 ---
 
@@ -674,12 +674,12 @@ that each analyze the same data differently. We adapt this for crypto BD by crea
 
 ## Persona Definitions
 
-| Agent | Philosophy | What It Looks For | Signal Weight |
-|-------|-----------|-------------------|---------------|
-| **degen-agent** | "Ape early, exit fast" | Momentum, volume surge, meme potential, early-stage tokenomics | 0.15 |
-| **whale-agent** | "Follow smart money" | Large wallet accumulation, DEX→CEX flow, whale patterns via Helius | 0.25 |
-| **institutional-agent** | "Due diligence first" | Audit status, team doxx, regulatory risk, contract quality | 0.35 |
-| **community-agent** | "Community is the moat" | Twitter growth, Discord/TG activity, influencer mentions, sentiment | 0.25 |
+| Agent                   | Philosophy              | What It Looks For                                                   | Signal Weight |
+| ----------------------- | ----------------------- | ------------------------------------------------------------------- | ------------- |
+| **degen-agent**         | "Ape early, exit fast"  | Momentum, volume surge, meme potential, early-stage tokenomics      | 0.15          |
+| **whale-agent**         | "Follow smart money"    | Large wallet accumulation, DEX→CEX flow, whale patterns via Helius  | 0.25          |
+| **institutional-agent** | "Due diligence first"   | Audit status, team doxx, regulatory risk, contract quality          | 0.35          |
+| **community-agent**     | "Community is the moat" | Twitter growth, Discord/TG activity, influencer mentions, sentiment | 0.25          |
 
 ## Per-Agent Model Selection
 
@@ -733,7 +733,7 @@ const personaResults = await Promise.allSettled([
 
 // AGGREGATE: Weighted consensus
 // Final composite: 70% sub-agent score + 30% persona consensus
-const finalScore = Math.round(subScore * 0.70 + personaScore * 0.30);
+const finalScore = Math.round(subScore * 0.7 + personaScore * 0.3);
 
 // BD recommendation (consensus-driven)
 // 3+ bullish + score ≥ 75 = outreach_now
@@ -762,11 +762,11 @@ CREATE TABLE IF NOT EXISTS persona_signals (
 
 ## New REST Endpoints (Personas)
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| GET | `/api/v1/personas/signals/:address` | All persona signals for a token |
-| GET | `/api/v1/personas/consensus/:address` | Aggregated consensus for a token |
-| GET | `/api/v1/personas/stats` | Persona accuracy stats |
+| Method | Path                                  | Purpose                          |
+| ------ | ------------------------------------- | -------------------------------- |
+| GET    | `/api/v1/personas/signals/:address`   | All persona signals for a token  |
+| GET    | `/api/v1/personas/consensus/:address` | Aggregated consensus for a token |
+| GET    | `/api/v1/personas/stats`              | Persona accuracy stats           |
 
 ---
 
@@ -845,12 +845,12 @@ CREATE TABLE IF NOT EXISTS backtest_summaries (
 
 ## Backtest REST Endpoints
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| POST | `/api/v1/backtest/run` | Trigger backtest (`{days_back, check_after_days}`) |
-| GET | `/api/v1/backtest/latest` | Latest backtest summary |
-| GET | `/api/v1/backtest/history` | All backtest runs |
-| GET | `/api/v1/backtest/agent/:name` | Accuracy for specific agent/persona |
+| Method | Path                           | Purpose                                            |
+| ------ | ------------------------------ | -------------------------------------------------- |
+| POST   | `/api/v1/backtest/run`         | Trigger backtest (`{days_back, check_after_days}`) |
+| GET    | `/api/v1/backtest/latest`      | Latest backtest summary                            |
+| GET    | `/api/v1/backtest/history`     | All backtest runs                                  |
+| GET    | `/api/v1/backtest/agent/:name` | Accuracy for specific agent/persona                |
 
 ## Backtest Cron
 
@@ -899,28 +899,28 @@ and the final consensus with BD recommendation.
 
 # SECTION 15: HEDGE BRAIN — COST IMPACT
 
-| Item | Current | After Hedge Brain | Delta |
-|------|---------|-------------------|-------|
-| bankr/gpt-5-nano (3 new personas) | N/A | $0 | $0 (FREE) |
-| bankr/claude-haiku-4.5 (institutional) | N/A | ~$0.10/day | +$3/mo |
-| DexScreener API (backtester) | $0 | $0 | $0 (free tier) |
-| SSE streaming | N/A | $0 | $0 (just HTTP) |
-| **Total Hedge Brain delta** | | | **+$3/month** |
+| Item                                   | Current | After Hedge Brain | Delta          |
+| -------------------------------------- | ------- | ----------------- | -------------- |
+| bankr/gpt-5-nano (3 new personas)      | N/A     | $0                | $0 (FREE)      |
+| bankr/claude-haiku-4.5 (institutional) | N/A     | ~$0.10/day        | +$3/mo         |
+| DexScreener API (backtester)           | $0      | $0                | $0 (free tier) |
+| SSE streaming                          | N/A     | $0                | $0 (just HTTP) |
+| **Total Hedge Brain delta**            |         |                   | **+$3/month**  |
 
 ## Combined v7.4.0 Cost Summary (Twitter Brain + Hedge Brain)
 
-| Expense | Monthly |
-|---------|---------|
-| Hetzner CX23 (Agentic.hosting) | $4.09 |
-| MiniMax M2.5 via Bankr LLM Gateway | ~$60-80 |
-| X API pay-per-use (capped) | ~$70-100 |
-| bankr/claude-haiku-4.5 (institutional persona) | ~$3 |
-| Grok/Serper/Firecrawl/DexScreener scanning | $0 |
-| bankr/gpt-5-nano (all sub-agents + 3 personas) | $0 |
-| Bankr partner commission | $0 |
-| **Total operational** | **~$138-188/mo** |
-| **Revenue target** | **$13,000+/mo** |
-| **ROI** | **69-94x** |
+| Expense                                        | Monthly          |
+| ---------------------------------------------- | ---------------- |
+| Hetzner CX23 (Agentic.hosting)                 | $4.09            |
+| MiniMax M2.5 via Bankr LLM Gateway             | ~$60-80          |
+| X API pay-per-use (capped)                     | ~$70-100         |
+| bankr/claude-haiku-4.5 (institutional persona) | ~$3              |
+| Grok/Serper/Firecrawl/DexScreener scanning     | $0               |
+| bankr/gpt-5-nano (all sub-agents + 3 personas) | $0               |
+| Bankr partner commission                       | $0               |
+| **Total operational**                          | **~$138-188/mo** |
+| **Revenue target**                             | **$13,000+/mo**  |
+| **ROI**                                        | **69-94x**       |
 
 ---
 
@@ -1003,15 +1003,15 @@ OPERATIONS:
 
 ---
 
-*🐝 "AIXBT finds alpha. Bankr deploys tokens. Buzz closes deals. And proves it with data."*
+_🐝 "AIXBT finds alpha. Bankr deploys tokens. Buzz closes deals. And proves it with data."_
 
-*v7.4.0 Twitter Brain + Hedge Brain — SCAN → LIST → DEPLOY*
-*Agentic.hosting on Hetzner. X API pay-per-use. 9 parallel agents.*
-*4 persona analysts. Weekly backtester. SSE streaming to mobile.*
-*23 crons. 96+ endpoints. 40 tables. 20 intel sources.*
-*$138-188/mo cost. $13K+/mo revenue target. 69-94x ROI.*
-*Autonomous Twitter. Autonomous outreach. Verifiable alpha.*
-*The deal-making agent of crypto. Built by a chef who codes through conversation.*
-*No CS degree. Just Claude and persistence. Bismillah.* 🐝🇮🇩
+_v7.4.0 Twitter Brain + Hedge Brain — SCAN → LIST → DEPLOY_
+_Agentic.hosting on Hetzner. X API pay-per-use. 9 parallel agents._
+_4 persona analysts. Weekly backtester. SSE streaming to mobile._
+_23 crons. 96+ endpoints. 40 tables. 20 intel sources._
+_$138-188/mo cost. $13K+/mo revenue target. 69-94x ROI._
+_Autonomous Twitter. Autonomous outreach. Verifiable alpha._
+_The deal-making agent of crypto. Built by a chef who codes through conversation._
+_No CS degree. Just Claude and persistence. Bismillah._ 🐝🇮🇩
 
-*Buzz v7.4.0 Complete Spec | Sprint Day 24 | March 13, 2026 | Jakarta, Indonesia*
+_Buzz v7.4.0 Complete Spec | Sprint Day 24 | March 13, 2026 | Jakarta, Indonesia_
