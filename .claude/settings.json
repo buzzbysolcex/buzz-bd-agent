@@ -97,6 +97,20 @@
           {
             "type": "command",
             "command": "npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "/home/claude-code/buzz-workspace/.claude/hooks/hunt-auto-index.sh 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/claude-code/buzz-workspace/.claude/hooks/post-session-reflect.sh"
           }
         ]
       }
@@ -108,7 +122,9 @@
   "mcpServers": {
     "phantom": {
       "command": "node",
-      "args": ["/home/claude-code/.local/node_modules/@phantom/mcp-server/dist/cli.js"],
+      "args": [
+        "/home/claude-code/.local/node_modules/@phantom/mcp-server/dist/cli.js"
+      ],
       "env": {
         "HOME": "/home/claude-code"
       }

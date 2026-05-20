@@ -62,3 +62,29 @@ npm test                                     # Jest suite
 5. **LLM cost discipline** — Sub-agents route to bankr/gpt-5-nano (free) only — never to MiniMax or Anthropic. Orchestrator uses MiniMax M2.7 with `max_tokens: 2000`. Cascade on failure: M2.7 → Bankr gemini-3-flash → claude-haiku-4.5.
 
 See `BUZZ_RULES.md` for the full ruleset and `.claude/rules/` for path-scoped rules (schedule events, security, signals, deployment).
+
+# === PERSISTENT MEMORY (Obsidian Mind, May 7 2026) ===
+
+## On Session Start
+
+Read these for context: brain/Vision-2027.md (permanent operating directive, North Star), brain/Doctrine.md (methodology), brain/Predator-Vision.md, brain/North Star.md, brain/Architecture.md, brain/People.md, brain/Revenue.md, projects-mind/Bug Bounty Genius Plan.md
+
+**Startup-read priority (post-2026-05-21 Vision-2027 Activation):**
+
+1. **brain/Vision-2027.md** — PERMANENT operating directive, North Star Dec 2027, four-lane wiring, monthly checkpoints (LOAD FIRST alongside Doctrine.md: governs WHAT to do)
+2. **brain/Methodology-Doctrine.md** (alias: Doctrine.md) — 23+ worked examples, 19+ doctrines, standing rules (LOAD FIRST alongside Vision-2027.md: governs HOW to do it)
+3. **brain/Predator-Vision.md** — three pillars, three-lane revenue, milestone targets (operational supplement to Vision-2027)
+4. brain/North Star.md, Architecture.md, People.md, Revenue.md — operational context
+5. projects-mind/Bug Bounty Genius Plan.md — execution plan against vision
+
+## During Session
+
+Decisions > decisions/. Incidents > incidents/. Wins > update brain/ notes. Status changes > update projects-mind/.
+
+## On Wrap-Up
+
+Update changed brain/ notes. Update Genius Plan status. Log to logs/.
+
+## Rules
+
+brain/ = persistent truth. Never delete, only update. Link with [[wikilinks]].
