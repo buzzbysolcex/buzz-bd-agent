@@ -102,6 +102,7 @@ If monitoring tasks haven't fired in >2h:
 
 - Run all monitors: contest monitor (smartcontractshacking), Moltbook post-comment watch, defensive intel sweep (rekt.news + PeckShield + SlowMist + CertiKAlert + BlockSecTeam), disclosure-tracker freshness check, Veda #79280 + Firedancer triage watch
 - **Lane 5 daemons (added 2026-05-24, Ogie msg 7643)** — verify the Morpho Blue flash-loan monitor (`scripts/lane5/morpho-flashloan-monitor.js`) daemon is alive (PID check + last-heartbeat timestamp); if dead → restart + log to War Room; if alive but quiet >24h → spot-check WebSocket subscription health via single test event replay. As additional Lane 5 daemons ship (Aave V3 flash-loan monitor, Balancer flash-loan monitor, etc.), extend this check to each.
+- **Brain-backup health check (added 2026-05-24, Ogie msg 7696)** — `git -C /home/claude-code/buzz-workspace log -1 --format='%ai' backup/HEAD 2>/dev/null` (or read `data/infra-logs/brain-backup.log` last "push complete" line). If the most recent successful push is older than 8 days, surface to War Room as RED ALERT: "Brain backup STALE — last successful push <date>. Cron may be failing — investigate scripts/infra/brain-backup.sh + crontab status." This is non-negotiable infrastructure — brain is the single most valuable server asset.
 - Return to Step 1
 
 ### STEP 9 — PROPAGATION SWEEP
