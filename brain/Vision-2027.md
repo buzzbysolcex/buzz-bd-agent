@@ -190,6 +190,58 @@ E) **Competitive intelligence + partnership mapping:** Dave Bitcoin (since 2013,
 
 ---
 
+### Lane 5 — CEX Intelligence ("The Pre-Exploit Order-Book Lens") — RESEARCH NOTE, NOT ACTIVE
+
+> Status: **CONCEPT, NOT ACTIVE.** Filed 2026-05-22 per Ogie msg 7523. Defer to post-Month 6. Logged as future lane.
+
+**Thesis:** same pattern-recognition brain, different substrate. The 4-lane brain is a primitive-and-chain detection engine — it doesn't care whether the substrate is Solidity code, BitcoinTalk forum posts, or CEX order books. CEX order books carry signal that precedes on-chain exploits: positioning, shorts, options skew, funding-rate divergence, abnormal stable-pair routing.
+
+**Cross-Lane Signal Triangulation (the moat):**
+
+- Lane 1 surfaces a code-level vulnerability (bug exists)
+- Lane 4 surfaces wallets that look like attacker behavioral profiles (substrate prepared)
+- **Lane 5 surfaces CEX positioning consistent with imminent exploit (timer started)**
+
+When all three light up on the same protocol, the alert is high-confidence pre-exploit notification — sellable to the protocol, to insurers, to incident-response teams, to white-hat networks.
+
+**Architecture (sketch):**
+
+- Bybit / Binance / OKX / Bitget MCP connectors → Claude Code
+- Anomaly detection: large directional flow vs. average, options-skew shift, basis collapse, funding-rate inversion
+- Cross-reference engine: anomaly + Lane 1 code vuln + Lane 4 wallet profile = alert
+- Alert pipeline: Telegram → operator triage → outbound
+
+**Revenue (concept):**
+
+- Sell alerts to protocols ("someone is positioning against your contract") — subscription tier or per-alert
+- Sell to insurers (Nexus Mutual, InsurAce class) for premium adjustment
+- Sell to incident-response teams (SEAL 911, ChainAegis, etc.) for early-warning
+- Brand: BuzzWatch / BuzzSentinel
+
+**Risk / non-trivial unknowns (file before activation):**
+
+- CEX API rate limits + legal posture on order-flow analysis
+- False-positive cost on alerts that name protocols publicly (defamation risk)
+- Lane 4 attacker-profile primitives must mature before triangulation has signal
+- Lane 1 finding surface must be live enough that "someone is positioning against your contract" is a credible claim rather than fishing
+
+**Activation gates (when to revisit):**
+
+- Lane 1 has shipped $50K+ in confirmed bounties (proves brain catches real bugs)
+- Lane 4 has Phase 2 white-label live (proves behavioral-profile primitives transfer)
+- Operator capacity for new lane (no earlier than Month 6 — Vision-2027 timeline holds)
+
+**Wiring to brain (when active):** every CEX anomaly → behavioral primitive in `brain/CEX-Anomaly-Patterns.md`. Every alert → cross-validated with Lane 1 + Lane 4 → confidence-tier published. Triangulation method published as Lane 3 content (proprietary edge maintained at the brain level, not the public-edge level).
+
+**Cross-Lane addition to map below:**
+
+- L1 → L5: code vuln → triangulation input
+- L4 → L5: attacker-profile wallet → triangulation input
+- L5 → L1: positioning alert → BD signal ("protocol X needs Lane 1 audit, ASAP")
+- L5 → L2: pre-exploit alert subscriber → HSaaS upsell
+
+---
+
 ## Cross-Pollination Map (the engine nobody else has)
 
 | From | To  | Mechanism                                         |

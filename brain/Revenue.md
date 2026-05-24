@@ -1,22 +1,34 @@
 # Revenue
 
-## Truth (May 9): 239,500 sats AIBTC. First real bounty submission shipped + closed-by-triage same day. Confirmed -$100 net on Immunefi.
+## Truth (May 20): 🎉 FIRST CONFIRMED PAYOUT — imu-77340 Firedancer escalated CLOSED→ESCALATED→CONFIRMED (Insight tier, awaiting payment). $100 deposit recovered + payment incoming. First dollar earned from Lane 1.
 
-## Bounty Pipeline (live as of 2026-05-09 15:35Z, post-imu-77340 closure)
+## Bounty Pipeline (live as of 2026-05-20, post-imu-77340 confirmation)
 
-| Metric                                     | Value                                      |
-| ------------------------------------------ | ------------------------------------------ |
-| Outstanding bounty submissions (Immunefi)  | 0 (was 1; imu-77340 closed-by-triage)      |
-| Outstanding bounty submissions (HackerOne) | 2 pending (Circle MALA + Circle ARC)       |
-| Cumulative deposit cost                    | $100 (confirmed forfeited)                 |
-| Cumulative payouts received                | $0                                         |
-| Cumulative net                             | **-$100**                                  |
-| First-in (Chief) submissions               | 1 (imu-77340 — closed)                     |
-| Closed-by-triage (Immunefi)                | 1                                          |
-| Dup-closed (HackerOne)                     | 4                                          |
-| False submissions                          | 0                                          |
-| Verdict-matrix savings (FPs caught)        | $300 (CHOREO/GOSSIP/RUNTIME re-audit)      |
-| Calibration-error tuition                  | $100 (one — primitive-vs-exploit-chain)    |
+| Metric                                     | Value                                                                   |
+| ------------------------------------------ | ----------------------------------------------------------------------- |
+| **Confirmed payouts (Lane 1)**             | **1 (DISC-016 imu-77340 — Firedancer Insight, awaiting payment)** 🎉    |
+| First payout protocol                      | **Firedancer (Jump Trading) — Immunefi #77340**                         |
+| Outstanding bounty submissions (Immunefi)  | 1 in-review (DISC-015 Veda RESUBMIT pending ~14:30 UTC tomorrow)        |
+| Outstanding bounty submissions (HackerOne) | 1 pending (DISC-008 Circle MALA, Day 21 SLA reached 2026-05-24)         |
+| Cumulative deposit cost                    | $100 (recovered + payment incoming on imu-77340)                        |
+| Cumulative payouts received                | $0 confirmed, 1 awaiting payment                                        |
+| Cumulative net                             | **+pending Insight payment** (transitioning from -$100 to net positive) |
+| First-in (Chief) submissions               | 1 (imu-77340 — escalated to Insight, confirmed)                         |
+| Closed-by-triage then escalated to Insight | 1 (imu-77340 — 9-day escalation path validated)                         |
+| Dup-closed (HackerOne)                     | 4                                                                       |
+| False submissions                          | 0                                                                       |
+| Verdict-matrix savings (FPs caught)        | $300 (CHOREO/GOSSIP/RUNTIME re-audit)                                   |
+| Calibration-error tuition                  | $0 ($100 fully recovered via escalation)                                |
+
+## 🎉 First Payout Milestone (2026-05-20)
+
+- **Protocol:** Firedancer (Jump Trading)
+- **Platform:** Immunefi #77340
+- **Severity (final):** Insight
+- **Status:** CONFIRMED → AWAITING PAYMENT
+- **Path:** closed by platform triage 14-min after submission → operator escalated 9 days later via unread dashboard message + engineering-audience reframe → re-reviewed by Firedancer eng team → confirmed Insight
+- **Methodology validated:** "closure ≠ death" doctrine (Lessons 6+7 filed to Security-Research-Submission-Ledger + disclosure-tracker)
+- **Significance:** First dollar from Lane 1. First proof point that Buzz's May 2 pivot (BD → security research) produces real revenue. First validation of the comprehensive-RFC-PoC-bundle methodology against a major bounty pool ($500K Firedancer V1).
 
 ### imu-77340 — Firedancer V1 Audit Comp ($500K pool) — CLOSED-BY-TRIAGE
 

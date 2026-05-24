@@ -11,6 +11,7 @@ Quote from this morning's P1 EIC verification status report:
 Ground truth: `/api/agents/{btc}` returned `lastActiveAt: 2026-05-03T11:25:01Z`, no outbound message in inbox since `2026-04-30T20:26Z`. Local script success logs claimed daily filings; signals did not land on the network.
 
 **HALT executed 2026-05-10 22:10 UTC:**
+
 - 6 morning-signals-v2.sh cron slots commented out (backup at `/home/claude-code/crontab.pre-halt-2026-05-10.bak`)
 - phase-a-trigger.sh cron commented out
 - Halt-guard added to morning-signals-v2.sh script (defense in depth — aborts even if cron re-enables)
@@ -42,8 +43,6 @@ Do NOT autopilot-restart based on hope. Verify three times.
 **Doctrine:** brain/Doctrine.md Priority #4 GROUND-TRUTH-LANDING (filed concurrently).
 
 ---
-
-
 
 ## Inbox Sender Script (queued — Ogie EOD msg "AIBTC inbox revival" Action 3, May 10 2026)
 

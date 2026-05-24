@@ -476,62 +476,62 @@ v6.7 PIPELINE TUNING QUEUE (added 2026-05-09 18:35 UTC via Ogie EOD msg DECISION
 v6.6 batch (b683e97 + e8af5cc + 51537b4 + c7c58d7) GREENLIT for merge to main per refined halt rule (DECISION 2). HE-21 hit -60% on its targeted FP class. HE-20 didn't fire because Phase 12 detected legitimate user-facing mutator set (Symbiotic) — premise mismatch, separate FP class. L1d-17 surviving FPs need #139.
 
 ┌─ #128 — PoC Type Classifier (poc-type-classifier-v1) ──────────────────┐
-│                                                                          │
+│ │
 │ Trigger: imu-77340 closed-by-triage 2026-05-09 15:20 UTC. $100 forfeit. │
 │ Triage critique: primitive PoCs (server accepts non-conformant framing) │
 │ ≠ exploit chain (proxy + Firedancer + attacker bytes reaching GUI/RPC). │
-│                                                                          │
-│ Classifier: parse all PoC PASS-lines, classify primitive vs exploit vs  │
-│ mixed. BLOCK MED+ submissions to Immunefi Audit Comp with primitive-    │
+│ │
+│ Classifier: parse all PoC PASS-lines, classify primitive vs exploit vs │
+│ mixed. BLOCK MED+ submissions to Immunefi Audit Comp with primitive- │
 │ only PoCs. Allow LOW informational on Immunefi Standing Bounty / Hacker │
-│ One. Mixed → manual override + Ogie greenlight required.                │
-│                                                                          │
-│ Algorithm in /data/buzz/persistent/buzz-api/ground-truth/2026-05-09-    │
-│ immunefi-primitive-vs-chain-calibration.md (Detection Rule section).    │
-│                                                                          │
-│ Implementation: ~50 LOC. Branch reserved: poc-type-classifier-v1.       │
-│ Bound to detector PR template required-checks.                          │
-│                                                                          │
-│ Reference doctrine: brain/Doctrine.md "Pre-Submission PoC Standard".    │
-│                                                                          │
-│ ETA: 30-45 min implementation + dry-run on imu-77340 retro              │
-│                                                                          │
+│ One. Mixed → manual override + Ogie greenlight required. │
+│ │
+│ Algorithm in /data/buzz/persistent/buzz-api/ground-truth/2026-05-09- │
+│ immunefi-primitive-vs-chain-calibration.md (Detection Rule section). │
+│ │
+│ Implementation: ~50 LOC. Branch reserved: poc-type-classifier-v1. │
+│ Bound to detector PR template required-checks. │
+│ │
+│ Reference doctrine: brain/Doctrine.md "Pre-Submission PoC Standard". │
+│ │
+│ ETA: 30-45 min implementation + dry-run on imu-77340 retro │
+│ │
 └──────────────────────────────────────────────────────────────────────────┘
 
 ┌─ #139 — Flow-direction analysis for invariant_multi_mutator ───────────┐
-│                                                                          │
-│ Trigger: HE-20 didn't catch Symbiotic L1d-17 because Phase 12          │
-│ INVARIANT_HINTS regex over-broad on "collateralization" — flagged the  │
+│ │
+│ Trigger: HE-20 didn't catch Symbiotic L1d-17 because Phase 12 │
+│ INVARIANT_HINTS regex over-broad on "collateralization" — flagged the │
 │ pattern even when ALL mutators are user-facing (deposit/claim/onSlash/ │
-│ _initialize all nonReentrant). HE-20's mixed admin+user pattern wasn't │
-│ present in this finding.                                                │
-│                                                                          │
-│ Tuning: Phase 12 must distinguish balance-direction-changing mutators  │
-│ (deposit moves balance up, withdraw moves balance down, slash burns)   │
-│ from metadata-touching mutators (setLimit changes limit but not the    │
+│ \_initialize all nonReentrant). HE-20's mixed admin+user pattern wasn't │
+│ present in this finding. │
+│ │
+│ Tuning: Phase 12 must distinguish balance-direction-changing mutators │
+│ (deposit moves balance up, withdraw moves balance down, slash burns) │
+│ from metadata-touching mutators (setLimit changes limit but not the │
 │ tracked invariant value). Only flag when mutators DISAGREE on direction │
-│ of invariant change.                                                    │
-│                                                                          │
-│ Branch: invariant-flow-direction-v1                                     │
-│ ETA: ~45 min — needs AST walk over function bodies for sstore targets  │
-│                                                                          │
+│ of invariant change. │
+│ │
+│ Branch: invariant-flow-direction-v1 │
+│ ETA: ~45 min — needs AST walk over function bodies for sstore targets │
+│ │
 └──────────────────────────────────────────────────────────────────────────┘
 
 ┌─ #140 — Pattern C transfer/sstore depth analysis ──────────────────────┐
-│                                                                          │
-│ Trigger: 4 surviving Pattern C MEDs in Symbiotic regression have       │
-│ legitimate cheap-path writes (sstore on cheap branch). HE-21 catches   │
-│ view_only/revert_only cheap paths but mis-clears legitimate-write      │
-│ cheap paths.                                                            │
-│                                                                          │
+│ │
+│ Trigger: 4 surviving Pattern C MEDs in Symbiotic regression have │
+│ legitimate cheap-path writes (sstore on cheap branch). HE-21 catches │
+│ view_only/revert_only cheap paths but mis-clears legitimate-write │
+│ cheap paths. │
+│ │
 │ Tuning: classify cheap-path writes by external-fund-flow reachability. │
-│ If cheap-path sstore touches a balance/allowance/share field that      │
-│ flows to user transfer → keep flagged. If it touches admin metadata   │
-│ (lastUpdate, maxLimit, fee bps) → auto-REJECT.                         │
-│                                                                          │
-│ Branch: pattern-c-flow-depth-v1                                         │
-│ ETA: ~45 min — extends Phase 5 cheap_path_classification taxonomy      │
-│                                                                          │
+│ If cheap-path sstore touches a balance/allowance/share field that │
+│ flows to user transfer → keep flagged. If it touches admin metadata │
+│ (lastUpdate, maxLimit, fee bps) → auto-REJECT. │
+│ │
+│ Branch: pattern-c-flow-depth-v1 │
+│ ETA: ~45 min — extends Phase 5 cheap_path_classification taxonomy │
+│ │
 └──────────────────────────────────────────────────────────────────────────┘
 
 Sequence: #128 first (calibration tuition, prevents next-Immunefi loss), then #139 + #140 parallel (Symbiotic regression cleanup). All three queued for first session after May 12 (Frontier window). Apply v2.5 doctrine + Pre-Submission PoC Standard + refined halt rule on every commit.
