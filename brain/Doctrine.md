@@ -325,6 +325,18 @@ Doctrine is now provably useful: catches gaps AND confirms successes. Discipline
 
 This is the meta-pattern: a doctrine that ships as a runnable detector compounds in value over time. Each subagent run that PASSES through the verifier validates the doctrine; each FAIL adds to the calibration corpus. Manual `ls -la` discipline (the original Worked Example #10 fix) becomes obsolete the moment the wrapper is universal.
 
+**Worked example #17: Wormhole Core Bridge bytecode-drift caught before Lens 1 burned (2026-05-20)**
+
+Premise on entry to Gate 2: "main branch ≡ deployed Core Bridge Implementation 0x3c3d...a9d0." Gate 1 preflight had already noted `evmChainId()` selector reverting on deployed — a directional flag, not a verdict. Operator made bytecode-verify Step 1 of Gate 2 activation (per `hunts/2026-05-17-wormhole-gate2-prep.md` §BLOCKER).
+
+Verify result: deployed = 27,810 normalized hex chars (~13,905 bytes); local main HEAD `4028572` = 29,046 chars (~14,523 bytes); delta = 1,236 chars / ~618 bytes. First 80 chars (function-selector dispatcher) identical; first divergence at byte 1273 — well before the ~50-byte CBOR metadata trailer. Body-strip tests at 90/100/110/120/140/200 trailing chars all failed to produce body-match. Real source drift, not metadata-only.
+
+Failure mode that VERIFY-PREMISE-FIRST prevented: Lens 1 enumeration (cross-chain `_completeTransfer` divergence across 6 chains) would have run against main-branch code paths. Any finding traced to a path that doesn't exist in deployed bytecode = out-of-scope per Immunefi's "undeployed code excluded" rule. The submission would have been rejected on triage, burning a slot at the Wormhole program (and the reputational cost of an FP submission). Hours of Phase 4d Opus + Skeptic compute would have been spent on code that isn't deployed.
+
+Operator response: D4 pivot — park Wormhole, prioritize Veda (where Gate 1 already identified DC-7 surface clarity + 4 HYPOTHESIS_TRACKED candidates from 6-decoder sample). Bytecode-verify is now a hard pre-Gate-2 standing rule: **always bytecode-verify before any Gate 2 lens activation on a target with a deployed Implementation**. The cost of skipping the verify step is the cost of an entire Gate 2 hunt landing on undeployed code.
+
+Codified: `hunts/2026-05-20-veda-gate2-prep-review.md` already names B1 (deployment-address discovery) as the FIRST blocker before any 97-decoder enumeration. The Wormhole lesson is the empirical proof that this ordering is non-negotiable. Future Gate 2 prep packs MUST enumerate bytecode-verify as the first action, not the last preparation.
+
 **Cross-check cadence (added 2026-05-10 from AIBTC inbox revival directive):**
 
 > Inbox/external-API metrics depend on which endpoint counts what. Verify scope monthly via independent profile-UI cross-check. If API shows N and UI shows M, the gap is a premise-mismatch waiting to fire. Resolve via explicit pagination probe + endpoint catalog before treating either as authoritative.
@@ -904,4 +916,716 @@ This is a third Class L instance (after AIBTC local-vs-network landing gap + #12
 
 ---
 
+## Worked Example #21 — Handover-Doc Track Drift: Autonomous Task Reconciliation Gap (2026-05-11)
+
+> Origin: Track 1 Opal Gorilla DRI reply was framed as a Monday morning "pending action" in the 4-track briefing, but autonomous task #48 had already fired the substance-equivalent reply on 2026-05-09 23:53Z. Attempted 05-11 send returned HTTP 409 "Reply already exists" — the conflict was detected at network boundary, not at handover-composition time. Authority: Ogie msg 6720 (Branch A + Branch C master ops resolution).
+
+**Same family as Worked Example #20:** autoDream Sunday→Monday live-data reconciliation drift. In #20, autoDream's drafted stats (hashrate/difficulty/epoch) lagged behind live mempool.space pull at fire time; in #21, the handover-doc Tracks section listed Track 1 as pending when an autonomous outbound send had already addressed it under task #48 pre-authorization. Both are **state-vs-doc drift**: the durable doc reflects state from when the doc was composed, not from when the doc is read/acted.
+
+**The detection that worked (this time):** AIBTC inbox server-side reply-uniqueness check fired HTTP 409 on the 322c send attempt. Network rejected the duplicate; no garbage landed. Operator caught the gap at master ops review, not Buzz at compose time — same wrong-direction-catch pattern as Worked Example #4 (AIBTC autopilot streak hallucination) where Ogie caught local-vs-network gap, not Buzz.
+
+**Pattern: Handover-doc writers don't reconcile autonomous-task-fired outbound against Tracks section.** When a Monday handover composes the day's open Tracks, the writer relies on the prior handover's "in-progress / pending" state without re-checking the outbound log or inbox-replies/ for sends that fired between the two handover compositions. Autonomous task fires (task #48 was pre-authorized Sunday and ran without War Room ping) leave durable evidence (the AIBTC inbox reply, the local outbound log, the inbox-replies/ folder if used) but not in the handover-doc state machine.
+
+**Rule (codifies Standing Rule per msg 6720):** Handover-writer protocol must check the following BEFORE composing the Tracks section:
+
+1. **`/data/buzz/persistent/buzz-api/inbox-replies/`** for any reply files dated within the prior 7 days
+2. **AIBTC outbound log** (whatever's authoritative — `/api/agents/{addr}` lastActiveAt + sentCount delta vs prior handover, or inbox.json sent items)
+3. **Task ledger for autonomous-pre-authorized fires** completed in the prior 24h (`TaskList` for tasks moved to completed status outside operator interaction)
+
+Auto-resolve any Track whose subject matches a fired outbound. Promote it to "CLOSED — autonomous fire ref task #XX" in the Tracks section so master ops review starts from accurate state.
+
+**Why a manifest check, not memory:** the handover doc is the durable state. The writer's session may not have context of the autonomous fire (task #48 fired Sunday evening; Monday handover was composed Monday morning by a fresh session). The reconciliation step is what closes the gap between durable evidence (inbox-replies/, outbound log) and durable doc (handover Tracks section).
+
+**Cost of this gap (this instance):** ~2 minutes of operator master-ops cycles to issue Branch A + Branch C resolution. 322c well-crafted draft archived as deferred rather than sent. Reputational risk avoided (no duplicate reply landed; AIBTC inbox returned 409). Tuition paid: the autonomous-task pattern works under pre-authorization (signals confidence-builder for restart-conditions tracker), but durable state reconciliation needs explicit protocol step.
+
+**Doctrine refinement:** add a `handover-reconcile` step to the handover-auto rule before composing Tracks. Pattern matches Doctrine Priority #4 GROUND-TRUTH-LANDING ("did the action land?") + Priority #0 VERIFY-PREMISE-FIRST ("is the premise of 'pending' still true?"). Both gates fire here: the doc said pending; the network said done.
+
+**Operational implication for autonomous-task pattern:** autonomous fires under pre-authorization continue to be acceptable (task #48 fired clean, tone-correct, substance-appropriate for pre-Sunday context). The fix is at the handover-reconcile boundary, not at the autonomous-fire boundary. Don't constrain autonomy where it works; tighten the doc-state reconciliation that consumes the autonomy output.
+
+**Cross-references:**
+
+- Worked Example #4 (AIBTC autopilot streak hallucination — operator caught network gap, not Buzz)
+- Worked Example #20 (autoDream Sunday→Monday live-data reconciliation drift)
+- Doctrine Priority #4 GROUND-TRUTH-LANDING (server-side verification before status assertion)
+- `handover-auto.md` rule (target for the new `handover-reconcile` step)
+- `/data/buzz/persistent/buzz-api/inbox-replies/2026-05-11-opal-deferred-draft-methodology-framing.md` (the 322c deferred draft preserved for next Opal-initiated thread reopening)
+- Task #48 (autonomous Opal reply sent 2026-05-09 23:53Z) — fired clean
+- Restart-conditions tracker (`/data/buzz/persistent/buzz-api/ground-truth/2026-05-10-aibtc-local-vs-network-landing-gap.md`) — confidence-builder logged for autonomous-task behavioral signal
+
+---
+
+## Worked Example #22 — Verify source-pool integrity before accepting null-result discipline (2026-05-11)
+
+> Origin: Loop D Branch A 5-source broaden pull surfaced 4-of-5 Twitter blackout (HTTP 402 Cloudflare + nitter ecosystem collapse). Default-B SKIP-on-rekt-only would have hidden this infrastructure gap completely. Branch A discipline ran the broaden anyway "as cheap insurance" and produced the load-bearing finding. Authority: Ogie msg 6722 (Loop D follow-up master ops).
+
+**Pattern (codifies the discipline):** When a default-discipline pathway recommends SKIP based on a single-source null result, broaden one source-pool layer BEFORE settling. **Absence-of-finding ≠ absence-of-data when source coverage is unverified.** A null result from one source carries credible signal only when source-coverage integrity is independently checked.
+
+**Same family as Priority #4 GROUND-TRUTH-LANDING:** Priority #4 asks "did the action land on the network?" before asserting success. This Worked Example asks "did the search hit all the sources I assumed?" before asserting null. Both gate the same family of false-confidence error: trusting local/single-source state as global truth.
+
+**The vindication mechanism that worked (today):**
+
+- Default discipline: rekt.news 06:00Z pull returned stale-only (Wasabi 7d, no fresh disclosures) → recommend B SKIP.
+- Branch A override (operator-authorized): broaden one layer — 5 canonical security-researcher sources (PeckShield / SlowMist / CertiKAlert / BlockSec / DefiHackLabs).
+- Branch A finding: 4-of-5 Twitter sources UNVERIFIABLE due to **infrastructure failure** (HTTP 402 X bot-protection + nitter ecosystem collapse) — NOT due to absence of disclosures. The "default null" was a partial null masking a load-bearing infrastructure gap.
+- Mitigated by fallback: hacked.slowmist.io (SlowMist's own cross-firm aggregator) + DefiHackLabs GitHub + WebSearch corroboration. Achieved effective 3-of-5 coverage and confirmed verdict.
+- **Output**: NO_FRESH verdict held (correct), **PLUS** load-bearing infrastructure finding surfaced (Twitter blackout, #179 P2 → P1 elevated for Loop D extension).
+
+**Pattern-level lesson:** Branch B (SKIP-on-rekt-only) would have produced:
+
+- Same NO_FRESH verdict (technically correct)
+- ZERO surfacing of the infrastructure gap (false-confidence in source coverage)
+- Continued degraded coverage on every future Loop D fire until someone independently noticed
+- Tuition cost: indefinite — the gap could have hidden a real disclosure for weeks before independent detection.
+
+Branch A cost: ~8 minutes of subagent compute. ROI: a permanent infrastructure gap surfaced + escalated to P1 detector queue. The cheap-insurance broaden is the operationalization of this doctrine.
+
+**Rule (codifies Worked Example #22 standing pattern):**
+
+When a default-discipline pathway recommends SKIP or NULL based on single-source / single-tool / single-window output:
+
+1. **Identify the source-pool the default rests on.** (Loop D default rested on rekt.news 06:00Z.)
+2. **Verify the source-pool integrity** before accepting null — broaden to ≥2 independent sources OR explicitly confirm the single source covers the relevant scope.
+3. **If a broaden surfaces a tool / infrastructure / coverage failure, log it as load-bearing finding distinct from the original null check.** Even if the verdict matches, the infrastructure failure is a separate ground-truth surface.
+4. **Default-discipline pathways must be calibrated against the source-pool they actually cover.** A pathway that says "skip when rekt.news is empty" is only as good as rekt.news's coverage of the field. Broaden-one-layer makes that coverage explicit.
+
+**Operational implication:** every default-NULL / default-SKIP discipline pathway should carry a "broaden one layer" companion check, executable as cheap-insurance compute (~5-10 min subagent). The companion check produces either (a) confirmation of the default (verdict matches, infrastructure healthy) or (b) load-bearing-finding (verdict matches but infrastructure broken — escalate). Either output is calibration data for the default pathway.
+
+**Cross-references:**
+
+- **Worked Example #21** (handover-doc track drift — same family of state-vs-doc drift; both gate against asserting state from an unverified source).
+- **Priority #4 GROUND-TRUTH-LANDING** (`brain/Doctrine.md` Priority #4 + `/data/buzz/persistent/buzz-api/ground-truth/2026-05-10-aibtc-local-vs-network-landing-gap.md`) — parent doctrine; same family.
+- **Worked Example #4** (AIBTC autopilot streak hallucination — operator-caught network gap pattern; same blind-spot family — local state ≠ network state).
+- **Doctrine #19** (industry validation — methodology-as-product framing). Source-pool-integrity check IS the methodology. Productizing it as cheap-insurance companion to every default-NULL pathway is the next iteration.
+- **#179 P2 → P1 Loop D extension** (escalated 2026-05-11 per Ogie msg 6722 Item 2) — operationalizes broader source coverage as automated default; reduces reliance on manual Branch-A overrides.
+- **Loop D Branch A results manifest** (`/data/buzz/persistent/buzz-api/intel/2026-05-11-loop-d-broaden-results.md` + `2026-05-11-loop-d-broaden-summary.json`) — the canonical first instance of this discipline applied.
+
+**Tuition paid:** None today (the discipline worked first-time on operator override). Tuition saved: undefined-but-large (the unsurfaced Twitter blackout could have hidden a real disclosure for weeks).
+
+---
+
+## Doctrine refinement — "Low-cost-reversible deviation = acceptable autonomy" (2026-05-11)
+
+> Filed per Ogie msg 6725 Item 3.2 endorsement: "Low-cost-reversible deviation with explicit flag + reasoning + revert-option preserved = acceptable autonomy." Authority: master ops resolution on Item 3 ground-truth/ filing (vs operator-directed intel/ destination).
+
+**Pattern:** When operator directive specifies destination/format/posture, Buzz may deviate IF AND ONLY IF all three conditions hold:
+
+1. **Low-cost-reversible** — the deviation can be reverted in <5 minutes of operator-directed action. File moves, table reformulations, status-flag flips all qualify. Code commits, network sends, deletes, public posts do NOT qualify (those are high-cost OR irreversible).
+2. **Explicit flag + reasoning surfaced** — Buzz announces the deviation immediately to War Room with clear "I went off-spec because X" framing. Hidden deviation does NOT qualify.
+3. **Revert-option preserved** — the deviation does not destroy information or close paths that operator could have wanted preserved. Adding annotation, moving with backup link, creating alternative-location pointer all qualify. Hard-deleting content does NOT qualify.
+
+**Worked example (today, 2026-05-11):** Operator directive Item 3 said "If no match: archive to intel/". Buzz filed to ground-truth/ with explicit flag in 6723/6724 surface: "filed to ground-truth/ not intel/ — calibration value is structural since NO_MATCH validates detector tight predicates. Operator can request move to intel/ for strict directive compliance." All 3 conditions met: low-cost-reversible (file move = <30s), explicit flag (surfaced immediately), revert-option preserved (file is identical structure; could be moved or copied without info loss). Operator response in msg 6725: "ground-truth/ filing ACCEPTED. Do NOT move to intel/." Outcome: deviation validated, autonomy preserved, no operator-time cost beyond Item 3.1 sentence.
+
+**Counter-example (Worked Example #22 reciprocal application — same day, same task):** The OPPOSITE pattern — Branch A subagent's TrustedVolumes vector classification ("admin function publicly accessible") was a high-cost-irreversible-style deviation because:
+
+- It was presented as positive-confirmed fact in the JSON manifest + cross-reference file, not lead-pending-verification
+- It was used to draft a productization spec (`#TV-RFQ-admin-unprotected`) downstream
+- It would have propagated as canonical-corpus if not caught — Pattern A productization spec, Wasabi-class corpus framing, etc.
+- Reverting it required a full correction cycle (WebSearch + WebFetch + 4 file edits + this doctrine entry)
+
+**Distinguishing axis:** the difference is FRAMING. The ground-truth/ deviation was framed as "I deviated, here's why, you decide" (autonomy-with-correction-loop). The TrustedVolumes vector deviation was framed as "this IS the vector class" (autonomy-as-fact-assertion). The first is acceptable autonomy; the second is over-confident extrapolation.
+
+**Rule (codifies the doctrine refinement):** Buzz may deviate from operator directive when low-cost-reversible + explicit-flag + revert-preserved. Buzz may NOT present subagent extrapolations as primary-source-confirmed facts. The autonomy boundary is at the framing, not at the deviation: deviating-with-flag is fine; asserting-without-verification is not.
+
+**Cross-references:**
+
+- Worked Example #22 (Verify source-pool integrity before accepting null-result discipline) — symmetric application: this doctrine refinement is the POSITIVE-result symmetry.
+- Worked Example #21 (Handover-Doc Track Drift) — state-vs-doc-drift family; same root: framing matters more than content.
+- Worked Example #4 (AIBTC autopilot streak hallucination) — local-vs-network gap; framing matters more than local-success-claim.
+- TrustedVolumes cross-reference correction (`/data/buzz/persistent/buzz-api/ground-truth/2026-05-11-trustedvolumes-corpus-cross-reference.md` "Reciprocal application of Worked Example #22" section) — concrete instance of the counter-example pattern.
+- Ogie msg 6725 Item 3.1 (ground-truth/ filing acceptance) + Item 3.2 (doctrine refinement endorsement) + Item 3.3 (1inch corpus clarification).
+
+**Operational implication:** continue exercising deviation autonomy on low-cost-reversible decisions; tighten the framing discipline on classification claims. The two are complementary, not contradictory.
+
+---
+
+## Worked Example #23 — Microcap liquidity asymmetry: methodology-as-product means we don't accidentally manipulate the markets we score (2026-05-11)
+
+> Origin: SCHEDULE: score_tweets directive surfaced solaura as slot 2 Watch candidate with score 64/100. Handle-verified, brand-safe, narrative-fit. **But $4.6K liquidity vs @BuzzBySolCex audience size = audience-to-liquidity asymmetry where the tweet itself becomes a market-moving event.** Operator master ops msg 6737 verdict: STAND DOWN — not a narrative-quality call but a structural-impact call. Doctrine codified as $50K liquidity floor in tweet-on-score.md v2.2.
+
+**The math (worked example):**
+
+- solaura liquidity = $4,591 USD (DexScreener API live read)
+- @BuzzBySolCex audience producing 10 engaged buyers @ $100 each = $1,000 in buy pressure
+- $1,000 / $4,591 = **~22% sweep of the pool**
+- Even pessimistic engagement: 3 engaged buyers @ $50 = $150 = 3.3% sweep
+- For comparison, Pashov-class pre-deployment audits work on contracts BEFORE liquidity bootstraps — Pashov doesn't have this class of risk
+
+**Pattern: Methodology-as-product owns its amplification surface.**
+
+Pashov publishes audits on contracts that haven't deployed yet. Their methodology surface ends at the report; their amplification doesn't move price because there is no price yet. Buzz publishes scores on live tokens with live liquidity. Our methodology surface continues into the secondary market — the score tweet IS a market signal regardless of NFA framing. NFA disclaimer does not absolve the structural impact of "100 followers see this tweet, 10 buy, pool sweeps 22%."
+
+**This is the Section 11 Pashov delta (cross-pollination thesis specialization):** when your methodology product publishes downstream of deployment + carries amplification, you own the amplification effect on markets you score. Pre-deployment auditors don't. Operator-deployed agent-product publishers do.
+
+**Rule (codifies Worked Example #23 standing pattern, ALSO filed to tweet-on-score.md v2.2):**
+
+Score tweet posting requires minimum **$50,000 liquidity** in target token. Below threshold:
+
+1. Score logs to public leaderboard (`buzzbd.ai/scores`) — discovery surface preserved
+2. NO Twitter post — amplification surface withheld
+3. Hold regardless of band (Watch / High / Flagged / Calibration)
+4. Hold regardless of NFA framing (NFA does not absolve structural impact)
+
+**Re-evaluation:** quarterly review as @BuzzBySolCex audience grows. Floor scales with audience size.
+
+**TEPE exception (one-time, transparent):** TEPE @ $41K liquidity (May 11, 2026) drafted under v2.1 spec before v2.2 floor was articulated. Master-ops narrative-quality exception per Ogie msg 6737 because TEPE's 42x churn teach-moment narrative has higher educational value than the structural risk. **From v2.2 onward: no exceptions.** Documented as one-time grandfather in v2.2 changelog so future Buzz cannot claim precedent.
+
+**Cross-references:**
+
+- Doctrine #5 (Priority #4 GROUND-TRUTH-LANDING) — parent doctrine. Ground-truth here is "did the post amplification move the pool?" Asking the question before posting is the discipline.
+- Doctrine #19 (industry validation — methodology-as-product). This Worked Example specializes the methodology-as-product thesis: methodology surface continues into the market when product publishes downstream of deployment + carries amplification.
+- Section 11 cross-pollination thesis (Pashov delta) — pre-deployment vs post-deployment auditor responsibility split.
+- `.claude/rules/tweet-on-score.md` v2.2 (2026-05-11) — codified liquidity floor + body-truncation clause + CTA migration.
+- `.claude/rules/bd-outreach-brand-safety.md` (sibling discipline — brand-safety filter is to BD outreach what liquidity floor is to score tweets; both are amplification-surface controls).
+- Worked Example #22 (verify source-pool integrity before accepting null-result) — methodological humility on what we DETECT. Worked Example #23 extends to methodological humility on what we PUBLISH.
+
+**Operational implication:** continue scoring micro-cap tokens (discovery value of the leaderboard is real). Withhold the Twitter amplification surface below $50K. Methodology product retains its scoring layer; amplification layer respects the market we'd otherwise move.
+
+**Tuition saved:** undefined-but-large. A solaura tweet pumping then dumping a $4.6K-liquidity pool would generate (a) "pump-and-dump agent" reputational hit, (b) potential SEC manipulation framing if scaled, (c) inversion of methodology-as-product into manipulation-as-product. All avoided by the floor.
+
+---
+
+## Worked Example #24 — Forge `.gitmodules` remapping contamination → `solc --standard-json` direct bypass (Veda Gate 2, 2026-05-20)
+
+**Context.** Veda BoringVault Gate 2 drift-discovery: deploy substrate is on a historical commit (window-end SHA `9657653`, 2024-06-13) but main HEAD is months newer (`a07a61fb` → ... → present, 2024-11+). To verify a finding is in-scope on the deployed bytecode we need to reproduce the historical compile output from that commit.
+
+**The trap.** `forge build` from a clean checkout of `9657653` still failed reproducibility. Foundry merges remappings from THREE sources at build time: (a) `foundry.toml` `remappings = [...]`, (b) auto-generated remappings from `.gitmodules`-tracked submodule paths, (c) any `remappings.txt`. When the project has been refactored (submodule renames, lib/ structure changes) between the historical commit and main, the LATEST `.gitmodules` shape leaks into the historical build path through the foundry tooling. Result: even with a clean `git checkout 9657653`, the compiled output drifts because the auto-remapping resolves submodule paths against the current working-dir submodule tree, not the historical one.
+
+**Symptom.** `forge build` succeeds, deployedBytecode hash diffs against on-chain. False-positive drift verdict.
+
+**Bypass.** Use `solc --standard-json` directly with an explicit input shape that ENUMERATES every remapping by hand, taken from the on-chain Sourcify metadata (or the `compilationTarget` block in the Etherscan-published source). Skip Forge entirely. Inputs to specify:
+
+```json
+{
+  "language": "Solidity",
+  "sources": { "<path>.sol": { "content": "..." } },
+  "settings": {
+    "remappings": [/* exact remappings from on-chain metadata */],
+    "optimizer": { "enabled": true, "runs": <from metadata> },
+    "evmVersion": "<from metadata, e.g. paris/shanghai/london>",
+    "outputSelection": { "*": { "*": ["evm.deployedBytecode.object"] } }
+  }
+}
+```
+
+Compare the `deployedBytecode.object` strip-CBOR-tail against `cast code <addr>` strip-CBOR-tail. If they match → in-scope on deployed. If only CBOR metadata trailer differs (~50 bytes, `a26469706673582212`-prefix IPFS hash + 32 bytes + version) → same source, Solidity metadata-only diff, safe.
+
+**Why this is correct.** The Solidity compiler is hermetic given exact remappings + optimizer + evm-version + source content. Forge is a build wrapper that's helpful 99% of the time and exactly wrong 1% of the time — when historical-substrate reproducibility is the goal. Cutting the wrapper out is the rule.
+
+**Decision rule (for future drift-discovery work).**
+
+1. First attempt: `forge build` against the historical commit. If deployedBytecode strip-CBOR matches → done.
+2. If diff: switch to `solc --standard-json` direct with on-chain-metadata remappings.
+3. If diff persists: walk `git log -- <ImplementationFile>.sol` to binary-search the actual deploy commit (the substrate may be on a SHA the audit-target repo never tagged).
+
+**Operational implication.** Drift-discovery loops are not a Forge failure — they're a "right tool, wrong layer" failure. `solc --standard-json` is the right tool for reproducing historical bytecode. Forge is the right tool for building/deploying main. Don't conflate them.
+
+**Tuition.** Veda Gate 2 burned ~45 min of subagent cycles on Forge-driven reproduction attempts before pivoting to `solc --standard-json`, at which point Track 1 (Manager) pinned to a 117-commit window in one subagent run and Track 2 (Decoders) confirmed all 3 top decoders drifted in parallel. The bypass is durably faster on every future audit where deploy substrate ≠ main.
+
+**Generalization.** Applies to any source-verification or bytecode-drift work where the audit-target repo has a non-trivial git history (>3 months between deploy substrate and current main, or any submodule path rename in between). Add `solc-direct-fallback` to the bytecode-drift verify routine as the standard second step.
+
+---
+
 _(Existing doctrines below as Priority #4+. Add new doctrines into this hierarchy as they are derived from Priority #1.)_
+
+---
+
+## Doctrine #20 — Sig-binding gaps defended upstream by opaque-hash preimage are research-input, not submission-input (added 2026-05-21 — Coinbase Base L2 TEEVerifier kill)
+
+**Rule.** When a contract-level signature does NOT bind chainId / contract / nonce / deadline at the verifier site, but the journal hash being signed is constructed UPSTREAM with an opaque immutable hash (e.g., `CONFIG_HASH`, `DOMAIN_HASH`, `BUNDLE_HASH`) that is computed off-chain before deployment, the defense status depends on the off-chain preimage construction — NOT on contract code alone.
+
+**Apply.** Treat this class as research-input. Promote to submission ONLY if deployment-script inspection (or operator-side disclosure) shows the opaque hash's preimage doesn't include the omitted field.
+
+**Why.** Coinbase Base L2 V6 deep scan (2026-05-21) flagged `TEEVerifier.verify()` Pattern F signature_field_gap (HIGH per Skeptic ACCEPT @ 0.95). Phase 4d traced upstream to `AggregateVerifier._verifyTeeProof` where the journal is `keccak256(... CONFIG_HASH, TEE_IMAGE_HASH)`. The CONFIG_HASH preimage construction is off-chain; in practice it naturally diverges between Sepolia and mainnet deployments because rollup configs differ. Cantina would triage the finding as "intentional / off-chain mitigation." Submitting would burn credibility without bounty payout.
+
+**Worked example.** `hunts/2026-05-21-coinbase-base-l2-phase4d-teeverifier-kill.md` — full upstream trace + verdict.
+
+**Generalization.** Applies to ANY ECDSA verifier path where:
+
+1. The verifier itself binds (data_hash, signature) but data_hash is computed upstream
+2. The upstream data_hash construction includes an opaque immutable that "carries" deployment-binding semantically but not explicitly
+3. The omitted field (chainId / contract / nonce) is presumed defended by the opaque hash's preimage
+
+**Submission criterion.** Promote ONLY if:
+
+- Deployment-script inspection shows the opaque hash's preimage uses a documented schema that omits the field, OR
+- Cross-deployment observation shows two deployments share the same opaque hash value (collision evidence), OR
+- An operator-controlled deployment misconfiguration is observed
+
+Otherwise: file as KILL with Doctrine #20 invocation. Internal research input; no external submission.
+
+**Tuition.** Coinbase TEEVerifier finding survived Skeptic with confidence 0.95 because adversarial review couldn't refute the structural gap — but Phase 4d killed the submission via upstream trace. This is the asymmetric-cost-of-discipline trade: ~30 min of Phase 4d saved a credibility-burning submission against a $5M cap. Same family as Doctrine #14 (vector ≠ outcome), specialized for the opaque-hash-preimage class.
+
+---
+
+## Doctrine #21 — Honest CVE-bootstrap NOT-CAUGHT entries are detector specs, not failures (added 2026-05-21 — CVE coverage matrix Run 1)
+
+**Rule.** When V6 fails to catch a historical exploit at parent-of-patch SHA during regression testing, the right response is to file the missing pattern as a new detector spec, NOT to inflate the existing detector's claimed coverage.
+
+**Apply.** Each NOT-CAUGHT entry from a CVE bootstrap run gets:
+
+1. A precise structural description of the missed pattern
+2. A proposed detection rule (deterministic, not LLM-dependent)
+3. A buildable detector module file with estimated build time
+4. A retroactive validation contract: the new detector MUST catch the original exploit at parent SHA before merging
+
+**Why.** Coinbase Base L2 V6 deep correctly KILLED the only HIGH finding to honest submission. But CVE Run 1 also exposed two pattern gaps: Nomad's default-trust-enum class (Pattern H) and Raydium's Rust rounding-asymmetry class (Pattern A). Both are NEW pattern families not represented in the v6 detector pack. Honest coverage rate = 30%, claim-anything-higher = lying to ourselves and to operator. The path from 30% to 80%+ is: file NOT-CAUGHTs → build → validate → re-run.
+
+**Worked examples.**
+
+- `brain/cve-regression-coverage-matrix-v1.md` Spec 1 (default-trust-enum / Nomad)
+- `brain/cve-regression-coverage-matrix-v1.md` Spec 2 (Rust rounding-asymmetry / Raydium)
+- `brain/cve-regression-coverage-matrix-v1.md` Spec 3 (Euler paired-token invariant enrichment to Phase 12)
+
+**Generalization.** Vision-2027 "Moody's of crypto security" stake requires honest coverage data. Coverage compounding via NOT-CAUGHT → detector → validate → re-run is the explicit moat-building loop. Every NOT-CAUGHT is fuel.
+
+**Tuition.** Run 1 produced 1 CAUGHT (Poly Network signature gap) + 2 PARTIAL (Euler, Wormhole) + 2 NOT-CAUGHT (Nomad, Raydium). Honest 30% baseline. Quality ground-truth data > inflated marketing claims.
+
+---
+
+## Doctrine #22 — Shared-codebase family synergy on heavily-audited forks cuts BOTH ways (added 2026-05-21 — Usual/Fira Sherlock 9-KILL day)
+
+**Rule.** When evaluating a strategic target stack where multiple targets share codebase ancestry (fork lineage, shared infrastructure modules, common upstream library), the "one finding → multiple submissions" synergy is INVERTED into "one audit hardening → multiple immunities" when the shared ancestor is itself heavily audited.
+
+**Apply.** For any Sherlock/Immunefi target stack with stated family-synergy edge:
+
+1. Identify the shared ancestor codebase (Morpho-Blue / Pendle V2 / OpenZeppelin 4626 / etc.)
+2. Pull the ancestor's audit pedigree (Spearbit, Trail of Bits, ChainSecurity, Cantina, OZ — count waves)
+3. **If 3+ firms × 2+ waves**: the shared layer is dedupe-saturated. Findings on the shared layer will be DUP-rejected.
+4. The synergy edge applies ONLY to the FORK-SPECIFIC DELTA (the wrapper code, customization patches, integration glue). Map delta line-count vs ancestor line-count.
+5. Delta < 100 LOC = thin wrapper, likely audited heavily as part of fork integration audit. Low EV.
+6. Delta > 1000 LOC + custom domain logic (oracle pipeline, decimal arithmetic, post-maturity state) = real attack surface.
+
+**Why.** 2026-05-21 Sherlock activation day produced 9 KILLs across 4 Usual/Fira ecosystem targets sharing Morpho-Blue + Pendle V2 + OZ 4626 ancestry. Operator's stated edge ("one finding × 3 submissions") was inverted: every candidate finding hit a Morpho-Blue-audited or Pendle-V2-audited surface and got dedupe-rejected at Gate 2. The shared codebase amplifies hardening, not vulnerability.
+
+**Worked examples.**
+
+- **#S1 USLMigrator EVC bypass** — KILL. Fira's USLLendingMarket has zero EVC integration. USLMigrator architecturally cannot be a controller. Refutation chain: \_msgSenderForBorrow() would always revert. Operator's "low dedupe risk (EVC integration novel)" was correct DIRECTION but the integration is so thin it can't host the bug class.
+- **#S5 BT/CT/FW post-maturity** — KILL. Pendle V2 fork = ChainSecurity + Spearbit + Immunefi $200K active since 2023 + Penpie exploit ($27M was reentrancy on malicious SY, NOT core). Inherited hardening.
+- **#S5 SisuVault donation** — KILL. OpenZeppelin ERC4626 with \_decimalsOffset=12 + virtual asset offset + LendingMarket-tracked totalAssets (NOT raw balanceOf). 3-layer donation defense. Inherited from OZ ancestry.
+- **#S5 BT/CT/FW decimal mismatch** — KILL. Symmetric protocol-favoring rounding (both legs round down against user). Opposite of Raydium's attacker-favoring asymmetry. Inherited from Pendle SY conversion pattern.
+- **#S5 LendingMarket post-maturity** — KILL. Morpho-Blue verbatim 762 LOC + 80-line Fira delta. Math line-by-line clean. Fira docs framing of "DAO forced-liquidation" turned out to be DEAD CODE (modifier exists, applied to ZERO functions).
+
+**Generalization.** This doctrine applies to any audit research where the strategic frame is "family synergy on a forked codebase." Pre-Gate-1 due diligence MUST include: (1) ancestor codebase identification, (2) ancestor audit pedigree count, (3) fork-specific-delta line-count map. The Gate 1 EV calculation should DISCOUNT the bounty cap by ancestor-audit-coverage saturation rate.
+
+**Tuition.** 9 KILLs + 1 demotion + 0 submissions = a full operator-driven day of work producing methodology integrity but $0 revenue. The discipline preserved long-term brand (no DUP-rejected noise submissions). The lesson cost an autonomous day's worth of cycles. NEXT-TIME prevention: every Gate 1 hunt file MUST include an "Ancestor codebase audit pedigree" section + "Fork-specific delta line-count" section, with EV discount applied BEFORE Gate 2 dispatch.
+
+**Worked example (NEXT TARGET filter).** Targets to PRIORITIZE in pipeline: BCLpOracle (Fira-specific 4-layer oracle pipeline, NOVEL custom code, not fork), ChainlinkOracleV2Factory (Fira-specific deployment), #S6 Midas Solana (DC-8 Anchor angle, less researcher density), #S7 Sherlock Core UMA integration (novel UMA claim resolution NOT in fork lineage). Targets to AVOID: any Morpho-Blue fork lending market, any Pendle V2 fork structured product, any OZ 4626 standard vault — unless the fork-specific delta exceeds 1000 LOC of novel domain logic.
+
+**Sub-lesson (added 2026-05-21 from Midas Gate 2 reframe).** Doctrine #22 is necessary but NOT sufficient. Novel custom code can still embody **intentional design** that LOOKS like a bug. The Gate 2 pattern that catches this: **smoking-gun test-suite check.**
+
+When a Gate 1 hunt surfaces a fund-flow asymmetry (admin rejects request but no refund to user, etc.), Gate 2 MUST grep the project's test suite for assertions on the alleged-gap behavior. If the test suite contains explicit assertions like `balanceAfterUser == balanceBeforeUser` post-reject + `balanceAfterContract == balanceBeforeContract` post-reject + `supplyAfter == supplyBefore` post-reject — this is **intentional design comprehensively tested by the team**. Sherlock + Immunefi will reject as "admin-trust + design-intent in scope."
+
+**Smoking-gun pattern (file under Gate 2 standard checks):**
+
+```
+grep -rn "balanceAfterUser\|balanceBeforeUser\|supplyAfter\|supplyBefore" test/
+grep -rn "rejectRequest\|cancelRequest" test/   # find tests asserting reject behavior
+```
+
+If the test suite asserts the alleged-bug behavior as the EXPECTED outcome, the finding is dead at Gate 2 — no submission. Severity demoted to documentation-quality observation (operator-side soft-disclosure if direct contact exists).
+
+**Tuition.** Midas Solana `reject_redeem_request` looked like a CRIT fund-lock primitive at Gate 1 (mTokens enter vault custody on redeem_request, no refund path on reject). Gate 2 ETH parity check found the same emit-only pattern + the project's test/common/redemption-vault.helpers.ts:826-837 explicitly asserts `balanceAfterUser==balanceBeforeUser`. This isn't a code-level invariant break — it's a documented admin-trust design that the team comprehensively tested. EV recalibration: $40K → $5K. KILL.
+
+**Generalization.** The smoking-gun test-suite check is now part of the Gate 2 pre-flight protocol for any admin-gated request/approval/rejection asymmetry finding. Add to audit-methodology v2.6 next operator review cycle.
+
+---
+
+## Doctrine #23 — Architectural Foreclosure is a Publishable Result (added 2026-05-22 — Pattern I + Pattern J dual-foreclosure)
+
+**Statement.** When a fresh detector scans a high-fit target and returns zero findings BECAUSE the bug class is structurally impossible in that architecture, the result is NOT a null outcome — it is a positive methodology product. The "proof of immunity" compounds in the brain as a new primitive: "ask first whether structure X is present; if yes, bug class Y cannot land." Two consecutive scans on different bug classes ending in the same kind of foreclosure on the same architectural family ratifies the primitive as load-bearing.
+
+**Worked anchor 1 — Pattern I + Uniswap V4 / Balancer V3 (scanned 2026-05-22):**
+
+- Pattern I = post-audit CEI break via upgradeable hook. Detector wants storage `address hookAddress` + `setHook(address) external onlyOwner` without timelock guard, called inside fund-flow.
+- Uniswap V4: hook is a field of the `PoolKey` struct (computed at pool deploy time). No setter exists structurally. Hook is part of pool identity → change the hook, you have a different pool. Pattern I's surface does not exist by design.
+- Balancer V3: `_hooksContracts[pool]` is write-once at `VaultExtension._registerPool()`. Functionally equivalent to immutable. Detector's qualifier finds nothing.
+
+**Worked anchor 2 — Pattern J + Balancer V3 / Uniswap V4 / Fira / 1inch LOP (scanned 2026-05-22):**
+
+- Pattern J = slippage double-count across swap steps. Detector wants same per-hop `amountOut` value flowing into both NEXT_HOP_INPUT and CUMULATIVE_TALLY without per-step boundary validation.
+- Balancer V3 `BatchRouterHooks.sol`: per-step minOut zeroed at L127 (`isLastStep ? path.minAmountOut : 0`), write-once `pathAmountsOut[i]` at L179, assignment-not-accumulation at L182. No surface to double-count.
+- Uniswap V4: multi-hop pushed to caller's `unlockCallback`; conservation enforced by transient-storage delta net-settle at `unlock()` boundary. No in-core amountOut-to-amountIn pipe.
+- Fira / 1inch LOP: no multi-step batch surface (LOP is per-order fill).
+
+**The compounded brain primitive (the actual product):**
+
+> Before scanning any AMM / vault / router for a state-machine bug class, ask FIRST:
+>
+> - Is the privileged-surface address part of identity (struct field, write-once) rather than mutable storage? → forecloses CANDIDATE-M / CANDIDATE-N / Pattern I family
+> - Is conservation enforced by delta-net-settle at a transaction boundary (V4 unlock, V3 vault.batchSwap end) rather than by accumulation across steps? → forecloses CANDIDATE-O / Pattern J family
+>
+> If both yes, the entire CANDIDATE-M/N/O + Pattern I/J family is structurally closed for this target. Skip detailed L1d enumeration on these bug classes; route Gate 1 cycles elsewhere.
+
+**Generalization.** Architectural foreclosure isn't an audit-skipping shortcut. It's a brain primitive that lets the formula (Hyperactive Formula Step 4, run detectors) ROUTE cycles efficiently. Detectors STILL run against the target (the run produces the foreclosure receipt + populates the propagation engine's zero-finding entries), but the manual triage cycles get deferred to surfaces where the family CAN land.
+
+**Where the bug class actually lives (the publishable methodology pivot).** When core protocols foreclose, the bug class migrates to the orchestration layer:
+
+- Pattern I → diamond-proxy facet registries, post-audit refactor surfaces, lending protocol post-deployment hook additions (the 0xBugDrop $7M class)
+- Pattern J → aggregator routers (1inch AggregationRouterV5, Paraswap Augustus, Kyber AggregationExecutor, Universal Router) where caller-supplied route lists drive per-step settlement
+- DC-9 → Solana programs with `DurableNonce` accounts (paired with CANDIDATE-P) + multi-chain bridge admin paths + post-deployment privileged setters + ERC4626 mints + bridge-mint paths
+
+**Tuition.** The Sky-sweep doctrine (#22 sibling) was about discount-the-EV-on-forks-of-heavily-audited-codebases. Doctrine #23 sharpens this: discount-the-EV on entire CORE-DESIGN families when foreclosure is structurally proven. The 1,127 .sol files scanned across Pattern I + Pattern J produced two foreclosure reports — and the manual-triage cycles that would have gone into them are reallocated to aggregator orchestrators (Pattern J pivot) and post-audit-refactor surfaces (Pattern I pivot). That's the EV gain.
+
+**Lane 3 surface (publishable methodology product).** "Proof of immunity" reports are the kind of work nobody pays out for in the moment but everybody RESPECTS in the brand. Drafted Moltbook m/crypto Thursday post `drafts/moltbook-mcrypto-thursday-2026-05-22.md` captures the dual-foreclosure story for the public-facing methodology track. Operator-gated for publish.
+
+**Cross-reference into audit-methodology.** Standing Intake Protocol Step 5 should accept "architectural foreclosure receipt" as a complete Gate 1 outcome when (a) the detector ran cleanly with positive-control validation pre-run AND (b) the foreclosure mechanism is documented inline with file:line evidence. Operator review cycle.
+
+**Worked anchor 3 — DC-9 sub-4 + ERC4626 family (scanned 2026-05-22, 11:25 UTC, msg 7535 directive #3):**
+
+7 ERC4626-class targets / 1,442 .sol files / 21 HIGH findings ALL deterministically FP / 0 Gate 2 candidates. DC-9 sub-4 (state-not-invalidated repeated mint) is structurally immune across the ERC4626 family via 8 defensive primitives that the Solv BRO conversion contract LACKED:
+
+1. ERC20 share burn per redeem (OZ ERC4626 inheritance — universal)
+2. ERC20 balance burn on withdraw paths
+3. Mailbox proof bookkeeping (`$.deliveredPayload[hash] = true` post-consume — Lombard pattern at gmp/Mailbox.sol:497)
+4. Initializer modifier (OZ Initializable upgrade-once pattern — Usual sUSD0/sEUR0)
+5. Timestamp-window state (RDM `$.lastDistribution = block.timestamp` invalidation — Usual)
+6. Mint-cap decrement (per-tx hard ceiling)
+7. Role gates with external lib checks (Usual `$.registryAccess.onlyMatchingRole(...)`)
+8. Request-status state-machine (`request.status = Processed` per-action — Midas)
+
+Per-target verdicts: SisuVault 356 files / 3 FP (return-tuple destructure + OZ \_burn) | Yearn V3 5 files Vyper-foreclosure (out-of-detector-scope, separate Vyper port queued) | Midas 542 files / 1 FP (request.status invalidation) | Aave V4 364 files clean | Lombard LBTC 76 files / 12 FP (mailbox proof + tuple + role+balance) | Usual USD0 49 files / 5 FP (time-window + mint-cap + initializer) | Ethena 50 files clean (closed-source scope-limited).
+
+**Solv was the only known anchor for sub-4 because Solv's BRO→SolvBTC conversion contract was BESPOKE — none of the 8 ERC4626 defensive primitives applied to the conversion path. The class lives ONLY in bespoke conversion contracts that look like ERC4626 mints but lack the primitives.**
+
+**Worked anchor 4 — Pattern A-K propagation sweep + 19-repo watchlist (scanned 2026-05-22, ~11:25 UTC, Step 9 / msg 7535 directive #4):**
+
+3 NEW architectural foreclosure receipts surfaced beyond the targeted detector scans:
+
+| Target       | Pattern |                                                  Defense ratio | Mechanism                                                           |
+| ------------ | ------- | -------------------------------------------------------------: | ------------------------------------------------------------------- |
+| Lombard-LBTC | DC-9    | 4.73 (15 priv-mint × 8 timelock + 42 rate-limit + 21 guardian) | Strong defense layering — DC-9 surface present but heavily guarded  |
+| Usual-Fira   | DC-9    |              40.4 (110 timelock + 34 supply-cap concentration) | Sherlock $7.5M cap structurally justified by depth of admin guards  |
+| Lido         | DC-9    |                                                           48.5 | Near-total DC-9 foreclosure via node-operator-driven access control |
+
+**Operator-callout:** the "defense ratio" heuristic (defense-word count / privileged-mutation count) is a candidate brain primitive in itself. High ratio = structural immunity even without per-function source review. Threshold candidate: ratio > 4 → likely foreclosed; ratio < 2 → genuine attack surface; in-between = needs Gate 1.
+
+**Aggregate update.** The "ask first" primitive at the head of this doctrine now spans 3 bug classes + 3 substrate families:
+
+| Bug class                                        | Foreclosure question                                                                                                                                 |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pattern I (CEI-break via upgradeable hook)       | Is the privileged-surface address part of identity (struct field, write-once) rather than mutable storage?                                           |
+| Pattern J (slippage double-count)                | Is conservation enforced by delta-net-settle at a transaction boundary rather than by accumulation across steps?                                     |
+| DC-9 sub-4 (state-not-invalidated repeated mint) | Does the privileged-mutation function REQUIRE inherited ERC4626 share-burn / mailbox bookkeeping / state-machine status-flag / initializer modifier? |
+| DC-9 family broadly (propagation triage)         | Is the defense ratio (timelock + cap + rate-limit + guardian count / privileged-mutation count) ≥ 4?                                                 |
+
+If any answer is YES for the relevant bug class on a candidate target, the family is structurally closed — manual triage cycles reallocate to bespoke / orchestrator / Solv-class targets where the defenses don't apply.
+
+**Lane 3 surface update.** Foreclosure-trilogy (3 receipts × 3 substrate-families) extends the Moltbook m/crypto draft beyond the original dual-foreclosure framing. Re-draft pre-publish to add DC-9 ERC4626 + Step 9 propagation foreclosure-ratio framings. Operator-gated.
+
+---
+
+## Doctrine #24 — Hyperlane Router parent-class auth is the canonical cross-chain defense pattern (added 2026-05-22 — Renzo Gate 2 KILL)
+
+**Statement.** When a target inherits from a cross-chain messaging vendor's canonical Router (Hyperlane `Router.handle()`, LayerZero `OAppReceiver._lzReceive()`, CCIP `CCIPReceiver._ccipReceive()`, Wormhole `WormholeReceiver.receiveMessage()`), the **AUTH GATES ARE IN THE PARENT CLASS** — not in the protocol's `_handle()` override. Before flagging a missing-auth finding on a cross-chain receiver, READ THE PARENT CLASS. Skipping this step manufactures FPs in heavily-audited cross-chain targets.
+
+**Worked anchor — Renzo HyperlaneReceiver (Gate 2 KILL, 2026-05-22).**
+
+`HyperlaneReceiver._handle()` at `HyperlaneReceiver.sol:65-75` has no inline `_origin` or `_sender` check. Looks suspicious in isolation. BUT inherits from Hyperlane's `Router.handle()` (`Router.sol:96-105` in `~/.tmp-clones/hyperlane-monorepo/`) which enforces 3 gates BEFORE the override fires:
+
+1. `onlyMailbox` modifier — `msg.sender` must be the registered Hyperlane mailbox
+2. `_mustHaveRemoteRouter(_origin)` — origin domain must be enrolled in the receiver's allowlist
+3. `require(_router == _sender, "Enrolled router does not match sender")` — sender bytes32 must match the enrolled router contract address-cast
+
+Plus Renzo's own downstream defenses: `xRenzoDepositNativeBridge.updatePrice` (L354-355) re-asserts `msg.sender == receiver` AND `_beforeUpdatePrice` (L384-412) enforces economic invariants (±1% drift cap + monotonic timestamp + ≥1 ETH floor + future-ts guard). Five total gates. Surface fully foreclosed.
+
+**Generalization.** For every cross-chain receiver Gate 1 / Gate 2:
+
+1. Identify the parent class via `import` + `is` clause
+2. Open the parent class file (vendored at `~/.tmp-clones/<vendor>-monorepo/` or `node_modules/`)
+3. Enumerate the parent's `handle()` / `_lzReceive()` / `_ccipReceive()` auth gates BEFORE inspecting the override
+4. Only after confirming parent gates are absent or weak, flag the override-side missing-auth
+
+**Vendor anchors (preliminary, expand as new receivers scanned):**
+
+| Vendor    | Parent class                        | Critical gates                                              |
+| --------- | ----------------------------------- | ----------------------------------------------------------- |
+| Hyperlane | `Router.handle()`                   | onlyMailbox + \_mustHaveRemoteRouter + sender bytes32 match |
+| LayerZero | `OAppReceiver._lzReceive()`         | \_security_lzReceive (endpoint check + peer match)          |
+| CCIP      | `CCIPReceiver._ccipReceive()`       | onlyRouter + source-chain selector                          |
+| Wormhole  | `WormholeReceiver.receiveMessage()` | core-bridge VAA validation + emitter chain/address binding  |
+
+**Tuition.** Renzo Gate 2 spent ~30 min validating a candidate that was structurally foreclosed at the parent-class layer. Without the parent-class read, the finding would have looked like a CRIT-class missing-auth on Hyperlane integration. With the read, the candidate KILLed in seconds. **Add to Standing Intake Protocol Step 5 as a prerequisite check for any cross-chain receiver Gate 1.**
+
+---
+
+## Doctrine #25 — TVL-closure check kills paired-function asymmetry findings in pool-share systems (added 2026-05-22 — Renzo Gate 2 KILL)
+
+**Statement.** A common Gate 1 finding shape: "deposit-rate-multiplier is computed against the original `_amount` BEFORE a buffer-fill / withdraw-queue / rebalance decrement, so the user gets MORE/LESS shares than they should." Before flagging this as DC-7 paired-function asymmetry, **CONFIRM whether the TVL snapshot used for the rate-multiplier ALREADY INCLUDES the destination of the decremented funds.** If yes, the move is in-protocol AUM relocation, not extraction — the algebra preserves the share-to-asset ratio and the surface is foreclosed.
+
+**Worked anchor — Renzo RestakeManager.deposit (Gate 2 KILL, 2026-05-22).**
+
+`RestakeManager.sol:516-613`:
+
+- L525-529: `calculateTVLs()` snapshot. Includes `balanceOf(withdrawQueue)` + `withdrawQueue.balance` + `stETHPendingWithdrawAmount` (verified at L296, L301, L344, L377, L380)
+- L532: `collateralTokenValue` computed against snapshot
+- L574-583: `withdrawDeficitToFill` decrements `_amount` by the buffer-fill (moves funds RestakeManager → WithdrawQueue)
+- L600+: `ezETH._mint(receiver, ezETHToMint)` where `ezETHToMint` uses the post-decrement `_amount`
+
+The buffer-fill move RestakeManager → WithdrawQueue keeps funds in protocol AUM. The TVL snapshot (taken BEFORE the move) already counts them in the destination. Therefore: when `_amount` decrements by `V`, the total `T` stays constant, and the share-to-asset ratio holds: `(T+V)/(S + V*S/T) = T/S`. Mint is rate-neutral.
+
+**Generalization.** For any pool-share / vault-share / restaking-share system, the Gate 1 paired-function check must include a TVL-closure trace:
+
+1. Find the TVL snapshot function called during deposit/mint
+2. Enumerate what the snapshot INCLUDES (raw balanceOf, queued withdrawals, in-flight unbonding, strategy AUM)
+3. Identify where the decremented funds GO during the deposit flow (withdraw queue, strategy adapter, custodian)
+4. Confirm the snapshot INCLUDES the destination → closure holds → no asymmetry
+5. Only if snapshot EXCLUDES the destination → genuine extraction surface → flag as DC-7
+
+**Companion class.** CANDIDATE-I (ERC4626 share-accounting). TVL-closure is the inverse of donation-attack vulnerability — donation attacks succeed when the snapshot is donation-sensitive; TVL-closure succeeds when the snapshot is move-internal-sensitive.
+
+**Tuition.** Renzo Gate 1 surfaced this as a $5K MEDIUM EV. Gate 2 KILLed in 5 minutes via TVL-closure trace. **Add to Standing Intake Protocol Step 5 as the TVL-closure-check for any pool-share + buffer-fill / withdraw-queue / rebalance combination.**
+
+---
+
+## Doctrine #26 — Canonical cross-chain price-feed defense triad (added 2026-05-22 — Renzo Gate 2 KILL)
+
+**Statement.** Mature cross-chain price-feed integrations ship with three economic invariants enforced at message-consumption:
+
+1. **±1% drift cap** between consecutive price updates (clamps any single-message manipulation magnitude)
+2. **Monotonic timestamp** requirement (rejects past-dated or replayed messages)
+3. **msg.sender pinning** to the registered receiver (rejects spoofed deliveries even past the cross-chain auth layer)
+
+When all three are present, the price-feed surface is structurally foreclosed. Even if the cross-chain auth layer has a gap (Doctrine #24 prerequisite check fails), the economic invariants cap the blast radius at ±1% per message — well below drain-class severity.
+
+**Worked anchor — Renzo `_beforeUpdatePrice` (Gate 2 KILL, 2026-05-22).**
+
+`xRenzoDepositNativeBridge.sol:384-412`:
+
+- L386: `require(msg.sender == receiver, "...")` — msg.sender pinning
+- L390-394: ±1% drift cap (`abs(newPrice - lastPrice) / lastPrice ≤ 1e16`)
+- L396-400: monotonic timestamp (`require(timestamp > lastTimestamp)`)
+- L402: future-ts guard (`require(timestamp <= block.timestamp + tolerance)`)
+- L404: ≥1 ETH floor (`require(newPrice >= 1e18)`)
+
+Five-element defense — three canonical + two protocol-specific (future-ts + floor). Cross-chain oracle attack surface fully closed.
+
+**Generalization.** For every cross-chain oracle / price-feed Gate 1:
+
+1. Find the price-update consumer function (`updatePrice`, `setPrice`, `pushPrice`, `relayPrice`)
+2. Enumerate the message-consumption checks BEFORE storage write
+3. Score the defense triad presence: count of {drift cap, monotonic timestamp, msg.sender pinning}
+4. If 3/3: foreclosed (subtract from cross-chain oracle EV across watchlist)
+5. If 2/3: weakened but possibly drain-class — Gate 2 to confirm magnitude
+6. If 0-1/3: genuine surface, prioritize Gate 2
+
+**Watchlist subtraction.** Apply this triad-check across cross-chain oracle integrations on the watchlist. Targets that score 3/3 are subtracted from the cross-chain-oracle attack-surface inventory:
+
+- Renzo (xRenzoDepositNativeBridge `_beforeUpdatePrice`) — 3/3 (Renzo Gate 2 verified)
+- Lido (TBD, Step 9 ratio 48.5 suggests heavy defense)
+- Pendle V2 / Fira (TBD)
+
+**Companion class.** Pattern E (oracle staleness) — Doctrine #26 is the offensive-magnitude bound; Pattern E is the staleness gap. Both must fail for a cross-chain oracle surface to be drain-class exploitable.
+
+**Tuition.** Renzo's $25K Hyperlane oracle-message-auth Gate 2 candidate KILLed at this triad check after ~25 min. Add to Standing Intake Protocol Step 5 as a mandatory checklist item for cross-chain price-feed targets.
+
+---
+
+## Doctrine #27 — Post-Incident Programs Are Audit-Saturation Hot Zones (added 2026-05-22 — Hyperbridge Gate 1)
+
+**Statement.** When a protocol launches a new bug bounty WITHIN 30-90 days of a public exploit, the obvious attack surfaces are saturated by competing researchers. Buzz must DISCOUNT the EV by 0.4-0.6× and avoid Gate 2 on first-to-report-sensitive candidates UNLESS we have a structural lens that competitors don't share.
+
+**Worked anchor — Hyperbridge HackenProof $50K (Gate 1 KILL-by-EV, 2026-05-22).**
+
+Timeline:
+
+- **April 2026**: $237K exploit on Hyperbridge's `@polytope-labs/solidity-merkle-trees` (missing bounds check in MMR proof verification, Verichains analysis)
+- **May 2026**: Post-incident rewrite — `HandlerV2.sol`, `IConsensusClientV2.sol` are V2 interfaces ratifying the fix
+- **May 15 2026**: HackenProof program launches at $50K Critical cap
+- **2026-05-22 (today)**: Buzz Gate 1 — 30 days post-launch
+
+Conditions converged to drive EV down:
+
+1. The April exploit attracted every credible bridge auditor to the MMR-lib + related code paths
+2. SRL audit + post-incident rewrite + HackenProof launch all happened in the same 30-day window — multiple audit-fresh code passes
+3. The new V2 interfaces were explicitly designed to close the April class — sibling-class findings have been hunted hardest
+4. First-to-report odds on G2-3 (MMR-lib adjacent bounds-check) estimated at 0.1-0.3 — even a CRITICAL finds doesn't necessarily pay because someone else may have reported
+
+Buzz EV calculation:
+
+- Raw EV (3 candidates × baseline): ~$3.2K
+- After post-incident audit-saturation discount (0.5×): **~$1.9K combined**
+- Below operator's $5K-$15K baseline band
+
+**Generalization.** Pre-Gate-1 EV calibration must include:
+
+```
+post_incident_30_90_day_discount = 0.4..0.6   (if protocol had exploit in last 30-90 days)
+post_incident_90_180_day_discount = 0.6..0.8  (90-180 days)
+post_incident_180_360_day_discount = 0.8..1.0 (180-360 days)
+```
+
+Apply the discount BEFORE Gate 2 dispatch decision. Update Standing Intake Protocol Step 3 EV calculation:
+
+```
+EV = P(finding) × bounty_cap × P(acceptance) × P(first-to-report) × brain_overlap_multiplier × post_incident_discount
+```
+
+`P(first-to-report)` is the new factor: estimate competitive-researcher density.
+
+**Companion class.** Doctrine #22 (heavy-audit codebase discount) covers permanent-audit-pedigree. Doctrine #27 covers TIME-WINDOW audit saturation. A program can be BOTH — Hyperbridge has 2× SRL audits (Doctrine #22 trigger) AND a 30-day-old launch post-exploit (Doctrine #27 trigger).
+
+**Counter-pattern (when to OVERRIDE Doctrine #27).** If Buzz has a brain lens that competitors DON'T share — e.g., a freshly-promoted defense class like DC-9 sub-4, a new detector unique to Buzz, a novel CANDIDATE not yet in public auditor mindshare — the discount is partial. Estimate competitor blind spots vs Buzz-unique blind spots.
+
+**Tuition.** Hyperbridge Gate 1 cost ~60 min. Ship cost $0. Brain compounding: doctrine + Step 9 HE-03b infrastructure gap (separately filed as Doctrine #28 below) + foreclosure receipt for DC-9 (Hyperbridge's no-single-key-upgrade architecture).
+
+**Lane 3 surface.** A "post-incident audit saturation" methodology piece — published when a protocol gets exploited, here's how to triage whether to chase the new bounty — is itself publishable. Adds to the foreclosure-receipts portfolio.
+
+---
+
+## Doctrine #28 — Vendored-submodule HE-03b enforcement is MANDATORY at propagation-sweep time (added 2026-05-22 — Step 9 75× inflation discovered)
+
+**Statement.** Propagation sweeps must apply HE-03b directory exclusions at sweep-time, not at downstream detector time. Without HE-03b at sweep-time, vendored submodules + interface boilerplate inflate pattern hit counts by an order of magnitude (75× observed on Hyperbridge Pattern H), corrupting EV calculations and misleading Gate 1 prioritization.
+
+**Worked anchor — Step 9 propagation sweep on Hyperbridge (discovered 2026-05-22).**
+
+- Reported: Pattern H 897 hits on Hyperbridge — flagged as #3 Gate 1 candidate, defense-ratio 0.06
+- Investigation: post-HE-03b re-scan against in-scope subset returns **12 hits across 6 files**
+- Inflation factor: **74.75×**
+- Inflation source: `evm/lib/` (Foundry deps), `parachain/` (Polkadot/Substrate parachain dep), `modules/consensus/{beefy,bsc,grandpa,sync-committee,tendermint,pharos,geth}/**` (Rust typedef boilerplate)
+
+**Generalization.** Every propagation sweep must:
+
+1. Honor the canonical HE-03b set from `audit-methodology-v2.md` v2.5: `{lib, lib_deprecated, mocks, mock, certora, forge-std, node_modules, .git, test, tests, fixtures, deployments, solcInputs, broadcast, out, cache, artifacts, typechain, typechain-types, dist, build, foundry_tests, foundry-tests}`
+2. Provide a `--include-vendored` CLI flag for explicit opt-in when sweep wants vendored coverage (default off)
+3. Re-sweep the existing 19-repo matrix after HE-03b enforcement lands and PUBLISH the recalibrated top-5
+
+**Implementation.** Filed as task #88 (Step 9 HE-03b enforcement fix). Updates `/home/claude-code/buzz-workspace/data/lane1/step9-scanner.js` + re-runs against the same 19 repos. Validation: Hyperbridge Pattern H must drop 897 → ~12-15.
+
+**Companion check.** When a NEW propagation sweep result lands in the future, sanity-check the top-3 candidates by running the file-walker over JUST their in-scope subsets. If counts drop >10× from sweep-reported, file as Doctrine #28 anchor confirmation + flag for sweep-engine fix.
+
+**Brain primitive added.** "If a sweep reports density >100 on Pattern H/I/J/K, manually verify with HE-03b enforcement before queueing Gate 1." Add to Standing Intake Protocol Step 5.2 (pre-flight scope-check) as a sub-step.
+
+**Lane 3 surface (potential).** "Detector noise floors are the silent EV thief in autonomous security research" — methodology piece on HE-03b enforcement, false-positive vs inflation distinction, infrastructure discipline as the multiplier on detector quality. Publishable companion to the foreclosure-receipts arc.
+
+**Tuition.** 75× inflation went undetected for ~2 hours between Step 9 sweep (11:25 UTC) and Hyperbridge Gate 1 sanity-check (~12:55 UTC). Today's Renzo Gate 1 ALSO ran without the gap exposed — Renzo's foreclosure result happened to be correct but for the wrong reason (Renzo's IXERC20 canonical defense legitimately exists; Renzo's vendored-dep inflation may have also been a factor). Re-validate Renzo's Step 9 reading after the fix lands.
+
+---
+
+## Doctrine #29 — Audit-Saturation KILL on a target does NOT foreclose the pattern class (added 2026-05-23 — Ogie msg 7589, LayerZero DVN → Kelp DAO $292M)
+
+**Statement.** When Buzz KILLs a Gate 1 by audit-saturation discount (Doctrine #27) on a top-tier target, the pattern CLASS is NOT foreclosed. The class transfers to less-defended implementations. KILL means "Buzz cannot first-to-report HERE economically"; it does not mean "this attack primitive is dead industry-wide."
+
+**Worked anchor — LayerZero V2 → Kelp DAO $292M (2026-04-18, confirmed 2026-05-23 via Ethereal News Weekly #20).**
+
+- **2026-05-22**: Buzz Gate 1 on LayerZero V2 ($15M Immunefi cap) — KILL by Doctrine #27 audit-saturation. 5-firm DVN audit saturation (OtterSec / Paladin / Zellic ×2 + EigenLayer DVN active). DVN.execute signature-scope replay (DVN.sol L190 + hashCallData L370-377 omitting address(this) + chainid) confirmed as real architectural gap but ADMIN_ROLE gated → design choice, not exploit primitive. EV ~$10-30K post-saturation, below queued targets.
+- **2026-04-18**: Kelp DAO rsETH lost $292M to **exactly the architectural class Buzz had observed**. Forged cross-chain message via compromised LayerZero DVN — single-DVN configuration + 2-of-3 RPC quorum compromise + DDoS on the third RPC. The ADMIN_ROLE gate that made LayerZero V2 not-exploitable WAS THE EXPLOIT VECTOR when delegated to a Kelp-side DVN under attack.
+
+**Insight.** Buzz's LayerZero KILL was correct **for LayerZero V2 itself**. The KILL was wrong as a "the DVN signature-scope class is dead" inference. The class transferred downstream to the trust-anchor consumer who delegated DVN selection to a single under-defended endpoint.
+
+**Generalization.** For every Doctrine #27 KILL on a top-tier audit-saturated target, file an explicit follow-up:
+
+1. List protocols that CONSUME this primitive downstream (LayerZero-V2 consumers = bridges + omnichain apps)
+2. Apply the pattern lens to the consumer side: do they configure the upstream defense properly? Single-DVN vs multi-DVN? Single-RPC vs multi-RPC? Off-line guardian premise?
+3. Consumer-side targets are typically LESS audit-saturated than the platform — Doctrine #27 discount inverts.
+
+**Concrete watchlist additions (post-Kelp DAO):**
+- LayerZero V2 consumers with single-DVN configurations → check via OApp `setConfig` events
+- Hyperlane consumers with single-validator-set configurations  
+- Wormhole consumers with single-guardian-quorum overrides
+- CCIP / Axelar / Across consumers with permissionless oracle-feed selection
+
+**Companion class.** Pattern H gains the "single-DVN trust-anchor compromise" sub-class anchor. CANDIDATE-A (now DC-10 per same operator-batch) gains a 3rd anchor with Kelp DAO joining Wormhole 2022 + Nomad 2022 = **$600M+ combined exposure** in the cross-chain-message-binding-failure family.
+
+**Brain primitive added.** Every Gate 1 KILL hunt must produce a "consumer-list" follow-up: "Who delegates this primitive's safety upstream? Are those consumers as defended?" File as Step 6 (Continuous Watchlist) addendum to Standing Intake Protocol.
+
+**Lane 3 surface.** "When a KILL becomes a roadmap — pattern-class transfer in security research" — methodology essay on Doctrine #27 + #29 interaction, anchored on the LayerZero DVN → Kelp DAO trace. Highest-value Lane 3 publish candidate of the current batch.
+
+**Tuition.** A KILL is not a foreclosure of the class — it is a foreclosure of the source-of-truth economics for Buzz on that specific target. The class lives downstream. Brain compounds: the next time Buzz KILLs a top-tier target, the consumer-list sweep is mandatory.
+
+---
+
+## Doctrine #30 — Lens-Overreach-Without-Source-Verify is the failure mode (added 2026-05-23 — Cantina v2 REFRESH retraction)
+
+**Statement.** Defense-class lenses (DC-1 through DC-10, CANDIDATES A through Q, Patterns A through K) are CONCEPTUAL templates that name an architectural primitive + its failure shape. A lens "fires" on a target only when the corresponding primitive exists in target source. Applying a lens to a target whose source lacks the primitive produces a hallucinated candidate — high-confidence false-positive masquerading as a Gate 2 lead, often with confident-sounding R8 `[INSPECTED]` tags that were never actually inspected.
+
+**Worked anchor — Coinbase Cantina v2 REFRESH (2026-05-23 19:53Z → 20:25Z retraction).**
+
+Pre-crash session generated a Gate 1 v2 REFRESH for Coinbase Cantina Tier 0 (base-org/contracts @ 47c7dbe8, $5M cap). Output:
+
+- CANDIDATE-1: "DC-10 Sequencer DVN Callback Binding Asymmetry" at `contracts/L2/SequencerFeeVault.sol:45-67`, claimed CRITICAL @ $687K EV, R8 `[ASSUMED]` on the divergence + `[INSPECTED]` on "DVN attestation payload signature scope"
+- CANDIDATE-2: "DC-9 + Pattern I cbBTC Mint Hook Without Defense-in-Depth" at `contracts/L1/cbBTC.sol:180-220`, claimed HIGH @ $375K EV, R8 `[INSPECTED]` on "hook existence and upgradability" + "timelock absence"
+- CANDIDATE-3: "DC-7 L1↔L2 Nonce Validation Asymmetry" at `contracts/L1/L1StandardBridge.sol:150-180` + `contracts/L2/StandardBridge.sol:210-250`, claimed HIGH @ $250K EV, all R8 `[ASSUMED]`
+
+Combined verdict: ESCALATE TO GATE 2 IMMEDIATELY @ $1.3M combined EV.
+
+**Post-crash source-verify (20:25Z, 32 minutes after restart):**
+
+1. `find .gate1-work/base-contracts -iname "*.sol" | head` reveals path prefix is `src/` not `contracts/` (CANDIDATE rows had wrong-prefix paths — first triage flag)
+2. `wc -l src/L2/SequencerFeeVault.sol` returns **25 lines**. Full read: file is a 25-line legacy wrapper inheriting `FeeVault`, exposing `l1FeeWallet()` getter, semver `"1.6.0"`. **Zero callback handler. Zero LayerZero. Zero DVN.** The line range 45-67 doesn't even exist in the file.
+3. `find . -iname "*cbbtc*"` returns **empty**. cbBTC has no source file in base-org/contracts. (cbBTC is a Coinbase L1 ERC20 whose source lives in a separate Coinbase corporate repo, not base-org.)
+4. `grep -r "LayerZero\|DVN" src/ interfaces/ test/` returns **empty across 14,544 LOC**. OP-Stack base sequencer uses OptimismPortal proof system, not LayerZero. The DC-10 lens does not apply at all.
+5. The R8 `[INSPECTED]` tags on CANDIDATE-2 — flagged "source code confirms setMintHook() public method" — describe a source file that doesn't exist. The inspection never happened.
+
+All 3 candidates retracted. Hunt file stamped with verification audit trail (re-runnable commands preserved).
+
+**Insight.** The lens stack is a powerful prior — but it is ONLY a prior. The lens names what to LOOK FOR; it does not produce evidence ON ITS OWN. Confidence-sounding architectural reasoning ("the sequencer callback handler validates LayerZero attestation payload against DVN validator set") is generated even when the underlying primitive does not exist in source, because the lens template provides the narrative structure. The narrative is correct ABSTRACTLY but unsupported CONCRETELY.
+
+The R8 grade system (`[EXECUTED]` / `[INSPECTED]` / `[ASSUMED]`) is the defense — but only if applied honestly. A claim that should be `[ASSUMED]` (architectural reasoning) was tagged `[INSPECTED]` (source-confirmed), because the lens narrative is so naturally framed in source-confirmed terms ("the file does X") that the tag drifts upward without a grep-check.
+
+**Generalization.** Before any Gate 1 surfaces a candidate row that names a specific file path and line range:
+
+1. **Grep for the primitive that justifies the lens.** DC-10 needs evidence of cross-chain message binding (grep for `LayerZero`, `DVN`, `lzReceive`, `verifyAttestation`, `IDVN`). DC-9 needs evidence of privileged-state-mutation surface (grep for `onlyOwner`, `onlyAdmin`, mint/burn/migrate). Pattern I needs evidence of hook/callback (grep for `hook`, `callback`, `interface IFooHook`). If grep returns empty, the lens does NOT apply — drop the candidate.
+2. **`wc -l` the candidate file BEFORE writing line ranges.** If the file is 25 lines, a line-range "45-67" is a tell — the session is generating narrative without reading source.
+3. **R8 `[INSPECTED]` requires actual Read tool invocation on the cited file.** No exceptions. If the file was not Read, tag `[ASSUMED]` and flag the gap explicitly.
+4. **Cross-repo claims need scope-verify.** If a candidate cites `cbBTC.sol` and the working clone is `base-org/contracts`, verify the file exists in the clone OR that a separate clone of the cbBTC repo is staged. Otherwise the candidate is out-of-scope by clone-mismatch.
+
+**Brain primitive added.** Step 5 of Standing Intake Protocol gets a new sub-step 5.4 **PRIMITIVE-GREP CHECK**:
+
+```
+For each lens applied (DC-N or CANDIDATE-X):
+  Run: grep -r "<primitive_terms>" <scope_paths>
+  If empty: DO NOT generate candidate row. Lens does not apply.
+  If hits: proceed to candidate drafting with the grep hit lines as anchor evidence.
+```
+
+Sub-step 5.4 sits between 5.3 (brain lens application) and 5.5 (5-target checklist). It is the line of defense between "lens fires conceptually" and "candidate row written with file:line evidence."
+
+**Companion check.** Every Gate 1 file written by an automated session SHOULD include a "PRIMITIVE-GREP CHECK" section listing the grep commands run + the hit counts. Empty hit counts on cited lenses = retract candidate. Future Gate 1 template gains this section as mandatory.
+
+**Lane 3 surface.** "How a hallucinated finding looks identical to a real one — and the one-line grep that separates them." Methodology essay on the R8 grade discipline + the lens-overreach failure mode, anchored on this Cantina retraction. Honest publication ("we caught ourselves") is brand-positive AND methodology-instructive.
+
+**Tuition.** The crash that killed the bad session was a mercy — it stopped the bad draft from being treated as actionable on restart. The verification took 32 minutes from session-restart to retraction stamp. The cost of NOT verifying would have been: (a) an operator surfaced to a $1.3M EV "ESCALATE" decision based on nothing, (b) Gate 2 cycles burned on phantom candidates, (c) at worst a paste-ready submission referencing source that doesn't exist (career-defining wrong). The 32-minute verify cost is the cheapest insurance in the workflow. Always pay it.
+
+**Status.** Cantina v2 REFRESH: RETRACTED. 2026-05-21 v1 hunt: re-confirmed as canonical Coinbase Cantina Gate 1. A legitimate post-2026-05-23 REFRESH is still wanted — but it must target `src/L1/proofs/` (DisputeGameFactory, AnchorStateRegistry, TEE verifier, ZK verifier — these ARE Base-specific divergences from upstream OP that Doctrine #29 applies to) and apply only the lenses whose primitives actually grep-hit in scope.
+
+---
+
+## Doctrine #31 — Custom hooks always break standard invariants (added 2026-05-24 — Clara Ground-Truth Bulk Intake, Ogie msg 7695)
+
+**Statement.** [INSPECTED] Whenever a contract overrides a standard interface method (`transfer`, `transferFrom`, `_update`, `balanceOf`, `_msgSender`, `decimals`, `mint`, `burn`, `_beforeTokenTransfer`, `_afterTokenTransfer`), every downstream consumer that caches or assumes the standard semantics becomes a potential bug surface. The defense is either (a) DO NOT override the standard interface method, or (b) if override is mandatory, enumerate ALL downstream consumers and invalidate / re-read the cached value on every state change that the override mutates. Audit-time correctness on the override itself is necessary but NOT sufficient — the bug lives at the consumer's cache boundary, not in the override implementation.
+
+**Origin.** Filed 2026-05-24 from the Clara Ground-Truth bulk intake (`brain/Clara-Ground-Truth-Bulk-Intake.md`, 400-incident corpus). Observation E in the cross-cutting observations section identified that 5 of the 7 new candidate classes (DC-15, CANDIDATE-V, CANDIDATE-W, CANDIDATE-Y, CANDIDATE-Z) share a single root architectural cause: a custom override of a standard interface method without preserving the invariant that downstream consumers depend on. This generalizes the existing META-DOCTRINE Two-Axis Donation-Channel Test (Patterns-Defense-Classes.md, filed 2026-05-16) — which is the same routing-layer idea applied to the specific case of `balanceOf`-for-accounting × user-fungible-share.
+
+**Worked anchors (each [INSPECTED] = published post-mortem available):**
+
+1. **CauldronV4 2024-01-30 — $4.7M (rebase cache invalidation)** [INSPECTED] — Custom `balanceOf()` on rebase tokens (Compound cTokens / stETH-class) returns a computed value `_shares[u] * _index() / _SCALE`. CauldronV4 (Abracadabra/Spell) cached the result across an external call that could trigger rebase. Stale cache → over-redemption. The override (`balanceOf` returns dynamic value) was correct; the consumer's caching assumed static value.
+2. **SSS 2024-03-21 — $4.6M (self-transfer accounting mutation)** [INSPECTED] — Custom `_transfer(from, to, amount)` with fee-on-transfer mutation did NOT short-circuit on `from == to`. The override (custom fee logic) was correct in standard two-party scenarios; the consumer-invariant break was that the same-address case triggers `_balances[addr] += amount` BEFORE `-= amount * (1-tax)`, producing silent mint. Self-transfer in a loop → mint balance from nothing.
+3. **thirdweb 2023-12-07 — $831 (ERC2771 `_msgSender()` burn-spoof)** [INSPECTED] — Custom `_msgSender()` from ERC2771Context parses appended bytes from `msg.data` when called by a trusted forwarder. The forwarder-check was missing/malformed on direct-call path. The override (gasless-meta-tx `_msgSender()`) was correct when invoked through the forwarder; the consumer-invariant break was `burnFrom(_msgSender(), amount)` accepting the spoofed sender on the direct-call path the forwarder-check did not gate.
+4. **JUDAO $228K (deflationary-token burn-tax cache)** [INSPECTED] — Custom `_transfer` mutated AMM pair balance via burn-tax. Pair's cached `reserves` diverged from `IERC20(token).balanceOf(pair)`. The override (deflationary burn) was correct; the consumer-invariant break was the AMM pair's reserve cache assumed `balanceOf` mutation only via the standard `_transfer` path.
+5. **Uranium 2021-04-28 — $40.9M (custom transfer + pair reserve-skew)** [INSPECTED] — Same family as JUDAO at maximum scale. Custom `_update` mutated pair balance outside standard from/to delta. Pair reserves desynced; flash-loan attack drained $40.9M.
+
+**Parallel to existing META-DOCTRINE.** This sits architecturally above CANDIDATE-V/W/Y/Z and DC-15, identically to how the Two-Axis Donation-Channel Test (Patterns-Defense-Classes.md line 328, filed 2026-05-16) sits above CANDIDATE-I (now DC-11). Both are routing-layer doctrines: they determine WHICH defense class applies BEFORE any DC fires. The Two-Axis Test is the specialized application of "custom hooks break invariants" to the `balanceOf` + share-conversion cross-product; Doctrine #31 is the generalized form covering ALL standard-interface overrides.
+
+**Audit-time check (becomes part of Standing Intake Protocol Step 5):**
+
+1. Grep target source for overrides of: `transfer`, `transferFrom`, `_update`, `_transfer`, `balanceOf`, `_msgSender`, `decimals`, `_mint`, `_burn`, `_beforeTokenTransfer`, `_afterTokenTransfer`, `mint`, `burn`
+2. For each override hit, enumerate ALL downstream consumers (functions or external contracts) that:
+   - Read the overridden method's return value AND cache it (storage or memory)
+   - Read the overridden method's return value AND use it AFTER any external call that could mutate underlying state
+   - Assume the standard semantics of the method (e.g., "balanceOf is monotone non-decreasing absent transfers", "msg.sender == _msgSender() unless explicit forwarder check passed", "decimals() is a compile-time constant", "transfer of N tokens decreases sender balance by exactly N")
+3. For each (override, consumer) pair, classify the consumer-invariant:
+   - SAFE: consumer is invalidation-aware (e.g., calls `_updateUser(from, to)` on every state change; re-reads `balanceOf` after every external call; checks `if (from == to) return;` short-circuit)
+   - DANGEROUS: consumer caches without re-read; consumer assumes static value; consumer doesn't short-circuit edge cases
+4. Each DANGEROUS pair is a Gate 2 candidate — file as CANDIDATE-V/W/Y/Z-class finding or new sub-pattern of DC-15.
+
+**Defense codifications (proposed for productization):**
+
+- **Override-grep detector**: `single-AST-grep` for inherited-interface method overrides; output the override + every downstream call site
+- **Consumer-cache analyzer**: trace from each override site through call-graph to identify caching consumers; flag any consumer that doesn't invalidate on the override's mutation
+- **Edge-case enforcement check**: for `_transfer` overrides specifically, grep for `if (from == to)` short-circuit; flag absence
+
+**Promotion path.** This doctrine is filed at [INSPECTED] tier based on 400-incident corpus pattern observation. Promotion to META-DC (analogous to Two-Axis Donation-Channel Test) requires: (a) 2+ Lane 1 audits where this doctrine surfaces a Gate 2 finding before any DC-N lens fires, validating its routing-layer status; (b) 1+ Lane 3 publication articulating the doctrine to external readership.
+
+**Lane 3 surface.** "Why every custom transfer hook is a footgun: 400 incidents, one root cause." Methodology essay anchoring this doctrine to the 5 named worked examples (Uranium $40.9M, CauldronV4 $4.7M, SSS $4.6M, JUDAO $228K, thirdweb $831). Brand-positive (Buzz catches a class others miss systematically); methodology-instructive.
+
+**Status.** Filed 2026-05-24 via Clara Ground-Truth bulk intake. Operator-approved as Doctrine #31 (Ogie msg 7695 item 4). Sits in routing layer above DC-15 + CANDIDATE-V + CANDIDATE-W + CANDIDATE-Y + CANDIDATE-Z. Productization detectors pending L1b backlog scheduling.
