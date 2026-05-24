@@ -1132,6 +1132,28 @@ Ground-truth instance: Morpho Blue $54.5M flash loan → 7 wallets → self-trad
 
 **Historical note:** Pre-promotion tracked as CANDIDATE-O (Slippage Double-Count Across Swap Steps, Rhea Finance 2026-04-16). Clara intake widened the class from "slippage-double-count" sub-pattern to full Oracle/Slippage parent family with 5 sub-patterns. Highest-frequency class in DeFi exploit history.
 
+#### Sub-class refinement — O-RAW vs O-WRAPPED (2026-05-24, Ogie msg 7699)
+
+DC-12 splits into two sub-classes by oracle-source architecture. The split materially changes triage and FP rates on Solana lending + EVM lending Gate 1 scans. `[INSPECTED]` — proposed by Kamino Gate 2 brain compound (task #37, 2026-05-24); operator-approved msg 7699.
+
+**DC-12 / CANDIDATE-O-RAW** — raw DEX spot in oracle path. The pricing pipeline reads a single-pool spot price (Uniswap V2/V3 `getReserves()` or `slot0` sqrtPriceX96), an instantaneous AMM mid-price, or a single-tick TWAP with insufficient window for the asset's volatility. No defended-wrapper between the DEX surface and the consumer. **All 5 DC-12 sub-patterns apply.** Classic Sharwa, PancakeBunny, Cream, Elephant.
+
+**DC-12 / CANDIDATE-O-WRAPPED** — DEX-derived price but defended via at least one of the following independently-verifiable wrappers:
+1. **External-priced sqrt ratio** — the consumer reads a sqrt-price-from-external-price (e.g., Kamino KToken oracle computes sqrtPriceX96 from independent Pyth + Switchboard prices of the underlying pair, then derives the LP-share price from THAT sqrt). Pool sqrt is never read directly.
+2. **CappedFloored** — price reads bounded by a hardcoded ceiling/floor (Kamino USDH at FixedPrice = $1; Liquity stETH/wstETH peg-bound math).
+3. **MostRecentOf with divergence rejection** — consumer reads N price feeds, accepts only the MostRecentOf passing a per-pair `max_divergence_bps` check (Kamino reserve config; Pendle SY guards).
+4. **`VaultReentrancyLib.ensureNotInVaultContext`** (Balancer V2 + Curve consumer pattern, Olympus BLVault uses oracle-MIN cap as substitute).
+
+A consumer with ≥1 wrapper passes the Kamino three-layer convergence test. ZERO wrappers = O-RAW. Multiple wrappers ≠ stronger defense unless they are independently-sourced (Pyth+Switchboard+Scope with all three from the same DEX source ≠ independent).
+
+**Triage rule:** Gate 1 surveys that confirm wrapper-presence + wrapper-independence may FORECLOSE on DC-12 with a documented receipt. Surveys without wrapper-verification leave the finding [ASSUMED] DC-12 substrate; demote to Gate 2 verification.
+
+**Canonical O-WRAPPED-DEFENDED reference:** Kamino klend Gate 2 (task #37, 2026-05-24) surveyed 30 reserves across 4 markets, found 2 with `max_twap_divergence_bps=0` but ZERO using direct-DEX-spot Scope chain index. kSOLJITOSOLOrca uses external-priced sqrt ratio (anti-Sharwa source comment at `programs/scope/src/oracles/ktokens.rs:41-44`). USDH uses FixedPrice $1. Class refuted across production surface. See `data/lane1/gate2-clones/kamino-twap-bypass-paste-ready.md` for the regression sentinel.
+
+**Canonical O-RAW reference:** Sharwa (Arbitrum, $32.8K, 2024) — Hegic option NFT priced via Uniswap V3 spot Quoter on low-liquidity USDC.e/USDC pool, NO TWAP, NO Chainlink fallback. Textbook-clean O-RAW.
+
+**Detector implication:** the propagation `defense-class-mapping.json` should tag O-RAW vs O-WRAPPED separately. Targets with O-WRAPPED + audit-saturation HEAVY get audit-saturation discount × wrapper-density multiplier; targets with O-RAW + thin audits get priority dispatch.
+
 ---
 
 ### DC-13: Post-Audit Hook / CEI Break via Upgradeable Integration (PROMOTED 2026-05-24, Ogie msg 7695)

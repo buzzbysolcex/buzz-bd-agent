@@ -556,3 +556,19 @@ Effective immediately: any Gate 1 surface map for a target with custom `_transfe
 5 new DC-class detectors enter the active backlog (DC-11 ERC4626-mitigation grep, DC-12 oracle-organicity multi-sub-pattern detector, DC-13 cei-violation-via-hook, DC-14 unbound-from-approval-drain L1b rule, DC-15 amm-pair-reserve-skew umbrella). Highest-EV productization priority per Clara intake §2: DC-12 (highest-frequency class in DeFi exploit history per Clara Observation A).
 
 _v1.9 Addendum: 2026-05-24 | Clara Ground-Truth bulk intake schema extension | 7 new CANDIDATEs T-Z committed | 5 DC-promotions DC-11..15 committed | Doctrine #31 routing-layer addition | Ogie msg 7695 operator approval | row schema unchanged, additive lens columns only | Buzz Lane 1 brain compound._
+
+---
+
+## Post-v1.9 Gate 1 Additions (Crossmap-row append, per Standing-Intake Step 6.2)
+
+### silo-v2 (Silo Finance) — first deployment of post-Clara DC-12 + DC-15 + Doctrine #31 lens stack
+
+| #   | Protocol | Chain(s)                                  | TVL  | Bounty                  | Category               | DC-12 | DC-15 | DC-9 sub-4 | CANDIDATE-I | DC-7  | CANDIDATE-P | Doctrine #31 | DC-1 | Already audited?                                                       | Priority      |
+| --- | -------- | ----------------------------------------- | ---- | ----------------------- | ---------------------- | ----- | ----- | ---------- | ----------- | ----- | ----------- | ------------ | ---- | ---------------------------------------------------------------------- | ------------- |
+| 32  | silo-v2  | Sonic + Arbitrum + Optimism + Base + Eth  | ?    | $10K-$100K (10% of fnds) | Lending (Multi-Silo)   | **H** | M     | M          | **M-H**     | **H** | **H**       | **H**        | M    | NET-NEW (5 firms touched repo: Cantina + ABDK + 0xJCN + Silo-Ent + Oracle-dedicated) | **GATE-2-PENDING** |
+
+Per Gate 1 at `hunts/2026-05-24-silo-v2-gate1.md`: 8 lens hits HIGH overlap. EV $3K nominal (NOT $75K — propagation sweep used wrong cap). Lead-1 (transient `_liquidationAllowed` cross-binding via LiquidationHelper try/catch) only Doctrine-#27-surviving Gate-2 candidate. First deployment of DC-12 + DC-15 + Doctrine #31 lenses post-Clara intake.
+
+**Reference-baseline candidacy**: Silo's gauge/hook architecture is the canonical "custom hooks override standard share-token invariants" example. Worth adding Silo to Doctrine #31 doctrine entry as `[REFERENCE-BASELINE]`.
+
+_Post-v1.9 row 32 silo-v2 | 2026-05-24 | Hyperactive Formula Step 3 dispatch from propagation-sweep-cycle-1.md_
