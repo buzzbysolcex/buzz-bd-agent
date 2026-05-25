@@ -1111,6 +1111,7 @@ Ground-truth instance: Morpho Blue $54.5M flash loan → 7 wallets → self-trad
 3. **cross-pool-mispricing** — same asset priced differently across pools used in same pipeline; attacker engineers route through mispriced pool
 4. **read-only-reentrancy-on-oracle** — oracle read happens mid-callback when reserves are temporarily wrong-state (Curve / Balancer V2-class)
 5. **slippage-double-count-across-swap-steps** (Rhea-class) — per-step slippage check reuses carry-value semantically; cumulative protection unbounded
+6. **cross-chain-staleness-asymmetry** (Pendle-class, filed 2026-05-25, Ogie msg 7733) — consumer chain reads price/exchange-rate posted via cross-chain message (LayerZero, Wormhole, Hyperlane, Axelar, custom bridge). The update path is monotonic OR write-only — there is NO per-read `block.timestamp - last_updated < max_age` floor enforced at the read site. Cross-chain message delays (1-30 min for honest delivery, hours under network congestion / bridge halts / DDoS) let stale rates persist on consumer chain. Distinct from sub-1 (spot-no-TWAP is on-chain spot read; sub-6 is cross-chain message staleness with no time-decay defense). Anchor: PendleExchangeRateOracleApp `getExchangeRate()` lacks max-age floor on consumer chain; `_updateExchangeRate()` is monotonic but only fires on cross-chain message arrival — no fallback if messages stall. (Pendle V2 Gate 1 task #61 v1.1 re-dispatch, R8 [INSPECTED])
 
 **Anchor incidents (Clara + brain):**
 - Rhea Finance 2026-04-16 **$18.4M** (NEAR; 0xTeam analysis — canonical Buzz anchor, sub-5)
@@ -1127,6 +1128,7 @@ Ground-truth instance: Morpho Blue $54.5M flash loan → 7 wallets → self-trad
 - `oracle-volume-organicity` detector spec'd in brain Ground-Truth v1.7
 - DC-12 sub-1 (spot-no-TWAP) — propagation regex; explicit detector pending
 - DC-12 sub-4 (read-only-reentrancy) — partial coverage via Pattern D consumer-side checks
+- DC-12 sub-6 (cross-chain-staleness-asymmetry) — propagation regex pending; detector spec: grep for `getExchangeRate` / `getPrice` / `latestAnswer` callers reading from cross-chain-message receiver contracts (LayerZero `lzReceive`, Wormhole `receivedMessage`, Hyperlane `handle`, Axelar `_execute`) without per-read `block.timestamp - last_updated < max_age` check at the read site
 
 **Cross-pollination scan targets (active):** every protocol with Chainlink consumer + AMM consumer + lending market liquidator. Highest-EV next sweep cycle per Clara intake Observation A.
 

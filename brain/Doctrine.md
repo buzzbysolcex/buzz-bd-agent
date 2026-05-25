@@ -1857,4 +1857,40 @@ Detector value: ZERO (no Layer 1 substrate). Triage value: HIGH (saves 60-90 min
 
 **Source.** Propagation cycle 1 close (2026-05-25). Operator-approved msg 7728 proposal B. Cycle 1 watchlist baseline FORECLOSED; cycle 2 filter standing directive embedded.
 
-**Status.** Filed 2026-05-25 as standing-directive doctrine. Cycle 2 dispatch will validate the inverse — does the post-Clara lens stack bind on fresh substrate? Expected positive validation on first cycle-2 target with audit_cadence_months < 12 + late_changes_30d > 0.
+**Status.** Filed 2026-05-25 as standing-directive doctrine. v1.1 calibration filed 2026-05-25 (below) — PERMANENT operator-approved per Ogie msg 7733.
+
+### Doctrine #32 v1.1 PERMANENT calibration (added 2026-05-25 — Cycle 2 3-for-3 strict-filter trigger, Ogie msg 7733)
+
+**Calibration trigger.** Three consecutive cycle 2 dispatches under v1.0 strict filter (Pendle V2 / Morpho Blue family / Symbiotic family — 2026-05-25) ALL failed `late_changes_30d > 0` despite HIGH brain overlap on 5-6 DCs each. Structural pattern surfaced: **heavily-audited mature protocols freeze main post-audit by design** (Pendle 76d HEAD age, Morpho 10-90d across 7 repos, Symbiotic 102-304d across 7 repos). The v1.0 filter forecloses the entire top-EV mature-protocol tier where the Clara lens stack would otherwise have HIGH binding probability.
+
+**Cross-system contradiction observed:** Lane 5 morpho daemon real-time monitors Morpho codebase for flash-loan exploits, but v1.0 cycle 2 filter labels Morpho "frozen, skip." Two Buzz systems disagreed on whether the Morpho codebase is "active." v1.1 resolves the contradiction.
+
+**Calibration (PERMANENT, Ogie msg 7733):**
+
+```
+Old (v1.0):  audit_cadence_months < 12  AND  late_changes_30d > 0
+New (v1.1):  audit_cadence_months < 12  AND  (dangerous_area_changes_365d >= 10  OR  audit_age_days <= 180)
+```
+
+**Rationale.** v1.1 captures post-audit-freeze targets where dev is active on private branches OR audit cadence is fresh (≤180d). Preserves cycle 2 intent (test Clara lens stack on fresh substrate) without losing top-EV mature-protocol tier. Targets falling under v1.0's stricter `late_changes_30d > 0` continue to qualify under v1.1 (the new filter is a superset).
+
+**Canonical v1.1 pass-case reference.** Pendle V2 (`pendle-finance/pendle-core-v2-public`, HEAD 2026-03-10) — audit_age 105d (PASS ≤180), 22 audit reports across 9 firms (Spearbit / ChainSecurity / WatchPug / 0xleastwood / Ackee / Dedaub / Dingbats / CMichel / HickupHH), audit cadence active. Re-dispatched 2026-05-25 under v1.1 (task #61). Gate 1 result: 0/6 detector binding (substrate absent for 3, clean for 3), but 1 net-new lens surfaced via manual brain-lens (DC-12 sub-pattern 6 cross-chain-staleness-asymmetry filed to brain). v1.1 IS productive: even when detector rotation is silent on a v1.1-pass target, the Step 5.6 manual lens application surfaces brain compounding signal.
+
+**Forecast (cycle 2 lens-binding rate under v1.1).** Pendle yielded ZERO automated detector hits but ONE net-new lens via manual brain-lens. If this generalizes, cycle 2 under v1.1 is a **brain-compounding** activity (net-new lens harvest) more than a **Gate 2 dispatch** activity (binding-finding harvest). Calibrate expectations: cycle 2 Gate 1 outcomes will skew toward FORECLOSURE-RECEIPT + manual-lens net-new lens proposals rather than direct Gate 2 escalations.
+
+**Where v1.1 STILL does not apply (real-bug classes that bypass the calibration):**
+
+1. **Net-new lens discovery** — net-new lens surfaced via manual brain-lens during cycle 2 Gate 1 may warrant escalation regardless of detector rotation result. The whole point of cycle 2 is to find these.
+2. **Critical-tier program with novel architecture** — if program is post-incident-rewrite or post-major-pivot, the audit_age measure may be misleading. Manually verify audit scope covers HEAD architecture.
+3. **Cross-protocol composition surface** — composition surfaces are typically OOS for individual-target audits. Apply lens stack at composition boundary regardless of #32 v1.1.
+4. **Operator override** — operator may explicitly direct Gate 2 dispatch on a #32-foreclosed target. The doctrine is a default, not a hard veto.
+
+**R8 tags:**
+
+- `[INSPECTED]` Pendle / Morpho / Symbiotic cycle 2 strict-filter 3-for-3 FAIL (task #61 + 2 sub-dispatches, Layer 0 JSON evidence retained)
+- `[INSPECTED]` Pendle v1.1 PASS via audit_age=105 ≤180 (Layer 0 JSON `.pendle-layer0.json`)
+- `[INSPECTED]` 0/6 detector binding on Pendle v1.1 re-dispatch, 1 net-new lens via manual Step 5.6
+- `[INSPECTED]` Lane 5 morpho daemon online 31h, monitors codebase v1.0 labeled "frozen" — cross-system contradiction confirmed
+- `[ASSUMED]` v1.1 generalizes to future cycle 2 dispatches (validation pending on next 2-3 v1.1-pass-case targets)
+
+**Source.** Pendle V2 v1.1 re-dispatch task #61 + 3-for-3 cycle 2 strict-filter trigger event (2026-05-25 11:30-12:20 UTC). Operator-approved PERMANENT msg 7733.
