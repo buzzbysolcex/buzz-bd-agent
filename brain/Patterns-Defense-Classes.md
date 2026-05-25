@@ -1265,6 +1265,46 @@ A consumer with ≥1 wrapper passes the Kamino three-layer convergence test. ZER
 
 ---
 
+### DC-16: Decimal / Unit-of-Measure Asymmetry in Pricing or Redemption (PROMOTED 2026-05-25, Ogie msg 7710)
+
+> **Promotion event:** Promoted from net-new CANDIDATE-X on 2026-05-25 at 00:24Z. Clara Ground-Truth bulk intake surfaced **3 anchors** crossing the 2+ adjacent-anchor DC-promotion threshold. Operator decision: msg 7710. DC-16 closes the "approved Clara intake set" at 6 DC promotions today (DC-11..16).
+
+**Class statement (DC-16):**
+
+> A pricing, redemption, liquidation, or share-conversion function computes `output = price * input / SCALE` (or analogous shape) where `price` and `input` are denominated in DIFFERENT precisions (e.g., 8-decimal Chainlink feed vs 18-decimal ERC20 amount vs 6-decimal stablecoin), and the `SCALE` constant assumes a third unrelated precision. The arithmetic produces a value off by 10^N from intended, allowing attackers to redeem/borrow/liquidate at wildly-favorable rates. Adjacent gap class to DC-7 (Validating-Field ≠ Consuming-Field) but operating at the decimal/unit dimension rather than the field-binding dimension.
+
+**Sub-pattern enumeration (each anchored above):**
+
+1. **chainlink-feed-decimal-vs-token-decimal** — 8-decimal price feed × 18-decimal token amount, hardcoded `1e18` divisor (Blueberry pattern)
+2. **redemption-decimal-mis-scaling** — vault redemption uses one decimal for shares and another for assets without conversion (ENF pattern)
+3. **amm-cross-asset-quote-decimal-asymmetry** — AMM quote formula uses raw `reserveOut/reserveIn` where the two assets have different decimals, no normalization (Nowswap V1 pattern)
+4. **stablecoin-mixed-decimal** — pools / protocols supporting USDC (6-dec) + DAI (18-dec) + USDT (6-dec) where one path normalizes and another doesn't (theoretical sub-pattern, no Clara anchor yet)
+
+**Anchor incidents (Clara + brain):**
+- Blueberry 2024-02-23 **$1.3M** ("Decimal mismatch exploit") — canonical sub-1 anchor `[INSPECTED]` (published post-mortem)
+- ENF 2023-02-24 **$5.2M** ("Redeem decimal mis-scaling") — sub-2 anchor `[ASSUMED]` (Clara index-only)
+- Nowswap V1 2021-09-15 **$1.1M** ("WETH mis-scaled KLOSS invariant") — sub-3 anchor `[ASSUMED]` (Clara index-only)
+- Combined Clara USD: **$7.6M+ named exposure**
+
+**Detector coverage (current shipped):**
+
+- `/home/claude-code/.tmp-build/v6/buzzshield-cand-x-detector.js` (2026-05-25 shipped, 566 lines) — DC-16 production detector
+- `HE-34` Skeptic hard-exclusion rule registered: DECIMAL_NORMALIZATION_DEFENSE_RE / LIBRARY_NORMALIZED_PRICE_RE / same-decimal-class trio at conf 0.85-0.95
+- E2E test: `/home/claude-code/.tmp-build/v6/tests/detector-x-e2e.test.js` 5/5 PASS + 4/4 full-pipeline validation
+- 4 synthetic targets: positive-blueberry-class + positive-nowswap-class + negative-normalized + negative-library
+
+**Sub-class refinement — same-decimal-class projection [INSPECTED] (Clara intake 2026-05-24)**
+
+The pattern `USDC + USDT in same contract` (both 6-dec) is structurally immune to DC-16. Worth noting: any stablecoin-pair fork (Curve 3pool style) trivially defends against DC-16. Conversely, the moment a stablecoin pool adds WBTC or WETH as a wrapper-asset (e.g., "Tricrypto" extension), the defense disappears.
+
+**Cross-pollination scan targets (active):** every lending protocol with multi-decimal collateral support (Aave-fork + Compound-fork + Silo + Morpho), every AMM with cross-decimal pair support (Uniswap V3 + Curve + Balancer), every redemption-flow oracle consumer (Origin Dollar, OUSD, sUSDS, frxETH).
+
+**Meta-pattern observation (cross-class enrichment):** The "low-decimal + 18-decimal token in same contract → arithmetic site → defense check" three-step regex pipeline could generalize to other cross-context unit issues — Q64.96 (Uniswap V3) vs uint256, basis-points (1e4) vs WAD (1e18), seconds vs blocks, gas-units vs wei. Worth tracking as a routing meta-pattern for future DC-N sub-class detectors.
+
+**Historical note:** Pre-promotion tracked as CANDIDATE-X (Clara intake bulk-filed 2026-05-24, brain commit e810bd3). The 3-anchor threshold + cross-cutting nature (lending + AMM + redemption all affected) justified DC promotion. Operator-approved msg 7710. DC-16 is the highest DC-N currently active (DC-1..16); next promotions on 2+ adjacent anchors for CANDIDATE-V (~20 anchors, threshold-met but awaiting promotion review), CANDIDATE-W (3 anchors, threshold-met), CANDIDATE-Y (8 anchors, threshold-met), CANDIDATE-Z (5 anchors, threshold-met).
+
+---
+
 ## CANDIDATE Pool extensions — Clara Ground-Truth Bulk Intake (2026-05-24, Ogie msg 7695)
 
 The following 7 candidates were filed from the Clara Ground-Truth bulk-intake (`brain/Clara-Ground-Truth-Bulk-Intake.md`, 400-incident corpus, ~$400M+ documented Clara USD). All 7 were operator-approved on 2026-05-24 (msg 7695). Five (T, U, M, O, I) were simultaneously promoted to DC-11 through DC-15 — their full active-catalog spec lives above; the CANDIDATE entries below preserve the historical CANDIDATE-stage framing per brain convention. The remaining 2 (V, W, X, Y, Z) remain at CANDIDATE stage pending additional adjacent worked examples.
@@ -1319,7 +1359,9 @@ FP gate: most modern reward systems use SushiSwap's `_updateRewardDebt` pattern 
 
 **Status:** 3 anchors (proposal-threshold met). Small-dollar but VERY high catch-rate on cross-pollination — class is mechanical and grep-friendly. Detector-build EV HIGH per build-cost ratio.
 
-### CANDIDATE-X: Decimal / Unit-of-Measure Asymmetry in Pricing or Redemption (Clara intake 2026-05-24, proposed)
+### CANDIDATE-X (PROMOTED 2026-05-25 → DC-16, Decimal / Unit-of-Measure Asymmetry in Pricing or Redemption). See active catalog DC-16 above for full spec, detector status, and sub-pattern enumeration. Original CANDIDATE-stage framing preserved below for historical continuity.
+
+#### CANDIDATE-X (historical, pre-promotion): Decimal / Unit-of-Measure Asymmetry in Pricing or Redemption (Clara intake 2026-05-24, proposed)
 
 **Class statement:**
 

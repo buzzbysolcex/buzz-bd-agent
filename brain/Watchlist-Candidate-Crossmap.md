@@ -404,7 +404,7 @@ _v1.6 Addendum: 2026-05-24 ~13:00 UTC | 6-target Cantina batch intake (operator 
 |------|--------|--------------------|------------------|----------|
 | **silo-v2** | Immunefi $1M | K_qual=20 + E_hits=349/61files + H_hits=289 + 416 total files | DC-9 sub-4 + CANDIDATE-O + Pattern H + multi-chain | **HIGH** |
 | **origin-dollar** | Immunefi $1M | K_qual=15 + E_hits=56/16files + D=204 | DC-9 family + CANDIDATE-O + reentrancy/TOCTOU | HIGH |
-| **venus-core-pool** | Immunefi $1M | K_qual=15 + D=207 + E_hits=2 (CANDIDATE-O LOW) | DC-9 family ONLY (Chainlink-only oracles likely; recommend `bsc_mainnet_only` scope_filter v1.9) | MEDIUM |
+| **venus-core-pool** | **NO LIVE BOUNTY** (verified 2026-05-24 via WebSearch + 3 WebFetch + immunefi explore search "venus" all ZERO; sweep "$1M Immunefi" was [ASSUMED] now REFUTED) | K_qual=15 + D=207 + E_hits=2 (CANDIDATE-O LOW) + Layer 0 audit_age `159_DonationAttack_Patch_Hashdit_20260320` triple-firm fresh + 714 fix_candidates active dev (HEAD 2026-05-17) | DC-11/CANDIDATE-I DIRECT (Compound v2 canonical fork triple-audited 20260320 first-depositor inflation patch), DC-12 substrate (DBO integration Apr 2-15 post-audit fix-cluster), DC-9 family substrate, **DC-15/CANDIDATE-U NEGATIVE** (single-asset vToken no LP collateral, R+S detectors empty), Doctrine #27 HIGH (60 audit reports) | **FORECLOSURE-RECEIPT (no live bounty)** — `bounty_relaunch_monitor=true` proposed for Lane 4 weekly cron on `immunefi.com/explore?search=venus` + GitHub SECURITY.md; substrate value $50-150K if relaunched (DonationAttack post-audit fix-cluster is highest-EV); hunts/2026-05-24-venus-core-pool-gate1.md |
 | **lifi** | Immunefi $1M | D=478/394files + H=64/17files + K_qual=9 + J=12 | CANDIDATE-A bridge + DC-6 + CANDIDATE-O composition via cross-chain quote-aggregation | MEDIUM |
 | **cooler-loans** | Immunefi ~$500K-1M | H=158/12files (13.2 ratio!) + K_qual=7 + E_hits=8 | DC-9 + Pattern H + Olympus MIN-cap-defense reference (Doctrine #29) | MEDIUM |
 
@@ -571,4 +571,35 @@ Per Gate 1 at `hunts/2026-05-24-silo-v2-gate1.md`: 8 lens hits HIGH overlap. EV 
 
 **Reference-baseline candidacy**: Silo's gauge/hook architecture is the canonical "custom hooks override standard share-token invariants" example. Worth adding Silo to Doctrine #31 doctrine entry as `[REFERENCE-BASELINE]`.
 
-_Post-v1.9 row 32 silo-v2 | 2026-05-24 | Hyperactive Formula Step 3 dispatch from propagation-sweep-cycle-1.md_
+**FORECLOSED 2026-05-24 (Ogie msg 7701)** — Lead-1 EV $3K nominal is below floor. KILL.
+
+**TVL re-evaluation threshold** — $30M+ TVL across the multi-Silo deployment activates the Immunefi 10%-of-funds-affected clause, which can scale the Critical-bucket EV above the $100K nominal floor. If aggregate Silo Finance TVL crosses $30M (currently `?` per Gate 1; check DefiLlama for the v2 monorepo across all chains), Lead-1 EV scales and re-evaluation is warranted. NO monitoring cron per operator directive — this is a passive re-evaluation note only.
+
+**Clone management** — silo-v2 clone at `.gate1-work/silo-v2-2026-05-24/` (106MB) deleted on auto-purge schedule 2026-05-31 (7d retention per Aave V4 reference-clone protocol). NO manual purge.
+
+_Post-v1.9 row 32 silo-v2 | 2026-05-24 | Hyperactive Formula Step 3 dispatch from propagation-sweep-cycle-1.md | FORECLOSED Ogie msg 7701, TVL re-eval $30M threshold noted_
+
+---
+
+## Origin Dollar (OUSD / OETH / OS) — Gate 1 2026-05-24
+
+| Field | Value |
+|-------|-------|
+| Bounty | Immunefi `originprotocol`, $1M Critical, $15K High flat, $25K Web, no KYC, $84.2K paid / 34 reports |
+| Chains | Ethereum (primary), Base, Sonic, Plume, Arbitrum |
+| Repo | github.com/OriginProtocol/origin-dollar @ cd7218c2 (2026-05-13) |
+| Brain overlap | **HIGH** (DC-9 sub-2 + Doctrine #31 + CANDIDATE-Z + DC-12 first-application against rebase-protocol) |
+| Nominal EV | **$45K** (= $1M × 0.10 × 0.45 × 1.0) |
+| Audit-saturation | HEAVY (ToB + OZ + Certora externally referenced, OOS prior-issues clause) |
+| Verdict | **GATE 2 CANDIDATE QUEUED (Conditional)** — 3 verifications gate escalation |
+
+**Lead-1 anchor**: PR #2889 (May 10) "Add permissioned rebase" — removed auto-rebase-on-mint/redeem trigger entirely. Yield batching now operator-driven only. Rebase-timing sandwich attack hypothesis: `mint` → wait for strategist's `rebase()` → `requestWithdrawal` → 10min delay → `claimWithdrawal`. Bounded by `MAX_REBASE = 2%` + 10-min `withdrawalClaimDelay`. **Viable IF avg-rebase-interval > 60 min** on mainnet Vault `0xe75d77b1865ae93c7eaa3040b038d7aa7bc02f70`. Gate 2 cron verification required.
+
+**Brain compound proposals from this Gate 1**:
+1. **Doctrine #31a (sub-doctrine candidate)** — "rebase-trigger-shift requires downstream integrator re-audit". Anchor: Origin PR #2889. When a rebase-protocol changes its TRIGGER mechanism (auto→manual or vice-versa), all integrators built against old cadence assumptions become re-audit candidates.
+2. **CANDIDATE-Z first-application NEGATIVE example** — WOETH's `adjuster` initialize-time snapshot mechanism (`token/WOETH.sol:62-72`) is the canonical defended-design for rebase-token wrappers. Worth adding to CANDIDATE-Z "negative example" section so future scans don't re-flag well-designed adjusters.
+3. **DC-12 first-application against rebase-protocol** — Origin's OracleRouter family is the first rebase-protocol target post-Ogie-msg-7699 O-RAW/O-WRAPPED split. Chainlink-primary path is trivially O-WRAPPED. Curve fallback path needs Gate 2 verification (raw `get_p()` = O-RAW; `last_prices_packed` running average = O-WRAPPED).
+
+**Clone management** — origin-dollar clone at `.gate1-work/origin-dollar-2026-05-24/` (~30MB) RETAINED for Gate 2 oracle + integrator scan. Delete after Gate 2 resolution or auto-purge 2026-05-31 if not dispatched.
+
+_Post-v1.9 row 33 origin-dollar | 2026-05-24 | Hyperactive Formula Step 3 dispatch from propagation-sweep-cycle-1.md cycle 3 | CONDITIONAL Gate 2 (3 verifications gate escalation), $45K nominal EV mid-pack_
