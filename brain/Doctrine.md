@@ -1270,6 +1270,36 @@ If the test suite asserts the alleged-bug behavior as the EXPECTED outcome, the 
 
 **Cross-reference into audit-methodology.** Standing Intake Protocol Step 5 should accept "architectural foreclosure receipt" as a complete Gate 1 outcome when (a) the detector ran cleanly with positive-control validation pre-run AND (b) the foreclosure mechanism is documented inline with file:line evidence. Operator review cycle.
 
+### Worked anchor 3 — Morpho IOracle interface foreclosure (added 2026-05-25 — Notional V3 Gate 1, Ogie msg 7750 P4)
+
+**Anchor.** Notional V3 Exponent uses Morpho lending primitives, including the `Morpho/IOracle.sol:14` interface:
+
+```solidity
+interface IOracle {
+    function price() external view returns (uint256);
+}
+```
+
+The interface returns only `uint256` — no `updatedAt`, no `roundId`, no staleness signal. ALL freshness responsibility is pushed onto the integrator (Notional V3 in this case, but the same applies to every Morpho Blue market deployer).
+
+**Why this compounds the brain (publishable methodology pivot).**
+
+When a load-bearing primitive (oracle, identity, state machine) is architecturally forecloseable on its own freshness-defense, the bug class **transfers to the integrator** per Doctrine #29 (audit-saturation KILL transfers to consumers). The integrator's compensating defense becomes the new audit surface. **Gate 1 cycles on Morpho Blue itself should foreclose on this class and instead route to the per-market oracle adapter contracts** (which are NOT in Morpho's bounty scope but ARE in each adapter-deployer's bounty scope).
+
+**Standing-Intake Step 2 lens addition (operator-approved 2026-05-25 P4):**
+
+> When the target's primitive interface forecloses on a primary defense (e.g., oracle returns only price, no staleness; identity is struct-field write-once, no setter; conservation is delta-net at boundary, no accumulator), THE FORECLOSURE TRANSFERS RESPONSIBILITY to the integrator's compensating defense layer. Apply the lens stack PRIMARILY to the integrator's compensation logic, not the foreclosed primitive itself.
+
+**Detector implication.** Future Gate 1 scans on Morpho Blue / Uniswap V4 / Balancer V3 / similar foreclosed-primitive protocols should auto-route detector cycles to:
+
+- Per-market adapter contracts (Morpho ecosystem) — third-party-deployed, distinct bounty scopes
+- Hook contracts (Uniswap V4) — pool-key-bound, deployed per-pool
+- BatchRouterHooks integrator chains (Balancer V3) — caller-supplied route metadata
+
+**Cross-pollination from Notional V3 anchor.** The MidasOracle engineered-staleness-mask (DC-12 sub-7e) directly exploits this architectural-foreclosure transfer pattern — Morpho's interface foreclosed freshness, the integrator (Notional MidasOracle wrapper) ostensibly compensates BUT does so via active-overwrite of `updatedAt` with a fresher source. The integrator's compensation IS the bug substrate. Gate 1 cycles correctly routed to MidasOracle (integrator), not Morpho IOracle (foreclosed primitive).
+
+**Generalization.** Doctrine #23 v3 (post-Morpho-anchor) — architectural foreclosure on a primitive's primary defense AUTO-PROMOTES Standing-Intake-Protocol routing of cycles to the integrator's compensation layer. Foreclosure is no longer just "skip this surface" — it's "redirect to compensation surface."
+
 **Worked anchor 3 — DC-9 sub-4 + ERC4626 family (scanned 2026-05-22, 11:25 UTC, msg 7535 directive #3):**
 
 7 ERC4626-class targets / 1,442 .sol files / 21 HIGH findings ALL deterministically FP / 0 Gate 2 candidates. DC-9 sub-4 (state-not-invalidated repeated mint) is structurally immune across the ERC4626 family via 8 defensive primitives that the Solv BRO conversion contract LACKED:
