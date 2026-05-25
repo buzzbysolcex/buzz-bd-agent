@@ -1301,7 +1301,48 @@ The pattern `USDC + USDT in same contract` (both 6-dec) is structurally immune t
 
 **Meta-pattern observation (cross-class enrichment):** The "low-decimal + 18-decimal token in same contract → arithmetic site → defense check" three-step regex pipeline could generalize to other cross-context unit issues — Q64.96 (Uniswap V3) vs uint256, basis-points (1e4) vs WAD (1e18), seconds vs blocks, gas-units vs wei. Worth tracking as a routing meta-pattern for future DC-N sub-class detectors.
 
-**Historical note:** Pre-promotion tracked as CANDIDATE-X (Clara intake bulk-filed 2026-05-24, brain commit e810bd3). The 3-anchor threshold + cross-cutting nature (lending + AMM + redemption all affected) justified DC promotion. Operator-approved msg 7710. DC-16 is the highest DC-N currently active (DC-1..16); next promotions on 2+ adjacent anchors for CANDIDATE-V (~20 anchors, threshold-met but awaiting promotion review), CANDIDATE-W (3 anchors, threshold-met), CANDIDATE-Y (8 anchors, threshold-met), CANDIDATE-Z (5 anchors, threshold-met).
+**Historical note:** Pre-promotion tracked as CANDIDATE-X (Clara intake bulk-filed 2026-05-24, brain commit e810bd3). The 3-anchor threshold + cross-cutting nature (lending + AMM + redemption all affected) justified DC promotion. Operator-approved msg 7710. Next promotions on 2+ adjacent anchors for CANDIDATE-V (~20 anchors, threshold-met but awaiting promotion review), CANDIDATE-Y (8 anchors, threshold-met), CANDIDATE-Z (5 anchors, threshold-met).
+
+---
+
+### DC-17: ERC2771 / Trusted-Forwarder `_msgSender()` Misuse on Burn / Transfer (PROMOTED 2026-05-25, Ogie msg 7712)
+
+> **Promotion event:** Promoted from net-new CANDIDATE-W on 2026-05-25 at 00:29Z. Clara Ground-Truth bulk intake surfaced **3 anchors** crossing the 2+ adjacent-anchor DC-promotion threshold. Operator decision: msg 7712. DC-17 closes the second wave of Clara intake promotions (DC-16 + DC-17 both filed 2026-05-25 in the same operator-active window).
+
+**Class statement (DC-17):**
+
+> A token or vault contract inherits OpenZeppelin's `ERC2771Context` (or equivalent trusted-forwarder pattern) and exposes sensitive functions (`burn`, `_burn`, `transfer`, `transferFrom`, `approve`, `stake`, `unstake`, `withdraw`, `claim`, role-grants, rate-limited paths) where SOME callsites use the OZ-correct `_msgSender()` extraction but OTHERS use raw `msg.sender`. The mismatch creates an identity-spoofing surface: attacker constructs a forged meta-tx with `<victim_address>` appended bytes, the `_msgSender()`-using callsite resolves to victim, but the `msg.sender`-using callsite resolves to forwarder OR attacker — the inconsistent identity binding lets attacker burn / transfer / claim against the victim's state. Distinct from generic auth bugs (DC-3): the contract DID adopt OZ ERC2771Context; the bug is the partial-adoption regression class.
+
+**Sub-pattern enumeration (each anchored above):**
+
+1. **burn-internal-helper-mismatch** — public `burn(uint256)` uses `_msgSender()` correctly, but the called internal `_burn` helper checks `balanceOf(msg.sender)` or `_balances[msg.sender]` (thirdweb anchor)
+2. **stake-balance-update-with-rate-limit-mismatch** — `stake()` mutates balance via `_msgSender()` but `staker[msg.sender].lastUpdate` rate-limit check uses raw msg.sender (TIME anchor)
+3. **rate-limit-vs-balance-mismatch** — rate-limit check uses `msg.sender` while balance mutation uses `_msgSender()` (DominoTT anchor)
+4. **tx-origin-in-forwarder-context** — even worse: contract uses `tx.origin` instead of either; tx.origin resolves to relayer wallet which is forwarder owner (theoretical sub-pattern, no Clara anchor yet)
+
+**Anchor incidents (Clara + brain):**
+- thirdweb TokenERC20-class 2023 (~$Xk-Mk, multi-token burn exploit across forks) — canonical sub-1 anchor `[INSPECTED]` (published post-mortem)
+- TIME (BSC/multi-chain staking) — sub-2 anchor `[ASSUMED]` (Clara index-only)
+- DominoTT — sub-3 anchor `[ASSUMED]` (Clara index-only)
+- Combined Clara USD: **3 anchors, ~$Mk+ named exposure** (specific USD figures pending per-incident WebFetch — skipped per Ogie msg 7695 directive low-ROI)
+
+**Detector coverage (current shipped):**
+
+- `/home/claude-code/.tmp-build/v6/buzzshield-cand-w-detector.js` (2026-05-24 shipped, 617 lines) — DC-17 production detector
+- `HE-35` Skeptic hard-exclusion rule registered: no-ERC2771-inheritance / explicit-isTrustedForwarder-guard / non-state-mutating-view-context trio at conf 0.85-0.95
+- E2E test: `/home/claude-code/.tmp-build/v6/tests/detector-w-e2e.test.js` 5/5 PASS + 4/4 full-pipeline validation
+- 4 synthetic targets: positive-thirdweb-burn HIGH + positive-time-stake HIGH + negative-pure-msgsender + negative-no-forwarder
+- Two-stage AST walk: `findErc2771Contracts` + `enumerateOzHelpers` — correctly handles inlined-abstract-base pattern (thirdweb, TIME) AND OZ-import pattern
+
+**Sub-class refinement — abstract-base-in-same-file [INSPECTED] (W detector build observation 2026-05-24)**
+
+OZ canonical pattern imports `ERC2771Context` from `node_modules/@openzeppelin/...` (HE-03b auto-skipped during scan). Some projects inline the abstract definition in the SAME .sol file as the concrete implementer (thirdweb, TIME). The detector's two-stage walk handles both: identifies concrete contracts via `is ERC2771*` inheritance clause AND scopes sensitive-function analysis to skip OZ helper-function bodies. Future audits should expect either deployment pattern.
+
+**Cross-pollination scan targets (active):** every meta-tx-enabled protocol — Biconomy ecosystem, OpenGSN-integrated tokens, thirdweb-fork token issuers, gasless-NFT mint protocols. Plus any DAO with forwarder-relayed governance.
+
+**Cross-pollination with CANDIDATE-P (Drift durable-nonce):** both classes exploit identity/state staleness across an off-chain relayer boundary. DC-17 is the meta-tx forwarder version; CANDIDATE-P is the durable-nonce pre-signed-tx version. Combined cross-domain lens surfaces relayer-class bugs in any future audit target with relayer integration.
+
+**Historical note:** Pre-promotion tracked as CANDIDATE-W (Clara intake bulk-filed 2026-05-24, brain commit e810bd3). The 3-anchor threshold + the structural identity-mismatch class (distinct from generic auth bugs) justified DC promotion. Operator-approved msg 7712. DC-17 is the highest DC-N currently active (DC-1..17). Next promotions awaiting operator review: CANDIDATE-V (~20 anchors, highest-anchor-count remaining), CANDIDATE-Y (8 anchors), CANDIDATE-Z (5 anchors).
 
 ---
 
@@ -1339,7 +1380,9 @@ FP gate: most modern reward systems use SushiSwap's `_updateRewardDebt` pattern 
 
 **Status:** ~20 Clara anchors. Detector EV MEDIUM (FP rate higher; needs Skeptic enrichment to discriminate). Hypothetical catch rate on cross-pollination: 0.10-0.15. Mature pattern, but constantly re-invented in new staking systems.
 
-### CANDIDATE-W: ERC2771 / Trusted-Forwarder `_msgSender()` Misuse on Burn / Transfer (Clara intake 2026-05-24, proposed)
+### CANDIDATE-W (PROMOTED 2026-05-25 → DC-17, ERC2771 / Trusted-Forwarder `_msgSender()` Misuse on Burn / Transfer). See active catalog DC-17 above for full spec, detector status, and sub-pattern enumeration. Original CANDIDATE-stage framing preserved below for historical continuity.
+
+#### CANDIDATE-W (historical, pre-promotion): ERC2771 / Trusted-Forwarder `_msgSender()` Misuse on Burn / Transfer (Clara intake 2026-05-24, proposed)
 
 **Class statement:**
 
