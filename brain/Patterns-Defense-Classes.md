@@ -1226,6 +1226,19 @@ A consumer with ≥1 wrapper passes the Kamino three-layer convergence test. ZER
 
 **Historical note:** Filed as net-new CANDIDATE-T from Clara Ground-Truth bulk intake 2026-05-24 (no prior brain anchor). Promotion-on-filing because Clara anchor count (~37) and the structural pattern repeatability (5+ years of recurring router drains per Clara intake Observation C) exceeded the DC-9 promotion bar at intake time.
 
+**Reference baseline — LiFi post-2022 architectural fix (CONFIRMED INTACT 2026-05-25, Ogie msg 7725 proposal A) [INSPECTED]:**
+
+LiFi 2022-03-20 ($202K) was the canonical Clara anchor that opened the DC-14 class. The post-incident architectural fix has held: `lifinance/contracts` HEAD 61ef8dcd (2026-05-22) ran cand-t-detector against 394 .sol files → **0 findings**. The defense pattern that closes DC-14 cleanly:
+
+1. **Explicit `_receiver` parameter binding** — `swapAndExecute` / `swapAndCompleteBridgeTokens` take `_receiver` as an explicit argument; downstream transferFrom is bound to `_receiver`, not to attacker-supplied `from`
+2. **`nonReentrant` modifier** on all Executor entry-points (Executor.sol L100+131)
+3. **Backend-generated `LibSwap.SwapData[]` calldata constraint** — Cantina program OOS rule: "self-crafted calldata" not in scope. Means user-supplied `from` reaches the contract only via off-chain-signed routes that re-validate
+4. **Receiver* periphery layer** — 5 dedicated Receiver contracts that re-validate the destination address against signed intent
+
+This is the **structural reference DC-14 defense**. Future Gate 1 surveys finding router/aggregator transferFrom patterns should compare against this baseline. Defense ratio: explicit _receiver + nonReentrant + backend-calldata + Receiver* re-validation = 4-layer defense. Any router shipping with fewer than 3 of these layers is candidate Gate 2 surface.
+
+**Source:** lifi Gate 1 task #57, 2026-05-25. Foreclosure-receipt at `hunts/2026-05-25-lifi-gate1.md`. Operator-approved msg 7725 proposal A.
+
 ---
 
 ### DC-15: AMM Pair Reserve-Skew via Custom Transfer / Burn / Skim (PROMOTED 2026-05-24, Ogie msg 7695)
@@ -1344,7 +1357,126 @@ OZ canonical pattern imports `ERC2771Context` from `node_modules/@openzeppelin/.
 
 **Cross-pollination with CANDIDATE-P (Drift durable-nonce):** both classes exploit identity/state staleness across an off-chain relayer boundary. DC-17 is the meta-tx forwarder version; CANDIDATE-P is the durable-nonce pre-signed-tx version. Combined cross-domain lens surfaces relayer-class bugs in any future audit target with relayer integration.
 
-**Historical note:** Pre-promotion tracked as CANDIDATE-W (Clara intake bulk-filed 2026-05-24, brain commit e810bd3). The 3-anchor threshold + the structural identity-mismatch class (distinct from generic auth bugs) justified DC promotion. Operator-approved msg 7712. DC-17 is the highest DC-N currently active (DC-1..17). Next promotions awaiting operator review: CANDIDATE-V (~20 anchors, highest-anchor-count remaining), CANDIDATE-Y (8 anchors), CANDIDATE-Z (5 anchors).
+**Historical note:** Pre-promotion tracked as CANDIDATE-W (Clara intake bulk-filed 2026-05-24, brain commit e810bd3). The 3-anchor threshold + the structural identity-mismatch class (distinct from generic auth bugs) justified DC promotion. Operator-approved msg 7712. Subsequent V/Y/Z promotions to DC-18/19/20 followed on 2026-05-25 (msg 7725).
+
+---
+
+### DC-18: Reward / Staking Accumulator Reuse Without Per-User Snapshot Invalidation (PROMOTED 2026-05-25, Ogie msg 7725)
+
+> **Promotion event:** Promoted from CANDIDATE-V on 2026-05-25. Clara Ground-Truth bulk intake surfaced **~20 anchors** with $3-5M+ named exposure (NFD $1.3M + YYDS $742K canonical anchors). Operator decision: msg 7725. DC-18 opens the third wave of Clara intake promotions (DC-18/19/20 filed 2026-05-25 in the same operator-active window).
+
+**Class statement (DC-18):**
+
+> A staking, farming, or reward-distribution contract tracks reward eligibility via a global per-pool accumulator (`accRewardPerShare`, `cumulativeIndex`, `lastUpdate`) and a per-user record (`userInfo[u].rewardDebt`, `lastClaim`, `pendingReward`). The accumulator is correctly updated on deposit / withdraw, BUT the per-user `rewardDebt` snapshot is NOT correctly invalidated on token transfer (LP-share transfer, NFT-stake transfer, or external delegation). Attacker buys LP shares → transfers to a fresh wallet → both wallets claim the same reward against the unsynchronized per-user records. Alternatively: attacker manipulates the accumulator via flash-loan deposit → withdraws → still has the snapshot to claim against. Specialization of DC-9 sub-4 (state-not-invalidated-repeated-mint) applied to reward distribution rather than mint-by-signature.
+
+**Sub-pattern enumeration:**
+
+1. **transfer-no-rewardDebt-sync** — staking-token transfer hook absent or incomplete; `_beforeTokenTransfer` does not call `_updateUser(from, to)` to settle pending rewards before share-balance changes
+2. **flash-deposit-accumulator-manipulation** — attacker flash-loans capital, deposits, manipulates accumulator via reward injection, withdraws same-block; per-user snapshot still claimable
+3. **referral-overpay-no-snapshot-cap** — referral-tier reward systems pay against a snapshot that was never invalidated when the referrer rebalanced
+4. **NFT-stake-transfer-no-snapshot-reset** — NFT-position staking pays against the original staker's snapshot after position transfer
+
+**Anchor incidents (Clara):**
+- NFD 2022-09-08 **$1.3M** (canonical reward Sybil anchor) **[ASSUMED]**
+- YYDS 2022-09-08 **$742K** (referral overpayment, sub-3) **[ASSUMED]**
+- BCT 2023-12-09 $2.5K **[ASSUMED]**
+- GDS — large-volume "Transferable LP Share Reuse" direct-class anchor **[ASSUMED]**
+- WECOStaking, BambooAI, BigBangSwap, FireBird, Floor DAO, FarmZAP, JUICE, OKC, CAROL, EHIVE, GROKD, BurnsDeFi, Audius (gov-reinit), Pancake forks, BabySwap, Annex, ATK — ~20 total Clara anchors tagged `gap:reward-drain` **[ASSUMED]**
+- Combined Clara USD: **$3-5M+ named**
+
+**Detector coverage (current shipped):**
+
+- `/home/claude-code/.tmp-build/v6/buzzshield-cand-v-detector.js` (2026-05-24 shipped) — DC-18 production detector
+- Detector primitive: `claim()` / `harvest()` / `withdraw()` / `collect()` reads `userInfo[msg.sender].rewardDebt` AND updates `rewardDebt` AFTER reward paid AND staking-token transfer does NOT call `_updateUser(from, to)` hook
+- FP gate: modern reward systems use SushiSwap's `_updateRewardDebt` pattern in `_beforeTokenTransfer`. Skeptic confirms absence of that hook before promoting to HIGH
+- E2E test: `/home/claude-code/.tmp-build/v6/tests/detector-v-e2e.test.js` 5/5 PASS
+
+**Cross-pollination scan targets (active):** every staking / farming protocol with custom transfer hooks. MasterChef-fork ecosystem (Pancake / Annex / ATK / BabySwap derivatives), NFT-position staking (Uniswap V3 manager-derived), reward-snapshot governance forks (Audius, dYdX-class callback patterns). Pair-check each against DC-18 sub-patterns at Skeptic verification time.
+
+**Historical note:** Pre-promotion tracked as CANDIDATE-V (Clara intake bulk-filed 2026-05-24, brain commit e810bd3). The ~20-anchor threshold (vastly exceeding 2+ promotion bar) + the structural pattern repeatability across MasterChef-fork ecosystem justified DC promotion. Operator-approved msg 7725.
+
+---
+
+### DC-19: `from == to` Self-Transfer Accounting Mutation (PROMOTED 2026-05-25, Ogie msg 7725)
+
+> **Promotion event:** Promoted from CANDIDATE-Y on 2026-05-25. Clara Ground-Truth bulk intake surfaced **8 anchors** with ~$5M named exposure (SSS $4.6M canonical anchor). Operator decision: msg 7725. DC-19 is the token-class layer of the AMM-pair-skew family (DC-15); both filed as standalone DC promotion AND retained as DC-15.Y sub-pattern per dual-layer composition.
+
+**Class statement (DC-19):**
+
+> A token's `_transfer(from, to, amount)` does `_balances[from] -= amount; _balances[to] += amount;` WITHOUT a `from == to` short-circuit. If the token has fee-on-transfer, deflationary burn, reflection, or other accounting mutations layered on top, calling `_transfer(addr, addr, amount)` produces: (a) double-counted accounting (balance goes UP by `amount * tax%`), or (b) silent mint (`_balances[addr] += amount` runs first, then `-= amount * (1-tax)` from a now-inflated balance), or (c) supply inflation (custom hook fires twice on the same address). Attacker uses self-transfer in a loop to mint balance from nothing.
+
+**Sub-pattern enumeration:**
+
+1. **fee-on-transfer-self-double-tax** — fee deduction runs against post-credit balance, attacker gains net tokens per self-tx
+2. **reflection-self-double-credit** — reflection-redistribute hook fires on `to` AND on `from` independently
+3. **burn-on-transfer-self-mint** — `_balances[from] -= amount; _balances[to] += (amount - burn); _burn(from, burn);` runs `+= amount` before `-=`, attacker keeps the diff
+4. **custom-balanceOf-hook-double-fire** — `_beforeTokenTransfer` mutates `_balances[from]` and `_balances[to]` separately; same address double-credited
+5. **DC-15.Y compound** — composed with AMM pair to drain reserves (see DC-15 active catalog)
+
+**Anchor incidents (Clara):**
+- SSS 2024-03-21 **$4.6M** (largest single anchor, fee-on-transfer compound) **[INSPECTED]** (published post-mortem)
+- DeezNutz 2024-02-21 **$170K** **[ASSUMED]**
+- MINER 2024-02-14 **$77.7K** **[ASSUMED]**
+- BRAToken 2023-01-10 **$41K** ("Self-transfer tax bug") **[ASSUMED]**
+- APIG 2023-09-08 **$169K** **[ASSUMED]**
+- LPC 2022-07-25 **$46K** **[ASSUMED]**
+- 2 additional implied class anchors
+- Combined Clara USD: **~$5M**
+
+**Detector coverage (current shipped):**
+
+- `/home/claude-code/.tmp-build/v6/buzzshield-cand-y-detector.js` (2026-05-24 shipped) — DC-19 production detector
+- Detector primitive: token's `_transfer` / `_update` does NOT include `if (from == to) return;` short-circuit AND contract has fee-on-transfer / reflection / custom `_balances` mutation hook
+- FP gate: pure-ERC20 tokens (no custom hooks) are immune; detector requires positive-detection of mutation hook before flagging
+- E2E test: `/home/claude-code/.tmp-build/v6/tests/detector-y-e2e.test.js` 5/5 PASS
+
+**Cross-pollination scan targets (active):** every memecoin / reflection-token / fee-on-transfer token deployed on BSC/Ethereum/Base/Polygon. Detector EV HIGH per build-cost ratio — class is mechanical and grep-friendly. Plus any rebase token with custom transfer logic.
+
+**DC-15.Y dual enumeration:** DC-19 also lives as DC-15.Y sub-pattern (parent DC-15 AMM pair-skew family). The same exploit composes at BOTH the token-class layer (DC-19 standalone) AND the pair-class layer (DC-15.Y compound with AMM sync()). Future detector enrichment: combine DC-19 standalone-detection with DC-15 pair-context to surface compound CRITICAL findings on memecoin pairs.
+
+**Historical note:** Pre-promotion tracked as CANDIDATE-Y (Clara intake bulk-filed 2026-05-24, brain commit e810bd3). The 8-anchor threshold + SSS $4.6M anchor [INSPECTED] published post-mortem + dual-layer composition with DC-15 justified DC promotion. Operator-approved msg 7725.
+
+---
+
+### DC-20: Rebase Token Cache Invalidation Failure (PROMOTED 2026-05-25, Ogie msg 7725)
+
+> **Promotion event:** Promoted from CANDIDATE-Z on 2026-05-25. Clara Ground-Truth bulk intake surfaced **5 anchors** with ~$5.3M named exposure (CauldronV4 $4.7M + ElasticSwap $500K canonical anchors). Operator decision: msg 7725. DC-20 closes the Clara-intake DC promotion wave at 10 promotions (DC-11..20). Subclass of Doctrine #31 (custom hooks break standard invariants) — rebase-token storage-cache is the canonical structural violation.
+
+**Class statement (DC-20):**
+
+> A rebase token (Ampleforth-class, OHM staking, AAVE aTokens, Compound cTokens, stETH, OUSD, OETH) exposes `balanceOf(u) = _shares[u] * _index() / _SCALE` — a COMPUTED property, not a stored property. A downstream consumer (vault, AMM, lending market, debt-position tracker) caches `balanceOf(u)` at time T and consumes the cached value at time T+1 across an index update. The cached value is now stale — either over-priced (rebase up, attacker over-redeems against stale-low debt-cache) or under-priced (rebase down, protocol over-mints to attacker against stale-high collateral-cache). Attacker triggers the index update mid-flow via flash-loan-deposit-into-rebase-pool or via a single-tx settle-cycle that crosses the rebase boundary.
+
+**Sub-pattern enumeration:**
+
+1. **debt-cache-stale-on-rebase** — borrower's debt is cached pre-rebase; rebase up shrinks effective debt; borrower repays the cached (smaller) amount, walks with collateral (CauldronV4 anchor)
+2. **collateral-cache-stale-on-rebase** — collateral value cached pre-rebase; rebase down inflates the apparent collateral-to-debt ratio; over-borrow or over-mint against the stale-high cache (ElasticSwap anchor)
+3. **pair-reserve-stale-on-rebase** — AMM pair caches `balanceOf(pair)` as reserve; rebase-token rebases against the pair; reserve out-of-sync until `sync()`; arbitrageur drains the asymmetric reserve
+4. **read-asymmetric-cache-vs-live-mismatch** — protocol caches the value but reads `live` for related computation; the two diverge across rebase; arbitrage between cache-read and live-read
+
+**Anchor incidents (Clara + brain):**
+- CauldronV4 2024-01-30 **$4.7M** (canonical sub-1 anchor — "Debt rebase exploit") **[INSPECTED]** (published post-mortem)
+- ElasticSwap 2022-12-13 **$500K** (sub-2 anchor — "Rebase exploit") **[INSPECTED]** (published post-mortem)
+- QUATERNION 2023-01-18 $4K ("Pair-rebase accounting drift", sub-3) **[ASSUMED]**
+- HATE 2023-09-05 **$12.8K** **[ASSUMED]**
+- QWAStaking 2023-09-05 $696 **[ASSUMED]**
+- Combined Clara USD: **~$5.3M**
+
+**Detector coverage (current shipped):**
+
+- `/home/claude-code/.tmp-build/v6/buzzshield-cand-z-detector.js` (2026-05-24 shipped) — DC-20 production detector
+- Detector primitive: contract calls `IERC20(rebaseToken).balanceOf(...)` AND caches result to storage / memory AND uses cached result AFTER any external call that could trigger rebase AND target token is known-rebase (stETH / AMPL / OHM staking / lendingPool aToken / OUSD / OETH)
+- Rebase-token catalog: stETH, wstETH (cache target NOT wrapped), AMPL, OHM, sOHM, aDAI / aUSDC / aWETH / aWBTC (AAVE aTokens), cDAI / cUSDC / cWETH (Compound cTokens), OUSD, OETH, frxETH, sUSDS, RAI (formerly), Sturdy stable-vaults
+- E2E test: `/home/claude-code/.tmp-build/v6/tests/detector-z-e2e.test.js` 5/5 PASS
+
+**Canonical negative example — Origin Dollar `lastOraclePrice` (defended-by-design) [INSPECTED]:**
+
+Origin's `BridgedWOETHStrategy.lastOraclePrice` (file: `contracts/strategies/BridgedWOETHStrategy.sol`, audited 2024+) DOES cache an oracle price to storage, but the cache is **monotone-up only** + documented under-report design. The cache can only INCREASE on update (never decrease); reads where live oracle is below cache return live (lower) value — protocol always under-reports collateral vs reality. Attacker cannot exploit stale-low cache because protocol takes the conservative (lower) of live + cache. This is the **structural answer** to DC-20: don't avoid caching, design the cache + read function so the asymmetric error mode favors the protocol. Future Gate 1 surveys finding `lastOraclePrice`-style cache should check: (a) is the cache monotone-up only? (b) is the read function `min(live, cache)` or `max(live, cache)`? Only `min(live, cache)` is defended.
+
+**Cross-pollination scan targets (active):** every lending market with rebase-token collateral support (Aave forks, Compound forks, Cauldron / Spell ecosystem, Sturdy, Morpho with rebase-asset adapters), every AMM with rebase-token pair (Curve stETH/ETH pools, Uniswap V3 with aToken pairs), every vault wrapping rebase tokens for redistribution.
+
+**Cross-pollination with Doctrine #31a:** DC-20 is the cache-class manifestation; Doctrine #31a is the yield-ceiling calibration that bounds rebase-timing-attack profit. Both apply to same target-class (rebase protocols) but at different layers — DC-20 detects the substrate, Doctrine #31a calibrates the economic ceiling. Gate 1 Step 5 should run BOTH in parallel: if DC-20 finds no cache, Doctrine #31a still applies to bound any timing-attack class.
+
+**Historical note:** Pre-promotion tracked as CANDIDATE-Z (Clara intake bulk-filed 2026-05-24, brain commit e810bd3). The 5-anchor threshold + CauldronV4 $4.7M [INSPECTED] anchor + structural distinction from generic oracle staleness (DC-12) + sub-doctrine relationship to Doctrine #31a justified DC promotion. Operator-approved msg 7725. DC-20 closes the Clara-intake DC promotion wave at 10 total (DC-11..20).
 
 ---
 
@@ -1356,7 +1488,9 @@ The following 7 candidates were filed from the Clara Ground-Truth bulk-intake (`
 
 ### CANDIDATE-U (PROMOTED 2026-05-24 → DC-15, AMM Pair Reserve-Skew via Custom Transfer/Burn/Skim, PARENT ABSTRACTION). See active catalog DC-15 above. R + S concrete sub-patterns kept as-is per operator directive.
 
-### CANDIDATE-V: Reward / Staking Accumulator Reuse Without Per-User Snapshot Invalidation (Clara intake 2026-05-24, proposed)
+### CANDIDATE-V (PROMOTED 2026-05-25 → DC-18, Reward / Staking Accumulator Reuse Without Per-User Snapshot Invalidation). See active catalog DC-18 above for full spec, detector status, and sub-pattern enumeration. Original CANDIDATE-stage framing preserved below for historical continuity.
+
+#### CANDIDATE-V (historical, pre-promotion): Reward / Staking Accumulator Reuse Without Per-User Snapshot Invalidation (Clara intake 2026-05-24, proposed)
 
 **Class statement:**
 
@@ -1431,7 +1565,9 @@ FP gate: most contracts that do `price * amount / 1e18` DO handle decimals corre
 
 **Status:** 3 anchors (proposal-threshold met). High-EV class because each hit is typically a CRITICAL severity. Detector EV MEDIUM-HIGH; needs Skeptic semantic check (decimal-of-A vs decimal-of-B vs SCALE constant).
 
-### CANDIDATE-Y: `from == to` Self-Transfer Accounting Mutation (Clara intake 2026-05-24, proposed)
+### CANDIDATE-Y (PROMOTED 2026-05-25 → DC-19, `from == to` Self-Transfer Accounting Mutation). See active catalog DC-19 above for full spec, detector status, and sub-pattern enumeration. Original CANDIDATE-stage framing preserved below for historical continuity.
+
+#### CANDIDATE-Y (historical, pre-promotion): `from == to` Self-Transfer Accounting Mutation (Clara intake 2026-05-24, proposed)
 
 **Class statement:**
 
@@ -1455,7 +1591,9 @@ FP gate: most contracts that do `price * amount / 1e18` DO handle decimals corre
 
 **Status:** 8 anchors (proposal-threshold met). Detector spec trivial: AST grep + presence-of-custom-hook qualifier. HIGH detector-EV per build-cost.
 
-### CANDIDATE-Z: Rebase Token Cache Invalidation Failure (Clara intake 2026-05-24, proposed)
+### CANDIDATE-Z (PROMOTED 2026-05-25 → DC-20, Rebase Token Cache Invalidation Failure). See active catalog DC-20 above for full spec, detector status, and sub-pattern enumeration. Original CANDIDATE-stage framing preserved below for historical continuity.
+
+#### CANDIDATE-Z (historical, pre-promotion): Rebase Token Cache Invalidation Failure (Clara intake 2026-05-24, proposed)
 
 **Class statement:**
 

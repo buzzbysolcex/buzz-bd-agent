@@ -1470,6 +1470,55 @@ EV = P(finding) × bounty_cap × P(acceptance) × P(first-to-report) × brain_ov
 
 **Lane 3 surface.** A "post-incident audit saturation" methodology piece — published when a protocol gets exploited, here's how to triage whether to chase the new bounty — is itself publishable. Adds to the foreclosure-receipts portfolio.
 
+### Doctrine #27 sub-rule — Sustained Multi-Firm Audit Cadence Hard Discount (added 2026-05-25 — LiFi Gate 1 foreclosure, Ogie msg 7725 proposal C) [INSPECTED]
+
+**Statement.** When a target's `auditLog.json` (or equivalent audit-tracking artifact) reveals **≥30 audit reports over ≥18 months of sustained cadence** (multi-firm, facet-by-facet, with audit-AHEAD-of-HEAD or audit-mirror-of-HEAD timing), apply **maximum 0.4× Doctrine #27 discount** AND **skip deep-Gate-2-trace by default**; surface as FORECLOSURE-RECEIPT with brain-compound capture only. Continuous Layer 0 monitoring of `late_changes` substitutes for fresh-surface scanning — re-activate Gate 2 only when `late_changes` introduces a non-housekeeping diff.
+
+**Worked anchor — LiFi `lifinance/contracts` Gate 1 (2026-05-25 FORECLOSURE-RECEIPT, task #57).**
+
+- 85 audit reports across `audit/reports/` directory (Cantina + Sujith Somraaj + Spearbit + Trail of Bits)
+- 18+ months sustained cadence: Cantina PreComp + 10+ Sujith Somraaj dedicated facet audits + dedicated firm-per-facet rotation
+- HEAD 61ef8dcd 2026-05-22; newest audit 2026-05-19 (GenericSwapFacetV3 v2.0.0) — audit AHEAD of HEAD by 2 days
+- Late_changes (last 30d): 4 entries, ALL housekeeping (test coverage, deprecation revert, foundry-profile cleanup) — NOT new attack surface
+- Cantina cap auth-walled; inferred ~$1M Critical-equivalent placeholder; EV after maximum discount: ~$4K — below silo-v2 foreclosure floor
+- Detector rotation: cand-t / cand-w / cand-y → 0/0/0 findings on 394 .sol files = post-2022 architectural fix CONFIRMED INTACT
+
+**Decision rule integration with Standing Intake Step 3 EV calculation:**
+
+```
+if (audit_count >= 30 AND audit_cadence_months >= 18 AND multi_firm == TRUE):
+    apply_discount = 0.4×   # maximum Doctrine #27 discount
+    default_action = "FORECLOSURE-RECEIPT, skip Gate 2 deep-trace"
+    reactivation_trigger = "non-housekeeping late_change in Layer 0 monitoring"
+else if (audit_count >= 30 AND audit_cadence_months >= 12):
+    apply_discount = 0.5×   # standard Doctrine #27 maximum
+    default_action = "Gate 1 with reduced deep-trace; explicit brain-overlap requirement"
+else:
+    apply standard Doctrine #27 time-window discount (0.4-1.0×)
+```
+
+**Where this DOES NOT apply (real-bug classes that bypass the discount):**
+
+1. **Net-new substrate not covered by historical audits** — if a facet was added AFTER the audit-cadence window started, audit-saturation does NOT extend to it. Treat as fresh-Gate-1.
+2. **Cross-protocol composition** — audits cover the target in isolation; cross-protocol composition surfaces are typically OOS even for heavily-audited targets. Apply lens stack at composition boundary.
+3. **Off-chain trust-anchor delegation** (per Doctrine #29) — audit-saturation on the platform doesn't propagate to consumer-side trust configuration. Apply Doctrine #29 KILL-transfers-pattern check.
+4. **Brain lens unique to Buzz** (per Doctrine #27 original counter-pattern) — newly-promoted DC class or detector not in public auditor mindshare may surface in heavily-audited targets that other auditors miss.
+
+**Productization signal:**
+
+Detector value: ZERO. Triage value: HIGH (saves 2-6h per heavily-audited target Gate 1 + reduces wasted Gate 2 dispatches). Implementation: append to `.claude/rules/standing-intake-protocol.md` Step 3 EV calculation as `audit_cadence_hard_discount` sub-routine. Operator-approved msg 7725 proposal C, 2026-05-25.
+
+**R8 tags:**
+
+- `[INSPECTED]` LiFi 85 audit reports in `audit/reports/` directory (file-tree confirmed, task #57 Gate 1)
+- `[INSPECTED]` LiFi audit-AHEAD-of-HEAD timing (newest audit 2026-05-19, HEAD 2026-05-22)
+- `[INSPECTED]` LiFi 4 late_changes in 30d all housekeeping (Layer 0 git-security analyzer output)
+- `[INSPECTED]` cand-t / cand-w / cand-y detector rotation 0/0/0 findings (task #57 Step 5.5)
+- `[ASSUMED]` Cantina cap ~$1M placeholder (auth-walled; inferred from Cantina-tier norms)
+- `[ASSUMED]` 0.4× maximum discount appropriate for ≥30 audits + ≥18mo cadence (first application; calibrate on future sUSDS / frxETH / Yearn V3 deployments)
+
+**Source.** lifi Gate 1 task #57 Step 9 brain compound proposal C, 2026-05-25. Foreclosure-receipt at `hunts/2026-05-25-lifi-gate1.md`. Operator-approved msg 7725 proposal C.
+
 ---
 
 ## Doctrine #28 — Vendored-submodule HE-03b enforcement is MANDATORY at propagation-sweep time (added 2026-05-22 — Step 9 75× inflation discovered)
@@ -1702,3 +1751,43 @@ Detector value: ZERO (no Layer 1d substrate to grep). Triage value: HIGH (saves 
 **Source.** origin-dollar Gate 2 task #53 second-pass economic analysis, 2026-05-25. Foreclosure-receipt at `data/lane1/gate2-clones/origin-dollar-rebase-sandwich-foreclosed.md`. Operator-approved msg 7715 proposal D.
 
 **Status.** Filed 2026-05-25 as sub-doctrine of Doctrine #31 (custom hooks break standard invariants — rebase hooks are the canonical subclass). Sits in Standing-Intake Step 2 calibration layer above Step 5 Gate 1 execution. Cross-pollination expected on first sUSDS / frxETH / Sturdy Gate 1 dispatch.
+
+### Doctrine #31a cross-chain variant — Rebase-Bridge Wrap/Unwrap Naming-Inversion Surface (added 2026-05-25 — LiFi LidoWrapper observation, Ogie msg 7725 proposal B) [INSPECTED]
+
+**Statement.** [INSPECTED] When a rebase token (stETH, OUSD, OETH, sUSDS, frxETH, RAI-class) is bridged via an L2 wrap/unwrap adapter that exposes asymmetric handling between paired wrap/unwrap functions, the naming inversion creates a Doctrine #31a substrate even WITHOUT an internal storage cache. The cross-chain variant extends CauldronV4's internal-cache class (DC-20) to the cross-chain adapter layer: the adapter's wrap function accepts `stETH` and emits `wstETH`, the unwrap function accepts `wstETH` and emits `stETH`, BUT the balance-vs-amount asymmetric handling (rebase index applied on one side, not the other; OR naming convention reversed between local view and L2 destination view) creates an exploit window if the user-supplied amount is interpreted in the wrong unit on either side of the bridge.
+
+**Worked anchor — LiFi LidoWrapper.sol (FORECLOSED by `@dev` warning, 2026-05-25 lifi Gate 1) [INSPECTED]:**
+
+- `LidoWrapper.sol L2` — stETH ↔ wstETH naming inversion in bridge-adapter wrap/unwrap
+- Asymmetric handling between paired functions: rebase index applied on wrap side; direct passthrough on unwrap side; user-supplied amount could be misinterpreted as shares vs balance across bridge
+- **Defense:** explicit `@dev` warning: "Any stETH or wstETH tokens sent directly to the contract can be irrecoverably swept by MEV bots" — acknowledged-by-design, falls under Cantina OOS "known/acknowledged in audits"
+- Severity at best Low/Info on LiFi severity matrix (no user-fund-at-risk path beyond direct-deposit dust)
+- Class IS substrate; defense IS Doctrine #27 audit-saturation + `@dev` acknowledgment
+
+**Why this extends Doctrine #31a beyond CauldronV4:**
+
+CauldronV4 was the canonical internal-cache class (debt-cache stale on rebase). The LiFi LidoWrapper case shows the SAME class manifesting at the cross-chain bridge-adapter layer WITHOUT internal storage cache — the asymmetry is between the wrap-input view and the unwrap-output view, not between cache-time and consume-time. Future targets with stETH/wstETH or OUSD/OETH bridge adapters that LACK a `@dev` acknowledgment warrant Gate 2 escalation:
+
+1. **Check 1:** does the adapter expose paired wrap/unwrap functions with rebase-token on one side and non-rebase wrapper on the other?
+2. **Check 2:** is the amount parameter interpreted consistently across wrap/unwrap (both shares OR both balances)?
+3. **Check 3:** is there an explicit `@dev` warning acknowledging the asymmetric-deposit / MEV-sweep surface?
+4. **Verdict:** Check1=YES + Check2=NO + Check3=NO → **Gate 2 escalation candidate**. Check3=YES → **FORECLOSED by acknowledgment + Doctrine #27 (audit-saturation)**.
+
+**Cross-pollination scan targets:**
+
+Apply at Step 5.5 detector rotation against: Stargate stETH bridge adapter, Hop wstETH adapter, Across stETH adapter, Connext rebase-token bridges, LayerZero OFT-wrapper-for-rebase, any custom bridge adapter for OUSD / OETH / sUSDS / frxETH wrap-unwrap pair. For each: locate `wrap`/`unwrap` or `deposit`/`withdraw` paired functions; grep for rebase-token import; check `@dev` warning presence.
+
+**Productization signal:**
+
+Detector value: MEDIUM (AST-walkable: paired wrap/unwrap function detection + rebase-token import grep + `@dev`-warning presence-check). Triage value: HIGH at Gate 2 escalation decision. Implementation: extend `buzzshield-cand-z-detector.js` (DC-20 detector) with cross-chain-bridge-adapter sub-pattern; add `@dev`-warning negative-control to FP gate.
+
+**R8 tags:**
+
+- `[INSPECTED]` LiFi LidoWrapper.sol L2 stETH↔wstETH naming-inversion + `@dev` warning (task #57 Step 6 deferred-lead-1)
+- `[INSPECTED]` Cantina OOS "known/acknowledged in audits" rule covers @dev acknowledgments
+- `[ASSUMED]` Future bridge-adapter targets without `@dev` warning warrant Gate 2 (first cross-pollination application pending)
+- `[ASSUMED]` `@dev` warning presence is reliable acknowledgment signal across audit firms (Cantina convention; may vary by firm)
+
+**Source.** lifi Gate 1 task #57 Step 9 brain compound proposal B, 2026-05-25. Operator-approved msg 7725 proposal B.
+
+**Status.** Filed 2026-05-25 as cross-chain extension of Doctrine #31a (rebase-protocol yield-ceiling calibration). Together Doctrine #31a + #31a-cross-chain cover BOTH the internal-storage-cache class (CauldronV4 anchor) AND the cross-chain-bridge-adapter class (LiFi LidoWrapper anchor). DC-20 (rebase-cache-invalidation) is the detector substrate for both layers.

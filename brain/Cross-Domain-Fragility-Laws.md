@@ -819,7 +819,9 @@ When the next cross-domain public exploit hits, file under this ledger with the 
 
 ---
 
-_Cross-Domain Fragility Laws ledger | v1.8 | 2026-05-25 (JIT-Yield-Capture as Structural Property of Rebase-Mint-1:1 Protocols filed per Ogie msg 7715 proposal C — origin-dollar Gate 2 second-pass economic analysis bounded ~$2-3K profit per attack on $50M TVL, below Critical threshold + likely OOS prior-audit territory; Gate-1-economic-foreclosure template added for future rebase-protocol Gate 1 dispatches; v1.7 footer history preserved below.)_
+_Cross-Domain Fragility Laws ledger | v1.9 | 2026-05-25 (DC-18/19/20 promotions [CANDIDATE-V→DC-18 reward-accumulator + CANDIDATE-Y→DC-19 self-transfer-mutation + CANDIDATE-Z→DC-20 rebase-cache] per Ogie msg 7725 + 3 lifi brain proposals A/B/C filed: DC-14 LiFi post-2022 reference baseline INTACT, Doctrine #31a cross-chain rebase-bridge variant via LidoWrapper @dev-warning structural defense, Doctrine #27 sub-rule for ≥30-audit + ≥18mo sustained cadence with 0.4× maximum discount + skip-deep-trace; v1.8 footer history preserved below.)_
+
+_Prior footer — v1.8 | 2026-05-25 (JIT-Yield-Capture as Structural Property of Rebase-Mint-1:1 Protocols filed per Ogie msg 7715 proposal C — origin-dollar Gate 2 second-pass economic analysis bounded ~$2-3K profit per attack on $50M TVL, below Critical threshold + likely OOS prior-audit territory; Gate-1-economic-foreclosure template added for future rebase-protocol Gate 1 dispatches; v1.7 footer history preserved below.)_
 
 _Prior footer — v1.7 | 2026-05-21 (DC-8 cross-domain extension to MPC theorized after CB-MPC research pass — conjecture filed pending CB-MPC Gate 2; Lombard dual-trust mint chain filed as defensive pattern + cross-pollination opportunity for single-tier bridges, THORChain Bifrost specifically called out as Lane 1.5 candidate; v1.6 footer history preserved below.)_
 
