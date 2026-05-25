@@ -161,3 +161,69 @@ NEVER reveal IP 204.168.137.253. NEVER share keys. Tweets via War Room. Sentinel
 **Rollback:** `rm /home/claude-code/buzz-workspace/scripts/v6 && mv /home/claude-code/buzz-workspace/scripts/v6.pre-divergence-fix /home/claude-code/buzz-workspace/scripts/v6` — restores the 29 root-owned originals. Backup retained until W2 (or until operator confirms stability).
 
 **Validated:** Coinbase Smart Wallet validation scan run via symlinked path (Day 11 Phase 1e + #122 HE-19 pre-filter + 6 production detectors all confirmed firing through symlink). 5-gate verification logged in `/data/buzz/persistent/buzz-api/build-reports/2026-05-12-divergence-fix-shipped.md`.
+
+---
+
+## DVT (Distributed Validator Technology) Family Lens — Buzz Architecture Pre-Loaded Surfaces (added 2026-05-25 — SSV Network Gate 1, Ogie msg 7736 proposal B)
+
+> **Operator-approved DVT lens pre-load.** SSV Network was Buzz's first DVT target (Gate 1 task #63, 2026-05-25, FORECLOSURE-RECEIPT). The lens stack that surfaced cleanly during SSV scan is now pre-loaded for future Diva / Obol / EigenLayer-DVT / Lido-CSM / RockX-DVT / Ankr-DVT / Rocketpool-Atlas-DVT Gate 1 dispatches.
+
+### Cluster lifecycle paired-functions (DC-7 substrate)
+
+Every DVT protocol exposes cluster operations as state machines. The DC-7 lens (Validating-Field ≠ Consuming-Field on Adjacent Function Pipelines) maps directly to:
+
+| Paired-function family | Operations | Substrate to check |
+|---|---|---|
+| **Cluster lifecycle** | `createCluster` / `removeCluster`, `freezeCluster` / `unfreezeCluster`, `pauseOperator` / `resumeOperator` | Each pair must validate AND consume the SAME identity/state field |
+| **Operator lifecycle** | `registerOperator` / `removeOperator`, `setOperatorFee` / `claimOperatorFee`, `optInToCluster` / `optOutOfCluster` | Fee-index snapshot + balance-snapshot consistency across activate/deactivate |
+| **Validator lifecycle** | `registerValidator` / `removeValidator`, `activateValidator` / `exitValidator`, `bondCluster` / `unbondCluster` | Cluster balance recompute on validator state transitions |
+| **Stake / Unstake** | `stake` / `requestUnstake`, `claim` / `unclaim`, `delegate` / `undelegate` | Same accumulator-index settle pattern (DC-18) |
+
+**Lens application rule:** For each paired-function in target, locate VALIDATING field (e.g., `clusterId`) and CONSUMING field (e.g., `_clusterState[clusterId].operatorBitmap`). If the consuming-side reads a field NOT bound by the validating-side check, surface as DC-7 candidate.
+
+### EB Drift class (DVT-specific stale-state)
+
+**Class statement.** [INSPECTED — SSV Known Issue #1] DVT protocols commit Effective Balance (EB) snapshots to a Merkle root at periodic intervals (cluster snapshot, oracle commit, beacon-state-anchor). Between commits, the on-chain protocol references a SNAPSHOT EB while the actual beacon-chain EB has drifted. Attacker invokes liquidation / fee-extraction / cluster-rebalance with a stale-but-valid root committed BEFORE the drift, causing auto-liquidation against a stale-high EB while the real EB has dropped below liquidation threshold.
+
+**Cross-pollination check primitive:** grep for `commitRoot` / `commitSnapshot` / `submitOracleRoot` / `updateBeaconState` callers that DO NOT enforce `(currentRoot.blockNumber - latestRoot.blockNumber) < MAX_ROOT_DRIFT` at the liquidation / fee-extract / rebalance read site. If the drift bound is missing, candidate Gate 2 surface.
+
+**Distinction from generic oracle staleness (DC-12 sub-1 spot-no-TWAP / sub-6 cross-chain-staleness):** EB drift is INTRA-CHAIN message-passing between oracle quorum and consumer; no cross-chain bridge; no AMM spot. The drift is in the validator's beacon-side state vs the on-chain snapshot, NOT in price feeds.
+
+### Oracle-quorum frozen-supply pattern (DVT-specific defense)
+
+**Class statement.** [INSPECTED — SSV Known Issue #2 frozen index pattern] When an operator is removed mid-cycle, the oracle-quorum frozen-supply pattern captures the operator's earned-but-unsettled fees in a `frozen_index` snapshot, allowing post-removal fee extraction without exposing the protocol to additional accumulation. This is a DC-18 (reward accumulator) defense pattern specific to DVT.
+
+**Defense recognition:** the protocol has a `frozenIndex[operator]` or `lastSettledIndex[operator]` field that captures the accumulator value at removal time. The operator can later call `extractFrozenFees(operator)` to claim against the snapshot, but cannot accumulate further. This is the DVT analog of the DC-9 sub-4 (state-not-invalidated repeated-mint) defense — the snapshot IS the invalidation.
+
+**Future Gate 1 check:** for DVT targets with operator-removal flow, confirm `frozen_index` defense present. If absent OR if the snapshot is mutable post-removal, surface as DC-18 candidate.
+
+### Cluster hooks (Doctrine #31 substrate)
+
+DVT clusters expose hooks for transfer / activation / fee-recipient-change / migration. Per Doctrine #31 (custom hooks break standard invariants), every hook is a candidate breakpoint for cluster accounting invariants.
+
+**SSV-class hook substrate observed (R8 [INSPECTED]):**
+- `onClusterUpdate(clusterId)` — fires on cluster state changes; check CEI ordering
+- `onOperatorChange(clusterId, operator)` — fires on operator add/remove; check fee-index settle ordering
+- `onValidatorActivation(validatorId, clusterId)` — fires on validator activation; check beacon-state binding
+- `onCSSVTransfer(from, to)` — CSSVToken hook on share transfers; SSV settles via `_syncFees + _settle(from) + _settle(to)`
+
+**Cross-pollination check primitive:** for each hook, identify ALL accumulator/state fields that the hook should sync; grep for the hook callsites to confirm sync ordering correctness (settle BEFORE balance change, not after).
+
+### Cross-pollination scan targets (active)
+
+Apply the DVT lens stack at Gate 1 Step 5.6 on:
+
+| Target | Platform | Status | DVT subclass |
+|---|---|---|---|
+| SSV Network | Immunefi $250K | FORECLOSED 2026-05-25 (reference baseline) | Cluster-operator-validator triplet |
+| Diva Staking | Immunefi (cap pending) | Watchlist | Cluster-operator pattern |
+| Obol Network | Immunefi (cap pending) | Watchlist | Charon DV operator pattern |
+| EigenLayer DVT (Hyve / Operator-Set DVT extensions) | Immunefi $1M+ | Watchlist | AVS-operator-cluster pattern |
+| Lido CSM (Community Staking Module) | Immunefi $2M+ | Watchlist | Solo-operator-via-bond pattern |
+| Rocketpool Atlas DVT | Watchlist | Watchlist | Node-operator-DVT-extension pattern |
+
+**Productization signal:** DVT lens stack is reusable across the cross-pollination scan targets above. Pre-loading saves 30-45 min per future DVT Gate 1 dispatch (no need to re-discover the cluster-operator-validator triplet substrate from scratch).
+
+### Source
+
+SSV Network Gate 1 task #63, 2026-05-25. Operator-approved Architecture.md pre-load per Ogie msg 7736 proposal B. R8 [INSPECTED] for all SSV-class anchors; [ASSUMED] for cross-pollination targets pending first Gate 1 application.
