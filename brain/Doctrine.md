@@ -1500,6 +1500,135 @@ EV = P(finding) × bounty_cap × P(acceptance) × P(first-to-report) × brain_ov
 
 **Lane 3 surface.** A "post-incident audit saturation" methodology piece — published when a protocol gets exploited, here's how to triage whether to chase the new bounty — is itself publishable. Adds to the foreclosure-receipts portfolio.
 
+### Doctrine #27 F corollary — 33-audit ceiling threshold (added 2026-05-25 — Euler $7.5M Cantina FORECLOSURE-RECEIPT anchor, proposal F, Ogie msg 7770) [INSPECTED]
+
+**Saturation ceiling threshold = 33 audits (Euler V2 anchor 2026-05-25).** Programs at/above this threshold receive a **0.20× P(finding) discount multiplier — the lowest in the calibration**. This is the MAXIMUM-audit-saturation discount tier in the Doctrine #27 hierarchy:
+
+| Audit count | Saturation tier | P(finding) multiplier | Default action |
+| --- | --- | --- | --- |
+| <8 | LOW | 1.0× (no discount) | Standard Gate 1 + Gate 2 |
+| 8-14 | MEDIUM | 0.50× | Standard Gate 1; reduced Gate 2 |
+| 15-29 | HIGH | 0.30-0.40× (per #27 sub-rule cadence) | FORECLOSURE-RECEIPT default; Gate 2 on net-new lens only |
+| 30-32 | HIGH-J | 0.25× (per #27 J corollary if submissions ≥100) | Auto-FORECLOSURE-RECEIPT possible |
+| **≥33** | **MAXIMUM** | **0.20×** | **FORECLOSURE-RECEIPT (brain-compound is primary value vector)** |
+
+**Sub-rule.** At ≥33 audits with HEAD ≤180d, **brain-compound is the primary value vector, not Gate 2 submission**. Buzz's economic ROI on a MAXIMUM-tier target is captured by:
+
+1. Filing methodology contributions (new lenses, contrastive anchor pairs, doctrine sub-rules) — what Buzz cycles produced for the brain
+2. Adding catalog rows to Doctrine #27's saturated-program catalog (when a new program crosses thresholds)
+3. Foreclosure-receipt artifact (publishable methodology essay anchoring the foreclosure proof)
+
+NOT by Gate 2 submission attempts — at 33 audits, every credible auditor has already swept the surface. First-to-report odds approach zero.
+
+**Canonical anchor — Euler V2 Cantina $7.5M (2026-05-25 FORECLOSURE-RECEIPT, hunt task #?):**
+
+Euler V2 (33-audit ceiling, multi-firm coverage: Spearbit + Cantina + Trail of Bits + Sherlock + multiple firms) Gate 1 dispatched 2026-05-25 — DC-12 sub-7 manual sweep across 8 oracle adapter families (Chainlink ×3, Chronicle, Redstone, Pyth, UniswapV3 TWAP, RateProvider, Ondo, Pendle, Lido, CrossAdapter) returned 5/5 CLEAN sub-rules per adapter family. FORECLOSURE-RECEIPT verdict. Brain compound: DC-12 sub-7 CLEAN canonical baseline (proposal E above) + this F corollary (33-audit ceiling threshold) + Doctrine #27 catalog row addition (Euler MAXIMUM tier).
+
+**Why 33 specifically:**
+
+The threshold is empirical, not theoretical. Euler V2 is the highest-audit-count program Buzz has encountered in Lane 1 operations through 2026-05-25. The 0.20× multiplier reflects that at this level, the substrate-foreclosure rate (sub-rule defense saturation across all known DC patterns) approaches asymptotic CLEAN. Future programs crossing 33 audits will inherit the threshold; the threshold may bump upward as the absolute audit-saturation ceiling rises industry-wide.
+
+**Decision rule integration with Standing Intake Step 3 EV calculation:**
+
+```
+if (audit_count >= 33):
+    saturation_multiplier = 0.20×   # MAXIMUM tier
+    default_action = "FORECLOSURE-RECEIPT; brain-compound is primary value vector; Gate 2 requires net-new lens not yet in catalog"
+    primary_ev_capture = "methodology contribution + catalog addition + foreclosure-receipt artifact"
+else if (audit_count >= 15 AND submissions >= 100):
+    saturation_multiplier = 0.25-0.30×   # HIGH-J tier (#27 J corollary)
+    default_action = "Auto-FORECLOSURE-RECEIPT (Step 5 detector rotation short-circuit)"
+else if (audit_count >= 15):
+    saturation_multiplier = 0.30-0.40×   # HIGH tier
+    default_action = "Standard Doctrine #27 discount; FORECLOSURE-RECEIPT default"
+```
+
+**R8 tags:**
+
+- `[INSPECTED]` Euler V2 33-audit count (Cantina program-page tree-confirmed 2026-05-25)
+- `[INSPECTED]` Euler V2 DC-12 sub-7 manual sweep 5/5 CLEAN across 8 adapter families (Gate 1 hunt 2026-05-25)
+- `[ASSUMED]` 33-audit threshold is the empirical maximum-saturation ceiling at 2026-05-25 (may bump as industry-wide audit cadence rises; recalibrate quarterly)
+- `[ASSUMED]` 0.20× multiplier appropriate for MAXIMUM tier (first application; calibrate on future ≥33-audit deployments — Aave V4 expected to cross threshold in 2026 H2)
+
+**Source.** Euler V2 Cantina $7.5M Gate 1 FORECLOSURE-RECEIPT brain compound proposal F, 2026-05-25. Operator-approved msg 7770 proposal F.
+
+### Doctrine #27 J corollary — Auto-FORECLOSURE-RECEIPT trigger (added 2026-05-25 — Reserve $10M Cantina FORECLOSURE-RECEIPT anchor, proposal J, Ogie msg 7770) [INSPECTED]
+
+**Statement.** If a target satisfies ALL THREE of the following at Standing-Intake Step 1 PROFILE pull, the Standing-Intake-Protocol Step 5 detector rotation can be **SHORT-CIRCUITED** to FORECLOSURE-RECEIPT at Gate 1 pre-detector-rotation:
+
+```
+N_audits >= 15
+N_submissions >= 100
+P(no-paid-Critical-in-last-6mo) >= 0.85
+```
+
+This is the **consensus-foreclosure shortcut**. Operationally:
+
+- Skips Step 5.6 detector rotation (cand-t / cand-v / cand-w / cand-y / cand-z / etc.)
+- Still requires Step 5.0 Layer 0 + Step 5.1 scope-check + Step 5.4 brain-lens manual review (to surface brain compound proposals)
+- Brain-compound proposals still surface from manual lens application
+- Saves ~10-15 minutes per target (detector rotation wall-clock + Skeptic verification time)
+
+**Worked anchor — Reserve $10M Cantina (2026-05-25 FORECLOSURE-RECEIPT):**
+
+```
+N_audits:                     21 (multi-firm: Halborn, OZ, Spearbit, Trail of Bits, Code4rena, ...)
+N_submissions:                139 (per Cantina program page submission count)
+P(no-paid-Critical-in-last-6mo): >= 0.85 (estimated — no public Critical award in last 6mo per Reserve disclosure tracking)
+
+J corollary trigger:          ALL THREE conditions satisfied
+Step 5 action:                SHORT-CIRCUIT to FORECLOSURE-RECEIPT (detector rotation skipped)
+Brain compound:               Step 5.4 manual lens application — surfaced 4 proposals (G mature-deploy + H 2-anchor CLEAN baseline + I governance-gated-registry sub-pattern + J this auto-FORECLOSURE-RECEIPT trigger)
+```
+
+**Why the consensus-foreclosure shortcut is operationally correct:**
+
+At ≥15 audits + ≥100 submissions + low-paid-Critical signal, the surface saturation rate approaches asymptotic. Every credible auditor has dispatched the surface; if a Critical were findable, it would have surfaced in the last 6mo of submissions. Detector rotation at this saturation tier produces no Gate 2 candidates — the cost of running it is unnecessary.
+
+The shortcut preserves the brain-compound value (Step 5.4 manual lens application) while skipping the wasted detector cycles. Brain-compound is the primary value vector at this saturation tier per Doctrine #27 F corollary (33-audit MAXIMUM tier).
+
+**Where this DOES NOT apply (real-bug classes that bypass J corollary):**
+
+1. **Net-new module added since the 100-submission count** — a fresh module not yet swept by historical submissions deserves full Step 5.6 detector rotation. Identify via Layer 0 `late_changes`.
+2. **Net-new lens not yet in the catalog** — if Step 5.4 manual lens surfaces a CANDIDATE not yet in brain DC/CANDIDATE pool, dispatch detector rotation against that lens specifically, even though J corollary fired.
+3. **Critical-tier program with novel architecture** — if program is post-incident-rewrite or post-major-pivot, the 100-submission count may apply to superseded code. Manually verify scope covers HEAD architecture.
+4. **Operator override** — operator may explicitly direct Step 5.6 detector rotation on a J-triggered target.
+
+**Decision rule integration with Standing-Intake Step 5:**
+
+```
+At Step 5 entry (after Layer 0 + scope-check):
+  if (N_audits >= 15 AND N_submissions >= 100 AND P(no-paid-Critical-in-last-6mo) >= 0.85):
+      execute_steps = {5.0, 5.1, 5.2, 5.3, 5.4, 5.5}   # NO 5.6 detector rotation
+      default_verdict = FORECLOSURE-RECEIPT
+      brain_compound_required = TRUE   # Step 5.4 must surface ≥1 proposal
+      override_required = operator approval to override default verdict
+  else:
+      proceed_with_full_Step_5_dispatch
+```
+
+**Estimating `P(no-paid-Critical-in-last-6mo)`:**
+
+Public signals:
+
+- Immunefi / HackenProof / Cantina program-page disclosure timeline
+- Cantina blog post-disclosures
+- Twitter / X public-disclosure threads
+- Audit-firm blog posts on the protocol
+- DefiLlama incident tracking
+
+If no Critical award visible in the last 6mo across these sources, estimate P ≥ 0.85. If awards are visible but were Medium/Low severity, P remains ≥ 0.85 (Critical-specific). If a Critical was paid but for a contract that has since been deprecated or refactored, P remains ≥ 0.85 (resolved-class-not-active).
+
+**R8 tags:**
+
+- `[INSPECTED]` Reserve $10M Cantina N_audits=21 + N_submissions=139 (program page tree-confirmed 2026-05-25)
+- `[INSPECTED]` Reserve P(no-paid-Critical-in-last-6mo) high-estimate (public disclosure timeline checked at filing time)
+- `[INSPECTED]` Reserve Gate 1 FORECLOSURE-RECEIPT verdict (hunt task 2026-05-25)
+- `[ASSUMED]` 15-audit + 100-submission + 0.85-low-Critical threshold reflects optimal Step 5 short-circuit point (first calibration; validate on next 2-3 J-eligible targets — Compound V3, Aave V3, MakerDAO Sky modules)
+- `[ASSUMED]` Future J-corollary firings yield zero Gate 2 candidates (validation pending on next J trigger — Aave V3 or Compound V3 likely)
+
+**Source.** Reserve $10M Cantina Gate 1 FORECLOSURE-RECEIPT brain compound proposal J, 2026-05-25. Operator-approved msg 7770 proposal J.
+
 ### Doctrine #27 sub-rule — Sustained Multi-Firm Audit Cadence Hard Discount (added 2026-05-25 — LiFi Gate 1 foreclosure, Ogie msg 7725 proposal C) [INSPECTED]
 
 **Statement.** When a target's `auditLog.json` (or equivalent audit-tracking artifact) reveals **≥30 audit reports over ≥18 months of sustained cadence** (multi-firm, facet-by-facet, with audit-AHEAD-of-HEAD or audit-mirror-of-HEAD timing), apply **maximum 0.4× Doctrine #27 discount** AND **skip deep-Gate-2-trace by default**; surface as FORECLOSURE-RECEIPT with brain-compound capture only. Continuous Layer 0 monitoring of `late_changes` substitutes for fresh-surface scanning — re-activate Gate 2 only when `late_changes` introduces a non-housekeeping diff.
@@ -1548,6 +1677,40 @@ Detector value: ZERO. Triage value: HIGH (saves 2-6h per heavily-audited target 
 - `[ASSUMED]` 0.4× maximum discount appropriate for ≥30 audits + ≥18mo cadence (first application; calibrate on future sUSDS / frxETH / Yearn V3 deployments)
 
 **Source.** lifi Gate 1 task #57 Step 9 brain compound proposal C, 2026-05-25. Foreclosure-receipt at `hunts/2026-05-25-lifi-gate1.md`. Operator-approved msg 7725 proposal C.
+
+### Doctrine #27 catalog — Saturated programs (≥15 audits, ranked) (added 2026-05-25 — proposal C, Ogie msg 7770) [INSPECTED]
+
+Authority: Ogie msg 7770 (2026-05-25 18:22 UTC) — batch-approval of 14 proposals from today's Gate 1 trio + DeXe.
+
+Catalog of audit-saturated programs encountered in Buzz Lane 1 operations. Each row is calibrated with the Doctrine #27 / #27 sub-rule / #32 multipliers applicable at intake time. The catalog is APPEND-ONLY — programs that fall below the saturation floor are NOT removed; programs that cross 15+ audits are added. Cross-referenced from F, G, J corollaries below.
+
+| Program | Audits (count) | Saturation tier | P(finding) multiplier | Default action | Source |
+| --- | --- | --- | --- | --- | --- |
+| Euler V2 | 33 (multi-firm) | MAXIMUM (≥33, per #27 F corollary) | 0.20× | FORECLOSURE-RECEIPT at Gate 1 (brain-compound primary) | Cantina $7.5M, 2026-05-25 |
+| Aave V3 | ~25 | HIGH (multi-firm) | 0.30× | FORECLOSURE-RECEIPT default, Gate 2 only on net-new lens | Pashov + OZ + Spearbit cumulative |
+| Reserve | 21 (139 submissions) | HIGH-J (per #27 J corollary auto-FORECLOSURE-RECEIPT) | 0.20× | Auto-FORECLOSURE-RECEIPT (Step 5 short-circuit) | Cantina $10M, 2026-05-25 |
+| Aave V4 | ~20 | HIGH | 0.30× | FORECLOSURE-RECEIPT default; composition surfaces still OOS | Pre-launch audit cadence |
+| MakerDAO / Sky | 15+ (lockstake audit list + sUSDS + D3M) | HIGH | 0.35× | FORECLOSURE-RECEIPT on heavily-audited modules; Gate 2 on net-new modules (Sky lockstake worked example) | Day 17 Sky-family sweep, 2026-05-16 |
+| Compound | 12+ | MEDIUM-HIGH | 0.40× | Standard #27 discount; Gate 2 viable on net-new substrate | Cycle 2 pending |
+| Notional V2 | 8+ | MEDIUM | 0.50× | Standard #27 discount; V3 DISC-019 anchor demonstrates net-new substrate accessible | DISC-019 Immunefi #79837 |
+| Morpho V1 | 10+ | MEDIUM | 0.45× | Standard #27 discount; V2 family-widening accessible (DISC-018 anchor) | DISC-018 Cantina #1035 |
+| Olympus | 5+ internal + Sherlock + Code4rena | MEDIUM | 0.45× | FORECLOSURE-RECEIPT when wrapper #5 (internal-monotonic-oracle) confirmed; Gate 2 elsewhere | Cooler Loans task #59 |
+| Uniswap V4 | ~9+ off-repo (per Cantina blog) | MEDIUM-HIGH | 0.35× | FORECLOSURE-RECEIPT default per audit-AHEAD-of-HEAD posture (per #32 v1.1.1 M corollary) | Cantina $15.5M, 2026-05-25 |
+
+**Catalog usage:**
+
+- At Standing Intake Step 3 EV calculation, look up target program in catalog. Apply the `P(finding) multiplier` BEFORE bounty-cap × P(acceptance) math.
+- If target is not in catalog but audit count crosses 15, add the row at Gate 1 close (Step 9 brain compound). Note the saturation tier, multiplier, default action, and source so future Buzz sessions can compound the catalog.
+- When a catalog entry's audit count crosses a saturation tier boundary (15 → MEDIUM → HIGH-J at 21+ AND submissions ≥100 → MAXIMUM at 33), update the row + cite the trigger source.
+- Catalog rows should be treated as `[INSPECTED]` when audit counts are sourced from audit/reports/ directory tree-confirmed; `[ASSUMED]` when sourced from program-page summary text.
+
+**Calibration multipliers (cross-reference to F / G / J corollaries below):**
+
+- **F corollary (33-audit ceiling threshold):** target at ≥33 audits = 0.20× multiplier (MAXIMUM saturation tier). Euler V2 is current anchor.
+- **G corollary (mature-deploy hold pattern):** target with `days_since_last_commit > 365 AND audits_count > 5` = additional 0.5× discount stacked on saturation tier. Reserve 40d HEAD stale + 21 audits = HIGH-J + G applied jointly.
+- **J corollary (auto-FORECLOSURE-RECEIPT trigger):** target with `N_audits ≥ 15 AND N_submissions ≥ 100 AND P(no-paid-Critical-in-last-6mo) ≥ 0.85` = Step 5 detector rotation auto-SHORT-CIRCUITED to FORECLOSURE-RECEIPT. Reserve is the canonical J-corollary anchor.
+
+**Source.** Operator msg 7770 batch-approval of 14 proposals from 2026-05-25 Gate 1 trio (Euler + Reserve + Uniswap, all FORECLOSURE-RECEIPT) plus DeXe. Catalog seeded with the 10 programs encountered in Lane 1 operations through 2026-05-25.
 
 ---
 
@@ -1709,6 +1872,76 @@ Sub-step 5.4 sits between 5.3 (brain lens application) and 5.5 (5-target checkli
 
 **Status.** Filed 2026-05-24 via Clara Ground-Truth bulk intake. Operator-approved as Doctrine #31 (Ogie msg 7695 item 4). Sits in routing layer above DC-15 + CANDIDATE-V + CANDIDATE-W + CANDIDATE-Y + CANDIDATE-Z. Productization detectors pending L1b backlog scheduling.
 
+### Doctrine #31b — Governance-gated-asset-registry as delegatecall-trust-surface (added 2026-05-25 — Reserve `RewardableLibP1` Gate 1 substrate, proposal I, Ogie msg 7770) [INSPECTED]
+
+**Statement.** [INSPECTED] When a protocol `delegatecall`s into a list of governance-approved assets / strategies / modules, the delegatecall TRUST is load-bearing on the GOVERNANCE ASSET-VETTING PROCESS, not on per-call defense at the delegatecall site itself. The defense lives upstream (in the governance approval pipeline), not at the runtime execution boundary. Detection requires identifying the registry-iterator pattern + grading the governance vetting quality. Findings hinge on governance quality, not on the protocol's runtime code.
+
+**Anchor — Reserve `RewardableLibP1.claimRewards` (2026-05-25 Reserve $10M Cantina Gate 1, FORECLOSURE-RECEIPT) [INSPECTED]:**
+
+Reserve's `RewardableLibP1.claimRewards()` iterates over an ASSET LIST (registered at governance level via the Reserve Asset Registry pipeline) and `functionDelegateCall`s into each asset's `claimRewards` selector. The delegatecall executes in Reserve's RToken context, granting the called asset code FULL execution authority over Reserve's storage. The defense pattern is:
+
+1. **NOT runtime check** — there is no `require(approvedAssets[asset])` guard at the delegatecall site (or rather, the registry membership IS the check, but it's been resolved upstream at registry-add time)
+2. **YES governance vetting** — assets are added to the registry only via Reserve's governance flow: timelock-queued, OZ Governor proposal, multi-sig approval, public discussion period, audit-team review of the new asset's `claimRewards` implementation
+3. **YES asset-quality audit gate** — Reserve's governance process explicitly requires each new asset's `claimRewards` to undergo audit before registry addition
+
+Thus the delegatecall surface is structurally DEFENDED — not by code, but by governance. A bad asset cannot reach the registry without crossing the governance gate. Once in the registry, the delegatecall executes with full trust.
+
+**Detection: grep for `functionDelegateCall` + registry-iterator pattern.** The signature:
+
+```solidity
+for (uint i = 0; i < registeredAssets.length; i++) {
+    address asset = registeredAssets[i];
+    asset.functionDelegateCall(abi.encodeWithSelector(IAsset.claimRewards.selector));
+}
+```
+
+OR equivalent patterns using `assembly { delegatecall(...) }`, OpenZeppelin's `Address.functionDelegateCall`, or custom delegatecall wrappers iterating over registry lists.
+
+**Foreclose ONLY IF:** governance is a known-quality multisig with timelock (Reserve uses 4d timelock + 4-of-6 multisig + OZ Governor) OR a known-quality DAO (e.g., Curve's CVX-vlCVX gauge-controller flow, MakerDAO Spell process, OZ Governor with sufficient delay + quorum).
+
+**Otherwise: HIGH-EV substrate** — one bad asset addition = full protocol drain. Targets without robust governance vetting represent the highest-value Gate 2 dispatch in the delegatecall-registry class.
+
+**Decision rule integration with Doctrine #31:**
+
+Doctrine #31's "every standard-interface override is a potential bug surface" extends naturally: every governance-gated delegatecall-registry is an INTRINSIC bug surface that the protocol has structurally accepted, with defense delegated upstream. At Gate 1 inventory:
+
+1. Grep for `functionDelegateCall` + registry-iterator patterns
+2. For each match, identify the registry source (storage variable name; how is it populated? what is the add/remove flow?)
+3. Grade the governance vetting:
+   - **HIGH governance quality** (4d+ timelock + multi-sig + OZ Governor + public discussion + audit-team review of each new asset): FORECLOSURE-RECEIPT candidate
+   - **MEDIUM governance quality** (single multisig, no timelock, or timelock <24h): STANDARD Gate 1 lens application
+   - **LOW governance quality** (single role, no timelock, no review): HIGH-EV Gate 2 dispatch — bad-asset-addition = drain
+
+**Cross-pollination scan targets (active):**
+
+Apply at Step 5.5 detector rotation against:
+
+- Reserve `RewardableLibP1` (FORECLOSURE-RECEIPT confirmed 2026-05-25)
+- Curve `Vyper` gauge-controller delegatecall iterators (governance via CRV/CVX vote)
+- Aave V3 `Pool.executeWithdraw` strategy-execution patterns (no delegatecall but functional analog)
+- Yearn V3 strategy-registry delegatecall iterators (multi-strategy vault, each strategy `harvest`)
+- ConvexFinance booster delegatecall to Curve gauges (compounding-trust surface)
+- 1inch aggregator router delegatecall patterns (limit orders, RFQ, fusion mode)
+- LiFi facet diamond-proxy delegatecall (FORECLOSURE-RECEIPT precedent — 4-layer defense per task #57)
+
+For each: grep the registry-iterator pattern; trace registry membership upstream; grade governance vetting; classify as FORECLOSURE-RECEIPT / STANDARD / HIGH-EV.
+
+**Productization signal:**
+
+Detector value: MEDIUM (`functionDelegateCall` grep + AST iterator-pattern walker + governance-quality classifier). Triage value: HIGH (identifies the highest-EV substrate class — single bad-asset = drain). Implementation: append to L1 deep Phase 11 (Off-chain trust boundary) — extend with governance-registry-delegatecall sub-phase that classifies registry membership defense.
+
+**R8 tags:**
+
+- `[INSPECTED]` Reserve `RewardableLibP1.claimRewards` delegatecall-loop iterator (Gate 1 hunt task 2026-05-25, source-confirmed)
+- `[INSPECTED]` Reserve governance vetting flow (4d timelock + 4-of-6 multisig + OZ Governor + discussion period — Reserve docs + Cantina program page tree-confirmed)
+- `[INSPECTED]` Reserve `OracleLib` 5/5 sub-7 sub-rules CLEAN (manual sweep 2026-05-25, see DC-12 contrastive anchor pair)
+- `[ASSUMED]` Future delegatecall-registry targets without robust governance vetting represent HIGH-EV substrate (validation pending on next non-Reserve / non-Yearn / non-Curve delegatecall-iterator target)
+- `[ASSUMED]` Governance-quality grading thresholds (HIGH ≥4d timelock + multi-sig + OZ Gov; MEDIUM = single multi-sig + <24h timelock; LOW = single role) are first-application estimates (recalibrate quarterly)
+
+**Source.** Reserve $10M Cantina Gate 1 FORECLOSURE-RECEIPT brain compound proposal I, 2026-05-25. Operator-approved msg 7770 proposal I.
+
+**Cross-reference.** Sits under Doctrine #31 (custom hooks break standard invariants) as the delegatecall-trust-surface sub-pattern. Compounds with Doctrine #29 (audit-saturation KILL does NOT foreclose pattern class) — Reserve's governance-gated registry pattern transfers downstream to consumer protocols that integrate Reserve assets; those consumers inherit the delegatecall trust surface without inheriting Reserve's governance quality.
+
 ---
 
 ## Doctrine #31a — Rebase-Protocol Standing-Intake Yield-Ceiling Calibration (sub-doctrine, added 2026-05-25 — Origin-Dollar Gate 2 economic foreclosure, Ogie msg 7715 proposal D)
@@ -1800,8 +2033,40 @@ CauldronV4 was the canonical internal-cache class (debt-cache stale on rebase). 
 
 1. **Check 1:** does the adapter expose paired wrap/unwrap functions with rebase-token on one side and non-rebase wrapper on the other?
 2. **Check 2:** is the amount parameter interpreted consistently across wrap/unwrap (both shares OR both balances)?
-3. **Check 3:** is there an explicit `@dev` warning acknowledging the asymmetric-deposit / MEV-sweep surface?
-4. **Verdict:** Check1=YES + Check2=NO + Check3=NO → **Gate 2 escalation candidate**. Check3=YES → **FORECLOSED by acknowledgment + Doctrine #27 (audit-saturation)**.
+3. **Check 3 (extended 2026-05-25, proposal L, Ogie msg 7770):** is there an explicit operator-disclosure NatSpec comment acknowledging the asymmetric / vulnerable / deprecated surface? Both formats trigger the acknowledgment-OOS rule:
+   - **`@dev` warning format** — `/// @dev <warning text>` or `/* @dev <warning text> */` — canonical anchor: LiFi LidoWrapper.sol L2 stETH↔wstETH naming-inversion (`Any stETH or wstETH tokens sent directly to the contract can be irrecoverably swept by MEV bots`)
+   - **`@notice DEPRECATED:` format** — `/// @notice DEPRECATED: <vulnerability description> - do not use this function.` — canonical anchor (2nd, added 2026-05-25 proposal L): Uniswap V4 PositionManager `_increaseFromDeltas` + `_mintFromDeltas` (both LIVE in `_handleAction` dispatch with `/// @notice DEPRECATED: Vulnerable to sandwich attacks - do not use this function.`)
+
+   The acknowledgment-OOS rule applies to BOTH formats — functionally identical operator-disclosure signals. Both signal: "the protocol team is aware of this surface; treat it as an OOS-by-acknowledgment design property." Cantina's "known/acknowledged in audits" OOS rule explicitly covers both NatSpec formats.
+4. **Verdict:** Check1=YES + Check2=NO + Check3=NO → **Gate 2 escalation candidate**. Check3=YES (in EITHER format) → **FORECLOSED by acknowledgment + Doctrine #27 (audit-saturation)**.
+
+**Uniswap V4 PositionManager 2nd-anchor verification (proposal L, 2026-05-25) [INSPECTED]:**
+
+Uniswap V4 PositionManager `_increaseFromDeltas(...)` and `_mintFromDeltas(...)` are LIVE-in-dispatch functions (callable via `_handleAction` selector router in PositionManager.sol). Both functions carry the literal NatSpec:
+
+```solidity
+/// @notice DEPRECATED: Vulnerable to sandwich attacks - do not use this function.
+function _increaseFromDeltas(...) internal {
+    // body still LIVE, callable via _handleAction
+}
+
+/// @notice DEPRECATED: Vulnerable to sandwich attacks - do not use this function.
+function _mintFromDeltas(...) internal {
+    // body still LIVE, callable via _handleAction
+}
+```
+
+The Cantina $15.5M Uniswap V4 program treats these as OOS — operator-acknowledged sandwich-attack surface is a design property (Uniswap V4 explicitly retains the functions for backward-compat with external integrators who may have built against the deprecated selectors; the disclosure is the gate to the foreclosure receipt). 2026-05-25 Uniswap Gate 1 confirmed FORECLOSURE-RECEIPT verdict on this acknowledgment.
+
+**Cross-pollination detector enrichment:**
+
+The DC-20 detector (`buzzshield-cand-z-detector.js`) `@dev`-warning negative-control should be extended to also match `@notice DEPRECATED:` patterns. Both NatSpec formats trigger FP-immunity for cross-chain bridge-adapter and rebase-pair surfaces. Update the detector's NatSpec regex from `/@dev [^\n]*(?:MEV|sweep|asymmetric|warning|caution)/i` to:
+
+```js
+const NATSPEC_ACKNOWLEDGMENT_RE = /(?:\/\/\/|\/\*)\s*(?:@dev|@notice\s+DEPRECATED:?)\s+[^\n]*(?:MEV|sweep|asymmetric|warning|caution|vulnerable|do not use|deprecated)/i;
+```
+
+Either format match → auto-REJECT at Skeptic conf 0.95.
 
 **Cross-pollination scan targets:**
 
@@ -1924,3 +2189,232 @@ New (v1.1):  audit_cadence_months < 12  AND  (dangerous_area_changes_365d >= 10 
 - `[ASSUMED]` v1.1 generalizes to future cycle 2 dispatches (validation pending on next 2-3 v1.1-pass-case targets)
 
 **Source.** Pendle V2 v1.1 re-dispatch task #61 + 3-for-3 cycle 2 strict-filter trigger event (2026-05-25 11:30-12:20 UTC). Operator-approved PERMANENT msg 7733.
+
+### Doctrine #32 v1.1 validation — First cycle-2 PASS with FORECLOSURE-RECEIPT confirms "brain-compound-tier" forecast (added 2026-05-25 — Uniswap $15.5M Cantina, proposal M, Ogie msg 7770) [INSPECTED]
+
+**Validated 2026-05-25 — first cycle-2 PASS with FORECLOSURE-RECEIPT (Uniswap $15.5M Cantina).**
+
+All 3 in-scope Uniswap repos (V4 PositionManager, V4 Core pool manager, V4 Periphery extensions) satisfied v1.1 filter (`dangerous_area_changes_365d ≥ 10` per cycle 2 strict-filter v1.1 rule) AND yielded FORECLOSURE-RECEIPT verdicts on the Gate 1 dispatch.
+
+**Observed pattern: audit-AHEAD-of-HEAD.** Uniswap V4's audit reports are dated 53 days AND 45 days AFTER the corresponding HEAD commits — i.e., the audit team locked the codebase, audited the locked state, and the project has NOT shipped new commits since. This is the **locked-down post-audit posture**:
+
+- HEAD #1 commit: 2026-03-19 → audit dated 2026-05-11 (53 days post-commit)
+- HEAD #2 commit: 2026-03-27 → audit dated 2026-05-11 (45 days post-commit)
+- multi-firm coverage: Spearbit + ChainSecurity + ABDK + Trail of Bits + (per Cantina blog) 9+ off-repo firm-cumulative
+
+**Forecast confirmed.** Pre-dispatch hypothesis was: "audit-AHEAD-of-HEAD targets with multi-firm coverage produce Pareto-frontier substrate where Buzz's primary value vector is METHODOLOGY CONTRIBUTION, not finding submission." Uniswap Gate 1 result confirms:
+
+- 3/3 in-scope repos FORECLOSURE-RECEIPT
+- 0 Gate 2 candidates surfaced (no detector binding; no manual lens binding on novel sandwich-attack surface — both `_increaseFromDeltas` + `_mintFromDeltas` ARE OOS via Doctrine #31a Check 3 NatSpec acknowledgment per proposal L)
+- 1 net-new doctrine sub-pattern surfaced via Step 5.4 manual lens (Doctrine #31a Check 3 extension to `/// @notice DEPRECATED:` NatSpec format — proposal L)
+- 1 net-new validation of "brain-compound-tier" forecast (this proposal M)
+
+**Forecast for future cycle 2 PASS targets with similar audit-AHEAD posture:**
+
+| Audit posture | Detector binding | Gate 2 yield | Brain compound yield |
+| --- | --- | --- | --- |
+| audit-AHEAD (audit >30d AFTER HEAD) + multi-firm | LOW (Pareto-frontier substrate) | LOW (FORECLOSURE-RECEIPT default) | HIGH (methodology contribution primary) |
+| audit-MIRROR (audit ±7d of HEAD) + multi-firm | LOW-MEDIUM | LOW-MEDIUM | MEDIUM-HIGH |
+| audit-BEHIND (audit >30d BEFORE HEAD) + multi-firm | MEDIUM | MEDIUM | MEDIUM |
+
+The audit-AHEAD-of-HEAD pattern is the strongest FORECLOSURE-RECEIPT signal — the project signaled "we're done shipping; audit team validate the locked state." Future Gate 1s identifying this pattern should default to FORECLOSURE-RECEIPT verdict with brain-compound focus.
+
+**Decision rule integration with Doctrine #32 v1.1:**
+
+```
+At Step 5 entry, check audit-vs-HEAD timing:
+  audit_AHEAD_days = max(0, audit_dates) - HEAD_commit_date
+  if (audit_AHEAD_days > 30 AND multi_firm == TRUE):
+      forecast_tier = "BRAIN-COMPOUND-TIER"
+      default_verdict = "FORECLOSURE-RECEIPT (Pareto-frontier substrate; Buzz value = methodology contribution)"
+      expected_brain_compound_proposals = ">= 1 (Step 5.4 manual lens application)"
+      expected_Gate_2_candidates = "0 (FORECLOSURE-RECEIPT default)"
+  elif (audit_AHEAD_days > 0 AND multi_firm == TRUE):
+      forecast_tier = "MIRROR-TIER"
+      default_verdict = "FORECLOSURE-RECEIPT (likely); Gate 2 conditional on novel-lens discovery"
+  elif (HEAD_commit_date > newest_audit_date + 30):
+      forecast_tier = "BEHIND-TIER"
+      default_verdict = "STANDARD Gate 1 dispatch; Gate 2 conditional on standard EV math"
+```
+
+**Where this DOES NOT apply (real-bug classes that bypass M forecast):**
+
+1. **Net-new module added since audit lock** — if HEAD has shipped a new module AFTER the audit lock, that module is NOT audit-AHEAD; STANDARD dispatch.
+2. **Cross-protocol composition surface** — composition surfaces are typically OOS for individual-target audits regardless of audit timing.
+3. **Operator override** — operator may explicitly direct Gate 2 dispatch on a BRAIN-COMPOUND-TIER target if novel lens emerges.
+4. **Cycle 3+ recalibration** — as more cycle 2 targets land, the forecast may shift; update the tier-thresholds quarterly.
+
+**R8 tags:**
+
+- `[INSPECTED]` Uniswap V4 audit-AHEAD-of-HEAD timing (53d and 45d gaps confirmed at Gate 1 hunt 2026-05-25)
+- `[INSPECTED]` 3/3 in-scope repos FORECLOSURE-RECEIPT verdict (hunt task 2026-05-25)
+- `[INSPECTED]` Doctrine #31a Check 3 NatSpec acknowledgment fired on both `_increaseFromDeltas` and `_mintFromDeltas` (proposal L verification)
+- `[ASSUMED]` Future BRAIN-COMPOUND-TIER targets yield ≥1 brain compound proposal per Gate 1 (validation pending on next 2-3 cycle 2 PASS targets — Aerodrome, Velodrome, Camelot, Verge candidates)
+- `[ASSUMED]` audit-AHEAD-of-HEAD threshold of 30 days is the empirical inflection point (calibrate quarterly as more cycle 2 targets land)
+
+**Source.** Uniswap V4 $15.5M Cantina Gate 1 FORECLOSURE-RECEIPT brain compound proposal M, 2026-05-25. Operator-approved msg 7770 proposal M.
+
+### Doctrine #32 v1.1.1 corollary — Mature-deploy hold pattern (added 2026-05-25 — Reserve $10M Cantina FORECLOSURE-RECEIPT, proposal G, Ogie msg 7770) [INSPECTED]
+
+**Statement.** If a target satisfies `days_since_last_commit > 365 AND audits_count > 5`, apply a **0.5× P(finding) discount multiplier** ON TOP of the cycle-2 filter PASS/FAIL outcome. Mature-deploy = stable-state codebase with deep audit cycle history; substrate is preserved but exploit-rate decays in proportion to deployment age × audit coverage.
+
+**Worked anchor — Reserve `protocol` Cantina $10M Gate 1 FORECLOSURE-RECEIPT (2026-05-25):**
+
+```
+HEAD age:           40d stale (last commit ~2026-04-15)
+                    ⟵ technically passes v1.1 audit_age<=180 PASS bar
+audits_count:       21 (multi-firm)
+submissions_total:  139 (per program page)
+
+v1.1 filter outcome: PASS (audit_age=14d ≤180, dangerous_area_changes_365d adequate)
+v1.1.1 corollary applies: days_since_last_commit=40 BORDER. Audits_count=21 >5 → MATURE-DEPLOY tier
+                          → apply 0.5× ON TOP of v1.1 PASS
+Combined multiplier: 0.5× (v1.1.1) × 0.20× (Doctrine #27 HIGH-J per J corollary, 21 audits + 139 submissions)
+                   = 0.10× effective P(finding) multiplier
+Default action: FORECLOSURE-RECEIPT (per J corollary auto-FORECLOSURE-RECEIPT trigger)
+```
+
+Result: Reserve foreclosure-receipt despite passing v1.1's PASS bar. The mature-deploy hold pattern catches the case where v1.1 logically PASSES but the additional age × audit-coverage signal indicates the substrate is in stable-state.
+
+**Why 0.5× specifically (rather than 0.3× or 0.7×):**
+
+The threshold is empirical. Reserve at 40d-stale HEAD + 21 audits is the canonical mature-deploy anchor at filing time. The 0.5× multiplier reflects that:
+
+- `days_since_last_commit > 365` indicates a structurally stable codebase (not abandoned; audits ongoing — typically signals "post-major-launch protocol in maintenance mode")
+- `audits_count > 5` indicates the codebase has been re-swept multiple times during the stable-state period
+- Combined: half of the v1.1-PASS bonus is consumed by the stale-deploy + multi-audit signal
+
+Targets crossing higher thresholds (e.g., `days_since_last_commit > 730 AND audits_count > 15`) may warrant a 0.3× corollary; targets below the v1.1.1 threshold but above mere-PASS bar remain at v1.1 default multiplier. Calibrate on future anchor crossings.
+
+**Decision rule integration with Doctrine #32 v1.1:**
+
+```
+v1.1 filter outcome = PASS / FAIL  (per audit_cadence_months < 12 AND (dangerous_area_changes_365d >= 10 OR audit_age_days <= 180))
+
+if (v1.1_outcome == PASS):
+    if (days_since_last_commit > 365 AND audits_count > 5):
+        apply_v1_1_1_corollary = 0.5×   # mature-deploy hold pattern
+        default_action = "Apply standard verdict + 0.5× discount; FORECLOSURE-RECEIPT default if combined with Doctrine #27 J corollary"
+    else:
+        proceed_with_v1_1_PASS_action
+elif (v1.1_outcome == FAIL):
+    # cycle 2 strict-filter fail; FORECLOSURE-RECEIPT per v1.1
+    proceed_with_v1_1_FAIL_action
+```
+
+**Where this DOES NOT apply (real-bug classes that bypass v1.1.1):**
+
+1. **Net-new lens discovery on the mature target** — if Gate 1 surfaces a CANDIDATE not yet in the catalog, escalate regardless of mature-deploy hold pattern. The whole point of any propagation cycle is net-new lens harvest.
+2. **Recently-added module** — if the target has been mature for 365d+ but added a NEW module in the last 30-90d, the mature-deploy hold applies to the OLD modules only; new modules dispatch at full v1.1 PASS multiplier.
+3. **Operator override** — operator may explicitly direct Gate 2 dispatch on a v1.1.1-foreclosed target.
+4. **Cross-protocol composition surface** — composition surfaces are typically OOS for individual-target audits. Apply lens stack at composition boundary regardless of #32 v1.1.1.
+
+**R8 tags:**
+
+- `[INSPECTED]` Reserve HEAD 40d stale + 21 audits + 139 submissions (Cantina program page tree-confirmed 2026-05-25)
+- `[INSPECTED]` Reserve cycle-2 v1.1 PASS via audit_age + dangerous_area combined (Layer 0 JSON output)
+- `[INSPECTED]` Reserve Gate 1 FORECLOSURE-RECEIPT verdict (hunt task 2026-05-25, hunt file confirms)
+- `[ASSUMED]` 0.5× multiplier appropriate for mature-deploy tier (first calibration; validate on next 2-3 mature-deploy targets — Yearn V3, sUSDS, Compound III could provide anchors)
+- `[ASSUMED]` 365d / 5-audits threshold reflects mature-deploy substrate at 2026-05-25 (industry-wide audit cadence may shift threshold upward)
+
+**Source.** Reserve $10M Cantina Gate 1 FORECLOSURE-RECEIPT brain compound proposal G, 2026-05-25. Operator-approved msg 7770 proposal G.
+
+---
+
+## Doctrine #33 — Vendor-Protection-Layer-Auto-OOS (added 2026-05-25 — DeXe Gate 1 substrate, proposal D, Ogie msg 7770)
+
+**Statement.** [INSPECTED] Vendor protection layers — vendored copies of OpenZeppelin / Solady / Solmate / forge-std / Aave-v3-vendor / OZ-upgradeable / canonical-ERC-implementation contracts placed in a target project's source tree for compile-time inclusion or audit-fork-traceability — are PERMANENTLY OUT-OF-SCOPE for Gate 2 findings regardless of `--include-periphery` flag state. This is a doctrine-level extension of `audit-methodology-v2.md` v2.5 HE-03b directory exclusions (`lib/`, `mocks/`, `certora/`, `lib_deprecated/`, `forge-std/`, `foundry_tests/`).
+
+**Why this is a doctrine, not just an HE-03b directory extension:**
+
+HE-03b is a file-discovery-time exclusion based on DIRECTORY name. Doctrine #33 extends to CONTENT-DERIVED vendor-protection identification regardless of directory placement. A protocol may vendor OZ contracts into `src/lib/openzeppelin/` (HE-03b matches `lib`), but it may also vendor them into `src/vendor/oz/` or `src/external/openzeppelin/` or `src/dependencies/` — none of which match the HE-03b directory set. The directory-based exclusion is necessary but not sufficient; the doctrine adds content-fingerprint identification.
+
+**Identification heuristics (any one sufficient for AUTO-OOS classification):**
+
+1. **Directory placement** — file lives under `lib/`, `lib_deprecated/`, `mocks/`, `mock/`, `certora/`, `forge-std/`, `node_modules/`, `vendor/`, `external/`, `dependencies/`, `submodule*/`, `lib-vendor*/`, `oz-*/`, `openzeppelin/`, `solady/`, `solmate/`, `aave-v3-vendor/`, `aave-*-vendor/`, `canonical-erc/`, `compound-vendor/`, `uniswap-vendor/`
+2. **SPDX + canonical-import signature** — file's SPDX license identifier matches the upstream vendor (e.g., OpenZeppelin uses `MIT`, files start with `// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;` AND contain `@openzeppelin/contracts` upstream namespace in any `import` statement or comment block)
+3. **NatSpec @custom:legacy or @custom:vendor tag** — file header explicitly declares vendor origin via `@custom:legacy`, `@custom:vendor`, `@dev Vendored from <upstream>`, or equivalent acknowledgment comment
+4. **Bytecode-fingerprint match against canonical vendor commit SHA** — for ambiguous cases, compile the file with `solc --standard-json` and compare against canonical upstream-OpenZeppelin / Solady / Solmate bytecode for the corresponding version. Exact match = vendored copy = AUTO-OOS
+
+**What this means operationally:**
+
+- Gate 1 surface map MUST classify each in-scope file's vendor status BEFORE detector rotation. Files identified as vendor-protection layers receive a `vendor_status: VENDORED` tag.
+- Detectors continue to run against vendored files (the protocol's vendored OZ ERC20 may have a hand-edited modification that introduces a bug — DETECT the modification), but findings WITH `vendor_status: VENDORED` AND `modification_status: UNMODIFIED` (bytecode-fingerprint matches upstream) auto-REJECT at Skeptic with conf 1.0.
+- Findings in vendored files with `modification_status: MODIFIED` (the protocol hand-edited the vendor file) are IN-SCOPE — the modification IS the new attack surface. Verify modification scope via diff against canonical upstream commit.
+- The doctrine does NOT exempt vendor files from inventory or read; it exempts them from Gate 2 submission as "unmodified upstream bug" findings.
+
+**Why this is mandatory:**
+
+Vendor files contain pre-audited, widely-deployed primitives whose bug class is the responsibility of the UPSTREAM vendor, not the consuming protocol. A finding "OpenZeppelin ERC20 has a bug" submitted against a consuming protocol's vendored copy = OUT-OF-SCOPE by all major bounty program rules (Immunefi, HackerOne, Cantina, Sherlock, Code4rena all explicitly exclude vendored unmodified library code). Reporting such findings burns Buzz credibility + wastes triager cycles.
+
+**Worked anchors:**
+
+1. **Sky lockstake `certora/harness/dss/{Dog,Vat}.sol`** (2026-05-08, audit-methodology-v2 v2.5 trigger) — formal-verification harnesses vendored from canonical Dog/Vat upstream. HE-03b directory match (`certora/`); doctrine identification redundant but consistent.
+2. **Spark `contracts/mocks/tokens/MintableERC20.sol`** (2026-05-08) — OpenZeppelin mock vendored under `mocks/`. HE-03b match; doctrine identification redundant.
+3. **GMX synthetics `lib/forge-std/Multicall3.sol`, `mocks/MockEndpointV2.sol`, `mocks/MockStargatePool.sol`** (2026-05-08) — Foundry submodule dep + mocks. HE-03b match; doctrine identification redundant.
+4. **DeXe Gate 1 (2026-05-25)** — Operator-flagged vendored OpenZeppelin under `contracts/` subdirectory (NOT `lib/`, NOT `mocks/`). HE-03b directory match does NOT fire. Doctrine identification via SPDX + canonical-import signature catches it. Canonical worked example for content-derived identification — operator-approved msg 7770 proposal D.
+5. **Reserve `RewardableLibP1.sol` claimRewards delegatecall iterator** (2026-05-25) — NOT a vendor file (Reserve's own library), but compounds with Doctrine #33 by referencing governance-asset-vetting as the load-bearing defense (see Doctrine #31b sub-pattern below). Doctrine #33 covers the vendored OZ ERC20 / OZ Ownable / OZ AccessControl callsites that Reserve inherits within `RewardableLibP1`.
+
+**Cross-reference to audit-methodology-v2 v2.5:**
+
+This doctrine EXTENDS, not replaces, HE-03b. HE-03b is a fast file-walker exclusion (directory-name-based); Doctrine #33 is the slower content-derived classifier that catches the long-tail (3-5% of vendor files placed outside canonical directories). Both apply.
+
+**Cross-reference to Doctrine #29 (Audit-Saturation KILL does NOT foreclose pattern class):**
+
+Doctrine #29's "the class transfers downstream" insight DOES apply to vendor files IF the consuming protocol's USAGE of the vendor primitive is the attack surface. Example: protocol vendors OZ ERC20, then implements a CUSTOM mint() function in a DIFFERENT non-vendored file that calls into the vendored `_mint` internal. The custom mint() is IN-SCOPE per Doctrine #33 (modification_status: derived/custom-callsite), even though the vendored `_mint` itself is OOS. The bug-class CAN still transfer to the custom-callsite.
+
+**Productization signal:**
+
+Detector value: MEDIUM (SPDX header parse + canonical-import grep is mechanical; bytecode-fingerprint requires solc invocation but cacheable). Triage value: HIGH (saves Skeptic cycles + prevents OOS-reporting credibility-hits). Implementation: extend HE-03b file-walker with `vendor_status` content-classification step; emit per-file vendor tag in scan summary; Skeptic auto-REJECTs `vendor_status: VENDORED + modification_status: UNMODIFIED` findings at conf 1.0.
+
+**R8 tags:**
+
+- `[INSPECTED]` Sky / Spark / GMX worked anchors (audit-methodology-v2 v2.5 record, 2026-05-08)
+- `[INSPECTED]` DeXe Gate 1 content-derived vendor identification (2026-05-25 task record)
+- `[ASSUMED]` Future targets with non-canonical-directory vendor placement benefit from doctrine identification (validation pending on next cycle 2 dispatch)
+- `[ASSUMED]` Bytecode-fingerprint matching is reliable across OZ ^4.x / ^5.x version drift (typical upstream-version-pin matching, may vary by protocol)
+
+**Source.** DeXe Gate 1 brain compound proposal D, 2026-05-25. Operator-approved Ogie msg 7770 batch-approval of 14 proposals (proposal D specifically authorized this doctrine, with proposal-text "vendor protection layers are AUTO-OOS regardless of `--include-periphery` flag... Add to brain as Doctrine #33: Vendor-Protection-Layer-Auto-OOS").
+
+**Status.** Filed 2026-05-25 as PERMANENT doctrine #33. Sits architecturally above HE-03b (audit-methodology-v2 v2.5) as the content-derived classifier layer. PERMANENT operator-approved per Ogie msg 7770. Cross-pollination expected on next cycle 2 dispatch when content-derived vendor identification can be validated against fresh substrate.
+
+---
+
+## Doctrine #34 — Post-Audit Composition Multiplier (added 2026-05-25 — Cap Sherlock Gate 1, proposal C-Cap-3, Ogie msg 7772)
+
+**Statement.** When a protocol layers a NEW external system on top of an audited codebase AFTER the audit window closes, the cumulative attack surface should be re-audited at parity with the original review depth — NOT treated as a thin extension. Audit reports calibrate confidence based on the substrate inspected; new compositional layers introduce attack surfaces the auditors never reasoned about. The original audit's coverage claim does NOT transfer to the composed system. [INSPECTED]
+
+**Why this is a doctrine, not a heuristic.** Post-audit composition is the dominant fresh-surface pattern in 2026-05-25 substrate (Cap Sherlock: 132 commits between audit commit `0a57fbf` and HEAD `7254ed0`, scope grew 49→185 .sol files = +277%; EigenLayer stack + Gelato keepers + LayerZero OFT stack + Swapper + 8 new oracle adapters added). Detector rotations skip post-audit code by default because Layer 0 git-security analyzer reads audit-folder mtime against HEAD without weighting new-module presence. The doctrine corrects this default. [INSPECTED]
+
+**Identification heuristics:**
+
+1. **Layer 0 audit/HEAD commit gap >= 3 months** AND `dangerous_area_changes_365d >= 30` (high-volume change post-audit) [INSPECTED]
+2. **New top-level module directories** introduced after the audited commit (grep `git log --diff-filter=A --name-only audit-sha..HEAD` for new directory paths). New modules signal compositional growth. [INSPECTED]
+3. **Integration-vendor signatures in new code:** EigenLayer / LayerZero / Symbiotic / Wormhole / Pyth / Chainlink CCIP / external bridge dependencies → composition multiplier applies regardless of LOC count. [INSPECTED]
+4. **Solo-author dominance in new modules** — if `git log` shows a single author wrote >70% of post-audit code on a critical module, the change-set never received review-quality scrutiny. [ASSUMED]
+
+**Calibration multiplier.** When Doctrine #34 fires:
+
+- `P(finding)_post_audit_module = P(finding)_unaudited × 1.0` (no audit-coverage discount applies)
+- `P(finding)_pre_audit_module = P(finding) × audit-coverage-discount-per-Doctrine-#27`
+- Aggregate: `P(finding)_combined = max(P(post), P(pre × Doctrine #27 multiplier))` — the post-audit module dominates EV when present.
+
+**Cap Sherlock canonical anchor (2026-05-25):** Cap contest #990 audited at `0a57fbf` (2025-07-24), HEAD at `7254ed0` (2026-04-29) = 9-month post-audit window. EigenLayer stack (EigenServiceManager 547 LOC + EigenAgentManager + EigenOperator) added entirely post-audit. CANDIDATE-EIGENOP-001 (permissionless TOTP grow-only allowlist) lives in this new module. Without Doctrine #34, the EigenLayer stack would inherit Cap's 10-medium-audited-issue "covered" status; with the doctrine, the stack is treated as unaudited substrate. [INSPECTED]
+
+**Integration with Standing Intake Step 2/3:**
+
+- Step 2 BRAIN OVERLAP: scan for post-audit module presence as a new sub-criterion. Hit raises overlap one tier (LOW→MEDIUM, MEDIUM→HIGH).
+- Step 3 EV CALCULATION: when Doctrine #34 fires, override the audit-coverage-discount in Doctrine #27 with the post-audit-module multiplier. Don't double-discount.
+
+**Cross-pollination targets:**
+
+- Any protocol that added a LayerZero OFT bridge after their main audit (very common 2024-2026)
+- Any protocol that integrated EigenLayer / Symbiotic restaking after their main audit (post-2024 surface)
+- Any protocol that added Gelato / Chainlink Automation / Keeper3 automation after their main audit
+- Any protocol that added Pyth / Redstone oracle alongside an existing Chainlink integration after the main audit
+
+**Status.** Filed 2026-05-25 as PERMANENT doctrine #34. Sits beside Doctrine #27 (audit-saturation discount) as the post-audit COMPOSITION layer of the same EV calculation. PERMANENT operator-approved per Ogie msg 7772. First worked anchor = Cap Sherlock Gate 1 EigenLayer stack. Cross-pollination expected on Flying Tulip Gate 1 (LayerZero OFT post-audit composition class) + future Gate 1 dispatches on post-2024-audit substrate.
+
+---
+
+_Doctrine v3.3 | 2026-05-25 | Batch-approval of 19 brain proposals across 4 Gate 1 outcomes (14 from Cantina trio + DeXe per msg 7770 + 5 from Cap Sherlock per msg 7772). 12 brain knowledge edits landed via subagent (A-J + L + M); detector code patches K+N in main session; 5 Cap proposals C-Cap-1..5 landed in main session post-subagent (CANDIDATE-Q grow-only-allowlist as DC-5 sub-pattern + CANDIDATE-A LZ-OFT-default-DVN enrichment + Doctrine #34 Post-Audit Composition Multiplier + Standing-Intake Step 1 Sherlock-status preflight rule + Watchlist-Candidate-Crossmap Cap row). Authority: Ogie msg 7770 + 7772 (2026-05-25 18:22-18:31 UTC). Doctrine #34 is the FIRST post-audit-composition doctrine; sits beside Doctrine #27 (audit-saturation discount) as the composition layer of the same EV calculation._

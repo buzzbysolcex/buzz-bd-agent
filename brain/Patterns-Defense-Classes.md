@@ -378,6 +378,16 @@ The following candidate defense classes are filed from public-disclosure retrosp
 **Full intake artifact:** `incidents/2026-05-15-thorchain-bifrost-10.8m-cross-chain-exploit.md`
 **Brain ledger entry:** `brain/Cross-Domain-Fragility-Laws.md` (inaugural entry)
 
+**Sub-class enrichment — LayerZero OFT default-DVN trust grants unrestricted underlying mint (Cap Protocol 2026-05-25, proposal C-Cap-2, Ogie msg 7772):**
+
+When a cross-chain bridge OFT (LayerZero) contract `_credit(to, amount)` path calls `underlying.mint(to, amount)` gated SOLELY on LayerZero's DVN (Decentralized Verifier Network) attestation, and the DVN config defaults to the LayerZero default-DVN set (no custom verifier required), the trust boundary collapses to "whoever controls the default-DVN can mint unrestricted underlying on the destination chain." This is a CANDIDATE-A specialization where the omitted-binding-bit is the DVN-quorum identity itself. The signature set authenticates the message; the message-to-mint binding assumes the DVN set is honest. [INSPECTED]
+
+**Cap canonical anchor (CANDIDATE_TRACKED, no submission path):** Cap TempoBridgeUpgradeable.sol:83-98 `_credit → underlying.mint` gated solely on LZ DVN config. Cap Sherlock Gate 1 surfaced as HIGH CANDIDATE-TEMPO-001. Brain-compound only (Cap contest finished). [INSPECTED]
+
+**Adjacent priors:** THORChain Bifrost (CANDIDATE-A inaugural), Wormhole core verifier (well-documented attack-surface), Kelp DAO $292M (DC-10 promotion anchor), Notional V3 cross-chain (sibling anchor). LayerZero OFT class is the largest unscanned substrate as of 2026-05-25 — every project building an OFT bridge inherits this surface unless they (a) override the DVN config OR (b) enforce per-message DVN-quorum verification at the contract level. [ASSUMED]
+
+**Detection sub-rule:** in any LayerZero OFT consumer, grep for `_credit` + `mint(` + DVN config — verify whether the contract calls `setSendVersion` / `setReceiveVersion` to pin a custom DVN set, OR whether default-DVN trust is the entire defense. Default-DVN trust = CANDIDATE-A enrichment hit. [INSPECTED]
+
 ### CANDIDATE-D: startSqrtP-Equality-Precondition (KyberSwap Elastic 2023, retrospective, confirmed post-mortem)
 
 **Class statement:**
@@ -1045,6 +1055,36 @@ Ground-truth instance: Morpho Blue $54.5M flash loan → 7 wallets → self-trad
 
 ---
 
+### CANDIDATE-Q: Permissionless TOTP/Digest Grow-Only Allowlist (Cap Protocol 2026-05-25, sub-pattern of DC-5 signature replay)
+
+**Class statement:**
+
+> When a contract maintains a per-key allowlist that authorizes downstream signature/digest verification (EIP-1271, EIP-712, custom replay-protection scheme) AND the allowlist-mutation entry-point is permissionless OR weakly-gated AND no expiry-prune mechanism reclaims old entries, the mapping grows monotonically. The attack surface compounds linearly with time: every new TOTP/digest advance widens the set of digests that pass signature verification, and stale digests retain authority indefinitely. [INSPECTED]
+
+**Specialization of:** DC-5 (signature replay family). Sibling to CANDIDATE-P (Drift durable-nonce pre-signed-tx). DC-5 covers single-signature reuse across chains; CANDIDATE-P covers nonce-stockpiling under non-expiring nonces; CANDIDATE-Q covers allowlist-stockpiling under no-expiry pruning. All three exploit the timing asymmetry between authorization-grant and authorization-revoke.
+
+**Anchor (CANDIDATE — Cap Sherlock Gate 1 post-audit drift, 2026-05-25):** Cap Protocol EigenOperator.sol:105-111 `advanceTotp(uint256 newTotp)` — permissionless function writes `validTotps[newTotp] = true`, no expiry, no prune, no cap on map size. Combined with EIP-1271 `isValidSignature` consumption pattern downstream, the allowlist becomes a grow-only digest registry. Status: CANDIDATE_TRACKED — added to brain on Cap Sherlock Gate 1 outcome (Ogie msg 7772, 2026-05-25). Cap contest #990 FINISHED 2025-07-24; no submission path; brain-compound only. [INSPECTED]
+
+**Audit-time check (proposed):**
+
+1. Grep for `mapping(... => bool) public validTotps`, `validDigests`, `validNonces`, `usedNonces` (the standard nonce-allowlist patterns)
+2. Find the write-site that flips `mapping[key] = true`
+3. Check the function's visibility + modifiers — is it permissionless? Role-gated? Time-gated?
+4. Check for an expiry-prune function (`pruneStaleTotps`, `expireBefore(uint256 blockNumber)`, etc.)
+5. If no prune AND permissionless write AND downstream signature consumer → CANDIDATE-Q [INSPECTED]
+6. Sub-rule: even with role-gating, if the role is held by a single multisig with no key-rotation cadence, the class still applies (timing-asymmetry remains)
+
+**Promotion path:** 2 additional worked anchors needed (likely targets: any EIP-1271-heavy protocol with off-chain signer rotation — Safe modules, Argent, Privy, account-abstraction account contracts). Cross-pollination with CANDIDATE-P during next Gate 1 dispatch on a signature-replay-substrate target.
+
+**Cross-pollination targets:**
+
+- ERC-4337 account contracts with custom validation logic
+- Smart-contract wallets with EIP-1271 signature consumption
+- Cross-chain bridge attestation gossip layers (DC-10 + CANDIDATE-Q intersection)
+- LayerZero / Wormhole VAA verification (if the verifier has a permissionless TOTP advance pattern)
+
+---
+
 ### DC-10: Cross-Chain Message Binding Failure (PROMOTED 2026-05-23, Ogie msg 7589)
 
 > **Promotion event:** CANDIDATE-A reached 3 worked-example anchors with $600M+ combined exposure on 2026-05-23 (Kelp DAO $292M filed via Ethereal News Weekly #20 intake completes the 3rd anchor); operator (Ogie msg 7589) promoted to DC-10, joining DC-9 as the newest battle-tested class. DC-10 must be added to: `defense-class-mapping.json` propagation engine (next version bump), all future cross-chain Gate 1 lens stacks, and Standing Intake Protocol Step 2 brain-overlap check for any bridge / OFT / cross-domain target.
@@ -1154,6 +1194,89 @@ Ground-truth instance: Morpho Blue $54.5M flash loan → 7 wallets → self-trad
 
 **Cross-pollination scan targets (active):** every protocol with Chainlink consumer + AMM consumer + lending market liquidator. Highest-EV next sweep cycle per Clara intake Observation A.
 
+**Contrastive Anchor Pair — DC-12 sub-7 CLEAN baseline vs DIRTY canonical (filed 2026-05-25 — proposals E + H, Ogie msg 7770) [INSPECTED]:**
+
+Future detector rotations need a Pareto-frontier reference for sub-7 (wrapper-strips-staleness-from-feed) to compare candidate code against both poles. Today's 2026-05-25 trio (Euler $7.5M Cantina + Reserve $10M Cantina + Notional V3 DISC-019 Immunefi) gives us a 2-anchor CLEAN baseline + 1-anchor DIRTY canonical:
+
+**CLEAN canonical — "Euler+Reserve-CLEAN-baseline" 2-anchor Pareto frontier (proposal H, Ogie msg 7770):**
+
+The CLEAN canonical reference is the JOINT 2-anchor Pareto frontier of Euler V2 oracle architecture AND Reserve `OracleLib`. Both implement the 5/5 sub-7 sub-rules, both surveyed at audit-saturation HIGH+/MAXIMUM tier, both produced FORECLOSURE-RECEIPT verdicts 2026-05-25. Future Gate 1s comparing wrapper structures against the CLEAN baseline should reference BOTH anchors:
+
+**Anchor 1 — Euler V2 oracle architecture, 33-audit saturation ceiling (MAXIMUM tier):**
+
+Euler V2 implements 8 oracle adapter families (Chainlink ×3 [BasePrice / OEV / Capped], Chronicle, Redstone, Pyth, UniswapV3 TWAP, RateProvider, Ondo, Pendle, Lido, CrossAdapter) — all 5/5 sub-7 sub-rules CLEAN across the full surface:
+
+| Sub-rule | Euler implementation status |
+| --- | --- |
+| roundId mismatch defense (`require(answeredInRound >= roundId)`) | CLEAN — checked in every Chainlink adapter |
+| staleness buffer (`block.timestamp - updatedAt <= maxStaleness`) | CLEAN — per-feed `maxStaleness` parameter, enforced uniformly |
+| negative-price reject (`require(answer > 0)`) | CLEAN — checked, with adapter-specific upper-bound caps where appropriate |
+| deprecated-aggregator detection (revert if aggregator returns sentinel) | CLEAN — Chronicle + Chainlink adapters both check |
+| try/catch on feed call (graceful fallback) | CLEAN — Pendle + CrossAdapter both use try/catch with explicit fallback |
+
+The CLEAN baseline anchors what a fully-defended sub-7 surface looks like: 8 adapter families × 5 sub-rules = 40 sub-rule checks across the production surface, all defended at audit-saturation 33 (MAXIMUM tier per Doctrine #27 F corollary). FORECLOSURE-RECEIPT at Gate 1 2026-05-25.
+
+**Anchor 2 — Reserve `OracleLib`, 21-audit + 139-submission HIGH-J tier (proposal H second-anchor confirmation):**
+
+Reserve protocol implements `OracleLib` (canonical Chainlink-consumer wrapper used by Reserve's RToken collateral / asset / RewardableLibP1 pricing pipelines). Manual sweep 2026-05-25 (Reserve $10M Cantina Gate 1 FORECLOSURE-RECEIPT, see Doctrine #32 v1.1.1 corollary anchor):
+
+| Sub-rule | Reserve `OracleLib` implementation status |
+| --- | --- |
+| roundId mismatch defense (`require(answeredInRound >= roundId)`) | CLEAN — checked in `OracleLib.price(IChainlinkFeedRegistryLike, ...)` |
+| staleness buffer (`block.timestamp - updatedAt <= timeout`) | CLEAN — per-feed `timeout` parameter, enforced uniformly across Reserve collateral types |
+| negative-price reject (`require(answer > 0)`) | CLEAN — checked, with `_priceTimeout` revert path |
+| deprecated-aggregator detection (revert if aggregator returns sentinel / stale) | CLEAN — `latestRoundData()` consumer pattern (NOT `latestAnswer()` — sub-7b structurally absent) |
+| try/catch on feed call (graceful fallback) | CLEAN — try/catch with explicit `errorOnPriceTimeout` policy parameter |
+
+**Why two anchors define the Pareto frontier (rather than one):**
+
+Single-anchor baselines (Euler alone) ground the structural defense but don't distinguish between "Euler-specific implementation choices" and "structural defenses that generalize." Adding Reserve as the 2nd anchor (DIFFERENT firm cadence, DIFFERENT codebase lineage, DIFFERENT consumer use case — RToken collateral vs Euler vault collateral) validates that the 5 sub-rules ARE the structural defense pattern, not Euler-specific quirks.
+
+Together Euler + Reserve form a 2-point Pareto frontier — any wrapper structurally matching BOTH is CLEAN; any wrapper missing any sub-rule that BOTH satisfy is potentially DIRTY. Future Gate 1s comparing against the CLEAN baseline should reference BOTH anchors and check whether candidate satisfies the 5 sub-rules in a manner consistent with BOTH implementations.
+
+**Cross-protocol propagation targets (Euler+Reserve CLEAN baseline):**
+
+Future sub-7 detector rotations targeting Compound V3, Spark, Sturdy, Frax Lend, Silo, Morpho, AAVE V3 oracle adapters, OpenEden tBTC oracle, Curve `StableSwap` oracle wrappers can use the Euler+Reserve 2-anchor reference to validate candidate wrapper-implementations. Match against BOTH anchors structurally:
+
+1. Does the candidate consume `latestRoundData()` (NOT `latestAnswer()`)?
+2. Does it check `answeredInRound >= roundId`?
+3. Does it enforce a per-feed staleness buffer (>0)?
+4. Does it reject `answer <= 0`?
+5. Does it use try/catch with explicit fallback policy?
+
+If 5/5 sub-rules satisfied in a manner consistent with BOTH anchors → FORECLOSURE-RECEIPT candidate. If <5/5 satisfied or implementation deviates from BOTH anchors in unsupported ways → STANDARD Skeptic verification.
+
+**DIRTY canonical (Notional V3 Exponent MidasOracle, DISC-019 Immunefi #79837):**
+
+Notional V3 Exponent `MidasOracle.sol:48-50` implements sub-7e engineered staleness mask:
+
+```solidity
+if (mTokenUpdatedAt < block.timestamp - 7 days) updatedAt = mTokenUpdatedAt;
+else updatedAt = baseFeedUpdatedAt;  // mask mToken staleness with fresh Chainlink updatedAt
+```
+
+For 0-7 days of mToken staleness, the wrapper actively MASKS mToken's true `updatedAt` with the fresher Chainlink base-feed `updatedAt`. Downstream consumers (`IYieldStrategy.price()` → `convertToAssets` → `TRADING_MODULE.getOraclePrice` → `MorphoLendingRouter.sol:463 collateralValue × m.lltv`) see a fresh `updatedAt` even when the underlying mToken NAV is up to 7 days stale. CRITICAL — escalated by Notional triage in 16 minutes.
+
+**Detector use of contrastive anchor pair:**
+
+Future sub-7 detector rotations (cand-sub7 variants, Skeptic enrichment) should compare candidate wrapper-implementation against BOTH anchors:
+
+- If candidate matches Euler's 5/5 CLEAN structure → auto-REJECT (FORECLOSED by structural defense, conf 1.0)
+- If candidate matches Notional's mask pattern (`if (... updatedAt < ...) updatedAt = freshTimestamp` OR `updatedAt = max(stale_a, fresh_b)`) → auto-ACCEPT (CRITICAL substrate, conf 0.95+)
+- If candidate matches neither pole → STANDARD Skeptic verification with both anchors loaded as prompt context
+
+**Cross-protocol propagation targets (sub-7 widening, post-contrastive-pair):**
+
+The Euler 8-adapter CLEAN baseline catalogs known-CLEAN structural patterns. Future Gate 1s comparing against Compound V3, Spark, Sturdy, Frax Lend, Silo, Morpho can use Euler's adapter-by-adapter coverage as the structural reference. Notional's DIRTY canonical anchors the detector signature: any wrapper that ACTIVELY OVERWRITES upstream `updatedAt` is a CRITICAL candidate.
+
+**R8 tags:**
+
+- `[INSPECTED]` Euler V2 oracle architecture 8-adapter CLEAN across 5 sub-rules (Cantina $7.5M Gate 1 2026-05-25, hunt file confirms manual sweep)
+- `[INSPECTED]` Notional V3 Exponent MidasOracle sub-7e engineered-mask DIRTY (DISC-019 Immunefi #79837, ESCALATED 16 min triage 2026-05-25)
+- `[ASSUMED]` Future detector rotations benefit from dual-anchor comparison (validation pending on next sub-7-class Gate 1)
+
+**Source.** Euler Gate 1 + Notional V3 Gate 1 close 2026-05-25. Operator-approved msg 7770 proposal E.
+
 **Historical note:** Pre-promotion tracked as CANDIDATE-O (Slippage Double-Count Across Swap Steps, Rhea Finance 2026-04-16). Clara intake widened the class from "slippage-double-count" sub-pattern to full Oracle/Slippage parent family with 5 sub-patterns. Highest-frequency class in DeFi exploit history.
 
 #### Sub-class refinement — O-RAW vs O-WRAPPED (2026-05-24, Ogie msg 7699)
@@ -1245,6 +1368,26 @@ A consumer with ≥1 wrapper passes the Kamino three-layer convergence test. ZER
 
 - Detector v2.0 spec: `unbound-from-approval-drain` (Clara intake §4 Pattern 1) — single-file AST grep + downstream-binding negative-control; ready for L1b productization
 - FP gate: legitimate forwarders / EIP-2771 / gasless-relayers require `from` argument — discriminate via positive-confirmation of downstream balance-delta or signature-binding check against `from`'s authorization
+
+**FP-exclusion sub-rule — vendor-library `_msgSender()` with explicit trusted-forwarder gate (added 2026-05-25 — proposal B, Ogie msg 7770) [INSPECTED]:**
+
+DeXe Gate 1 (2026-05-25 FORECLOSURE-RECEIPT) surfaced a CAND-T FP class anchored on vendor library `_msgSender()` callsites that pass through OpenZeppelin / Solady / Solmate ERC2771Context inheritance WITH explicit `isTrustedForwarder(msg.sender)` gating BEFORE the `_msgSender()` resolution. These callsites are **FP-immune** for DC-14 purposes — the `from` parameter is bound to the trusted-forwarder-resolved identity, not to attacker-supplied calldata. Skeptic must auto-REJECT these candidates at conf ≥0.95.
+
+**Auto-REJECT criteria (all three must hold):**
+
+1. Contract inherits from `ERC2771Context` (OZ canonical, OZ ^4.x / ^5.x) OR equivalent (Solady `ERC2771ContextUpgradeable`, Solmate `MetaTransactionContext`, custom abstract base with `_trustedForwarder` immutable + `isTrustedForwarder(addr)` view)
+2. The flagged transferFrom / route call uses `_msgSender()` (NOT raw `msg.sender`) as the `from` parameter
+3. There is no path from a non-forwarder direct-call that reaches the same transferFrom with attacker-supplied `from` — verify by enumerating callers of the flagged function
+
+**Why this is FP-immune for CAND-T but NOT for DC-17 (ERC2771 misuse class):**
+
+DC-14 is "unbound `from` approval drain" — the bug is `from` ≠ msg.sender via NO authorization. CAND-T FP-immunity above applies when `from = _msgSender()` IS the authorization (the forwarder-signed meta-tx is the auth). DC-17 (Clara CAND-W promotion) is a DIFFERENT class: `_msgSender()` is used CORRECTLY in one callsite but INCORRECTLY mixed with raw `msg.sender` in a sibling callsite (partial-adoption regression). The DeXe FP-immunity covers DC-14 only; DC-17 still fires on the partial-adoption pattern.
+
+**Detector implementation note for proposal K (main-session patch):**
+
+The vendor-library check should grep for ALL of: `import ".*ERC2771Context"`, `import ".*MetaTransactionContext"`, `abstract contract.*ERC2771`, `function isTrustedForwarder` — any positive match downgrades the candidate from HIGH to UNCERTAIN; pair-check with the AST `from == _msgSender()` binding confirms FP and auto-REJECTs.
+
+**Canonical anchor.** DeXe `DexeGovernance` (2026-05-25 Gate 1) — inherits OZ ERC2771Context via vendored OZ submodule; all reward-distribution transferFrom callsites use `_msgSender()` resolved through `isTrustedForwarder(msg.sender)` gate. CAND-T detector flagged 3 candidates pre-FP-rule; all 3 FP after vendor-library check applied. Operator-approved msg 7770 proposal B.
 
 **Cross-pollination scan targets (active):** every router-aggregator-bridge deployed since 2022. Cross-pollination scan EV: 0.05-0.10 catch rate on broad corpus; $50K-$200K per-finding EV on cap-bounded programs.
 
@@ -1417,9 +1560,24 @@ OZ canonical pattern imports `ERC2771Context` from `node_modules/@openzeppelin/.
 - FP gate: modern reward systems use SushiSwap's `_updateRewardDebt` pattern in `_beforeTokenTransfer`. Skeptic confirms absence of that hook before promoting to HIGH
 - E2E test: `/home/claude-code/.tmp-build/v6/tests/detector-v-e2e.test.js` 5/5 PASS
 
-**Cross-pollination scan targets (active):** every staking / farming protocol with custom transfer hooks. MasterChef-fork ecosystem (Pancake / Annex / ATK / BabySwap derivatives), NFT-position staking (Uniswap V3 manager-derived), reward-snapshot governance forks (Audius, dYdX-class callback patterns). Pair-check each against DC-18 sub-patterns at Skeptic verification time.
+**Substrate-widening sub-rule — DeXe Gate 1 enrichment (added 2026-05-25 — proposal A, Ogie msg 7770) [INSPECTED]:**
 
-**Historical note:** Pre-promotion tracked as CANDIDATE-V (Clara intake bulk-filed 2026-05-24, brain commit e810bd3). The ~20-anchor threshold (vastly exceeding 2+ promotion bar) + the structural pattern repeatability across MasterChef-fork ecosystem justified DC promotion. Operator-approved msg 7725.
+DeXe Gate 1 (2026-05-25 FORECLOSURE-RECEIPT) surfaced accumulator-field naming patterns NOT present in the original Clara-anchor regex set. The detector's `SUBSTRATE_ACCUM_FIELDS_RE_V` pattern pool has been widened in main session (proposal K) to include the following additional accumulator-field idioms; brain documents the widened substrate so future Gate 1s can match against the same widened set:
+
+| Original idiom                             | Widened idioms (DeXe-derived)                                                                                                                                                                  |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `accRewardPerShare`                        | `accRewardsPerShare`, `accumulatedRewardPerShare`, `cumulativeRewardPerToken`, `rewardPerTokenStored`, `globalRewardIndex`                                                                     |
+| `cumulativeIndex`                          | `rewardIndex`, `lastRewardIndex`, `globalIndex`, `poolIndex`, `accumulatorSnapshot`                                                                                                            |
+| `lastUpdate`                               | `lastAccrualTime`, `lastClaimAt`, `lastUpdateTimestamp`, `lastAccumulatorUpdate`, `accumulationStartedAt`                                                                                      |
+| `userInfo[u].rewardDebt`                   | `userRewardDebt[u]`, `_userDebt[u].snapshot`, `participants[u].rewardOffset`, `delegators[u].lastAccumulator`, `stakers[u].entryIndex`                                                         |
+
+**Why DeXe surfaced the widening:** DeXe's reward distribution uses governance-delegated accumulator math (delegator-snapshot-vs-pool-accumulator divergence). The naming convention diverged from MasterChef-fork lineage, surfacing 5+ idiom variants the original Clara regex missed. Detector now matches DeXe-class governance-token-distribution accumulators in addition to MasterChef-class farming accumulators.
+
+**Cross-pollination implication:** widened substrate increases candidate yield on governance-token-distribution protocols (Compound governance, Curve gauge accumulator, Synthetix staking, dYdX trader rewards, Lido `lastRewardBlock`-class patterns). FP rate expected to remain moderate via the existing `_beforeTokenTransfer` `_updateUser` hook negative-control. Re-validate against next 3-5 governance-staking targets before treating as permanent calibration.
+
+**Cross-pollination scan targets (active):** every staking / farming protocol with custom transfer hooks. MasterChef-fork ecosystem (Pancake / Annex / ATK / BabySwap derivatives), NFT-position staking (Uniswap V3 manager-derived), reward-snapshot governance forks (Audius, dYdX-class callback patterns), **governance-token-distribution layer (post-DeXe enrichment)**. Pair-check each against DC-18 sub-patterns at Skeptic verification time.
+
+**Historical note:** Pre-promotion tracked as CANDIDATE-V (Clara intake bulk-filed 2026-05-24, brain commit e810bd3). The ~20-anchor threshold (vastly exceeding 2+ promotion bar) + the structural pattern repeatability across MasterChef-fork ecosystem justified DC promotion. Operator-approved msg 7725. Substrate widening proposal A (DeXe-derived) operator-approved msg 7770, 2026-05-25.
 
 ---
 
@@ -1648,3 +1806,5 @@ FP gate: most contracts that do `price * amount / 1e18` DO handle decimals corre
 Future Gate 1 surveys finding `lastOraclePrice`-style cache should check: (a) is the cache monotone-up only? (b) is the read function `min(live, cache)` or `max(live, cache)`? Only `min(live, cache)` is defended; `max(live, cache)` OR raw-cache-read is the bug class. Operator approval: Ogie msg 7715 proposal B, 2026-05-25. Cross-reference: `data/lane1/gate2-clones/origin-dollar-rebase-sandwich-foreclosed.md` V3 verification.
 
 ---
+
+_Patterns: Defense Classes | v2.1 | 2026-05-25 | Batch-commit of 6 brain edits across two msg-7770 (A, B, E, H) + msg-7772 (C-Cap-1, C-Cap-2). Edits A/B/E/H per v2.0 footer. Additional C-Cap-1: CANDIDATE-Q "Permissionless TOTP/Digest Grow-Only Allowlist" filed as DC-5 sub-pattern (Cap Sherlock EigenOperator.sol:105-111 anchor — promotion path requires 2 additional anchors). C-Cap-2: CANDIDATE-A sub-class enrichment "LayerZero OFT default-DVN trust grants unrestricted underlying mint" (Cap Sherlock TempoBridgeUpgradeable.sol:83-98 anchor — every LayerZero OFT consumer without per-message DVN verification inherits the surface). Companion Doctrine.md at v3.3 (now includes Doctrine #34 Post-Audit Composition Multiplier per C-Cap-3). Authority: Ogie msg 7770 + 7772 (2026-05-25 18:22-18:31 UTC)._

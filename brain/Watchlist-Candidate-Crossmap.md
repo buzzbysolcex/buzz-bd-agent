@@ -605,3 +605,45 @@ _Post-v1.9 row 32 silo-v2 | 2026-05-24 | Hyperactive Formula Step 3 dispatch fro
 _Post-v1.9 row 33 origin-dollar | 2026-05-24 | Hyperactive Formula Step 3 dispatch from propagation-sweep-cycle-1.md cycle 3 | CONDITIONAL Gate 2 (3 verifications gate escalation), $45K nominal EV mid-pack_
 
 _Post-v1.9 row 34 lifi | 2026-05-25 | Hyperactive Formula Step 3 default-next dispatch from propagation-sweep-cycle-1.md (D=478+H=64+J=12 highest D-class density) | FORECLOSURE-RECEIPT, brain-compound captured: DC-14 anchor regression-check CLEAN (cand-t-detector 0 findings on 394 .sol = post-2022 fix confirmed intact, lifi becomes reference baseline for DC-14 defense pattern), Doctrine #31a first-deployment substrate identified (LidoWrapper L2 stETH↔wstETH naming-inversion + balance-asymmetric unwrap, acknowledged-by-design via @dev MEV-sweep warning), Doctrine #27 maximum-discount applied (85 audits over 30-month cadence, Cantina+Sujith Somraaj+dedicated firm-per-facet). Cantina-platform (NOT Immunefi). EV $4K nominal placeholder (auth-walled cap). 3 brain compound proposals filed for DC-14 baseline + Doctrine #31a cross-chain extension + Doctrine #27 sub-rule. Clone retained 7d (.gate1-work/lifi-2026-05-25/ purge 2026-06-01). Layer 0 JSON .lifi-layer0.json retained indefinitely as DC-14 anchor reference._
+
+---
+
+## Cap Protocol — Sherlock Gate 1 2026-05-25 (proposal C-Cap-5, Ogie msg 7772)
+
+| Field | Value |
+|-------|-------|
+| Contest | Sherlock #990 — **FINISHED 2025-07-24** ($93.1K final / $126K rewards, NOT $1M as briefed) |
+| Repo | github.com/cap-labs-dev/cap-contracts @ HEAD `7254ed0` (2026-04-29); audited at `0a57fbf` (2025-07-24) → 9-mo gap |
+| Scope drift | 49 .sol audited → 185 .sol HEAD = **+277% post-audit growth** |
+| Chains | Multi-chain via LayerZero OFT |
+| Brain overlap | **HIGH post-pivot** — DC-9 + DC-12 sub-7 + Doctrine #34 (NEW, this Gate 1 anchored it) + CANDIDATE-A LZ-OFT-default-DVN + CANDIDATE-Q grow-only-allowlist (NEW) + Pattern F |
+| Verdict | **Gate-1-MIXED → watchlist-only** — contest finished, no submission path. 5 candidates surfaced in post-audit-new code per Ogie msg 7772 |
+
+**Candidates surfaced (operator-decision: watchlist-only, no cold-email per msg 7772):**
+
+| # | Sev | ID | File | Class |
+|---|-----|----|------|-------|
+| 1 | CRITICAL | CANDIDATE-EIGENOP-001 | EigenOperator.sol:105-111 | CANDIDATE-Q grow-only-allowlist (1st anchor) |
+| 2 | HIGH | CANDIDATE-HARVESTER-001 | CapInterestHarvester.sol:69-91,149-192 | DC-9 + Dutch-auction asymmetry |
+| 3 | HIGH | CANDIDATE-DELEGATION-001 | Delegation.sol coverage() | DC-7 timestamp asymmetry |
+| 4 | HIGH | CANDIDATE-TEMPO-001 | TempoBridgeUpgradeable.sol:83-98 | CANDIDATE-A LZ-OFT-default-DVN (1st sub-class anchor) |
+| 5 | MEDIUM | CANDIDATE-FRR-001 | FractionalReserveLogic.sol:100-110 | DC-7 pre-withdraw amount skim |
+
+**Brain compounds landed (5 of 5, batch C-Cap-1..5):**
+
+- C-Cap-1 → CANDIDATE-Q grow-only-allowlist filed as DC-5 sub-pattern in `Patterns-Defense-Classes.md`
+- C-Cap-2 → CANDIDATE-A LZ-OFT-default-DVN sub-class enrichment in `Patterns-Defense-Classes.md`
+- C-Cap-3 → Doctrine #34 Post-Audit Composition Multiplier filed PERMANENT in `Doctrine.md`
+- C-Cap-4 → Standing-Intake Step 1 PROFILE rule extended with platform-STATUS preflight in `.claude/rules/standing-intake-protocol.md`
+- C-Cap-5 → this Crossmap row
+
+**Re-evaluation triggers** — any of:
+
+1. Cap launches active Sherlock/Cantina/Immunefi bounty
+2. Cap publishes SECURITY.md or security@ email
+3. Post-audit composition layer receives independent audit
+4. 6-month review tick (2026-11-25)
+
+**Clone management** — `.gate1-work/cap-2026-05-25/` (11MB) retained 7d (purge 2026-06-01). Layer 0 JSON retained indefinitely as Doctrine #34 canonical anchor.
+
+_Post-v1.9 row 35 cap-protocol | 2026-05-25 | Operator dispatch msg 7768 + Gate 1 pivot msg 7772 | Gate-1-MIXED → watchlist-only (contest finished, no submission path), 5 brain compounds landed including Doctrine #34 Post-Audit Composition Multiplier (first worked anchor)._
