@@ -1791,3 +1791,70 @@ Detector value: MEDIUM (AST-walkable: paired wrap/unwrap function detection + re
 **Source.** lifi Gate 1 task #57 Step 9 brain compound proposal B, 2026-05-25. Operator-approved msg 7725 proposal B.
 
 **Status.** Filed 2026-05-25 as cross-chain extension of Doctrine #31a (rebase-protocol yield-ceiling calibration). Together Doctrine #31a + #31a-cross-chain cover BOTH the internal-storage-cache class (CauldronV4 anchor) AND the cross-chain-bridge-adapter class (LiFi LidoWrapper anchor). DC-20 (rebase-cache-invalidation) is the detector substrate for both layers.
+
+---
+
+## Doctrine #32 — Cycle-1 Foreclosure Pattern: Heavily-Audited + Code-Stable + Detector-Clean = Auto-Foreclose (added 2026-05-25 — Propagation Cycle 1 5/5 Foreclosure, Ogie msg 7728 proposal B)
+
+**Statement.** [INSPECTED] When a Gate 1 target satisfies ALL THREE of the following at Step 5 execution, the target auto-downgrades to LOW brain-overlap and forecloses by default — Gate 2 dispatch requires a net-new lens not yet in the catalog:
+
+1. **Heavily-audited substrate** — ≥10 audit reports in the audit-tracking artifact, multi-firm coverage, audit-AHEAD-of-HEAD or audit-mirror-of-HEAD timing
+2. **Code-stable substrate** — Layer 0 git-security-analyzer reports `late_changes` (last 30d) all classified as housekeeping (test coverage / deprecation / lint / CI / workflow / submodule bumps); no net-new attack surface introduced
+3. **Detector-clean substrate** — full active-DC-detector rotation (currently cand-t/w/y/v/z and any subsequent additions) returns ZERO findings on the scoped .sol set
+
+When all three conditions hold, the FORECLOSURE-RECEIPT verdict is the default — operator approval required to override. The single allowed override is the discovery of a NET-NEW LENS not yet promoted to the DC catalog: a CANDIDATE not in the brain pool that the substrate uniquely surfaces.
+
+**Worked anchor — Propagation Cycle 1 (2026-05-23 through 2026-05-25, 5/5 FORECLOSURE-RECEIPT).**
+
+| Target | Audits | late_changes (30d) | Detector hits | Verdict |
+|---|---|---|---|---|
+| silo-v2 (task #43) | 5+ Certora | 0 net-new surface | 0 | FORECLOSURE-RECEIPT |
+| origin-dollar (task #45 / Gate 2 #53) | 7+ (OZ + ToB + Spearbit + Certora) | 0 net-new surface | 0 (multiple rotations) | FORECLOSURE-RECEIPT |
+| venus-core-pool (task #47) | 8+ (Certora + Halborn + multiple) | 0 net-new surface | 0 | FORECLOSURE-RECEIPT |
+| lifi (task #57) | 85 (Cantina + Somraaj + Spearbit + ToB) | 0 net-new (4 housekeeping) | 0 | FORECLOSURE-RECEIPT |
+| cooler-loans (task #59) | 5+ internal + Sherlock + Code4rena | 0 net-new surface | 0 | FORECLOSURE-RECEIPT |
+
+5/5 FORECLOSURE-RECEIPT outcomes across the cycle 1 watchlist — the Clara Ground-Truth bulk-intake lenses (CANDIDATE-T/V/W/X/Y/Z, now DC-14/17/18/19/20) found NO surface in any of the 5 heavily-audited mature targets. **The pattern is real:** mature targets with sustained audit cadence have already foreclosed the substrate that historical Clara incidents anchor on.
+
+**Why this is a doctrine, not a heuristic:**
+
+- The audit-saturation discount (Doctrine #27) attenuates EV
+- The audit-cadence sub-rule (Doctrine #27 sub-rule, msg 7725) further attenuates EV when cadence is ≥30 audits + ≥18mo
+- BUT until Doctrine #32, there was no explicit STOP rule preventing Gate 2 dispatch on a target that satisfied all 3 cycle-1 conditions
+- Doctrine #32 codifies: when the three conditions hold, the EV is BELOW the foreclosure floor structurally, not just on a discount
+
+**Cycle 2 targeting rule (standing directive, Ogie msg 7728):**
+
+For future propagation cycles where the goal is to test the post-Clara lens stack against FRESH substrate (where DC-14..20 will find surface), filter the watchlist for:
+
+```
+audit_cadence_months < 12   AND   late_changes_30d > 0
+```
+
+These are the substrates where the lens stack will bind. Cycle 1 confirmed the lens stack does NOT bind on heavily-audited code-stable targets — by design, those targets have already foreclosed the historical anchor classes.
+
+Implementation: encode the cycle-2 filter as a `propagation-cycle-target-filter.json` (or extend `defense-class-mapping.json`) such that future propagation sweeps default to the cycle-2 filter. The cycle-1 watchlist is now baseline FORECLOSED — re-activate only on a new late_change or net-new lens.
+
+**Where this DOES NOT apply (real-bug classes that bypass Doctrine #32):**
+
+1. **Net-new lens discovery** — if Gate 1 surfaces a CANDIDATE not yet promoted to the DC catalog, escalate regardless of audit-saturation. The whole point of a propagation cycle is to surface net-new lenses; suppressing them via #32 would be self-defeating.
+2. **Critical-tier program with novel architecture** — if the program is post-incident-rewrite or post-major-architectural-pivot, the "audit cadence" measure may be misleading (audit pile-up on superseded code). Manually verify audit scope covers HEAD architecture before applying #32.
+3. **Cross-protocol composition surface** — composition surfaces are typically OOS for individual-target audits. Apply lens stack at composition boundary regardless of #32.
+4. **Operator override** — operator may explicitly direct Gate 2 dispatch on a #32-foreclosed target. The doctrine is a default, not a hard veto.
+
+**Productization signal:**
+
+Detector value: ZERO (no Layer 1 substrate). Triage value: HIGH (saves 60-90 min per cycle-1-class target Gate 1). Implementation: append to `.claude/rules/standing-intake-protocol.md` Step 4 QUEUE DECISION matrix as `cycle_1_foreclosure_auto_check` sub-routine (run after Step 5 detector rotation; if all 3 conditions hold, default verdict = FORECLOSURE-RECEIPT). Operator-approved msg 7728 proposal B, 2026-05-25.
+
+**R8 tags:**
+
+- `[INSPECTED]` All 5 cycle 1 targets foreclosed (silo-v2 / origin-dollar / venus / lifi / cooler-loans — task #43/#45/#47/#57/#59 Gate 1 records)
+- `[INSPECTED]` Detector rotation cand-t/w/y/v 0 findings across all 5 targets (task records verified)
+- `[INSPECTED]` Layer 0 late_changes data confirms all 5 stable (4 housekeeping + 0 + 0 + 0 + 0)
+- `[INSPECTED]` Audit-count data per cycle 1 target (audit/reports/ directories verified)
+- `[ASSUMED]` Doctrine #32 generalizes to future heavy-audit + code-stable + detector-clean targets (cycle 2 will validate via fresh substrate testing)
+- `[ASSUMED]` Cycle 2 filter (audit_cadence_months < 12 AND late_changes_30d > 0) will produce binding substrate for the DC-14..20 lens stack (first cycle 2 dispatch will validate)
+
+**Source.** Propagation cycle 1 close (2026-05-25). Operator-approved msg 7728 proposal B. Cycle 1 watchlist baseline FORECLOSED; cycle 2 filter standing directive embedded.
+
+**Status.** Filed 2026-05-25 as standing-directive doctrine. Cycle 2 dispatch will validate the inverse — does the post-Clara lens stack bind on fresh substrate? Expected positive validation on first cycle-2 target with audit_cadence_months < 12 + late_changes_30d > 0.
