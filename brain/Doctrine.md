@@ -1629,3 +1629,76 @@ Sub-step 5.4 sits between 5.3 (brain lens application) and 5.5 (5-target checkli
 **Lane 3 surface.** "Why every custom transfer hook is a footgun: 400 incidents, one root cause." Methodology essay anchoring this doctrine to the 5 named worked examples (Uranium $40.9M, CauldronV4 $4.7M, SSS $4.6M, JUDAO $228K, thirdweb $831). Brand-positive (Buzz catches a class others miss systematically); methodology-instructive.
 
 **Status.** Filed 2026-05-24 via Clara Ground-Truth bulk intake. Operator-approved as Doctrine #31 (Ogie msg 7695 item 4). Sits in routing layer above DC-15 + CANDIDATE-V + CANDIDATE-W + CANDIDATE-Y + CANDIDATE-Z. Productization detectors pending L1b backlog scheduling.
+
+---
+
+## Doctrine #31a — Rebase-Protocol Standing-Intake Yield-Ceiling Calibration (sub-doctrine, added 2026-05-25 — Origin-Dollar Gate 2 economic foreclosure, Ogie msg 7715 proposal D)
+
+**Statement.** [INSPECTED] For any rebase-protocol target hitting Standing Intake Protocol Step 2 (brain-overlap scoring), apply the JIT-yield-capture upper-bound math BEFORE deep-reading any rebase-timing-attack class lens. The formula is:
+
+```
+upper_bound_per_attack = realized_yield_per_rebase × max_attacker_fraction - JIT_capital_cost
+```
+
+where:
+- `realized_yield_per_rebase` = TVL × APR / rebases_per_year
+- `max_attacker_fraction` = min(attacker_capital / (attacker_capital + existing_supply), 0.5) — capped at 50% (above which attacker IS the protocol)
+- `JIT_capital_cost` = flash-loan fee × lockup_duration (typical ~0.5 bps/min)
+
+**If `upper_bound_per_attack` < Critical-bucket-floor (typically $75K per Immunefi standard), then rebase-timing-attack class is bounded BELOW submission viability AND likely OOS as prior-audit-covered design property. Skip deep-read on rebase-timing class; redirect Gate 1 cycles to non-rebase substrates in the same target (oracle integration, admin paths, hook surfaces, governance, upgradeability).**
+
+**Worked example (Origin OUSD canonical, task #53):**
+
+```
+TVL                  = $50M rebasing
+APR                  = 4% annualized (~$5K/12h realized yield, 2 rebases/day)
+rebases_per_year     = 730
+realized_per_rebase  = $50M × 0.04 / 730 = ~$2,740
+max_attacker_frac    = $50M / ($50M + $50M) = 0.5 (cap)
+JIT_cost             = ~$5 on $50M / 10min lockup
+upper_bound          = $2,740 × 0.5 - $5 = ~$1,365 per attack
+
+Result: BELOW $75K Critical floor → SKIP rebase-timing class → redirect to oracle / admin / hook surfaces.
+```
+
+**Why this is a Standing Intake calibration not a Gate 2 rule:**
+
+The math is cheap (5-min computation) and the input data is public (DefiLlama TVL + Origin yield dashboards). Running it at Step 2 BEFORE clone + deep-read saves 2-6h Gate 2 wall-clock per rebase-protocol target. Skipping it = waste cycles on bounded-economic-class targets that prior audits have already cleared.
+
+**Decision rule integration with Standing Intake Step 2:**
+
+When the target is a rebase-1:1 protocol (OUSD, sUSDS, Sturdy, frxETH, Yearn V3 rebase vaults, OETH, RAI-class), the Step 2 brain-overlap score must include a separate `rebase_yield_ceiling_check` field:
+
+- `PASS` (upper_bound ≥ Critical floor) → rebase-timing-attack class IS in-scope, file as normal
+- `FAIL` (upper_bound < Critical floor) → rebase-timing-attack class is OUT-of-scope per Doctrine #31a; redirect Gate 1 effort to non-rebase substrates
+
+**Cross-pollination scan targets:**
+
+Apply the math at Step 2 against: OUSD (Origin), OETH (Origin), sUSDS (Sky), Sturdy stable-vaults, frxETH (Frax), Yearn V3 vaults with rebase-style accumulation, Reflexer RAI (formerly), Compound v2/v3 cTokens (for cToken-cache substrate, not interest-rebase), Aave aTokens (similar substrate). For each, the rebase-timing-attack ceiling will be `min(realized_yield_per_rebase × 0.5, MAX_REBASE_cap × existing_supply × 0.5)`. The MAX_REBASE_cap (typically 2%) provides an upper-upper bound when realized yield exceeds the cap.
+
+**Where this DOES NOT apply (real-bug classes that bypass Doctrine #31a):**
+
+1. **Mint-yield divergence** (`_mint(amount)` adds to `totalSupply` but NOT 1:1 to `vaultValue`) — bypasses the structural ceiling, file as DC-9 sub-1 or new sub-pattern
+2. **Withdrawal lockup < rebase-frequency / 2** — attacker can rotate faster than yield, ceiling becomes meaningless
+3. **Attacker-callable rebase paths** (admin manual rebase callable by anyone, gas-paid) — attacker amplifies attack rate
+4. **Oracle-driven realized_yield manipulable by attacker** — bypasses the structural cap
+
+If ANY of these 4 bypass conditions are confirmed at Step 5 inventory, escalate IMMEDIATELY to Gate 2 — Doctrine #31a does NOT foreclose those.
+
+**Productization signal:**
+
+Detector value: ZERO (no Layer 1d substrate to grep). Triage value: HIGH (saves 2-6h per rebase-protocol Gate 1 + reduces FP rate on prior-audit-covered design properties). Implementation: append to `.claude/rules/standing-intake-protocol.md` Step 2 as a sub-routine "Apply Doctrine #31a if target is rebase-1:1 protocol" with the upper-bound formula inline. Operator-decision: rule edit pending separate file commit (Doctrine.md commit lands the rule; standing-intake.md commit can follow).
+
+**R8 tags:**
+
+- `[INSPECTED]` Origin OUSD `_mint` 1:1 vault-value addition (VaultCore.sol:78-85, task #53 V1 source-read)
+- `[INSPECTED]` Origin OUSD `_rebase` headroom formula (VaultCore.sol:506)
+- `[INSPECTED]` Origin OUSD MAX_REBASE 2% cap + 10-min withdrawal lockup (VaultStorage.sol, task #53 V1)
+- `[INSPECTED]` Origin OUSD rebase cadence average 7.5h / median 10.9h (mainnet event-log query, task #53 V1, 46 events over 14d)
+- `[ASSUMED]` JIT-capital cost ~0.5 bps/min flash-loan fee (typical market rate, not protocol-specific)
+- `[ASSUMED]` Captured-fraction proportionality (basic pool-math, no edge cases for rebase-time-snapshot vs continuous accrual)
+- `[ASSUMED]` Future rebase-protocol Gate 1 targets benefit from this calibration (pending first-application validation against sUSDS or frxETH)
+
+**Source.** origin-dollar Gate 2 task #53 second-pass economic analysis, 2026-05-25. Foreclosure-receipt at `data/lane1/gate2-clones/origin-dollar-rebase-sandwich-foreclosed.md`. Operator-approved msg 7715 proposal D.
+
+**Status.** Filed 2026-05-25 as sub-doctrine of Doctrine #31 (custom hooks break standard invariants — rebase hooks are the canonical subclass). Sits in Standing-Intake Step 2 calibration layer above Step 5 Gate 1 execution. Cross-pollination expected on first sUSDS / frxETH / Sturdy Gate 1 dispatch.

@@ -750,13 +750,78 @@ This isn't a vulnerability — it's an opportunity for protocols WITHOUT dual-tr
 
 ---
 
+## JIT-Yield-Capture as Structural Property of Rebase-Mint-1:1 Protocols (filed 2026-05-25, Ogie msg 7715 proposal C)
+
+> **Authority:** origin-dollar Gate 2 task #53 second-pass economic analysis. Operator-approved msg 7715. MEDIUM-ceiling severity by structural design.
+
+**Property statement:**
+
+> For ANY rebase-share protocol where: (a) `_mint(amount)` increases both `totalSupply` AND `vaultValue` 1:1 (i.e., minting OUSD against $1 stable creates 1 OUSD share + adds $1 to vault), AND (b) the rebase formula computes `newIndex = vaultValue / totalSupply`, AND (c) the rebase is triggered on a scheduled cadence (cron / Defender Action / TWAP window), THEN an attacker can JIT-mint shares pre-rebase + redeem post-rebase to capture a fraction of the realized yield. The captured fraction = `attacker_capital / (attacker_capital + existing_supply)` × `realized_yield_per_rebase`.
+
+**Math worked example (Origin OUSD scale):**
+
+```
+existing_supply         = $50,000,000 (rebasing TVL)
+realized_yield_per_12h  = $5,000 (typical Origin OUSD yield, $10K/day / 2 rebases)
+MAX_REBASE_cap          = 2% per rebase (Origin parameter)
+attacker_JIT_capital    = $50,000,000 (JIT flash-loan, 1:1 match)
+withdrawal_lockup       = 10 minutes (Origin parameter)
+
+attacker_captured_yield = $5,000 × (50M / (50M + 50M)) = $2,500
+JIT_capital_cost        = ~$5 (10min @ 0.5 bps/min flash-loan fee on $50M)
+net_profit              = ~$2,495 per attack
+attacks_per_day         = 2 (one per rebase)
+gross_daily             = ~$5,000
+
+practical_bound: realized_yield_per_rebase × min(attacker_fraction, 0.5) - JIT_capital_cost
+```
+
+**Why this is STRUCTURAL not exploit:**
+
+1. The protocol's `_mint(amount)` is a public function; any user can call it
+2. The realized yield is by-design distributed to ALL holders pro-rata at rebase time
+3. The attacker's JIT capital DOES increase the existing supply AND the vault value 1:1, so they ARE entitled to a share of yield
+4. The economic ceiling is bounded by `realized_yield_per_rebase`; cannot exceed it
+5. Any submission to a bounty program is rejected as "intended-by-design rebasing behavior"
+
+**Where this BECOMES a real bug (not just structural):**
+
+- If `_mint(amount)` adds to `totalSupply` but does NOT add 1:1 to `vaultValue` (mint-yield divergence) → infinite-mint angle
+- If withdrawal lockup is < rebase frequency / 2 (e.g., 5min lockup with 10min rebase) → attacker can rotate capital faster than yield
+- If multiple rebase paths exist (admin manual + cron + emergency) AND an admin manual rebase can be triggered by attacker (e.g., callable by anyone, gas-paid) → attacker can amplify yield-capture rate
+- If realized_yield is computed from a manipulable source (oracle-driven AUM, attacker-controllable strategy)
+
+**Triage rule (Gate 1 standing-intake calibration):**
+
+For any rebase-protocol Gate 1, run the JIT-yield-capture upper-bound math BEFORE deep-reading. If `realized_yield_per_rebase × 0.5 - JIT_capital_cost` < Critical threshold ($75K typically), then any rebase-timing-attack class is bounded below submission viability AND likely OOS as prior-audit-covered design property. Skip deep-read on rebase-timing-attack class; redirect to non-rebase substrates in the same target (oracle, admin, hooks).
+
+**Cross-pollination scan targets:** every rebase-1:1 protocol — OUSD (Origin), OETH (Origin), sUSDS (Sky), Sturdy stable-vaults, Reflexer RAI (formerly), Frax FRAX-yield, Yearn V3 vaults with rebase-style accumulation. For each: confirm `_mint` adds 1:1 to vault value (if NOT 1:1, escalate). Cross-reference with `realized_yield_rate` from public dashboards (DefiLlama, oracle-feed publishers).
+
+**Detector implication:** NOT a Layer-1d substrate detector — this is a Gate-1-economic-foreclosure template. File under brain Doctrine #31a or as Standing-Intake Step 2 sub-rule. Detector value: ZERO. Triage value: HIGH (saves Gate 2 wall-clock on bounded-economic-class targets).
+
+**R8 tags:**
+
+- `[INSPECTED]` Origin OUSD `_mint` 1:1 vault-value addition (VaultCore.sol:78-85)
+- `[INSPECTED]` Origin OUSD `_rebase` headroom formula (VaultCore.sol:506)
+- `[INSPECTED]` MAX_REBASE 2% cap (Origin VaultStorage.sol)
+- `[INSPECTED]` 10-minute withdrawal lockup (Origin Vault)
+- `[INSPECTED]` Origin rebase cadence 12h average (mainnet event-log query, task #53 V1)
+- `[ASSUMED]` JIT-capital cost ~0.5 bps/min flash-loan fee (typical market rate)
+- `[ASSUMED]` Captured-fraction proportionality (basic pool-math, no edge cases like rebase-time-snapshot vs continuous accrual)
+
+**Source:** origin-dollar Gate 2 task #53, 2026-05-25, foreclosure-receipt at `data/lane1/gate2-clones/origin-dollar-rebase-sandwich-foreclosed.md`. Operator-approved msg 7715 proposal C.
+
+---
+
 ## Future entries
 
 When the next cross-domain public exploit hits, file under this ledger with the same schema. Pattern goal: 5-10 entries here surface a meta-pattern about cross-domain fragility that becomes a Pattern J in `audit-methodology-v2.md`.
 
 ---
 
-_Cross-Domain Fragility Laws ledger | v1.7 | 2026-05-21 (DC-8 cross-domain extension to MPC theorized after CB-MPC research pass — conjecture filed pending CB-MPC Gate 2; Lombard dual-trust mint chain filed as defensive pattern + cross-pollination opportunity for single-tier bridges, THORChain Bifrost specifically called out as Lane 1.5 candidate; v1.6 footer history preserved below.)_
+_Cross-Domain Fragility Laws ledger | v1.8 | 2026-05-25 (JIT-Yield-Capture as Structural Property of Rebase-Mint-1:1 Protocols filed per Ogie msg 7715 proposal C — origin-dollar Gate 2 second-pass economic analysis bounded ~$2-3K profit per attack on $50M TVL, below Critical threshold + likely OOS prior-audit territory; Gate-1-economic-foreclosure template added for future rebase-protocol Gate 1 dispatches; v1.7 footer history preserved below.)_
+
+_Prior footer — v1.7 | 2026-05-21 (DC-8 cross-domain extension to MPC theorized after CB-MPC research pass — conjecture filed pending CB-MPC Gate 2; Lombard dual-trust mint chain filed as defensive pattern + cross-pollination opportunity for single-tier bridges, THORChain Bifrost specifically called out as Lane 1.5 candidate; v1.6 footer history preserved below.)_
 
 _Prior footer — v1.6 | 2026-05-19 (Echo Protocol $822K eBTC unauthorized mint on Monad filed as Pattern H enrichment per operator msg 7286 — "Admin Key = Trust Anchor Collapse" sub-class formalized; CANDIDATE-A cross-reference extended with bridge-mint-authority verification surface survey list across Wormhole / cap / Lido / Renzo / Stader / Rocket Pool / Veda; Curvance leg flagged as cross-protocol-loss-compounding meta-pattern candidate for future family promotion; v1.5 footer history preserved below.)_
 

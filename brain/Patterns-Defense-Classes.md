@@ -1148,7 +1148,9 @@ A consumer with ≥1 wrapper passes the Kamino three-layer convergence test. ZER
 
 **Triage rule:** Gate 1 surveys that confirm wrapper-presence + wrapper-independence may FORECLOSE on DC-12 with a documented receipt. Surveys without wrapper-verification leave the finding [ASSUMED] DC-12 substrate; demote to Gate 2 verification.
 
-**Canonical O-WRAPPED-DEFENDED reference:** Kamino klend Gate 2 (task #37, 2026-05-24) surveyed 30 reserves across 4 markets, found 2 with `max_twap_divergence_bps=0` but ZERO using direct-DEX-spot Scope chain index. kSOLJITOSOLOrca uses external-priced sqrt ratio (anti-Sharwa source comment at `programs/scope/src/oracles/ktokens.rs:41-44`). USDH uses FixedPrice $1. Class refuted across production surface. See `data/lane1/gate2-clones/kamino-twap-bypass-paste-ready.md` for the regression sentinel.
+**Canonical O-WRAPPED-DEFENDED references:**
+1. **Kamino klend Gate 2** (task #37, 2026-05-24, Solana substrate) — surveyed 30 reserves across 4 markets, found 2 with `max_twap_divergence_bps=0` but ZERO using direct-DEX-spot Scope chain index. kSOLJITOSOLOrca uses external-priced sqrt ratio (anti-Sharwa source comment at `programs/scope/src/oracles/ktokens.rs:41-44`). USDH uses FixedPrice $1. Class refuted across production surface. See `data/lane1/gate2-clones/kamino-twap-bypass-paste-ready.md` for the regression sentinel.
+2. **Origin Dollar (OUSD/OETH) Gate 2** (task #53, 2026-05-25, EVM substrate, second-anchor confirmation) — Origin's `AbstractOracleRouter.sol` + `OracleRouter.sol` + `OETHOracleRouter.sol` family is Chainlink-only with `latestRoundData()` + staleness + DRIFT bounds. ZERO `get_p` / `last_price` / `price_oracle` grep hits in `oracle/` dir. NO Curve fallback path. WETH = FIXED_PRICE 1e18. Stablecoin reserves all mapped to Chainlink USD feeds. CONFIRMS the DC-12 O-WRAPPED reference pattern cross-substrate (Solana + EVM). See `data/lane1/gate2-clones/origin-dollar-rebase-sandwich-foreclosed.md` for full V2 verification record. (Operator approval: Ogie msg 7715 proposal A, 2026-05-25)
 
 **Canonical O-RAW reference:** Sharwa (Arbitrum, $32.8K, 2024) — Hegic option NFT priced via Uniswap V3 spot Quoter on low-liquidity USDC.e/USDC pool, NO TWAP, NO Chainlink fallback. Textbook-clean O-RAW.
 
@@ -1474,5 +1476,11 @@ FP gate: most contracts that do `price * amount / 1e18` DO handle decimals corre
 - AND target token is known-rebase (stETH / AMPL / OHM staking / lendingPool aToken)
 
 **Status:** 5 anchors. Detector spec needs rebase-token catalog + cross-reference. MEDIUM EV.
+
+**Canonical negative example — well-designed defense against Doctrine #31a cache class [INSPECTED]:**
+
+**Origin Dollar `BridgedWOETHStrategy.lastOraclePrice`** (file: `contracts/strategies/BridgedWOETHStrategy.sol`, audited 2024+) — Origin's bridged-WOETH strategy DOES cache an oracle price to storage (`lastOraclePrice`), but the cache is **monotone-up only** + documented under-report design. The cache can only INCREASE on update (never decrease), and any read where the live oracle is below the cache returns the live (lower) value — so the protocol always under-reports collateral value vs reality. Attacker cannot exploit a stale-low cache because the protocol takes the conservative (lower) of live + cache for collateralization. This is the **structural answer** to CANDIDATE-Z: don't avoid caching, design the cache + read function so that the asymmetric error mode favors the protocol.
+
+Future Gate 1 surveys finding `lastOraclePrice`-style cache should check: (a) is the cache monotone-up only? (b) is the read function `min(live, cache)` or `max(live, cache)`? Only `min(live, cache)` is defended; `max(live, cache)` OR raw-cache-read is the bug class. Operator approval: Ogie msg 7715 proposal B, 2026-05-25. Cross-reference: `data/lane1/gate2-clones/origin-dollar-rebase-sandwich-foreclosed.md` V3 verification.
 
 ---
