@@ -813,13 +813,49 @@ For any rebase-protocol Gate 1, run the JIT-yield-capture upper-bound math BEFOR
 
 ---
 
+## Selective-Coverage Defense Asymmetry Law (filed 2026-05-25, Ogie msg 7775 — Flying Tulip Sherlock Gate 1 proposal P3)
+
+**Statement.** Any protocol defense mechanism with explicit, documented coverage exclusions creates a cross-domain fragility surface: the defense calibrates external auditor + integrator confidence ("this protocol has X defense"), while the documented exclusion creates a known-uncovered hot zone where the defense's existence increases (not decreases) per-path EV by inverting the implicit trust model. [INSPECTED]
+
+**Why this is a cross-domain law, not a single-protocol heuristic:**
+
+1. **Auditor-time exclusion** — auditors review code coverage, not exclusion-list reasoning. A documented exclusion in README or NatSpec is "out of scope" by virtue of being acknowledged. [INSPECTED]
+2. **Integrator-time exclusion** — downstream integrators (other protocols composing on this one) inherit the defense-coverage assumption. When the excluded path becomes an integration surface, the trust assumption propagates one layer deeper. [ASSUMED]
+3. **Attacker-time exclusion** — attackers reading public docs find the exclusion list directly. Documented exclusions become the attack roadmap. [INSPECTED]
+4. **Post-deploy exclusion** — when a protocol UPDATES its defense module to ADD an exclusion, the change-set is rarely re-audited at parity. The exclusion-add commit is structurally low-attention. [ASSUMED]
+
+**Cross-domain implication:** the fragility extends from the host protocol to every downstream consumer that composed on the defense's coverage claim. Cap Sherlock Gate 1 produced 5 candidates anchored to post-audit composition (Doctrine #34); the same pattern applies inverted here — excluded coverage creates downstream-consumer fragility even when the host code is unchanged.
+
+**Flying Tulip canonical anchor (2026-05-25, [INSPECTED] README-only):** CircuitBreaker `withdrawFT()` exclusion. README verbatim: "CircuitBreaker notably does not cover putManager.withdrawFT() by design choice." Exclusion is intentional design — likely UX/liveness trade-off. EV on the excluded path is uncalibrated by public-source pass (no source-read, no submission path; Flying Tulip Sherlock contest #1223 FINISHED). Lens-tracked, no promotion yet.
+
+**Sibling anchors (future scan targets, [ASSUMED]):**
+
+- **Aave V3** flashLoan paths excluded from certain reserve-config guards (would need source-confirmation)
+- **Compound** liquidate function explicit pause-bypass
+- **Olympus BLVault** MIN-cap defense excluded for emergency unwind paths
+- **Curve V2** selective-TWAP path divergence
+- **Any LayerZero OFT consumer** with default-DVN trust + custom-DVN exclusion list (sibling to CANDIDATE-A LZ-OFT-default-DVN trust enrichment, C-Cap-2)
+
+**Detection signature** (for Standing-Intake Step 2 BRAIN OVERLAP application):
+
+1. Step 1 PROFILE returns "has named defense mechanism" → fire lens
+2. Grep README + NatSpec + source comments for: "not covered", "by design", "excluded from", "intentional bypass", "design choice"
+3. For each documented exclusion, enumerate downstream consumer protocols + verify whether they composed on the FULL defense coverage claim vs the EXCLUSION-AWARE coverage claim
+4. Surface as candidate to Step 5 detector rotation
+
+**Promotion path:** filed as Cross-Domain Law (this entry) + Lens (`Lens-FT-CircuitBreaker-Asymmetry.md`). CANDIDATE-letter promotion requires 2 additional anchors with confirmed-or-disclosed exploit paths (currently 1, Flying Tulip [INSPECTED] anchor).
+
+---
+
 ## Future entries
 
 When the next cross-domain public exploit hits, file under this ledger with the same schema. Pattern goal: 5-10 entries here surface a meta-pattern about cross-domain fragility that becomes a Pattern J in `audit-methodology-v2.md`.
 
 ---
 
-_Cross-Domain Fragility Laws ledger | v1.9 | 2026-05-25 (DC-18/19/20 promotions [CANDIDATE-V→DC-18 reward-accumulator + CANDIDATE-Y→DC-19 self-transfer-mutation + CANDIDATE-Z→DC-20 rebase-cache] per Ogie msg 7725 + 3 lifi brain proposals A/B/C filed: DC-14 LiFi post-2022 reference baseline INTACT, Doctrine #31a cross-chain rebase-bridge variant via LidoWrapper @dev-warning structural defense, Doctrine #27 sub-rule for ≥30-audit + ≥18mo sustained cadence with 0.4× maximum discount + skip-deep-trace; v1.8 footer history preserved below.)_
+_Cross-Domain Fragility Laws ledger | v2.0 | 2026-05-25 (Selective-Coverage Defense Asymmetry Law filed per Ogie msg 7775 — Flying Tulip CircuitBreaker `withdrawFT()` documented exclusion, first cross-domain law on this family; companion to `Lens-FT-CircuitBreaker-Asymmetry.md` + `Operator-Brief-Reconciliation.md` + Crossmap row 36; v1.9 footer history preserved below.)_
+
+_Prior footer — v1.9 | 2026-05-25 (DC-18/19/20 promotions [CANDIDATE-V→DC-18 reward-accumulator + CANDIDATE-Y→DC-19 self-transfer-mutation + CANDIDATE-Z→DC-20 rebase-cache] per Ogie msg 7725 + 3 lifi brain proposals A/B/C filed: DC-14 LiFi post-2022 reference baseline INTACT, Doctrine #31a cross-chain rebase-bridge variant via LidoWrapper @dev-warning structural defense, Doctrine #27 sub-rule for ≥30-audit + ≥18mo sustained cadence with 0.4× maximum discount + skip-deep-trace; v1.8 footer history preserved below.)_
 
 _Prior footer — v1.8 | 2026-05-25 (JIT-Yield-Capture as Structural Property of Rebase-Mint-1:1 Protocols filed per Ogie msg 7715 proposal C — origin-dollar Gate 2 second-pass economic analysis bounded ~$2-3K profit per attack on $50M TVL, below Critical threshold + likely OOS prior-audit territory; Gate-1-economic-foreclosure template added for future rebase-protocol Gate 1 dispatches; v1.7 footer history preserved below.)_
 

@@ -647,3 +647,45 @@ _Post-v1.9 row 34 lifi | 2026-05-25 | Hyperactive Formula Step 3 default-next di
 **Clone management** — `.gate1-work/cap-2026-05-25/` (11MB) retained 7d (purge 2026-06-01). Layer 0 JSON retained indefinitely as Doctrine #34 canonical anchor.
 
 _Post-v1.9 row 35 cap-protocol | 2026-05-25 | Operator dispatch msg 7768 + Gate 1 pivot msg 7772 | Gate-1-MIXED → watchlist-only (contest finished, no submission path), 5 brain compounds landed including Doctrine #34 Post-Audit Composition Multiplier (first worked anchor)._
+
+---
+
+## Flying Tulip — Sherlock Gate 1 2026-05-25 (proposal P2 of 4, Ogie msg 7775)
+
+| Field | Value |
+|-------|-------|
+| Contest | Sherlock #1223 — **FINISHED**, $100K USDC final (NOT $1M as briefed — 2nd 10× operator-brief divergence today) |
+| Sherlock blog | "A Model Codebase" 2026-04-30 — adjudicated, 2,000+ submissions, **zero valid Medium/High findings** |
+| Repo | github.com/zaki9501/2026-01-flying-tulip-zaki9501-main (audit-contest source mirror) |
+| Chains | Ethereum + Sonic (mid-April 2026 launch) |
+| Architecture | Multi-chain yield + puts protocol; LayerZero OFT (FT token, 5 chains); ftPUT proxy; PutManager proxy; FlyingTulipOracle; CircuitBreaker |
+| Brain overlap | **HIGH despite zero-clone pass** — DC-10 OFT + DC-12 sub-7 + Doctrine #31 + CANDIDATE-A (LZ-OFT-DVN sibling to Cap TempoBridge) + **Selective-Coverage Defense Asymmetry lens** (NEW, P1 anchor, CircuitBreaker `withdrawFT()` README-confirmed exclusion) |
+| Verdict | **Gate-1-FORECLOSURE-RECEIPT → watchlist-only** — contest finished, no submission path, no Immunefi/Cantina/HackerOne backup discoverable in public-source pass |
+
+**5 pre-source candidate frames (Track-B only if operator greenlit; not pursued per msg 7775):**
+
+| # | ID | Class | Evidence grade |
+|---|----|----|-------|
+| FT-1 | CircuitBreaker `withdrawFT()` selective-coverage asymmetry | Selective-Coverage Defense Asymmetry lens (P1, this batch) | [INSPECTED] README |
+| FT-2 | Cross-chain OFT + AAVE oracle divergence | DC-10 + DC-12 sub-7 | [ASSUMED] |
+| FT-3 | Cap-update front-run window | DC-9 sub-1 / Doctrine #31 | [INSPECTED] README known-issue |
+| FT-4 | Production-timelock-vs-test drift | Doctrine #34 sibling | [ASSUMED] |
+| FT-5 | AAVE-oracle wrapper price-bounds bypass | DC-12 sub-7 / wrapper-strips-staleness | [ASSUMED] |
+
+**Brain compounds landed (4 of 4, batch P1-P4):**
+
+- **P1** → NEW file `brain/Lens-FT-CircuitBreaker-Asymmetry.md` — Selective-Coverage Defense Asymmetry family lens, Flying Tulip CircuitBreaker `withdrawFT()` first anchor (LENS_TRACKED, needs 2 more for CANDIDATE promotion)
+- **P2** → this Crossmap row 36
+- **P3** → `brain/Cross-Domain-Fragility-Laws.md` Selective-Coverage Defense Asymmetry Law (v2.0 footer bump, companion to P1 lens)
+- **P4** → NEW file `brain/Operator-Brief-Reconciliation.md` — Cap + Flying Tulip 2-of-2 divergence pattern formalized as PERMANENT brain rule, sibling to C-Cap-4 Standing-Intake Step 1 platform-STATUS preflight
+
+**Re-evaluation triggers** — any of:
+
+1. Flying Tulip announces new bounty (Immunefi/Cantina/Sherlock/Hyperdrive)
+2. Flying Tulip publishes private security disclosure channel
+3. CircuitBreaker module receives independent audit
+4. Selective-Coverage Defense Asymmetry lens hits 2nd worked anchor on a different protocol (promotion path)
+
+**Clone management** — NO clone executed (Cap-style waste avoidance at Step 1 preflight per C-Cap-4 platform-STATUS rule). Layer 0 JSON NOT generated.
+
+_Post-v1.9 row 36 flying-tulip | 2026-05-25 | Operator dispatch msg 7768 + watchlist-only directive msg 7775 | Gate-1-FORECLOSURE-RECEIPT (contest finished, zero clone, 15min wall-clock), 4 brain compounds landed P1-P4 including NEW lens Selective-Coverage Defense Asymmetry + NEW brain file Operator-Brief-Reconciliation (2-of-2 Sherlock divergence pattern formalized)._
