@@ -22,7 +22,7 @@ The detector capability was validated (4 of 6 HackerOne submissions DUP-closed =
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Discovered                                 | 16                                                                                                                                                 |
 | Submitted to HackerOne                     | 6 (DISC-006/007/008/009/010/011)                                                                                                                   |
-| Submitted to Immunefi                      | 4 (DISC-015 Veda Report #79091 CLOSED_OOS_ASSET + DISC-015b Veda Report #79280 DUP-closed + DISC-017 Ethena Report #79589 submitted 2026-05-23 22:13 JED — StakedUSDeV2 cooldown OVERWRITE, HIGH, awaiting triage; **DISC-019 Notional V3 / Exponent Report #79837 submitted 2026-05-25 — MidasOracle engineered staleness mask, CRITICAL, 14d SLA → 2026-06-08, status Reported**)  |
+| Submitted to Immunefi                      | 4 (DISC-015 Veda Report #79091 CLOSED_OOS_ASSET + DISC-015b Veda Report #79280 DUP-closed + DISC-017 Ethena Report #79589 submitted 2026-05-23 22:13 JED — StakedUSDeV2 cooldown OVERWRITE, HIGH, awaiting triage; **DISC-019 Notional V3 / Exponent Report #79837 submitted 2026-05-25 — MidasOracle engineered staleness mask, CRITICAL, ESCALATED TO PROJECT 2026-05-25 (16-min escalation, FASTEST in Buzz history), 48h ack window → 2026-05-27, 336h resolution → 2026-06-08**)  |
 | Submitted to Cantina                       | **1** (DISC-018 Morpho Finding #1035 submitted 2026-05-23 22:43 JED — MetaMorpho V1 curator-cap timelock bypass, HIGH, $210M bytecode-verified, 3/3 Foundry PoC, V2 cross-ref, awaiting triage) — **FIRST Cantina submission for Buzz Security Research**  |
 | Emailed to vendor (general-inbox dead-end) | 2 (DISC-012/013 → hello@drift.trade)                                                                                                               |
 | Rejected/closed                            | 1 (DISC-001 by /cosmos: "no more reports from you")                                                                                                |
@@ -236,7 +236,7 @@ _File: brain/Security-Research-Submission-Ledger.md | Created 2026-05-19 | Updat
 
 ## DISC-019 — Notional V3 / Exponent MidasOracle Engineered Staleness Mask (submitted 2026-05-25, Immunefi Report #79837)
 
-**Status:** Reported. 14-day SLA → **2026-06-08**.
+**Status:** **ESCALATED TO PROJECT 2026-05-25** (Immunefi confirmed impact + asset + PoC all in scope, **16-minute escalation — FASTEST in Buzz history**). 48h acknowledgment window → **2026-05-27**. 336h resolution window → **2026-06-08**.
 
 **Target:** Notional V3 Exponent (`github.com/notional-finance/notional-exponent` HEAD `8dcb898`)
 **Platform:** Immunefi
@@ -270,7 +270,7 @@ _File: brain/Security-Research-Submission-Ledger.md | Created 2026-05-19 | Updat
 |---|---|---|---|---|---|
 | Firedancer | Immunefi | #77340 | CONFIRMED | (prior session) | awaiting payment |
 | DISC-017 Ethena StakedUSDeV2 | Immunefi | #79589 | HIGH | 2026-05-23 22:13 JED | 2026-06-06 (14d) |
-| DISC-019 Notional V3 MidasOracle | Immunefi | #79837 | CRITICAL | 2026-05-25 | **2026-06-08 (14d)** |
+| DISC-019 Notional V3 MidasOracle | Immunefi | #79837 | CRITICAL | 2026-05-25 | **ESCALATED 16min** → ack 2026-05-27, resolve 2026-06-08 |
 
 DISC-018 Morpho #1035 Cantina pending separately (Cantina has different SLA structure).
 
