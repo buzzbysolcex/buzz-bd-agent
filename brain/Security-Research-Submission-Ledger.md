@@ -20,9 +20,9 @@ The detector capability was validated (4 of 6 HackerOne submissions DUP-closed =
 
 | Metric                                     | Count                                                                                                                                              |
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Discovered                                 | 15                                                                                                                                                 |
+| Discovered                                 | 16                                                                                                                                                 |
 | Submitted to HackerOne                     | 6 (DISC-006/007/008/009/010/011)                                                                                                                   |
-| Submitted to Immunefi                      | 3 (DISC-015 Veda Report #79091 CLOSED_OOS_ASSET + DISC-015b Veda Report #79280 DUP-closed + DISC-017 Ethena Report #79589 submitted 2026-05-23 22:13 JED — StakedUSDeV2 cooldown OVERWRITE, HIGH, awaiting triage)  |
+| Submitted to Immunefi                      | 4 (DISC-015 Veda Report #79091 CLOSED_OOS_ASSET + DISC-015b Veda Report #79280 DUP-closed + DISC-017 Ethena Report #79589 submitted 2026-05-23 22:13 JED — StakedUSDeV2 cooldown OVERWRITE, HIGH, awaiting triage; **DISC-019 Notional V3 / Exponent Report #79837 submitted 2026-05-25 — MidasOracle engineered staleness mask, CRITICAL, 14d SLA → 2026-06-08, status Reported**)  |
 | Submitted to Cantina                       | **1** (DISC-018 Morpho Finding #1035 submitted 2026-05-23 22:43 JED — MetaMorpho V1 curator-cap timelock bypass, HIGH, $210M bytecode-verified, 3/3 Foundry PoC, V2 cross-ref, awaiting triage) — **FIRST Cantina submission for Buzz Security Research**  |
 | Emailed to vendor (general-inbox dead-end) | 2 (DISC-012/013 → hello@drift.trade)                                                                                                               |
 | Rejected/closed                            | 1 (DISC-001 by /cosmos: "no more reports from you")                                                                                                |
@@ -231,3 +231,46 @@ Per operator msg 7557 close: "The pipeline has Ethena + GMX Edge + 8 Sherlock ta
 ---
 
 _File: brain/Security-Research-Submission-Ledger.md | Created 2026-05-19 | Updated 2026-05-22 (Lessons 8 + DUP validation) | Authority: Master Ops msgs 7252 + 7259/7260 + 7557 | Companion to disclosure-tracker.md + disclosure-tracker.json | Anti-metrics applied throughout._
+
+---
+
+## DISC-019 — Notional V3 / Exponent MidasOracle Engineered Staleness Mask (submitted 2026-05-25, Immunefi Report #79837)
+
+**Status:** Reported. 14-day SLA → **2026-06-08**.
+
+**Target:** Notional V3 Exponent (`github.com/notional-finance/notional-exponent` HEAD `8dcb898`)
+**Platform:** Immunefi
+**Severity:** Critical (operator-greenlit dual-framing — lead Critical, address pre-registration explicitly)
+**Cap:** $250K USD (10% of economic impact)
+**KYC:** Required (Notional Exponent program standard)
+
+**Finding class:** DC-12 sub-7e wrapper-strips-staleness-from-feed (engineered staleness mask variant). Wrapper INTENTIONALLY masks mToken's true `updatedAt` with fresh Chainlink base-feed `updatedAt` for first 7 days of staleness. Downstream LLTV consumption: `IYieldStrategy.price()` → `convertToAssets` → `TRADING_MODULE.getOraclePrice` → `MorphoLendingRouter.sol:463 collateralValue × m.lltv`. 0-7d mToken NAV drift flows directly into borrow/liquidation math with lying-fresh timestamp.
+
+**Live verification at submit time (2026-05-25 14:57 UTC):**
+- mAPOLLO aggregator `0x84303e5...7Ee4B`: `mTokenUpdatedAt = 1779450263` = **3.13 days stale**
+- mHYPER aggregator `0x43881B0...05f68`: `mTokenUpdatedAt = 1779458819` = **3.03 days stale**
+- USDC/USD Chainlink `0x8fFfFfd...18f6`: `updatedAt = 1779696023` = 6.95h fresh
+- TradingModule `priceOracles(mAPOLLO/mHYPER) = 0x0` → pre-registration (addressed explicitly in submission's "Pre-Registration State Acknowledgment" section per operator directive)
+
+**Economic impact (parametric):** $129K per cycle at $10M TVL × 1.5% drift × 0.86 LLTV; $2.58M at $100M TVL × 3% stress drift. Cycle = weekly NAV-update cadence × 52/year.
+
+**Brain compounding from this submission:**
+- DC-12 sub-7e filed as new sub-pattern in `Patterns-Defense-Classes.md` (engineered staleness mask, distinct from 7a/7b/7c/7d)
+- DC-12 sub-7d also filed (post-destructure staleness loss — Inverse + Notional sibling anchors)
+- DC-9 sub-5 filed (default-zero threshold footgun — Inverse anchor)
+- Doctrine #23 worked anchor 3 filed (Morpho IOracle interface foreclosure transfers responsibility to integrator)
+
+**Pre-Registration State Acknowledgment** (added to paste-ready per operator msg 7753): submission explicitly addresses that audited-but-not-yet-deployed in-scope code is eligible per Immunefi norm. Activation gate is one admin tx (`TradingModule.setPriceOracle`). The mask is engineered (inline comment at MidasOracle.sol:36-37), not accidental. Underlying Midas aggregator infrastructure already 3-day stale on-chain.
+
+**R8 calibration:** 13 [EXECUTED] (all with inline verification timestamps) + 20 [INSPECTED] + 9 [ASSUMED] = 42 total tagged claims.
+
+**Lane 1 active submissions queue (3 live):**
+
+| Disclosure | Platform | Report | Severity | Submitted | SLA Expiry |
+|---|---|---|---|---|---|
+| Firedancer | Immunefi | #77340 | CONFIRMED | (prior session) | awaiting payment |
+| DISC-017 Ethena StakedUSDeV2 | Immunefi | #79589 | HIGH | 2026-05-23 22:13 JED | 2026-06-06 (14d) |
+| DISC-019 Notional V3 MidasOracle | Immunefi | #79837 | CRITICAL | 2026-05-25 | **2026-06-08 (14d)** |
+
+DISC-018 Morpho #1035 Cantina pending separately (Cantina has different SLA structure).
+
