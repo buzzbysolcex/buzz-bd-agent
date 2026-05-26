@@ -2441,6 +2441,18 @@ Captures the asymmetry between protocols that respond to compositional growth wi
 
 `[INSPECTED]` Day 26 Gate 1 outcomes anchor all 4 expansion entries. Status: filed as ENRICHMENT to Doctrine #34, doctrine number unchanged.
 
+### Doctrine #34 enrichment — Day 26 afternoon (2026-05-26 — Across V3 ArbitraryEVMFlowExecutor anchor candidate, Ogie msg 7844)
+
+**Anchor candidate 5 — Across V3 `ArbitraryEVMFlowExecutor` (proposal Across-P2, hunt `hunts/2026-05-26-across-immunefi-gate1-PRE-CLONE-HALT.md`).** Across Protocol is a continuously-audited bridge codebase (OpenZeppelin single-firm-continuous model, distinct from multi-firm-saturation per External-Frameworks). HEAD commit `9ffb2ab26464` (2026-05-19) introduces new token/balance/drain logic component — `ArbitraryEVMFlowExecutor` — AFTER the OpenZeppelin continuous-audit baseline. This is the exact functional surface where Pattern A / Pattern E / DC-9 sub-pattern bugs land in bridge history (Nomad replay, Wormhole signature-validation gap, KelpDAO L2 transfer). `[INSPECTED]` per HEAD commit message; `[ASSUMED]` for source-code-confirmed exploit-class fit (PRE-CLONE-HALT — full source-read not performed).
+
+**Status of this anchor:** PROVISIONAL anchor candidate, NOT promoted to "anchor 5" position yet — promotion gated on either (a) operator routes Across Gate 1 dispatch (Option 1 or 2 per halt file) and source-confirms the ArbitraryEVMFlowExecutor surface, OR (b) competitor audit firm discloses an issue in the new component. Anchor catalog tracks: Cap (anchor 1) + Filecoin (anchor 2) + Stacks sBTC (anchor 3) + JustLend (anchor 4) + Across V3 PROVISIONAL.
+
+**Why filed as anchor candidate pre-confirmation:** Doctrine #34's strength is preemptive — flagging the substrate BEFORE the bug lands. The HEAD commit message strongly indicates dangerous-area mutation (token + balance + drain logic). Filing as PROVISIONAL anchor establishes the brain reference for any future Across cross-pollination scan or operator-routed dispatch.
+
+**Vendor-cadence sub-criterion check (Raydium anti-anchor application):** Across uses OpenZeppelin continuous-audit cadence. Cadence is HIGH on paper (continuous), but Across-specific re-audit of `ArbitraryEVMFlowExecutor` post-2026-05-19 is unverified. If OpenZeppelin re-audits the new component within 4 weeks of commit, the high-cadence 0.5× discount applies. If no re-audit ships by 2026-06-19 (1 month post-commit), low-cadence 1.5× boost applies. Default until verified: standard cadence (no discount/boost).
+
+`[INSPECTED]` HEAD commit + repo metadata; `[ASSUMED]` ArbitraryEVMFlowExecutor exploit-class fit pending source-read. Status: filed as PROVISIONAL ENRICHMENT to Doctrine #34, anchor catalog position 5 reserved.
+
 ---
 
 ## Doctrine #35 — Trust-Boundary Surface Asymmetry (added 2026-05-26 — Stacks sBTC Gate 1, proposal P1, Ogie msg 7817 batch)
@@ -2475,6 +2487,50 @@ The most-blast-radius function has the LEAST defense. Defense-asymmetry inversio
 **Status.** Filed 2026-05-26 as PERMANENT doctrine #35. Single-anchor Stacks sBTC `update-protocol-contract-wrapper`. Authority: Ogie msg 7817 (Day 26 batch — frozen brain proposals approved). Promotion to CANDIDATE class deferred to 2nd worked anchor.
 
 ---
+
+## Doctrine #36 CANDIDATE — Substrate-Coverage Gate (added 2026-05-26 afternoon — dYdX V4 P2 PRE-CLONE-HALT proposal, single-anchor pending 2nd)
+
+**Statement (candidate).** When Buzz's detector pack has ZERO mechanical coverage for a target substrate (no AST walker, no Layer 1 deep-analyzer for the language, no semgrep ruleset binding), apply a floor `P(finding) ≤ 0.01` in Step 3 EV calculation. The floor prevents EV-inflation on Gate 1 dispatches against substrates where the corpus is structurally blind. [INSPECTED]
+
+**Why this is candidate doctrine, not standing rule.** Currently single-anchor (dYdX V4 Cosmos-SDK Go, 2026-05-23 + 2026-05-26 double-confirmation). The pattern recurs in the 2026-05-26 Day 26 batch (Filecoin Go portion ZERO Go detector, Stacks/ALEX Clarity ZERO Clarity detector) but those targets had PARTIAL detector coverage on adjacent substrate (Rust FVM for Filecoin, Clarity proposal-pending for Stacks). dYdX V4 is the cleanest single-anchor — 1,104 production Go files, ZERO Go AST detector, ZERO production Rust (v4-proto-rs is SDK bindings only).
+
+**Anchor — dYdX V4 substrate-mismatch (2026-05-23 + 2026-05-26 double-confirmation).** First Gate 1 (`hunts/2026-05-23-dydx-v4-gate1.md`) calculated EV=$1,125 ($5M × P(finding)=0.01 × P(acc)=0.5 × overlap=0.15 × Doctrine #27 discount=0.30). The 0.01 P(finding) floor was applied ad-hoc; codifying as Doctrine #36 makes it a standing rule. Second halt (`hunts/2026-05-26-dydx-v4-immunefi-gate1-PRE-CLONE-HALT.md`) confirmed: substrate-coverage gap unchanged since 2026-05-23, no `buzzshield-cosmos-deep.js` shipped, no Go AST walker implemented. Re-dispatch without detector pack = same outcome.
+
+**Identification heuristic.** Before Step 3 EV calculation, evaluate:
+
+1. **Layer 1 deep-analyzer support:** does `buzzshield-layer1-deep.js` have a parse path for the target language? Solidity = YES. Rust (Solana Anchor) = YES. Rust (Substrate runtime) = PARTIAL. Cosmos-SDK Go = NO. Clarity = NO. Move = NO. CosmWasm Rust = PARTIAL. FEVM Solidity = YES (inherits Solidity pack).
+
+2. **Layer 1b semgrep ruleset:** does semgrep have rules for the target language? Solidity = YES (smart-contracts pack + security-audit pack + trailofbits pack). Go = PARTIAL (generic Go rules, no Cosmos-SDK-specific). Rust = PARTIAL. Clarity = NO.
+
+3. **Brain lens applicability:** are CANDIDATE-A..R / DC-1..15 anchors language-bound (Solidity-anchored) or language-agnostic? Most have Solidity anchors; some (CANDIDATE-G Solana Anchor staker, DC-8 moved-out-of-Accounts-struct) are Solana-Rust-anchored. Cross-language lens application is `[ASSUMED]` quality at best — manual lens walk required.
+
+If ALL THREE return NO/PARTIAL → apply `P(finding) ≤ 0.01` floor.
+
+**Cross-pollination targets (substrates likely to fire Doctrine #36):**
+
+- Cosmos-SDK Go chains (dYdX V4, Osmosis, Sei, Injective, Berachain modules, Babylon, Celestia, NobleAssets)
+- Clarity (Stacks sBTC, ALEX, Arkadiko, ALEX Lab Foundation derivatives)
+- Move (Sui programs, Aptos applications)
+- CosmWasm (Stargaze, Andromeda, certain Babylon modules)
+- Cairo (Starknet — partial semgrep support)
+- FunC (TON) — fully unsupported
+
+**Distinct from Doctrine #27 (audit-saturation discount).** Doctrine #27 reduces P(finding) based on EXTERNAL audit completeness; Doctrine #36 reduces P(finding) based on INTERNAL detector blindness. Both can compound (substrate-blind AND audit-saturated = double-discount, e.g. dYdX V4 with 6 Informal Systems audits + ZERO Go detector = compound discount applied 2026-05-23).
+
+**Promotion path.** Currently CANDIDATE single-anchor (dYdX V4 Cosmos-SDK Go). Promotes to PERMANENT Doctrine #36 on 2nd anchor across a different substrate-blind substrate. Candidate 2nd anchors (pending future dispatch outcomes):
+
+- Lombard P-?? does NOT qualify (Lombard has Solidity detector coverage; the prior Gate 1 fired all V6 layers cleanly)
+- Babylon V1 (Cosmos+Bitcoin — Go + Clarity-adjacent — likely 2nd anchor if dispatched)
+- TON-based program (FunC = fully unsupported — likely high-confidence 2nd anchor if any TON program enters Buzz dispatch queue)
+- Aptos / Sui Move program (zero Move AST detector — 2nd anchor candidate)
+
+**Standing rule (interim, pre-promotion).** Until 2nd anchor lands, treat Doctrine #36 as CANDIDATE applied at operator discretion. Per dYdX V4 prior practice, the 0.01 P(finding) floor is already de facto applied to no-detector substrates; codification is documentation, not behavior change.
+
+**Status.** CANDIDATE Doctrine #36 filed 2026-05-26 afternoon. Single-anchor: dYdX V4. Pending 2nd anchor for PERMANENT promotion. Authority: dYdX V4 P2 PRE-CLONE-HALT proposal (auto-approved as corpus-internal discipline improvement per task framing).
+
+---
+
+_Doctrine v3.5 | 2026-05-26 afternoon | Day 26 afternoon batch — Doctrine #34 PROVISIONAL anchor 5 (Across V3 `ArbitraryEVMFlowExecutor`, OpenZeppelin single-firm-continuous-audit baseline; promotion gated on operator routing or competitor disclosure) + Doctrine #36 CANDIDATE NEW (Substrate-Coverage Gate, single-anchor dYdX V4 Cosmos-SDK Go, pending 2nd substrate-blind anchor for promotion). Authority: Ogie msg 7844 (Across proposals approved) + dYdX V4 P2 auto-approve (corpus-internal discipline improvement). Origins: 3 PRE-CLONE-HALT files (`hunts/2026-05-26-across-immunefi-gate1-PRE-CLONE-HALT.md`, `hunts/2026-05-26-dydx-v4-immunefi-gate1-PRE-CLONE-HALT.md`, `hunts/2026-05-26-lombard-immunefi-gate1-PRE-CLONE-HALT.md`)._
 
 _Doctrine v3.4 | 2026-05-26 | Day 26 batch — Doctrine #34 enrichment (anchors 2/3/4 + vendor-cadence anti-anchor + Composition-Multiplier-Strength axis) + Doctrine #35 NEW (Trust-Boundary Surface Asymmetry, Stacks sBTC anchor). Authority: Ogie msg 7817 (Day 26 frozen-brain-proposals batch from 5-target hunting day: Raydium + Hydration + Stacks + Filecoin + JustLend + ALEX retrospective). Doctrine #34 now dual-to-quad anchored (Cap + Filecoin + Stacks + JustLend), threshold met for production-grade EV math; Raydium serves as vendor-cadence anti-anchor for discount calibration. Doctrine #35 is FIRST cross-function comparative-asymmetry doctrine; sits adjacent to DC-9 (per-function defense absence) on the same architecture-review pass._
 

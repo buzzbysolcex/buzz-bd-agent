@@ -287,6 +287,50 @@ When additional external frameworks are surfaced by the operator or external res
 
 ---
 
+## Single-Firm-Continuous-Audit Sub-Pattern (filed 2026-05-26 afternoon — Across V3 P3, Ogie msg 7844)
+
+**Origin:** Across Protocol V3 (`across-protocol/contracts`) PRE-CLONE-HALT 2026-05-26. Across uses a **single-firm-continuous-audit** model (OpenZeppelin), distinct from the **multi-firm-saturation** pattern that Doctrine #27 was originally calibrated against (Sky 12 audits / Uniswap 9+ / Cantina contests).
+
+**Status:** REFERENCE sub-pattern — 2nd canonical anchor. First anchor: Risk Labs UMA (Across's parent — also OpenZeppelin-continuous-audited). Second anchor: Across V3 (this entry). Distinct from Doctrine #27 multi-firm-saturated catalog; may warrant a separate discount tier.
+
+### Why the sub-pattern matters
+
+Doctrine #27 (post-incident audit saturation discount) applies a P(finding) discount based on **audit count**. The default calibration assumes audits come from DIFFERENT firms, applying different threat models, so each marginal audit reduces the residual attack surface. The single-firm-continuous model violates this assumption:
+
+- **One firm = one threat model.** OpenZeppelin (or any single firm) develops idiomatic patterns and blind spots. Continuous re-engagement extends the THREAT-MODEL COVERAGE OVER TIME but does NOT diversify it across reviewer methodologies.
+- **Auditor capture risk.** Long-term single-firm engagement creates familiarity that can soften adversarial posture vs. a fresh second-firm look.
+- **Findings cluster within the firm's lens, not across the codebase.** Patterns the firm doesn't index for (e.g., MEV-specific lenses if the firm is consensus-focused; cross-chain field-binding gaps if the firm is single-chain-focused) may go undetected indefinitely.
+
+### Calibration proposal (CANDIDATE — NOT YET ADOPTED, pending 3rd anchor)
+
+Doctrine #27 saturation tiers should distinguish:
+
+| Audit pattern | P(finding) discount |
+|---|---|
+| Single-firm continuous (OpenZeppelin only) | 0.5-0.7× (lighter discount; one-lens coverage) |
+| Multi-firm saturated (3+ distinct firms) | 0.2-0.4× (heavier discount; multi-lens coverage) |
+| Multi-firm + contests + bug bounty + Hypernative + embedded security (Stacks sBTC profile) | 0.1-0.2× (deepest discount; STRONG-composition reality check still applies per Doctrine #34 STRONG tier) |
+
+**Status of calibration tiers:** PENDING 3rd single-firm-continuous anchor before promotion to standing Doctrine #27 sub-rule. Risk Labs UMA + Across V3 = 2 anchors so far; both share OpenZeppelin auditor. Need a 3rd protocol on the same model (e.g. another OpenZeppelin-continuous or another single-firm-continuous arrangement — likely candidates: Compound III, Aave V3 originally pre-Certora, MakerDAO core) to validate the calibration tier.
+
+### Doctrine #34 interaction
+
+Single-firm-continuous-audit substrates are particularly susceptible to Doctrine #34 (post-audit composition multiplier) because new components added between audit cycles inherit the SAME single-lens coverage. The Across V3 `ArbitraryEVMFlowExecutor` HEAD commit (2026-05-19) is the canonical anchor: new bridge component added in continuous-audit window, may or may not have received post-commit OpenZeppelin re-engagement; if it did, still single-lens coverage. **Doctrine #34 multiplier applies with full force on single-firm-continuous substrates regardless of cadence**, because cadence-discount captures TIME between audits but NOT LENS DIVERSITY across firms.
+
+### Cross-reference
+
+- Doctrine #27 (audit-saturation discount) — needs sub-pattern for single-firm-continuous
+- Doctrine #34 (post-audit composition multiplier) — fires with full force on this sub-pattern even at HIGH cadence
+- `brain/Audit-Reports-Library.md` — when audit count is enumerated post-clone, single-firm-continuous protocols should be tagged separately
+
+### Status
+
+REFERENCE filed 2026-05-26 afternoon. 2nd canonical anchor (Across V3); 1st anchor (Risk Labs UMA — Across's parent) is implicit, not yet enumerated as standalone Audit-Reports-Library entry. Promotion of calibration tier proposal to Doctrine #27 sub-rule deferred to 3rd anchor.
+
+---
+
+_brain/External-Frameworks.md | v1.4 | 2026-05-26 afternoon (Ogie msg 7844 — Across V3 P3 single-firm-continuous-audit sub-pattern filed as 2nd canonical anchor after Risk Labs UMA. Distinct from multi-firm-saturation pattern that Doctrine #27 was originally calibrated against. Doctrine #34 interaction noted: post-audit composition multiplier fires with full force on single-firm-continuous substrates even at HIGH cadence, because cadence-discount captures TIME between audits but NOT LENS DIVERSITY across firms. Calibration-tier sub-rule for Doctrine #27 PENDING 3rd anchor. Hunt: hunts/2026-05-26-across-immunefi-gate1-PRE-CLONE-HALT.md proposal P3.)_
+
 _brain/External-Frameworks.md | v1.3 | 2026-05-26 (Ogie msg 7817 — Day 26 batch — Raydium CLMM 4-audit precedent on Pre-Audit-Composition-Multiplier classes filed as vendor-cadence anti-anchor for Doctrine #34. The Raydium CLMM limit_order subsystem (introduced 2025-09-16, hardened 4 audits in 8 weeks) is a textbook Doctrine #34 candidate by existing criteria, BUT engineering response cadence is FAST (6 fixes in 8 weeks across 4 audit firms). Refinement to Doctrine #34 Calibration Multiplier: discount the post-audit-module multiplier when vendor fix-cadence is high. Fix-cadence sub-criterion: high cadence (≥1 audit / 4 weeks AND ≥1 fix-per-commit per audit) → 0.5× discount; standard cadence → no discount; low cadence (no audit since post-audit module shipped) → 1.5× boost. Captures the asymmetry between protocols that respond to compositional growth with re-audits (Raydium) vs those that don't (Cap, Filecoin, Stacks long-tail). Hunt: hunts/2026-05-26-raydium-immunefi-gate1.md proposal C. Companion: Doctrine.md v3.4 (Doctrine #34 enrichment incorporates this anti-anchor).)_
 
 _brain/External-Frameworks.md | v1.2 | 2026-05-24 (Ogie msg 7637 — TU Berlin / Max Planck "Toward Securing AI Agents Like Operating Systems" PRIORITY intake; 16-attack-class threat model, 5-item immediate hardening checklist, long-term wrapper/sandbox/scoped-context evaluation)_

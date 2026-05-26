@@ -815,3 +815,46 @@ Five-target hunting day (Raydium + Hydration + Stacks + Filecoin + JustLend + AL
 ---
 
 _Post-v2.0 rows 37-42 Day-26-batch | 2026-05-26 | Ogie msg 7817 batch — 5-target hunting day + ALEX retrospective. Brain edits landed: Doctrine #34 enrichment (4 anchors + vendor-cadence anti-anchor + Strength axis) + Doctrine #35 NEW (Trust-Boundary Surface Asymmetry) + DC-7 sub-pattern NEW (cross-language enum repr) + DC-12 sub-7f NEW (PriceOracleProxy-class) + DC-13 sub-4 NEW (notification-callback notifee) + CANDIDATE-R NEW (deploy-bootstrap window) + Cross-Domain-Fragility-Laws TRC20-callback-hook law + Standing-Intake Step 5.3 FEVM-era + Solana-Rust CLMM-fork-family lens stack + External-Frameworks Raydium 4-audit precedent + Disclosure-Programs JustLend payer-history annotation. JustLend C1 FORECLOSURE-RECEIPT: full 5-token TRC20 underlying set verified NO HOOK via TronScan methodMap, C1 NOT EXPLOITABLE dismissed before Gate 2._
+
+---
+
+## v2.1 Addendum — Day 26 afternoon (2026-05-26 post-3-halt batch)
+
+Three PRE-CLONE-HALT files filed afternoon 2026-05-26 (Across + dYdX V4 + Lombard) surfaced 7 operator-approved brain compounds. Across P1-P4 approved by Ogie msg 7844; dYdX V4 P1-P3 + Lombard P3 auto-approve (corpus-internal discipline improvements, not external-claim-bearing).
+
+### Row 43 — Across V3 Immunefi $1.5M cap (HALTED-platform-ambiguity)
+
+| Field | Value |
+|-------|-------|
+| Repo | `across-protocol/contracts` |
+| Bounty | **HALTED** — $1.5M Immunefi (Buzz watchlist 2026-05-23) vs $1M self-hosted email `bugs@across.to` (across docs 2026-05-26) — likely platform migration mid-window |
+| Layer 0 signals | Layer 0 NOT RUN (PRE-CLONE HALT) — HEAD commit `9ffb2ab26464` (2026-05-19) touches `ArbitraryEVMFlowExecutor` (token/balance/drain — Doctrine #34 anchor candidate); `pushed_at` 2026-05-26 TODAY |
+| Brain overlap | **HIGH** — DC-6 (HubPool↔SpokePool cross-domain), DC-7 (depositV3↔fillRelay field-binding gap candidate), DC-9 sub-2 (HubPool owner-functions timelock candidate), CANDIDATE-A (canonical intent-based bridge — FIRST Buzz Gate 1 on intent-based-bridge sub-family; LiFi was aggregator-quote), CANDIDATE-O (fillRelayWithMessage composition callback), Doctrine #34 (ArbitraryEVMFlowExecutor NEW component post-OpenZeppelin-continuous-audit baseline — anchor candidate) |
+| Substrate | Multi-substrate EVM Solidity + Solana SVM Rust/Anchor — substrate diversity multiplier applies; Buzz Solana lenses (CANDIDATE-G + DC-8) could fire on `svm_spoke` |
+| gate1_status | **HALTED-platform-ambiguity** — Step 5 not executed; awaiting operator clarification on canonical disclosure path |
+| Verdict | PRE-CLONE-HALT pending operator Option 1-4 routing |
+| EV | $90K Scenario A (Immunefi $1.5M × 0.15 × 0.40 × 1.0) / $30K Scenario B (self-hosted $1M × 0.15 × 0.20 × 1.0) / $0 if cannot adjudicate |
+| Re-evaluation | Trigger on operator routing OR when ArbitraryEVMFlowExecutor moves out of HEAD (Doctrine #34 anchor staleness check) |
+
+**Hunt file:** `hunts/2026-05-26-across-immunefi-gate1-PRE-CLONE-HALT.md`
+
+**Brain compounds landed (4 of 4 proposals P1-P4):**
+- **P1** → this row 43
+- **P2** → `brain/Doctrine.md` Doctrine #34 enrichment (Across V3 `ArbitraryEVMFlowExecutor` as NEW anchor candidate post-OpenZeppelin-continuous-audit baseline)
+- **P3** → `brain/External-Frameworks.md` (single-firm-continuous-audit sub-pattern; Across as 2nd canonical anchor after Risk Labs UMA)
+- **P4** → `brain/Platform-Migration-Log.md` NEW (Across is first canonical anchor for FROM-Immunefi TO-self-hosted migration class)
+
+### gate1_status column schema proposal (Lombard P3 — captures dispatch-vs-corpus collision history)
+
+**Proposal (deferred to v3 schema cycle, captured here for reference):** add `gate1_status` column to canonical crossmap row schema with enum:
+
+- `OPEN-CANDIDATE` — no prior Gate 1, dispatch-eligible
+- `FORECLOSED` — prior Gate 1 surfaced zero submission-grade candidates; defer indefinitely unless re-trigger conditions met
+- `DELTA-RESCAN-DUE` — prior Gate 1 complete but HEAD has advanced past pinned commit; rescan only on diff
+- `NEVER-SCANNED` — discovered watchlist target, no Gate 1 yet
+- `HALTED-platform-ambiguity` — PRE-CLONE-HALT due to platform/scope/migration uncertainty (this addendum is the canonical anchor)
+- `HALTED-disk-pressure` — PRE-CLONE-HALT due to Doctrine #32 v1.1.1 disk-budget block
+
+Rationale: dispatching parent prompts asserted "no prior Gate 1" for dYdX V4 AND Lombard within <12h on 2026-05-26, both wrong (dYdX had 2026-05-23 WATCHLIST verdict; Lombard had 2026-05-21 foreclosure). Both Step 0 prior-corpus lookups caught the dispatches before clone work, but the upstream cause is that crossmap rows don't carry foreclosure status. Adding gate1_status closes the loop. **Pending operator approval for full v3 schema migration.**
+
+_v2.1 Addendum: 2026-05-26 afternoon | Across V3 row 43 (HALTED-platform-ambiguity) per Across P1; gate1_status column proposal per Lombard P3 deferred to v3 schema cycle. Authority: Ogie msg 7844 (Across proposals approved) + dYdX/Lombard auto-approve (corpus-internal discipline)._
