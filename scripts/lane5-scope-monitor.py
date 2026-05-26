@@ -229,6 +229,19 @@ def get_db() -> sqlite3.Connection:
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA foreign_keys=ON")
     conn.executescript(SCHEMA)
+    # idempotent migrations for Immunefi-enrichment columns (added 2026-05-26)
+    _existing_cols = {row[1] for row in conn.execute("PRAGMA table_info(programs)")}
+    for col, ddl in (
+        ("kyc_required", "INTEGER"),
+        ("chains_json", "TEXT"),
+        ("languages_json", "TEXT"),
+        ("last_updated_program", "TEXT"),
+    ):
+        if col not in _existing_cols:
+            try:
+                conn.execute(f"ALTER TABLE programs ADD COLUMN {col} {ddl}")
+            except sqlite3.OperationalError as e:
+                log.debug("alter add %s skipped: %s", col, e)
     conn.commit()
     return conn
 
@@ -265,95 +278,183 @@ def acquire_lock():
 # Scrapers — each returns list[Program] or [] (fail-soft)
 # ---------------------------------------------------------------------------
 
-def scrape_immunefi() -> list[Program]:
-    """Immunefi — current frontend is a client-side React SPA with no public JSON endpoint.
+_IMMUNEFI_SLUG_RE = re.compile(r'/bug-bounty/([a-zA-Z0-9_\-]+)/information')
+_IMMUNEFI_MAXBOUNTY_RE = re.compile(r'"maxBounty\\":(\d+(?:\.\d+)?)')
+_IMMUNEFI_KYC_RE = re.compile(r'"kyc\\":(true|false)')
+_IMMUNEFI_VAULT_RE = re.compile(r'"vaultBalance\\":(\d+(?:\.\d+)?)')
+_IMMUNEFI_PROJECTNAME_RE = re.compile(r'"projectName\\":\\"([^"\\]{1,80})\\"')
+_IMMUNEFI_PROJECTNAMESAFE_RE = re.compile(r'"projectNameSafe\\":\\"([^"\\]{1,80})\\"')
+_IMMUNEFI_ECOSYSTEM_RE = re.compile(r'"ecosystem\\":\[((?:\\"[^"\\]+\\",?\s*)+)\]')
+_IMMUNEFI_TECH_RE = re.compile(r'"technologies\\":\[((?:\\"[^"\\]+\\",?\s*)*)\]')
+_IMMUNEFI_ASSET_MARKER_RE = re.compile(r'"addedAt\\":\\"\d{4}-\d{2}-\d{2}')
+_IMMUNEFI_FIRSTSEEN_RE = re.compile(r'"firstSeen\\":\\"(\d{4}-\d{2}-\d{2}[^"\\]*)')
+_IMMUNEFI_LASTUPDATED_RE = re.compile(r'"lastUpdated\\":\\"(\d{4}-\d{2}-\d{2}[^"\\]*)')
 
-    The historic /public-api/bounty endpoint returned 404/403 as of 2026-05-26.
-    Immunefi data is loaded via authenticated XHR (or DataDome-gated edge calls)
-    visible only in the rendered DOM. Without a headless browser this source is
-    deferred to manual-fetch mode (a follow-up gsd-browser scraper can be wired
-    in later). Per spec: fail-soft, log + continue to next source.
+
+def _immunefi_extract_string_list(blob: str) -> list[str]:
+    """Parse the inner-of-array body of an RSC-encoded ['ETH','BSC'] field."""
+    out = []
+    for m in re.finditer(r'\\"([^"\\]+)\\"', blob or ""):
+        v = m.group(1).strip()
+        if v:
+            out.append(v)
+    return out
+
+
+def _immunefi_fetch_detail(slug: str) -> Program | None:
+    """Fetch the /bug-bounty/<slug>/information detail page and extract structured fields.
+
+    The detail page is a static SSR-rendered React Server Component shell where
+    bounty metadata is embedded as escaped JSON in `self.__next_f.push([...])` chunks.
+    All numeric fields (`maxBounty`, `vaultBalance`) and booleans (`kyc`) are recoverable
+    via regex without needing JSON-tree reconstruction — RSC always escapes `"` as `\"`.
     """
-    data = http_get_json(IMMUNEFI_API_URL)
-    if not data:
-        # try /public-api/bounties (plural — endpoint varies historically)
-        data = http_get_json("https://immunefi.com/public-api/bounties")
-    programs: list[Program] = []
-    if not isinstance(data, list):
-        if isinstance(data, dict):
-            # some shapes wrap list under "data"/"bounties"
-            for key in ("data", "bounties", "items", "results"):
-                if isinstance(data.get(key), list):
-                    data = data[key]
-                    break
-        if not isinstance(data, list):
-            log.info(
-                "immunefi: SPA-only frontend, no public JSON — deferred to manual-fetch "
-                "(follow-up: integrate gsd-browser scraper at scripts/gsd-browser/)"
-            )
-            return []
+    url = f"https://immunefi.com/bug-bounty/{slug}/information/"
+    html = http_get_text(url, timeout=25)
+    if not html:
+        return None
+    # max critical reward
+    max_critical = None
+    m = _IMMUNEFI_MAXBOUNTY_RE.search(html)
+    if m:
+        try:
+            max_critical = float(m.group(1))
+        except ValueError:
+            pass
+    # kyc
+    kyc_required = None
+    m_kyc = _IMMUNEFI_KYC_RE.search(html)
+    if m_kyc:
+        kyc_required = (m_kyc.group(1) == "true")
+    # vault balance
+    vault = None
+    m_v = _IMMUNEFI_VAULT_RE.search(html)
+    if m_v:
+        try:
+            vault = float(m_v.group(1))
+        except ValueError:
+            pass
+    # display name — prefer projectName, fall back to projectNameSafe, then slug
+    name = None
+    m_n = _IMMUNEFI_PROJECTNAME_RE.search(html)
+    if m_n:
+        name = m_n.group(1).strip()
+    if not name:
+        m_n2 = _IMMUNEFI_PROJECTNAMESAFE_RE.search(html)
+        if m_n2:
+            name = m_n2.group(1).strip()
+    if not name:
+        name = slug
+    # asset count — every in-scope asset has its own `addedAt` timestamp
+    # (cap at 999 to ignore unrelated `addedAt` references from program-history blobs)
+    asset_markers = len(_IMMUNEFI_ASSET_MARKER_RE.findall(html))
+    assets_count = asset_markers if 0 < asset_markers < 1000 else None
+    # ecosystem / chains
+    chains: list[str] = []
+    m_eco = _IMMUNEFI_ECOSYSTEM_RE.search(html)
+    if m_eco:
+        chains = _immunefi_extract_string_list(m_eco.group(1))
+    # languages / technologies (often empty array)
+    languages: list[str] = []
+    m_tech = _IMMUNEFI_TECH_RE.search(html)
+    if m_tech:
+        languages = _immunefi_extract_string_list(m_tech.group(1))
+    # last_updated from page (program-side, not row-side)
+    last_updated_program = None
+    m_lu = _IMMUNEFI_LASTUPDATED_RE.search(html)
+    if m_lu:
+        last_updated_program = m_lu.group(1)
 
-    for entry in data:
-        if not isinstance(entry, dict):
-            continue
-        name = (
-            entry.get("project")
-            or entry.get("name")
-            or entry.get("title")
-            or entry.get("programName")
-            or entry.get("slug")
-        )
-        if not name:
-            continue
-        # extract max critical reward across known shapes
-        max_critical = None
-        rewards = entry.get("rewards") or entry.get("maxBounty") or entry.get("rewardLevels")
-        if isinstance(rewards, list):
-            for r in rewards:
-                if isinstance(r, dict):
-                    sev = (r.get("severity") or r.get("level") or "").lower()
-                    amt = r.get("amount") or r.get("usd") or r.get("value")
-                    if "critical" in sev and isinstance(amt, (int, float)):
-                        max_critical = float(amt)
-                        break
-        elif isinstance(rewards, (int, float)):
-            max_critical = float(rewards)
-        if max_critical is None:
-            for k in ("maxReward", "maxBounty", "maxBountyUsd", "critical"):
-                v = entry.get(k)
-                if isinstance(v, (int, float)):
-                    max_critical = float(v)
-                    break
-        # vault
-        vault = entry.get("vaultBalance") or entry.get("kybVault") or entry.get("tvl")
-        if isinstance(vault, str):
+    raw: dict[str, Any] = {
+        "slug": slug,
+        "source": "immunefi_detail_html",
+        "max_critical_usd": max_critical,
+        "kyc_required": kyc_required,
+        "vault_balance_usd": vault,
+        "assets_count": assets_count,
+        "chains": chains,
+        "languages": languages,
+        "project_name": name,
+    }
+    if last_updated_program:
+        raw["last_updated_program"] = last_updated_program
+
+    return Program(
+        platform="immunefi",
+        program_name=name,
+        max_critical_reward=max_critical,
+        vault_balance=vault,
+        assets_count=assets_count,
+        url=url,
+        status="live",
+        raw=raw,
+    )
+
+
+def scrape_immunefi() -> list[Program]:
+    """Immunefi — fetch /bug-bounty/ explore page, harvest slugs, fetch each detail page.
+
+    The explore page is a Next.js App Router shell where per-program URLs render as
+    `<Link href="/bug-bounty/<slug>/information/">`. Each detail page is a regular
+    SSR-rendered React Server Component page with bounty metadata embedded as escaped
+    JSON in `self.__next_f.push(...)` blobs. Regex-extract `maxBounty`, `kyc`,
+    `vaultBalance`, `projectName`, plus chain + language arrays.
+
+    Concurrency: 8 threads × 25s timeout — full 219-program crawl runs in ~30-60s.
+    Stdlib-only (urllib + concurrent.futures), no new pip deps.
+    """
+    html = http_get_text(IMMUNEFI_LIST_URL)
+    if not html:
+        # legacy fallback: try /bug-bounty (same content, different canonical URL)
+        html = http_get_text("https://immunefi.com/bug-bounty/")
+    if not html:
+        log.info("immunefi: explore page unreachable — deferred to next cycle")
+        return []
+    slugs = sorted(set(_IMMUNEFI_SLUG_RE.findall(html)))
+    if not slugs:
+        log.info("immunefi: no slugs found on explore page — page shape may have changed")
+        return []
+    log.info("immunefi: discovered %d slugs on explore page; fetching details serially @ 0.4s spacing", len(slugs))
+
+    programs: list[Program] = []
+    failed_slugs: list[str] = []
+    started = time.time()
+
+    # SERIAL fetch with 0.4s spacing — empirically the Immunefi WAF rate-limits
+    # concurrent requests aggressively (≥4 parallel triggers 403/429 cascade).
+    # 219 × 0.4s ≈ 90s; the retry pass historically recovered 189/192 stragglers.
+    for slug in slugs:
+        time.sleep(0.4)
+        try:
+            p = _immunefi_fetch_detail(slug)
+            if p is not None:
+                programs.append(p)
+            else:
+                failed_slugs.append(slug)
+        except Exception as e:
+            log.debug("immunefi: detail fetch crashed slug=%s err=%s", slug, type(e).__name__)
+            failed_slugs.append(slug)
+
+    # Retry pass with longer back-off (1.5s) for stragglers
+    if failed_slugs:
+        log.info("immunefi: retrying %d failed slugs with 1.5s back-off", len(failed_slugs))
+        recovered = 0
+        for slug in failed_slugs[:]:
+            time.sleep(1.5)
             try:
-                vault = float(re.sub(r"[^0-9.\-]", "", vault))
-            except ValueError:
-                vault = None
-        # assets
-        assets = entry.get("assets") or entry.get("assetsInScope") or entry.get("scope")
-        if isinstance(assets, list):
-            assets_count = len(assets)
-        elif isinstance(assets, int):
-            assets_count = assets
-        else:
-            assets_count = None
-        slug = entry.get("slug") or entry.get("id") or name.lower().replace(" ", "-")
-        url = f"https://immunefi.com/bounty/{slug}/"
-        programs.append(
-            Program(
-                platform="immunefi",
-                program_name=str(name).strip(),
-                max_critical_reward=max_critical,
-                vault_balance=float(vault) if isinstance(vault, (int, float)) else None,
-                assets_count=assets_count,
-                url=url,
-                status="live",
-                raw=entry,
-            )
-        )
-    log.info("immunefi: scraped %d programs", len(programs))
+                p = _immunefi_fetch_detail(slug)
+                if p is not None:
+                    programs.append(p)
+                    recovered += 1
+            except Exception:
+                pass
+        log.info("immunefi: retry recovered %d/%d", recovered, len(failed_slugs))
+
+    elapsed = time.time() - started
+    log.info(
+        "immunefi: scraped %d / %d programs in %.1fs",
+        len(programs), len(slugs), elapsed,
+    )
     return programs
 
 
@@ -639,6 +740,14 @@ def diff_and_record(conn: sqlite3.Connection, programs: list[Program], dry_run: 
         )
         row = cur.fetchone()
         raw_json_str = json.dumps(p.raw, default=str)[:64_000]  # cap forensic blob
+        # extract enrichment fields (only Immunefi currently populates these)
+        kyc_raw = p.raw.get("kyc_required") if isinstance(p.raw, dict) else None
+        kyc_int = (1 if kyc_raw is True else (0 if kyc_raw is False else None))
+        chains_val = p.raw.get("chains") if isinstance(p.raw, dict) else None
+        chains_json_str = json.dumps(chains_val) if isinstance(chains_val, list) and chains_val else None
+        langs_val = p.raw.get("languages") if isinstance(p.raw, dict) else None
+        langs_json_str = json.dumps(langs_val) if isinstance(langs_val, list) and langs_val else None
+        last_updated_program = p.raw.get("last_updated_program") if isinstance(p.raw, dict) else None
 
         if row is None:
             # NEW program
@@ -646,8 +755,9 @@ def diff_and_record(conn: sqlite3.Connection, programs: list[Program], dry_run: 
                 conn.execute(
                     """INSERT INTO programs
                        (platform, program_name, max_critical_reward, vault_balance,
-                        assets_count, last_updated, first_seen, status, url, raw_json)
-                       VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                        assets_count, last_updated, first_seen, status, url, raw_json,
+                        kyc_required, chains_json, languages_json, last_updated_program)
+                       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                     (
                         p.platform,
                         p.program_name,
@@ -659,6 +769,10 @@ def diff_and_record(conn: sqlite3.Connection, programs: list[Program], dry_run: 
                         p.status,
                         p.url,
                         raw_json_str,
+                        kyc_int,
+                        chains_json_str,
+                        langs_json_str,
+                        last_updated_program,
                     ),
                 )
             ch = {
@@ -712,7 +826,11 @@ def diff_and_record(conn: sqlite3.Connection, programs: list[Program], dry_run: 
             conn.execute(
                 """UPDATE programs
                    SET max_critical_reward=?, vault_balance=?, assets_count=?,
-                       last_updated=?, status=?, url=?, raw_json=?
+                       last_updated=?, status=?, url=?, raw_json=?,
+                       kyc_required=COALESCE(?, kyc_required),
+                       chains_json=COALESCE(?, chains_json),
+                       languages_json=COALESCE(?, languages_json),
+                       last_updated_program=COALESCE(?, last_updated_program)
                    WHERE platform=? AND program_name=?""",
                 (
                     p.max_critical_reward if p.max_critical_reward is not None else row["max_critical_reward"],
@@ -722,6 +840,10 @@ def diff_and_record(conn: sqlite3.Connection, programs: list[Program], dry_run: 
                     p.status,
                     p.url,
                     raw_json_str,
+                    kyc_int,
+                    chains_json_str,
+                    langs_json_str,
+                    last_updated_program,
                     p.platform,
                     p.program_name,
                 ),
