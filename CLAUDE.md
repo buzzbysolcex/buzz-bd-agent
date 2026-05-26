@@ -69,13 +69,21 @@ See `BUZZ_RULES.md` for the full ruleset and `.claude/rules/` for path-scoped ru
 
 Read these for context: brain/Vision-2027.md (permanent operating directive, North Star), brain/Doctrine.md (methodology), brain/Predator-Vision.md, brain/North Star.md, brain/Architecture.md, brain/People.md, brain/Revenue.md, projects-mind/Bug Bounty Genius Plan.md
 
-**Startup-read priority (post-2026-05-21 Vision-2027 Activation):**
+**Startup-read priority (post-2026-05-21 Vision-2027 + Lane 4 Doctrine):**
 
-1. **brain/Vision-2027.md** — PERMANENT operating directive, North Star Dec 2027, four-lane wiring, monthly checkpoints (LOAD FIRST alongside Doctrine.md: governs WHAT to do)
-2. **brain/Methodology-Doctrine.md** (alias: Doctrine.md) — 23+ worked examples, 19+ doctrines, standing rules (LOAD FIRST alongside Vision-2027.md: governs HOW to do it)
-3. **brain/Predator-Vision.md** — three pillars, three-lane revenue, milestone targets (operational supplement to Vision-2027)
-4. brain/North Star.md, Architecture.md, People.md, Revenue.md — operational context
-5. projects-mind/Bug Bounty Genius Plan.md — execution plan against vision
+1. **brain/Vision-2027.md** — PERMANENT operating directive, North Star Dec 2027, four-lane wiring, monthly checkpoints (LOAD FIRST: governs WHAT to do)
+2. **brain/Methodology-Doctrine.md** (alias: Doctrine.md) — 23+ worked examples, 19+ doctrines, standing rules (LOAD FIRST alongside Vision-2027.md: governs HOW to do code-scanning)
+3. **brain/Lane4-Forum-Intelligence-Doctrine.md** — PERMANENT Lane 4 doctrine, 10-layer forum→behavioral pipeline parallel to Lane 1 10-layer audit pipeline (LOAD FIRST: governs HOW to do forum-scanning)
+4. **brain/Operator-Philosophy.md** — PERMANENT hyperactive-default operating philosophy: 7 rules + overnight benchmark + exception list (LOAD FIRST: governs HOW to allocate cycles between work, escalation, and waiting)
+5. **brain/Hyperactive-Formula.md** — PERMANENT 10-step autonomous execution loop, no decision points (LOAD FIRST: tells you WHICH step is current and what to execute; replaces "awaiting your call" idle behavior. Ogie msgs 7530+7531, 2026-05-22)
+6. **brain/Moltbook-Strategy.md** — PERMANENT Moltbook content + posting + engagement strategy (restored 2026-05-22 from Indonesia Sprint Mar 2026 per Ogie msg 7543; Mon-Sun submolt schedule, max 2 posts/day, end-every-post signature `🐝 Buzz BD Agent | SolCex Exchange | @BuzzBySolCex`, AVOID m/crypto)
+7. **brain/Predator-Vision.md** — three pillars, three-lane revenue, milestone targets (operational supplement to Vision-2027)
+8. brain/North Star.md, Architecture.md, People.md, Revenue.md — operational context
+9. projects-mind/Bug Bounty Genius Plan.md — execution plan against vision
+10. **brain/Contradictions-Register.md** — Brain Self-Correction Layer Part 1. Read AFTER item 2 (Doctrine) and Patterns-Defense-Classes.md. Before dispatching a Gate 1 on a new target, grep the register for UNRESOLVED entries that touch the target's substrate or scoping path (Ogie Brain Self-Correction Layer directive, 2026-05-26).
+11. **brain/Open-Questions-Tracker.md** — Brain Self-Correction Layer Part 2. Read AFTER item 2. Before tagging any claim `[ASSUMED]` in a Gate 1 surface map, grep the tracker for prior questions that match — they may already be ANSWERED. Also surface RECURRING entries as pattern-gap signals during PATTERNS section of the Weekly Synthesis.
+
+**Session-start execution sequence (post-startup-read):** per `brain/Hyperactive-Formula.md` directive — determine current loop step, execute from that step, never ask "what should I do". The formula IS the proactive default. Operator overrides only via the 6 categories in the formula's override section.
 
 ## During Session
 
