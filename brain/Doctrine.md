@@ -2530,6 +2530,100 @@ If ALL THREE return NO/PARTIAL → apply `P(finding) ≤ 0.01` floor.
 
 ---
 
+## Doctrine #29 v1.1 amendment — Two-Sided MIN-Cap Defense (added 2026-05-26 evening — Olympus BLVaultLido 2nd implementer anchor)
+
+**Origin:** Olympus DAO `BLVaultLido.sol` deposit + withdraw legs (verified 2026-05-26, `hunts/2026-05-26-olympus-immunefi-gate1.md` proposal #3, Ogie msg 7846 hunting cycle).
+
+**Statement.** Doctrine #29's original MIN-cap defense (`min(oracle, pool)` on deposit-mint to defend against Balancer read-only reentrancy spike) extends to a **TWO-SIDED** symmetric pattern:
+
+- **Deposit-mint leg:** `min(oraclePrice, poolPrice)` cap on the mint amount. Attacker cannot inflate mint via oracle-or-pool manipulation. (Original Doctrine #29 anchor.)
+- **Withdraw-payout leg:** oracle-only price computation, with user payout `min(actualAsset, expectedAsset)` and **EXCESS-TO-TREASURY** routing. Attacker cannot drain via pool-price spike on withdraw because their payout is bounded by oracle-derived expected amount; any excess flows to TRSRY, not attacker.
+
+**When two-sided is sufficient (Pattern D enricher refinement):** When BOTH deposit and withdraw legs implement their respective side of the MIN-cap pattern, the protocol does NOT need a separate `VaultReentrancyLib.ensureNotInVaultContext` defense (Pattern D defense (a) per audit-methodology-v2 v2.5 §"Balancer VaultReentrancyLib defense check"). The two-sided MIN-cap IS Pattern D defense (b), architecturally complete.
+
+**Anchor verification — Olympus BLVaultLido (2nd implementer):**
+
+- `src/policies/BoostedLiquidity/BLVaultLido.sol:174-184` (deposit): `ohmWstethPrice = min(oraclePrice, poolPrice)` then `ohmMintAmount = (amount_ * ohmWstethPrice) / WSTETH_DECIMALS`. [INSPECTED] — MIN-cap PRESENT on deposit-mint.
+- `src/policies/BoostedLiquidity/BLVaultLido.sol:265-276` (withdraw): oracle-only `getTknOhmPrice()`, user payout `min(actualWsteth, expectedWsteth)`, excess wsteth flows to `TRSRY`. [INSPECTED] — oracle-only payout + excess-to-treasury PRESENT.
+- `src/policies/BoostedLiquidity/BLVaultManagerLido.sol:583-593` (`getOhmTknPoolPrice`): reads `vault.getPoolTokens()` DIRECTLY with NO `VaultReentrancyLib.ensureNotInVaultContext`. [INSPECTED] — defense (a) ABSENT, but defense (b) PRESENT and sufficient via two-sided MIN-cap.
+
+**Why this matters as a doctrine amendment:** the original Doctrine #29 anchor only verified the deposit-mint side. Olympus is the 2nd confirmed implementer AND the first protocol where Buzz verified the symmetric withdraw-payout side. Two confirmed implementers + working architectural rationale = strong enough to amend Doctrine #29 baseline. Future Pattern D enricher analysis should check: (a) is `VaultReentrancyLib` called? OR (b) is the MIN-cap pattern two-sided (deposit-mint AND withdraw-payout)? Either is sufficient — no need to ding the protocol if (b) is symmetric.
+
+**Cross-reference for detector pack:** `audit-methodology-v2.md` v2.5 §"Balancer VaultReentrancyLib defense check" — the second condition "(b) all fund-flow paths cap at oracle-MIN" should be expanded to require BOTH deposit-leg MIN-cap AND withdraw-leg oracle-only-with-excess-to-treasury. Single-leg MIN-cap (deposit-only) is still vulnerable to read-only-reentrancy on the withdraw path.
+
+**Status.** Doctrine #29 amended to v1.1 with two-sided pattern. 2 confirmed implementers (original anchor + Olympus BLVaultLido). Authority: Olympus Gate 1 proposal #3 (2026-05-26 evening, Ogie msg 7846 hunting cycle). Sibling cross-pollination targets to verify two-sided pattern: any Balancer-LP-wrapping protocol (Aura Finance, Yearn V3 Balancer strategies, Tessera, Stake DAO).
+
+---
+
+## Doctrine #37 CANDIDATE — Audited-and-Frozen Substrate (added 2026-05-26 evening — CoW canonical A-class + rhino.fi canonical B-class anchors)
+
+**Origin:** Joint anchor — CoW Protocol Immunefi `hunts/2026-05-26-cowprotocol-immunefi-gate1.md` proposal #1 (canonical A-class) + rhino.fi Immunefi `hunts/2026-05-26-rhinofi-immunefi-gate1.md` proposal #1 (canonical B-class refinement). Ogie msg 7846 hunting cycle.
+
+**Statement.** When intake reveals an active protocol with frozen bounty scope (audit_age > 365 days), classify into one of two sub-types and apply the corresponding shortcut:
+
+### Sub-Type A — Audited-and-Frozen-and-Scope-Frozen (canonical: CoW Protocol)
+
+**Trigger:** `days_since_push > 365` AND Immunefi scope is **SHA-pinned to old commit** AND new features explicitly OFF scope (live on different repos/SHAs that are NOT in the bounty).
+
+**Action:** **AUTO-FORECLOSE pre-clone.** Lens-by-lens skipped. Watchlist defer indefinitely. Re-trigger only on (a) scope SHA bump, (b) scope expansion to new components, OR (c) new brain lens emerges that maps to in-scope surface.
+
+**Anchor — CoW Protocol Immunefi:**
+
+- `pushed_at` 2021-04-08 → 2026-05-26 = **1844 days frozen** [EXECUTED via `git log -1 --format=%ai`]
+- Immunefi scope SHA-pinned to `6ebbd810ff2da635fb6f88e9a15fde196f8c852a` (2021-04-08)
+- New features (Hooks framework, CoW AMM, ETHFlow, MEV Blocker) live on separate repos, ALL explicitly OFF scope per Immunefi page
+- ≥20 audits (Trail of Bits multiple, OpenZeppelin, Certora formal verification, Inria, G0, Gnosis-internal) — Doctrine #27 saturation FAIL
+- Doctrine #32 v1.1 cycle-2 filter FAIL (audit_age=1844d > 180d AND dangerous_area_changes=0)
+- EV = $375 (per hunt file Step 3 calculation: 0.005 × $1M × 0.5 × 0.15)
+- **Verdict: FORECLOSED.** Saves ~30 min of lens-by-lens work per future re-intake.
+
+**Saves:** ~30-40 min per A-class re-intake (full Gate 1 → 5-min foreclosure). Risk: misses rare class-A latent bug in frozen-mature substrate. Mitigated by Doctrine #27 saturation filter (a class-A bug in ≥20-audit substrate would have been caught).
+
+### Sub-Type B — Audited-and-Frozen-but-Product-Live (canonical: rhino.fi)
+
+**Trigger:** `days_since_push > 365` AND Immunefi scope is **branch-pinned (`master`/`main`)** AND `README.md` shows recent on-chain deployments off the SAME contracts.
+
+**Action:** **PROCEED with sharpened post-audit-composition lens (Doctrine #34).** New chain integrations / yield extensions / product features that compose with the frozen base substrate ARE the highest-EV surface. Repo-freshness is not a useful signal in this sub-type because the SURFACE is the same; the LENS pass focuses on composition multipliers.
+
+**Anchor — rhino.fi Immunefi:**
+
+- `pushed_at` 2025-03-12 → 2026-05-26 = **440 days frozen** [INSPECTED via GitHub API]
+- Immunefi scope branch-pinned to `master` (no SHA pin)
+- Product actively shipping (SuperEarn cross-chain Mar 2026, Stablecoin 1:1 launch Mar 2026, Post Bridge Actions Nov 2025, new chain integrations Plume/Morph/Celo/Soneium monthly)
+- 28 chains deployed per `README.md` vs 10 chains listed in Immunefi scope — IDENTICAL bytecode on most (recurring `0x5e023c31...` proxy address)
+- 4 prior audits (PeckShield base + CrossSwap v1 + UserWallet + CrossSwap v2 fix commits) + 1 Quantstamp TON = **5 audits** — Doctrine #27 PASSES (FAIL only at ≥20 audits)
+- Doctrine #34 composition surface PRESENT — `DVFDepositContractBlast` + `DVFDepositContractApe` are POST-AUDIT yield-extension subclasses (C4 in hunt file). Cross-language guard-coverage asymmetry surfaces TON-vs-EVM gap (C5 in hunt file).
+- EV = $20,000 (per hunt file Step 3 calculation: 0.04 × $2M × 0.5 × 0.5)
+- **Verdict: PROCEED with composition lens; WATCHLIST with operator-decision-point on C8.**
+
+**Saves vs naive lens enumeration:** the sub-type B classification points the operator at the composition surface immediately (Doctrine #34 + DC-7 cross-language sub-pattern), skipping ~10-15 min of base-surface lens walks that would resolve to "audit-survived" / "intentional trust-model design choice."
+
+### Decision Rule Between A and B
+
+1. Fetch `pushed_at` for canonical repo (GitHub API or `git log -1 --format=%ai`).
+2. If `days_since_push > 365` AND Immunefi scope is **SHA-pinned to old commit** → P37.A (foreclose).
+3. If `days_since_push > 365` AND Immunefi scope is **branch-pinned (`master` / `main`)** AND `README.md` shows recent on-chain deployments → P37.B (proceed with composition lens).
+4. If `days_since_push ≤ 365` → Doctrine #37 does NOT fire; standard Gate 1 lens walk applies.
+
+### Promotion path
+
+CANDIDATE Doctrine #37 filed with 2 anchors (CoW canonical A; rhino.fi canonical B). Promotes to PERMANENT Doctrine #37 on 2nd A-class anchor AND 2nd B-class anchor (currently single-anchor in each sub-type). Candidate 2nd anchors:
+
+- A-class: any Immunefi/Cantina/Sherlock program with scope-SHA pinned to >1y-old commit + live protocol features OFF scope. Candidates: legacy Compound V2 (Aave-fork-pinned), Sushi MasterChef original, Curve V1 pool factory (scope pinned to pre-Vyper-CVE SHA).
+- B-class: bridge / vault / interop protocol where the bridge contracts are frozen but new chains/yield-protocols compose monthly. Candidates: Stargate V1, Hop Protocol, Synapse, Across V3 (if it migrates back to Immunefi).
+
+### Cross-references
+
+- Doctrine #27 (audit-saturation discount) — Sub-Type A always passes Doctrine #27 saturation FAIL; Sub-Type B may or may not.
+- Doctrine #32 v1.1 cycle-2 filter — Sub-Type A always FAILs cycle-2 (frozen + no changes); Sub-Type B FAILs cycle-2 base but the lens still applies to composition surfaces.
+- Doctrine #34 (post-audit composition multiplier) — Sub-Type B is the PRIMARY substrate where Doctrine #34 fires with the most leverage; the composition delta is exactly the new surface.
+
+**Status.** CANDIDATE Doctrine #37 filed 2026-05-26 evening. 2 anchors (CoW + rhino.fi, one each sub-type). Pending 2nd anchor in each sub-type for PERMANENT promotion. Authority: CoW P1 + rhino.fi P1 (joint), Ogie msg 7846 hunting cycle.
+
+---
+
+_Doctrine v3.6 | 2026-05-26 evening | Day 26 evening batch — Doctrine #29 v1.1 amendment (two-sided MIN-cap defense, Olympus BLVaultLido 2nd implementer anchor; deposit-mint MIN(oracle,pool) + withdraw-payout oracle-only-with-excess-to-treasury = architecturally complete Pattern D defense (b), no VaultReentrancyLib required) + Doctrine #37 CANDIDATE NEW (Audited-and-Frozen Substrate; A=repo+scope frozen FORECLOSE / B=repo-frozen-product-live PROCEED with composition lens). Joint anchors: CoW Protocol Immunefi (canonical A-class, 1844-day frozen + SHA-pinned + ≥20 audits + Doctrine #27 FAIL); rhino.fi Immunefi (canonical B-class, 440-day frozen + branch-pinned + product-live with new chains shipping monthly + Doctrine #34 composition surface). Companion Patterns-Defense-Classes.md at v2.3 (DC-9 sub-pattern 5 Asset-vs-Receipt + DC-7 sub-pattern Cross-Language Guard-Coverage Asymmetry). Authority: Ogie msg 7846 hunting cycle + Lane 5 crawler ship; origins 3 Gate 1 hunt files (`hunts/2026-05-26-olympus-immunefi-gate1.md`, `hunts/2026-05-26-cowprotocol-immunefi-gate1.md`, `hunts/2026-05-26-rhinofi-immunefi-gate1.md`)._
+
 _Doctrine v3.5 | 2026-05-26 afternoon | Day 26 afternoon batch — Doctrine #34 PROVISIONAL anchor 5 (Across V3 `ArbitraryEVMFlowExecutor`, OpenZeppelin single-firm-continuous-audit baseline; promotion gated on operator routing or competitor disclosure) + Doctrine #36 CANDIDATE NEW (Substrate-Coverage Gate, single-anchor dYdX V4 Cosmos-SDK Go, pending 2nd substrate-blind anchor for promotion). Authority: Ogie msg 7844 (Across proposals approved) + dYdX V4 P2 auto-approve (corpus-internal discipline improvement). Origins: 3 PRE-CLONE-HALT files (`hunts/2026-05-26-across-immunefi-gate1-PRE-CLONE-HALT.md`, `hunts/2026-05-26-dydx-v4-immunefi-gate1-PRE-CLONE-HALT.md`, `hunts/2026-05-26-lombard-immunefi-gate1-PRE-CLONE-HALT.md`)._
 
 _Doctrine v3.4 | 2026-05-26 | Day 26 batch — Doctrine #34 enrichment (anchors 2/3/4 + vendor-cadence anti-anchor + Composition-Multiplier-Strength axis) + Doctrine #35 NEW (Trust-Boundary Surface Asymmetry, Stacks sBTC anchor). Authority: Ogie msg 7817 (Day 26 frozen-brain-proposals batch from 5-target hunting day: Raydium + Hydration + Stacks + Filecoin + JustLend + ALEX retrospective). Doctrine #34 now dual-to-quad anchored (Cap + Filecoin + Stacks + JustLend), threshold met for production-grade EV math; Raydium serves as vendor-cadence anti-anchor for discount calibration. Doctrine #35 is FIRST cross-function comparative-asymmetry doctrine; sits adjacent to DC-9 (per-function defense absence) on the same architecture-review pass._

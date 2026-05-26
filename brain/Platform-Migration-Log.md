@@ -99,4 +99,60 @@ Lane 5 (the crawler infrastructure lane, per Vision-2027) currently scrapes Immu
 
 ---
 
+## Lane 5 Crawler Enhancement Tasks (filed 2026-05-26 evening — operator-action items)
+
+Two Lane 5 crawler enhancements surfaced via the 2026-05-26 evening hunting cycle (Olympus + CoW + rhino.fi Gate 1s). Both queued as operator-action items beyond the existing Lane 5 infrastructure task list above.
+
+### Task A — Asset-Address Per-Page Scrape (Olympus 72-asset anchor, hunt `hunts/2026-05-26-olympus-immunefi-gate1.md` proposal #2)
+
+**Observation:** The Lane 5 Immunefi crawler currently records `assets_count` (Olympus = 72) but not the per-asset address list. For programs with paginated asset lists, only the first SPA page is enumerable via WebFetch. Olympus showed 12 of 72 assets visible without pagination; the remaining 60 were `[ASSUMED]`-grade in the Gate 1 Step 5.2 Pre-flight Scope-Check, flagging a FLAG-raised state requiring Gate 2 re-verification before any submission.
+
+**Proposed Lane 5 enhancement:**
+
+- When `assets_count > 12` (single-page Immunefi threshold), trigger per-page scrape of asset names + addresses
+- Persist into a new `program_assets` table linked to `programs` row by `program_id`
+- Schema proposal: `(program_id INTEGER, asset_name TEXT, asset_address TEXT, asset_chain TEXT, asset_type TEXT, page_number INTEGER, scraped_at TEXT)`
+- Re-scrape cadence: daily for high-value programs (Critical ≥ $1M); weekly for mid-tier; on-trigger (operator-routed Gate 1) for any below threshold
+
+**Why:** prevents Veda-OOS-lesson recurrence (per `.claude/rules/standing-intake-protocol.md` Step 5.2). For paginated programs, Gate 2 escalations currently require manual SPA-walk to verify scope membership; Lane 5 should pre-cache the full asset list.
+
+**Cross-protocol applicability:** Coinbase Cantina (large multi-Tier scope), Aave V3 (multi-deployment-address scope), Olympus (this anchor), MakerDAO/Sky $10M (Tier 1 enumerated by-address), any Cantina mega-target with >50 assets.
+
+**Effort estimate:** 1-2 days engineering (Playwright-based per-page scrape + schema migration + bulk-update job).
+
+**Owner:** TBD. Build trigger = operator routing OR next paginated-scope Gate 1 dispatch.
+
+### Task B — Chain-List Calibration: Immunefi-listed vs README-deployed (DUPLICATE-MERGED from CoW P2 + rhino.fi P2)
+
+**Observation:** Lane 5 crawler over-reports deployment chains vs Immunefi actual scope carve-outs. Confirmed in TWO independent Gate 1s during the 2026-05-26 evening cycle:
+
+1. **CoW Protocol** (`hunts/2026-05-26-cowprotocol-immunefi-gate1.md` proposal #2): Lane 5 DB `chains_json=[ETH, Gnosis]`. Immunefi page explicitly excludes "Non-Ethereum Mainnet issues." Gnosis chain deployment is DEPLOYED but OOS for bounty purposes. Crawler is enumerating deployment chains (from networks.json / repo) without consulting the scope page's exclusion text.
+2. **rhino.fi** (`hunts/2026-05-26-rhinofi-immunefi-gate1.md` proposal #2): Lane 5 DB lists 10 Immunefi-scope chains, but `README.md` lists 28 chains deployed with identical bytecode (recurring `0x5e023c31...` proxy address). Operator must clarify whether non-listed chain deployments are OOS or implicitly in-scope as identical-bytecode deployments. Ratio of deployed-to-listed = 2.8× — well past the proposed 1.5× ambiguity threshold.
+
+The two-anchor confirmation in a single evening cycle establishes the class. **DUPLICATE-MERGED into a single Platform-Migration-Log operator-action item per ledger v3.**
+
+**Proposed Lane 5 calibration:**
+
+- Lane 5 crawler should parse the EXCLUSION section of Immunefi pages for chain-restriction clauses (regex match on patterns like `"Non-X Mainnet issues"` / `"X chain issues are out of scope"` / `"chain X is excluded"` / etc.). Treat scope-exclusion text as canonical over deployment lists.
+- Lane 5 crawler should fetch BOTH the Immunefi page's listed chains AND the canonical repo's `README.md` chain enumeration (per Doctrine #34 cross-reference: README.md is often the truth source for deployment-chain enumeration).
+- **Flag scope ambiguity when `len(deployed_chains) > 1.5 × len(immunefi_listed_chains)`**.
+- Surface to operator at intake time: "N chains listed, M chains deployed, identical bytecode on most — clarify scope before Gate 2 escalation."
+
+**Why:**
+- Prevents Gate 1 dispatches that waste time on OOS chains (CoW Gnosis-chain attack-surface would have burned cycles before lens-firing)
+- Prevents Gate 2 wasted effort if Immunefi triager later rejects "we only meant the N listed chains" (rhino.fi: 18-chain ambiguity zone)
+- Cross-language guard-coverage findings (per DC-7 sub-pattern Cross-Language Guard-Coverage Asymmetry, Patterns-Defense-Classes.md v2.3) become harder to translate to bounty findings if the multi-chain deployment is partially OOS
+
+**Effort estimate:** ~3-5 days engineering (regex pack for exclusion-clause patterns + README.md crawler addition + schema column for `deployed_chains` separately from `scope_chains` + ambiguity-flag surface to War Room).
+
+**Owner:** TBD. Build trigger = operator routing OR next chain-list-ambiguity Gate 1 dispatch.
+
+### Status
+
+Both tasks queued as operator-action items beyond the existing Lane 5 Immunefi crawler integration task list. Combined with the prior task list (diff-and-detect migrations, auto-write to this log, surface to operator, cross-platform polling, daily cadence target), Lane 5 enhancement queue now totals 7 items. Authority: Ogie msg 7846 hunting cycle.
+
+---
+
+_brain/Platform-Migration-Log.md | v1.1 | 2026-05-26 evening (Ogie msg 7846 hunting cycle — Lane 5 crawler enhancement queue extended with 2 NEW operator-action items: (Task A) asset-address per-page scrape from Olympus 72-asset anchor — prevents Veda-OOS-lesson recurrence on paginated Immunefi scope pages; (Task B) chain-list calibration from DUPLICATE-MERGED CoW P2 + rhino.fi P2 anchors — Lane 5 over-reports deployment chains vs Immunefi actual carve-outs (CoW [ETH,Gnosis] but only ETH in-scope; rhino.fi 10 listed vs 28 deployed identical-bytecode; flag ratio>1.5× as ambiguity). Both tasks queued for engineering routing. Hunt sources: hunts/2026-05-26-olympus-immunefi-gate1.md + hunts/2026-05-26-cowprotocol-immunefi-gate1.md + hunts/2026-05-26-rhinofi-immunefi-gate1.md.)_
+
 _brain/Platform-Migration-Log.md | v1.0 | 2026-05-26 afternoon (Ogie msg 7844 — Across V3 P4 proposal approved; operator explicitly endorsed file as "real gap"). First canonical entry: Across Protocol Immunefi→self-hosted migration. Schema established. Lane 5 Immunefi crawler integration queued as highest-priority post-cycle infrastructure task._

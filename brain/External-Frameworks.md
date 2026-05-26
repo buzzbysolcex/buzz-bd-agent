@@ -329,6 +329,74 @@ REFERENCE filed 2026-05-26 afternoon. 2nd canonical anchor (Across V3); 1st anch
 
 ---
 
+## Selective-Coverage Defense Asymmetry — Carve-Out → Genuine-Risk-Surface Pairs Refinement (filed 2026-05-26 evening — CoW Protocol canonical anchor)
+
+**Origin:** CoW Protocol Immunefi Gate 1 (`hunts/2026-05-26-cowprotocol-immunefi-gate1.md` proposal #3), Ogie msg 7846 hunting cycle. Sibling-lens extension to the existing `brain/Lens-FT-CircuitBreaker-Asymmetry.md` family.
+
+**Status:** REFINEMENT of the existing Selective-Coverage Defense Asymmetry lens. CoW Protocol is the canonical anchor for the explicit-enumeration variant.
+
+### Why the refinement matters
+
+The base Selective-Coverage lens (sibling to FT-CircuitBreaker-Asymmetry) fires on "guard exists on path A, missing on path B" within a protocol. The refinement extends OUT to BUG-BOUNTY SCOPE: which attack surfaces does the protocol PAY for, and which does it explicitly EXCLUDE? Carve-out language in the bounty scope reveals which surfaces the protocol considers (a) acceptable risk-as-designed, (b) too expensive to defend, or (c) too central to the threat model to consider as bugs.
+
+**The lens fires on the carve-outs themselves** — pointing at where the protocol is genuinely concentrated-risk but unwilling-to-pay. This is the inverse-signal of where the bug bounty defends: the OOS list IS the threat-model leak.
+
+### Anchor — CoW Protocol Immunefi
+
+Explicit OOS carve-outs from CoW v2 Immunefi page (per hunt file Step 1 PROFILE):
+
+| Carve-out | Genuine-risk-surface revealed |
+|---|---|
+| Settlement transaction DOS / sandwich attacks | CoW relies on solver competition + DAO governance to discipline DoS; doesn't believe on-chain defense is buildable |
+| Solver fund theft | Trusted-solver allowlist IS the threat model; solver behavior is treated as PRINCIPAL, not BUG |
+| Price manipulation by solvers | Same — solver IS the price authority, not the protocol |
+| Migration methods | One-time admin paths assumed safe; not a defended surface |
+| Vulnerabilities mentioned in CoW Swap's official audits | Prior-disclosed findings = institutional knowledge, not bug-bounty surface |
+| Pre-exploited / previously reported vulnerabilities | Standard de-dup |
+| Attacks requiring leaked keys / privileged access | Operator security is OFF the on-chain threat model |
+| 51% attacks, gas optimization, best-practice critiques, Sybil, gas depletion | Standard Immunefi excludes |
+| Non-Ethereum mainnet | Cross-chain trust intentionally OFF-scope (Gnosis chain deployment OOS despite being deployed) |
+
+**Carve-out → genuine-risk-surface mapping:**
+
+- **The four high-EV attack surfaces on CoW v2** — solver theft, solver price manipulation, settlement DoS, migration — are all explicitly OOS.
+- **The in-scope surface** — 416-LOC settlement core + 2100-LOC total Solidity — has been audited ≥20 times by Trail of Bits / OpenZeppelin / Certora / Inria / G0 / Gnosis-internal.
+- **The carve-out IS the lens fire.** It reveals: "We trust the solver allowlist absolutely. We don't believe DoS is defendable. We don't believe migrations need on-chain enforcement. We don't believe Gnosis-chain deployment merits payment-class defense."
+- **Useful for future bounty-meta intelligence (Lane 5 competitive-intel expansion):** Which protocols carve out which surfaces tells you what they actually fear.
+
+### Refined lens application — operational use
+
+When intaking ANY bug bounty program (Step 1 PROFILE of `standing-intake-protocol.md`):
+
+1. **Enumerate the OOS carve-outs** from the bounty page explicitly.
+2. **Map each carve-out to the corresponding attack surface** (DoS / oracle / solver / cross-chain / migration / admin / privileged-key / gas / etc.).
+3. **Flag mismatches:** if the carve-outs systematically exclude the LARGEST attack surfaces on the protocol's architecture (e.g., a batch-auction protocol that excludes solver-trust attacks; an oracle wrapper that excludes oracle-staleness), the in-scope surface is the most-audited residue.
+4. **EV reduction:** when carve-outs cover ≥50% of the protocol's attack surface, apply a 0.5× brain_overlap_multiplier discount in the EV calculation, beyond the standard Doctrine #27 saturation discount.
+
+### Cross-pollination targets (verify lens applicability)
+
+- **Aggregator-class protocols** (CoW v2, 1inch Aggregation Router, 0x v3) — solver/relayer trust carve-outs
+- **Bridge protocols with operator allowlists** (Wormhole guardians, LayerZero DVNs, Across relayers, Synapse validators) — operator-key-leak carve-outs
+- **CEX bridges** (Binance Bridge, Coinbase L2 sequencers) — centralized operator carve-outs
+- **MEV-resistant protocols** (CoW, Cowswap, MEV Blocker, Flashbots) — solver/searcher carve-outs
+
+In each case, the OOS list reveals the LOAD-BEARING trust assumption that the protocol cannot or will not defend on-chain. Buzz Gate 1 should not waste cycles attacking surfaces the protocol has already conceded.
+
+### Status
+
+REFINEMENT filed 2026-05-26 evening. Canonical anchor: CoW Protocol Immunefi. Sibling-lens extension to FT-CircuitBreaker-Asymmetry family. Cross-protocol verification pending for non-CoW anchors (Wormhole / LayerZero / Across as next-likely confirmations). Authority: CoW P3 proposal, Ogie msg 7846 hunting cycle.
+
+### Cross-references
+
+- `brain/Lens-FT-CircuitBreaker-Asymmetry.md` — parent lens family (intra-protocol "guard exists on path A, missing on path B")
+- `brain/Doctrine.md` Doctrine #37 CANDIDATE — Sub-Type A canonical anchor is the same CoW Protocol Immunefi case (audited-and-frozen-and-scope-frozen)
+- `brain/Watchlist-Candidate-Crossmap.md` Row 45 — CoW FORECLOSED with EV $375
+- `.claude/rules/standing-intake-protocol.md` Step 1 PROFILE — should include OOS-carve-out enumeration as a standard intake field
+
+---
+
+_brain/External-Frameworks.md | v1.5 | 2026-05-26 evening (Ogie msg 7846 hunting cycle — Selective-Coverage Defense Asymmetry refinement: carve-out → genuine-risk-surface pairs. CoW Protocol Immunefi canonical anchor with 9 explicit OOS carve-outs systematically excluding the 4 high-EV attack surfaces (solver theft / price manipulation / settlement DoS / migration / Non-Ethereum mainnet). Sibling-lens extension to the FT-CircuitBreaker-Asymmetry family; cross-pollination targets: aggregators / bridges with operator allowlists / CEX bridges / MEV-resistant protocols. Operational use: when carve-outs cover ≥50% of protocol's attack surface, apply 0.5× brain_overlap_multiplier discount in EV calculation beyond standard Doctrine #27 saturation discount. Hunt: hunts/2026-05-26-cowprotocol-immunefi-gate1.md proposal #3.)_
+
 _brain/External-Frameworks.md | v1.4 | 2026-05-26 afternoon (Ogie msg 7844 — Across V3 P3 single-firm-continuous-audit sub-pattern filed as 2nd canonical anchor after Risk Labs UMA. Distinct from multi-firm-saturation pattern that Doctrine #27 was originally calibrated against. Doctrine #34 interaction noted: post-audit composition multiplier fires with full force on single-firm-continuous substrates even at HIGH cadence, because cadence-discount captures TIME between audits but NOT LENS DIVERSITY across firms. Calibration-tier sub-rule for Doctrine #27 PENDING 3rd anchor. Hunt: hunts/2026-05-26-across-immunefi-gate1-PRE-CLONE-HALT.md proposal P3.)_
 
 _brain/External-Frameworks.md | v1.3 | 2026-05-26 (Ogie msg 7817 — Day 26 batch — Raydium CLMM 4-audit precedent on Pre-Audit-Composition-Multiplier classes filed as vendor-cadence anti-anchor for Doctrine #34. The Raydium CLMM limit_order subsystem (introduced 2025-09-16, hardened 4 audits in 8 weeks) is a textbook Doctrine #34 candidate by existing criteria, BUT engineering response cadence is FAST (6 fixes in 8 weeks across 4 audit firms). Refinement to Doctrine #34 Calibration Multiplier: discount the post-audit-module multiplier when vendor fix-cadence is high. Fix-cadence sub-criterion: high cadence (≥1 audit / 4 weeks AND ≥1 fix-per-commit per audit) → 0.5× discount; standard cadence → no discount; low cadence (no audit since post-audit module shipped) → 1.5× boost. Captures the asymmetry between protocols that respond to compositional growth with re-audits (Raydium) vs those that don't (Cap, Filecoin, Stacks long-tail). Hunt: hunts/2026-05-26-raydium-immunefi-gate1.md proposal C. Companion: Doctrine.md v3.4 (Doctrine #34 enrichment incorporates this anti-anchor).)_

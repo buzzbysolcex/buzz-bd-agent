@@ -1858,6 +1858,109 @@ Future Gate 1 surveys finding `lastOraclePrice`-style cache should check: (a) is
 
 ---
 
+## DC-7 sub-pattern — Cross-Language Guard-Coverage Asymmetry (added 2026-05-26 evening — rhino.fi TON-vs-EVM canonical anchor)
+
+**Class statement:**
+
+> When a protocol has parallel implementations across multiple languages (EVM Solidity + TON FunC + Solana Anchor + Move + Cairo + CosmWasm + etc.), the SAME logical guard (pause, replay, role-check, ownership, threshold) should be present on equivalent code paths across all languages. **Asymmetric guard coverage** — where one language enforces the guard on a code-path family but another language enforces it on only a subset of equivalent paths — IS the finding. The deeper-audited language gets one threat model; the lighter-audited language gets another; the discrepancy reveals which threat model the team actually believes in.
+
+**Specialization of:** DC-7 base (Validating-Field ≠ Consuming-Field). DC-7 base is INTRA-language (within one pipeline). This sub-pattern extends OUT of language to compare same guard / same protocol / different implementations. Sibling to Filecoin-3 (cross-language enum repr divergence between native VM and FEVM — same DC-7 family).
+
+**Anchor — rhino.fi TON-vs-EVM deposit-pause asymmetry:**
+
+- TON FunC `ton-deposit/contracts/bridge_contract.fc` checks `global_deposits_blocked` flag on BOTH `op::transfer_notification` (jetton deposit, line 122) AND `op::deposit_native` (TON native, line 165) — **symmetric coverage** [INSPECTED via hunt-file source-read]
+- EVM Solidity `bridge-deposit/DVFDepositContract.sol` checks `_areDepositsAllowed` modifier on `deposit(line 70)` + `depositNative(line 103)` ONLY. Functions `depositWithId(line 84)`, `depositWithPermit(line 95)`, `depositNativeWithId(line 113)` are MISSING the modifier — **asymmetric coverage** [INSPECTED via hunt-file source-read]
+- Threat-model implication: TON team treats commitment-ID deposits as MUST-PAUSE-with-emergency; EVM team treats commitment-ID deposits as off-chain-rate-limited, NOT-emergency-pausable. In an authorized-keeper-key-leak scenario, the EVM contract cannot fully halt deposits while the TON contract CAN.
+- Severity: **LOW-MEDIUM** in isolation (depends on incident-response surface), but the cross-language asymmetry IS the load-bearing observation. Operator-decision finding (rhino.fi C5).
+
+**Why it's not just DC-7 base:** DC-7 base requires a validation step on-chain (e.g., `validating field` like `receiptTokenIn` ≠ `consuming field` like `actualAmount`). Cross-Language Guard-Coverage Asymmetry compares INSTEAD of validating-vs-consuming — it compares GUARD APPLICATION across language implementations. The same guard exists in both languages; the asymmetry is in which CODE PATHS receive the guard. This is a meta-level DC-7 (DC-7 at the architecture-comparison layer, not the function-internal layer).
+
+**Detector primitive:**
+
+- protocol has parallel implementations across ≥2 languages (multi-substrate bridge / interop / cross-chain protocol)
+- for each guard name in protocol corpus (pause flag, replay protection, role check, threshold validate): enumerate entry-point functions touching equivalent logical action in each language
+- diff the guard-application set: which entry points in each language carry the guard? Asymmetry across languages → finding candidate
+- FP gate: confirm the asymmetric code path is genuinely a parallel implementation (not a language-specific behavior or a deprecated path)
+
+**Status:** 1 anchor (rhino.fi TON-vs-EVM). Promotion to PERMANENT DC-7 sub-pattern requires 2nd cross-language anchor. High cross-pollination value because every multi-substrate bridge potentially exhibits this class.
+
+**High-EV cross-pollination targets:**
+
+- **Wormhole** — EVM Solidity + Solana Rust + Cosmos Go + Aptos Move + Sui Move. Pause-flag coverage diff across substrates is a known target class.
+- **LayerZero** — EVM Solidity + Aptos Move + Solana Rust. OFT default-DVN guard coverage across endpoints.
+- **ZetaChain** — Cosmos Go + EVM Solidity. Cross-chain deposit-pause + role-check coverage.
+- **Stargate V2** — EVM Solidity + non-EVM endpoints. Bus fee + pause coverage.
+- **Hop Protocol** — EVM Solidity (multiple chains, same contract). Pause coverage across chains.
+- **Synapse Protocol** — EVM Solidity + Ethereum/Optimism/Arbitrum-specific deployments + Optics-based message passing. Validator-pause coverage.
+- **Multichain (Anyswap)** — historical (post-incident) — would have been canonical anchor if pre-collapse audit had applied this lens.
+
+**Cross-reference:**
+
+- DC-7 base (Validating-Field ≠ Consuming-Field) — sub-pattern parent
+- Filecoin-3 (cross-language enum repr divergence between native VM and FEVM) — sibling cross-language DC-7 extension
+- DC-8 (Anchor-Signer-Validation moved out of Accounts struct) — Solana-language sibling
+- Cross-Domain-Fragility-Laws.md — interop family laws
+
+**R8 grade:** anchor `[INSPECTED]` (code-confirmed coverage diff); cross-pollination targets `[ASSUMED]` (lens applicable; case-by-case verification needed).
+
+**Authority:** rhino.fi Gate 1 proposal #3 (2026-05-26 evening, `hunts/2026-05-26-rhinofi-immunefi-gate1.md`), Ogie msg 7846 hunting cycle.
+
+---
+
+## DC-9 sub-pattern 5 — Asset-vs-Receipt Accounting Asymmetry (added 2026-05-26 evening — Olympus ConvertibleDepositFacility + DepositManager paired anchor)
+
+**Class statement:**
+
+> An ERC4626-backed deposit facility computes a minted token amount (e.g., OHM, shares, receipt) from a **user-input field** (e.g., `receiptTokenIn`, `depositAmount`, `assets`) while the actual asset moved by the underlying call is a **return-value field** (e.g., `actualAmount`, `actualShares`). When the two fields can diverge (ERC4626 share-rounding-down on tiny inputs, vault fee deductions, or explicit "may return 0" documentation), and the calling layer DISCARDS the return-value and mints based on the user-input, the protocol's mint-vs-asset accounting drifts. Compound effect appears when the operator-liability ledger is ALSO decremented by the user-input field (not the return-value), so the ledger drifts in the same direction as the mint-vs-asset drift. Repeated dust-conversion exploits inflation-from-nothing.
+
+**Specialization of:** DC-9 (Privileged State Mutation Without Defense-in-Depth) family. Sibling to:
+- DC-9 sub-1 (unchecked mint)
+- DC-9 sub-2 (zero-timelock migration)
+- DC-9 sub-3 (upgradeable-hook-no-timelock)
+- DC-9 sub-4 (state-not-invalidated repeated-mint — closely related; sub-5 is the paired-ledger variant where the asymmetry is between mint-driver and asset-moved rather than between mint repetition and state invalidation)
+- DC-7 (validating-field ≠ consuming-field — the validating field here is `receiptTokenIn`, the consuming field is `actualAmount`)
+
+**Anchor — Olympus ConvertibleDepositFacility.convert + DepositManager.withdraw (paired C1+C2):**
+
+- `src/policies/deposits/ConvertibleDepositFacility.sol:301-366` (`convert`): accumulates `convertedTokenOut += previewConvertOut` based on user-input `depositAmount` (line 320-329), then calls `DEPOSIT_MANAGER.withdraw(WithdrawParams{... amount: receiptTokenIn ...})` (line 346-355), DISCARDS the returned `actualAmount`, mints OHM based on `convertedTokenOut`. [INSPECTED]
+- `src/policies/deposits/DepositManager.sol:293-324`: returns `actualAmount` (line 295), documented at line 245 as "Given a low enough amount, the actual amount withdrawn may be 0. This function will not revert in such a case." [INSPECTED]
+- `src/policies/deposits/DepositManager.sol:313-321` (paired ledger half — C2): line 314 `_assetLiabilities[key] -= params_.amount` runs BEFORE `_withdrawAsset` (line 318). If `_withdrawAsset` returns `actualAmount < params_.amount`, the recorded liability is over-decremented. Over time, `_assetLiabilities` drifts BELOW true outstanding obligation. [INSPECTED]
+- Solvency check (`_validateOperatorSolvency` line 353-367) runs AFTER the liability has already been reduced — solvency check is computed on the drifted ledger, not the true ledger. Compound drift. [INSPECTED]
+- Comment at ConvertibleDepositFacility line 340-345 acknowledges the delta ("the actual amount withdrawn may differ from receiptTokenIn by a few wei") — but DepositManager comment at line 245 says actualAmount can be **0**, which is qualitatively different from "a few wei."
+- Exploit construction: user supplies `depositAmount` small enough that `_withdrawAsset` returns 0 (1 wei against high share/asset ratio vault). User receives OHM minted on `previewConvertOut`; ZERO asset reaches TRSRY; operator liability decremented by `params_.amount` despite no asset moving. Repeated dust-conversion = inflation-from-nothing.
+
+**Detector primitive:**
+
+- function calls `IERC4626(vault).withdraw(amount, ...)` OR `IERC4626(vault).redeem(shares, ...)` OR equivalent "asset-moved-may-differ-from-requested" external call
+- AND the calling function uses the **request parameter** (not the return value) for downstream accounting (mint amount, liability decrement, share burn)
+- AND the request parameter and return value are NOT enforced equal via `require(actualAmount == amount, ...)`
+- AND the divergence is NOT covered by a downstream solvency/invariant check that consumes the post-call true state (not the pre-call assumed state)
+
+**FP gate:** many ERC4626 wrappers DO normalize between request and return via explicit `-1` rounding adjustments (DepositManager line 235-238 has this for `maxClaimYield`, but NOT for the withdraw path). Detector should flag the asymmetry; manual triage confirms the no-normalization case.
+
+**Status:** 1 paired anchor (Olympus C1+C2). Promotion to PERMANENT DC-9 sub-5 requires 2nd anchor with similar asset-vs-receipt-vs-ledger compound. Candidate 2nd anchors:
+
+- Any ERC4626-wrapping deposit facility that issues a fungible mint based on request param (e.g., yield-token wrappers, perpetual collateral managers, structured-product deposit facades)
+- Convex / Aura LP-token wrappers (request-param-driven mint with ERC4626 underlying)
+- Pendle PT/YT/SY interop layers where SY-mint is request-driven
+- Sky USDe / sUSDe conversion paths if they wrap ERC4626
+
+**Severity profile:** the dust-amplification factor governs severity. Single dust conversion = sub-cent attacker gain. Repeated in a loop (gas-optimized batch) = significant inflation. Severity in real exploits typically rises to MEDIUM-HIGH range, capped by gas cost vs OHM-mint-per-dust ratio.
+
+**R8 grade:** anchor `[INSPECTED]` (code-confirmed mechanic on Olympus C1+C2 paired finding); exploit-magnitude `[ASSUMED]` pending Foundry PoC measuring dust-conversion drift across realistic vault states.
+
+**Cross-reference:**
+
+- DC-9 sub-4 (state-not-invalidated repeated-mint) — closely related sibling; sub-5 is the paired-ledger variant
+- DC-7 base (Validating-Field ≠ Consuming-Field) — same finding viewed from inter-function field-binding angle
+- CANDIDATE-I (ERC4626 share-asymmetry on cumulative accounting) — earlier framing of the same class without the paired-ledger compound
+
+**Authority:** Olympus Gate 1 proposal #1 (2026-05-26 evening, `hunts/2026-05-26-olympus-immunefi-gate1.md`), Ogie msg 7846 hunting cycle. Caveat: anchor is `[ASSUMED]`-scope (ConvertibleDepositFacility + DepositManager not in the 12-asset legacy list visible without SPA pagination; scope-verify pending against full Immunefi 72-asset list before Gate 2).
+
+---
+
+_Patterns: Defense Classes | v2.3 | 2026-05-26 evening | Day 26 evening batch — Ogie msg 7846 hunting cycle. Adds: (1) DC-7 sub-pattern Cross-Language Guard-Coverage Asymmetry (rhino.fi TON-vs-EVM canonical anchor — TON FunC checks `global_deposits_blocked` symmetric on jetton+native; EVM Solidity asymmetric, depositWithId/depositWithPermit/depositNativeWithId MISSING the pause modifier); (2) DC-9 sub-pattern 5 Asset-vs-Receipt Accounting Asymmetry (Olympus ConvertibleDepositFacility.convert + DepositManager.withdraw paired C1+C2 anchor — mint-driver field is `receiptTokenIn` while asset-moved field is `actualAmount`, with paired-ledger drift compound effect; documented at DepositManager line 245 as "actualAmount may be 0"). Companion Doctrine.md at v3.6 (Doctrine #29 v1.1 two-sided MIN-cap amendment + Doctrine #37 CANDIDATE Audited-and-Frozen Substrate). Authority: 3 Gate 1 hunt files (Olympus + CoW + rhino.fi)._
+
 _Patterns: Defense Classes | v2.2 | 2026-05-26 | Day 26 batch — Ogie msg 7817 (41 frozen brain proposals from 5-target hunting day). Adds: (1) DC-7 sub-pattern "Cross-language enum repr divergence between native VM and FEVM" (Filecoin SectorStatusCode anchor, proposal C-Filecoin-3); (2) DC-12 sub-7f "PriceOracleProxy-class wrapper strips staleness from v1 oracle" (JustLend + Notional V3 paired anchor, proposal JustLend #1, hunt 2026-05-26); (3) DC-13 sub-pattern 4 "notification-callback admits attacker-controlled notifee" (Filecoin FIP-0109 anchor, proposal C-Filecoin-1); (4) CANDIDATE-R "Pre-Rotation Deploy-Bootstrap Window" (Stacks sBTC `current-signer-principal` anchor, renamed from hunt-file CANDIDATE-Q to avoid collision with existing CANDIDATE-Q Cap TOTP allowlist). Companion Doctrine.md at v3.4 (now includes Doctrine #35 NEW Trust-Boundary Surface Asymmetry + Doctrine #34 dual-to-quad-anchor enrichment). Authority: Ogie msg 7817 (Day 26 frozen brain proposals batch from Raydium $505K + Hydration $500K + Stacks $250K + Filecoin $150K + JustLend $50K + ALEX retrospective)._
 
 _Patterns: Defense Classes | v2.1 | 2026-05-25 | Batch-commit of 6 brain edits across two msg-7770 (A, B, E, H) + msg-7772 (C-Cap-1, C-Cap-2). Edits A/B/E/H per v2.0 footer. Additional C-Cap-1: CANDIDATE-Q "Permissionless TOTP/Digest Grow-Only Allowlist" filed as DC-5 sub-pattern (Cap Sherlock EigenOperator.sol:105-111 anchor — promotion path requires 2 additional anchors). C-Cap-2: CANDIDATE-A sub-class enrichment "LayerZero OFT default-DVN trust grants unrestricted underlying mint" (Cap Sherlock TempoBridgeUpgradeable.sol:83-98 anchor — every LayerZero OFT consumer without per-message DVN verification inherits the surface). Companion Doctrine.md at v3.3 (now includes Doctrine #34 Post-Audit Composition Multiplier per C-Cap-3). Authority: Ogie msg 7770 + 7772 (2026-05-25 18:22-18:31 UTC)._

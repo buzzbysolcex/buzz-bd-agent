@@ -858,3 +858,64 @@ Three PRE-CLONE-HALT files filed afternoon 2026-05-26 (Across + dYdX V4 + Lombar
 Rationale: dispatching parent prompts asserted "no prior Gate 1" for dYdX V4 AND Lombard within <12h on 2026-05-26, both wrong (dYdX had 2026-05-23 WATCHLIST verdict; Lombard had 2026-05-21 foreclosure). Both Step 0 prior-corpus lookups caught the dispatches before clone work, but the upstream cause is that crossmap rows don't carry foreclosure status. Adding gate1_status closes the loop. **Pending operator approval for full v3 schema migration.**
 
 _v2.1 Addendum: 2026-05-26 afternoon | Across V3 row 43 (HALTED-platform-ambiguity) per Across P1; gate1_status column proposal per Lombard P3 deferred to v3 schema cycle. Authority: Ogie msg 7844 (Across proposals approved) + dYdX/Lombard auto-approve (corpus-internal discipline)._
+
+---
+
+## v2.2 Addendum — Day 26 evening (2026-05-26 post-3-Gate-1 batch)
+
+Three Gate 1 hunt files filed during 2026-05-26 evening hunting cycle against DB-verified active Immunefi bounties surfaced 9 operator-approved brain compounds. All proposals applied; this addendum adds 3 rows (Olympus + CoW + rhino.fi). Authority: Ogie msg 7846 hunting cycle + Lane 5 crawler ship.
+
+### Row 44 — Olympus DAO (Olympus V3 / Bophades) Immunefi $3.33M no-KYC (hunt `hunts/2026-05-26-olympus-immunefi-gate1.md`)
+
+| Field | Value |
+|-------|-------|
+| Program | Olympus DAO (Olympus V3 / Bophades — Default Framework: Kernel + 12 modules + multi-policy) |
+| Bounty | $3,333,333 Critical Immunefi, no-KYC |
+| Brain overlap | **MEDIUM-HIGH** — DC-9 sub-4 partial fire on Convertible Deposits (`[ASSUMED]`-scope); Doctrine #29 MIN-cap defense CONFIRMED PRESENT on BLVaultLido (deposit + withdraw legs, v1.1 two-sided pattern anchored); Doctrine #34 HIGH-SIGNAL (5 internal audit dirs, post-audit Convertible Deposits + V1 Migrator); DC-7 fires on C1 paired finding |
+| Substrate | Solidity ^0.8.15/^0.8.24 EVM (Arbitrum/Avalanche/Boba/ETH/Fantom/Optimism/Polygon); 240 .sol files / 50,614 LOC src/ |
+| Verdict | **Gate-1-SURFACED** — 2 carry-forward leads (C1+C2 paired ConvertibleDepositFacility.convert dust-mint + DepositManager.withdraw liability over-decrement, ASSUMED-scope pending scope-verify of full 72-asset Immunefi list); 2 foreclosure-receipts (C3 BLVault VaultReentrancyLib absence — architecturally mitigated by two-sided MIN-cap; C4 Operator.swap permissionless — Spearbit-audited + minAmountOut slippage protection) |
+| EV | **$83K midpoint** ($125K optimistic if deposits + BLVault scope-confirmed; $41.7K conservative if only legacy 12 assets in-scope) |
+| Re-evaluation | (a) Scope-verify ConvertibleDepositFacility + DepositManager addresses against full Immunefi 72-asset list — if confirmed in-scope → Gate 2 C1+C2 paired finding; (b) new audit completion on Convertible Deposits subsystem (kills Doctrine #34 composition lens fire); (c) any new yield-extension subclass added beyond BLVaultLido / BLVaultLusd / BLVaultManagerLido (Doctrine #34 anchor refresh) |
+
+**Brain compounds landed (3 of 3 proposals):**
+- **#1** → `brain/Patterns-Defense-Classes.md` DC-9 sub-pattern 5 NEW (Asset-vs-Receipt Accounting Asymmetry; Olympus C1+C2 paired anchor)
+- **#2** → `brain/Platform-Migration-Log.md` Lane 5 crawler asset-address enhancement (72-asset Immunefi anchor; per-page scrape into `program_assets` table)
+- **#3** → `brain/Doctrine.md` Doctrine #29 v1.1 amendment (two-sided MIN-cap defense; BLVaultLido 2nd implementer anchor)
+
+### Row 45 — CoW Protocol Immunefi $1M no-KYC (hunt `hunts/2026-05-26-cowprotocol-immunefi-gate1.md`)
+
+| Field | Value |
+|-------|-------|
+| Program | CoW Protocol (GPv2 settlement layer) |
+| Bounty | $1,000,000 Critical Immunefi, no-KYC |
+| Brain overlap | **LOW** — DC-7 FALSE-FIRE on EIP-712 type-hash (verified bytecode-correct via keccak256); DC-9 acknowledged-by-design (manager = DAO multisig); DC-12 N/A (no oracle); CANDIDATE-A/E/I/O/W/Z all N/A or solver-trust-OOS; Doctrine #27 FAIL (≥20 audits over 5 years across canonical firms); Doctrine #32 v1.1 FAIL (1844 days frozen, 0 dangerous-area changes) |
+| Substrate | Solidity 0.7.6, ~2100 production LOC; scope SHA-pinned to `6ebbd810ff2da635fb6f88e9a15fde196f8c852a` (2021-04-08); Ethereum mainnet ONLY (Lane 5 over-read on Gnosis-chain) |
+| Verdict | **Gate-1-FORECLOSED** — Doctrine #37 CANDIDATE Sub-Type A canonical anchor (repo+scope frozen; CoW Hooks framework + CoW AMM + ETHFlow + MEV Blocker shipped post-2022 but explicitly OFF scope per Immunefi page); 3 candidates (C1 impl-vs-proxy initialize, C2 setManager single-sig DC-9 sub-2 analogue, C3 partiallyFillable rounding CANDIDATE-E) all resolved OOS via Immunefi carve-outs (leaked-keys/solver-behavior/migration explicit OOS) |
+| EV | **$375** (0.005 × $1M × 0.5 × 0.15 LOW overlap multiplier) — below $500 threshold to justify Gate 2 work |
+| Re-evaluation | (a) Scope expands to Hooks framework / CoW AMM / ETHFlow / MEV Blocker (post-2022 substrate) → re-Gate-1 against new SHA; (b) new brain lens emerges on EIP-712 multi-scheme signature recovery (EIP-1271 verifier-address-from-bytes) or batch-settlement-with-arbitrary-interactions pattern; (c) scope-SHA bump announcement |
+
+**Brain compounds landed (3 of 3 proposals):**
+- **#1** → `brain/Doctrine.md` Doctrine #37 CANDIDATE NEW Sub-Type A canonical anchor (Audited-and-Frozen-and-Scope-Frozen → AUTO-FORECLOSE pre-clone, saves ~30 min per A-class re-intake)
+- **#2** → `brain/Platform-Migration-Log.md` Lane 5 chain-list calibration (CoW Immunefi excludes Non-Ethereum Mainnet but Lane 5 DB lists [ETH, Gnosis] — over-read; **MERGED with rhino.fi #2**)
+- **#3** → `brain/External-Frameworks.md` Selective-Coverage Defense Asymmetry refinement (carve-out → genuine-risk-surface pairs; CoW canonical anchor — solver-theft / settlement-DoS / migration OOS systematically excludes largest attack surfaces; sibling-lens to FT-CircuitBreaker family)
+
+### Row 46 — rhino.fi (DVF / DeversiFi) Immunefi $2M no-KYC (hunt `hunts/2026-05-26-rhinofi-immunefi-gate1.md`)
+
+| Field | Value |
+|-------|-------|
+| Program | rhino.fi (StarkEx-anchored authorized-keeper bridge; multi-substrate EVM Solidity + TON FunC) |
+| Bounty | $2,000,000 Critical Immunefi, no-KYC |
+| Brain overlap | **MEDIUM** — Pattern H direct fit (authorized-keeper bridge, already lensed in Architecture.md:60); DC-9 sub-2 confirmed (transferOwner single-tx no two-step on EVM, contrasts with TON two-step pattern); Doctrine #34 fires (DVFDepositContractBlast + DVFDepositContractApe yield-extension subclasses POST-audit); Doctrine #23 fires on orphaned `processedWithdrawalIds` mapping; Selective-Coverage MEDIUM-HIGH (depositPause exists, NO withdrawal-pause symmetric circuit-breaker); Doctrine #27 PASSES (5 audits — NOT in ≥20-audit saturated territory); Doctrine #32 v1.1 FAIL (audit_age 400d > 180d AND dangerous_area_changes_30d=0) |
+| Substrate | Solidity 0.8.x EVM (10 Immunefi-listed chains: Arbitrum/BSC/Ethereum/Optimism/Polygon/Polygon-zkEVM/zkSync/Starknet/Tron/Base; 28 chains in README with identical bytecode on `0x5e023c31...` recurring address) + TON FunC (Quantstamp-audited); ~921 effective LOC (excluding stdlib) |
+| Verdict | **Gate-1-WATCHLIST** — Doctrine #37 CANDIDATE Sub-Type B canonical anchor (repo-frozen 440 days, product-live with new chains shipping monthly + SuperEarn + Stablecoin 1:1); 8 candidates filed (C1-C8): C1 orphan state (not a bug), C2 single-tx ownership (audit-survived), C3 unbounded loop (onlyOwner — not exploitable), C4 Blast yield composition (economically negligible YIELD-LOSS, not security), C5 deposit-pause TON-vs-EVM asymmetry (DC-7 sub-pattern Cross-Language Guard-Coverage NEW anchor; LOW-MEDIUM severity, incident-response framing), C6 withdrawVmFunds no-modifier (intentional permissionless sweep), C7 createVMContract idempotency (atomic with initialize), **C8 depositWithPermit + commitmentId binding (POSSIBLY MEDIUM, requires off-chain UI flow recon to upgrade [ASSUMED] → [INSPECTED])** |
+| EV | **$20,000** (0.04 × $2M × 0.5 × 0.5 MEDIUM overlap multiplier); operator-decision point on C8 — fund 1-2hr off-chain UI recon to determine commitmentId-to-msg.sender binding; if loose → Gate 2 with M-severity framing (EV $5K-$10K) |
+| Re-evaluation | (a) Scope expansion to UserWallet / CrossSwap family (StarkEx settlement-side contracts); (b) new yield-composition chain integration (post-Blast/Ape); (c) public PM on operator-key compromise; (d) off-chain UI recon resolves C8 to [INSPECTED] loose-binding → re-Gate-2 |
+
+**Brain compounds landed (3 of 3 proposals):**
+- **#1** → `brain/Doctrine.md` Doctrine #37 CANDIDATE NEW Sub-Type B canonical anchor (Audited-and-Frozen-but-Product-Live → PROCEED with composition lens; refines CoW P1 with A/B sub-types per joint anchor)
+- **#2** → `brain/Platform-Migration-Log.md` Lane 5 chain-list calibration (10 Immunefi vs 28 README deployed, ratio>1.5× ambiguity flag; **MERGED with CoW #2** into single Platform-Migration-Log operator-action item)
+- **#3** → `brain/Patterns-Defense-Classes.md` DC-7 sub-pattern NEW Cross-Language Guard-Coverage Asymmetry (rhino.fi TON-vs-EVM deposit-pause anchor; high-EV cross-pollination targets: Wormhole / LayerZero / ZetaChain / Stargate V2 / Hop / Synapse)
+
+---
+
+_v2.2 Addendum: 2026-05-26 evening | rows 44 (Olympus MEDIUM-HIGH, EV $83K, C1+C2 pending scope-verify) + 45 (CoW FORECLOSED, $375 EV, Doctrine #37 Sub-Type A canonical anchor) + 46 (rhino.fi WATCHLIST, EV $20K, C8 operator-decision-point, Doctrine #37 Sub-Type B canonical anchor). 9 of 9 brain compounds applied (1 duplicate-merged: Lane 5 chain-list calibration surfaced in CoW #2 AND rhino.fi #2). Authority: Ogie msg 7846 hunting cycle + Lane 5 crawler ship. Companion: `hunts/2026-05-26-brain-proposals-applied-ledger-v3.md`._
