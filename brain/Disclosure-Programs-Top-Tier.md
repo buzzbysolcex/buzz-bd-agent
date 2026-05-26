@@ -114,4 +114,28 @@ Today's brain growth produced 4 fragility-family entries. Map them to the 3 veri
 
 ---
 
+---
+
+## Payer-History Watchlist Annotations (added 2026-05-26 per Ogie msg 7817 batch)
+
+Standing-Intake Step 1 PROFILE includes payer-history as a key signal. Below: protocols where payer-history materially affects P(acceptance) calibration. Maintain as a running annotation set alongside the H2 named-targets list above.
+
+| Program | Bounty | Payer history | P(acc) calibration | Source |
+|---------|--------|---------------|---------------------|--------|
+| JustLend DAO | $50K Critical | **$20K total paid** ($0-history ZONE per standing-intake-protocol.md Step 1) | **P(acc) ≈ 0.2** (default 0.5 reduced) | Hunt `hunts/2026-05-26-justlend-immunefi-gate1.md` proposal #5 |
+
+**Why annotate JustLend specifically.** Standing Intake Step 1 PROFILE captures payer-history as a key signal for EV calibration. JustLend's $20K total paid is below the $50K Critical cap — the program has historically NOT settled at-cap, suggesting either (a) no Critical findings have been validated, or (b) settlements consistently scope-narrow to lower severities. Either way, P(acceptance) of a Critical finding is materially below the established-payer baseline (P(acc) ≈ 0.5). Reduce to P(acc) ≈ 0.2 per Step 1 $0-history-zone heuristic.
+
+**Operational implication.** EV recalculation for JustLend Gate 2 work:
+- Naive EV = P(finding) × $50K × P(acc) × overlap = 0.15 × $50K × 0.5 × 0.42 (M-?-H-?-M=22/52) = ~$1,575
+- Payer-discounted EV = 0.15 × $50K × **0.2** × 0.42 = **~$630**
+
+The payer-discount drops JustLend below the Day 26 sibling-target floor (Raydium $15K, Stacks $10K, Filecoin $25K) by ~25-40×. Recommend: defer to 6-month rescan cadence (Doctrine #32 v1.1) rather than fresh Gate 2 effort.
+
+**Future annotations.** Add a row each time Gate 1 surfaces a payer-history signal that materially affects EV. Target: build a 5-10 entry payer-history calibration matrix to feed Standing-Intake Step 3 EV formula.
+
+---
+
+_Disclosure Programs Top-Tier Tracker | v1.1 | 2026-05-26 (Day 26 batch — Ogie msg 7817 — JustLend $50K Tron Immunefi payer-history annotation filed [$20K total paid → P(acc) ≈ 0.2 vs default 0.5; payer-discount drops EV below sibling-target floor; recommend defer to Doctrine #32 v1.1 6-month rescan cadence]. Companion: hunt `hunts/2026-05-26-justlend-immunefi-gate1.md` proposal #5. v1.0 footer preserved below.)_
+
 _Disclosure Programs Top-Tier Tracker | v1.0 | 2026-05-15 (H2 inaugural pull: Sky $10M / Wormhole $1M / Polygon $250K verified; Coinbase deferred — page unavailable)_

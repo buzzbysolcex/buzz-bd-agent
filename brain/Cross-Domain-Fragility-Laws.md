@@ -847,11 +847,31 @@ For any rebase-protocol Gate 1, run the JIT-yield-capture upper-bound math BEFOR
 
 ---
 
+## TRC20-Callback-Hook Law (Compound-V2-Fork-on-TRON, 2026-05-26, JustLend Gate 1 anchor)
+
+**Statement.** Every Compound V2 fork deployed on TRON inherits structural CEI exposure on ANY underlying with TRC20-callback semantics. TRON's TRC20 standard documentation includes optional `tokensReceived` callback for TRC10 wrappers (WBTT in particular), and any Compound V2 fork that integrates such a wrapper as a market underlying admits the cross-cToken re-entry surface — even if the cToken itself was never refactored for TRC20-callback awareness.
+
+**Why this is a cross-domain law, not a per-protocol bug.** Compound V2's `CToken.redeemFresh()` + `borrowFresh()` pre-date ERC777 awareness (Compound V2 originated 2019, ERC777 finalized 2017 but unadopted in lending until late 2020+). The codebase's pre-2020 reentrancy mental model was "underlying = ERC20 with no callbacks." TRON forks adopted Compound V2 wholesale circa 2019-2021 (JustLend, JUST DAO, SUN.io) without considering that TRON's TRC20 → TRC10 wrappers (WBTT class) would later add `tokensReceived` semantics. The same Compound V2 codebase on Ethereum is structurally exposed iff an underlying is ERC777 — but on TRON the wrapper-class is much more common (TRC10 → TRC20 wrapping is the standard pattern for the native BTT-class tokens).
+
+**Anchor (2026-05-26 JustLend Gate 1, hunt `hunts/2026-05-26-justlend-immunefi-gate1.md`):** JustLend `CTokenERC777` variant exists in the codebase as evidence that the bug class was IDENTIFIED at some point, but the fix was variant-specific (only the explicitly-named CTokenERC777 has CEI hardening). The base `CToken` retains the pre-ERC777 ordering. Day 26 hunt verified that the 5 in-scope underlyings (WBTT / SUN / JST / WIN / NFT) all have NO HOOK via TronScan methodMap — so the C1 finding is NOT EXPLOITABLE on the current JustLend in-scope set (FORECLOSURE-RECEIPT filed). But: any future market addition that integrates a TRC10-wrapped underlying with `tokensReceived` semantics WOULD be exploitable. The class is forensically dormant but structurally live. [INSPECTED]
+
+**Defense.** Either (a) wholesale CTokenERC777-style CEI ordering applied to base CToken (the canonical fix Compound never backported), (b) per-market underlying-hook bytecode verification at admission (Compound never added admin tooling for this), or (c) protocol-level allowlist restricting cToken markets to underlying-tokens with verified-no-callback bytecode.
+
+**Cross-pollination targets:** every Compound V2 fork on TRON (JustLend, JUST DAO, SUN, BTTC variants) + every Compound V2 fork on any chain where wrapper-tokens with optional receive-callbacks are common (BSC pre-2022, Polygon meme-token wave 2022-2023, BNB Chain SOLBT-class wrappers).
+
+**Promotion path.** This is the FIRST cross-domain law on the TRON Compound-V2-fork substrate. Promotes to standalone CANDIDATE class when 2nd worked anchor confirms the family on a different TRON Compound-V2-fork (likely SUN.io or BTTC-deployed variant).
+
+**Source.** Hunt `hunts/2026-05-26-justlend-immunefi-gate1.md` proposal #4. Filed 2026-05-26 per Ogie msg 7817 batch.
+
+---
+
 ## Future entries
 
 When the next cross-domain public exploit hits, file under this ledger with the same schema. Pattern goal: 5-10 entries here surface a meta-pattern about cross-domain fragility that becomes a Pattern J in `audit-methodology-v2.md`.
 
 ---
+
+_Cross-Domain Fragility Laws ledger | v2.1 | 2026-05-26 (TRC20-Callback-Hook Law filed per Ogie msg 7817 Day 26 batch — JustLend Compound-V2-on-TRON Gate 1 anchor, FIRST cross-domain law on TRON Compound-V2-fork substrate. C1 CEI candidate FORECLOSED on current JustLend in-scope set (5/5 TRC20 underlyings verified NO HOOK via TronScan methodMap) but structural class remains live on any future market addition with TRC10-wrapped underlying carrying `tokensReceived` semantics. Companion: `brain/Patterns-Defense-Classes.md` DC-12 sub-7f new (PriceOracleProxy-class wrapper strips staleness — JustLend proposal #1) + `brain/Doctrine.md` v3.4 (Doctrine #34 anchor 4 BUSD-market-added-Feb-2023). v2.0 footer history preserved below.)_
 
 _Cross-Domain Fragility Laws ledger | v2.0 | 2026-05-25 (Selective-Coverage Defense Asymmetry Law filed per Ogie msg 7775 — Flying Tulip CircuitBreaker `withdrawFT()` documented exclusion, first cross-domain law on this family; companion to `Lens-FT-CircuitBreaker-Asymmetry.md` + `Operator-Brief-Reconciliation.md` + Crossmap row 36; v1.9 footer history preserved below.)_
 

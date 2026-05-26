@@ -1,0 +1,90 @@
+{
+  "schema": "buzz-git-security-analyzer-v1",
+  "generated_at": "2026-05-26T04:04:23.265Z",
+  "repo": "/home/claude-code/buzz-workspace/.gate1-work/justlend-immunefi-2026-05-26/justlend-protocol",
+  "head_sha": "f28f3b462a4f281761e23423554563e15fc9f028",
+  "head_iso": "2026-03-24T03:09:53.000Z",
+  "total_commits": 12,
+  "commits_analyzed": 12,
+  "sections": {
+    "fix_candidates": {
+      "count": 2,
+      "items": [
+        {
+          "sha": "f28f3b462a4f281761e23423554563e15fc9f028",
+          "ts": 1774321793,
+          "iso": "2026-03-24T03:09:53.000Z",
+          "author": "ghacct930",
+          "subject": "Merge pull request #26 from justlend/feature/security-config",
+          "files": [],
+          "file_count": 0,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "ba3ca97a5eb3d45f5c2227708a3a9bf7c4dacd99",
+          "ts": 1774271496,
+          "iso": "2026-03-23T13:11:36.000Z",
+          "author": "ghacct930",
+          "subject": "security: remove dev private key from config",
+          "files": [
+            "tronbox.js"
+          ],
+          "file_count": 1,
+          "touches_dangerous": false
+        }
+      ]
+    },
+    "dangerous_area_changes": {
+      "count": 0,
+      "items": []
+    },
+    "late_changes": {
+      "count": 0,
+      "window_days": 30,
+      "items": []
+    },
+    "audit_age": {
+      "present": false,
+      "reason": "no audits/ directory found (searched: audits, contracts/audits, docs/audits, security/audits, reports/audits, audit-reports)"
+    },
+    "untouched_critical": {
+      "count": 0,
+      "threshold_days": 90,
+      "items": []
+    },
+    "revert_history": {
+      "count": 1,
+      "items": [
+        {
+          "sha": "e56d7a25dc5e6505a2461bf4eaab0c6cc269d6ef",
+          "iso": "2022-09-28T03:13:41.000Z",
+          "author": "huffstarrr81256",
+          "subject": "Revert \"Change compiler version\""
+        }
+      ]
+    },
+    "author_distribution": {
+      "count": 3,
+      "items": [
+        {
+          "author": "huffstarrr81256",
+          "commit_count": 7,
+          "insertions": 74,
+          "deletions": 28
+        },
+        {
+          "author": "diky861009",
+          "commit_count": 3,
+          "insertions": 16613,
+          "deletions": 0
+        },
+        {
+          "author": "ghacct930",
+          "commit_count": 2,
+          "insertions": 2,
+          "deletions": 2
+        }
+      ]
+    }
+  }
+}

@@ -2415,6 +2415,67 @@ Detector value: MEDIUM (SPDX header parse + canonical-import grep is mechanical;
 
 **Status.** Filed 2026-05-25 as PERMANENT doctrine #34. Sits beside Doctrine #27 (audit-saturation discount) as the post-audit COMPOSITION layer of the same EV calculation. PERMANENT operator-approved per Ogie msg 7772. First worked anchor = Cap Sherlock Gate 1 EigenLayer stack. Cross-pollination expected on Flying Tulip Gate 1 (LayerZero OFT post-audit composition class) + future Gate 1 dispatches on post-2024-audit substrate.
 
+### Doctrine #34 enrichment — Day 26 multi-anchor expansion (2026-05-26, hunts batch — Filecoin + Stacks STRONG-composition + JustLend post-audit anchor; Raydium vendor-cadence anti-anchor)
+
+**Anchor 2 — Filecoin post-2023 FVM era (proposal C-Filecoin-2, hunt `hunts/2026-05-26-filecoin-immunefi-gate1.md`).** Filecoin builtin-actors received a single Oak Security audit at FEVM activation (Q2 2023). Subsequent 6+ FIPs (FIP-0079 / 0090 / 0091 / 0100 / 0103 / 0109 / 0110) shipped composition layers (precompiles, F4 namespace, new sector lifecycle modes, EVM↔Wasm cross-call surfaces) without parity re-audit. Direct EigenLayer-on-Cap structural analog: a single audit, then sustained additive composition. Promotes Doctrine #34 from single-anchor (Cap) to **dual-anchor (Cap + Filecoin)** = doctrine threshold met for production-grade EV math. `[INSPECTED]` per hunt Gate 1 outcome.
+
+**Anchor 3 — Stacks sBTC sustained post-audit churn (proposal P3, hunt `hunts/2026-05-26-stacks-immunefi-gate1.md`).** STRONGEST known example of sustained post-audit composition pressure: 4 audit firms + 2 attackathons + embedded security + Hypernative + Staking Defense League + Immunefi bug bounty, AND fixes #2030 + #2033 still landing April-May 2026. Composition pressure surfaces new bugs faster than human review can audit-out.
+
+**Composition Multiplier Strength axis (quantification — Stacks proposal P3):** add a strength tier to Doctrine #34 firing based on fix-rate-density:
+
+- **WEAK:** <1 fix-commit per 100 commits in last 365d
+- **MEDIUM:** 1-5 fix-commits per 100 commits
+- **STRONG:** 5+ fix-commits per 100 commits (Stacks sBTC = ~19% = STRONG, given 39 fix candidates in 200 commits)
+
+STRONG-composition substrates warrant **continued surveillance even when EV is medium-low** — the bug-discovery rate outpaces audit-coverage extension, so the EV ceiling is structurally floor-raised regardless of nominal bounty cap.
+
+**Anchor 4 — JustLend BUSD-market-added-Feb-2023 (proposal #2, hunt `hunts/2026-05-26-justlend-immunefi-gate1.md`).** CertK Apr 2022 audit covered 11 markets; BUSD market was added 10 months later (Feb 2023) without (apparent) re-audit. Same structural pattern as Cap + Filecoin + Stacks — single-audit window followed by additive market/asset/integration composition that inherits the original "covered" status without re-review. JustLend is a low-cap ($50K) anchor but the structural shape is identical, validating the doctrine across small-cap substrates not just top-tier.
+
+**Anti-anchor (vendor-cadence discount) — Raydium 4-audit precedent (proposal C, hunt `hunts/2026-05-26-raydium-immunefi-gate1.md`).** The Raydium CLMM limit_order subsystem (introduced 2025-09-16, hardened 4 audits in 8 weeks) is a textbook Doctrine #34 candidate by the existing criteria (post-audit composition added a new pricing module), BUT the engineering team's response cadence is FAST (6 fixes in 8 weeks across 4 audit firms). **Refinement to Doctrine #34 Calibration multiplier:** discount the post-audit-module multiplier when vendor fix-cadence is high. Add a fix-cadence sub-criterion:
+
+- **High cadence (≥1 audit / 4 weeks AND ≥1 fix / commit per audit):** apply 0.5× discount to the post-audit-module multiplier
+- **Standard cadence:** no discount (full multiplier applies)
+- **Low cadence (no audit since post-audit module shipped):** apply 1.5× boost
+
+Captures the asymmetry between protocols that respond to compositional growth with re-audits (Raydium) vs those that don't (Cap, Filecoin, Stacks long-tail).
+
+`[INSPECTED]` Day 26 Gate 1 outcomes anchor all 4 expansion entries. Status: filed as ENRICHMENT to Doctrine #34, doctrine number unchanged.
+
 ---
+
+## Doctrine #35 — Trust-Boundary Surface Asymmetry (added 2026-05-26 — Stacks sBTC Gate 1, proposal P1, Ogie msg 7817 batch)
+
+**Statement.** When a contract has an admin function whose authority delta (what changes after the call) is large (e.g., entire protocol-logic swap, full migration target re-pointing, governance-key rotation) AND has **fewer defense layers than user-facing functions on the same contract**, the asymmetry IS the finding even if individually each defense layer is "correct". The cross-function comparative dimension catches what per-function review misses. [INSPECTED]
+
+**Why this is a doctrine, not a heuristic.** Per-function review evaluates each function against its own apparent risk surface. Trust-Boundary Surface Asymmetry evaluates functions COMPARATIVELY against siblings on the same contract: when blast-radius rank-orders inversely to defense-layer count, the inversion itself is the architectural finding. Sky / Maker / sBTC / Stacks / many EVM upgrade-routes exhibit this inversion silently because each function passes its own review but no review compares siblings. [INSPECTED]
+
+**Identification heuristic.** For every Solidity / Clarity / Rust contract:
+
+1. Count defense layers per public function: `assert!`/`require`/`asserts!`/`ensure!` calls + access-control modifiers + struct-level constraints
+2. Rank functions by blast radius: blast-radius ≈ scope of state change (whole-contract-logic-swap > user-balance-mutation > user-event-emit)
+3. Plot defense-count vs blast-radius
+4. **Inversion = finding.** Admin functions with blast-radius >> user-functions but defense-count < user-functions are DC-9-adjacent but NOT identical: DC-9 fires on per-function defense absence; Doctrine #35 fires on cross-function defense asymmetry.
+
+**Anchor — Stacks sBTC `update-protocol-contract-wrapper`** (`sbtc-deposit.clar:53-60`):
+
+| Function                                | Asserts | Blast radius                                        |
+| --------------------------------------- | ------- | --------------------------------------------------- |
+| `complete-deposit-wrapper`              | 6       | Single deposit state advance                        |
+| `initiate-withdrawal-request`           | 2       | Single user withdrawal queue insert                 |
+| `update-protocol-contract-wrapper`      | **1**   | **Swap entire protocol-logic contract (admin)**     |
+
+The most-blast-radius function has the LEAST defense. Defense-asymmetry inversion is the finding even though `update-protocol-contract-wrapper`'s single assert (signer-multisig check) is "correct" per function.
+
+**Distinct from DC-9.** DC-9 (Privileged State Mutation Without Defense-in-Depth) fires on per-function defense absence (no timelock on admin mint, no checks-effects on upgrade). Doctrine #35 fires on cross-function asymmetry across the same contract. They can compound (Doctrine #35 admin function ALSO violates DC-9) but Doctrine #35 stands alone when each individual defense is correct but the comparative ranking is inverted.
+
+**Integration with Standing Intake Step 5.6 (5-target quality checklist).** Add as a sub-check under Admin/Upgrade (target #5): "For each admin function, count its defense layers AND compare to user-function defense layers on the same contract. Asymmetric inversion = Doctrine #35 candidate." Surface to Gate 1 surface map as a separate row from any DC-9 hits.
+
+**Promotion path.** Currently single-anchor (Stacks sBTC). Promotes to CANDIDATE class on 2nd anchor across a different substrate (EVM Ownable-upgrade-routes / Solana Anchor admin-instructions / Cosmos governance handlers). Cross-pollination scan target list: every protocol with a `set*` / `update*` / `migrate*` admin function; compare its defense count to the closest user-facing sibling.
+
+**Status.** Filed 2026-05-26 as PERMANENT doctrine #35. Single-anchor Stacks sBTC `update-protocol-contract-wrapper`. Authority: Ogie msg 7817 (Day 26 batch — frozen brain proposals approved). Promotion to CANDIDATE class deferred to 2nd worked anchor.
+
+---
+
+_Doctrine v3.4 | 2026-05-26 | Day 26 batch — Doctrine #34 enrichment (anchors 2/3/4 + vendor-cadence anti-anchor + Composition-Multiplier-Strength axis) + Doctrine #35 NEW (Trust-Boundary Surface Asymmetry, Stacks sBTC anchor). Authority: Ogie msg 7817 (Day 26 frozen-brain-proposals batch from 5-target hunting day: Raydium + Hydration + Stacks + Filecoin + JustLend + ALEX retrospective). Doctrine #34 now dual-to-quad anchored (Cap + Filecoin + Stacks + JustLend), threshold met for production-grade EV math; Raydium serves as vendor-cadence anti-anchor for discount calibration. Doctrine #35 is FIRST cross-function comparative-asymmetry doctrine; sits adjacent to DC-9 (per-function defense absence) on the same architecture-review pass._
 
 _Doctrine v3.3 | 2026-05-25 | Batch-approval of 19 brain proposals across 4 Gate 1 outcomes (14 from Cantina trio + DeXe per msg 7770 + 5 from Cap Sherlock per msg 7772). 12 brain knowledge edits landed via subagent (A-J + L + M); detector code patches K+N in main session; 5 Cap proposals C-Cap-1..5 landed in main session post-subagent (CANDIDATE-Q grow-only-allowlist as DC-5 sub-pattern + CANDIDATE-A LZ-OFT-default-DVN enrichment + Doctrine #34 Post-Audit Composition Multiplier + Standing-Intake Step 1 Sherlock-status preflight rule + Watchlist-Candidate-Crossmap Cap row). Authority: Ogie msg 7770 + 7772 (2026-05-25 18:22-18:31 UTC). Doctrine #34 is the FIRST post-audit-composition doctrine; sits beside Doctrine #27 (audit-saturation discount) as the composition layer of the same EV calculation._

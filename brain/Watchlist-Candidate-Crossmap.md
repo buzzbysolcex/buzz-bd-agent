@@ -689,3 +689,129 @@ _Post-v1.9 row 35 cap-protocol | 2026-05-25 | Operator dispatch msg 7768 + Gate 
 **Clone management** — NO clone executed (Cap-style waste avoidance at Step 1 preflight per C-Cap-4 platform-STATUS rule). Layer 0 JSON NOT generated.
 
 _Post-v1.9 row 36 flying-tulip | 2026-05-25 | Operator dispatch msg 7768 + watchlist-only directive msg 7775 | Gate-1-FORECLOSURE-RECEIPT (contest finished, zero clone, 15min wall-clock), 4 brain compounds landed P1-P4 including NEW lens Selective-Coverage Defense Asymmetry + NEW brain file Operator-Brief-Reconciliation (2-of-2 Sherlock divergence pattern formalized)._
+
+---
+
+## Day 26 batch — rows 37-40 (2026-05-26, Ogie msg 7817)
+
+Five-target hunting day (Raydium + Hydration + Stacks + Filecoin + JustLend + ALEX retrospective) generated 41 frozen brain proposals. Rows below capture per-target Watchlist matrix entries.
+
+### Row 37 — Raydium CLMM Immunefi $505K (hunt `hunts/2026-05-26-raydium-immunefi-gate1.md`)
+
+| Field | Value |
+|-------|-------|
+| Program | Raydium (Solana, Anchor Rust + cp-swap + AMM v4) |
+| Bounty | $505K Critical (Immunefi historical anchor — @Lastc0de cp-swap 2025) |
+| Brain overlap | **LOW-MEDIUM** — DC-7 LOW (audited 4x recent), DC-9 LOW (admin-only path), DC-12 N/A (no external oracle in CLMM), CANDIDATE-E direct anchor (fix verified line 124 withdraw.rs) |
+| Layer 0 signals | 113 fix_candidates, 97 dangerous_area_changes, fresh limit_order subsystem (introduced 2025-09-16, 4 audits in 8 weeks) |
+| Verdict | **Gate-1-FORECLOSURE-RECEIPT (MIXED)** — 3 Gate-2-eligible low-confidence threads (HUNT-CAND-7, 14, 18) documented for operator decision |
+| EV | $12K-$30K range (Gate 2 conditional) — vendor-cadence-discounted per Doctrine #34 enrichment |
+| Re-evaluation | Watchdog speedrunner on commit-diff for `programs/amm/`, `programs/cp-swap/`, new limit_order PRs |
+
+**Brain compounds landed (4 of 4 proposals A-D):**
+- **A** → this row 37
+- **B** → CANDIDATE-E v2 deferred (pending CAND-G2-3 Gate 2 worked-example for promotion threshold)
+- **C** → `brain/External-Frameworks.md` Raydium 4-audit Pre-Audit-Composition-Multiplier precedent (vendor-cadence anti-anchor for Doctrine #34)
+- **D** → `.claude/rules/standing-intake-protocol.md` Solana-Rust CLMM-fork-family lens stack (canonical for Orca Whirlpool / Phoenix / Lifinity v3)
+
+### Row 38 — Stacks sBTC Immunefi $250K (hunt `hunts/2026-05-26-stacks-immunefi-gate1.md`)
+
+| Field | Value |
+|-------|-------|
+| Program | Stacks sBTC (Clarity, Bitcoin L2) |
+| Bounty | $250K Critical Immunefi |
+| Brain overlap | **MEDIUM-HIGH** — Doctrine #35 (Trust-Boundary Surface Asymmetry NEW), CANDIDATE-R (deploy-bootstrap window NEW), Doctrine #34 STRONG-composition anchor, DC-9 sub-3 |
+| Layer 0 signals | 200 commits, ~39 fix candidates (~19% fix-density = STRONG composition multiplier strength), 4 audit firms + 2 attackathons + embedded security + Hypernative + SDL + Immunefi |
+| Substrate | FIRST Clarity production-tier Gate 1 entry; net-new substrate-class for Buzz |
+| Verdict | Gate-1-COMPLETE → 2 Gate 2 candidates (C1 quorum atomic swap + C2 max-fee unbounded) HOLD pending Clarity Alliance PDF DUP-check |
+| EV | ~$2K adj per nominal (Gate-fill queue) |
+| Re-evaluation | Watchdog speedrunner on commit-diff for `contracts/contracts/*.clar` (Clarity substrate untouched for 90+ days, any change is meaningful signal) |
+
+**Brain compounds landed (5 of 5 proposals P1-P5):**
+- **P1** → `brain/Doctrine.md` Doctrine #35 NEW (Trust-Boundary Surface Asymmetry)
+- **P2** → `brain/Patterns-Defense-Classes.md` CANDIDATE-R NEW (renamed from hunt-file CANDIDATE-Q to avoid Cap-CANDIDATE-Q collision)
+- **P3** → `brain/Doctrine.md` Doctrine #34 enrichment (STRONG-composition tier + Composition-Multiplier-Strength axis)
+- **P4** → DEFERRED (Clarity detector pack spec; tracked in hunt file for build trigger)
+- **P5** → this row 38
+
+### Row 39 — Filecoin Immunefi $150K (hunt `hunts/2026-05-26-filecoin-immunefi-gate1.md`)
+
+| Field | Value |
+|-------|-------|
+| Program | Filecoin builtin-actors + lotus + ref-fvm (Rust + Go + FEVM Solidity) |
+| Bounty | $150K Critical Immunefi |
+| Brain overlap | **HIGH** — DC-7 sub-pattern NEW (cross-language enum repr), DC-9 sub-2, DC-13 sub-4 NEW (notification-callback notifee), Doctrine #34 dual-anchor confirmation |
+| Layer 0 signals | Builtin-actors 8.5MB; lotus 77MB partial; ~6+ FIPs shipped post-2023 Oak audit (FEVM-era composition multiplier) |
+| Substrate | FIRST storage-L1 substrate-class for Buzz watchlist (joins Cosmos/Polkadot/Clarity/Rust-Solana/EVM/Sui-Move/CosmWasm-Wasm; storage-L1-FVM is new) |
+| Verdict | Gate-1-COMPLETE → Lead 1 (FIP-0109 self-notifee bypass) HOLD pending operator scope-triage query at `hunts/2026-05-25-filecoin-scope-triage-query.md` |
+| EV | $9K-10.8K nominal (Gate 2 conditional on bytecode verification of v17+ miner CodeCID) |
+| Re-evaluation | Watchdog speedrunner on commit-diff for `actors/miner/`, `actors/market/`, FIP additions, EVM precompile dir |
+
+**Brain compounds landed (5 of 5 proposals C-Filecoin-1..5):**
+- **C-Filecoin-1** → `brain/Patterns-Defense-Classes.md` DC-13 sub-4 NEW (notification-callback-admits-attacker-controlled-notifee)
+- **C-Filecoin-2** → `brain/Doctrine.md` Doctrine #34 enrichment anchor 2 (Filecoin FEVM-era dual-anchor confirmation)
+- **C-Filecoin-3** → `brain/Patterns-Defense-Classes.md` DC-7 sub-pattern NEW (cross-language enum repr divergence)
+- **C-Filecoin-4** → this row 39
+- **C-Filecoin-5** → `.claude/rules/standing-intake-protocol.md` Step 5.3 enrichment for FEVM-era Filecoin substrates
+
+### Row 40 — Hydration HydraDX Immunefi $500K (hunt `hunts/2026-05-26-hydration-immunefi-gate1.md`)
+
+| Field | Value |
+|-------|-------|
+| Program | Hydration (Substrate / Polkadot, 39 pallets, 73 assets) |
+| Bounty | $500K Critical Immunefi, $1M historical paid |
+| Brain overlap | **MEDIUM-effective** — HIGH on paper, MEDIUM after lens-by-lens verification (all primary anchors found DEFENDED) |
+| Substrate | FIRST Substrate/Polkadot comprehensive Gate 1 entry for Buzz; net-new ecosystem (Substrate-class detector rotation requires manual lens-walk per Hydration P6 proposal) |
+| Verdict | **Gate-1-MIXED → WATCHLIST ADD (not immediate Gate 2 dispatch)** — 3 CANDIDATE substrates filed (slip-fee inverse, route-MEV, conviction-vote hook); none reach Critical confidence |
+| EV | $14,625 nominal — below Cantina mega-targets, below DISC-019 |
+| Re-evaluation | Re-Gate-1 on PR merges to `pallets/hsm`, `pallets/liquidation`, `math/src/omnipool/slip_fee.rs`; ecosystem cross-pollination on Substrate Pashov / ChainSecurity advisory drops |
+
+**Brain compounds landed/deferred (6 proposals P1-P6 — most non-actionable for brain edits, but lens-stack value preserved):**
+- **P1-P3** → DEFERRED (Substrate-Ecosystem-Entry.md / CANDIDATE-SUBSTRATE-1/2 — would require dedicated Substrate substrate file; deferred pending 2nd Substrate Gate 1 anchor for promotion threshold)
+- **P4** → this row 40
+- **P5** → DEFERRED (Doctrine #35 Ecosystem Asymmetric Saturation Discount candidate — wait for 2nd ecosystem-first-touch anchor; promotion threshold not yet met)
+- **P6** → DEFERRED (.claude/rules/standing-intake-protocol.md Substrate-skip clause — already implicit in current Step 5.6 manual-lens-walk discipline)
+
+### Row 41 — JustLend DAO Tron Immunefi $50K (hunt `hunts/2026-05-26-justlend-immunefi-gate1.md`)
+
+**JustLend was previously row 8 in the 2026-05-18 table with overlap=15 (L-?-M-?-L). Re-scored per Day 26 Gate 1 outcome to overlap=22 (M-?-H-?-M) reflecting DC-12 sub-7f elevation + Pattern D CEI elevation.**
+
+| Field | Value |
+|-------|-------|
+| Program | JustLend DAO (Tron, Compound V2 fork) |
+| Bounty | $50K Critical Immunefi, $20K total paid (payer-risk flag per Standing-Intake Step 1 — `$0-history zone P(acceptance)≈0.2`) |
+| Brain overlap | **M-?-H-?-M (overlap=22)** — UP from L-?-M-?-L=15 — DC-12 sub-7f NEW (PriceOracleProxy strips staleness), DC-13 (CEI) elevated, Doctrine #34 anchor 4 (BUSD market added post-audit) |
+| Verdict | **Gate-1-COMPLETE → C1 FORECLOSURE-RECEIPT** — 5/5 in-scope TRC20 underlyings verified NO HOOK via TronScan methodMap; CEI reentrancy via underlying receive-hook NOT EXPLOITABLE. C3 (first-mint inflation), C4 (TRC20-callback griefing), C5 (Doctrine #32 stale-substrate cadence flag) remain as low-EV candidates |
+| EV | $1,575 nominal Gate 2 — LOW priority vs sibling targets; defer to 6-month rescan cadence |
+| Re-evaluation | 6-month Doctrine #32 v1.1 rescan; trigger on any new market addition to JustLend pool |
+
+**Brain compounds landed (5 of 5 proposals):**
+- **#1** → `brain/Patterns-Defense-Classes.md` DC-12 sub-7f NEW (PriceOracleProxy-class wrapper strips staleness)
+- **#2** → `brain/Doctrine.md` Doctrine #34 enrichment anchor 4 (BUSD-market-added-Feb-2023)
+- **#3** → this row 41 (re-score from overlap=15 → 22)
+- **#4** → `brain/Cross-Domain-Fragility-Laws.md` TRC20-callback-hook addition (Compound-V2-fork-on-TRON law)
+- **#5** → `brain/Disclosure-Programs-Top-Tier.md` JustLend payer-history annotation
+
+### Row 42 — ALEX Stacks Immunefi $100K (hunt `hunts/2026-05-26-alex-immunefi-gate1.md`)
+
+| Field | Value |
+|-------|-------|
+| Program | ALEX Lab Foundation (Stacks Clarity, alex-v1 + alex-dao) |
+| Bounty | $100K Critical Immunefi |
+| Brain overlap | LOW — substrate dormant (HEAD frozen 743 days = XLink exploit day); dead-substrate-discount fires per ALEX P1 corollary |
+| Substrate | SECOND Clarity Lane 1 anchor (after Stacks sBTC same day); validates parallel logic of Toly Percolator Bounty 5 v16 (Rust/Solana) for non-Solidity targets |
+| Verdict | **Gate-1-FORECLOSURE-RECEIPT** — dead-substrate, no further dispatch |
+| EV | $100 adj per dead-substrate-discount (EV_base $400 × 0.25 multiplier) |
+| Re-evaluation | Reactivate on substrate-thaw signal (ALEX revival announcement / new audit / fresh commit) |
+
+**Brain compounds landed/deferred (6 detector-pack proposals P1-P6 — most NON-actionable for brain edits, primary value = Clarity detector pack roadmap):**
+- **P1** → DEFERRED (Doctrine #27 K corollary "Dead-Substrate Discount Multiplier" — DRAFT pending 2nd dead-substrate anchor for calibration validation, likely Yearn V2 or other zombie program)
+- **P2** → DEFERRED (Operator-Brief-Reconciliation expansion: Substrate-Freshness Divergence — captured in hunt file, awaiting follow-up Operator-Brief intake to formalize)
+- **P3** → DEFERRED (Layer 0 detector generalization Clarity-keyword pattern set — captured in hunt file as detector spec; ship trigger when Stacks bounty pipeline justifies ROI)
+- **P4** → DEFERRED (Clarity-specific detector pack roadmap — 6 detector specs in hunt file; ship when (a) Stacks pipeline justifies, OR (b) 3rd Clarity Gate 1 dispatched)
+- **P5** → DEFERRED (`brain/Lane1-Substrate-Coverage.md` catalog entry — would require new brain file; tracked here in row 42 as substrate-coverage anchor pending file creation decision)
+- **P6 (implicit)** → this row 42 (Watchlist entry, the only direct-edit-actionable proposal)
+
+---
+
+_Post-v2.0 rows 37-42 Day-26-batch | 2026-05-26 | Ogie msg 7817 batch — 5-target hunting day + ALEX retrospective. Brain edits landed: Doctrine #34 enrichment (4 anchors + vendor-cadence anti-anchor + Strength axis) + Doctrine #35 NEW (Trust-Boundary Surface Asymmetry) + DC-7 sub-pattern NEW (cross-language enum repr) + DC-12 sub-7f NEW (PriceOracleProxy-class) + DC-13 sub-4 NEW (notification-callback notifee) + CANDIDATE-R NEW (deploy-bootstrap window) + Cross-Domain-Fragility-Laws TRC20-callback-hook law + Standing-Intake Step 5.3 FEVM-era + Solana-Rust CLMM-fork-family lens stack + External-Frameworks Raydium 4-audit precedent + Disclosure-Programs JustLend payer-history annotation. JustLend C1 FORECLOSURE-RECEIPT: full 5-token TRC20 underlying set verified NO HOOK via TronScan methodMap, C1 NOT EXPLOITABLE dismissed before Gate 2._

@@ -223,6 +223,18 @@ For every function exposed to user input, build the validation→consumption map
 
 **Anchor file:** This entry. Worked-example details in `brain/Cross-Domain-Fragility-Laws.md` v1.5 + downstream incident files.
 
+### DC-7 sub-pattern — Cross-language enum repr divergence between native VM and FEVM (added 2026-05-26 from Filecoin Gate 1, hunt `hunts/2026-05-26-filecoin-immunefi-gate1.md` proposal C-Filecoin-3)
+
+**Statement:** When a builtin-actor (or any cross-language interop substrate) defines an enum type that is consumed by BOTH a native-language caller (Rust on Filecoin's FVM) AND a non-native caller (Solidity on FEVM via precompile / runtime call), the serialization representation MUST be EXPLICIT — typically `#[repr(uN)]` plus `Serialize_repr` for Rust enums. Default Rust enum CBOR variant-name serialization (string-keyed) vs Solidity `uint8`-decoded enum is a structural mismatch: validation reads one repr, consumption reads another. The DC-7 keys decouple along the LANGUAGE-BOUNDARY axis instead of the per-pipeline-field axis. [INSPECTED]
+
+**Distinct from DC-7 base:** base DC-7 fires when KEY-A and KEY-B differ within a single language's type system. This sub-pattern fires when the SAME conceptual field has different binary representations across language boundaries — the validation reads the Rust default-CBOR variant string, the consumption decodes the Solidity uint8. Same field name, same source of truth in the protocol spec, BUT the actual bytes consumed are different on each side.
+
+**Anchor:** Filecoin builtin-actors `SectorStatusCode` enum + sibling enums reachable via FEVM precompile / runtime call. KAMT `set_root` cache-stale class (#1667) is same family: type-system mismatch between Rust caller and FEVM caller, both consume the "same" field but bind different bytes.
+
+**Detector spec:** AST-grep for `pub enum` declarations in builtin-actors that are reachable via FEVM precompile / runtime call without `#[repr]` attribute. Combine with grep for `precompiles` / `runtime::send` / `runtime::call` call sites that pass the enum across the boundary. Productization HIGH on Filecoin substrate; class transfers to any cross-language interop substrate (Cosmos SDK ↔ CosmWasm Wasm, Substrate native ↔ EVM Frontier, etc.).
+
+**Promotion path:** single-anchor (Filecoin SectorStatusCode). Promotes to standalone DC class when 2nd cross-language interop substrate confirms the family (likely Cosmos↔CosmWasm or Substrate↔Frontier next).
+
 ---
 
 ## DC-8: Anchor-Signer-Validation-Moved-From-Accounts-Struct-To-Function-Body — Refactor Regression Class
@@ -1085,6 +1097,42 @@ Ground-truth instance: Morpho Blue $54.5M flash loan → 7 wallets → self-trad
 
 ---
 
+### CANDIDATE-R: Pre-Rotation Deploy-Bootstrap Window (Stacks sBTC 2026-05-26, NEW)
+
+**Class statement:**
+
+> Multi-stage protocol deployments where the initial admin / signer / governance / `current-signer-principal` value defaults to the deploying EOA at constructor / `(define-data-var ... tx-sender)` time, with the intent that a "first rotation" transaction immediately replaces it with the production multisig / timelock / contract. The TEMPORAL WINDOW between deploy + first-rotation = full-admin compromise window for the deployer key. Defense IS atomic-deploy-and-rotate (constructor-equivalent rotation in the same tx) OR compile-time-set immutable signer.
+
+**Promotion path:** 2 additional worked anchors needed (likely targets: any multi-stage Solana Anchor deployment with `set_authority` post-deploy, any Solidity OpenZeppelin Ownable-then-transferOwnership pattern, any Cosmos governance-pallet bootstrap). Currently single-anchor (Stacks sBTC).
+
+**Anchor (Stacks sBTC, 2026-05-26):** `current-signer-principal` init = `tx-sender` at deploy time (`sbtc-registry.clar:18`). Intent is rotate-keys-immediately-after-deploy via multisig. Window exists between deploy block + rotate-keys tx confirmation. During that window, the deploying EOA is the protocol-admin equivalent of full multisig authority. Attack surface = compromise of the deployer EOA OR adversarial reordering of the deploy + rotate tx pair via miner/sequencer collusion. [INSPECTED] hunt `hunts/2026-05-26-stacks-immunefi-gate1.md` proposal P2.
+
+**Examples to seed (cross-substrate):**
+- Stacks sBTC: deploy → rotate-keys → multisig active
+- Generic Solidity OZ Ownable: deploy → transferOwnership(timelock) → renounceOwnership
+- Solana Anchor: deploy → set_authority → freeze_authority (mint authority, upgrade authority)
+- Cosmos SDK genesis bootstrap: validator-set deploys with single-validator threshold, then governance proposal expands set
+
+**Defense:** atomic deploy + rotate (constructor-equivalent), or compile-time-set immutable signer-principal. Defense-in-depth: deploy via factory contract that performs rotation atomically; never expose the deployer-keyed window.
+
+**Audit-time check:**
+
+1. Find the protocol's signer/admin/governance field initialization site
+2. If init = `tx-sender` / `msg.sender` / `payer` / `deployer-keyed-default`, check whether rotation is enforced atomically in the same tx
+3. If rotation is a separate tx (deploy then rotate-later), the bootstrap window EXISTS — file CANDIDATE-R
+4. Severity calibration: bounty programs typically discount post-deploy admin-compromise as "operational", but during the bootstrap window the protocol IS structurally undefended — file as Medium/High depending on TVL exposure during window
+
+**Cross-pollination targets:**
+
+- Any Solana Anchor protocol with `set_authority` post-deploy
+- Any Solidity OZ Ownable / Ownable2Step with separate transferOwnership tx
+- Any Stacks Clarity protocol with `(define-data-var ... tx-sender)` admin init
+- Any Cosmos genesis-bootstrap chain with governance-expansion post-launch
+
+**Source.** Hunt `hunts/2026-05-26-stacks-immunefi-gate1.md` Gate 1 proposal P2. Filed 2026-05-26 as CANDIDATE-R (Note: hunt-file proposal originally named "CANDIDATE-Q" but renamed to CANDIDATE-R to avoid collision with existing CANDIDATE-Q Cap Protocol TOTP allowlist; both classes structurally distinct.). Authority: Ogie msg 7817 batch.
+
+---
+
 ### DC-10: Cross-Chain Message Binding Failure (PROMOTED 2026-05-23, Ogie msg 7589)
 
 > **Promotion event:** CANDIDATE-A reached 3 worked-example anchors with $600M+ combined exposure on 2026-05-23 (Kelp DAO $292M filed via Ethereal News Weekly #20 intake completes the 3rd anchor); operator (Ogie msg 7589) promoted to DC-10, joining DC-9 as the newest battle-tested class. DC-10 must be added to: `defense-class-mapping.json` propagation engine (next version bump), all future cross-chain Gate 1 lens stacks, and Standing Intake Protocol Step 2 brain-overlap check for any bridge / OFT / cross-domain target.
@@ -1172,6 +1220,7 @@ Ground-truth instance: Morpho Blue $54.5M flash loan → 7 wallets → self-trad
      - **positional-drop:** `(,int256 price,,,) = feeds[token].feed.latestRoundData()` — all-positional destructure with empty slot for `updatedAt`. Anchor: Inverse FiRM `Oracle.sol:159` (Code4rena Oct 2022 M-17 flagged exact pattern; sponsor "fixed" via commit `f53087d` Dec 2022 which migrated API but kept destructure-drop — **the audited fix was cosmetic**). Distinct case of Doctrine #23 (architectural foreclosure WITH cosmetic-fix-history is even harder to re-pursue).
      - **comment-marked-drop:** `(_, answer, _, /* updatedAt */, _) = feed.latestRoundData()` — explicit comment marks the discarded field, signaling deliberate choice. Anchor: Notional V3 Exponent `ChainlinkUSDOracle.sol:41-44` (quote-feed updatedAt silently destructured; only base-feed staleness defended upstream).
    - **7e (engineered staleness mask)** (added 2026-05-25 from Notional V3 Gate 1, Ogie msg 7750 P2) — wrapper actively OVERWRITES the upstream `updatedAt` with a FRESHER value from a different source — semantically lying about freshness while structurally appearing defended. Distinct from 7c (hardcoded constant) in that 7e uses a live fresh-source. Distinct from 7d (passive destructure-drop) in that 7e actively writes a fake-fresh value. Canonical: Notional V3 Exponent `MidasOracle.sol:48-50` — wrapper masks mToken's true `updatedAt` with fresh Chainlink base feed `updatedAt` for first 7 days of staleness. Direct LLTV consumer pathway: `IYieldStrategy.price()` → `convertToAssets` → `TRADING_MODULE.getOraclePrice` → `MorphoLendingRouter.sol:463 collateralValue × m.lltv`. 0-7d mToken NAV drift flows directly into borrow/liquidation math. Detector signature: `if (... updatedAt < ...) updatedAt = freshTimestamp` OR `updatedAt = max(stale_a, fresh_b)` patterns.
+   - **7f (PriceOracleProxy-class wrapper strips staleness from v1 oracle)** (added 2026-05-26 from JustLend Gate 1, hunt `hunts/2026-05-26-justlend-immunefi-gate1.md` proposal #1) — Compound-V2-fork `PriceOracleProxy` contracts that read from EOA-pushed `v1PriceOracle` without ANY staleness check whatsoever. The wrapper is structurally a passthrough: it inherits the v1 oracle's raw price and exposes it to `Comptroller.getAccountLiquidity` without `updatedAt` / staleness-buffer / circuit-breaker. Distinct from 7a (interface returns only `(uint256)`) in that 7f wrappers DO have access to richer upstream metadata via cToken admin push but discard it at the wrapper layer. Anchor: JustLend `PriceOracleProxy` reads from JustLend Foundation EOA-pushed v1 oracle — admin-pushed prices with NO on-chain staleness verification. **Class:** index all Compound-V2-fork `PriceOracleProxy` contracts that read from EOA-pushed v1PriceOracle without staleness checks. There are many forks: Cream, Hundred, Iron Bank pre-Chainlink, dozens of long-tail Compound-V2 forks across L2s. **Paired anchor:** Notional V3 MidasOracle (DISC-019, sub-7e) — both are wrapper-strips-staleness patterns; 7e is engineered mask, 7f is structural absence. Common origin: protocols inheriting Compound V2's `PriceOracleProxy` pattern without retrofit. **Productization target:** AST-grep for `contract PriceOracleProxy` + `setUnderlyingPrice` or `setDirectPrice` admin entrypoint + downstream consumer never reading `updatedAt`. NOTE: Immunefi typically excludes "mispricing without active manipulation" from scope — this class is more useful for cross-protocol detector seeding than direct bounty submission.
    - Distinct from sub-6 (cross-chain message-receiver staleness) — sub-7 is on-chain wrapper-layer staleness-strip independent of cross-chain message-passing. Could compose with sub-6 if the cross-chain receiver IS the staleness-stripping wrapper.
 
 **Anchor incidents (Clara + brain):**
@@ -1320,11 +1369,13 @@ A consumer with ≥1 wrapper passes the Kamino three-layer convergence test. ZER
 1. **hook-added-after-audit** — upgrade adds external-call surface to previously-audited function
 2. **callback-before-state** — initial implementation used CEI; refactor moved state-mutation after callback
 3. **fake-pool-callback** — contract accepts arbitrary pool address as callback target; attacker registers fake pool
+4. **notification-callback-admits-attacker-controlled-notifee** (added 2026-05-26 from Filecoin Gate 1, hunt `hunts/2026-05-26-filecoin-immunefi-gate1.md` proposal C-Filecoin-1) — cross-actor notification target is user-set in the message params AND the send uses state-mutating flags AND the notifee return-value is consumed as an attestation of payload validity. Attacker registers a self-controlled notifee; the system admits a self-attestation bypass. Distinct from sub-3 (fake-pool-callback — attacker registers fake pool for a hook surface) in that sub-4 the NOTIFEE is a documented protocol participant whose return value is treated as an authoritative validation (not a hook side-effect). Canonical anchor: Filecoin FIP-0109 `notify_data_consumers` post-FIP — miner-actor sends notification to user-set `notifee_addr`, consumes notifee's return as deal-validity attestation. Expands the DC-13 family from "upgradeable contract address as hook target" to "user-set notification target field as attestation authority." [INSPECTED] (Filecoin Gate 1 outcome, Day 26 batch.)
 
 **Anchor incidents (Clara + brain):**
 - 0xBugDrop unnamed 2026-05-22 **$7M** (canonical Buzz brain anchor — sub-1+sub-2 compound)
 - ~10 Clara anchors across 2022-2024 reentrancy revival corpus (per Clara intake §3 cumulative count); 2022 CEI-class chain (Hundred Gnosis + Agave + Paraluni + bHOME + Fuse Pool 127 + Revest + ACOWriter + Umbrella) as substrate for the re-emergent class
-- Combined Clara USD: $10M+ named exposure
+- Filecoin FIP-0109 `notify_data_consumers` 2024 (Lead 1, hunt `hunts/2026-05-26-filecoin-immunefi-gate1.md` — sub-4 canonical anchor)
+- Combined Clara USD: $10M+ named exposure (Filecoin lead pending Gate 2 bytecode verification)
 
 **Detector coverage (current shipped):**
 
@@ -1806,5 +1857,7 @@ FP gate: most contracts that do `price * amount / 1e18` DO handle decimals corre
 Future Gate 1 surveys finding `lastOraclePrice`-style cache should check: (a) is the cache monotone-up only? (b) is the read function `min(live, cache)` or `max(live, cache)`? Only `min(live, cache)` is defended; `max(live, cache)` OR raw-cache-read is the bug class. Operator approval: Ogie msg 7715 proposal B, 2026-05-25. Cross-reference: `data/lane1/gate2-clones/origin-dollar-rebase-sandwich-foreclosed.md` V3 verification.
 
 ---
+
+_Patterns: Defense Classes | v2.2 | 2026-05-26 | Day 26 batch — Ogie msg 7817 (41 frozen brain proposals from 5-target hunting day). Adds: (1) DC-7 sub-pattern "Cross-language enum repr divergence between native VM and FEVM" (Filecoin SectorStatusCode anchor, proposal C-Filecoin-3); (2) DC-12 sub-7f "PriceOracleProxy-class wrapper strips staleness from v1 oracle" (JustLend + Notional V3 paired anchor, proposal JustLend #1, hunt 2026-05-26); (3) DC-13 sub-pattern 4 "notification-callback admits attacker-controlled notifee" (Filecoin FIP-0109 anchor, proposal C-Filecoin-1); (4) CANDIDATE-R "Pre-Rotation Deploy-Bootstrap Window" (Stacks sBTC `current-signer-principal` anchor, renamed from hunt-file CANDIDATE-Q to avoid collision with existing CANDIDATE-Q Cap TOTP allowlist). Companion Doctrine.md at v3.4 (now includes Doctrine #35 NEW Trust-Boundary Surface Asymmetry + Doctrine #34 dual-to-quad-anchor enrichment). Authority: Ogie msg 7817 (Day 26 frozen brain proposals batch from Raydium $505K + Hydration $500K + Stacks $250K + Filecoin $150K + JustLend $50K + ALEX retrospective)._
 
 _Patterns: Defense Classes | v2.1 | 2026-05-25 | Batch-commit of 6 brain edits across two msg-7770 (A, B, E, H) + msg-7772 (C-Cap-1, C-Cap-2). Edits A/B/E/H per v2.0 footer. Additional C-Cap-1: CANDIDATE-Q "Permissionless TOTP/Digest Grow-Only Allowlist" filed as DC-5 sub-pattern (Cap Sherlock EigenOperator.sol:105-111 anchor — promotion path requires 2 additional anchors). C-Cap-2: CANDIDATE-A sub-class enrichment "LayerZero OFT default-DVN trust grants unrestricted underlying mint" (Cap Sherlock TempoBridgeUpgradeable.sol:83-98 anchor — every LayerZero OFT consumer without per-message DVN verification inherits the surface). Companion Doctrine.md at v3.3 (now includes Doctrine #34 Post-Audit Composition Multiplier per C-Cap-3). Authority: Ogie msg 7770 + 7772 (2026-05-25 18:22-18:31 UTC)._
