@@ -1093,3 +1093,30 @@ Liquid Collective LsETH = **canonical anchor** for "frozen-substrate saturation"
 - Open Questions Tracker Q-NEW: at what T+N does compound stack lose reinforcement strength? (suggests Day-45 retest as boundary probe)
 
 _v2.9 Addendum: 2026-05-27 ~22:15 UTC | row N+2 Kiln Immunefi v2 DEDUP-FORECLOSURE-RECEIPT | Step 0.5 short-circuit no-clone-spent | LsETH = canonical Sub-rule #27c anchor | Doctrine #38 generalizes to per-operator pool wrappers | 2 same-day T+3 short-circuit demonstrations validate protocol reliability_
+
+---
+
+## v2.10 Addendum: Veda Immunefi T+5 DEDUP-FORECLOSURE-RECEIPT (2026-05-27 22:30 UTC)
+
+5-channel Step 0.5 convergence (prior submission ledger + Audit-Reports library + in-source HEAD probe + live Immunefi STATUS + receipt-window age). No clone spent.
+
+| # | Target | Cap | Scope | Brain overlap | Verdict | Receipt |
+|---|--------|-----|-------|----------------|---------|---------|
+| N+3 | **Veda BoringVault** (Immunefi) | $1M Critical (KYC) | 52 assets — EVM `Se7en-Seas/boring-vault` + SVM `veda-labs/boring-vault-svm` | HIGH (DC-7 Manager-Merkle/Decoder textbook + CANDIDATE-I/J/A + DC-9 + DC-12 + CANDIDATE-O + CG) — but Step 0.5 ledger probe surfaced DISC-015 CLOSED_OOS 2026-05-20 + DISC-015b DUP-of-#64307 2026-05-22 (BoringVault Manager, same finding, prior reporter won race) | **DEDUP-FORECLOSURE-RECEIPT (Step 0.5)** — 5-channel convergence on MAXIMUM saturation: EVM HEAD `0e23e7f` 525d stale + SVM HEAD `450cfd8` 275d stale + 4 firms × 14+ audits + 0xMacro continuous re-audit cadence + T+5 days post DISC-015b DUP. The most architecturally-obvious DC-7 surface (BoringVault Manager) was already enumerated by #64307. EV post-discount ~$750 (Doctrine #37 Sub-B 0.30× + Doctrine #27c frozen-substrate 0.50× + saturation 0.10×). | `hunts/2026-05-27-veda-immunefi-gate1.md` |
+
+**Brain compounds from this row:**
+1. **Doctrine #37 Sub-Type B → PERMANENT** (3 anchors: rhino.fi + Gains Network + Veda) — see Doctrine.md edit
+2. **Doctrine #27c frozen-substrate multiplier formalization** (pending Doctrine.md edit) — HEAD >120 days stale + audit-saturation HIGH → 0.50× compound multiplier; 2-anchor evidence base (LsETH/Kiln + Veda BoringVault)
+3. **Veda re-activation watchdog cron spec** (queued, project memory): add `Se7en-Seas/boring-vault` to commit-diff watchdog; trigger on new `*DecoderAndSanitizer.sol` / `Teller*.sol` / `*Solver*.sol` PRs to fire fresh-module Gate 1 within 0xMacro pre-audit ~5-10 day window
+4. **Standing Intake Step 0.5 5-channel codification** (queued, rule file edit): formalize the 5 channels (brain ledger + Audit-Reports + in-source HEAD + live program-status + receipt-window age) as a checklist for `.claude/rules/standing-intake-protocol.md`
+
+**Validation event — THREE same-day Step 0.5 receipts:**
+
+Day-27 evening now has **three back-to-back Step 0.5 short-circuit successes**:
+- Paxos T+3 (Cantina) — Day-27 stack REINFORCE
+- Kiln T+3 (Immunefi) — Day-27 stack REINFORCE
+- Veda T+5 (Immunefi) — 5-channel ledger+audits+HEAD+status+age convergence
+
+Three demonstrations in <2 hours. Validates the Cross-Pollination-Log Section 10 thesis: the compound-engine positive feedback loop is OPERATIONAL — brain compounds discount-arbitrage future re-dispatches into 10-min receipts, freeing dispatch capacity for FRESH-substrate targets.
+
+_v2.10 Addendum: 2026-05-27 ~22:30 UTC | row N+3 Veda Immunefi DEDUP-FORECLOSURE-RECEIPT (5-channel) | Doctrine #37 Sub-Type B PROMOTE PERMANENT (3 anchors) | 3 same-day Step 0.5 demonstrations | next-target pivot to FRESH-substrate Top-5 (cap Immunefi $1M, 2026-05-08 HEAD)_

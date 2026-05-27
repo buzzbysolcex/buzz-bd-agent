@@ -2626,7 +2626,14 @@ CANDIDATE Doctrine #37 filed with 2 anchors (CoW canonical A; rhino.fi canonical
 - Doctrine #32 v1.1 cycle-2 filter — Sub-Type A always FAILs cycle-2 (frozen + no changes); Sub-Type B FAILs cycle-2 base but the lens still applies to composition surfaces.
 - Doctrine #34 (post-audit composition multiplier) — Sub-Type B is the PRIMARY substrate where Doctrine #34 fires with the most leverage; the composition delta is exactly the new surface.
 
-**Status.** CANDIDATE Doctrine #37 filed 2026-05-26 evening. 2 anchors (CoW + rhino.fi, one each sub-type). Pending 2nd anchor in each sub-type for PERMANENT promotion. Authority: CoW P1 + rhino.fi P1 (joint), Ogie msg 7846 hunting cycle.
+**Status.** PERMANENT Doctrine #37 (promoted 2026-05-27 evening — Sub-Type B reaches 3 anchors: rhino.fi canonical + Gains Network gTrade 2nd anchor + Veda BoringVault 3rd anchor). Sub-Type A still 1 anchor (CoW); promotion of A pending 2nd Sub-A anchor.
+
+**Sub-Type B 3 anchors (PERMANENT):**
+1. rhino.fi (canonical) — 440-day frozen + Immunefi branch-pinned `master` + 28-chain deployment vs 10 in scope + 5 audits
+2. Gains Network gTrade (2nd anchor 2026-05-27) — frozen Solidity substrate + active product launches off same contracts
+3. Veda BoringVault (3rd anchor 2026-05-27 evening) — `Se7en-Seas/boring-vault` HEAD `0e23e7f` 525d stale + `veda-labs/boring-vault-svm` HEAD `450cfd8` 275d stale + Immunefi program LIVE since 2026-01-21 with 52 active assets, 4 firms × 14+ audits, 0xMacro continuous cadence
+
+Authority: CoW P1 + rhino.fi P1 (joint authorities), Gains Network 2026-05-27 dispatch (Doctrine v3.7.2), Veda 2026-05-27 Step 0.5 receipt (`hunts/2026-05-27-veda-immunefi-gate1.md`).
 
 ---
 

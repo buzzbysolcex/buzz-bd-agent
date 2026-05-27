@@ -152,10 +152,11 @@ Sunday weekly synthesis includes a CROSS-POLLINATION section per `Weekly-Synthes
 |---|---|---|---|---|---|
 | 2026-05-27 evening | Paxos Cantina T+3 redispatch | P4 brain stack | P4 next-target queue | Doctrine #27 Corollary B + Sub-rule #27c + Doctrine #34 sub-class b + Doctrine #36 PERMANENT + DC-9 sub-2 DEFENSE PATTERN — all REINFORCE prior receipt, none unlock fresh angle | DEDUP-FORECLOSURE-RECEIPT, no clone spent (~10min budget) |
 | 2026-05-27 22:09 | Kiln Immunefi v2 T+3 redispatch | P4 brain stack | P4 next-target queue | All 7 Day-27 compounds re-applied: Doctrine #27 + Sub-rule #27c (LsETH = canonical anchor, mirrors Paxos PYUSD/USDP) + #34 sub-b + #36 PERMANENT + #37 Sub-Type B + #38 PARTIAL HIT (hatchers + per-operator pools = pass-through wrappers) + DC-9 sub-2 DEFENSE PATTERN. None unlock fresh angle. | DEDUP-FORECLOSURE-RECEIPT, no clone spent (~10min budget) |
+| 2026-05-27 22:30 | Veda Immunefi T+5 redispatch (post DISC-015b DUP) | P4 brain stack | P4 next-target queue | 5-channel Step 0.5 convergence: prior submission ledger (DISC-015 OOS + DISC-015b DUP-of-#64307) + Audit-Reports library (4 firms × 14+ audits + 0xMacro continuous cadence) + in-source HEAD probe (EVM `0e23e7f` 525d stale, SVM `450cfd8` 275d stale) + live Immunefi STATUS (program active) + receipt-window age (T+5 days post DISC-015b). HIGH lens overlap (DC-7 + CANDIDATE-I/J/A + DC-9 + DC-12 + CANDIDATE-O + CG) all confirm but the most architecturally-obvious DC-7 surface already enumerated by #64307. | DEDUP-FORECLOSURE-RECEIPT, no clone spent. EV post-discount ~$750 (Doctrine #37 Sub-B 0.30× + Doctrine #27c frozen-substrate 0.50×). |
 
 **Validation conclusion:**
 
-Two same-day T+3 day demonstrations on Day 27 confirm Step 0.5 short-circuit is a **reliable mechanism at T+3 days** when the compound stack is fully primed. Both verdicts reinforce prior receipts without unlocking fresh angles, meaning the compound stack is performing its predicted role: turning what would be 4-hour Gate-1 cycles into 10-minute DEDUP-FORECLOSURE-RECEIPTs.
+**THREE same-day Step 0.5 short-circuit successes (Paxos T+3 + Kiln T+3 + Veda T+5)** confirm Step 0.5 short-circuit is a **reliable mechanism at T+3 to T+5 days** when the compound stack is fully primed. Both verdicts reinforce prior receipts without unlocking fresh angles, meaning the compound stack is performing its predicted role: turning what would be 4-hour Gate-1 cycles into 10-minute DEDUP-FORECLOSURE-RECEIPTs.
 
 **Open Questions Tracker addition (Q-NEW pending file):** At what T+N day-count does the compound stack lose reinforcement strength? Probe at Day-45 (T+18 from now) as boundary test.
 
@@ -163,4 +164,4 @@ Two same-day T+3 day demonstrations on Day 27 confirm Step 0.5 short-circuit is 
 
 ---
 
-_Brain Cross-Pollination Log | v1.1 | 2026-05-27 evening | Section 10 adds Day-27 Step 0.5 reliability validation (Paxos T+3 + Kiln T+3). Compound-engine positive feedback loop empirically confirmed._
+_Brain Cross-Pollination Log | v1.2 | 2026-05-27 evening | Section 10 adds Day-27 Step 0.5 reliability validation (Paxos T+3 + Kiln T+3 + Veda T+5). Three same-day demonstrations. Compound-engine positive feedback loop empirically confirmed._
