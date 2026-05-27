@@ -419,10 +419,14 @@ When Gate 1 surface map includes any DC-7 hypothesis that spans protocol boundar
 
 If 2+ of those 3 defenses are present → DC-7 EXCLUSION sub-pattern fires (see Patterns-Defense-Classes.md), foreclose at Gate 1.
 
-**Recurrence count:** 1 anchored event (Cap 2026-05-27). Track for 2nd+ anchor. If pattern recurs ≥2 times, promote rule to MANDATORY Step 5 sub-check in `.claude/rules/standing-intake-protocol.md`.
+**Recurrence count:** **2 anchored events — PROMOTION-ELIGIBLE:**
+1. Cap C1 (advanceTotp + EigenLayer race) — Gate 1 novelty 35% → actual <5% = 7× overestimate
+2. Cap C3 (PriceOracle pause-asymmetry) — Gate 1 novelty 30% → actual ~4% = **7.5× overestimate, exact match to predicted median**
+
+Both anchors fired on cross-protocol DC-7 hypotheses where the consumer-side replay/freshness defenses were not pre-enumerated. The 7× factor reproduced with high precision (7.0 + 7.5 / 2 = 7.25 median, within sampling noise). **Promote rule to MANDATORY Step 5 sub-check** in `.claude/rules/standing-intake-protocol.md` (Step 5.11 Cross-Protocol Defense Enumeration). Status: **RESOLVED-PROMOTED** pending the .claude/rules file edit (queued for batch commit).
 
 **Cross-reference:** Doctrine #34 sub-class b anchor #3 (Cap, this hunt) — both are facets of the same lesson: structural defense layers exist and need to be enumerated BEFORE Gate 2 dispatch, not discovered during it.
 
 ---
 
-_Brain Contradictions Register | v1.7 | 2026-05-27 evening | 20 entries (18 P4 + 1 P1 + 1 CROSS; v1.7 adds INFO #20 Gate 1 novelty over-estimate, anchors process-hardening rule for cross-protocol DC-7)_
+_Brain Contradictions Register | v1.8 | 2026-05-27 evening | 20 entries (18 P4 + 1 P1 + 1 CROSS; v1.8 promotes INFO #20 to RESOLVED-PROMOTED — 2nd anchor secured Cap C3, 7.5× novelty overestimate matches predicted ~7× median. Step 5.11 Cross-Protocol Defense Enumeration queued for standing-intake-protocol.md MANDATORY-rule promotion)_

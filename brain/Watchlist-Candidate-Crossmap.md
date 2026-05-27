@@ -1171,3 +1171,24 @@ Matches Veda agent's pre-Gate-1 estimate. Above $5K floor. Cap Gate 2 GREEN.
 - Clone kept at 9.4M, well under 87% threshold — preserved for Gate 2.
 
 _v2.11 Addendum: 2026-05-27 ~22:35 UTC | row N+4 Cap Gate 1 PROCEED-DOWN-TO-GATE-2 | platform correction: Immunefi (briefed) → Sherlock #114 (live) | FIRST PROCEED in night cycle after 3 same-day DEDUP-FORECLOSURE-RECEIPTs | EV $5-15K post-discount, advanceTotp Finding 1 = highest paste-ready candidate_
+
+---
+
+## v2.12 Addendum: Cap Findings 1+3 BOTH NEGATED — skip remaining Cap findings (2026-05-27 22:55 UTC)
+
+| Finding | Verdict | Mechanism | Time | Hunt receipt |
+|---------|---------|-----------|------|---------------|
+| F1 (advanceTotp + EigenLayer race) | NEGATED | DC-7 EXCLUSION (validating-field = consuming-field via deterministic derivation) + EigenLayer's `approverSaltIsSpent` + LIVE `getOperatorShares()` | ~50 min Phase 1 | `hunts/2026-05-27-cap-c1-gate2-foreclosure.md` |
+| F3 (PriceOracle pause-asymmetry) | NEGATED | Doctrine #27 Corollary B Anchor #2 — `validateBorrow` natspec self-disclosure: "pause is borrow-only by design"; 4 surgical Aug-2025 audit-fix commits on `liquidate` deliberately did NOT add pause check (industry-standard liquidation-during-pause matches Aave/Compound/Sky/Maker) | ~7 min Phase 0 | `hunts/2026-05-27-cap-c3-gate2-foreclosure.md` |
+
+**Combined Cap dispatch outcome:** 2 PROCEED candidates from Gate 1 → 2 Gate 2 NEGATEs. ~3.5h Foundry investment avoided across the two.
+
+**Remaining Cap findings (F2 / F4 / F5) per Gate 1 hunt:** all ≤10% novel-payable probability after INFO #20 7.5× multiplier on TIER-A saturated substrate (9 audits / 7 firms). EV per finding < $5K floor. **Decision: SKIP remaining Cap findings, purge Cap clones (21.4M), pivot to fresh-substrate Lane 5 target.**
+
+**Brain compounds from Cap C3:**
+1. Doctrine v3.8.4 — Doctrine #34 sub-class b Anchor #4 (cumulative 5 anchors, ~10.5-17.5h Foundry saved): Sky + Alchemix + DeFi Saver + Cap C1 + Cap C3
+2. Contradictions-Register v1.8 — INFO #20 RESOLVED-PROMOTED (2nd anchor Cap C3 = 7.5× overestimate matches predicted ~7× median exactly)
+3. Patterns-Defense-Classes pending — "DefaultFallbackPause" non-finding: liquidation-during-protocol-pause is standard DeFi design, foreclose-signal documented
+4. Standing-Intake Step 5.11 — Cross-Protocol Defense Enumeration MANDATORY rule (pending `.claude/rules/standing-intake-protocol.md` edit)
+
+_v2.12 Addendum: 2026-05-27 ~22:55 UTC | rows N+4 (F1) + N+4 (F3) both NEGATED via Doctrine #34 sub-b anchor #3+#4 | skip remaining Cap findings (F2/F4/F5 EV <$5K floor) | Cap clones purge queued (21.4M) | next-target pivot: fresh-substrate Lane 5 target with 0-1 audits + ≥$50K cap (Function FBTC $822M BTC bridge $100K candidate; OnRe $177M Solana RWA $100K candidate)_
