@@ -945,7 +945,17 @@ _Patterns: Defense Classes | v1.9 | 2026-05-19 | CANDIDATE-G PROMOTED to DC-8 ("
 4. Cascade: forced-liquidations on lending contracts using the manipulated price
 5. Recovery: ~$10M (Tether froze $3.29M USDT + attacker returned $4.86M); ~$8.4M outstanding
 
-**Status:** 1 worked example confirmed (Rhea Finance). Needs 1+ adjacent worked example for promotion to DC-N. Productization-friendly: AST-grep for variable-reuse across function-boundary in swap routers.
+**Status:** 3 worked examples confirmed as of 2026-05-27 — promotion-threshold (≥2 independent anchors + ≥1 PoC-confirmed leak) SATISFIED. Promotion-to-DC queued in OQT Q-41 awaiting operator decision.
+
+**Anchor 1 — Rhea Finance (NEAR, 2026-04-16, $18.4M drain, see above).** Production exploit, original substrate.
+
+**Anchor 2 — Balancer V3 BatchRouterHooks + StableSurgeHook (2026-05-26, PoC CONFIRMED 2026-05-27).** `pkg/vault/contracts/BatchRouterHooks.sol:122-127` per-step `minAmountOut = 0` + StableSurgeHook approximation drift compose across hops. 2-hop leak 1.09% vs 1-hop 0.55% on identical 5% end-to-end envelope under production-default surge parameters. PoC at `balancer-v3-monorepo/pkg/pool-hooks/test/foundry/BatchRouterSlippageDoubleCountPoC.t.sol` against HEAD `80fd29ce4eb6`. Paste-ready: `data/lane1/gate2-clones/balancer-b1-batchrouter-slippage-paste-ready-v2.md`.
+
+**Anchor 3 — PancakeSwap Infinity Router CL + Bin multi-hop loops (2026-05-27, PoC CONFIRMED 2026-05-27).** `infinity-periphery/src/pool-cl/CLRouterBase.sol:40-65` (`_swapExactInput`) + `:82-111` (`_swapExactOutput`) + `infinity-periphery/src/pool-bin/BinRouterBase.sol:42-66` + `:82-113` ALL share the same shape: iterate path, propagate hop-N output as hop-(N+1) input, only check composed extreme at loop end. NO per-step floor parameter even exists in `CLSwapExactInputParams` / `BinSwapExactInputParams` / their exact-out duals. Composes with `CLHooks.afterSwap` (`pancake-v4-core/src/pool-cl/libraries/CLHooks.sol:163-193`) and `BinHooks.afterSwap` positive-`hookDelta` primitives — `delta = delta - hookDelta` at line 189 silently reduces caller's output on every intermediate hop. 2-hop leak 1.195% vs 1-hop 0.600% on identical 5% end-to-end envelope with 25-bps hook fee. PoC at `infinity-periphery/test/pool-cl/InfinityRouterSlippageDoubleCountPoC.t.sol` against HEAD `f39aef4a1be6`. Paste-ready: `data/lane1/gate2-clones/pancake-p1-infinity-router-slippage-paste-ready-v2.md`.
+
+**Multi-anchor pattern argument:** Two independent production deployments (Balancer V3 + Pancake Infinity) by two unrelated teams converge on the same structural shape: end-of-path-only slippage enforcement composed with permitted per-hop hook deltas. Pancake's expression is even more exposed — there is no per-step `minAmountOut` parameter at all in the four affected router-base loops (Balancer at least zeros an explicit per-step field; Pancake's structs don't even define one). The pattern is intrinsic to the hook-based singleton-vault router architecture family, not an implementation accident. Proposed promotion name (Q-41): **DC-13 End-of-Path-Only Slippage Composition With Per-Hop Hook Deltas**. Productization-friendly: AST-grep for multi-hop loop bodies in router contracts that propagate hop-N output without per-step floor check.
+
+
 
 **Cross-pollination scan targets:**
 
@@ -1222,6 +1232,9 @@ Ground-truth instance: Morpho Blue $54.5M flash loan → 7 wallets → self-trad
    - **7e (engineered staleness mask)** (added 2026-05-25 from Notional V3 Gate 1, Ogie msg 7750 P2) — wrapper actively OVERWRITES the upstream `updatedAt` with a FRESHER value from a different source — semantically lying about freshness while structurally appearing defended. Distinct from 7c (hardcoded constant) in that 7e uses a live fresh-source. Distinct from 7d (passive destructure-drop) in that 7e actively writes a fake-fresh value. Canonical: Notional V3 Exponent `MidasOracle.sol:48-50` — wrapper masks mToken's true `updatedAt` with fresh Chainlink base feed `updatedAt` for first 7 days of staleness. Direct LLTV consumer pathway: `IYieldStrategy.price()` → `convertToAssets` → `TRADING_MODULE.getOraclePrice` → `MorphoLendingRouter.sol:463 collateralValue × m.lltv`. 0-7d mToken NAV drift flows directly into borrow/liquidation math. Detector signature: `if (... updatedAt < ...) updatedAt = freshTimestamp` OR `updatedAt = max(stale_a, fresh_b)` patterns.
    - **7f (PriceOracleProxy-class wrapper strips staleness from v1 oracle)** (added 2026-05-26 from JustLend Gate 1, hunt `hunts/2026-05-26-justlend-immunefi-gate1.md` proposal #1) — Compound-V2-fork `PriceOracleProxy` contracts that read from EOA-pushed `v1PriceOracle` without ANY staleness check whatsoever. The wrapper is structurally a passthrough: it inherits the v1 oracle's raw price and exposes it to `Comptroller.getAccountLiquidity` without `updatedAt` / staleness-buffer / circuit-breaker. Distinct from 7a (interface returns only `(uint256)`) in that 7f wrappers DO have access to richer upstream metadata via cToken admin push but discard it at the wrapper layer. Anchor: JustLend `PriceOracleProxy` reads from JustLend Foundation EOA-pushed v1 oracle — admin-pushed prices with NO on-chain staleness verification. **Class:** index all Compound-V2-fork `PriceOracleProxy` contracts that read from EOA-pushed v1PriceOracle without staleness checks. There are many forks: Cream, Hundred, Iron Bank pre-Chainlink, dozens of long-tail Compound-V2 forks across L2s. **Paired anchor:** Notional V3 MidasOracle (DISC-019, sub-7e) — both are wrapper-strips-staleness patterns; 7e is engineered mask, 7f is structural absence. Common origin: protocols inheriting Compound V2's `PriceOracleProxy` pattern without retrofit. **Productization target:** AST-grep for `contract PriceOracleProxy` + `setUnderlyingPrice` or `setDirectPrice` admin entrypoint + downstream consumer never reading `updatedAt`. NOTE: Immunefi typically excludes "mispricing without active manipulation" from scope — this class is more useful for cross-protocol detector seeding than direct bounty submission.
    - Distinct from sub-6 (cross-chain message-receiver staleness) — sub-7 is on-chain wrapper-layer staleness-strip independent of cross-chain message-passing. Could compose with sub-6 if the cross-chain receiver IS the staleness-stripping wrapper.
+   - **7h (Deterministic-Upstream-No-Staleness-State, STRUCTURAL-FORECLOSED-CLASS)** (added 2026-05-27 from Lista DAO Moolah PT oracle Gate 2 NEGATE, foreclosure receipt `hunts/2026-05-27-lista-dao-gate2-foreclosure.md`) — Consumer wrapper destructures `(, int256 answer, , , ) = upstream.latestRoundData()` discarding `updatedAt`, but the UPSTREAM SOURCE is a deterministic on-chain formula (NOT a Chainlink-style push-feed). The upstream returns `updatedAt = 0` by design because there is no external state to track freshness against — the answer is recomputed every call from `block.timestamp` and immutable storage. **Distinct from 7c (hardcoded-value strip)** in that 7c describes the wrapper hardcoding the staleness output to lie; 7h describes the wrapper correctly destructuring an upstream that LEGITIMATELY has no staleness state. **Distinct from 7d (post-destructure staleness loss)** in that 7d describes a consumer dropping a stale-able field from a stale-able source; 7h describes a consumer dropping a non-stale-able field from a deterministic source — adding a staleness check would PERMANENTLY BREAK the oracle. **Anchor — STRUCTURAL-FORECLOSED:** Lista DAO `PTLinearDiscountOracle.sol:56` + `PTLinearDiscountMarketOracle.sol:83` — both consume Pendle `PendleSparkLinearDiscountOracle.latestRoundData()` which returns `(0, int256(ONE - discount), 0, 0, 0)` where `discount = (timeLeft * baseDiscountPerYear) / SECONDS_PER_YEAR` and `timeLeft = maturity > block.timestamp ? maturity - block.timestamp : 0`. Pure on-chain math, no external feed, no stale-state. Lista's PT oracle correctly does NOT add a staleness check; doing so would brick the oracle. **Sub-rule 34.1 of Doctrine #34 codifies this as a Gate 1 → Gate 2 dispatch protocol step: classify upstream source as CLASS A (stale-able feed) / CLASS B (deterministic on-chain formula) / CLASS C (hybrid) before promoting DC-12 lens-hits to Gate 2.** **Cross-pollination targets (CLASS B candidates likely to false-positive on DC-12 sub-7h):** any PT (principal token) oracle adapter (Pendle, Spark, Element, etc.); bond-style discount oracles (zero-coupon adapters); pure-vAMM / TWAP-only oracles with no external source; custom maturity-curve adapters (option/future pricers); Convex/Yearn share-price adapters computing from on-chain LP state alone. Productization target: AST-grep for `.latestRoundData()` consumers that DESTRUCTURE-DROP `updatedAt` AND check whether upstream source class is CLASS B (deterministic). NEGATE the DC-12 finding when upstream is CLASS B.
+   - **7g (LST-PoR-feed-no-staleness, DEDUP-FORECLOSED-CLASS)** (added 2026-05-27 from Stader ETHx Gate 2 dispatch foreclosure) — Liquid Staking Token (LST) contracts that integrate Chainlink Proof-of-Reserve feeds for exchange-rate updates and discard `updatedAt` + `answeredInRound` from `latestRoundData()`. **Distinct from 7b (API-choice strip)** in that the LST wrapper DOES call `latestRoundData()` (correct API choice) but ignores the staleness fields at the consumer site. **Anchor — DEDUP-FORECLOSED:** Stader `StaderOracle.getPORFeedData` (lines 737-743 HEAD `9d4a921`) reads `ETHBalancePORFeedProxy.latestRoundData()` + `ETHXSupplyPORFeedProxy.latestRoundData()` and uses only the answer. **Public-audit dedup status:** Code4rena 2023-06-stader M-14 + Halborn V2 HAL-09 + C4 Issue #15 (primary) + #153 (dup-of-15) all flag this exact bug VALID with recommended fix. **Cross-protocol propagation hypothesis:** other LST protocols integrating Chainlink PoR (e.g., Coinbase cbETH PoR, Frax PoR-attested sfrxETH, RocketPool PoR pipeline if added) MAY exhibit the same pattern but with different audit-coverage status. Dedup-foreclosed on Stader itself; Productization target: AST-grep `*PORFeed*.latestRoundData()` consumer sites + check for `updatedAt` flow-through across the LST-only subclass.
+   - **Meta-doctrine corollary (from Stader 7g foreclosure):** Targets with ≥3 reputable audit firms + HEAD-stale >3 months collapse paste-ready EV on the audited surface toward zero — even when the vulnerability class is confirmed present. Phase 0 audit-dedup is the canonical gate that saves Foundry-PoC build cycles. (Proposed Standing-Intake-Protocol Step 3 EV multiplier: 0.25× when ≥3 firms + HEAD-stale.)
 
 **Anchor incidents (Clara + brain):**
 - Rhea Finance 2026-04-16 **$18.4M** (NEAR; 0xTeam analysis — canonical Buzz anchor, sub-5)
@@ -1958,6 +1971,66 @@ Future Gate 1 surveys finding `lastOraclePrice`-style cache should check: (a) is
 **Authority:** Olympus Gate 1 proposal #1 (2026-05-26 evening, `hunts/2026-05-26-olympus-immunefi-gate1.md`), Ogie msg 7846 hunting cycle. Caveat: anchor is `[ASSUMED]`-scope (ConvertibleDepositFacility + DepositManager not in the 12-asset legacy list visible without SPA pagination; scope-verify pending against full Immunefi 72-asset list before Gate 2).
 
 ---
+
+## DC-9 sub-2 DEFENSE PATTERN — Governance Ward-Removal Neutralizes In-Source Privileged Mutation (added 2026-05-27 — Sky LockstakeMigrator anchor)
+
+**Class statement (defense):**
+
+> A contract that retains a privileged registry-mutation call in its source code (e.g., `vat.file(ilk, "line", 55M)`) but is NOT a current ward on the target registry exhibits **dead-code at the privileged call-site**: any invocation will revert with the registry's `not-authorized` error. The source-level pattern appears risky to source-only Gate 1 inspection, but the on-chain state has neutralized it. This is a VALID defense pattern when (a) the privileged mutation was needed temporarily (migration, bootstrap, parameter-config), (b) governance has since denyed the contract on the registry, and (c) the source retains the call for archaeological/audit-traceability reasons or because removing it would require redeploying an immutable.
+
+**Specialization of:** DC-9 sub-2 (zero-timelock migration) defense surface. Sibling defense to:
+- "Pause + Sunset" pattern (contract self-pauses + governance signals deprecation)
+- "Self-Destruct After Migration" pattern (contract removes itself from chain entirely)
+- "Multisig Threshold Inflation" pattern (raise required-sigs to functionally-impossible level)
+- "Ward Removal" (this pattern — governance-side state change, no source modification)
+
+**Anchor — Sky LockstakeMigrator (2026-05-27 worked example #1):**
+
+- `lockstake/src/LockstakeMigrator.sol:144`: `vat.file(newIlk, "line", 55_000_000 * RAD);` — appears as a privileged registry mutation. [INSPECTED]
+- `lockstake/deploy/LockstakeInit.sol:218`: `dss.vat.rely(address(se.migrator));` — confirmed migrator WAS relied at init-time. [INSPECTED]
+- ChainSecurity Sep 26 2025 audit §2 Setup: "It is further assumed the LockstakeMigrator is deprecated (as **August 2025 it is no longer a ward on Vat**). Otherwise, it could directly change ilk.line during migration." [INSPECTED]
+- Governance commit `43662905a3504debc48d7ba3b3907c98fffb35f8` "Migrator Reset Line" Aug 2 2025: migrator denyed on Vat via `vat.deny(LOCKSTAKE_MIGRATOR)` spell. [INSPECTED — via ChainSecurity changelog]
+- Net effect: `vat.file(newIlk, "line", 55_000_000 * RAD)` reverts at run-time with `Vat/not-authorized`. The entire `onVatDaiFlashLoan` callback path is dead-code on mainnet. Users calling `migrate()` with art>0 will hit this revert. [ASSUMED — current on-chain `vat.wards(LOCKSTAKE_MIGRATOR)==0` not bytecode-verified via cast; audit assumption Sep 2025 is dispositive]
+
+**Detection signature (offense — for Gate 1 dispatch):**
+
+When scanning a contract for DC-9 sub-2 candidates, after identifying the privileged-mutation call-site, verify:
+1. Does the contract NEED to be a ward on the target registry to make the call work?
+2. Is the contract CURRENTLY a ward at the latest block? (`cast call <REGISTRY> "wards(address)(uint256)" <CONTRACT> --rpc-url $ETH_RPC`)
+3. If NOT a ward → the candidate is DEAD-CODE-FORECLOSED. File under DC-9 sub-2 defense pattern, not as a finding.
+
+**Detection signature (defense — for governance hygiene auditing):**
+
+When auditing a protocol's privilege-removal hygiene:
+1. List every contract that was ever relied on a registry (grep deploy scripts + chainlog for `rely(X)` calls)
+2. For each, check if a corresponding `deny(X)` was executed at a later block (governance spell history)
+3. If a contract has rely-without-deny AND has a privileged call-site that no longer needs to be live → flag as "stale ward" (possible attack surface if the contract gets compromised by a different vulnerability that allows it to call back to the registry)
+4. If a contract has rely-followed-by-deny AND retains a privileged call-site in source → defense pattern confirmed (intentional dead-code, archaeological)
+
+**FP gate:** Buzz Gate 1 source-only inspection cannot distinguish "live privileged call" from "dead privileged call" without on-chain ward verification. Phase 0 dedup must include `cast call wards()` query OR audit-PDF grep for explicit "no longer a ward" / "deprecated" / "denyed" remediation language to avoid Foundry waste.
+
+**Severity profile (when DEFENSE is confirmed):** $0 — pattern is operational dead-code. Bug class is structurally neutralized. Any submission citing this call-site as a vulnerability will be rejected at triage with the audit-disclosed deprecation as the rebuttal.
+
+**Severity profile (when defense FAILS — historical hypothetical):** If a future protocol implements the same source pattern but FORGETS to deny the contract on the registry, the original DC-9 sub-2 exposure becomes live. The $55M migration ceiling (or whatever the line cap is) becomes drainable by anyone who can trigger the call path. Sky's 9-month gap between deprecation (Aug 2 2025) and Buzz's verification (May 27 2026) demonstrates that the defense pattern is robust when actually deployed — but the absence of source-level enforcement means a future fork or copy-pasted code could re-introduce the live exposure.
+
+**R8 grade:** anchor `[INSPECTED]` (audit-document quote + deployment script + source code all confirmed); on-chain ward state `[ASSUMED]` pending future `cast` verification.
+
+**Cross-reference:**
+- DC-9 sub-2 base (zero-timelock migration) — this is the DEFENSE counterpart to the OFFENSE pattern
+- Doctrine #27 Corollary B (Remediation-Language Search Beats Lens-Label Search) — the dedup technique that surfaces this defense pattern at Phase 0
+- Doctrine #34 sub-rule 34.2 candidate (post-mitigation vs post-null distinction) — pending 2nd anchor
+
+**Status:** 1 anchor (Sky LockstakeMigrator). Promotion to PERMANENT DC-9 sub-2 defense pattern requires 2nd anchor with similar ward-removal-without-source-modification pattern. Candidate 2nd anchors:
+- Any MakerDAO/Sky module that was deprecated via governance spell rather than redeployment
+- Any Aave V2/V3 contract with admin permission removed via governance vote
+- Any Compound governance-deprecated module
+- Any Yearn / Curve gauge-controller deprecated via parameter-only governance action
+
+**Authority:** Sky LockstakeMigrator Gate 2 foreclosure receipt (`hunts/2026-05-27-sky-c1-gate2-foreclosure.md`), 2026-05-27.
+
+---
+
+_Patterns: Defense Classes | v2.4 | 2026-05-27 | Day 27 — DC-9 sub-2 DEFENSE PATTERN added (Governance Ward-Removal Neutralizes In-Source Privileged Mutation; Sky LockstakeMigrator anchor, ChainSecurity Sep 2025 explicit deprecation + "Migrator Reset Line" governance commit Aug 2 2025). Companion to Doctrine v3.8 Corollary B (Remediation-Language Search Beats Lens-Label Search) — Phase 0 audit-PDF grep technique that surfaces these defense patterns. Single anchor; promotion to PERMANENT requires 2nd anchor (candidate MakerDAO/Aave/Compound deprecated modules). Authority: Sky Gate 2 dispatch outcome._
 
 _Patterns: Defense Classes | v2.3 | 2026-05-26 evening | Day 26 evening batch — Ogie msg 7846 hunting cycle. Adds: (1) DC-7 sub-pattern Cross-Language Guard-Coverage Asymmetry (rhino.fi TON-vs-EVM canonical anchor — TON FunC checks `global_deposits_blocked` symmetric on jetton+native; EVM Solidity asymmetric, depositWithId/depositWithPermit/depositNativeWithId MISSING the pause modifier); (2) DC-9 sub-pattern 5 Asset-vs-Receipt Accounting Asymmetry (Olympus ConvertibleDepositFacility.convert + DepositManager.withdraw paired C1+C2 anchor — mint-driver field is `receiptTokenIn` while asset-moved field is `actualAmount`, with paired-ledger drift compound effect; documented at DepositManager line 245 as "actualAmount may be 0"). Companion Doctrine.md at v3.6 (Doctrine #29 v1.1 two-sided MIN-cap amendment + Doctrine #37 CANDIDATE Audited-and-Frozen Substrate). Authority: 3 Gate 1 hunt files (Olympus + CoW + rhino.fi)._
 

@@ -2622,6 +2622,60 @@ CANDIDATE Doctrine #37 filed with 2 anchors (CoW canonical A; rhino.fi canonical
 
 ---
 
+## Doctrine #34 Sub-Rule 34.1 — Upstream-Source Semantic Test (added 2026-05-27 — Lista DAO Gate 2 NEGATE, PT oracle false-positive)
+
+**Statement.** For DC-12-class candidates (missing-staleness-check on `latestRoundData()` consumers), Doctrine #34's post-audit-composition-window heuristic is necessary but NOT sufficient. Before promoting to Gate 2, verify the upstream `latestRoundData()` source returns a stale-able value. If the upstream is a **deterministic on-chain formula** (Pendle LinearDiscount, custom maturity-curve oracle, fixed-formula adapter, time-based discount oracle), there is no stale-state to validate — adding a staleness check would brick the oracle. **Foreclose at Gate 1 surface map → Gate 2 dispatch transition, not at Gate 2 Phase 0 dedup.** [INSPECTED]
+
+**Anchor — Lista DAO PTLinearDiscountOracle Gate 2 NEGATE (2026-05-27).** Gate 1 flagged DC-12 lens-hit on `src/oracle/PTLinearDiscountOracle.sol:56` + `PTLinearDiscountMarketOracle.sol:83` — both destructure `(, int256 answer, , , ) = ILinearDiscountOracle(discountOracle).latestRoundData()` discarding `updatedAt`. EV calculation produced $55K (P(finding)=0.10 × $1M × P(acc)=0.55 × overlap=1.0). Gate 2 Phase 0 dispatch ran audit-dedup (CLEAR — zero hits across 19 PDFs from 7 firms) then ran upstream-source verification on Pendle `PendleSparkLinearDiscountOracle.sol`. The upstream returns `(0, int256(ONE - discount), 0, 0, 0)` — `updatedAt = 0` hardcoded by design, `answer` derived from `block.timestamp` and immutable `maturity` + `baseDiscountPerYear`. No stale-state exists. Bug-class structurally negated. Actual EV: $0.
+
+**Why the lens fires syntactically but not semantically.** DC-12's pattern detector matches the `(, answer, , , )` destructure shape. The shape is correct syntax for the FP detector but the source SEMANTIC must also be Chainlink-or-equivalent (push-based external feed with `updatedAt` lag potential). When the source is on-chain math, the destructured `updatedAt` would always be either `block.timestamp` (correct-fresh, false-positive lens) or `0` (deliberately-meaningless, like Pendle's case — adding a check would brick the oracle).
+
+**Refinement to Standing Intake Step 5.6 (5-target quality checklist) + Gate 1 → Gate 2 dispatch protocol.** Add as a sub-check under Liquidation+Oracle (target #2): for every DC-12 lens-hit, before dispatching Gate 2, verify the upstream `latestRoundData()` source class:
+- **CLASS A (stale-able feed)** — Chainlink price feeds, Pyth on-chain feeds with publish-time, Tellor reporter-pushed feeds. DC-12 fires valid. Promote to Gate 2.
+- **CLASS B (deterministic on-chain formula)** — Pendle LinearDiscount, fixed-formula maturity oracles, TWAP-derivation oracles with no external source, computed-from-immutable adapters. DC-12 misfires. Foreclose at Gate 1.
+- **CLASS C (hybrid)** — Adapter wraps Chainlink for one leg + on-chain math for another (e.g., Lista's `PTLinearDiscountMarketOracle` multiplies WBNB-Chainlink-price × on-chain-discount). DC-12 fires ONLY on the Chainlink leg, and only if THAT leg's staleness check is missing AT THE WRAPPER level (not upstream). Most well-architected hybrid oracles delegate staleness to upstream ResilientOracle/multi-pivot validators — verify whether the staleness check belongs to the wrapper or the upstream.
+
+**Distinct from DC-12 sub-7g (LST-PoR-feed-no-staleness, DEDUP-FORECLOSED-CLASS).** Sub-7g was Stader StaderOracle.getPORFeedData — 3-firm publicly-published DUP. Sub-Rule 34.1 is the STRUCTURAL companion: even with no DUP, the bug class can be NOT-A-BUG if the upstream is on-chain deterministic math. Both sub-rules close paths where the DC-12 lens fires but EV is $0:
+- Sub-7g: dedup-foreclosed (someone else already submitted)
+- Sub-Rule 34.1: structurally-negated (no bug exists)
+
+**Cross-pollination targets (CLASS B candidates likely to false-positive on DC-12 lens).** Future Gate 1 dispatches should pre-screen for CLASS B upstreams before promoting DC-12 candidates:
+- Any PT (principal token) oracle adapter (Pendle, Spark, Element, etc.)
+- Bond-style discount oracles (zero-coupon bond price adapters)
+- vAMM / TWAP-only oracles (Uniswap V3 cardinality-based, no external)
+- Custom maturity-curve adapters (option / future / forward derivative pricers)
+- Convex/Yearn share-price adapters that compute from on-chain LP state alone
+
+**Status.** Sub-Rule 34.1 filed 2026-05-27 as standing rule under Doctrine #34. Single-anchor (Lista PT oracle Gate 2 NEGATE). Authority: Lista Gate 2 dispatch outcome (foreclosure receipt `hunts/2026-05-27-lista-dao-gate2-foreclosure.md`). Does NOT require 2nd anchor for promotion — the structural argument is self-contained and the refinement to Standing Intake is immediate.
+
+---
+
+## Doctrine #27 Corollary B — Remediation-Language Search Beats Lens-Label Search (added 2026-05-27 — Sky LockstakeMigrator Gate 2 DEDUP-FORECLOSED)
+
+**Statement.** When a Buzz lens (e.g., DC-9 sub-2 "zero-timelock migration") was promoted AFTER an in-scope codebase's last audit, the saturation multiplier (Doctrine #27 standard 0.30× or F-corollary 0.20×) may still UNDER-DISCOUNT the candidate's true EV if auditors addressed the SAME attack surface using DIFFERENT TERMINOLOGY. Phase 0 dedup MUST search audit PDFs for **remediation verbs and magic numbers**, not just lens-label keywords.
+
+**Anchor — Sky LockstakeMigrator (2026-05-27 Gate 2 DEDUP-FORECLOSED).** Buzz CANDIDATE 1 hypothesis: `LockstakeMigrator.onVatDaiFlashLoan` l144 calls `vat.file(newIlk, "line", 55_000_000 * RAD)` mid-flashloan — DC-9 sub-2 lens (promoted 2026-05-22, AFTER Sky's Sep 26 2025 last full audit). Gate 1 EV calc applied 0.25× saturation multiplier → $262K-$375K post-saturation EV → PROCEED. Gate 2 Phase 0 audit-PDF grep with **remediation verbs** (`deprecated`, `removed`, `no longer a ward`, `denyed`) + **magic number** (`55_000_000`, `55M`) hit ChainSecurity Sep 26 2025 audit §2 Setup: "It is further assumed the LockstakeMigrator is deprecated (as August 2025 it is no longer a ward on Vat). Otherwise, it could directly change ilk.line during migration." Migrator denyed on Vat via commit `43662905...` "Migrator Reset Line" Aug 2 2025. The Buzz-lens substrate was ALREADY mitigated 9 months before our hunt. Actual EV: $0. Time-cost: 30 min Phase 0 (vs. 2-4h Foundry waste avoided). [INSPECTED]
+
+**Why the saturation multiplier under-discounted.** Doctrine #27 calibration assumes lens-promotion-AFTER-audit = auditors-did-not-have-the-lens. But auditors don't NEED the Buzz lens label to hit the substrate — they hit it via their own framing ("ward-removal", "deprecation", "config hygiene"). When the SOURCE CODE still contains the dangerous-looking pattern but the GOVERNANCE-LAYER STATE has neutralized it, only on-chain state verification (or audit-language search) reveals the dead-code reality. Source-only Gate 1 inspection cannot see this.
+
+**Refinement to Standing Intake Step 0 (Phase 0 dedup).** When in-scope repos contain an `audit/` subdirectory with PDF reports, MUST grep ALL audit PDFs for:
+1. **Contract names** from the candidate (e.g., `LockstakeMigrator`)
+2. **Magic numbers** from the candidate source (e.g., `55_000_000`, `55M`)
+3. **Mechanism keywords** (e.g., `flashloan`, `migration`, `vat.line`)
+4. **Remediation verbs** (e.g., `deprecated`, `removed`, `denyed`, `no longer a ward`, `disabled`, `revoked`)
+
+Use pypdf (Python `import pypdf`) — pdftotext is often not installed. Pattern: read each PDF page-by-page, concatenate text, regex-search with case-insensitive flag. If ANY PDF returns hits AND the audit date is AFTER the candidate's substrate was introduced → FORECLOSE before any Foundry investment. Saves 2-4h per dedup-hit.
+
+**Cross-pollination — Doctrine #34 interaction.** Doctrine #34 (Post-Audit Composition Multiplier) assumes auditors did NOT cover the substrate. When the audit changelog includes commits like "Reset Line", "Disable Migration", "Deprecate <module>", treat the subsequent versions' surface as **POST-MITIGATION not POST-NULL**. Doctrine #34 should NOT fire on these substrates. Add as Doctrine #34 sub-rule 34.2 candidate (pending 2nd anchor).
+
+**Status.** Corollary B filed 2026-05-27 as standing rule under Doctrine #27. Single-anchor (Sky LockstakeMigrator). Authority: Sky Gate 2 foreclosure receipt (`hunts/2026-05-27-sky-c1-gate2-foreclosure.md`). Does NOT require 2nd anchor — the operational refinement to Standing Intake Phase 0 is immediate and the time-saved validation is self-evident (~2-4h per dedup hit).
+
+---
+
+_Doctrine v3.8 | 2026-05-27 | Corollary B added (Remediation-Language Search Beats Lens-Label Search — Phase 0 audit-PDF grep MUST search for remediation verbs + magic numbers, not just lens-label keywords; saturation multiplier UNDER-DISCOUNTS when auditors addressed the same substrate via different terminology). Single anchor: Sky LockstakeMigrator Gate 2 DEDUP-FORECLOSED (EV calculated $262K-$375K, actual $0 — auditor-deprecated 9 months earlier via "Migrator Reset Line" commit Aug 2 2025). Companion to Sub-Rule 34.1 (DC-12 upstream-source semantic test). Authority: Sky Gate 2 dispatch outcome. Doctrine #34 sub-rule 34.2 candidate seeded (post-mitigation-vs-post-null distinction)._
+
+_Doctrine v3.7 | 2026-05-27 | Sub-Rule 34.1 added (Upstream-Source Semantic Test — DC-12 lens MUST verify upstream source class before Gate 2 dispatch; CLASS A stale-able feed PROMOTES, CLASS B deterministic on-chain formula FORECLOSES at Gate 1, CLASS C hybrid verifies which leg). Single anchor: Lista DAO PTLinearDiscountOracle Gate 2 NEGATE (EV calculated $55K, actual $0 — structurally-not-a-bug). Companion to DC-12 sub-7g (Stader DEDUP-FORECLOSED-CLASS). Authority: Lista Gate 2 dispatch outcome._
+
 _Doctrine v3.6 | 2026-05-26 evening | Day 26 evening batch — Doctrine #29 v1.1 amendment (two-sided MIN-cap defense, Olympus BLVaultLido 2nd implementer anchor; deposit-mint MIN(oracle,pool) + withdraw-payout oracle-only-with-excess-to-treasury = architecturally complete Pattern D defense (b), no VaultReentrancyLib required) + Doctrine #37 CANDIDATE NEW (Audited-and-Frozen Substrate; A=repo+scope frozen FORECLOSE / B=repo-frozen-product-live PROCEED with composition lens). Joint anchors: CoW Protocol Immunefi (canonical A-class, 1844-day frozen + SHA-pinned + ≥20 audits + Doctrine #27 FAIL); rhino.fi Immunefi (canonical B-class, 440-day frozen + branch-pinned + product-live with new chains shipping monthly + Doctrine #34 composition surface). Companion Patterns-Defense-Classes.md at v2.3 (DC-9 sub-pattern 5 Asset-vs-Receipt + DC-7 sub-pattern Cross-Language Guard-Coverage Asymmetry). Authority: Ogie msg 7846 hunting cycle + Lane 5 crawler ship; origins 3 Gate 1 hunt files (`hunts/2026-05-26-olympus-immunefi-gate1.md`, `hunts/2026-05-26-cowprotocol-immunefi-gate1.md`, `hunts/2026-05-26-rhinofi-immunefi-gate1.md`)._
 
 _Doctrine v3.5 | 2026-05-26 afternoon | Day 26 afternoon batch — Doctrine #34 PROVISIONAL anchor 5 (Across V3 `ArbitraryEVMFlowExecutor`, OpenZeppelin single-firm-continuous-audit baseline; promotion gated on operator routing or competitor disclosure) + Doctrine #36 CANDIDATE NEW (Substrate-Coverage Gate, single-anchor dYdX V4 Cosmos-SDK Go, pending 2nd substrate-blind anchor for promotion). Authority: Ogie msg 7844 (Across proposals approved) + dYdX V4 P2 auto-approve (corpus-internal discipline improvement). Origins: 3 PRE-CLONE-HALT files (`hunts/2026-05-26-across-immunefi-gate1-PRE-CLONE-HALT.md`, `hunts/2026-05-26-dydx-v4-immunefi-gate1-PRE-CLONE-HALT.md`, `hunts/2026-05-26-lombard-immunefi-gate1-PRE-CLONE-HALT.md`)._

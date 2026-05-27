@@ -33,6 +33,7 @@ Per `four-pillar-loop.md` §"Pillar 4 → Pillar 1 (Bug findings improve token s
 | 2026-05-27 | P4 | DC-9 sub-1 unchecked-mint anchor 4 ($320M+ combined exposure) | P1 | `brain/Token-Scoring-Doctrine.md` T-4 cross-pollination table | TRP-12 candidate proposed; weight calibration pending | TRP-12 detector spec needs on-chain queryability test |
 | 2026-05-27 | P4 | DC-12 sub-7g LST-PoR-feed-no-staleness DEDUP-FORECLOSED-CLASS (Stader anchor) | P1 | `brain/Token-Rug-Patterns.md` TRP-5 SECURITY_PENALTY section | Detector-class catalog hardening; no new penalty rule (source-level, not on-chain queryable) | Cross-protocol re-fire watch on cbETH, Frax, similar LST-PoR-feed users |
 | 2026-05-27 | P4 | DC-12 sub-7h Deterministic-Upstream-No-Staleness STRUCTURAL-FORECLOSED-CLASS (Lista PT-oracle anchor) | P1 | `brain/Token-Scoring-Doctrine.md` T-5 (oracle-dependent unreliability section) | Calibration: oracle staleness signals must check upstream-source class before flagging | Sub-Rule 34.1 Upstream-Source Semantic Test now standing |
+| 2026-05-27 | P4 | DC-9 sub-2 Dead-Code-Migrator (Sky LockstakeMigrator anchor) — `vat.file()` retained in source but governance denyed migrator on Vat Aug 2 2025 | P1 | `brain/Token-Rug-Patterns.md` candidate TRP entry "DEAD-WARD" — contracts calling privileged registry mutation functions but NOT a ward at current block | Detector candidate: query `Registry.wards(contract_addr) == 0` for known-privileged-mutator contracts; flag as dead-code (UX-fidelity penalty, low severity, not loss-bearing) | Detector spec needs on-chain queryability test + Registry registry (Vat, Pause, ESM, etc.) |
 
 ---
 
@@ -63,6 +64,7 @@ Per `four-pillar-loop.md` §"Pillar 4 → Pillar 2 (Bug findings create content 
 | 2026-05-27 | P4 | Balancer B-1 Gate 2 CONFIRMS (BatchRouterHooks slippage double-count, ~$50-500K/yr impact on $100M-TVL pool) | P2 | `brain/Content-Playbook.md` §5 methodology threads queue | DRAFT pending operator approval to publish post-disclosure | Post-disclosure timing depends on Immunefi submission outcome |
 | 2026-05-27 | P4 | Pancake P-1 Gate 2 CONFIRMS (Infinity Router slippage, multi-anchor of B-1) | P2 | `brain/Content-Playbook.md` §5 methodology threads queue | DRAFT methodology thread on multi-anchor pattern recognition | Post-disclosure timing |
 | 2026-05-27 | P4 | Stader G2-CAND-1 FORECLOSURE-AT-DEDUP (C4 2023 M-14 published 2 years ago) | P2 | `brain/Content-Playbook.md` §5 methodology threads queue | DRAFT thread on "audit-dedup gate saving Foundry investment" | Operator approval needed |
+| 2026-05-27 | P4 | Sky LockstakeMigrator Gate 2 DEDUP-FORECLOSED (ChainSecurity Sep 2025 explicit deprecation; "Migrator Reset Line" commit Aug 2 2025 denyed migrator on Vat) | P2 | `brain/Content-Playbook.md` §5 methodology threads queue | DRAFT thread: "How Sky deprecated a $55M-per-call vat.line lift WITHOUT modifying source code — the ward-removal governance pattern" | Operator approval needed; pairs well with Stader thread as 2-anchor "audit-dedup as competitive advantage" series |
 
 ---
 
