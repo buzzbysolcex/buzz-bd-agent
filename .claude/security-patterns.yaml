@@ -1,0 +1,74 @@
+# Buzz security pattern catalog
+# REGEX ONLY — never embed literal secret values in this file.
+# Patterns catch the SHAPE of sensitive data, not the data itself.
+# Authority: Ogie msg 7892 (2026-05-27) — revised after rejection of msg 7889
+# whose substring rules would have committed the actual secrets to the repo.
+patterns:
+  - rule_name: hetzner_ip_leak
+    regex: "204\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}"
+    reminder: "CRITICAL: Hetzner-range IP pattern detected (204.x.x.x). Use domain names only (api.buzzbd.ai / sentinel.buzzbd.ai / shield.buzzbd.ai). See BUZZ_RULES + .claude/rules/security.md."
+
+  - rule_name: firecrawl_key_format
+    regex: "\\bfc-[0-9a-fA-F]{32,}\\b"
+    reminder: "CRITICAL: Firecrawl API key format detected (fc- prefix). Never commit to public repos. See .claude/rules/security-wallets.md."
+
+  - rule_name: telegram_bot_token
+    regex: "[0-9]{8,10}:[A-Za-z0-9_-]{35}"
+    reminder: "Telegram bot token pattern. Use TELEGRAM_BOT_TOKEN env var, not hardcoded."
+
+  - rule_name: telegram_chat_id_outside_env
+    regex: "-?[0-9]{9,13}"
+    paths:
+      [
+        "**/scripts/**",
+        "**/api/**",
+        "**/src/**",
+        "**/brain/**",
+        "**/hunts/**",
+        "**/data/**",
+      ]
+    exclude_paths:
+      [
+        "**/.env*",
+        "**/audits-library/**",
+        "**/lane4/corpus/**",
+        "**/lane4/raw/**",
+      ]
+    reminder: "9-13 digit ID outside .env — verify this isn't a Telegram chat_id or user_id leak. War Room + DM ids are operator PII."
+
+  - rule_name: private_key_64hex
+    regex: "(?<![0-9a-fA-F])(0x)?[0-9a-fA-F]{64}(?![0-9a-fA-F])"
+    paths: ["**/scripts/**", "**/src/**", "**/api/**"]
+    exclude_paths:
+      ["**/test/**", "**/hunts/**", "**/audits-library/**", "**/brain/**"]
+    reminder: "64-hex pattern — possible private key. Verify this is not a secret before committing. Move to env var."
+
+  - rule_name: bip39_mnemonic_phrase
+    regex: "\\b(abandon|ability|able|about|above|absent|absorb|abstract|absurd|abuse|access|accident|account|accuse|achieve|acid|acoustic|acquire|across|act|action|actor|actress|actual|adapt|add|addict|address|adjust|admit|adult|advance|advice|aerobic|affair|afford|afraid|again|age|agent|agree|ahead|aim|air|airport|aisle|alarm|album)\\b(\\s+\\w+){11,23}"
+    reminder: "Sequence of BIP39 wordlist words detected. Possible mnemonic seed phrase. NEVER commit."
+
+  - rule_name: api_admin_key_var_reference
+    regex: "\\bBUZZ_API_ADMIN_KEY\\b|X-API-Key\\s*:"
+    paths: ["**/scripts/**", "**/src/**", "**/api/**"]
+    exclude_paths: ["**/.env*", "**/CLAUDE.md", "**/.claude/**"]
+    reminder: "Admin API key reference in code. Confirm value is read from env at runtime, not hardcoded."
+
+  - rule_name: ssh_user_at_host_pattern
+    regex: "\\b(root|claude|claude-code|ubuntu)@(?!localhost|127\\.0\\.0\\.1)([a-zA-Z0-9.-]+\\.(buzzbd\\.ai|hetzner\\.|com|net|io))\\b"
+    paths:
+      ["**/brain/**", "**/data/**", "**/hunts/**", "**/scripts/**", "**/api/**"]
+    reminder: "SSH user@host pattern detected. Server access details are operational secrets. Remove or move to runbook outside repo."
+
+  - rule_name: listing_fee_currency_pattern
+    regex: "\\$\\s*[0-9](?:[0-9,]*)?\\s*(K|k|USDT|USDC)?\\s*/?\\s*(listing|commission|listing[- ]fee|deal[- ]fee)"
+    paths: ["**/brain/**", "**/data/**", "**/hunts/**", "**/data/pillar2/**"]
+    exclude_paths:
+      ["**/Revenue.md", "**/HSaaS-Operations.md", "**/Content-Playbook.md"]
+    reminder: "Listing/commission fee numeric pattern outside revenue-tracking files. Pricing structure is INTERNAL ONLY per BUZZ_RULES rule #2. Confirm context is private or move to non-public-facing file."
+
+  - rule_name: operator_pii_email_local_part
+    regex: "[a-z]+\\.[a-z]+@(gmail|outlook|yahoo|protonmail|me)\\.com"
+    paths:
+      ["**/brain/**", "**/hunts/**", "**/data/**", "**/scripts/**", "**/api/**"]
+    exclude_paths: ["**/People.md", "**/.env*", "**/CLAUDE.md"]
+    reminder: "Personal email pattern in non-people-registry file. Verify this isn't operator PII bleeding into public-facing content."
