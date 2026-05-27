@@ -1306,3 +1306,31 @@ This produces the **G-2 Doctrine #34 sub-b BI-DIRECTIONAL CLARIFICATION** — de
 **Brief-vs-live correction:** brief specified `Gearbox-Protocol/router-v3` as in-scope; live scope file makes NO mention of router-v3, repo returns 404. Logged per INFO #19 (4th anchor: PLATFORM #1 Kiln + PLATFORM #2 Cap + INFO #21 TIME-drift OnRe + INFO #19 SCOPE-drift Gearbox).
 
 _v2.15 Addendum: 2026-05-27 ~23:25 UTC | row N+7 Gearbox WATCHLIST-PARK | **DC-7 EXCLUSION sub-pattern → CANONICAL same-day** (3-anchor threshold met in ~3 hours: Cap C1 + Function FBTC H1 + Gearbox H2) | 4-anchor INFO #19 PLATFORM/SCOPE drift catalog | 10 G1/G2 verdicts in Day-27 night cycle | next-target: Templar Protocol $20M BTC+ETH+Stellar $100K (multi-substrate novelty, avoids ETH-lending lens-saturation trap)_
+
+---
+
+## v2.16 ADDENDUM — Templar Protocol Gate 1 (Day-27 night cycle, ~23:35 UTC)
+
+**Row 21 update:** Templar Protocol — Bitcoin+ETH+Stellar (brief) → **NEAR-only (live scope)** | $20M | $100K Critical / $10K High | Lending (cross-chain) | DC-7 **H** + DC-7 EXCLUSION CANONICAL preemptive + CANDIDATE-J + Doctrine #36 substrate-novelty | EV $3.6K post-discount | **GATE-1-COMPLETE / WATCHLIST-PARK pri 12** | `hunts/2026-05-27-templar-immunefi-gate1.md`
+
+**Key Day-27 compounds from this Gate 1:**
+
+1. **INFO #19 → 5th anchor.** Brief said Bitcoin+ETH+Stellar substrate; live Immunefi scope is NEAR-only. Substrate-drift this time (Kiln/Cap/Gearbox were platform/scope drift; OnRe was time-drift). Catalog now 5 anchors. **Standing rule reinforced: every brief MUST be live-cross-checked via Step 1 STATUS preflight before clone work.**
+
+2. **DC-7 EXCLUSION CANONICAL — first compound-impact validation.** Hyp-1 (withdraw-collateral fast-path vs priced-path) was correctly filtered by the new canonical rule because `get_total_borrow_asset_liability()` includes `borrow_asset_in_flight` (symmetric defense holds). **Saved ~1-2 hours of dead Gate 2 work.** Promotion → compound-impact gap: ~30 min. First measurable doctrine-to-doctrine-saving cycle.
+
+3. **Doctrine #36 sub-rule #36c (PROPOSED, PERMANENT pending acceptance) — Multi-substrate Account Abstraction signature scheme disambiguation.** Templar Universal Account accepts ed25519 + p256 + EIP-712 + Stellar SEP-53 + passkey signatures. The signed payload MUST include a scheme-id (or domain-separation byte) such that a signature valid under one scheme cannot be replayed under another. Salt + chain_id alone insufficient (chain_id shared). First-anchor candidate; needs 2 more anchors for promotion.
+
+4. **CANDIDATE-Q (PROPOSED) — NEAR Async Cross-Contract Callback State-Divergence.** Defense pattern: in-flight tracking + symmetric finalize that handles both success and failure branches AND writes results back to storage. Anchors: Templar v1.1.0 fix (`withdraw_static_yield` rollback) + Templar defense-in-depth (liability includes in_flight). 2-anchor start, needs 1 more for canonical.
+
+5. **Substrate-coverage gap surfaced.** NEAR has 15 trace mentions across brain but zero doctrine. Soroban has 1 file (Watchlist only). Lane 4 scrape directive: add `NEAR async callback` + `Soroban auth` keyword vein.
+
+6. **Audit-saturation × Substrate-novelty trade-off (Doctrine #34 sub-b ↔ Doctrine #36).** Templar has 3 audits in 10 months (2 firms: guvenkaya + thesis_defense + 1 unnamed Oct 2025) — saturation discount 0.6×. But NEAR-specialist auditor population is ~5-10× smaller than EVM — substrate-novelty bonus 1.5×. Net multiplier 0.9× (saturation slightly wins). This is the first explicit clash where the two doctrines are netted at near-1.0.
+
+7. **PDF-read tooling blocker:** Hetzner env lacks `pdftotext` / `poppler-utils`. Blocks automated audit-PDF dedupe. Standing infra request: install poppler-utils to unblock audit-cross-reference on future Gate 1s with in-repo audits.
+
+**Day-27 night cycle total:** 11 G1/G2 verdicts. Templar is verdict 11.
+
+**Next target:** Sky lockstake (Watchlist row 11) — $10M no-KYC, CANDIDATE-D direct match, EV $300K+ pre-discount. Highest unscanned EV in pipeline.
+
+_v2.16 Addendum: 2026-05-27 ~23:35 UTC | row 21 Templar WATCHLIST-PARK | **INFO #19 5th anchor (substrate-drift class)** | **DC-7 EXCLUSION CANONICAL first compound-impact validation (Hyp-1 filtered, ~1-2hr saved)** | Doctrine #36 sub-rule #36c proposal (multi-substrate AA scheme-disambiguation, 1-anchor) | CANDIDATE-Q proposal (NEAR async callback state-divergence, 2-anchor) | 11 G1/G2 verdicts in Day-27 night cycle | next-target: Sky lockstake $10M no-KYC CANDIDATE-D direct (~$300K pre-discount EV)_
