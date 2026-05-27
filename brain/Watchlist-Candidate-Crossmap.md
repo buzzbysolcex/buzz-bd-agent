@@ -30,7 +30,7 @@ Legend: H = HIGH confidence architectural match / M = MEDIUM confidence / L = LO
 | 1   | Lido                   | Ethereum + Solana + Moonbeam + | $18.77B | $2M    | Liquid Staking        | **H** | M     | **H** | –   | M     | NET-NEW          | **1**    |
 | 2   | Veda                   | Ethereum + 11 EVM + (SVM repo) | $1.05B  | $1M    | Onchain Capital Alloc | **H** | M     | L     | –   | M     | NET-NEW          | **3**    |
 | 3   | cap                    | Ethereum                       | $337M   | $1M    | Lending               | **H** | –     | **H** | –   | L     | NET-NEW          | **2**    |
-| 4   | Stader                 | Ethereum + Hedera + BNB + Near | $327M   | $1M    | Liquid Staking        | M     | –     | M     | –   | **H** | NET-NEW          | **6**    |
+| 4   | Stader                 | Ethereum + Hedera + BNB + Near | $327M   | $1M    | Liquid Staking        | M     | –     | M     | –   | **H** | GATE-2-FORECLOSED [^stader-g2] | PARK     |
 | 5   | Rocket Pool            | Ethereum                       | $1.05B  | $150K  | Liquid Staking        | M     | –     | M     | –   | **H** | NET-NEW          | **7**    |
 | 6   | Renzo                  | Ethereum + Linea + Solana + LZ | $182M   | $500K  | Liquid Restaking      | M     | L     | M     | –   | **H** | NET-NEW          | **4**    |
 | 7   | Defi Saver             | Ethereum + Arb + OP            | $271M   | $350K  | CDP Manager           | **H** | –     | L     | –   | –     | NET-NEW          | **8**    |
@@ -418,6 +418,7 @@ All H qual_hits=0 — heuristics surfaced no field-pair gaps → strong-defense 
 | layerzero-bridge | 16 | 7 | 0.023 | "ulnConfig presumed canonical; Stargate v3 endorsement chain" |
 | hyperlane | 70 | 25 | 0.071 | "ISM-config-as-DVN reference template" |
 | across | 29 | 10 | 0.102 | "UMA OO + Helios light client reference" |
+| lista-moolah | (Gate 1 2026-05-27 / Gate 2 2026-05-27 FORECLOSED) | ~11.2K LOC | 0.62 overlap | "Morpho Blue fork + Lista-bespoke broker layer; 7-firm core saturation (20 audits). DC-12 PT-oracle staleness Gate 2 NEGATED — structural-not-a-bug (Pendle `PendleSparkLinearDiscountOracle` returns `updatedAt=0` by design, deterministic on-chain math, no stale-state). Foundry PoC NOT BUILT (Phase 0 NEGATE). Doctrine #34 Sub-Rule 34.1 (Upstream-Source Semantic Test) FILED. DC-12 sub-7h (Deterministic-Upstream-No-Staleness-State, STRUCTURAL-FORECLOSED-CLASS) FILED. LendingBroker.emergencyWithdraw STRUCTURALLY-OOS per Immunefi (privileged-role drain treated as governance). MoolahVault setName/setSymbol post-audit drift DEFERRED. Legacy Helio CDP foreclosed (lista-dao-contracts archived 2026-05-19). Monitor for future Lista PT oracle variants bridging Pyth/Chainlink upstream — would re-fire DC-12 lens validly. Receipt: `hunts/2026-05-27-lista-dao-gate2-foreclosure.md`." |
 
 ### scope_filter v1.8/v1.9 SUGGESTIONS (operator review tomorrow)
 
@@ -919,3 +920,112 @@ Three Gate 1 hunt files filed during 2026-05-26 evening hunting cycle against DB
 ---
 
 _v2.2 Addendum: 2026-05-26 evening | rows 44 (Olympus MEDIUM-HIGH, EV $83K, C1+C2 pending scope-verify) + 45 (CoW FORECLOSED, $375 EV, Doctrine #37 Sub-Type A canonical anchor) + 46 (rhino.fi WATCHLIST, EV $20K, C8 operator-decision-point, Doctrine #37 Sub-Type B canonical anchor). 9 of 9 brain compounds applied (1 duplicate-merged: Lane 5 chain-list calibration surfaced in CoW #2 AND rhino.fi #2). Authority: Ogie msg 7846 hunting cycle + Lane 5 crawler ship. Companion: `hunts/2026-05-26-brain-proposals-applied-ledger-v3.md`._
+
+---
+
+## v2.3 Addendum: 2026-05-27 PancakeSwap Infinity (V4) Multi-Anchor Scout
+
+| # | Target | Platform | Cap | Status | Primary lens | Secondary lenses | EV | Notes |
+|---|---|---|---|---|---|---|---|---|
+| 47 | PancakeSwap Infinity Core (V4) | Immunefi | $1M Critical | Gate 1 COMPLETE 2026-05-27 — Gate 2 GATED on B-1 Balancer outcome | CANDIDATE-O slippage double-count analog (B-1 cross-pollination) | DC-9 sub-1/sub-2 (Vault.registerApp + Bin owner-setters no-timelock) + Pattern I (hook-call asymmetry) + DC-12 partial (protocolFeeController staticcall) | $40K base, elevated to $75K+ if B-1 confirms tonight | Same singleton-vault + hook-based architecture family as Uniswap V4 / Balancer V3. CORE confirmed; periphery (Universal Router) NOT cloned due to disk halt 94%. P-1 finding hinges on Infinity Router slippage-check placement (pre- vs post-hookDelta). Repo: `pancake-v4-core` HEAD. Gate 1 file: `hunts/2026-05-27-pancakeswap-v4-immunefi-gate1.md`. |
+
+### Multi-Anchor Hypothesis (B-1 generalization)
+
+If Balancer B-1 confirms (BatchRouterHooks per-step slippage zero + hookFee absorption), the SAME finding class is testable on Pancake Infinity within 4-6h (clone periphery + Foundry fork BSC). If B-1 disconfirms, both anchors likely disconfirm — singleton-vault hook architectures converge structurally. Pancake is the second-anchor proof-or-disproof for whether the hook-based AMM class has the slippage-double-count exploit primitive.
+
+### Open Questions queued
+
+- OQ-PCK-1: Does Infinity Router enforce slippage against pre-hookDelta or post-hookDelta `delta`? (load-bearing for P-1 promotion to Gate 2)
+- OQ-PCK-2: Does Pancake Infinity Universal Router accept per-route `minAmountOut=0`? (sibling to Balancer B-1 BatchRouter question)
+
+_v2.3 Addendum: 2026-05-27 00:30 UTC | row 47 PancakeSwap Infinity Gate 1 complete | multi-anchor scout for CANDIDATE-O generalization | autonomous dispatch per `.claude/rules/autonomy-boundary.md` | Companion: `hunts/2026-05-27-pancakeswap-v4-immunefi-gate1.md`_
+
+[^stader-g1]: Stader row 4 promoted from priority 6 → priority 2 on 2026-05-27 post Gate 1. Findings: Doctrine #29 v1.1 MIN-cap defense ABSENT (Stader is NEW NEGATIVE-anchor candidate, not 2nd PRESENT-anchor); DC-12 monotonic-oracle staleness check MISSING in `StaderOracle.getPORFeedData` (HIGH-severity G2-CAND-1, paste-ready); CANDIDATE-O asymmetric MIN-cap in `UserWithdrawalManager.finalizeUserWithdrawalRequest` (G2-CAND-2, MEDIUM/HIGH); DC-9 sub-4 asset-vs-receipt accounting skew in same function. EV ~$60K. Gate 2 DEFERRED until Balancer B-1 PoC resolves. New OQT Q-36 logged. Companion: `hunts/2026-05-27-stader-ethx-immunefi-gate1.md`.
+
+_v2.4 Addendum: 2026-05-27 ~00:55 UTC | row 4 Stader ETHx Gate 1 complete | autonomous dispatch per `.claude/rules/autonomy-boundary.md` | priority promoted 6 → 2 (post-Balancer-B-1) | OQT v1.2 → v1.3 (Q-36 added)_
+
+---
+
+## v2.5 Addendum — Balancer V3 B-1 Gate 2 PoC Result (2026-05-27 ~00:35 UTC, post-dispatch)
+
+**Outcome: PoC CONFIRMS the slippage-double-count + StableSurgeHook approximation-drift composition in NON-EXTREME parameter regime.**
+
+### Row 48 — Balancer V3 BatchRouter B-1 Gate 2 Foundry PoC
+
+| # | Target | Platform | Cap | Status | Primary lens | Confirmation evidence | EV | Paste-ready |
+|---|---|---|---|---|---|---|---|---|
+| 48 | Balancer V3 BatchRouterHooks + StableSurgeHook | Immunefi | $1M Crit / $250K High | Gate 2 PoC CONFIRMS, paste-ready HOLD for operator | CANDIDATE-O (slippage double-count) + WONTFIX-non-extreme-regime | 2-test Foundry `BatchRouterSlippageDoubleCountPoC.t.sol` both PASS against HEAD `80fd29ce4eb6`. 5,000 DAI 2-hop = 1.09% composed slippage vs 0.55% single-hop on same surge pool. Production-default params (30% threshold, 200 amp, 70/30 imbalance). | $50-250K range (severity High recommended, escalation argument for Critical) | `data/lane1/gate2-clones/balancer-b1-batchrouter-slippage-paste-ready-v2.md` |
+
+### Foreclosure-row correction (line 314)
+
+The prior "Pattern J FORECLOSED — Balancer V3" entry (line 314) treated `BatchRouterHooks.sol:127` per-step minOut zeroing as a defended substrate. PoC demonstrates the foreclosure was INCOMPLETE — the per-step zero IS a real attack substrate when composed with StableSurgeHook's acknowledged approximation. **Foreclosure-row 314 should be updated from "Pattern J FORECLOSED" to "Pattern J PARTIAL — load-bearing in StableSurgeHook composition surface".** Deferred-edit: surfaces on next maintenance loop (this v2.5 addendum is the authoritative correction record).
+
+### Downstream gate-resolution
+
+- **Row 47 (PancakeSwap Infinity)**: B-1 CONFIRMS → second-anchor cross-pollination is GO. Pancake Infinity periphery clone + Universal Router slippage-check inspection now unblocks (4-6h estimate per v2.3). OQ-PCK-1 + OQ-PCK-2 should be prioritized.
+- **Row 4 (Stader ETHx)**: B-1 CONFIRMS → Stader Gate 2 deferred-gate releases. G2-CAND-1 (DC-12 staleness) and G2-CAND-2 (CANDIDATE-O asymmetric MIN-cap) can now proceed independently.
+
+### PoC environment note
+
+- pnpm absent → yarn berry 4.12 used (engines mismatch ignored by Berry default)
+- Node 22.22.1 used despite package.json requiring `>=24` (Berry doesn't gate)
+- TMPDIR override required (`/tmp` host-restricted to claude user)
+- Peak disk during yarn install: 94% — required cleanup to return to 85% baseline
+- Bytecode pin against deployed BatchRouter `0x136f1Ee37Ec24bD4f57DBC9D78fb6f4c2db478d1` DEFERRED (5 public RPCs either rate-limited or returned `0x`; needs operator-supplied premium RPC). Paste-ready evidence-grade footer tags this as `[ASSUMED]`.
+
+_v2.5 Addendum: 2026-05-27 ~00:35 UTC | row 48 Balancer V3 B-1 Gate 2 PoC CONFIRM | autonomous dispatch per `.claude/rules/autonomy-boundary.md` | unblocks row 47 (Pancake) + row 4 (Stader) Gate 2 work | foreclosure-row 314 correction noted_
+
+[^stader-g2]: Stader row 4 Gate 2 dispatch 2026-05-27 — **FORECLOSED-ALL** at Phase 0 audit-dedup. G2-CAND-1 (DC-12 PoR staleness) dup of C4 M-14 + Halborn HAL-09 (both VALID 2023). G2-CAND-2 (UserWithdrawalManager MIN-cap) re-analyzed as canonical LST design feature (Lido/RocketPool pattern), NOT a bug. G2-CAND-3 (single-source oracle) partial-DUP of Halborn HAL-11 + SigmaPrime ETHX2-07. G2-CAND-4 (`depositETHOverTargetWeight`) dup of C4 M-09. G2-CAND-5 self-flagged OOS. Stader HEAD 9d4a921 (5+ months stale × 3 audit firms × 9 reports = exhausted paste-ready surface). EV-rank dropped 2 → PARK. Phases 1-5 (env + PoC + bytecode + paste-ready) NOT executed. Foreclosure receipt: `hunts/2026-05-27-stader-ethx-gate2-foreclosure.md`. OQT v1.4 → v1.5 (Q-36 superseded → Q-39 added with proposed EV-multiplier corollary for heavily-audited stale targets; Q-37/Q-38 slots already used by Balancer B-1 Gate 2).
+
+_v2.6 Addendum: 2026-05-27 ~01:25 UTC | row 4 Stader ETHx Gate 2 FORECLOSED-ALL via Phase 0 audit-dedup | autonomous dispatch per `.claude/rules/autonomy-boundary.md` | 25min to foreclosure verdict | Phases 1-5 saved (would have produced instant-DUP submission) | Q-37 EV-multiplier proposal queued for operator decision_
+
+## v2.7 Addendum: 2026-05-27 PancakeSwap Infinity P-1 Gate 2 — Foundry PoC CONFIRMS (Multi-Anchor Pattern)
+
+### Row 47 — Pancake Infinity Router P-1 Gate 2 Foundry PoC
+
+| # | Target | Platform | Cap | Status | Primary lens | Confirmation evidence | EV | Paste-ready |
+|---|---|---|---|---|---|---|---|---|
+| 47 (Gate 2) | PancakeSwap Infinity Router (CL + Bin multi-hop loops) | Immunefi | $1M Critical | Gate 2 PoC CONFIRMS, paste-ready HOLD for operator | CANDIDATE-O (slippage double-count) — DIRECT analog of Balancer B-1 | 3-test Foundry `InfinityRouterSlippageDoubleCountPoC.t.sol` all PASS against `infinity-periphery` HEAD `f39aef4a1be6`. 50 ether 2-hop = 1.195% composed slippage vs 0.600% single-hop on identical 25-bps hook fee + 5% end-to-end envelope. Affected: `CLRouterBase._swapExactInput`/`_swapExactOutput` + `BinRouterBase._swapExactInput`/`_swapExactOutput` (4 multi-hop loops, all share floor-absent shape). | $50-250K range (severity High recommended) | `data/lane1/gate2-clones/pancake-p1-infinity-router-slippage-paste-ready-v2.md` |
+
+### Phase 0 audit-dedup verdict (CLEAR)
+
+- **Cyfrin** (`infinity-universal-router/audits/Cyfrin.pdf`) — [M-2] "MEV Bots bypass slippage in Universal Router's stable swap" is a DIFFERENT finding: targets `StableSwapRouter::stableSwapExactInput` balance-check vs delta-diff, fixed in PR 22. Does NOT touch CL/Bin router multi-hop loop. **Not a duplicate.**
+- **Hexens, OtterSec, Zellic** (`infinity-periphery/audits/`) — all 3 audited periphery scope; none flagged multi-hop slippage gap in CL/Bin router loops. Hexens covers `validateMaxIn` liquidity-side + Bin `idSlippage` ergonomics. OtterSec general findings. Zellic 2 informational findings on Bin position manager. **No dedup hit.**
+
+P-1 is a fresh finding — the multi-hop loop pattern was visible to 4 audit firms but not flagged.
+
+### Multi-anchor pattern verdict — CANDIDATE-O CONFIRMED ACROSS 2 ANCHORS
+
+| Anchor | Repo | Floor-absence mechanism | Hook composition | PoC leak (1-hop vs 2-hop) |
+|---|---|---|---|---|
+| Balancer V3 (B-1) | `balancer-v3-monorepo` | `BatchRouterHooks.sol:122-127` explicit `minAmountOut = 0` per non-last step | `StableSurgeHook` approximation drift | 0.55% → 1.09% (~2x) |
+| Pancake Infinity (P-1) | `infinity-periphery` | `CLRouterBase._swapExactInput:40-65` loop has NO per-step floor check at all (no zero-knob even exists) | `CLHooks.afterSwap` positive hookDelta (`delta = delta - hookDelta`) | 0.60% → 1.195% (~2x) |
+
+Two independent production deployments by two unrelated teams converge on the same structural shape. Q-41 (OQT v1.7) queued for **DC-13 promotion** operator decision. Proposed name: "End-of-Path-Only Slippage Composition With Per-Hop Hook Deltas".
+
+### Bytecode-verification status
+
+- Deployed UniversalRouter at `0xd9c500dff816a1da21a48a732d3498bf09dc9aeb` on BSC confirmed live via `eth_getCode` (48702 bytes, non-empty). Address from `infinity-universal-router/deploy-addresses/bsc-mainnet.json`.
+- Local build of `infinity-universal-router` did not complete within verification window (FFI dep + 20k optimizer-runs; deferred per Balancer B-1 precedent). SHA-level bytecode pin tagged `[ASSUMED]` in paste-ready footer.
+
+### Source SHAs (paste-ready audit anchor)
+
+- `infinity-periphery/src/pool-cl/CLRouterBase.sol` `4d38ad2c5f9080fd847ffb2681b0c8ca7caf5117ddf7997f2a31d20d4a20aeab`
+- `infinity-periphery/src/pool-bin/BinRouterBase.sol` `c8eb71478353f35e074f4c800fc022d03a2a77e1237a0bb4d0e581b3d6a23cf4`
+- `infinity-core/src/pool-cl/libraries/CLHooks.sol` `63847a57de7914b039156626ae34bbe1675af0df9ccfde3defb80c8ddcc48f8f`
+
+### Downstream resolutions
+
+- **Row 48 (Balancer V3 B-1)**: companion-anchor confirmed; both rows now eligible for parallel operator-gated submission. Multi-anchor argument woven into Pancake paste-ready §Historical Context.
+- **CANDIDATE-O promotion to DC-13**: Q-41 OPEN, awaiting operator decision on `Patterns-Defense-Classes.md` amendment.
+
+### PoC environment note
+
+- Forge 1.5.1-stable from `/home/claude-code/.foundry/bin`
+- Submodules initialized via `git submodule update --init --recursive --depth 1`
+- TokenFixture mints only 100 ether per token; PoC top-up adds 1M ether per token to support 3 hook-bound pool initializations
+- Hook permissions bitmap: `HOOKS_AFTER_SWAP_OFFSET=7` + `HOOKS_AFTER_SWAP_RETURNS_DELTA_OFFSET=11` → bitmap `0x880` + tickSpacing=1 (`0x10000`) → `parameters = 0x10880`
+- Hook closes its own credit via `vault.take(unspecCurrency, address(this), hookFeeAbs)` to keep the Vault solvency invariant satisfied
+- Disk during PoC build: 84% / 6.0G free (within 88% halt threshold)
+
+_v2.7 Addendum: 2026-05-27 ~02:25 UTC | row 47 PancakeSwap Infinity Gate 2 PoC CONFIRMS | autonomous dispatch per `.claude/rules/autonomy-boundary.md` | multi-anchor confirmation: CANDIDATE-O now confirmed across Balancer V3 + Pancake Infinity | DC-13 promotion queued in Q-41 (OQT v1.7) for operator decision | Phase 0 audit-dedup verdict CLEAR (Cyfrin [M-2] not-a-dup, Hexens/OtterSec/Zellic no multi-hop slippage finding)_

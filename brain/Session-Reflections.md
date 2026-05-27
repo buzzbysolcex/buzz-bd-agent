@@ -1505,3 +1505,283 @@
 ## 2026-05-25T18:32:45Z — session end
 - branch: `main` @ `17ce839` (dirty: 832 files)
 - last commit: 17ce839 brain-backup-2026-05-25-auto
+
+## 2026-05-25T18:42:37Z — session end
+- branch: `main` @ `eaf6c9e` (dirty: 829 files)
+- last commit: eaf6c9e brain: batch-commit 19 brain proposals A-N + C-Cap-1..5 from 2026-05-25 Gate 1 trio + Cap Sherlock
+
+## 2026-05-25T19:08:24Z — session end
+- branch: `main` @ `eaf6c9e` (dirty: 830 files)
+- last commit: eaf6c9e brain: batch-commit 19 brain proposals A-N + C-Cap-1..5 from 2026-05-25 Gate 1 trio + Cap Sherlock
+
+## 2026-05-25T19:21:59Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-25T19:47:19Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-25T20:04:58Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-25T20:19:03Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-25T20:44:31Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-25T21:10:19Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-25T21:41:25Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-25T22:12:13Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-25T22:43:12Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-25T23:14:13Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-25T23:45:15Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-26T00:16:17Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-26T00:47:17Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-26T01:18:13Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-26T01:49:11Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-26T02:20:19Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-26T02:38:37Z — session end
+- branch: `main` @ `8879c2d` (dirty: 830 files)
+- last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
+
+## 2026-05-26T02:48:39Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 831 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T03:19:14Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 831 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T03:25:49Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 831 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T03:42:21Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 831 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T03:59:52Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 834 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T04:02:54Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 834 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T04:06:53Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 836 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T04:08:56Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 837 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T04:11:12Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 837 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T04:15:15Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 838 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T04:18:08Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 838 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T04:23:29Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 838 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T04:49:20Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 838 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T05:15:18Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 838 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T05:46:31Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 838 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T06:17:16Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 838 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T06:48:11Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 838 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T07:19:13Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 838 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T07:50:14Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 838 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T08:21:23Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 838 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T08:52:16Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 838 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T09:12:32Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 839 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T09:15:53Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 839 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T09:18:54Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 839 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T09:20:40Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 839 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T09:22:26Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 839 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T13:47:44Z — session end
+- branch: `main` @ `8fafa3d` (dirty: 839 files)
+- last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
+
+## 2026-05-26T14:00:56Z — session end
+- branch: `main` @ `9000768` (dirty: 1044 files)
+- last commit: 9000768 brain: Day 26 batch — 41 frozen proposals applied + JustLend C1 FORECLOSURE-RECEIPT + paste-readys
+
+## 2026-05-26T14:05:13Z — session end
+- branch: `main` @ `f8a0c72` (dirty: 1044 files)
+- last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
+
+## 2026-05-26T15:10:34Z — session end
+- branch: `main` @ `f8a0c72` (dirty: 1044 files)
+- last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
+
+## 2026-05-26T15:19:49Z — session end
+- branch: `main` @ `f8a0c72` (dirty: 1046 files)
+- last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
+
+## 2026-05-26T15:24:20Z — session end
+- branch: `main` @ `f8a0c72` (dirty: 1046 files)
+- last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
+
+## 2026-05-26T15:28:27Z — session end
+- branch: `main` @ `f8a0c72` (dirty: 1047 files)
+- last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
+
+## 2026-05-26T16:59:06Z — session end
+- branch: `main` @ `f8a0c72` (dirty: 1047 files)
+- last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
+
+## 2026-05-26T17:18:10Z — session end
+- branch: `main` @ `f8a0c72` (dirty: 1047 files)
+- last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
+
+## 2026-05-26T17:25:12Z — session end
+- branch: `main` @ `f8a0c72` (dirty: 1047 files)
+- last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
+
+## 2026-05-26T17:28:32Z — session end
+- branch: `main` @ `f8a0c72` (dirty: 1049 files)
+- last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
+
+## 2026-05-26T17:29:42Z — session end
+- branch: `main` @ `f8a0c72` (dirty: 1049 files)
+- last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
+
+## 2026-05-26T18:00:13Z — session end
+- branch: `main` @ `477afbf` (dirty: 1049 files)
+- last commit: 477afbf brain: DISC-020 Filecoin builtin-actors #79987 SUBMITTED — first post-AI-Report-refactor
+
+## 2026-05-26T18:05:01Z — session end
+- branch: `main` @ `477afbf` (dirty: 1050 files)
+- last commit: 477afbf brain: DISC-020 Filecoin builtin-actors #79987 SUBMITTED — first post-AI-Report-refactor
+
+## 2026-05-26T18:16:12Z — session end
+- branch: `main` @ `477afbf` (dirty: 1051 files)
+- last commit: 477afbf brain: DISC-020 Filecoin builtin-actors #79987 SUBMITTED — first post-AI-Report-refactor
+
+## 2026-05-26T18:17:57Z — session end
+- branch: `main` @ `477afbf` (dirty: 1052 files)
+- last commit: 477afbf brain: DISC-020 Filecoin builtin-actors #79987 SUBMITTED — first post-AI-Report-refactor
+
+## 2026-05-26T18:21:27Z — session end
+- branch: `main` @ `477afbf` (dirty: 1052 files)
+- last commit: 477afbf brain: DISC-020 Filecoin builtin-actors #79987 SUBMITTED — first post-AI-Report-refactor
+
+## 2026-05-26T18:23:39Z — session end
+- branch: `main` @ `477afbf` (dirty: 1054 files)
+- last commit: 477afbf brain: DISC-020 Filecoin builtin-actors #79987 SUBMITTED — first post-AI-Report-refactor
+
+## 2026-05-26T18:24:16Z — session end
+- branch: `main` @ `477afbf` (dirty: 1056 files)
+- last commit: 477afbf brain: DISC-020 Filecoin builtin-actors #79987 SUBMITTED — first post-AI-Report-refactor
+
+## 2026-05-26T18:28:41Z — session end
+- branch: `main` @ `b7539b1` (dirty: 1055 files)
+- last commit: b7539b1 brain: afternoon batch — 7 proposals from 3 halts (Across+dYdX+Lombard) + Platform-Migration-Log NEW
+
+## 2026-05-26T18:42:27Z — session end
+- branch: `main` @ `ba3e2ed` (dirty: 1049 files)
+- last commit: ba3e2ed lane5: Immunefi crawler shipped — 219 programs ingested, 0 regressions
+
+## 2026-05-26T18:53:30Z — session end
+- branch: `main` @ `ba3e2ed` (dirty: 1051 files)
+- last commit: ba3e2ed lane5: Immunefi crawler shipped — 219 programs ingested, 0 regressions
+
+## 2026-05-26T19:03:01Z — session end
+- branch: `main` @ `ba3e2ed` (dirty: 1052 files)
+- last commit: ba3e2ed lane5: Immunefi crawler shipped — 219 programs ingested, 0 regressions
+
+## 2026-05-26T19:12:16Z — session end
+- branch: `main` @ `ba3e2ed` (dirty: 1053 files)
+- last commit: ba3e2ed lane5: Immunefi crawler shipped — 219 programs ingested, 0 regressions
+
+## 2026-05-26T19:21:07Z — session end
+- branch: `main` @ `fd34d72` (dirty: 1050 files)
+- last commit: fd34d72 brain: evening batch — 9 proposals from 3 DB-verified Gate 1s (Olympus + CoW + rhinofi)
