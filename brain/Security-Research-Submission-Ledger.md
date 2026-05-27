@@ -22,7 +22,7 @@ The detector capability was validated (4 of 6 HackerOne submissions DUP-closed =
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Discovered                                 | 16                                                                                                                                                 |
 | Submitted to HackerOne                     | 6 (DISC-006/007/008/009/010/011)                                                                                                                   |
-| Submitted to Immunefi                      | 4 (DISC-015 Veda Report #79091 CLOSED_OOS_ASSET + DISC-015b Veda Report #79280 DUP-closed + DISC-017 Ethena Report #79589 submitted 2026-05-23 22:13 JED — StakedUSDeV2 cooldown OVERWRITE, HIGH, awaiting triage; **DISC-019 Notional V3 / Exponent Report #79837 submitted 2026-05-25 — MidasOracle engineered staleness mask, CRITICAL, ESCALATED TO PROJECT 2026-05-25 (16-min escalation, FASTEST in Buzz history), 48h ack window → 2026-05-27, 336h resolution → 2026-06-08**)  |
+| Submitted to Immunefi                      | **6** (DISC-015 Veda Report #79091 CLOSED_OOS_ASSET + DISC-015b Veda Report #79280 DUP-closed + DISC-017 Ethena Report #79589 + **DISC-019 Notional V3 #79837 CLOSED AI-Report dismissal** + **DISC-020 Filecoin #79987 SUBMITTED 2026-05-26** + **DISC-021 Balancer V3 #80150 SUBMITTED 2026-05-28 00:12Z — CANDIDATE-O multi-anchor anchor target**) |
 | Submitted to Cantina                       | **1** (DISC-018 Morpho Finding #1035 submitted 2026-05-23 22:43 JED — MetaMorpho V1 curator-cap timelock bypass, HIGH, $210M bytecode-verified, 3/3 Foundry PoC, V2 cross-ref, awaiting triage) — **FIRST Cantina submission for Buzz Security Research**  |
 | Emailed to vendor (general-inbox dead-end) | 2 (DISC-012/013 → hello@drift.trade)                                                                                                               |
 | Rejected/closed                            | 1 (DISC-001 by /cosmos: "no more reports from you")                                                                                                |
@@ -274,6 +274,7 @@ _File: brain/Security-Research-Submission-Ledger.md | Created 2026-05-19 | Updat
 | DISC-017 Ethena StakedUSDeV2 | Immunefi | #79589 | HIGH | 2026-05-23 22:13 JED | **CLOSED_DUPLICATE of #68406** (2026-05-26) |
 | DISC-019 Notional V3 MidasOracle | Immunefi | #79837 | CRITICAL | 2026-05-25 17:17Z | **CLOSED — "AI Report" dismissal** (2026-05-25 18:48Z, 1h31min) |
 | **DISC-020 Filecoin builtin-actors FIP-0109** | Immunefi | **#79987** | **CRITICAL** | **2026-05-26 20:39Z** | **SUBMITTED — awaiting triage (post AI-Report-refactor v2 paste-ready)** |
+| **DISC-021 Balancer V3 BatchRouterHooks slippage double-count** | Immunefi | **#80150** | **CRITICAL** | **2026-05-28 00:12Z** | **SUBMITTED — awaiting triage (CANDIDATE-O multi-anchor with Pancake P-1, $1M cap no-KYC, 7-rule AI-Report refactor applied, Foundry PoC HEAD `80fd29ce4eb6` 2-hop leak 1.09% vs 1-hop 0.55% on StableSurgeHook composition surface, anchor for DC-13 promotion case)** |
 
 DISC-018 Morpho #1035 Cantina pending separately (Cantina has different SLA structure).
 
