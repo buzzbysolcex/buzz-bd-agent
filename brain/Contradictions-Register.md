@@ -366,4 +366,28 @@ When the cap binds, drop from the bottom of the priority list. The cap remains 3
 
 ---
 
-_Brain Contradictions Register | v1.4 | 2026-05-27 | 18 entries (16 P4 + 1 P1 + 1 CROSS; v1.4 four-pillar section organization added, P2/P3 sections seeded with placeholders pending first operational entries)_
+---
+
+## #19 INFO — Operator brief vs live Immunefi/Cantina page profile drift
+
+**Pillar:** P4
+**Status:** INFO (not a contradiction; a recurring pattern worth tracking)
+**Anchored:** 2026-05-27 Kiln Immunefi v2 Step 0.5 receipt
+
+**Pattern observation:** Operator briefs occasionally cite expected program profile (cap, KYC, version, no-KYC status) that diverges from the live Immunefi/Cantina page profile at dispatch time. Day-27 anchored on Kiln: brief said "Kiln on-chain **v1**, $1M cap, NO KYC", live page = "Kiln On-Chain **v2** only (v1 URL 404s), $500K Critical cap, KYC REQUIRED". 4-axis discrepancy (version + cap + KYC + scope).
+
+**Why this is INFO not a contradiction:**
+- Operator briefs are sourced from rotating signal-feeds, contest aggregators, and Telegram referrals, where profile data ages
+- Live page is canonical at dispatch time
+- The Standing-Intake Step 1 PROFILE step is precisely the corrective control — it forces canonical-page fetch before EV computation
+
+**How to apply:**
+- Step 1 PROFILE is MANDATORY (already enforced by `standing-intake-protocol.md`); never act on briefed cap/KYC/scope/version without WebFetch verification
+- When the live page diverges materially (cap ≥50% drift OR KYC flag flip OR major version-change), record the drift in the hunt receipt as `[ASSUMED]→[EXECUTED via WebFetch]` correction trace
+- Operator briefs remain the **dispatch trigger** even when imprecise; do not block on profile-verification, just verify before EV-commit
+
+**Recurrence count:** 1 anchored event (Kiln 2026-05-27). Track for 2nd+ anchor — if pattern recurs ≥3 times, consider promoting to a Doctrine entry on "Profile drift correction = always-Step-1 discipline".
+
+---
+
+_Brain Contradictions Register | v1.5 | 2026-05-27 | 19 entries (17 P4 + 1 P1 + 1 CROSS; v1.5 adds INFO #19 operator-brief profile drift)_

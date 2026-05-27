@@ -1061,3 +1061,35 @@ _v2.7 Addendum: 2026-05-27 ~02:25 UTC | row 47 PancakeSwap Infinity Gate 2 PoC C
 ---
 
 _v2.8 Addendum: 2026-05-27 ~22:00 UTC | row N+1 DeFi Saver Gate 2 FORECLOSED (both tracks) | autonomous dispatch per `.claude/rules/autonomy-boundary.md` | structural NEGATE on EIP712 pass-through wrapper class — saves ~2-4h Foundry investment | DC-9 sub-2 DEFENSE PATTERN 2nd anchor lands (Patterns v2.5 — multisig-with-threshold rule) | Doctrine #38 NEW STRUCTURAL FORECLOSE class lands (Doctrine v3.8.2)_
+
+---
+
+## v2.9 Addendum: Kiln Immunefi v2 DEDUP-FORECLOSURE-RECEIPT (2026-05-27 22:09 UTC)
+
+Step 0.5 short-circuit triggered — no clone spent. Dispatched per `.claude/rules/autonomy-boundary.md` autonomous next-target selection.
+
+| # | Target | Cap | Scope | Brain overlap | Verdict | Receipt |
+|---|--------|-----|-------|----------------|---------|---------|
+| N+2 | **Kiln On-Chain v2** (Immunefi) | $500K Critical (KYC REQUIRED) | 13 contracts: Nexus + Coinbase Cloud Pool×4 + Kiln Pool×2 + 3 hatchers | HIGH on paper, but canonical substrate (`liquid-collective/liquid-collective-protocol`) already FORECLOSURE-WITH-RECEIPT at T-3 days (Kiln V1 Cantina row 3 above). 13 contracts are deployment-wrappers/hatchers around the canonical Nexus. | **DEDUP-FORECLOSURE-RECEIPT (Step 0.5)** — Day 27 compound stack REINFORCES all prior receipts: Doctrine #27 Corollary B + Sub-rule #27c (frozen-substrate 2.5yr + Halborn + Spearbit + Certora FULL FV harness with conf/+harness/+applyHarness.patch in-repo) + Doctrine #36 PERMANENT (substrate covered T-3) + Doctrine #37 Sub-Type B (LsETH mainnet via Nexus) + Doctrine #38 PARTIAL HIT (hatchers + per-operator pools = pure pass-through wrappers, NOT substantive logic surfaces). Operator brief said "Kiln on-chain v1 / $1M / NO KYC" — live Immunefi page = v2 only, $500K, KYC REQUIRED. EV $1,400 post-discount, below every threshold. | `hunts/2026-05-27-kiln-immunefi-gate1.md` |
+
+**Sub-rule #27c canonical-anchor confirmation:**
+
+Liquid Collective LsETH = **canonical anchor** for "frozen-substrate saturation" (mirrors Paxos PYUSD/USDP stablecoin substrate). Criteria met:
+- 2.5yr mature primitive (since 2023)
+- 3 top-tier firms: Halborn + Spearbit + Certora
+- Certora **FULL FV** harness committed in-repo (`conf/`+`harness/`+`applyHarness.patch`)
+- Both PDF channel (Notion audit catalog) + in-source channel (canonical GH repo) crawled at T-3 (2026-05-24) and T+3 (2026-05-27)
+- Identical receipt structure both crawls → frozen-substrate predicate **CONFIRMED**
+
+**Cross-platform deployment pattern (Doctrine #38 PARTIAL HIT):**
+- 13 Immunefi v2 contracts = 6 substantive logic surfaces (Nexus core) + 7 deployment-wrappers (4 Coinbase Cloud Pool instances + 2 Kiln Pool instances + 1 hatcher class)
+- The 7 wrappers are SAME-PATTERN re-deployments differentiated only by operator address → Doctrine #38 STRUCTURAL FORECLOSE applies to wrappers
+- Validates "Pure Pass-Through *WithSig Wrappers" generalizes to "Pure Pass-Through Per-Operator Pool Re-Deployments"
+
+**Validation event: Step 0.5 short-circuit reliability:**
+- 2 same-day demonstrations on 2026-05-27 (Paxos T+3 + Kiln T+3)
+- Both REINFORCE prior verdicts, neither unlocks new angle
+- Confirms Step 0.5 short-circuit is reliable mechanism at T+3 days when Day 27 compound stack fully primed
+- Open Questions Tracker Q-NEW: at what T+N does compound stack lose reinforcement strength? (suggests Day-45 retest as boundary probe)
+
+_v2.9 Addendum: 2026-05-27 ~22:15 UTC | row N+2 Kiln Immunefi v2 DEDUP-FORECLOSURE-RECEIPT | Step 0.5 short-circuit no-clone-spent | LsETH = canonical Sub-rule #27c anchor | Doctrine #38 generalizes to per-operator pool wrappers | 2 same-day T+3 short-circuit demonstrations validate protocol reliability_
