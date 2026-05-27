@@ -396,4 +396,33 @@ Pattern transition: simple cap/KYC/version drift → **platform-routing drift**.
 
 ---
 
-_Brain Contradictions Register | v1.6 | 2026-05-27 evening | 19 entries (17 P4 + 1 P1 + 1 CROSS; v1.6 expands INFO #19 with 2nd anchor Cap platform-discrepancy)_
+---
+
+## #20 INFO — Gate 1 novelty over-estimate on cross-protocol DC-7 hypotheses
+
+**Pillar:** P4
+**Status:** INFO (process-hardening rule, not a contradiction in a doctrine)
+**Anchored:** 2026-05-27 evening Cap Gate 2 NEGATE
+
+**Pattern observation:** Cross-protocol DC-7 hypotheses generated at Gate 1 systematically over-estimate novelty when the consumer-side replay/freshness defenses on the OTHER protocol are not pre-enumerated.
+
+**Concrete data:** Cap Gate 1 estimated Finding 1 (`advanceTotp` + EigenLayer stale-restaker race) novelty at **35%**, EV $15K-$50K. Cap Gate 2 source-read showed actual novelty **<5%**: EigenLayer's `DelegationManager.approverSaltIsSpent[approver][salt]` replay defense + `getOperatorShares()` LIVE state reads + Cap's own deterministic-derivation key-binding meant the hypothesis was structurally non-applicable, not partially-defended. Gap = 7× over-estimate.
+
+**Why this happens:** Gate 1 surface-mapping focuses on the in-scope protocol's surface. Cross-protocol DC-7 (key-A in protocol-X, key-B in protocol-Y) requires reading the OTHER protocol's defenses too — but Gate 1 budget rarely covers that depth. Auditor often catches the cross-protocol angle, BUT only the consuming side's defenses; the originating side's setter may still look "permissionless".
+
+**How to apply (Standing-Intake Step 5 hardening proposal):**
+
+When Gate 1 surface map includes any DC-7 hypothesis that spans protocol boundaries (X writes, Y reads, OR X writes + downstream Y consumes via callback/integration), the Gate 1 file MUST include a "**Cross-Protocol Defense Enumeration**" subsection that lists:
+- Consumer-side replay defenses (saltIsSpent / nonceUsed / commitmentRevealed patterns)
+- Consumer-side freshness defenses (live-read vs cached-read, stale-tolerance windows)
+- Writer-side key-binding determinism (is the key fully determined by stored state? Or does attacker control any input?)
+
+If 2+ of those 3 defenses are present → DC-7 EXCLUSION sub-pattern fires (see Patterns-Defense-Classes.md), foreclose at Gate 1.
+
+**Recurrence count:** 1 anchored event (Cap 2026-05-27). Track for 2nd+ anchor. If pattern recurs ≥2 times, promote rule to MANDATORY Step 5 sub-check in `.claude/rules/standing-intake-protocol.md`.
+
+**Cross-reference:** Doctrine #34 sub-class b anchor #3 (Cap, this hunt) — both are facets of the same lesson: structural defense layers exist and need to be enumerated BEFORE Gate 2 dispatch, not discovered during it.
+
+---
+
+_Brain Contradictions Register | v1.7 | 2026-05-27 evening | 20 entries (18 P4 + 1 P1 + 1 CROSS; v1.7 adds INFO #20 Gate 1 novelty over-estimate, anchors process-hardening rule for cross-protocol DC-7)_

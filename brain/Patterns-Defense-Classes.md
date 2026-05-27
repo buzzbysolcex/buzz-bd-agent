@@ -223,6 +223,31 @@ For every function exposed to user input, build the validation→consumption map
 
 **Anchor file:** This entry. Worked-example details in `brain/Cross-Domain-Fragility-Laws.md` v1.5 + downstream incident files.
 
+### DC-7 EXCLUSION sub-pattern — Validating-Field = Consuming-Field via Deterministic Derivation (added 2026-05-27 evening from Cap Gate 2 NEGATE, hunt `hunts/2026-05-27-cap-c1-gate2-foreclosure.md`)
+
+**Statement:** A pipeline that LOOKS like DC-7 (paired validation + consumption functions sharing a mapping/lookup) does NOT qualify as DC-7 when the validating-write input is **fully determined by stored state with no attacker-controlled binding**. Specifically:
+
+1. Write function (e.g., `advanceTotp()`, `commitDigest()`) computes its key via a pure hash of (a) set-once / never-rotating storage variables and (b) `address(this)` or other contract-local constants.
+2. Read function consumes the SAME storage mapping via SAME hash derivation.
+3. No external input to the write function affects which key gets toggled.
+
+In this case validating-field IS consuming-field — they're the SAME deterministic slot, just accessed at different times. The "permissionless setter" surface is operationally a no-op flag-toggle, not a key-binding decision.
+
+**Negative-control for DC-7 surface mapping:** before flagging a permissionless setter / mutator as DC-7, ask:
+- Does the attacker control ANY input to the write function that affects the resulting key/digest? (If no → EXCLUSION fires, not DC-7)
+- Is the consuming-side read deriving its key from the SAME storage variables and SAME hash function? (If yes → EXCLUSION fires)
+- Is there a cross-protocol consumer that re-derives state from LIVE on-chain reads (no cache)? (If yes → EXCLUSION fires across protocol boundaries too)
+
+**Anchor:** Cap `EigenOperator.advanceTotp()` writes `allowlistedDigests[digest] = true` where `digest = calculateTotpDigestHash($.restaker, address(this))`. `$.restaker` is set-once (`registerOperatorSetToServiceManager` reverts on `restaker != address(0)`), `address(this)` is a constant. Consumer `isValidSignature` reads the SAME `allowlistedDigests[digest]` via SAME hash derivation. Cross-protocol: `Delegation.coverage()` → `IDelegationManager.getOperatorShares()` reads LIVE EigenLayer state, no cache. ALL 3 EXCLUSION conditions fire → DC-7 does NOT apply.
+
+**Detector spec (negative — to AVOID Gate 1 false-positive):** when surface-mapping permissionless setters, AST-grep the setter body for `keccak256(...)` / hash-derivation calls. If ALL hash inputs are storage-reads OR `address(this)` OR `block.chainid`-class constants, flag as DC-7 EXCLUSION candidate. Cross-check consumer's hash derivation matches. If match → EXCLUSION, no surface entry.
+
+**Boundary anchor for Doctrine #38:** this exclusion is the OPPOSITE pattern from Doctrine #38 (Pure Pass-Through *WithSig STRUCTURAL FORECLOSE). Doctrine #38 fires when a contract is a stateless signature-forwarding wrapper (no local state). DC-7 EXCLUSION fires when the contract has local state but the state-transitions are deterministic (no attacker binding). Both produce NEGATE verdicts at Gate 1/Gate 2 but for different structural reasons.
+
+**Authority:** Cap Gate 2 foreclosure receipt (`hunts/2026-05-27-cap-c1-gate2-foreclosure.md`). Gate 1 estimated novelty 35%, actual <5% — Contradictions-Register INFO #20 anchors the Gate 1 hardening rule (cross-protocol DC-7 hypotheses MUST enumerate consumer-side replay/freshness defenses before finalizing surface map).
+
+---
+
 ### DC-7 sub-pattern — Cross-language enum repr divergence between native VM and FEVM (added 2026-05-26 from Filecoin Gate 1, hunt `hunts/2026-05-26-filecoin-immunefi-gate1.md` proposal C-Filecoin-3)
 
 **Statement:** When a builtin-actor (or any cross-language interop substrate) defines an enum type that is consumed by BOTH a native-language caller (Rust on Filecoin's FVM) AND a non-native caller (Solidity on FEVM via precompile / runtime call), the serialization representation MUST be EXPLICIT — typically `#[repr(uN)]` plus `Serialize_repr` for Rust enums. Default Rust enum CBOR variant-name serialization (string-keyed) vs Solidity `uint8`-decoded enum is a structural mismatch: validation reads one repr, consumption reads another. The DC-7 keys decouple along the LANGUAGE-BOUNDARY axis instead of the per-pipeline-field axis. [INSPECTED]
