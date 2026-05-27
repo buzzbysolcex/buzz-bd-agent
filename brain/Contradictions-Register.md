@@ -13,6 +13,16 @@
 
 **Discovery method.** For each pair: read both rule statements as currently written. Construct a hypothetical target T that satisfies the trigger of both rules. Compare outputs. If the outputs are procedurally compatible (e.g., one prescribes a verification step, another prescribes a downstream submission gate), there is NO contradiction. If the outputs are mutually incompatible (PROCEED vs FORECLOSE, AUTO-DISPATCH vs SURFACE-TO-OPERATOR, REJECT vs ACCEPT at same confidence), the contradiction is logged below.
 
+**Section organization (v1.4 four-pillar extension, 2026-05-27):** Entries 1-16 are Pillar 4 (bug research — original Self-Correction Layer scope). Entries from #P1-1 onward are organized by pillar:
+
+- **#1-#16** — P4 (Pillar 4 — bug research)
+- **#P1-N** — P1 (Pillar 1 — token scoring) contradictions
+- **#P2-N** — P2 (Pillar 2 — HSaaS / Content) contradictions
+- **#P3-N** — P3 (Pillar 3 — corpus) contradictions
+- **#CROSS-N** — cross-pillar contradictions (rules from ≥2 pillars conflict)
+
+When adding a new contradiction, place it under the matching section (P1/P2/P3/P4/CROSS) and number within that pillar's sequence.
+
 **Sources read end-to-end for v1.0:** `brain/Doctrine.md` (2631 lines, Doctrines #19–#37 + 23+ worked examples + Priority #0–#4 hierarchy), `brain/Patterns-Defense-Classes.md` (DC-1..DC-20 + CANDIDATE-A..R + META-DOCTRINE Two-Axis Donation-Channel Test + sub-patterns), `brain/External-Frameworks.md` (Meta-LLM Charter / Anthropic Glasswing / 0xTeam lending+stablecoin / TU-Berlin agent-OS / Single-Firm-Continuous-Audit Sub-Pattern / Selective-Coverage Defense Asymmetry), `brain/Hyperactive-Formula.md` (10-step loop + v1.1 ZERO OPTION MENUS appendix), `.claude/rules/standing-intake-protocol.md` (6-step intake pipeline), `.claude/rules/aibtc-bm-3source-standard.md` (signal source standard), `.claude/rules/tweet-on-score.md` (v2.2 liquidity floor), and structural section-headers of `brain/Cross-Domain-Fragility-Laws.md` + `brain/Watchlist-Candidate-Crossmap.md`. `brain/Methodology-Doctrine.md` was listed in inputs as an alias of Doctrine.md; file does NOT exist at that path (verified 2026-05-26). Doctrine.md is canonical.
 
 ---
@@ -276,3 +286,84 @@ This is the broader principle: composition surfaces inherit the saturation profi
 ---
 
 _Brain Contradictions Register | v1.1 | 2026-05-26 | 15 entries (12 v1.0 + 3 fed back from Weekly Synthesis 2026-05-26) | Part 1 of Brain Self-Correction Layer rollout. Next update on next 2 Gate 1 brain-proposal cycles, or upon any Doctrine.md commit touching #27 / #32 / #34 / #36 / #37 calibration tiers, or upon any Hyperactive-Formula.md or standing-intake-protocol.md commit, or after the next Sunday weekly-synthesis run feeds new entries._
+
+---
+
+## #16 — Pattern J (slippage double-count) FORECLOSURE for Balancer V3 contradicted by composition with StableSurgeHook approximation
+
+**Source A:** `brain/Watchlist-Candidate-Crossmap.md:314` — "Balancer V3 | Pattern J FORECLOSED | `BatchRouterHooks.sol:127` per-step minOut zeroed + write-once `pathAmountsOut` + assignment-not-accumulation `stepExactAmountIn`"
+
+**Source B:** B-1 Gate 2 Foundry PoC (`pkg/pool-hooks/test/foundry/BatchRouterSlippageDoubleCountPoC.t.sol`, 2026-05-27) — Pattern J substrate IS load-bearing when composed with StableSurgeHook's acknowledged approximation. 2-hop batched swap leaks ~1.09% vs 0.55% single-hop on production-default parameters.
+
+**Conflict:** Foreclosure row was written treating "per-step minOut=0" as a defended-by-design choice. PoC demonstrates the per-step zero IS the vulnerability substrate when downstream calculation has structural approximation error. The substrate isn't foreclosed by router design — it's exposed by router design combined with hook design.
+
+**Proposed resolution:** Upgrade foreclosure-row 314 status from `Pattern J FORECLOSED` to `Pattern J PARTIAL — load-bearing in StableSurgeHook composition surface`. The pure Pattern J substrate (router-only, no hook) is still architecturally bounded by end-to-end slippage check on a single-fee curve. The compounded Pattern J (router + approximation-hook) is NOT bounded. This is a Doctrine #34 Post-Audit Composition Multiplier instance — the router and hook were audited separately and each in isolation was "defended"; the composition reveals the substrate.
+
+**Resolution status:** Pending — surfaces on next maintenance loop. Notes in Crossmap v2.5 addendum (2026-05-27 ~00:35 UTC). Until row 314 is corrected, treat the v2.5 addendum as authoritative.
+
+**2026-05-27 ~02:25 UTC reinforcement (Pancake Infinity Gate 2 CONFIRM):** Independent second-anchor for the same structural pattern. `infinity-periphery/src/pool-cl/CLRouterBase.sol:40-65` exhibits the same end-of-path-only floor + hook-returns-delta composition with 1.195% 2-hop vs 0.600% 1-hop leakage on identical envelopes. Two production deployments, two unrelated teams, same structural shape — the contradiction is now multi-anchored. CANDIDATE-O DC-promotion queued in OQT Q-41. Foreclosure-row 314 correction priority elevated.
+
+---
+
+_Brain Contradictions Register | v1.3 | 2026-05-27 ~02:25 UTC | 16 entries (15 v1.1 + Pattern J Balancer V3 foreclosure contradicted by Gate 2 PoC; reinforced 2026-05-27 by Pancake Infinity Gate 2 second-anchor CONFIRM)_
+
+---
+
+# === SECTION P1 — PILLAR 1 (TOKEN SCORING) CONTRADICTIONS ===
+
+## #P1-1 — Instant-kill "already listed on Tier 1/2 CEX" vs HSaaS outreach to established projects
+
+**Rule A** (source: `brain/Token-Scoring-Doctrine.md` T-1, current instant-kills list): Instant-kill rules deterministically disqualify tokens from scoring (STABLECOIN_EXCLUSION, GHOST_TOKEN). Hypothetical expansion candidate: "ALREADY_LISTED_TIER_1_CEX" — token already trades on Binance/Coinbase/Kraken → instant-skip because the listing-pipeline value vector (SolCex listing intelligence) does not apply.
+
+**Rule B** (source: `brain/HSaaS-Operations.md` §4 prospect-scoring hypotheses + `.claude/rules/tweet-on-score.md` v2.2): HSaaS audit-tier outreach targets ESTABLISHED projects (mcap $5M-$50M, doxxed team, prior audits) as a moderate-conversion segment. Many such projects are also Tier 1/2 CEX listed. The HSaaS sales pitch ("we'll audit your token honestly") does not require unlisted-status; it requires audit-budget appetite.
+
+**Conflict scenario:** A token like LDO or PENDLE — listed on Binance + Coinbase, $1B+ mcap, audit-budget present. Rule A (proposed instant-kill) would silently remove the token from the scoring pipeline → no score tweet draft → no HSaaS outreach trigger. Rule B (HSaaS) says these are valid outreach targets. Instant-killing them at Pillar 1 forecloses the Pillar 2 path.
+
+**Proposed resolution:** SCOPE-LIMIT. Do NOT promote "ALREADY_LISTED_TIER_1_CEX" to instant-kill. Instead: treat already-listed status as a SIGNAL routed to the Pillar 2 segmentation engine (HSaaS prospect scoring), NOT as a scoring-engine exclusion. The token still scores; the score-tweet template chooses between BD-listing-pitch framing vs HSaaS-audit-pitch framing based on listing status.
+
+**Resolution detail:** Add `tier_1_cex_listed` field to Pillar 1 scoring output (Boolean). Pillar 2 tweet-draft generator branches on the field: if `true` → HSaaS-pitch template + audit-tier CTA; if `false` → SolCex-listing-pitch template + BD-outreach CTA. The two pillars share the score but route different downstream actions.
+
+**Status:** ESCALATE (proposed rule; await operator decision on whether to add the field + template branching). Source: Four-Pillar Brain Extension cycle 2026-05-27.
+
+---
+
+# === SECTION P2 — PILLAR 2 (HSAAS / CONTENT) CONTRADICTIONS ===
+
+*(v1.4 seed: none yet — first operational P2 contradictions emerge when HSaaS outreach cycle goes live and engagement data accumulates. Anticipated first conflict: template-A vs template-B A/B winner-vs-Hyperactive-Formula deterministic-dispatch on next outreach batch.)*
+
+---
+
+# === SECTION P3 — PILLAR 3 (CORPUS) CONTRADICTIONS ===
+
+*(v1.4 seed: none yet — first operational P3 contradictions emerge when Phase 2 corpus consumer runs and classification mix produces a DETECTOR_SEED row that conflicts with an existing Pillar 4 detector. Anticipated first conflict: corpus-extracted historical pattern flagged DETECTOR_SEED vs the same pattern already FORECLOSED in Patterns-Defense-Classes.md as a defended-by-design class.)*
+
+---
+
+# === SECTION CROSS — CROSS-PILLAR CONTRADICTIONS ===
+
+## #CROSS-1 — Tweet daily cap (3 max) vs Pillar 4 wanting to tweet every confirmed exploit
+
+**Rule A** (source: `.claude/rules/tweet-on-score.md` v2.2 + `brain/Content-Playbook.md` §8 known constraints): "Maximum 3 score tweets per day (quality over spam)." Hard cap from v2.2 onward. Applies to all score-tweet templates (T-HOT, T-WATCH, T-FLAG, T-CAL).
+
+**Rule B** (source: `four-pillar-loop.md` Pillar 4 → Pillar 2 wiring + `brain/Cross-Pollination-Log.md` §3 anticipated handoffs): "Bug research confirms exploit POST-DISCLOSURE → Moltbook case study + 'Caught' tweet + shield.buzzbd.ai gallery + HSaaS outreach reference." The "Caught" tweet flow assumes every confirmed exploit produces a tweet. On a high-throughput day (e.g., 2 Gate 2 CONFIRMs land same day, AND a separate rug-catch fires from Pillar 1, AND a previously-scored token dumps), 4+ tweets queue against a 3-tweet cap.
+
+**Conflict scenario:** Day-with-4-events. Pillar 4 produces 2 "Caught" tweets (B-1 + P-1 post-disclosure). Pillar 1 produces 1 calibration tweet (a previously-scored 75/100 token dumped → T-CAL-v22). Pillar 1 also has 1 fresh 87/100 score → T-HOT-v22. Total: 4 tweets demanded, 3 allowed. Which 3 get tweeted? Which 1 gets dropped (log-only, no public surface)?
+
+**Proposed resolution:** SCOPE-LIMIT Rule A. Introduce a priority ordering inside the 3-tweet daily slot:
+
+1. **T-FLAG-v22 / "Caught" tweets (Pillar 4 confirmed exploit post-disclosure)** — priority 1, always-on regardless of other queue depth
+2. **T-CAL-v22 calibration tweets (Pillar 1 rug catch on previously-scored token)** — priority 2, methodology proof
+3. **T-HOT-v22 high-score tweets (Pillar 1 fresh score ≥85)** — priority 3
+4. **T-WATCH-v22 mid-score tweets (Pillar 1 fresh score 50-69)** — priority 4
+
+When the cap binds, drop from the bottom of the priority list. The cap remains 3/day (quality over spam preserved), but the priority preserves the highest-leverage content.
+
+**Alternative resolution:** Operator-decides-per-day exception — if a multi-exploit day produces 4+ confirmed P4 catches, operator approves a one-day expansion to N tweets. The cap remains the default; the exception path is documented.
+
+**Resolution detail:** Codify priority ordering in `tweet-on-score.md` v2.3 (or as a Content-Playbook §1 amendment). When `pending_tweets.count > 3`, sort by template priority, tweet top 3, log remainder to `data/buzz/persistent/audits/dropped-tweets-{date}.json` for next-day promotion if still relevant.
+
+**Status:** ESCALATE (operator decision on which resolution path; both are operationally viable). Source: Four-Pillar Brain Extension cycle 2026-05-27.
+
+---
+
+_Brain Contradictions Register | v1.4 | 2026-05-27 | 18 entries (16 P4 + 1 P1 + 1 CROSS; v1.4 four-pillar section organization added, P2/P3 sections seeded with placeholders pending first operational entries)_
