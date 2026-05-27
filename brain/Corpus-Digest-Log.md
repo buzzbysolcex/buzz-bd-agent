@@ -25,6 +25,7 @@ Classification mix counts: GROUND_TRUTH / RUG_PATTERN / METHODOLOGY / DETECTOR_S
 | date | phase | era_window | input_records | findings_extracted | classification_mix | brain_files_updated | runtime |
 |---|---|---|---|---|---|---|---|
 | 2026-05-20 | Phase 1 | 2009-2011 (topic IDs 1-30000) | 221,804 posts (corpus) → 1,230 extracted | 1,230 posts across 10 target authors | GROUND_TRUTH dominant | `brain/Lane4-Phase1-Results.md` created | not recorded |
+| 2026-05-27 | Phase 2 | extension-batch + carry-forward | 938202 new lines | 77884 findings | GT=56182/RP=20003/MTH=1442/DS=257 | proposals only (no brain writes) | 4.4m |
 
 **Phase 2 status (2026-05-27):** consumer script LANDED at `scripts/lane4-corpus-phase2-consumer.py` + `.sh` wrapper. Dry-run validated against full 935K corpus in 4m28s — produced 56,104 GT / 19,992 RP / 1,441 MTH / 257 DS findings (pre-cap). First production run scheduled Wed 2026-06-03 06:00 UTC (cron entry pending operator install). Output: proposals to `data/lane4/phase2-proposals/<date>/`, brain writes deferred to operator review.
 

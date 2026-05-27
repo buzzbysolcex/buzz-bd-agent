@@ -1029,3 +1029,35 @@ Two independent production deployments by two unrelated teams converge on the sa
 - Disk during PoC build: 84% / 6.0G free (within 88% halt threshold)
 
 _v2.7 Addendum: 2026-05-27 ~02:25 UTC | row 47 PancakeSwap Infinity Gate 2 PoC CONFIRMS | autonomous dispatch per `.claude/rules/autonomy-boundary.md` | multi-anchor confirmation: CANDIDATE-O now confirmed across Balancer V3 + Pancake Infinity | DC-13 promotion queued in Q-41 (OQT v1.7) for operator decision | Phase 0 audit-dedup verdict CLEAR (Cyfrin [M-2] not-a-dup, Hexens/OtterSec/Zellic no multi-hop slippage finding)_
+
+---
+
+### Row N+1 — DeFi Saver (Immunefi $350K Critical, no KYC)
+
+**Date probed:** 2026-05-27 (Gate 1 + Gate 2 same-day)
+**Status:** **FORECLOSED (Track A structural NEGATE) + SOFT-FORECLOSED (Track B Centralization-Accepted)**
+**Gate 1 file:** `hunts/2026-05-27-defisaver-immunefi-gate1.md`
+**Gate 2 receipt:** `hunts/2026-05-27-defisaver-c1-gate2-foreclosure.md`
+**Repo clone:** `.work-clones/defisaver-v3/` (52MB, RETAINED for CANDIDATE-3 future re-probe)
+**Lens-target matrix (final):**
+
+| Lens / Candidate | Hits | Verdict |
+|---|---|---|
+| CANDIDATE-K (state-not-invalidated cross-call) — *WithSig family | 7 hits | **STRUCTURAL NEGATE** — pure pass-through, EIP712 enforces signer-binding |
+| DC-7 — Validating-Field ≠ Consuming-Field | 3 hits (pause-asymmetry / L2 / *WithSig) | **NEGATE** — no validating-field exists on *WithSig wrappers |
+| DC-9 sub-2 — Privileged State Mutation Without Defense-in-Depth | 2 hits (AdminVault + DFSRegistry.revertToPreviousAddress) | **SOFT FORECLOSE** — AdminVault.admin = Gnosis Safe 3-of-6 (5-year operational, OOS clause); revertToPreviousAddress gated on admin compromise (low EV) |
+| Doctrine #34 sub-class b (audit-regression family-widening) | STRONG MATCH on *WithSig family | **NEGATE downstream** — family is post-audit but the substrate has no exploitable surface |
+| CANDIDATE-O (slippage double-count) — exchangeV3 | indirect | NOT INVESTIGATED |
+
+**Re-probe trigger conditions:**
+- AdminVault.admin Gnosis Safe threshold drops below 3 OR signer count drops below 5 → re-escalate DC-9 sub-2
+- Any new action contract added to `actions/aaveV4/`, `actions/morpho-blue/`, `actions/spark/` that takes LOCAL action beyond pass-through (i.e., extracts fields from the signed struct for downstream parameter resolution) → CANDIDATE-Q refined-hypothesis re-anchor opportunity
+- DFSRegistry event log enumeration not done — CANDIDATE-3 re-probe defer until disk allows + 2nd anchor for revertToPreviousAddress pattern emerges
+
+**Brain compounds from this row:**
+- Doctrine #38 NEW: Pure Pass-Through *WithSig Wrappers Are STRUCTURAL FORECLOSE (Doctrine v3.8.2)
+- DC-9 sub-2 DEFENSE PATTERN 2nd anchor: Multisig-with-Threshold-≥3-of-≥5 = Centralization-Accepted (Patterns v2.5)
+
+---
+
+_v2.8 Addendum: 2026-05-27 ~22:00 UTC | row N+1 DeFi Saver Gate 2 FORECLOSED (both tracks) | autonomous dispatch per `.claude/rules/autonomy-boundary.md` | structural NEGATE on EIP712 pass-through wrapper class — saves ~2-4h Foundry investment | DC-9 sub-2 DEFENSE PATTERN 2nd anchor lands (Patterns v2.5 — multisig-with-threshold rule) | Doctrine #38 NEW STRUCTURAL FORECLOSE class lands (Doctrine v3.8.2)_
