@@ -1192,3 +1192,43 @@ _v2.11 Addendum: 2026-05-27 ~22:35 UTC | row N+4 Cap Gate 1 PROCEED-DOWN-TO-GATE
 4. Standing-Intake Step 5.11 — Cross-Protocol Defense Enumeration MANDATORY rule (pending `.claude/rules/standing-intake-protocol.md` edit)
 
 _v2.12 Addendum: 2026-05-27 ~22:55 UTC | rows N+4 (F1) + N+4 (F3) both NEGATED via Doctrine #34 sub-b anchor #3+#4 | skip remaining Cap findings (F2/F4/F5 EV <$5K floor) | Cap clones purge queued (21.4M) | next-target pivot: fresh-substrate Lane 5 target with 0-1 audits + ≥$50K cap (Function FBTC $822M BTC bridge $100K candidate; OnRe $177M Solana RWA $100K candidate)_
+
+---
+
+## v2.13 Addendum: Function FBTC Gate 1 FORECLOSE + Step 5.11 first deployment (2026-05-27 ~23:10 UTC)
+
+**First hunt with NEW Step 5.11 Cross-Protocol Defense Enumeration MANDATORY rule applied.** Step 5.11 fired EXCLUSION on 4 of 5 hypotheses — saving Gate 2 dispatch on all 4.
+
+| # | Target | Cap | Scope | Brain overlap | Verdict | Receipt |
+|---|--------|-----|-------|----------------|---------|---------|
+| N+5 | **Function FBTC** (Immunefi) | $100K Critical (KYC) | Bitcoin bridge, custodial-minter + qualified-user model + FBTCGovernorModule Gnosis Safe owner | HIGH on paper (DC-7 H + CJ M + CANDIDATE-A primary bridge lens) | **FORECLOSE** — 10 hypotheses all NEGATE/OOS; Step 5.11 EXCLUSION on H1/H2/H6/H10 (3/3 defenses each); H8 below MIN-cap Doctrine #29 (Medium severity max) | `hunts/2026-05-27-function-fbtc-immunefi-gate1.md` (44KB) |
+
+**Step 5.11 Cross-Protocol Defense Enumeration matrix (FIRST PRODUCTION DEPLOYMENT):**
+
+| Hypothesis | Q1 freshness | Q2 replay | Q3 fallback | Defenses | EXCLUSION |
+|---|---|---|---|---|---|
+| H1 srcHash binding (DC-7 PRIMARY) | YES (`getCrossSourceRequestHash` recompute) | YES (`crosschainRequestConfirmation[srcHash]` + `dstChain==chain()`) | YES (pause) | **3/3** | **FIRES** |
+| H2 addBurnRequest CEI | YES (nonce invariant) | YES (nonce++ replay-prev) | YES (pause+userBlocked) | **3/3** | **FIRES** |
+| H6 blockDepositTx race | YES (shared `usedDepositTxs` precondition) | YES (mutual-exclusion mapping) | YES (pause) | **3/3** | **FIRES** |
+| H8 Pending after lock | NO (confirm-time no lock re-check) | PARTIAL | YES (pause) | **1.5/3** | NO (but Med severity < MIN-cap) |
+| H10 Factory front-run | YES post-verification (`_private=true`) | YES (`_guardSalt(sender,...)` binds caller) | N/A structural | **3/3** | **FIRES** |
+
+**Brain compounds (5 from this hunt):**
+
+1. **CANDIDATE-A.4 NEW sub-pattern** — Cross-chain factory front-run via permissionless deterministic deployment. Function FBTC = NEGATIVE worked example (correct mitigation: Create3WithSender enum=3 + `_private=true` + sender-bound salt). File for `brain/Patterns-Defense-Classes.md`.
+2. **Pending-request liveness-check asymmetry doctrine CANDIDATE** (1st anchor: Function FBTC H8 `confirmMintRequest` no lock re-check). Needs 2nd anchor per Doctrine #37 3-anchor rule.
+3. **DC-7 EXCLUSION sub-pattern — 2nd worked example** (1st: Cap C1, 2nd: Function FBTC H1). **One more anchor needed for canonical PROMOTION to DC-7 EXCLUSION-A.**
+4. **External-Frameworks update** — Function FBTC = trust-minimized-but-operationally-custodial bridge architecture (2nd anchor after THORChain Bifrost on Bitcoin substrate). Promotes architectural pattern recognition.
+5. **Doctrine #36 substrate-coverage build** — +4 anchors banked for Bitcoin bridge substrate (UTXO model + tx-replay commitment + trust-minimized-but-operationally-custodial topology + admin-trusted address binding). Substrate-coverage build EXEMPTS this hunt from P(finding) floor 0.01.
+
+**EV post-discount:**
+- Pre-discount: 0.10 × $100K × 0.5 × 1.0 = $5,000
+- Doctrine #34 saturation discount: 0.30 (5 audits / 3 firms: BlockSec×2 + MixBytes + Secure3)
+- Post-saturation: $1,500 (below $5K floor → Doctrine #29 MIN-cap supports FORECLOSE)
+- Realized EV: $0 (no Gate 2 candidate survives Step 5.11)
+
+**Method validation:**
+
+Step 5.11 deployment SUCCESS — fired EXCLUSION on 4 of 5 paired-pipeline hypotheses on the FIRST production hunt that applied it. Hypothesis-rejection signal-strength matches INFO #20 promotion rationale (cross-protocol defense enumeration BEFORE Gate 2 saves the dispatch). Function FBTC validates the rule's reliability.
+
+_v2.13 Addendum: 2026-05-27 ~23:10 UTC | row N+5 Function FBTC FORECLOSE | Step 5.11 first production deployment (4-of-5 EXCLUSIONs fire) | Doctrine #36 +4 anchors banked for Bitcoin bridge substrate | DC-7 EXCLUSION sub-pattern 2nd worked example (Cap C1 + Function FBTC H1, 1 more anchor for canonical promotion) | next-target pivot: OnRe $177M Solana RWA $100K (CANDIDATE-G promotion catalyst, CG → DC-7 promotion unblock candidate)_
