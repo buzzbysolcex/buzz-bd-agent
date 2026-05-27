@@ -2488,11 +2488,17 @@ The most-blast-radius function has the LEAST defense. Defense-asymmetry inversio
 
 ---
 
-## Doctrine #36 CANDIDATE — Substrate-Coverage Gate (added 2026-05-26 afternoon — dYdX V4 P2 PRE-CLONE-HALT proposal, single-anchor pending 2nd)
+## Doctrine #36 PERMANENT — Substrate-Coverage Gate (promoted 2026-05-27 evening — 2nd anchor lands via Bifrost Polkadot Substrate-Rust)
 
-**Statement (candidate).** When Buzz's detector pack has ZERO mechanical coverage for a target substrate (no AST walker, no Layer 1 deep-analyzer for the language, no semgrep ruleset binding), apply a floor `P(finding) ≤ 0.01` in Step 3 EV calculation. The floor prevents EV-inflation on Gate 1 dispatches against substrates where the corpus is structurally blind. [INSPECTED]
+**Statement (PERMANENT).** When Buzz's detector pack has ZERO mechanical coverage for a target substrate (no AST walker, no Layer 1 deep-analyzer for the language, no semgrep ruleset binding), apply a floor `P(finding) ≤ 0.01` in Step 3 EV calculation. The floor prevents EV-inflation on Gate 1 dispatches against substrates where the corpus is structurally blind. [INSPECTED]
 
-**Why this is candidate doctrine, not standing rule.** Currently single-anchor (dYdX V4 Cosmos-SDK Go, 2026-05-23 + 2026-05-26 double-confirmation). The pattern recurs in the 2026-05-26 Day 26 batch (Filecoin Go portion ZERO Go detector, Stacks/ALEX Clarity ZERO Clarity detector) but those targets had PARTIAL detector coverage on adjacent substrate (Rust FVM for Filecoin, Clarity proposal-pending for Stacks). dYdX V4 is the cleanest single-anchor — 1,104 production Go files, ZERO Go AST detector, ZERO production Rust (v4-proto-rs is SDK bindings only).
+**Promotion to PERMANENT (2026-05-27 evening).** 2-anchor criteria met across different substrate-blind substrates:
+- **Anchor 1 — dYdX V4 (Cosmos-SDK Go)** — original anchor 2026-05-23 + 2026-05-26 double-confirmation
+- **Anchor 2 — Bifrost Finance (Polkadot Substrate-Rust)** — 2026-05-27 Gate 1 (`hunts/2026-05-27-bifrost-immunefi-gate1.md`). 31 pallets across `bifrost-io/bifrost`, ZERO Substrate-Rust AST detector. Manual source-read sufficient for surface-mapping but P(finding) floor 0.01 applied to EV (final EV $8,800 below queue threshold). Supporting evidence: Hydration Gate 1 (`hunts/2026-05-26-hydration-immunefi-gate1.md`) hit the same substrate-blind condition on a different Polkadot parachain (HydraDX) at 2026-05-26.
+
+Single substrate covered by 2 anchors = PERMANENT (Substrate-Rust class confirmed substrate-blind, Cosmos-SDK Go separately confirmed substrate-blind). Future substrate-blind anchors (Move, FunC, Clarity, CosmWasm) refine the catalog but don't change the PERMANENT classification.
+
+**Why this is now standing rule, not candidate.** The pattern recurs in the 2026-05-26 Day 26 batch (Filecoin Go portion ZERO Go detector, Stacks/ALEX Clarity ZERO Clarity detector) and the 2026-05-27 Day 27 batch (Bifrost Substrate-Rust ZERO detector). dYdX V4 remains the cleanest Cosmos-Go anchor; Bifrost is the cleanest Substrate-Rust anchor — both 1000+ production source files with zero corresponding AST coverage.
 
 **Anchor — dYdX V4 substrate-mismatch (2026-05-23 + 2026-05-26 double-confirmation).** First Gate 1 (`hunts/2026-05-23-dydx-v4-gate1.md`) calculated EV=$1,125 ($5M × P(finding)=0.01 × P(acc)=0.5 × overlap=0.15 × Doctrine #27 discount=0.30). The 0.01 P(finding) floor was applied ad-hoc; codifying as Doctrine #36 makes it a standing rule. Second halt (`hunts/2026-05-26-dydx-v4-immunefi-gate1-PRE-CLONE-HALT.md`) confirmed: substrate-coverage gap unchanged since 2026-05-23, no `buzzshield-cosmos-deep.js` shipped, no Go AST walker implemented. Re-dispatch without detector pack = same outcome.
 
@@ -2517,16 +2523,18 @@ If ALL THREE return NO/PARTIAL → apply `P(finding) ≤ 0.01` floor.
 
 **Distinct from Doctrine #27 (audit-saturation discount).** Doctrine #27 reduces P(finding) based on EXTERNAL audit completeness; Doctrine #36 reduces P(finding) based on INTERNAL detector blindness. Both can compound (substrate-blind AND audit-saturated = double-discount, e.g. dYdX V4 with 6 Informal Systems audits + ZERO Go detector = compound discount applied 2026-05-23).
 
-**Promotion path.** Currently CANDIDATE single-anchor (dYdX V4 Cosmos-SDK Go). Promotes to PERMANENT Doctrine #36 on 2nd anchor across a different substrate-blind substrate. Candidate 2nd anchors (pending future dispatch outcomes):
+**Promotion path — COMPLETE 2026-05-27.** PERMANENT promotion authorized per autonomy-boundary "Promoting CANDIDATE to canonical → needs 2nd anchor (existing rule)". 2nd anchor Bifrost lands today. Future substrate-blind anchors strengthen the catalog:
 
-- Lombard P-?? does NOT qualify (Lombard has Solidity detector coverage; the prior Gate 1 fired all V6 layers cleanly)
-- Babylon V1 (Cosmos+Bitcoin — Go + Clarity-adjacent — likely 2nd anchor if dispatched)
-- TON-based program (FunC = fully unsupported — likely high-confidence 2nd anchor if any TON program enters Buzz dispatch queue)
-- Aptos / Sui Move program (zero Move AST detector — 2nd anchor candidate)
+- ✅ Cosmos-SDK Go: dYdX V4 (Anchor 1)
+- ✅ Polkadot Substrate-Rust: Bifrost + Hydration (Anchor 2, redundant confirmation)
+- ⏳ TON-based FunC: pending first TON program dispatch
+- ⏳ Aptos / Sui Move: pending first Move dispatch
+- ⏳ Clarity (Stacks pure): partially-covered, awaiting proposal-pending detector
+- ⏳ CosmWasm: pending first CosmWasm program dispatch
 
-**Standing rule (interim, pre-promotion).** Until 2nd anchor lands, treat Doctrine #36 as CANDIDATE applied at operator discretion. Per dYdX V4 prior practice, the 0.01 P(finding) floor is already de facto applied to no-detector substrates; codification is documentation, not behavior change.
+**Standing rule (PERMANENT).** Apply 0.01 P(finding) floor at Step 3 EV calculation for any substrate matching the Identification Heuristic's all-three-NO/PARTIAL condition. This is a mechanical EV adjustment, not an operator-discretion call. Operator override available only if Buzz ships a detector for the substrate (which converts substrate from blind → covered).
 
-**Status.** CANDIDATE Doctrine #36 filed 2026-05-26 afternoon. Single-anchor: dYdX V4. Pending 2nd anchor for PERMANENT promotion. Authority: dYdX V4 P2 PRE-CLONE-HALT proposal (auto-approved as corpus-internal discipline improvement per task framing).
+**Status.** PERMANENT Doctrine #36 promoted 2026-05-27 evening. 2 cross-substrate anchors (Cosmos-Go + Polkadot-Rust). Authority: autonomy-boundary 2nd-anchor promotion rule (existing standing rule, no operator decision needed for the PROMOTE; the CANDIDATE-spec already encoded the 2-anchor threshold).
 
 ---
 
