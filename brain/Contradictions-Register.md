@@ -429,4 +429,35 @@ Both anchors fired on cross-protocol DC-7 hypotheses where the consumer-side rep
 
 ---
 
-_Brain Contradictions Register | v1.8 | 2026-05-27 evening | 20 entries (18 P4 + 1 P1 + 1 CROSS; v1.8 promotes INFO #20 to RESOLVED-PROMOTED — 2nd anchor secured Cap C3, 7.5× novelty overestimate matches predicted ~7× median. Step 5.11 Cross-Protocol Defense Enumeration queued for standing-intake-protocol.md MANDATORY-rule promotion)_
+---
+
+## #21 INFO — Brief-generation freshness drift on watchlist-derived next-target recommendations
+
+**Pillar:** P4
+**Status:** INFO (process pattern; Step 0.5 5-channel ledger check is the defense, validated by 1 worked example)
+**Anchored:** 2026-05-27 OnRe Gate 1 DEDUP-FORECLOSURE
+
+**Pattern observation:** Subagent next-target recommendations can be stale by 7-14 days when the source watchlist priority list wasn't updated post-canonical-promotion. The Cap C3 G2 agent + Function FBTC G1 agent both recommended OnRe as "CANDIDATE-G promotion catalyst" — but CG was already PROMOTED to DC-8 (not DC-7) on 2026-05-18/19 via Ogie msg 7259 §5A. OnRe G1 Step 0.5 5-channel check caught the drift in ~7 min via brain-ledger lookup (Channel 1: `Patterns-Defense-Classes.md:265-345` DC-8 anchor record).
+
+**Why this is INFO not a contradiction:**
+- The drift is operator-brief-class (msg 7259 was a promotion directive that landed but watchlist priority list wasn't synced)
+- Step 0.5 5-channel check IS the defense — and it FIRED CORRECTLY here, ~7 min cost vs ~30-60 min sub-agent re-derivation against unchanged source
+- This is the SECOND positive worked example of Step 0.5 catching brief staleness (1st: Paxos T+3 redispatch 2026-05-27 — different staleness mechanism but same defense activated)
+
+**How to apply:**
+- Step 0.5 5-channel check stays MANDATORY (already enforced in Standing-Intake protocol)
+- Channel 1 (brain ledger) is the highest-yield channel for catching post-promotion drift — it has both the canonical doctrine + the original anchor evidence + the Watchlist row at synchronization time
+- When dispatching from a stale watchlist row, NORMAL behavior is the Step 0.5 catches it within 5-10 min — DO NOT pre-validate watchlist freshness, just dispatch and let Step 0.5 do its job
+
+**Cross-references:**
+- INFO #19 (platform-routing drift): brief said Immunefi, live was Sherlock #114 — 1-axis drift on PLATFORM dimension
+- INFO #20 (novelty over-estimate): cross-protocol DC-7 hypotheses 7× overestimate — 1-axis drift on NOVELTY dimension
+- INFO #21 (brief-generation freshness drift, THIS entry): watchlist row stale post-canonical-promotion — 1-axis drift on TIME dimension
+
+The three INFO entries together describe **three distinct drift axes** that Standing-Intake protocol must absorb. All three defenses (Step 1 PROFILE, Step 5.11 Cross-Protocol Defense Enumeration, Step 0.5 5-channel ledger check) are now MANDATORY-or-promoted.
+
+**Recurrence count:** 1 anchored event (OnRe 2026-05-27). Track for 2nd+ anchor. If pattern recurs ≥2 times within 14d, consider auto-watchlist-staleness scanner cron (Wednesday 06:00 UTC after Phase 2 corpus consumer).
+
+---
+
+_Brain Contradictions Register | v1.9 | 2026-05-27 evening | 21 entries (19 P4 + 1 P1 + 1 CROSS; v1.9 adds INFO #21 Brief-generation freshness drift — completes the 3-axis drift catalog (PLATFORM #19 + NOVELTY #20 + TIME #21))_

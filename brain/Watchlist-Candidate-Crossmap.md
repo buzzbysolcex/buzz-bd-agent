@@ -37,7 +37,7 @@ Legend: H = HIGH confidence architectural match / M = MEDIUM confidence / L = LO
 | 8   | JustLend               | Tron                           | $3.55B  | $50K   | Lending               | L     | –     | M     | –   | L     | NET-NEW          | **15**   |
 | 9   | Function FBTC          | Bitcoin                        | $822M   | $100K  | Bridge                | **H** | –     | M     | –   | –     | NET-NEW          | **9**    |
 | 10  | Hydration DEX          | HydraDX (Polkadot)             | $34M    | $500K  | DEX                   | L     | –     | L     | –   | –     | NET-NEW          | **18**   |
-| 11  | OnRe                   | Solana                         | $177M   | $100K  | RWA                   | M     | **H** | M     | M   | M     | NET-NEW          | **5**    |
+| 11  | OnRe                   | Solana                         | $177M   | $100K  | RWA                   | M     | **H** | M     | M   | M     | GATE 1 DONE 2026-05-18 + DC-8 3rd anchor + DEDUP T+9 2026-05-27 | PARK     |
 | 12  | Bifrost Liquid Staking | Bifrost + Manta + ETH          | $22M    | $500K  | Liquid Staking        | M     | –     | M     | –   | M     | NET-NEW          | **13**   |
 | 13  | Ankr                   | Ethereum + Flow + BNB          | $22M    | $500K  | Liquid Staking        | L     | –     | M     | –   | M     | NET-NEW          | **14**   |
 | 14  | Beefy                  | Ethereum + Base + Arb + 20+    | $118M   | $75K   | Yield Aggregator      | M     | –     | L     | –   | **H** | NET-NEW          | **10**   |
@@ -1232,3 +1232,33 @@ _v2.12 Addendum: 2026-05-27 ~22:55 UTC | rows N+4 (F1) + N+4 (F3) both NEGATED v
 Step 5.11 deployment SUCCESS — fired EXCLUSION on 4 of 5 paired-pipeline hypotheses on the FIRST production hunt that applied it. Hypothesis-rejection signal-strength matches INFO #20 promotion rationale (cross-protocol defense enumeration BEFORE Gate 2 saves the dispatch). Function FBTC validates the rule's reliability.
 
 _v2.13 Addendum: 2026-05-27 ~23:10 UTC | row N+5 Function FBTC FORECLOSE | Step 5.11 first production deployment (4-of-5 EXCLUSIONs fire) | Doctrine #36 +4 anchors banked for Bitcoin bridge substrate | DC-7 EXCLUSION sub-pattern 2nd worked example (Cap C1 + Function FBTC H1, 1 more anchor for canonical promotion) | next-target pivot: OnRe $177M Solana RWA $100K (CANDIDATE-G promotion catalyst, CG → DC-7 promotion unblock candidate)_
+
+---
+
+## v2.14 Addendum: OnRe Gate 1 DEDUP-FORECLOSURE + Watchlist row 11 staleness fix (2026-05-27 23:15 UTC)
+
+**KEY CORRECTION**: The "OnRe = CG → DC-7 promotion catalyst" recommendation from Cap C3 G2 agent + Function FBTC G1 agent was **STALE BY 9 DAYS**. Per `brain/Patterns-Defense-Classes.md:265-345` + `brain/Vision-2027.md:63`:
+- CG was already PROMOTED to **DC-8** (not DC-7) on 2026-05-18/19 via Ogie msg 7259 §5A
+- OnRe is the 3rd anchor (alongside Indentura + M0 Extensions + TruFin cross-auditor)
+- Watchlist row 11 had not been updated post-promotion — fixed in this addendum
+
+OnRe G1 Step 0.5 5-channel check caught the staleness in ~7 min:
+- Channel 1 (brain ledger): HIT — DC-8 3rd anchor record
+- Channel 3 (in-source HEAD): CONFIRMED — clone `361cd588` static since 2026-03-06 (2.5 months)
+- Channel 4 (live Immunefi STATUS): ACTIVE since 2026-05-11
+- Channel 5 (receipt-window): 9 days, zero drift on all 4 Day-27 detector additions (Doctrine #34 sub-b / #36 / #38 / DC-7 EXCLUSION) produced ZERO new candidates
+
+**Brain compounds from OnRe G1 (5 items):**
+1. **DC-8 3-variant taxonomy refinement** — OnRe = "Tier 2 closure" variant (`require!` on lines 65-72 of `set_kill_switch.rs`); Indentura = "Tier 2 deferred"; M0 Extensions = "Tier 1+2 absent"
+2. **Watchlist-Candidate-Crossmap row 11 staleness fix** — APPLIED (this addendum + row 11 status update)
+3. **CANDIDATE-G negative-anchor clarifier** — OnRe NEGATIVE example: CG fires on signature-validation co-signers (DC-8 PRIMARY), NOT on capital-custody off-chain relationships (Bermuda SAC). Adevar Labs auditor-bias question RESOLVED (no bias detected; the surface OnRe presents is the surface auditors covered)
+4. **Doctrine #36 substrate-coverage scoreboard** — Solana-Anchor RWA-fixed-income substrate now lens-complete: DC-8 ✅ (OnRe 3rd anchor) / CG NEGATIVE (clarifier) / CK NEGATIVE / DC-12 N/A / DC-9 sub-2 [ASSUMED] / Doctrine #38 inapplicable. Substrate-blind floor 0.01 LIFTED for Solana-Anchor RWA-fixed-income class.
+5. **Contradictions-Register INFO #21 NEW** — Brief-generation freshness drift (3rd pattern after #19 platform-routing drift + #20 novelty-overestimate). Pattern: operator briefs / next-target-recommendation chains lag canonical brain state when watchlist priority lists aren't updated post-promotion. **Step 0.5 5-channel = positive worked example, defense already in place.**
+
+**EV math:** brief's pre-converge EV $7.5K → post-converge EV $0 (would re-derive identical surface against unchanged HEAD). 30-60 min foreground-hunt-time returned to next-target queue.
+
+| # | Target | Cap | Verdict | Receipt |
+|---|--------|-----|---------|---------|
+| N+6 | **OnRe** (Immunefi) | $100K Critical (KYC) | $177M Solana RWA, single program `onreuGhHHgVzMWSkj2oQDLDtvvGvoepBPkqyaubFcwe` | **DEDUP-FORECLOSURE-RECEIPT (Step 0.5)** — 4-channel converge + 9-day staleness on Watchlist row | `hunts/2026-05-27-onre-immunefi-DEDUP-FORECLOSURE.md` (31KB) |
+
+_v2.14 Addendum: 2026-05-27 ~23:15 UTC | row N+6 OnRe DEDUP-FORECLOSURE | Watchlist row 11 PARK status + DC-8 3rd anchor recorded | INFO #21 NEW (Brief-generation freshness drift, 3rd Contradictions-Register info entry today) | Solana-Anchor RWA-fixed-income substrate-coverage now lens-complete (substrate-blind floor LIFTED) | 4 same-day Step 0.5 short-circuits (Paxos + Kiln + Veda + OnRe)_
