@@ -386,9 +386,10 @@ When the cap binds, drop from the bottom of the priority list. The cap remains 3
 - When the live page diverges materially (cap ≥50% drift OR KYC flag flip OR major version-change), record the drift in the hunt receipt as `[ASSUMED]→[EXECUTED via WebFetch]` correction trace
 - Operator briefs remain the **dispatch trigger** even when imprecise; do not block on profile-verification, just verify before EV-commit
 
-**Recurrence count:** 2 anchored events:
+**Recurrence count:** 3 anchored events:
 1. Kiln 2026-05-27 (4-axis drift: v1→v2, $1M→$500K, NO KYC→KYC, scope ~half)
 2. Cap 2026-05-27 evening (1-axis but high-impact: **platform discrepancy** — brief said Immunefi, live is Sherlock #114 $1M USDC since 2025-10-24; all 4 candidate Immunefi URLs returned 404)
+3. Gearbox 2026-05-27 23:24 (scope drift: brief listed `Gearbox-Protocol/router-v3` as in-scope, live scope file made NO mention of router-v3, GitHub repo 404). Same-axis as #2 but on SCOPE-asset dimension rather than PLATFORM dimension.
 
 Pattern transition: simple cap/KYC/version drift → **platform-routing drift**. The Cap case is more consequential because platform-routing affects submission discipline (Sherlock contest rules vs Immunefi bounty rules), not just discount math. **At 3rd anchor, promote to Doctrine entry**.
 
@@ -460,4 +461,4 @@ The three INFO entries together describe **three distinct drift axes** that Stan
 
 ---
 
-_Brain Contradictions Register | v1.9 | 2026-05-27 evening | 21 entries (19 P4 + 1 P1 + 1 CROSS; v1.9 adds INFO #21 Brief-generation freshness drift — completes the 3-axis drift catalog (PLATFORM #19 + NOVELTY #20 + TIME #21))_
+_Brain Contradictions Register | v1.10 | 2026-05-27 23:25 UTC | 21 entries (19 P4 + 1 P1 + 1 CROSS; v1.10 adds 3rd anchor to INFO #19 (Gearbox router-v3 scope drift) — now 4-axis: VERSION/CAP/KYC/SCOPE + PLATFORM + TIME + NOVELTY. Step 5.11 promoted MANDATORY validated by Cap C1 + Cap C3 + Function FBTC + Gearbox = 4 production deployments)_

@@ -41,7 +41,7 @@ Legend: H = HIGH confidence architectural match / M = MEDIUM confidence / L = LO
 | 12  | Bifrost Liquid Staking | Bifrost + Manta + ETH          | $22M    | $500K  | Liquid Staking        | M     | –     | M     | –   | M     | NET-NEW          | **13**   |
 | 13  | Ankr                   | Ethereum + Flow + BNB          | $22M    | $500K  | Liquid Staking        | L     | –     | M     | –   | M     | NET-NEW          | **14**   |
 | 14  | Beefy                  | Ethereum + Base + Arb + 20+    | $118M   | $75K   | Yield Aggregator      | M     | –     | L     | –   | **H** | NET-NEW          | **10**   |
-| 15  | Gearbox                | Ethereum                       | $25M    | $200K  | Lending               | **H** | –     | M     | –   | M     | NET-NEW          | **11**   |
+| 15  | Gearbox                | Ethereum                       | $25M    | $200K  | Lending               | **H** | –     | M     | –   | M     | GATE 1 DONE 2026-05-27 WATCHLIST-PARK EV $600 (Doctrine #27 F BOUNDARY 31 audits) — H2 = DC-7 EXCLUSION CANONICAL 3rd anchor | **PARK** |
 | 16  | LiNEAR Protocol        | Near                           | $44M    | $100K  | Liquid Staking        | L     | M     | M     | M   | M     | NET-NEW          | **17**   |
 | 17  | Gains Network          | Arb + Base + Polygon           | $14M    | $200K  | Derivatives           | **H** | –     | M     | –   | L     | GATE 1 DONE 2026-05-27 FORECLOSED EV $1.2K | **16**   |
 | 18  | Index Coop             | Ethereum + Arb + Base          | $13M    | $200K  | Indexes               | M     | –     | L     | –   | **H** | NET-NEW          | **20**   |
@@ -1262,3 +1262,47 @@ OnRe G1 Step 0.5 5-channel check caught the staleness in ~7 min:
 | N+6 | **OnRe** (Immunefi) | $100K Critical (KYC) | $177M Solana RWA, single program `onreuGhHHgVzMWSkj2oQDLDtvvGvoepBPkqyaubFcwe` | **DEDUP-FORECLOSURE-RECEIPT (Step 0.5)** — 4-channel converge + 9-day staleness on Watchlist row | `hunts/2026-05-27-onre-immunefi-DEDUP-FORECLOSURE.md` (31KB) |
 
 _v2.14 Addendum: 2026-05-27 ~23:15 UTC | row N+6 OnRe DEDUP-FORECLOSURE | Watchlist row 11 PARK status + DC-8 3rd anchor recorded | INFO #21 NEW (Brief-generation freshness drift, 3rd Contradictions-Register info entry today) | Solana-Anchor RWA-fixed-income substrate-coverage now lens-complete (substrate-blind floor LIFTED) | 4 same-day Step 0.5 short-circuits (Paxos + Kiln + Veda + OnRe)_
+
+---
+
+## v2.15 Addendum: Gearbox Gate 1 WATCHLIST-PARK + DC-7 EXCLUSION CANONICAL promotion (2026-05-27 23:24 UTC)
+
+**MILESTONE: DC-7 EXCLUSION sub-pattern → CANONICAL** via 3-anchor threshold met same-day (Cap C1 + Function FBTC H1 + Gearbox H2). Sub-pattern moved from CANDIDATE (filed evening) to CANONICAL (promoted in ~3 hours via 3 production validations).
+
+| # | Target | Cap | Verdict | Brain compounds | Receipt |
+|---|--------|-----|---------|------------------|---------|
+| N+7 | **Gearbox V3** (Immunefi) | $200K Critical | **WATCHLIST-PARK** | DC-7 EXCLUSION CANONICAL 3rd anchor (Gearbox H2) + 5 brain compounds (G-1..G-5) | `hunts/2026-05-27-gearbox-immunefi-gate1.md` (31.8KB) |
+
+**Saturation TIER-A+**: 31 audits across 7 firms (ChainSecurity 13 × continuous-cadence + Decurity 4 + ABDK/Peckshield/MixBytes 2 each + ConsenSys/SigmaPrime/Nethermind/Watchpug/SavantChat 1 each). 2 audits below Doctrine #27 F BOUNDARY ceiling of 33.
+
+**EV post-discount: $600** (pre $10K × 0.40 F BOUNDARY × 0.50 sustained cadence × 0.50 vendor anti-anchor × 0.60 lens-saturation = below Gate-2 effort floor)
+
+**Step 5.11 enumeration matrix (Gearbox H2 = canonical anchor):**
+
+| Hypothesis | Q1 freshness | Q2 replay | Q3 fallback | Verdict |
+|---|---|---|---|---|
+| H1 multicall slippage | N/A | YES | YES (fullCollateralCheck) | NEGATE-STRUCTURAL |
+| **H2 collateralDebtData trust** | **YES (storage re-derive)** | **YES (DebtUpdatedTwiceInOneBlockException)** | **YES (LossPolicy + maxDebtPerBlockMultiplier=0)** | **3/3 EXCLUSION FIRES → DC-7 EXCLUSION CANONICAL 3rd ANCHOR** |
+| H3 USDT fee asymmetry | N/A | N/A | N/A | NEGATE-AUDIT-SATURATION |
+| H4 botMulticall race | NO | YES | YES | 2/3 EXCLUSION-MEDIUM |
+
+**Doctrine #34 sub-class b commit-diff result — POSITIVE FIRE — DEFENSIVE DIRECTION:**
+
+3 fix-commits identified (all PATCHED at HEAD):
+- 2025-02-28 core-v3 phantom token state-fallback (CANDIDATE-J class)
+- 2025-03-16 core-v3 price-feed strictening (Doctrine #29 reinforcement)
+- 2026-05-08 integrations-v3 "liquidator stablecoin-based valuation" (CANDIDATE-I class, 19 days old)
+
+This produces the **G-2 Doctrine #34 sub-b BI-DIRECTIONAL CLARIFICATION** — defensive-direction inference (patches present = surface DEFENDED) vs offensive-direction inference (recent fix may have introduced regression).
+
+**Brain compound proposals (5 from Gearbox G1):**
+
+1. **G-1 — DC-7 EXCLUSION sub-pattern CANONICAL promotion (DONE in this commit batch)** — 3-anchor threshold met
+2. **G-2 — Doctrine #34 sub-class b BI-DIRECTIONAL clarification** — fix-commit presence is bi-directional signal (defensive = patches in place; offensive = recent fix may regress). Need to document the inference direction per fix-commit observation.
+3. **G-3 — Doctrine #27 F BOUNDARY-zone refinement** — 30-33 audit range is GRADIENT (0.30→0.50 multiplier scaling) vs discrete kill at 33. Gearbox at 31 = 0.40 multiplier. Anchor for gradient curve.
+4. **G-4 — Watchlist row 15 status update (DONE in this addendum)** — NET-NEW → GATE 1 DONE WATCHLIST-PARK
+5. **G-5 — Doctrine #36 lens-saturation-floor enrichment** — P(finding) ≤ 0.05 floor for lens-saturated ETH-lending substrate (vs 0.01 for substrate-blind class). Gearbox illustrates the "different floor for different saturation class" refinement.
+
+**Brief-vs-live correction:** brief specified `Gearbox-Protocol/router-v3` as in-scope; live scope file makes NO mention of router-v3, repo returns 404. Logged per INFO #19 (4th anchor: PLATFORM #1 Kiln + PLATFORM #2 Cap + INFO #21 TIME-drift OnRe + INFO #19 SCOPE-drift Gearbox).
+
+_v2.15 Addendum: 2026-05-27 ~23:25 UTC | row N+7 Gearbox WATCHLIST-PARK | **DC-7 EXCLUSION sub-pattern → CANONICAL same-day** (3-anchor threshold met in ~3 hours: Cap C1 + Function FBTC H1 + Gearbox H2) | 4-anchor INFO #19 PLATFORM/SCOPE drift catalog | 10 G1/G2 verdicts in Day-27 night cycle | next-target: Templar Protocol $20M BTC+ETH+Stellar $100K (multi-substrate novelty, avoids ETH-lending lens-saturation trap)_

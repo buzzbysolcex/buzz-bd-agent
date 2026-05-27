@@ -223,7 +223,19 @@ For every function exposed to user input, build the validation→consumption map
 
 **Anchor file:** This entry. Worked-example details in `brain/Cross-Domain-Fragility-Laws.md` v1.5 + downstream incident files.
 
-### DC-7 EXCLUSION sub-pattern — Validating-Field = Consuming-Field via Deterministic Derivation (added 2026-05-27 evening from Cap Gate 2 NEGATE, hunt `hunts/2026-05-27-cap-c1-gate2-foreclosure.md`)
+### DC-7 EXCLUSION sub-pattern (CANONICAL — promoted 2026-05-27 23:24 UTC, 3-anchor threshold met)
+
+**Promotion record:** Filed CANDIDATE 2026-05-27 evening with 1 anchor (Cap C1). Reached 3-anchor canonical threshold same day via Function FBTC H1 + Gearbox H2 production deployments. Sub-pattern is now CANONICAL for all future Gate 1/Gate 2 surface mapping.
+
+**Three canonical anchors:**
+
+| Anchor | Source | Validating-field | Consuming-field | Defenses (Q1/Q2/Q3) |
+|--------|--------|------------------|-----------------|---------------------|
+| #1 Cap C1 | `EigenOperator.advanceTotp()` | `allowlistedDigests[digest]` write | `isValidSignature` read SAME mapping | 3/3 (deterministic derivation + EigenLayer `approverSaltIsSpent` replay + LIVE `getOperatorShares` no-cache) |
+| #2 Function FBTC H1 | `confirmMintRequest` srcHash binding | `getCrossSourceRequestHash` recompute | `crosschainRequestConfirmation[srcHash]` | 3/3 (recompute freshness + dstChain==chain() replay + pause fallback) |
+| #3 Gearbox H2 (CANONICAL anchor) | `CreditFacadeV3.multicall` → `CreditManagerV3` collateralDebtData | storage re-derive `.debt`/`.cumulativeIndexLastUpdate`/`.lastDebtUpdate` | `_calcDebtAndCollateral` read same struct | 3/3 (storage re-derive + `DebtUpdatedTwiceInOneBlockException` replay + LossPolicy pluggable circuit-breaker) |
+
+### DC-7 EXCLUSION sub-pattern (canonical, formerly CANDIDATE, added 2026-05-27 evening from Cap Gate 2 NEGATE, hunt `hunts/2026-05-27-cap-c1-gate2-foreclosure.md`)
 
 **Statement:** A pipeline that LOOKS like DC-7 (paired validation + consumption functions sharing a mapping/lookup) does NOT qualify as DC-7 when the validating-write input is **fully determined by stored state with no attacker-controlled binding**. Specifically:
 
