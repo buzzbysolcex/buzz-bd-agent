@@ -26,7 +26,7 @@ Classification mix counts: GROUND_TRUTH / RUG_PATTERN / METHODOLOGY / DETECTOR_S
 |---|---|---|---|---|---|---|---|
 | 2026-05-20 | Phase 1 | 2009-2011 (topic IDs 1-30000) | 221,804 posts (corpus) → 1,230 extracted | 1,230 posts across 10 target authors | GROUND_TRUTH dominant | `brain/Lane4-Phase1-Results.md` created | not recorded |
 
-**Phase 2 pending (not yet built):** extension batch (30001-221000 range, 590K+ records) NOT YET consumed. Builds queued in `four-pillar-loop.md` Pillar 3 Phase 3 task list. First Phase 2 run target: Wednesday 06:00 UTC after `scripts/lane4-corpus-phase2-consumer.sh` lands (script not yet written).
+**Phase 2 status (2026-05-27):** consumer script LANDED at `scripts/lane4-corpus-phase2-consumer.py` + `.sh` wrapper. Dry-run validated against full 935K corpus in 4m28s — produced 56,104 GT / 19,992 RP / 1,441 MTH / 257 DS findings (pre-cap). First production run scheduled Wed 2026-06-03 06:00 UTC (cron entry pending operator install). Output: proposals to `data/lane4/phase2-proposals/<date>/`, brain writes deferred to operator review.
 
 ---
 
@@ -42,7 +42,7 @@ Aggregate of all digest runs by classification:
 
 | classification | count_total | last_added | top_5_targets | brain_file_destination |
 |---|---|---|---|---|
-| GROUND_TRUTH | 1,230 (Phase 1 only) | 2026-05-20 | (10 target authors per Phase1-Results) | `brain/Ground-Truth-Catalog.md` (to be created) + `brain/Lane4-Phase1-Results.md` |
+| GROUND_TRUTH | 1,230 (Phase 1 only) | 2026-05-20 | (10 target authors per Phase1-Results) | `brain/Ground-Truth-Catalog.md` (created 2026-05-27, awaiting first Phase 2 production-run entries) + `brain/Lane4-Phase1-Results.md` |
 | RUG_PATTERN | 0 | n/a | n/a | `brain/Token-Rug-Patterns.md` (created 2026-05-27, anchors pending) |
 | METHODOLOGY | 0 | n/a | n/a | `brain/Doctrine.md` (as CANDIDATE) |
 | DETECTOR_SEED | 0 | n/a | n/a | `brain/Patterns-Defense-Classes.md` (as CANDIDATE) |
