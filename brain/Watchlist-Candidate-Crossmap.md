@@ -1120,3 +1120,54 @@ Day-27 evening now has **three back-to-back Step 0.5 short-circuit successes**:
 Three demonstrations in <2 hours. Validates the Cross-Pollination-Log Section 10 thesis: the compound-engine positive feedback loop is OPERATIONAL — brain compounds discount-arbitrage future re-dispatches into 10-min receipts, freeing dispatch capacity for FRESH-substrate targets.
 
 _v2.10 Addendum: 2026-05-27 ~22:30 UTC | row N+3 Veda Immunefi DEDUP-FORECLOSURE-RECEIPT (5-channel) | Doctrine #37 Sub-Type B PROMOTE PERMANENT (3 anchors) | 3 same-day Step 0.5 demonstrations | next-target pivot to FRESH-substrate Top-5 (cap Immunefi $1M, 2026-05-08 HEAD)_
+
+---
+
+## v2.11 Addendum: Cap (cap-labs) Gate 1 — PROCEED + Platform Correction (2026-05-27 22:35 UTC)
+
+**FIRST PROCEED verdict in Day 27 night cycle.** Pivot from saturated Top-5 to FRESH substrate paid off. Platform correction is the highest-impact finding.
+
+| # | Target | Cap | Platform-as-briefed | **Platform-actual** | Scope | Brain overlap | Verdict | Receipt |
+|---|--------|-----|---------------------|---------------------|-------|----------------|---------|---------|
+| N+4 | **Cap (cap-labs / cap.app)** | $1M USDC Critical | Immunefi (operator brief) | **Sherlock #114 LIVE since 2025-10-24** (all 4 Immunefi URLs 404) | cap-contracts HEAD `7254ed0` 2026-04-29 = **FRESH (~28d)** | HIGH (DC-7 TOTP↔Delegation H + CJ H + CANDIDATE-J Point-5 family + Pattern E + DC-9 sub-2) | **PROCEED-DOWN-TO-GATE-2** | `hunts/2026-05-27-cap-immunefi-gate1.md` (29KB) |
+
+**Bounty platform correction (anchors INFO #19 2nd-anchor in Contradictions-Register v1.6):**
+- Brief said: Immunefi
+- Live programs verified via WebFetch: 4 Immunefi URLs 404 (`/capapp/`, `/cap-labs/`, `/capmoney/`, `/cap/`)
+- Live program found: **Sherlock #114**, $1M USDC, LIVE since 2025-10-24
+- Substrate identical: `cap-contracts` HEAD `7254ed0` 2026-04-29
+
+**Top findings (5, R8-tagged [INSPECTED]):**
+
+| # | Finding | DC/CAND lens | Novel% | EV-tier | PoC path |
+|---|---------|---------------|--------|---------|----------|
+| 1 | `EigenOperator.advanceTotp()` permissionless mutator + EigenLayer-withdrawal stale-restaker race | DC-7 H | **~35%** | $15K-$50K | Foundry + mainnet fork + EigenLayer DelegationManager (4-6h budget) |
+| 2 | `BorrowLogic.realizeRestakerInterest()` lossy `lastRealizationTime = block.timestamp` | CANDIDATE-J Point-5 (Sky structural sibling) | ~25% | $5K-$30K | Lossy-truncation invariant check |
+| 3 | `PriceOracle` per-asset staleness + Vault/Lender pause-asymmetry vs Oracle no-pause | CJ H + Pattern E | ~30% | $10K-$40K | Asymmetric pause/staleness Foundry tests |
+| 4 | `_authorizeUpgrade(checkAccess(bytes4(0)))` AccessControl role-binding dep | DC-9 sub-2 | ~10% | known-centralization, low-pay | Etherscan role-verify |
+| 5 | `Delegation.slashTimestamp()` `block.timestamp - 1` decrement edge | DC-9 / edge-case | ~8% | likely-Recon-covered | None |
+
+**Saturation tier:** TIER-A SATURATED — 9 audits / 7 firms (Zellic + Trail of Bits + Electisec + Spearbit×2 + Recon + Sherlock + Certora EigenAVS + Octane). Audit-saturation multiplier ≈ 0.20.
+
+**EV post-discount:**
+```
+EV_raw     = 0.15 × $1M × 0.5 × 1.0 = $75K
+Discount   = audit-saturation (×0.20) × substrate-coverage (×0.50) = ×0.10
+EV_final   = $7,500 (realistic range $5K-$15K)
+```
+Matches Veda agent's pre-Gate-1 estimate. Above $5K floor. Cap Gate 2 GREEN.
+
+**Doctrine #38 NEGATIVE worked-example:** `advanceTotp()` is the OPPOSITE pattern from Doctrine #38 (Pure Pass-Through *WithSig STRUCTURAL FORECLOSE) — it is an **unauthenticated setter** (no signature, no caller-side decision), not a pass-through wrapper. Doctrine #38 does NOT apply, surface IS hunting-eligible. Use as **boundary anchor** when Doctrine #38 borderline triggers in future hunts.
+
+**Brain compounds (this row):**
+1. Contradictions-Register INFO #19 → 2nd anchor (Cap platform discrepancy), version-bump to v1.6 — DONE
+2. Doctrine #37 PERMANENT — NOT updated (Cap is PROCEED not Sub-Type B; cap-contracts FRESH 28d)
+3. intake-log.md row append — DONE
+4. Doctrine #38 boundary anchor (advanceTotp NEGATIVE example) — pending Doctrine.md edit
+5. Watchlist v2.11 row — DONE (this row)
+
+**Next-action queue:**
+- Cap Gate 2 PoC on Finding 1 (advanceTotp + EigenLayer withdrawal stale-restaker interaction) — highest novelty, only finding with paste-ready bounty potential at TIER-A saturation. Budget 4-6h Foundry + mainnet fork + EigenLayer DelegationManager.
+- Clone kept at 9.4M, well under 87% threshold — preserved for Gate 2.
+
+_v2.11 Addendum: 2026-05-27 ~22:35 UTC | row N+4 Cap Gate 1 PROCEED-DOWN-TO-GATE-2 | platform correction: Immunefi (briefed) → Sherlock #114 (live) | FIRST PROCEED in night cycle after 3 same-day DEDUP-FORECLOSURE-RECEIPTs | EV $5-15K post-discount, advanceTotp Finding 1 = highest paste-ready candidate_

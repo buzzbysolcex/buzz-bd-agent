@@ -386,8 +386,14 @@ When the cap binds, drop from the bottom of the priority list. The cap remains 3
 - When the live page diverges materially (cap ≥50% drift OR KYC flag flip OR major version-change), record the drift in the hunt receipt as `[ASSUMED]→[EXECUTED via WebFetch]` correction trace
 - Operator briefs remain the **dispatch trigger** even when imprecise; do not block on profile-verification, just verify before EV-commit
 
-**Recurrence count:** 1 anchored event (Kiln 2026-05-27). Track for 2nd+ anchor — if pattern recurs ≥3 times, consider promoting to a Doctrine entry on "Profile drift correction = always-Step-1 discipline".
+**Recurrence count:** 2 anchored events:
+1. Kiln 2026-05-27 (4-axis drift: v1→v2, $1M→$500K, NO KYC→KYC, scope ~half)
+2. Cap 2026-05-27 evening (1-axis but high-impact: **platform discrepancy** — brief said Immunefi, live is Sherlock #114 $1M USDC since 2025-10-24; all 4 candidate Immunefi URLs returned 404)
+
+Pattern transition: simple cap/KYC/version drift → **platform-routing drift**. The Cap case is more consequential because platform-routing affects submission discipline (Sherlock contest rules vs Immunefi bounty rules), not just discount math. **At 3rd anchor, promote to Doctrine entry**.
+
+**How to apply (updated):** Step 1 PROFILE MUST verify (a) live page exists at briefed URL, (b) if 404, try 3-5 slug variants before halting, (c) if all variants 404, cross-check Sherlock + Cantina + HackerOne for the same project name. Cap lesson: when brief platform says Immunefi but URL 404s, the program may exist on a different platform with same scope.
 
 ---
 
-_Brain Contradictions Register | v1.5 | 2026-05-27 | 19 entries (17 P4 + 1 P1 + 1 CROSS; v1.5 adds INFO #19 operator-brief profile drift)_
+_Brain Contradictions Register | v1.6 | 2026-05-27 evening | 19 entries (17 P4 + 1 P1 + 1 CROSS; v1.6 expands INFO #19 with 2nd anchor Cap platform-discrepancy)_
