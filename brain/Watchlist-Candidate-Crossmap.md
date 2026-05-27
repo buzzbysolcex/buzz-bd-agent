@@ -43,7 +43,7 @@ Legend: H = HIGH confidence architectural match / M = MEDIUM confidence / L = LO
 | 14  | Beefy                  | Ethereum + Base + Arb + 20+    | $118M   | $75K   | Yield Aggregator      | M     | –     | L     | –   | **H** | NET-NEW          | **10**   |
 | 15  | Gearbox                | Ethereum                       | $25M    | $200K  | Lending               | **H** | –     | M     | –   | M     | NET-NEW          | **11**   |
 | 16  | LiNEAR Protocol        | Near                           | $44M    | $100K  | Liquid Staking        | L     | M     | M     | M   | M     | NET-NEW          | **17**   |
-| 17  | Gains Network          | Arb + Base + Polygon           | $14M    | $200K  | Derivatives           | **H** | –     | M     | –   | L     | NET-NEW          | **16**   |
+| 17  | Gains Network          | Arb + Base + Polygon           | $14M    | $200K  | Derivatives           | **H** | –     | M     | –   | L     | GATE 1 DONE 2026-05-27 FORECLOSED EV $1.2K | **16**   |
 | 18  | Index Coop             | Ethereum + Arb + Base          | $13M    | $200K  | Indexes               | M     | –     | L     | –   | **H** | NET-NEW          | **20**   |
 | 19  | TermMax                | BSquared + ETH + Base          | $69M    | $50K   | Lending               | M     | –     | M     | –   | M     | NET-NEW          | **22**   |
 | 20  | Vesu                   | Starknet                       | $21M    | $100K  | Lending               | M     | –     | M     | –   | M     | NET-NEW          | **23**   |
