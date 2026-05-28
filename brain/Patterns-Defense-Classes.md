@@ -495,6 +495,24 @@ Both anchor protocols are Solana (cp-swap fork + C-runtime private credit). The 
 
 Excluded from CANDIDATE-E hit-list (per refinements above): 1:1 PSM-class single-asset stablecoin parity modules; rate-accumulator ERC4626 share wrappers. **Productization impact:** detector FP cost reduced; targeted-sweep EV increased.
 
+**Exclusion class 3 — defensive-direction-symmetric rebasing-index lending family (added 2026-05-28 night — Compound III Comet C-3 Gate 2 Phase 1 NEGATE).** When a lending protocol uses a rebasing-index pair (e.g., `baseSupplyIndex` + `baseBorrowIndex`) where:
+1. **All rounding directions are intentionally pool-favoring** (supply-side rounds DOWN; borrow-side stored debt rounds UP — both bias against user, in favor of reserves)
+2. The protocol **lacks flash-loan + same-tx-paired-conversion primitives** required for Raydium-class amplification (per-cycle wei dust << gas cost makes single-direction extraction unprofitable)
+3. The reserves equation preserves pool-favoring net direction across both legs
+
+→ Pattern E cannot fire profitably. The Raydium 2025 anchor (paired-AND-conjunct topology with same-tx amplification) does NOT transfer. Lending-family protocols using Aave WadRayMath-style or Compound rebasing-index-style accounting are structurally immune absent flash-loan + paired-conversion in same transaction.
+
+**Anchor (NEGATE):** Compound III Comet `CometCore.sol:88-126` + `Comet.sol:395-432, 506-517` — all 4 conversion directions (presentValueSupply / presentValueBorrow / principalValueSupply / principalValueBorrow) verified DOWN-DOWN-DOWN-UP defensive symmetry. Reserves equation (`Comet.sol:511-517`) confirms pool-favoring net. Per-cycle extraction < 0.001 USDC wei dust << gas. Authority: 2026-05-28 Gate 2 PoC NEGATE (`hunts/2026-05-28-compound-iii-comet-gate2-c3-foreclosure.md`).
+
+**Sharpened cross-protocol prediction:** Expect NEGATE on future Pattern E Gate 1 dispatches against:
+- Aave V3 / Aave V4 (WadRayMath defensive symmetry, no flash-loan-paired primitive in same tx)
+- Morpho / Morpho Blue (P2P matching uses index-based accounting)
+- Spark Lend (Aave V3 fork — already FORECLOSURE-RECEIPT today via Doctrine #27 F MAXIMUM, double-anchored exclusion now)
+- Euler V2 (Resource Pricing rebasing — already FORECLOSURE-RECEIPT today via Doctrine #27 F MAXIMUM)
+- Compound V2 / Flux Finance (already FORECLOSURE-RECEIPT today via Doctrine #36 PERMANENT P-floor + same defensive-symmetric architecture)
+
+Pattern E hit-list (sharpened post-2026-05-28 night): LP-share-based protocols ONLY (Uniswap V2/V3 forks paired-mint/burn, Balancer weighted multi-asset paired-deposit, Curve metapool per-side normalization-conjunct, concentrated-AMM tick-boundary settlement, LP-share rebalancing). Lending-family is now Exclusion Class 3 — **do NOT pursue Pattern E Gate 1 on lending protocols absent verified flash-loan + paired-conversion same-tx primitive.**
+
 ### CANDIDATE-F: PROMOTED 2026-05-18 → DC-7 (Validating-Field ≠ Consuming-Field on Adjacent Function Pipelines). See active catalog section above.
 
 ### CANDIDATE-G: Solana-Off-Chain-Cosigner-Trust-Boundary (Indentura PL Vault 2026-02-17, Adevar Labs audit, confirmed in fix-review)
