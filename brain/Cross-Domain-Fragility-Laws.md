@@ -865,11 +865,27 @@ For any rebase-protocol Gate 1, run the JIT-yield-capture upper-bound math BEFOR
 
 ---
 
+## Wrapper-Protocol Defense-Inheritance Gap (filed 2026-05-29 — Wormhole NTT Hyp-C Gate 2 CONFIRM anchor, PoC 3/3 PASS)
+
+**Law.** When a wrapper / productization protocol is layered on top of a base protocol that carries a versioning / epoch defense against set-mutation replay, the productization audit may treat the version-defense as an UPSTREAM concern and fail to propagate the analogous defense to the wrapper layer's OWN set-mutation primitives. The wrapper re-implements the quorum / attestation accumulation but NOT the version-invalidation that protects it — a defense-inheritance gap.
+
+**Canonical anchor — Wormhole NTT (Hyp-C, CONFIRMED 2026-05-29):** Wormhole core protects guardian-set rotation with `guardianSetIndex` (a VAA signed under guardian set N is invalidated when the set rotates). NTT re-implements a transceiver-quorum on top, but `ManagerBase.sol` has NO analogous transceiver-set-version: an attestation collected under transceiver set N survives a `removeTransceiver()` and re-enters quorum when the transceiver is re-enabled. The wrapper inherited the quorum SHAPE but not the version-invalidation DEFENSE. Foundry PoC 3/3 PASS (`gate2-clones/wormhole-ntt/repo/evm/test/HypCReenableQuorumReplay.t.sol`, re-confirmed post-reboot 2026-05-29). Cross-substrate: Sui shares the gap (no epoch/version on `transceiver_registry`); Solana CLOSES it via `bitmap.rs::count_enabled_votes` bitwise-AND-with-current-enabled-set at count time (W-2-NEG negating anchor) — proof-by-implementation that the fix is mechanical.
+
+**Detection heuristic (cross-pollination):** for any wrapper / adapter protocol (LayerZero OFT, Wormhole NTT, Circle CCT, Hyperlane Warp, Axelar ITS) that re-implements a quorum / attester-set / DVN-set on top of a base messaging layer, ask: does the BASE layer have a set-version / epoch invalidation defense, and did the WRAPPER re-implement that invalidation for its OWN set-mutation paths? If the base has it and the wrapper doesn't → defense-inheritance-gap candidate. Pairs with DC-9 sub-4 cross-substrate-quorum-bitmap sub-variant (`brain/Patterns-Defense-Classes.md`).
+
+**Promotion path.** FIRST anchor (Wormhole NTT). 2nd anchor on a different wrapper-protocol class (LayerZero DVN-set rotation, Axelar ITS, Hyperlane ISM-set) promotes to a named Pattern.
+
+**Source.** Hunt `hunts/2026-05-29-wormhole-ntt-hyp-c-gate2-paste-ready.md` compound G2-4. Filed 2026-05-29 reboot-recovery TODO item 3 (Hyp-C PoC re-confirm), Ogie msg 7962.
+
+---
+
 ## Future entries
 
 When the next cross-domain public exploit hits, file under this ledger with the same schema. Pattern goal: 5-10 entries here surface a meta-pattern about cross-domain fragility that becomes a Pattern J in `audit-methodology-v2.md`.
 
 ---
+
+_Cross-Domain Fragility Laws ledger | v2.2 | 2026-05-29 (Wrapper-Protocol Defense-Inheritance Gap law filed — Wormhole NTT Hyp-C Gate 2 CONFIRM anchor, PoC 3/3 PASS re-confirmed post-reboot; wrapper protocols that re-implement a base-layer quorum but not its set-version invalidation defense. FIRST anchor; promotion on 2nd wrapper-class anchor. Companion: `brain/Patterns-Defense-Classes.md` v2.6 DC-9 sub-4 cross-substrate-quorum-bitmap sub-variant (W-2-NEG). Reboot-recovery TODO item 3, Ogie msg 7962. v2.1 footer history preserved below.)_
 
 _Cross-Domain Fragility Laws ledger | v2.1 | 2026-05-26 (TRC20-Callback-Hook Law filed per Ogie msg 7817 Day 26 batch — JustLend Compound-V2-on-TRON Gate 1 anchor, FIRST cross-domain law on TRON Compound-V2-fork substrate. C1 CEI candidate FORECLOSED on current JustLend in-scope set (5/5 TRC20 underlyings verified NO HOOK via TronScan methodMap) but structural class remains live on any future market addition with TRC10-wrapped underlying carrying `tokensReceived` semantics. Companion: `brain/Patterns-Defense-Classes.md` DC-12 sub-7f new (PriceOracleProxy-class wrapper strips staleness — JustLend proposal #1) + `brain/Doctrine.md` v3.4 (Doctrine #34 anchor 4 BUSD-market-added-Feb-2023). v2.0 footer history preserved below.)_
 
