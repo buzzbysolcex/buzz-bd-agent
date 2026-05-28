@@ -7,3 +7,8 @@
 - 2026-05-28 | onre | FORECLOSE | tweet+moltbook+outreach | promotion=True | 2026-05-27-onre-immunefi-DEDUP-FORECLOSURE.md
 - 2026-05-28 | gearbox | WATCHLIST | tweet+moltbook+outreach | promotion=True | 2026-05-27-gearbox-immunefi-gate1.md
 - 2026-05-28 | templar | WATCHLIST | tweet+moltbook+outreach | promotion=True | 2026-05-27-templar-immunefi-gate1.md
+- 2026-05-28 | hyperlane-hyp-1 | FORECLOSE | tweet+moltbook+outreach | promotion=True | 2026-05-29-hyperlane-hyp-1-gate2-foreclosure.md
+- 2026-05-28 | sky | FORECLOSE | tweet+moltbook+outreach | promotion=True | 2026-05-29-sky-immunefi-gate1.md
+- 2026-05-28 | wormhole-ntt-hyp-e | NEGATE | tweet+moltbook+outreach | promotion=True | 2026-05-29-wormhole-ntt-hyp-e-gate2-foreclosure.md
+- 2026-05-28 | wormhole-ntt-hyp-c | UNKNOWN | tweet | promotion=False | 2026-05-29-wormhole-ntt-hyp-c-gate2-paste-ready.md
+- 2026-05-28 | wormhole-ntt | FORECLOSE | tweet+moltbook+outreach | promotion=True | 2026-05-28-wormhole-ntt-immunefi-gate1.md
