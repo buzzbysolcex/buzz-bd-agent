@@ -1500,7 +1500,10 @@ EV = P(finding) × bounty_cap × P(acceptance) × P(first-to-report) × brain_ov
 
 **Lane 3 surface.** A "post-incident audit saturation" methodology piece — published when a protocol gets exploited, here's how to triage whether to chase the new bounty — is itself publishable. Adds to the foreclosure-receipts portfolio.
 
-### Doctrine #27 F corollary — 33-audit ceiling threshold (added 2026-05-25 — Euler $7.5M Cantina FORECLOSURE-RECEIPT anchor, proposal F, Ogie msg 7770) [INSPECTED]
+### Doctrine #27 F corollary — 33-audit ceiling threshold (added 2026-05-25 — Euler $7.5M Cantina FORECLOSURE-RECEIPT anchor, proposal F, Ogie msg 7770; **PROMOTED PERMANENT 2026-05-28 evening on 3rd canonical anchor — Spark Immunefi**) [INSPECTED]
+
+**Status.** PERMANENT (3-anchor band reached 2026-05-28 evening): Euler V2 Cantina (canonical 33-audit anchor, 2026-05-25) + Gearbox-BOUNDARY (2nd anchor) + **Spark Immunefi $5M (3rd canonical anchor 2026-05-28 evening)**. Spark's anchor evidence: spark-alm-controller alone has 21 audit rounds (8 ChainSecurity + 11 Cantina + 2 Certora, v100→v1100 sustained bi-directional cadence); aggregate across Spark in-scope contracts surfaces 36-44+ visible audit rounds across 8+ firms. 0.20× MAXIMUM-tier multiplier applied; FORECLOSURE-RECEIPT verdict at Gate 1 (no clone, NO Foundry investment). EV pre-discount $180K → post-discount $1.5-4K (~0.024× weighted combined: MAXIMUM tier 0.20× × Pattern H ×0.40 × DC-7 EXCLUSION ×0.30 = 0.024×). Spark anchor proves F corollary cleanly transfers across Immunefi-platform target class (was Euler+Cantina + Gearbox+? → now Spark+Immunefi adds platform-portability evidence). Authority: 2026-05-28 background-agent Spark Gate 1 (`hunts/2026-05-28-spark-immunefi-gate1.md`, 37KB, DEDUP-FORECLOSURE-RECEIPT verdict).
+
 
 **Saturation ceiling threshold = 33 audits (Euler V2 anchor 2026-05-25).** Programs at/above this threshold receive a **0.20× P(finding) discount multiplier — the lowest in the calibration**. This is the MAXIMUM-audit-saturation discount tier in the Doctrine #27 hierarchy:
 

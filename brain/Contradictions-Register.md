@@ -457,6 +457,14 @@ Both anchors fired on cross-protocol DC-7 hypotheses where the consumer-side rep
 
 The three INFO entries together describe **three distinct drift axes** that Standing-Intake protocol must absorb. All three defenses (Step 1 PROFILE, Step 5.11 Cross-Protocol Defense Enumeration, Step 0.5 5-channel ledger check) are now MANDATORY-or-promoted.
 
+**2026-05-28 EXPANSION 2 — Axis 5 sub-class NEW (Spark Gate 1):**
+
+| Sub-class | Drift mechanism | Anchor |
+|---|---|---|
+| **5a PLATFORM-CONFUSION-CANTINA-AS-AUDITOR** | Brief said Cantina (assumed = bounty platform); live = Immunefi (`immunefi.com/bug-bounty/sparklend/`). Cantina is an audit firm name colocated in the program's audit history, not the bounty platform. Operator-brief confused "audited by Cantina" with "Cantina-hosted bounty." | Spark Immunefi $5M Gate 1 2026-05-28 evening |
+
+Detection signal for Step 1 PROFILE: when brief says "Cantina" + program name, cross-check on Cantina's program listing AND Immunefi's program listing. If Cantina hosts ONLY audit history while Immunefi hosts the live bounty, flag Axis 5a drift and pivot platform identification to Immunefi for the actual submission path. Same pattern likely applies to Trail of Bits / OpenZeppelin / Spearbit (audit firms that also have separate bounty programs but most engagements are auditor-only).
+
 **2026-05-28 EXPANSION — INFO #19 now 9-axis drift catalog (Stargate V2 + Flux Finance same-day):**
 
 | Axis | Drift dimension | Anchor |
@@ -508,3 +516,5 @@ The three INFO entries together describe **three distinct drift axes** that Stan
 _Brain Contradictions Register | v1.11 | 2026-05-28 | 22 entries (20 P4 + 1 P1 + 1 CROSS; v1.11 adds #22 CLARIFICATION Doctrine #34 misapplication on DISC-020 — productive closure resolved by Doctrine #39 CANDIDATE Phase 0 gate, doctrine unchanged)_
 
 _v1.12 INFO #19 EXPANSION — 2026-05-28 evening: Stargate V2 (brief said V3) + Flux Finance (Ondo not FRAX; `flux-finance/` not `fluxfinance/`) add Axes 7-9. 9-axis drift catalog now canonical. Step 1 PROFILE preflight MANDATORY 9-axis cross-check._
+
+_v1.13 INFO #19 EXPANSION 2 — 2026-05-28 late evening: Spark Gate 1 anchors Axis 5 sub-class 5a PLATFORM-CONFUSION-CANTINA-AS-AUDITOR (brief said Cantina platform; live = Immunefi `sparklend/`). Doctrine #27 F corollary PROMOTED PERMANENT today on 3rd anchor (Euler V2 + Gearbox + Spark). Doctrine #34 sub-class b 6th-anchor count incremented (Spark 21-round bi-directional cadence + Flux V1→V2 oracle ~ both 6th-anchor candidates pending operator decision on which anchors)._
