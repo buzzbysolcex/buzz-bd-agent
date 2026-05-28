@@ -149,6 +149,7 @@
 - [ ] Identify Sherlock contest submission portal + dashboard
 - [ ] Understand judge-comment workflow (rebuttal window?)
 - [ ] Confirm $250 deposit refund policy (refundable on accepted finding?)
+- [ ] **Verify Sherlock's AI-generated-report posture (added 2026-05-29 per DISC-022b)** — Immunefi prohibited-conduct clause references AI-generated reports; Sherlock may have different policy. Required reading: Sherlock terms-of-service + recent contest judge comments. If Sherlock also flags AI-generated reports, port DISC-022b hardening requirements (Foundry PoC + operator-validation receipt + [EXECUTED]-bias R8 tags + 2+ external citations) to all Heimdall submissions. If Sherlock is AI-permissive, lighter requirements but still apply DISC-019 7-rule humanization for quality.
 
 ---
 
