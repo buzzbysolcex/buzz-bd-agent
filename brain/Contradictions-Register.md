@@ -457,6 +457,24 @@ Both anchors fired on cross-protocol DC-7 hypotheses where the consumer-side rep
 
 The three INFO entries together describe **three distinct drift axes** that Standing-Intake protocol must absorb. All three defenses (Step 1 PROFILE, Step 5.11 Cross-Protocol Defense Enumeration, Step 0.5 5-channel ledger check) are now MANDATORY-or-promoted.
 
+**2026-05-28 EXPANSION — INFO #19 now 9-axis drift catalog (Stargate V2 + Flux Finance same-day):**
+
+| Axis | Drift dimension | Anchor |
+|---|---|---|
+| 1 | VERSION (major→minor) | Cap (brief v2.x → live v1.x) |
+| 2 | CAP (USD) | Kiln (brief $200K → live $100K) |
+| 3 | KYC requirement | Gearbox (brief no-KYC → live YES) |
+| 4 | SCOPE assets | Function FBTC (brief 3-asset → live 1-asset) |
+| 5 | PLATFORM | OnRe/etc (Immunefi vs Sherlock) |
+| 6 | TIME (LIVE-since staleness) | OnRe (brief said new → live 17d old) |
+| 7 | **BRIEF-VERSION (NEW 2026-05-28)** | **Stargate (brief said V3 — `stg-evm-v3` GitHub 404; live = V2 `stargate-protocol/stargate-v2`)** |
+| 8 | **SUBSTRATE-AFFILIATION (NEW 2026-05-28)** | **Flux Finance (brief said FRAX-affiliated; live = Ondo Finance team)** |
+| 9 | **ORG-NAME (NEW 2026-05-28)** | **Flux Finance (brief said `fluxfinance/`; canonical = `flux-finance/`)** |
+
+**Why 9-axis matters:** Step 1 PROFILE preflight must cross-check ALL 9 axes against the operator brief. Axes 7-9 added today are all anchored by today's hunts. Step 5.6 5-Target Quality Checklist + Step 5.11 Cross-Protocol Enumeration catch most downstream drift; Step 1 PROFILE preflight catches it cheapest (pre-clone).
+
+**Recurrence count update:** INFO #19 anchor count now 9+ across Day 27-28 (Kiln/Cap/Gearbox/Function FBTC/OnRe/Templar/Gnosis Chain/Stargate/Flux). Pattern is canonical, not coincidence. Step 1 PROFILE preflight 9-axis cross-check is MANDATORY.
+
 **Recurrence count:** 1 anchored event (OnRe 2026-05-27). Track for 2nd+ anchor. If pattern recurs ≥2 times within 14d, consider auto-watchlist-staleness scanner cron (Wednesday 06:00 UTC after Phase 2 corpus consumer).
 
 ---
@@ -488,3 +506,5 @@ The three INFO entries together describe **three distinct drift axes** that Stan
 ---
 
 _Brain Contradictions Register | v1.11 | 2026-05-28 | 22 entries (20 P4 + 1 P1 + 1 CROSS; v1.11 adds #22 CLARIFICATION Doctrine #34 misapplication on DISC-020 — productive closure resolved by Doctrine #39 CANDIDATE Phase 0 gate, doctrine unchanged)_
+
+_v1.12 INFO #19 EXPANSION — 2026-05-28 evening: Stargate V2 (brief said V3) + Flux Finance (Ondo not FRAX; `flux-finance/` not `fluxfinance/`) add Axes 7-9. 9-axis drift catalog now canonical. Step 1 PROFILE preflight MANDATORY 9-axis cross-check._
