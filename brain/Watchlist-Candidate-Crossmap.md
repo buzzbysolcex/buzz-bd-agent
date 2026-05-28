@@ -1334,3 +1334,41 @@ _v2.15 Addendum: 2026-05-27 ~23:25 UTC | row N+7 Gearbox WATCHLIST-PARK | **DC-7
 **Next target:** Sky lockstake (Watchlist row 11) — $10M no-KYC, CANDIDATE-D direct match, EV $300K+ pre-discount. Highest unscanned EV in pipeline.
 
 _v2.16 Addendum: 2026-05-27 ~23:35 UTC | row 21 Templar WATCHLIST-PARK | **INFO #19 5th anchor (substrate-drift class)** | **DC-7 EXCLUSION CANONICAL first compound-impact validation (Hyp-1 filtered, ~1-2hr saved)** | Doctrine #36 sub-rule #36c proposal (multi-substrate AA scheme-disambiguation, 1-anchor) | CANDIDATE-Q proposal (NEAR async callback state-divergence, 2-anchor) | 11 G1/G2 verdicts in Day-27 night cycle | next-target: Sky lockstake $10M no-KYC CANDIDATE-D direct (~$300K pre-discount EV)_
+
+---
+
+## v2.17 Addendum: Gnosis Chain Bridge Gate 1 WATCHLIST-PARK + Doctrine #37 Sub-B 4th anchor (2026-05-28 ~13:25 UTC)
+
+**Doctrine #37 Sub-Type B grows to 4 anchors** — Gnosis Chain bridge = **longest-frozen substrate to date** (omnibridge HEAD `c814f68` 2021-09-06 = **1725 days frozen**). Strengthens doctrine core: "frozen substrate ≠ dead product" with $1B+ TVL bridging through 4 in-scope contracts.
+
+| # | Target | Cap | Verdict | EV post |
+|---|--------|-----|---------|---------|
+| N+9 | **Gnosis Chain bridge** (Immunefi $2M no-KYC) | Bridge contracts only (Solidity, 4 contracts) | WATCHLIST-PARK (Gate-2 conditional on pypdf install + ChainSecurity FT-AMB-6.0.0 PDF dedup-search) | $8-23K |
+
+**Saturation: Doctrine #27 LOW tier (1.0× multiplier, NO discount)** — 6 audits / 4 firms (Quantstamp ×2 + SmartDec + ChainSecurity ×2 + PepperSec). BELOW catalog threshold — rare for $2M cap target.
+
+**Step 5.11 enumeration:**
+- H1 Hashi 2nd-channel asymmetry → SURVIVES Gate 2 PROVISIONAL (2/3 NEGATE-LEAN; `_data` vs `message` keccak256 divergence; `HASHI_IS_MANDATORY=false`)
+- H2 `safeExecuteSignaturesWithGasLimit` gas-override → FORECLOSE (natspec self-disclosure; **Doctrine #34 sub-b Anchor #5 candidate**)
+- H4 OmniBridge mediatorBalance vs balanceOf → SURVIVES Gate 2 PROVISIONAL (likely DEDUP via ChainSecurity 1.1.0; need PDF read)
+- H5 Yaho re-entry → 3/3 EXCLUSION FIRES (DC-7 EXCLUSION 4th compound-impact validation)
+- H3/H6/H7/H8/H10 → FORECLOSED
+
+**Brain compounds (4):**
+1. **Doctrine #37 Sub-B 4th anchor** (applied to Doctrine.md — longest-frozen 1725d)
+2. **Doctrine #34 sub-b Anchor #5 candidate** (gas-override natspec cluster; 5-anchor = operationally PERMANENT)
+3. Doctrine #37 catalog row — Gnosis ↔ Hashi composition (frozen base + composition surface)
+4. **Open-Question Q-OXY** — bridge `safeExecute*` gas-override family cross-bridge pattern (check Polygon PoS, Optimism CDM, Arbitrum Inbox, Across V3, Stargate V2)
+
+**INFO #19 6th anchor** (now 6-axis drift): brief = L1 substrate (Beacon + execution + Solidity + Go); live = bridge-Solidity-only. New axis: SUBSTRATE-LANGUAGE drift.
+
+**Gate 2 escalation gates:**
+- `pip install pypdf` (standing infra request) → unblocks ChainSecurity PDF dedup for H4
+- OR operator override on H1 → Foundry harness independent of PDF dedup
+
+**Next-action (subagent recommendation corrected for stale state):** subagent suggested "Balancer B-1 paste-ready" but B-1 already SUBMITTED as DISC-021 #80150 yesterday. Real options:
+- Pancake P-1 paste-ready → operator-gated (24h Immunefi rule today)
+- Flux Finance G1 (Lane 5 row 15, $550K no-KYC, UNHUNTED, pre-EV $27.5K) — autonomous next-dispatch
+- Cap clones purge (operator sudo)
+
+_v2.17 Addendum: 2026-05-28 ~13:25 UTC | row N+9 Gnosis Chain bridge WATCHLIST-PARK | **Doctrine #37 Sub-B 4th anchor (LONGEST-FROZEN 1725 days)** | **DC-7 EXCLUSION 4th compound-impact validation (Yaho re-entry filtered)** | **Doctrine #34 sub-b Anchor #5 → 5-anchor OPERATIONALLY PERMANENT cluster** | INFO #19 6-axis drift catalog | next-dispatch: Flux Finance G1_

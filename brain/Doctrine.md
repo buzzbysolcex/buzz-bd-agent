@@ -2628,10 +2628,11 @@ CANDIDATE Doctrine #37 filed with 2 anchors (CoW canonical A; rhino.fi canonical
 
 **Status.** PERMANENT Doctrine #37 (promoted 2026-05-27 evening — Sub-Type B reaches 3 anchors: rhino.fi canonical + Gains Network gTrade 2nd anchor + Veda BoringVault 3rd anchor). Sub-Type A still 1 anchor (CoW); promotion of A pending 2nd Sub-A anchor.
 
-**Sub-Type B 3 anchors (PERMANENT):**
+**Sub-Type B 4 anchors (PERMANENT, expanded 2026-05-28):**
 1. rhino.fi (canonical) — 440-day frozen + Immunefi branch-pinned `master` + 28-chain deployment vs 10 in scope + 5 audits
 2. Gains Network gTrade (2nd anchor 2026-05-27) — frozen Solidity substrate + active product launches off same contracts
 3. Veda BoringVault (3rd anchor 2026-05-27 evening) — `Se7en-Seas/boring-vault` HEAD `0e23e7f` 525d stale + `veda-labs/boring-vault-svm` HEAD `450cfd8` 275d stale + Immunefi program LIVE since 2026-01-21 with 52 active assets, 4 firms × 14+ audits, 0xMacro continuous cadence
+4. Gnosis Chain bridge (4th anchor 2026-05-28) — **longest-frozen substrate to date**: `omnibridge` HEAD `c814f68` 2021-09-06 = **1725 days frozen** + `tokenbridge-contracts` HEAD `4787340` 2024-10-14 (Hashi PR 590d) — both heavily-used in live production bridging $1B+ TVL through 4 in-scope bridge contracts. Strengthens doctrine core: "frozen substrate ≠ dead product". Composition surface: Hashi 2nd-channel asymmetry + OmniBridge mediatorBalance vs balanceOf — 2 Gate 2 conditional candidates surviving filters.
 
 Authority: CoW P1 + rhino.fi P1 (joint authorities), Gains Network 2026-05-27 dispatch (Doctrine v3.7.2), Veda 2026-05-27 Step 0.5 receipt (`hunts/2026-05-27-veda-immunefi-gate1.md`).
 
