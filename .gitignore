@@ -80,3 +80,8 @@ deploy*.yaml
 .solana-deployer.json
 *.solana-keypair.json
 .env.solana
+/.brain-backup-staging/
+
+# Detector binaries (rebuildable, not for git)
+scripts/detectors/*/detector*
+scripts/detectors/cosmos-sdk-go-ast/c129-cosmos-go-ast
