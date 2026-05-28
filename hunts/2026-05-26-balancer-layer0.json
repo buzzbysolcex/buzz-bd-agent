@@ -1,0 +1,1230 @@
+{
+  "schema": "buzz-git-security-analyzer-v1",
+  "generated_at": "2026-05-26T21:51:07.181Z",
+  "repo": "/home/claude-code/buzz-workspace/data/lane1/clones/balancer-v3-monorepo",
+  "head_sha": "80fd29ce4eb627139694db7fef5aba355759d303",
+  "head_iso": "2026-05-22T03:00:15.000Z",
+  "total_commits": 200,
+  "commits_analyzed": 200,
+  "sections": {
+    "fix_candidates": {
+      "count": 21,
+      "items": [
+        {
+          "sha": "ef0d3afec734955b6e0cc549c521594461ad6f3f",
+          "ts": 1775066667,
+          "iso": "2026-04-01T18:04:27.000Z",
+          "author": "EndymionJkb",
+          "subject": "Fix benchmarks (#1650)",
+          "files": [
+            "pvt/benchmarks/foundry.toml",
+            "pvt/benchmarks/test/foundry/WeightedPoolSwaps.t.sol",
+            "pvt/benchmarks/test/foundry/YieldFees.t.sol"
+          ],
+          "file_count": 3,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "d807758cf7bc743f9072eaf5d998653f9931dc41",
+          "ts": 1774469733,
+          "iso": "2026-03-25T20:15:33.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Fix medusa stable tests (#1631)",
+          "files": [
+            "pkg/pool-stable/medusa.json",
+            "pkg/pool-stable/test/foundry/fuzz/AddAndRemoveLiquidityStable.medusa.sol",
+            "pkg/pool-stable/test/foundry/fuzz/AddAndRemoveLiquidityStableEnhanced.medusa.sol",
+            "pkg/pool-stable/test/foundry/fuzz/SwapStableEnhanced.medusa.sol",
+            "pkg/vault/test/foundry/utils/BaseMedusaTest.sol"
+          ],
+          "file_count": 5,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "b100677f53553131f92e7f2a60cfc849231dc0b4",
+          "ts": 1773247854,
+          "iso": "2026-03-11T16:50:54.000Z",
+          "author": "EndymionJkb",
+          "subject": "LBP audit fixes (#1637)",
+          "files": [
+            ".changeset/great-schools-check.md",
+            "pkg/pool-weighted/contracts/lbp/BPTTimeLocker.sol",
+            "pkg/pool-weighted/contracts/lbp/LBPCommon.sol",
+            "pkg/pool-weighted/test/foundry/FixedPriceLBPool.t.sol",
+            "pkg/pool-weighted/test/foundry/LBPMigrationRouter.t.sol",
+            "pkg/pool-weighted/test/foundry/LBPool.t.sol",
+            "pkg/pool-weighted/test/foundry/LBPoolFactory.t.sol",
+            "pkg/solidity-utils/contracts/test/ERC20TestToken.sol"
+          ],
+          "file_count": 8,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "36584eeaaf669743d2fd8ce30b5c1c64e1b96f04",
+          "ts": 1771023895,
+          "iso": "2026-02-13T23:04:55.000Z",
+          "author": "EndymionJkb",
+          "subject": "Address LBP audit issues (#1628)",
+          "files": [
+            ".changeset/easy-islands-repeat.md",
+            "pkg/pool-weighted/contracts/lbp/FixedPriceLBPoolFactory.sol",
+            "pkg/pool-weighted/contracts/lbp/LBPCommon.sol",
+            "pkg/pool-weighted/contracts/lbp/LBPMigrationRouter.sol",
+            "pkg/pool-weighted/contracts/lbp/LBPValidation.sol",
+            "pkg/pool-weighted/contracts/lbp/LBPool.sol",
+            "pkg/pool-weighted/contracts/lbp/LBPoolFactory.sol",
+            "pkg/pool-weighted/contracts/lib/LBPoolLib.sol",
+            "pkg/pool-weighted/test/LBPool.test.ts",
+            "pkg/pool-weighted/test/foundry/FixedPriceLBPool.t.sol",
+            "pkg/pool-weighted/test/foundry/FixedPriceLBPoolFactory.t.sol",
+            "pkg/pool-weighted/test/foundry/LBPool.t.sol",
+            "pkg/pool-weighted/test/foundry/LBPoolFactory.t.sol",
+            "pkg/pool-weighted/test/foundry/LBPoolRealReservesTest.t.sol",
+            "pkg/pool-weighted/test/foundry/utils/BaseLBPTest.sol"
+          ],
+          "file_count": 15,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "b9541d53f95b1634ea30479ac89905a6a8dd1d7b",
+          "ts": 1770928877,
+          "iso": "2026-02-12T20:41:17.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Fix medusa config (#1629)",
+          "files": [
+            "pkg/pool-stable/medusa.json",
+            "pkg/pool-weighted/medusa.json",
+            "pkg/vault/medusa.json"
+          ],
+          "file_count": 3,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "4be1ca366c5a3abd9f24934a24539c3dc45fd66a",
+          "ts": 1770041997,
+          "iso": "2026-02-02T14:19:57.000Z",
+          "author": "EndymionJkb",
+          "subject": "Add latest security audit (#1626)",
+          "files": [
+            "audits/README.md",
+            "audits/certora/2026-01-26.pdf"
+          ],
+          "file_count": 2,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "aed46f9b2c03bb08cd1ad3d37716ae86f2a4c44d",
+          "ts": 1767901983,
+          "iso": "2026-01-08T19:53:03.000Z",
+          "author": "EndymionJkb",
+          "subject": "Unbalanced Add Via Swap Router patch (V3) (#1600)",
+          "files": [
+            "pkg/vault/contracts/UnbalancedAddViaSwapRouter.sol",
+            "pkg/vault/test/foundry/UnbalancedAddViaSwapRouter.t.sol"
+          ],
+          "file_count": 2,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "4ce4c2f79da18280383346c892537853dc22e5d5",
+          "ts": 1767791322,
+          "iso": "2026-01-07T13:08:42.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Update past audits (#1596)",
+          "files": [
+            "audits/README.md",
+            "audits/certora/2025-09-08.pdf",
+            "audits/certora/2025-09-10.pdf"
+          ],
+          "file_count": 3,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "fd1c3712d8681e35caaf8a2691ca36d351c436ea",
+          "ts": 1764851689,
+          "iso": "2025-12-04T12:34:49.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Fix the LBPMigrationRouter scaling issue (#1581)",
+          "files": [
+            "pkg/pool-weighted/contracts/lbp/LBPMigrationRouter.sol",
+            "pkg/pool-weighted/test/foundry/LBPMigrationRouter.t.sol"
+          ],
+          "file_count": 2,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "e7aa4c6a0d2482a1ef93f7572c26f094bf416b2e",
+          "ts": 1764718543,
+          "iso": "2025-12-02T23:35:43.000Z",
+          "author": "EndymionJkb",
+          "subject": "Fixed price LBP (#1580)",
+          "files": [
+            "pkg/interfaces/contracts/pool-weighted/IFixedPriceLBPool.sol",
+            "pkg/interfaces/contracts/pool-weighted/ILBPCommon.sol",
+            "pkg/pool-weighted/contracts/lbp/BaseLBPFactory.sol",
+            "pkg/pool-weighted/contracts/lbp/FixedPriceLBPool.sol",
+            "pkg/pool-weighted/contracts/lbp/FixedPriceLBPoolFactory.sol",
+            "pkg/pool-weighted/contracts/lbp/LBPCommon.sol",
+            "pkg/pool-weighted/contracts/lbp/LBPValidation.sol",
+            "pkg/pool-weighted/contracts/lbp/LBPool.sol",
+            "pkg/pool-weighted/contracts/lbp/LBPoolFactory.sol",
+            "pkg/pool-weighted/test/foundry/FixedPriceLBPool.t.sol",
+            "pkg/pool-weighted/test/foundry/FixedPriceLBPoolFactory.t.sol",
+            "pkg/pool-weighted/test/foundry/LBPoolFactory.t.sol",
+            "pkg/pool-weighted/test/foundry/utils/FixedPriceLBPoolContractsDeployer.sol",
+            "pkg/pool-weighted/test/foundry/utils/WeightedLBPTest.sol"
+          ],
+          "file_count": 14,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "2df6f4de904e5af0910d1eeafd306e378709a598",
+          "ts": 1763149769,
+          "iso": "2025-11-14T19:49:29.000Z",
+          "author": "EndymionJkb",
+          "subject": "LBP Patch (#1584)",
+          "files": [
+            "pkg/pool-weighted/contracts/lbp/LBPCommon.sol"
+          ],
+          "file_count": 1,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "b63379e04c8bb39bd87f963339a1962c3e99f6cd",
+          "ts": 1759340627,
+          "iso": "2025-10-01T17:43:47.000Z",
+          "author": "EndymionJkb",
+          "subject": "CLR audit fixes #2 (#1555)",
+          "files": [
+            "pkg/pool-gyro/test/gas/.hardhat-snapshots/[Gyro2CLPPool - Standard] add liquidity single token exact out - warm slots",
+            "pkg/pool-gyro/test/gas/.hardhat-snapshots/[Gyro2CLPPool - Standard] add liquidity unbalanced - warm slots",
+            "pkg/pool-gyro/test/gas/.hardhat-snapshots/[Gyro2CLPPool - Standard] remove liquidity single token exact in - warm slots",
+            "pkg/pool-gyro/test/gas/.hardhat-snapshots/[Gyro2CLPPool - Standard] swap single token exact in with fees - cold slots",
+            "pkg/pool-gyro/test/gas/.hardhat-snapshots/[Gyro2CLPPool - Standard] swap single token exact in with fees - warm slots",
+            "pkg/pool-hooks/test/gas/.hardhat-snapshots/[StableSurgePool - Standard] swap single token exact in with fees - cold slots",
+            "pkg/pool-hooks/test/gas/.hardhat-snapshots/[StableSurgePool - Standard] swap single token exact in with fees - warm slots",
+            "pkg/pool-hooks/test/gas/.hardhat-snapshots/[StableSurgePool - WithRate - BatchRouter] swap exact in with one token and fees - warm slots",
+            "pkg/pool-hooks/test/gas/.hardhat-snapshots/[StableSurgePool - WithRate] swap single token exact in with fees - cold slots",
+            "pkg/pool-stable/test/gas/.hardhat-snapshots/[StablePool - Standard - BatchRouter] remove liquidity using swapExactIn - warm slots",
+            "pkg/pool-stable/test/gas/.hardhat-snapshots/[StablePool - Standard] swap single token exact in with fees - warm slots",
+            "pkg/pool-stable/test/gas/.hardhat-snapshots/[StablePool - WithRate - BatchRouter] swap exact in with one token and fees - warm slots",
+            "pkg/pool-stable/test/gas/.hardhat-snapshots/[StablePool - WithRate] swap single token exact in with fees - warm slots",
+            "pkg/pool-weighted/test/gas/.hardhat-snapshots/[WeightedPool - Standard - BatchRouter] remove liquidity using swapExactOut - warm slots",
+            "pkg/pool-weighted/test/gas/.hardhat-snapshots/[WeightedPool - WithRate - BatchRouter] remove liquidity using swapExactIn - warm slots",
+            "pkg/pool-weighted/test/gas/.hardhat-snapshots/[WeightedPool - WithRate] swap single token exact in with fees - cold slots",
+            "pkg/pool-weighted/test/gas/.hardhat-snapshots/[WeightedPool - WithRate] swap single token exact in with fees - warm slots",
+            "pkg/vault/contracts/CompositeLiquidityRouterHooks.sol",
+            "pkg/vault/contracts/RouterCommon.sol",
+            "pkg/vault/contracts/RouterHooks.sol"
+          ],
+          "file_count": 20,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "22eaa478541724f299a6f4f6cc099892e894b0c8",
+          "ts": 1758733405,
+          "iso": "2025-09-24T17:03:25.000Z",
+          "author": "EndymionJkb",
+          "subject": "Add audit report for LP oracles (#1556)",
+          "files": [
+            "audits/README.md",
+            "audits/certora/2025-08-19.pdf"
+          ],
+          "file_count": 2,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "40344695361a4678b5903d73a5e75b38a77b8200",
+          "ts": 1758117302,
+          "iso": "2025-09-17T13:55:02.000Z",
+          "author": "EndymionJkb",
+          "subject": "CLR audit fixes (#1551)",
+          "files": [
+            "pkg/interfaces/contracts/vault/ICompositeLiquidityRouter.sol",
+            "pkg/vault/contracts/CompositeLiquidityRouterHooks.sol",
+            "pkg/vault/test/.contract-sizes/CompositeLiquidityRouter",
+            "pkg/vault/test/foundry/AddUnbalancedLiquidityViaSwapRouter.t.sol"
+          ],
+          "file_count": 4,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "e6e69cfdf30aae766ce7665b66f8b2170f3397ab",
+          "ts": 1755553511,
+          "iso": "2025-08-18T21:45:11.000Z",
+          "author": "João Bruno - Balancer Labs",
+          "subject": "Fix limit of vm.txGasPrice (#1494)",
+          "files": [
+            "pkg/pool-hooks/test/foundry/MevCaptureHook.t.sol",
+            "pkg/solidity-utils/test/foundry/utils/BaseTest.sol"
+          ],
+          "file_count": 2,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "a94ae7ab11ccda28271215dd2c924935e204ed3c",
+          "ts": 1755280999,
+          "iso": "2025-08-15T18:03:19.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Fix flaky test (#1489)",
+          "files": [
+            "pkg/pool-weighted/test/foundry/LiquidityApproximationWeighted.t.sol"
+          ],
+          "file_count": 1,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "b8630e4454b447766b24141d948624ceb8649ceb",
+          "ts": 1755261396,
+          "iso": "2025-08-15T12:36:36.000Z",
+          "author": "EndymionJkb",
+          "subject": "Fix typos inherited from V2 (#1488)",
+          "files": [
+            "audits/README.md",
+            "audits/test-report.md"
+          ],
+          "file_count": 2,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "1eec006f7242c3dae41dd502e286e6af7c961e6e",
+          "ts": 1751385228,
+          "iso": "2025-07-01T15:53:48.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Docs fix (#1412)",
+          "files": [
+            "pkg/pool-weighted/contracts/lbp/LBPoolFactory.sol"
+          ],
+          "file_count": 1,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "84cfb0d9d0bd024f92c7a95c64ab7ab8b4c12f4b",
+          "ts": 1748888140,
+          "iso": "2025-06-02T18:15:40.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Fix ERC4626 cow status bug (#1388)",
+          "files": [
+            "pkg/standalone-utils/contracts/CowSwapFeeBurner.sol",
+            "pkg/standalone-utils/test/foundry/CowSwapFeeBurner.t.sol",
+            "pkg/standalone-utils/test/foundry/ERC4626CowSwapFeeBurner.t.sol"
+          ],
+          "file_count": 3,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "3ee29d17eba98421eca6ef4a3b3fe6e5d1de805f",
+          "ts": 1746612338,
+          "iso": "2025-05-07T10:05:38.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Fix delta for e2e tests (#1374)",
+          "files": [
+            "pkg/vault/test/foundry/E2eSwap.t.sol"
+          ],
+          "file_count": 1,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "aeec18927298eca6c6385241e4e0b63db8361036",
+          "ts": 1745506608,
+          "iso": "2025-04-24T14:56:48.000Z",
+          "author": "João Bruno - Balancer Labs",
+          "subject": "Fix E2E Swap test (#1358)",
+          "files": [
+            "pkg/vault/test/foundry/E2eSwap.t.sol"
+          ],
+          "file_count": 1,
+          "touches_dangerous": true
+        }
+      ]
+    },
+    "dangerous_area_changes": {
+      "count": 49,
+      "items": [
+        {
+          "sha": "ef0d3afec734955b6e0cc549c521594461ad6f3f",
+          "iso": "2026-04-01T18:04:27.000Z",
+          "author": "EndymionJkb",
+          "subject": "Fix benchmarks (#1650)",
+          "dangerous_files": [
+            "pvt/benchmarks/test/foundry/WeightedPoolSwaps.t.sol"
+          ]
+        },
+        {
+          "sha": "d807758cf7bc743f9072eaf5d998653f9931dc41",
+          "iso": "2026-03-25T20:15:33.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Fix medusa stable tests (#1631)",
+          "dangerous_files": [
+            "pkg/pool-stable/test/foundry/fuzz/SwapStableEnhanced.medusa.sol"
+          ]
+        },
+        {
+          "sha": "d455b70e78fb7a7466a9bc13840fe835823f963e",
+          "iso": "2026-03-19T23:13:20.000Z",
+          "author": "EndymionJkb",
+          "subject": "Correct NatSpec in ERC4626CowBurner (#1645)",
+          "dangerous_files": [
+            "pkg/standalone-utils/contracts/ERC4626CowSwapFeeBurner.sol"
+          ]
+        },
+        {
+          "sha": "d610556dc6e66741df867165660c11255570bdbf",
+          "iso": "2026-03-19T14:49:37.000Z",
+          "author": "EndymionJkb",
+          "subject": "New Vault tests from Certora (#1625)",
+          "dangerous_files": [
+            "pkg/vault/test/foundry/E2eBatchSwap.t.sol",
+            "pkg/vault/test/foundry/E2eSwapRateProvider.t.sol",
+            "pkg/vault/test/foundry/PoolSwapManager.t.sol",
+            "pkg/vault/test/foundry/UnbalancedAddViaSwapRouter.t.sol",
+            "pkg/vault/test/foundry/UninitializedBufferTest.sol",
+            "pkg/vault/test/foundry/VaultSwap.t.sol",
+            "pkg/vault/test/foundry/VaultSwapBalanceLoadRounding.t.sol",
+            "pkg/vault/test/foundry/VaultSwapQuotingCorrectness.t.sol",
+            "pkg/vault/test/foundry/VaultSwapRate.t.sol",
+            "pkg/vault/test/foundry/fuzz/Swap.medusa.sol",
+            "pkg/vault/test/foundry/unit/PoolAndVaultPaused.t.sol",
+            "pkg/vault/test/foundry/unit/VaultUnitSwap.t.sol"
+          ]
+        },
+        {
+          "sha": "ade794ae160a2766f023259735fa01e5958e99d3",
+          "iso": "2026-03-17T22:08:14.000Z",
+          "author": "EndymionJkb",
+          "subject": "New weighted tests from Certora (#1624)",
+          "dangerous_files": [
+            "pkg/pool-weighted/test/foundry/E2ESwapRateProvider.t.sol",
+            "pkg/pool-weighted/test/foundry/E2eBatchSwap.t.sol",
+            "pkg/pool-weighted/test/foundry/E2eSwapWeighted.t.sol",
+            "pkg/pool-weighted/test/foundry/fuzz/JoinSwapExitProfitWeighted.medusa.sol",
+            "pkg/pool-weighted/test/foundry/fuzz/SwapWeighted.medusa.sol",
+            "pkg/pool-weighted/test/foundry/fuzz/SwapWeightedDonation.medusa.sol",
+            "pkg/pool-weighted/test/foundry/fuzz/SwapWeightedMixedDecimals.medusa.sol"
+          ]
+        },
+        {
+          "sha": "0828963ba85af4236e0f8eddb559a364d3d2935b",
+          "iso": "2026-03-12T22:50:12.000Z",
+          "author": "EndymionJkb",
+          "subject": "New gyro tests from Certora (#1621)",
+          "dangerous_files": [
+            "pkg/pool-gyro/test/foundry/E2eBatchSwap2CLP.t.sol",
+            "pkg/pool-gyro/test/foundry/E2eBatchSwapECLP.t.sol",
+            "pkg/pool-gyro/test/foundry/E2eSwap2CLP.t.sol",
+            "pkg/pool-gyro/test/foundry/E2eSwapECLP.t.sol",
+            "pkg/pool-gyro/test/foundry/E2eSwapRateProvider2CLP.t.sol",
+            "pkg/pool-gyro/test/foundry/E2eSwapRateProviderECLP.t.sol",
+            "pkg/pool-gyro/test/foundry/SwapSmoke2CLP.t.sol",
+            "pkg/pool-gyro/test/foundry/SwapSmokeECLP.t.sol",
+            "pkg/pool-gyro/test/foundry/fuzz/Swap2CLP.medusa.sol",
+            "pkg/pool-gyro/test/foundry/fuzz/Swap2CLPDonationSandwich.medusa.sol",
+            "pkg/pool-gyro/test/foundry/fuzz/SwapECLP.medusa.sol",
+            "pkg/pool-gyro/test/foundry/fuzz/SwapECLPDonationSandwich.medusa.sol"
+          ]
+        },
+        {
+          "sha": "6a158e3dd732775a0b7f94edd1df10837d393ece",
+          "iso": "2026-02-17T14:23:40.000Z",
+          "author": "EndymionJkb",
+          "subject": "New stable tests from Certora (#1623)",
+          "dangerous_files": [
+            "pkg/pool-stable/test/foundry/E2eBatchSwap.t.sol",
+            "pkg/pool-stable/test/foundry/E2eErc4626Swaps.t.sol",
+            "pkg/pool-stable/test/foundry/E2eSwapRateProvider.t.sol",
+            "pkg/pool-stable/test/foundry/E2eSwapStable.t.sol",
+            "pkg/pool-stable/test/foundry/fuzz/SwapStableEnhanced.medusa.sol"
+          ]
+        },
+        {
+          "sha": "aa9fe53856b69ee0be58c273f0b899defb07e89f",
+          "iso": "2026-01-29T15:48:05.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Address informational issues from Certora report (#1616)",
+          "dangerous_files": [
+            "pkg/standalone-utils/contracts/CowSwapFeeBurner.sol"
+          ]
+        },
+        {
+          "sha": "b4e5aa3a9658e565c1ad480aa887bd265e1a314b",
+          "iso": "2026-01-22T16:37:32.000Z",
+          "author": "EndymionJkb",
+          "subject": "Dependabot updates (#1611)",
+          "dangerous_files": [
+            "pkg/standalone-utils/test/foundry/BalancerFeeBurner.t.sol"
+          ]
+        },
+        {
+          "sha": "6c37baf5d9efdc21c167e30fd6928446d717ab6e",
+          "iso": "2026-01-15T13:14:56.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Stable Pool updates (#1607)",
+          "dangerous_files": [
+            "pkg/pool-stable/test/foundry/E2eErc4626Swaps.t.sol",
+            "pkg/vault/test/foundry/E2eErc4626Swaps.t.sol"
+          ]
+        },
+        {
+          "sha": "aed46f9b2c03bb08cd1ad3d37716ae86f2a4c44d",
+          "iso": "2026-01-08T19:53:03.000Z",
+          "author": "EndymionJkb",
+          "subject": "Unbalanced Add Via Swap Router patch (V3) (#1600)",
+          "dangerous_files": [
+            "pkg/vault/contracts/UnbalancedAddViaSwapRouter.sol",
+            "pkg/vault/test/foundry/UnbalancedAddViaSwapRouter.t.sol"
+          ]
+        },
+        {
+          "sha": "ff61de6133a1a6640a7e11497e1429bdbe414ea9",
+          "iso": "2026-01-08T17:28:43.000Z",
+          "author": "EndymionJkb",
+          "subject": "Update benchmarks (#1606)",
+          "dangerous_files": [
+            "pvt/benchmarks/test/foundry/WeightedPoolSwaps.t.sol"
+          ]
+        },
+        {
+          "sha": "7ad0e280dda8624c6b593aa92099ebad7c6a5e3e",
+          "iso": "2026-01-07T22:36:57.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Weighted pool updates (#1601)",
+          "dangerous_files": [
+            "pkg/pool-weighted/test/foundry/E2ESwapRateProvider.t.sol",
+            "pkg/pool-weighted/test/foundry/E2eBatchSwap.t.sol",
+            "pkg/pool-weighted/test/foundry/E2eSwapWeighted.t.sol",
+            "pkg/vault/contracts/lib/MinTokenBalanceLib.sol"
+          ]
+        },
+        {
+          "sha": "565fbcedf16a570b9caa811169bd248518b443f5",
+          "iso": "2025-12-15T13:07:13.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Add wrap/unwrap to balancer burner (#1578)",
+          "dangerous_files": [
+            "pkg/interfaces/contracts/standalone-utils/IBalancerFeeBurner.sol",
+            "pkg/standalone-utils/contracts/BalancerFeeBurner.sol",
+            "pkg/standalone-utils/test/foundry/BalancerFeeBurner.t.sol"
+          ]
+        },
+        {
+          "sha": "fa667a9a08bcc42f691a9244b7f3ef68bdcf7633",
+          "iso": "2025-10-28T20:52:57.000Z",
+          "author": "EndymionJkb",
+          "subject": "Add coverage to CI (#1554)",
+          "dangerous_files": [
+            "pkg/pool-stable/test/foundry/fuzz/SwapStable.medusa.sol"
+          ]
+        },
+        {
+          "sha": "2f0eb1845eb7d40c83904b669cddf37c733479d3",
+          "iso": "2025-10-15T14:33:17.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Rename minBptAmountOut to exactBptAmountOut in UnbalancedAddViaSwapRouter (#1568)",
+          "dangerous_files": [
+            "pkg/interfaces/contracts/vault/IUnbalancedAddViaSwapRouter.sol",
+            "pkg/vault/contracts/UnbalancedAddViaSwapRouter.sol",
+            "pkg/vault/test/foundry/UnbalancedAddViaSwapRouter.t.sol"
+          ]
+        },
+        {
+          "sha": "15fec8cd044762942b8ebc357a5594e265096ba5",
+          "iso": "2025-10-09T15:44:29.000Z",
+          "author": "EndymionJkb",
+          "subject": "Reorder UnbalancedAdd router args for consistency (#1567)",
+          "dangerous_files": [
+            "pkg/vault/contracts/UnbalancedAddViaSwapRouter.sol",
+            "pkg/vault/test/foundry/UnbalancedAddViaSwapRouter.t.sol"
+          ]
+        },
+        {
+          "sha": "b52b542ca4b57fee10c73c3682432888a16f2d3e",
+          "iso": "2025-10-07T17:54:59.000Z",
+          "author": "EndymionJkb",
+          "subject": "Rename the new AddViaSwap router (#1566)",
+          "dangerous_files": [
+            "pkg/interfaces/contracts/vault/IUnbalancedAddViaSwapRouter.sol",
+            "pkg/vault/contracts/UnbalancedAddViaSwapRouter.sol",
+            "pkg/vault/test/foundry/UnbalancedAddViaSwapRouter.t.sol"
+          ]
+        },
+        {
+          "sha": "3ee90727e175957fda6daa231c984a2fffba2a02",
+          "iso": "2025-09-30T15:23:22.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Calculation of the exact swap amount on-chain in AddUnbalancedLiquidityViaSwapRouter (#1542)",
+          "dangerous_files": [
+            "pkg/interfaces/contracts/vault/IAddUnbalancedLiquidityViaSwapRouter.sol",
+            "pkg/vault/contracts/AddUnbalancedLiquidityViaSwapRouter.sol",
+            "pkg/vault/test/foundry/AddUnbalancedLiquidityViaSwapRouter.t.sol"
+          ]
+        },
+        {
+          "sha": "492afd26f6e41c11f5aaa03194a0e81d670765cc",
+          "iso": "2025-09-26T16:20:32.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Changing the router architecture (#1561)",
+          "dangerous_files": [
+            "pkg/vault/contracts/AddUnbalancedLiquidityViaSwapRouter.sol",
+            "pkg/vault/test/foundry/AddUnbalancedLiquidityViaSwapRouter.t.sol"
+          ]
+        },
+        {
+          "sha": "2a73ff06cfe55482bdebc37ee74ca3b93d9ea062",
+          "iso": "2025-09-17T15:07:46.000Z",
+          "author": "EndymionJkb",
+          "subject": "Multi list helpers (#1537)",
+          "dangerous_files": [
+            "pkg/standalone-utils/contracts/PoolPauseHelper.sol",
+            "pkg/standalone-utils/contracts/PoolSwapFeeHelper.sol",
+            "pkg/standalone-utils/test/foundry/PoolPauseHelper.t.sol",
+            "pkg/standalone-utils/test/foundry/PoolSwapFeeHelper.t.sol"
+          ]
+        },
+        {
+          "sha": "40344695361a4678b5903d73a5e75b38a77b8200",
+          "iso": "2025-09-17T13:55:02.000Z",
+          "author": "EndymionJkb",
+          "subject": "CLR audit fixes (#1551)",
+          "dangerous_files": [
+            "pkg/vault/test/foundry/AddUnbalancedLiquidityViaSwapRouter.t.sol"
+          ]
+        },
+        {
+          "sha": "47da107b150712bfd18fad88ec5d5c0bab24295e",
+          "iso": "2025-08-27T18:12:47.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Add unbalanced liquidity support for pools that allow only proportional adds (#1423)",
+          "dangerous_files": [
+            "pkg/interfaces/contracts/vault/IAddUnbalancedLiquidityViaSwapRouter.sol",
+            "pkg/vault/contracts/AddUnbalancedLiquidityViaSwapRouter.sol",
+            "pkg/vault/test/foundry/AddUnbalancedLiquidityViaSwapRouter.t.sol"
+          ]
+        },
+        {
+          "sha": "a7ffdb72f4ba867d23b7404b399f22d1bf8d1fd0",
+          "iso": "2025-08-26T16:47:54.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Split BatchRouter and AggregatorBatchRouter into Hooks and Router parts (#1496)",
+          "dangerous_files": [
+            "pkg/vault/test/foundry/E2eBatchSwap.t.sol",
+            "pkg/vault/test/foundry/E2eErc4626Swaps.t.sol",
+            "pkg/vault/test/foundry/UninitializedBufferTest.sol"
+          ]
+        },
+        {
+          "sha": "146ac43846b43fa24222f3c2ebf13fb9ac245ff1",
+          "iso": "2025-08-13T16:53:51.000Z",
+          "author": "EndymionJkb",
+          "subject": "Router coverage (#1479)",
+          "dangerous_files": [
+            "pkg/vault/test/foundry/fuzz/Swap.medusa.sol"
+          ]
+        },
+        {
+          "sha": "96620fcf38f8df38e03448bbee28a924a5583d18",
+          "iso": "2025-08-01T19:38:57.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Add prettier and tests commands to global package.json (#1451)",
+          "dangerous_files": [
+            "pkg/vault/test/foundry/fork/YieldBearingPoolSwapBase.t.sol"
+          ]
+        },
+        {
+          "sha": "d1e149ce4959efd2bde05893ee5f84c07ba87adb",
+          "iso": "2025-07-23T18:47:00.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "E2e test improvements (2) (#1441)",
+          "dangerous_files": [
+            "pkg/pool-gyro/test/foundry/E2eSwap2CLP.t.sol",
+            "pkg/pool-gyro/test/foundry/E2eSwapECLP.t.sol",
+            "pkg/pool-stable/test/foundry/E2eSwapStable.t.sol",
+            "pkg/pool-weighted/test/foundry/E2eSwapWeighted.t.sol",
+            "pkg/vault/test/foundry/E2eSwap.t.sol"
+          ]
+        },
+        {
+          "sha": "cb731f82c984788120df8da32c293cb4a89163c4",
+          "iso": "2025-07-21T13:53:26.000Z",
+          "author": "EndymionJkb",
+          "subject": "Add missing test report (#1443)",
+          "dangerous_files": [
+            "pkg/pool-weighted/test/foundry/E2eSwap.t.sol",
+            "pkg/vault/test/foundry/E2eBatchSwap.t.sol",
+            "pkg/vault/test/foundry/E2eSwap.t.sol",
+            "pkg/vault/test/foundry/VaultSwap.t.sol",
+            "pkg/vault/test/foundry/fork/YieldBearingPoolSwapBase.t.sol"
+          ]
+        },
+        {
+          "sha": "8b159b4d0c08a85e1eb9ad9dee97df88526d5e90",
+          "iso": "2025-07-14T12:45:12.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Simplify e2e tests (#1427)",
+          "dangerous_files": [
+            "pkg/pool-gyro/test/foundry/E2eSwap2CLP.t.sol",
+            "pkg/pool-gyro/test/foundry/E2eSwapECLP.t.sol",
+            "pkg/pool-gyro/test/foundry/E2eSwapRateProvider2CLP.t.sol",
+            "pkg/pool-gyro/test/foundry/E2eSwapRateProviderECLP.t.sol",
+            "pkg/pool-stable/test/foundry/E2eSwap.t.sol",
+            "pkg/pool-stable/test/foundry/E2eSwapRateProvider.t.sol",
+            "pkg/pool-weighted/test/foundry/E2ESwapRateProvider.t.sol",
+            "pkg/pool-weighted/test/foundry/E2eSwap.t.sol",
+            "pkg/vault/test/foundry/E2eSwap.t.sol",
+            "pkg/vault/test/foundry/E2eSwapRateProvider.t.sol"
+          ]
+        },
+        {
+          "sha": "84cfb0d9d0bd024f92c7a95c64ab7ab8b4c12f4b",
+          "iso": "2025-06-02T18:15:40.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Fix ERC4626 cow status bug (#1388)",
+          "dangerous_files": [
+            "pkg/standalone-utils/contracts/CowSwapFeeBurner.sol",
+            "pkg/standalone-utils/test/foundry/CowSwapFeeBurner.t.sol",
+            "pkg/standalone-utils/test/foundry/ERC4626CowSwapFeeBurner.t.sol"
+          ]
+        },
+        {
+          "sha": "e65fc25d8c33a17b0367ea2bc763d8a175be0867",
+          "iso": "2025-06-02T13:39:23.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Add balancer fee burner (#1369)",
+          "dangerous_files": [
+            "pkg/interfaces/contracts/standalone-utils/IBalancerFeeBurner.sol",
+            "pkg/interfaces/contracts/standalone-utils/ICowSwapFeeBurner.sol",
+            "pkg/standalone-utils/contracts/BalancerFeeBurner.sol",
+            "pkg/standalone-utils/contracts/CowSwapFeeBurner.sol",
+            "pkg/standalone-utils/contracts/ERC4626CowSwapFeeBurner.sol",
+            "pkg/standalone-utils/contracts/FeeBurnerAuthentication.sol",
+            "pkg/standalone-utils/contracts/test/FeeBurnerAuthenticationMock.sol",
+            "pkg/standalone-utils/test/foundry/BalancerFeeBurner.t.sol",
+            "pkg/standalone-utils/test/foundry/ERC4626CowSwapFeeBurner.t.sol",
+            "pkg/standalone-utils/test/foundry/FeeBurnerAuthentication.t.sol"
+          ]
+        },
+        {
+          "sha": "0a6fae1ccda93a8344c42cf050177effda4920db",
+          "iso": "2025-05-30T17:50:16.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Change auth logic in cow burner (#1391)",
+          "dangerous_files": [
+            "pkg/standalone-utils/contracts/CowSwapFeeBurner.sol",
+            "pkg/standalone-utils/contracts/ERC4626CowSwapFeeBurner.sol",
+            "pkg/standalone-utils/test/foundry/CowSwapFeeBurner.t.sol",
+            "pkg/standalone-utils/test/foundry/ERC4626CowSwapFeeBurner.t.sol"
+          ]
+        },
+        {
+          "sha": "006c64373186aedabaf7e85431499e336e2c4a2e",
+          "iso": "2025-05-23T15:46:23.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Add а zero amount check for redeem in ERC4626CowBurner (#1389)",
+          "dangerous_files": [
+            "pkg/interfaces/contracts/standalone-utils/ICowSwapFeeBurner.sol",
+            "pkg/standalone-utils/contracts/ERC4626CowSwapFeeBurner.sol",
+            "pkg/standalone-utils/test/foundry/ERC4626CowSwapFeeBurner.t.sol"
+          ]
+        },
+        {
+          "sha": "1b35f73fd2f38982766729f81fe72a3fa0f69cd9",
+          "iso": "2025-05-23T12:19:48.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Add minAmountOut for unwrapping in ERC4626CowBurner (#1387)",
+          "dangerous_files": [
+            "pkg/standalone-utils/contracts/ERC4626CowSwapFeeBurner.sol",
+            "pkg/standalone-utils/test/foundry/ERC4626CowSwapFeeBurner.t.sol"
+          ]
+        },
+        {
+          "sha": "a865d6c1b92208f3cccf84b1831c3ae6841f7a4a",
+          "iso": "2025-05-21T20:48:38.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Allow overriding non-specific e2e tests, 0 min trade amount. (#1383)",
+          "dangerous_files": [
+            "pkg/vault/test/foundry/E2eSwap.t.sol"
+          ]
+        },
+        {
+          "sha": "9c87e8f21907d1835fe93138fe2babcfca430a17",
+          "iso": "2025-05-15T16:15:31.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Fuzz pool params in `testExactInRepeatExactOutVariableFees__Fuzz` (#1378)",
+          "dangerous_files": [
+            "pkg/pool-weighted/test/foundry/E2ESwapRateProvider.t.sol",
+            "pkg/pool-weighted/test/foundry/E2eSwap.t.sol",
+            "pkg/standalone-utils/contracts/ERC4626CowSwapFeeBurner.sol",
+            "pkg/vault/test/foundry/E2eSwap.t.sol"
+          ]
+        },
+        {
+          "sha": "f2c6974b4f3b503422ca99061df2af559970f135",
+          "iso": "2025-05-07T16:14:01.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Cow burner: approve again on retry order (#1376)",
+          "dangerous_files": [
+            "pkg/standalone-utils/contracts/CowSwapFeeBurner.sol"
+          ]
+        },
+        {
+          "sha": "6fd254e79d8f45fca3fde19ef69eeffaca97ece1",
+          "iso": "2025-05-07T12:32:15.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Change auth system for cow fee burner (#1375)",
+          "dangerous_files": [
+            "pkg/interfaces/contracts/standalone-utils/ICowSwapFeeBurner.sol",
+            "pkg/standalone-utils/contracts/CowSwapFeeBurner.sol",
+            "pkg/standalone-utils/contracts/ERC4626CowSwapFeeBurner.sol",
+            "pkg/standalone-utils/test/foundry/CowSwapFeeBurner.t.sol",
+            "pkg/standalone-utils/test/foundry/ERC4626CowSwapFeeBurner.t.sol"
+          ]
+        },
+        {
+          "sha": "3ee29d17eba98421eca6ef4a3b3fe6e5d1de805f",
+          "iso": "2025-05-07T10:05:38.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Fix delta for e2e tests (#1374)",
+          "dangerous_files": [
+            "pkg/vault/test/foundry/E2eSwap.t.sol"
+          ]
+        },
+        {
+          "sha": "36cb281837e1fabe64254ecf938a2ef1b13c6e07",
+          "iso": "2025-05-06T19:13:31.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Add ERC4626 cow burner (#1371)",
+          "dangerous_files": [
+            "pkg/interfaces/contracts/standalone-utils/IProtocolFeeBurner.sol",
+            "pkg/standalone-utils/contracts/CowSwapFeeBurner.sol",
+            "pkg/standalone-utils/contracts/ERC4626CowSwapFeeBurner.sol",
+            "pkg/standalone-utils/test/foundry/ERC4626CowSwapFeeBurner.t.sol"
+          ]
+        },
+        {
+          "sha": "991c86836b27f1a112ebd7ddb008aa65ec897681",
+          "iso": "2025-05-06T14:37:12.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Adjust e2e swap tests to allow fuzz params to edit limits (#1372)",
+          "dangerous_files": [
+            "pkg/pool-gyro/test/foundry/E2eSwap2CLP.t.sol",
+            "pkg/pool-stable/test/foundry/E2eSwap.t.sol",
+            "pkg/pool-weighted/test/foundry/E2eSwap.t.sol",
+            "pkg/vault/test/foundry/E2eSwap.t.sol"
+          ]
+        },
+        {
+          "sha": "e44adf7ad77fba773af1dbdb4be30b2ce14c29e9",
+          "iso": "2025-04-29T17:31:20.000Z",
+          "author": "Juan Ignacio Ubeira",
+          "subject": "Remove redundant setter in vault mock (#1368)",
+          "dangerous_files": [
+            "pkg/vault/test/foundry/fuzz/Swap.medusa.sol"
+          ]
+        },
+        {
+          "sha": "ab48d59c4a922327a127a2959470a8161409559d",
+          "iso": "2025-04-25T21:09:15.000Z",
+          "author": "EndymionJkb",
+          "subject": "Factor common code out of helpers (#1362)",
+          "dangerous_files": [
+            "pkg/interfaces/contracts/standalone-utils/IPoolPauseHelper.sol",
+            "pkg/interfaces/contracts/standalone-utils/IPoolSwapFeeHelper.sol",
+            "pkg/standalone-utils/contracts/PoolPauseHelper.sol",
+            "pkg/standalone-utils/contracts/PoolSwapFeeHelper.sol",
+            "pkg/standalone-utils/test/foundry/PoolPauseHelper.t.sol",
+            "pkg/standalone-utils/test/foundry/PoolSwapFeeHelper.t.sol"
+          ]
+        },
+        {
+          "sha": "28a893d515af730f08940a392aeb9b5ce0eba973",
+          "iso": "2025-04-24T18:02:39.000Z",
+          "author": "EndymionJkb",
+          "subject": "Swap fee helper (#1346)",
+          "dangerous_files": [
+            "pkg/interfaces/contracts/standalone-utils/IPoolSwapFeeHelper.sol",
+            "pkg/standalone-utils/contracts/PoolSwapFeeHelper.sol",
+            "pkg/standalone-utils/test/foundry/PoolSwapFeeHelper.t.sol"
+          ]
+        },
+        {
+          "sha": "b4e6855dfa6d404ca5ba4a62974cda8333614157",
+          "iso": "2025-04-24T17:16:04.000Z",
+          "author": "EndymionJkb",
+          "subject": "Alternate Balancer Contract Registry Initializer (#1354)",
+          "dangerous_files": [
+            "pkg/governance-scripts/contracts/BalancerContractRegistryInitializer.sol"
+          ]
+        },
+        {
+          "sha": "aeec18927298eca6c6385241e4e0b63db8361036",
+          "iso": "2025-04-24T14:56:48.000Z",
+          "author": "João Bruno - Balancer Labs",
+          "subject": "Fix E2E Swap test (#1358)",
+          "dangerous_files": [
+            "pkg/vault/test/foundry/E2eSwap.t.sol"
+          ]
+        },
+        {
+          "sha": "286cba9ef45b9482667b0b5c43b652c7db0f35d6",
+          "iso": "2025-04-16T02:43:30.000Z",
+          "author": "EndymionJkb",
+          "subject": "Protocol fee helper (#1343)",
+          "dangerous_files": [
+            "pkg/interfaces/contracts/standalone-utils/IPoolPauseHelper.sol",
+            "pkg/standalone-utils/contracts/PoolPauseHelper.sol",
+            "pkg/standalone-utils/test/foundry/PoolPauseHelper.t.sol"
+          ]
+        },
+        {
+          "sha": "68bbc7d2c32271734330653d2dc98acfcfbbbe48",
+          "iso": "2025-04-01T12:23:12.000Z",
+          "author": "Elshan Dzhafarov",
+          "subject": "Balancer pause helper (#1211)",
+          "dangerous_files": [
+            "pkg/interfaces/contracts/standalone-utils/IPoolPauseHelper.sol",
+            "pkg/standalone-utils/contracts/PoolPauseHelper.sol",
+            "pkg/standalone-utils/test/foundry/PoolPauseHelper.t.sol"
+          ]
+        },
+        {
+          "sha": "e1ae7f091244ae20e5c1add3e7f89b6d33f48d23",
+          "iso": "2025-03-11T03:57:33.000Z",
+          "author": "EndymionJkb",
+          "subject": "Balancer Contract Registry initialization contract (#1327)",
+          "dangerous_files": [
+            "pkg/governance-scripts/contracts/BalancerContractRegistryInitializer.sol",
+            "pkg/interfaces/contracts/standalone-utils/ICowSwapFeeBurner.sol",
+            "pkg/interfaces/contracts/standalone-utils/IProtocolFeeBurner.sol",
+            "pkg/interfaces/contracts/vault/ISwapFeePercentageBounds.sol",
+            "pkg/pool-gyro/test/foundry/E2eBatchSwap2CLP.t.sol",
+            "pkg/pool-gyro/test/foundry/E2eBatchSwapECLP.t.sol",
+            "pkg/pool-gyro/test/foundry/E2eSwap2CLP.t.sol",
+            "pkg/pool-gyro/test/foundry/E2eSwapECLP.t.sol",
+            "pkg/pool-gyro/test/foundry/E2eSwapRateProvider2CLP.t.sol",
+            "pkg/pool-gyro/test/foundry/E2eSwapRateProviderECLP.t.sol",
+            "pkg/pool-stable/test/foundry/E2eBatchSwap.t.sol",
+            "pkg/pool-stable/test/foundry/E2eErc4626Swaps.t.sol",
+            "pkg/pool-stable/test/foundry/E2eSwap.t.sol",
+            "pkg/pool-stable/test/foundry/E2eSwapRateProvider.t.sol",
+            "pkg/pool-stable/test/foundry/fuzz/SwapStable.medusa.sol",
+            "pkg/pool-weighted/test/foundry/E2ESwapRateProvider.t.sol",
+            "pkg/pool-weighted/test/foundry/E2eBatchSwap.t.sol",
+            "pkg/pool-weighted/test/foundry/E2eSwap.t.sol",
+            "pkg/pool-weighted/test/foundry/UniswapV2BasePoolMathMock.sol",
+            "pkg/pool-weighted/test/foundry/UniswapV2BasePoolMathRounding.sol"
+          ]
+        }
+      ]
+    },
+    "late_changes": {
+      "count": 0,
+      "window_days": 30,
+      "items": []
+    },
+    "audit_age": {
+      "present": true,
+      "audit_dir": "audits",
+      "file_count": 16,
+      "newest_audit_file": "audits/trail-of-bits/2024-12-11.pdf",
+      "newest_audit_iso": "2026-05-26T21:50:53.241Z",
+      "head_commit_iso": "2026-05-22T03:00:15.000Z",
+      "days_since_newest_audit": 0,
+      "days_between_newest_audit_and_head": -5,
+      "recent_audit_files": [
+        {
+          "relpath": "audits/trail-of-bits/2024-12-11.pdf",
+          "iso": "2026-05-26T21:50:53.241Z",
+          "days_old": 0
+        },
+        {
+          "relpath": "audits/test-report.md",
+          "iso": "2026-05-26T21:50:53.235Z",
+          "days_old": 0
+        },
+        {
+          "relpath": "audits/certora/2026-01-26.pdf",
+          "iso": "2026-05-26T21:50:53.234Z",
+          "days_old": 0
+        },
+        {
+          "relpath": "audits/spearbit/2024-10-04.pdf",
+          "iso": "2026-05-26T21:50:53.234Z",
+          "days_old": 0
+        },
+        {
+          "relpath": "audits/certora/2025-09-10.pdf",
+          "iso": "2026-05-26T21:50:53.230Z",
+          "days_old": 0
+        },
+        {
+          "relpath": "audits/certora/2025-09-08.pdf",
+          "iso": "2026-05-26T21:50:53.228Z",
+          "days_old": 0
+        },
+        {
+          "relpath": "audits/certora/2025-08-19.pdf",
+          "iso": "2026-05-26T21:50:53.225Z",
+          "days_old": 0
+        },
+        {
+          "relpath": "audits/certora/2025-02-17.pdf",
+          "iso": "2026-05-26T21:50:53.222Z",
+          "days_old": 0
+        },
+        {
+          "relpath": "audits/certora/2025-02-07.pdf",
+          "iso": "2026-05-26T21:50:53.221Z",
+          "days_old": 0
+        },
+        {
+          "relpath": "audits/certora/2025-01-30.pdf",
+          "iso": "2026-05-26T21:50:53.220Z",
+          "days_old": 0
+        }
+      ]
+    },
+    "untouched_critical": {
+      "count": 36,
+      "threshold_days": 90,
+      "items": [
+        {
+          "file": "pkg/interfaces/contracts/vault/ISwapFeePercentageBounds.sol",
+          "last_touch_iso": "2025-03-11T03:57:33.000Z",
+          "days_untouched": 442
+        },
+        {
+          "file": "pkg/pool-weighted/test/foundry/UniswapV2BasePoolMathMock.sol",
+          "last_touch_iso": "2025-03-11T03:57:33.000Z",
+          "days_untouched": 442
+        },
+        {
+          "file": "pkg/pool-weighted/test/foundry/UniswapV2BasePoolMathRounding.sol",
+          "last_touch_iso": "2025-03-11T03:57:33.000Z",
+          "days_untouched": 442
+        },
+        {
+          "file": "pkg/solidity-utils/contracts/helpers/FactoryWidePauseWindow.sol",
+          "last_touch_iso": "2025-03-11T03:57:33.000Z",
+          "days_untouched": 442
+        },
+        {
+          "file": "pkg/standalone-utils/contracts/test/ProtocolFeeBurnerMock.sol",
+          "last_touch_iso": "2025-03-11T03:57:33.000Z",
+          "days_untouched": 442
+        },
+        {
+          "file": "pkg/vault/test/foundry/HookAdjustedSwap.t.sol",
+          "last_touch_iso": "2025-03-11T03:57:33.000Z",
+          "days_untouched": 442
+        },
+        {
+          "file": "pkg/vault/test/foundry/Initializer.t.sol",
+          "last_touch_iso": "2025-03-11T03:57:33.000Z",
+          "days_untouched": 442
+        },
+        {
+          "file": "pkg/vault/test/foundry/PoolPause.t.sol",
+          "last_touch_iso": "2025-03-11T03:57:33.000Z",
+          "days_untouched": 442
+        },
+        {
+          "file": "pkg/governance-scripts/contracts/BalancerContractRegistryInitializer.sol",
+          "last_touch_iso": "2025-04-24T17:16:04.000Z",
+          "days_untouched": 397
+        },
+        {
+          "file": "pkg/interfaces/contracts/standalone-utils/IPoolPauseHelper.sol",
+          "last_touch_iso": "2025-04-25T21:09:15.000Z",
+          "days_untouched": 396
+        },
+        {
+          "file": "pkg/interfaces/contracts/standalone-utils/IPoolSwapFeeHelper.sol",
+          "last_touch_iso": "2025-04-25T21:09:15.000Z",
+          "days_untouched": 396
+        },
+        {
+          "file": "pkg/interfaces/contracts/standalone-utils/IProtocolFeeBurner.sol",
+          "last_touch_iso": "2025-05-06T19:13:31.000Z",
+          "days_untouched": 385
+        },
+        {
+          "file": "pkg/interfaces/contracts/standalone-utils/ICowSwapFeeBurner.sol",
+          "last_touch_iso": "2025-06-02T13:39:23.000Z",
+          "days_untouched": 358
+        },
+        {
+          "file": "pkg/standalone-utils/contracts/FeeBurnerAuthentication.sol",
+          "last_touch_iso": "2025-06-02T13:39:23.000Z",
+          "days_untouched": 358
+        },
+        {
+          "file": "pkg/standalone-utils/contracts/test/FeeBurnerAuthenticationMock.sol",
+          "last_touch_iso": "2025-06-02T13:39:23.000Z",
+          "days_untouched": 358
+        },
+        {
+          "file": "pkg/standalone-utils/test/foundry/CowSwapFeeBurner.t.sol",
+          "last_touch_iso": "2025-06-02T18:15:40.000Z",
+          "days_untouched": 358
+        },
+        {
+          "file": "pkg/standalone-utils/test/foundry/ERC4626CowSwapFeeBurner.t.sol",
+          "last_touch_iso": "2025-06-02T18:15:40.000Z",
+          "days_untouched": 358
+        },
+        {
+          "file": "pkg/standalone-utils/test/foundry/FeeBurnerAuthentication.t.sol",
+          "last_touch_iso": "2025-06-02T13:39:23.000Z",
+          "days_untouched": 358
+        },
+        {
+          "file": "pkg/vault/test/foundry/E2eSwap.t.sol",
+          "last_touch_iso": "2025-07-23T18:47:00.000Z",
+          "days_untouched": 307
+        },
+        {
+          "file": "pkg/standalone-utils/contracts/PoolPauseHelper.sol",
+          "last_touch_iso": "2025-09-17T15:07:46.000Z",
+          "days_untouched": 251
+        },
+        {
+          "file": "pkg/standalone-utils/contracts/PoolSwapFeeHelper.sol",
+          "last_touch_iso": "2025-09-17T15:07:46.000Z",
+          "days_untouched": 251
+        },
+        {
+          "file": "pkg/standalone-utils/test/foundry/PoolPauseHelper.t.sol",
+          "last_touch_iso": "2025-09-17T15:07:46.000Z",
+          "days_untouched": 251
+        },
+        {
+          "file": "pkg/standalone-utils/test/foundry/PoolSwapFeeHelper.t.sol",
+          "last_touch_iso": "2025-09-17T15:07:46.000Z",
+          "days_untouched": 251
+        },
+        {
+          "file": "pkg/interfaces/contracts/vault/IUnbalancedAddViaSwapRouter.sol",
+          "last_touch_iso": "2025-10-15T14:33:17.000Z",
+          "days_untouched": 223
+        },
+        {
+          "file": "pkg/pool-stable/test/foundry/fuzz/SwapStable.medusa.sol",
+          "last_touch_iso": "2025-10-28T20:52:57.000Z",
+          "days_untouched": 210
+        },
+        {
+          "file": "pkg/interfaces/contracts/standalone-utils/IBalancerFeeBurner.sol",
+          "last_touch_iso": "2025-12-15T13:07:13.000Z",
+          "days_untouched": 162
+        },
+        {
+          "file": "pkg/standalone-utils/contracts/BalancerFeeBurner.sol",
+          "last_touch_iso": "2025-12-15T13:07:13.000Z",
+          "days_untouched": 162
+        },
+        {
+          "file": "pkg/vault/contracts/lib/MinTokenBalanceLib.sol",
+          "last_touch_iso": "2026-01-07T22:36:57.000Z",
+          "days_untouched": 139
+        },
+        {
+          "file": "pkg/vault/contracts/UnbalancedAddViaSwapRouter.sol",
+          "last_touch_iso": "2026-01-08T19:53:03.000Z",
+          "days_untouched": 138
+        },
+        {
+          "file": "pkg/vault/test/foundry/E2eErc4626Swaps.t.sol",
+          "last_touch_iso": "2026-01-15T13:14:56.000Z",
+          "days_untouched": 131
+        },
+        {
+          "file": "pkg/standalone-utils/test/foundry/BalancerFeeBurner.t.sol",
+          "last_touch_iso": "2026-01-22T16:37:32.000Z",
+          "days_untouched": 124
+        },
+        {
+          "file": "pkg/standalone-utils/contracts/CowSwapFeeBurner.sol",
+          "last_touch_iso": "2026-01-29T15:48:05.000Z",
+          "days_untouched": 117
+        },
+        {
+          "file": "pkg/pool-stable/test/foundry/E2eBatchSwap.t.sol",
+          "last_touch_iso": "2026-02-17T14:23:40.000Z",
+          "days_untouched": 98
+        },
+        {
+          "file": "pkg/pool-stable/test/foundry/E2eErc4626Swaps.t.sol",
+          "last_touch_iso": "2026-02-17T14:23:40.000Z",
+          "days_untouched": 98
+        },
+        {
+          "file": "pkg/pool-stable/test/foundry/E2eSwapRateProvider.t.sol",
+          "last_touch_iso": "2026-02-17T14:23:40.000Z",
+          "days_untouched": 98
+        },
+        {
+          "file": "pkg/pool-stable/test/foundry/E2eSwapStable.t.sol",
+          "last_touch_iso": "2026-02-17T14:23:40.000Z",
+          "days_untouched": 98
+        }
+      ]
+    },
+    "revert_history": {
+      "count": 1,
+      "items": [
+        {
+          "sha": "7b737758699f276ccc8facb98bbd42fa2a594258",
+          "iso": "2026-01-30T16:14:22.000Z",
+          "author": "EndymionJkb",
+          "subject": "Add \"revert if unlocked\" flag to Oracles (#1620)"
+        }
+      ]
+    },
+    "author_distribution": {
+      "count": 7,
+      "items": [
+        {
+          "author": "EndymionJkb",
+          "commit_count": 86,
+          "insertions": 148319,
+          "deletions": 10519
+        },
+        {
+          "author": "Juan Ignacio Ubeira",
+          "commit_count": 48,
+          "insertions": 13339,
+          "deletions": 3454
+        },
+        {
+          "author": "Elshan Dzhafarov",
+          "commit_count": 39,
+          "insertions": 20981,
+          "deletions": 11147
+        },
+        {
+          "author": "João Bruno - Balancer Labs",
+          "commit_count": 24,
+          "insertions": 9769,
+          "deletions": 2014
+        },
+        {
+          "author": "Olexandr88",
+          "commit_count": 1,
+          "insertions": 1,
+          "deletions": 1
+        },
+        {
+          "author": "radik878",
+          "commit_count": 1,
+          "insertions": 1,
+          "deletions": 1
+        },
+        {
+          "author": "Sergio Yuhjtman",
+          "commit_count": 1,
+          "insertions": 0,
+          "deletions": 0
+        }
+      ]
+    }
+  }
+}

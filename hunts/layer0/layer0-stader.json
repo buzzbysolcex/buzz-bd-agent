@@ -1,0 +1,1408 @@
+{
+  "schema": "buzz-git-security-analyzer-v1",
+  "generated_at": "2026-05-27T00:35:05.170Z",
+  "repo": "/home/claude-code/buzz-workspace/data/lane1/clones/stader-ethx",
+  "head_sha": "9d4a9211431d6c0cdf014bd64d3718cba4ce96ab",
+  "head_iso": "2025-12-18T09:50:59.000Z",
+  "total_commits": 186,
+  "commits_analyzed": 186,
+  "sections": {
+    "fix_candidates": {
+      "count": 39,
+      "items": [
+        {
+          "sha": "1b0f0588ae39d7dc6d5f605d44803b27d1fdcddf",
+          "ts": 1719534823,
+          "iso": "2024-06-28T00:33:43.000Z",
+          "author": "John Cairns",
+          "subject": "fixing lint issue, add test for 6% protocol fee, 4% operator",
+          "files": [
+            "contracts/PoolUtils.sol",
+            "test/foundry_tests/PoolUtils.t.sol"
+          ],
+          "file_count": 2,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "bd7e2391ef709dfccae75a11a46f27027164881e",
+          "ts": 1718741425,
+          "iso": "2024-06-18T20:10:25.000Z",
+          "author": "John Cairns",
+          "subject": "238: fixing lint issues with imports",
+          "files": [
+            ".solhint.json",
+            ".vscode/tasks.json",
+            "contracts/Auction.sol",
+            "contracts/ETHx.sol",
+            "contracts/L2/ETHx.sol",
+            "contracts/NodeELRewardVault.sol",
+            "contracts/OperatorRewardsCollector.sol",
+            "contracts/Penalty.sol",
+            "contracts/PermissionedNodeRegistry.sol",
+            "contracts/PermissionedPool.sol",
+            "contracts/PermissionlessNodeRegistry.sol",
+            "contracts/PermissionlessPool.sol",
+            "contracts/PoolSelector.sol",
+            "contracts/PoolUtils.sol",
+            "contracts/ProxyAdmin.sol",
+            "contracts/SDCollateral.sol",
+            "contracts/SDIncentiveController.sol",
+            "contracts/SDUtilityPool.sol",
+            "contracts/SocializingPool.sol",
+            "contracts/StaderConfig.sol"
+          ],
+          "file_count": 20,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "723fb35e1f15996a9d5b22c6b22b61488825d16b",
+          "ts": 1718036090,
+          "iso": "2024-06-10T16:14:50.000Z",
+          "author": "blockgroot",
+          "subject": "Fix lint issues (#235)",
+          "files": [
+            ".github/workflows/lint.yml",
+            "Dockerfile",
+            "package.json",
+            "test/foundry_tests/NodeELRewardVault.t.sol",
+            "test/foundry_tests/PermissionedPool.t.sol",
+            "test/foundry_tests/PermissionlessPool.t.sol",
+            "test/foundry_tests/SDIncentiveController.t.sol",
+            "test/foundry_tests/StaderStakePoolManager.t.sol",
+            "test/foundry_tests/ValidatorWithdrawalVault.t.sol"
+          ],
+          "file_count": 9,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "4dfc3d636d0d9ff8838dc225f225e7a3998a4d83",
+          "ts": 1712778532,
+          "iso": "2024-04-10T19:48:52.000Z",
+          "author": "John Cairns",
+          "subject": "220: cleanup UserWithdrawlManager tests - cleanup UserWithdrawlManager requestId finalization tests - fixes for formatting, leftover from previous change - Dockerfile optimization, move npm and python",
+          "files": [
+            ".devcontainer/devcontainer.json",
+            ".dockerignore",
+            ".vscode/tasks.json",
+            "Dockerfile",
+            "contracts/L2/ETHx.sol",
+            "contracts/factory/VaultFactory.sol",
+            "contracts/interfaces/INodeELRewardVault.sol",
+            "contracts/interfaces/INodeRegistry.sol",
+            "contracts/interfaces/IPermissionedNodeRegistry.sol",
+            "contracts/interfaces/IPermissionlessNodeRegistry.sol",
+            "contracts/interfaces/IPermissionlessPool.sol",
+            "contracts/interfaces/IPoolUtils.sol",
+            "contracts/interfaces/ISDIncentiveController.sol",
+            "contracts/interfaces/ISDUtilityPool.sol",
+            "contracts/interfaces/ISocializingPool.sol",
+            "contracts/interfaces/IStaderOracle.sol",
+            "contracts/interfaces/IStaderPoolBase.sol",
+            "contracts/interfaces/IUserWithdrawalManager.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IVaultProxy.sol"
+          ],
+          "file_count": 20,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "e34ece60308f73db626e45702bb9c7c9fd9020f9",
+          "ts": 1710886785,
+          "iso": "2024-03-19T22:19:45.000Z",
+          "author": "John Cairns",
+          "subject": "217: Test fixes",
+          "files": [
+            ".devcontainer/devcontainer.json",
+            ".github/workflows/ci-image.yml",
+            ".prettierrc",
+            "Dockerfile",
+            "contracts/Auction.sol",
+            "contracts/ETHx.sol",
+            "contracts/NodeELRewardVault.sol",
+            "contracts/OperatorRewardsCollector.sol",
+            "contracts/Penalty.sol",
+            "contracts/PermissionedNodeRegistry.sol",
+            "contracts/PermissionedPool.sol",
+            "contracts/PermissionlessNodeRegistry.sol",
+            "contracts/PermissionlessPool.sol",
+            "contracts/PoolSelector.sol",
+            "contracts/PoolUtils.sol",
+            "contracts/SDCollateral.sol",
+            "contracts/SDIncentiveController.sol",
+            "contracts/SDUtilityPool.sol",
+            "contracts/SocializingPool.sol",
+            "contracts/StaderConfig.sol"
+          ],
+          "file_count": 20,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "70435e18dec50c3f86cc3f4b6d022b9747d11a4a",
+          "ts": 1687495081,
+          "iso": "2023-06-23T04:38:01.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "update Pool Address fix (#192)",
+          "files": [
+            "contracts/PoolUtils.sol",
+            "contracts/StaderStakePoolsManager.sol",
+            "contracts/interfaces/IPoolUtils.sol"
+          ],
+          "file_count": 3,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "51023a394bf25058a578c8206c35195916549e2e",
+          "ts": 1686715192,
+          "iso": "2023-06-14T03:59:52.000Z",
+          "author": "Manoj Patra",
+          "subject": "code4rena issue 321: oracle consensus fix (#182)",
+          "files": [
+            "contracts/StaderOracle.sol"
+          ],
+          "file_count": 1,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "eed723d4790ed684fb42764d9aa65ea591d4235a",
+          "ts": 1685937665,
+          "iso": "2023-06-05T04:01:05.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "fixed a comment",
+          "files": [
+            "contracts/VaultProxy.sol"
+          ],
+          "file_count": 1,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "304e695511ffbb85b6d2bbeaa4a9b91aaf7d2a19",
+          "ts": 1685681905,
+          "iso": "2023-06-02T04:58:25.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "loop optimization fix (#171)",
+          "files": [
+            "contracts/PermissionedNodeRegistry.sol",
+            "contracts/PermissionedPool.sol"
+          ],
+          "file_count": 2,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "bd9fd16d4775c470d0f55234fb337b7a0871066a",
+          "ts": 1685163192,
+          "iso": "2023-05-27T04:53:12.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "block number fix in POR feed response (#159)",
+          "files": [
+            "contracts/StaderOracle.sol"
+          ],
+          "file_count": 1,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "ca9b2f50deafd3f6434d399357399310aabc6c37",
+          "ts": 1685078039,
+          "iso": "2023-05-26T05:13:59.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "ETHX-03 Sigma Prime Audit fix (#151)",
+          "files": [
+            "contracts/PermissionedNodeRegistry.sol",
+            "contracts/PermissionedPool.sol",
+            "contracts/PermissionlessNodeRegistry.sol",
+            "contracts/PermissionlessPool.sol",
+            "contracts/PoolUtils.sol",
+            "contracts/interfaces/INodeRegistry.sol",
+            "contracts/interfaces/IStaderPoolBase.sol"
+          ],
+          "file_count": 7,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "779cf2d3e1ed11967280d2ba2e04c53bdf790ddb",
+          "ts": 1684983677,
+          "iso": "2023-05-25T03:01:17.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "fix get validators by operator (#152)",
+          "files": [
+            "contracts/PermissionedNodeRegistry.sol",
+            "contracts/PermissionlessNodeRegistry.sol"
+          ],
+          "file_count": 2,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "ca3a8499688aede945f45fd3eb871bd263440875",
+          "ts": 1684914563,
+          "iso": "2023-05-24T07:49:23.000Z",
+          "author": "Manoj Patra",
+          "subject": "Halborn | SigP | Audit fixes 1 (#149)",
+          "files": [
+            "contracts/Auction.sol",
+            "contracts/ETHx.sol",
+            "contracts/NodeELRewardVault.sol",
+            "contracts/OperatorRewardsCollector.sol",
+            "contracts/Penalty.sol",
+            "contracts/PermissionedNodeRegistry.sol",
+            "contracts/PermissionedPool.sol",
+            "contracts/PermissionlessNodeRegistry.sol",
+            "contracts/PermissionlessPool.sol",
+            "contracts/PoolSelector.sol",
+            "contracts/PoolUtils.sol",
+            "contracts/SDCollateral.sol",
+            "contracts/SocializingPool.sol",
+            "contracts/StaderConfig.sol",
+            "contracts/StaderInsuranceFund.sol",
+            "contracts/StaderOracle.sol",
+            "contracts/StaderStakePoolsManager.sol",
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/factory/VaultFactory.sol"
+          ],
+          "file_count": 20,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "9884fa092f827895cfce35a57b2ab4c5739bceab",
+          "ts": 1684903228,
+          "iso": "2023-05-24T04:40:28.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "request withdraw fix (#148)",
+          "files": [
+            "contracts/StaderConfig.sol",
+            "contracts/UserWithdrawalManager.sol"
+          ],
+          "file_count": 2,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "b8dce67b43cc8d2bec923d541e70fb0e1630cbf3",
+          "ts": 1684356851,
+          "iso": "2023-05-17T20:54:11.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "pool selection fix (#144)",
+          "files": [
+            "contracts/PoolSelector.sol",
+            "contracts/StaderStakePoolsManager.sol"
+          ],
+          "file_count": 2,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "1c49a048978f75c75faa9e7556efb0aac5e073f7",
+          "ts": 1684134552,
+          "iso": "2023-05-15T07:09:12.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "distribution logic fix (#140)",
+          "files": [
+            "contracts/ValidatorWithdrawalVault.sol"
+          ],
+          "file_count": 1,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "93fa13ab0bbeb41ee5d6e77f54cc9cd8ca182cab",
+          "ts": 1683785900,
+          "iso": "2023-05-11T06:18:20.000Z",
+          "author": "Manoj Patra",
+          "subject": "missed attestation fix (#138)",
+          "files": [
+            "contracts/StaderOracle.sol",
+            "contracts/interfaces/IStaderOracle.sol"
+          ],
+          "file_count": 2,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "197773b138afc3e274e59b12184eb6a3f69b10eb",
+          "ts": 1683734814,
+          "iso": "2023-05-10T16:06:54.000Z",
+          "author": "Manoj Patra",
+          "subject": "fix SDCollateral::claimWithdraw (#135)",
+          "files": [
+            "contracts/SDCollateral.sol",
+            "contracts/interfaces/SDCollateral/ISDCollateral.sol",
+            "test/foundry_tests/SDCollateral.t.sol",
+            "test/mocks/PoolUtilsMock.sol"
+          ],
+          "file_count": 4,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "dc3ce85bb18bc743e27599376e4f3a7d3485a167",
+          "ts": 1683693875,
+          "iso": "2023-05-10T04:44:35.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "total active validator count fix (#136)",
+          "files": [
+            "contracts/PermissionedNodeRegistry.sol",
+            "contracts/PermissionlessNodeRegistry.sol"
+          ],
+          "file_count": 2,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "5bac343fb95101de43841508b163b76dfd28bd6a",
+          "ts": 1683093203,
+          "iso": "2023-05-03T05:53:23.000Z",
+          "author": "Manoj Patra",
+          "subject": "Oracle-SocializingPool cycle fix (#129)",
+          "files": [
+            "contracts/SocializingPool.sol",
+            "contracts/StaderOracle.sol",
+            "contracts/interfaces/ISocializingPool.sol",
+            "contracts/interfaces/IStaderOracle.sol"
+          ],
+          "file_count": 4,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "d3c7a5af6f4c6fd1b54753d2acac58d63cd0645a",
+          "ts": 1682929712,
+          "iso": "2023-05-01T08:28:32.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "fix events (#127)",
+          "files": [
+            "contracts/interfaces/INodeRegistry.sol",
+            "contracts/interfaces/IPenalty.sol",
+            "contracts/interfaces/IPermissionedNodeRegistry.sol",
+            "contracts/interfaces/IPermissionlessNodeRegistry.sol",
+            "contracts/interfaces/IStaderPoolBase.sol"
+          ],
+          "file_count": 5,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "e81775da859043b13aa239501c3ded702dc49876",
+          "ts": 1682615016,
+          "iso": "2023-04-27T17:03:36.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Halborn audit fix (#123)",
+          "files": [
+            "contracts/PermissionedNodeRegistry.sol",
+            "contracts/PermissionedPool.sol",
+            "contracts/PermissionlessNodeRegistry.sol",
+            "contracts/PermissionlessPool.sol",
+            "contracts/SDCollateral.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IStaderPoolBase.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol",
+            "contracts/interfaces/SDCollateral/ISDCollateral.sol"
+          ],
+          "file_count": 9,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "b197c02e10e6dd8977bd6f697704db94b8800961",
+          "ts": 1682061630,
+          "iso": "2023-04-21T07:20:30.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "variable name fix (#117)",
+          "files": [
+            "contracts/StaderOracle.sol",
+            "contracts/interfaces/IStaderOracle.sol"
+          ],
+          "file_count": 2,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "ba2f32fb88b4d0293d30e2ebeddfd5156420ecca",
+          "ts": 1681976113,
+          "iso": "2023-04-20T07:35:13.000Z",
+          "author": "Manoj Patra",
+          "subject": "sd price multiple data fix (#115)",
+          "files": [
+            "contracts/StaderOracle.sol"
+          ],
+          "file_count": 1,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "58c6096c5f49063a58e7c579012e0f115b58152f",
+          "ts": 1681722339,
+          "iso": "2023-04-17T09:05:39.000Z",
+          "author": "Manoj Patra",
+          "subject": "user withdraw finalize fix (#106)",
+          "files": [
+            "contracts/UserWithdrawalManager.sol"
+          ],
+          "file_count": 1,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "a6c0b4cf49802eda33fed7c66ef77fad7512d9df",
+          "ts": 1681670537,
+          "iso": "2023-04-16T18:42:17.000Z",
+          "author": "Manoj Patra",
+          "subject": "testing Fixes (#102)",
+          "files": [
+            "contracts/Auction.sol",
+            "contracts/SDCollateral.sol",
+            "contracts/SocializingPool.sol",
+            "contracts/interfaces/SDCollateral/ISDCollateral.sol"
+          ],
+          "file_count": 4,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "10262b4618b985037f2ce5e79e20dd3d41044987",
+          "ts": 1681670521,
+          "iso": "2023-04-16T18:42:01.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Permissionless node registry fix (#104)",
+          "files": [
+            "contracts/PermissionlessNodeRegistry.sol",
+            "contracts/StaderStakePoolsManager.sol",
+            "contracts/interfaces/IStaderStakePoolManager.sol",
+            "scripts/markValidatorReadyToDeposit.ts",
+            "scripts/submitOracleReport.ts"
+          ],
+          "file_count": 5,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "094e4347c0c9d37df2fdd8cfc965f71901ba1344",
+          "ts": 1681670376,
+          "iso": "2023-04-16T18:39:36.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "fix: allocateValidatorsAndUpdateOperatorId logic (#103)",
+          "files": [
+            "contracts/PermissionedNodeRegistry.sol"
+          ],
+          "file_count": 1,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "2e682c8a0b4206d3ac6e10a8430cf35660d5cf12",
+          "ts": 1681581759,
+          "iso": "2023-04-15T18:02:39.000Z",
+          "author": "Manoj Patra",
+          "subject": "decimal bug fix (#101)",
+          "files": [
+            "contracts/SDCollateral.sol",
+            "contracts/StaderStakePoolsManager.sol"
+          ],
+          "file_count": 2,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "d6ff2a7501350a471d92d105f795f3a7ccf10f47",
+          "ts": 1681361387,
+          "iso": "2023-04-13T04:49:47.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Feat/sigma prime audit (#91)",
+          "files": [
+            ".env.example",
+            "contracts/ETHx.sol",
+            "contracts/NodeELRewardVault.sol",
+            "contracts/PermissionedNodeRegistry.sol",
+            "contracts/PermissionedPool.sol",
+            "contracts/PermissionlessNodeRegistry.sol",
+            "contracts/PermissionlessPool.sol",
+            "contracts/PoolSelector.sol",
+            "contracts/PoolUtils.sol",
+            "contracts/SDCollateral.sol",
+            "contracts/SocializingPool.sol",
+            "contracts/StaderConfig.sol",
+            "contracts/StaderOracle.sol",
+            "contracts/StaderStakePoolsManager.sol",
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IPoolUtils.sol",
+            "contracts/interfaces/IStaderConfig.sol",
+            "contracts/interfaces/IStaderStakePoolManager.sol",
+            "contracts/library/UtilLib.sol"
+          ],
+          "file_count": 20,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "85fd1e5cb0ebee8f4c353b6824dfcbada8d05cd4",
+          "ts": 1681235533,
+          "iso": "2023-04-11T17:52:13.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "permission fixes across contracts (#86)",
+          "files": [
+            "contracts/Auction.sol",
+            "contracts/ETHx.sol",
+            "contracts/NodeELRewardVault.sol",
+            "contracts/Penalty.sol",
+            "contracts/PermissionedNodeRegistry.sol",
+            "contracts/PermissionedPool.sol",
+            "contracts/PermissionlessNodeRegistry.sol",
+            "contracts/PermissionlessPool.sol",
+            "contracts/PoolFactory.sol",
+            "contracts/PoolSelector.sol",
+            "contracts/SDCollateral.sol",
+            "contracts/SocializingPool.sol",
+            "contracts/StaderConfig.sol",
+            "contracts/StaderInsuranceFund.sol",
+            "contracts/StaderOracle.sol",
+            "contracts/StaderStakePoolsManager.sol",
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/factory/VaultFactory.sol",
+            "contracts/interfaces/IPenalty.sol"
+          ],
+          "file_count": 20,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "34b0b51a77017f0e5d7601cc152ff4e110bb148f",
+          "ts": 1681156132,
+          "iso": "2023-04-10T19:48:52.000Z",
+          "author": "Manoj Patra",
+          "subject": "fix: DefiWind TODOs (#85)",
+          "files": [
+            "contracts/ETHx.sol",
+            "contracts/NodeELRewardVault.sol",
+            "contracts/PermissionedNodeRegistry.sol",
+            "contracts/PermissionlessNodeRegistry.sol",
+            "contracts/PoolFactory.sol",
+            "contracts/SDCollateral.sol",
+            "contracts/SocializingPool.sol",
+            "contracts/StaderConfig.sol",
+            "contracts/StaderOracle.sol",
+            "contracts/StaderStakePoolsManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IPoolFactory.sol",
+            "contracts/interfaces/ISocializingPool.sol",
+            "contracts/interfaces/IStaderOracle.sol",
+            "contracts/interfaces/SDCollateral/ISDCollateral.sol"
+          ],
+          "file_count": 15,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "bf4ace86fb91b9066e45d8810db9bef7a01d5aef",
+          "ts": 1680677737,
+          "iso": "2023-04-05T06:55:37.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Feat/phase2 audit ready (#82)",
+          "files": [
+            "contracts/Auction.sol",
+            "contracts/ETHx.sol",
+            "contracts/NodeELRewardVault.sol",
+            "contracts/Penalty.sol",
+            "contracts/PermissionedNodeRegistry.sol",
+            "contracts/PermissionedPool.sol",
+            "contracts/PermissionlessNodeRegistry.sol",
+            "contracts/PermissionlessPool.sol",
+            "contracts/PoolFactory.sol",
+            "contracts/PoolSelector.sol",
+            "contracts/SDCollateral.sol",
+            "contracts/SocializingPool.sol",
+            "contracts/StaderConfig.sol",
+            "contracts/StaderOracle.sol",
+            "contracts/StaderStakePoolsManager.sol",
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/factory/VaultFactory.sol",
+            "contracts/interfaces/INodeRegistry.sol",
+            "contracts/interfaces/IPenalty.sol"
+          ],
+          "file_count": 20,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "089fed70a1f5e62abe3327ee3df0e90d0fca78fa",
+          "ts": 1680623250,
+          "iso": "2023-04-04T15:47:30.000Z",
+          "author": "Manoj Patra",
+          "subject": "SD Tokenomics Phase2: fixes, withdraw, oracle sd price, sd auction (#70)",
+          "files": [
+            "contracts/Auction.sol",
+            "contracts/NodeELRewardVault.sol",
+            "contracts/PriceFetcher.sol",
+            "contracts/SDCollateral.sol",
+            "contracts/SocializingPool.sol",
+            "contracts/StaderConfig.sol",
+            "contracts/StaderOracle.sol",
+            "contracts/StaderStakePoolsManager.sol",
+            "contracts/TWAPGetter.sol",
+            "contracts/interfaces/IStaderConfig.sol",
+            "contracts/interfaces/IStaderOracle.sol",
+            "contracts/interfaces/IStaderStakePoolManager.sol",
+            "contracts/interfaces/SDCollateral/IAuction.sol",
+            "contracts/interfaces/SDCollateral/IPriceFetcher.sol",
+            "contracts/interfaces/SDCollateral/ISDCollateral.sol",
+            "contracts/interfaces/SDCollateral/ITWAPGetter.sol",
+            "hardhat.config.ts",
+            "package-lock.json",
+            "package.json",
+            "scripts/deploy/sdCollateral.ts"
+          ],
+          "file_count": 20,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "c366e8372f5a1543a4e1eec8a576842d304c8106",
+          "ts": 1680495992,
+          "iso": "2023-04-03T04:26:32.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Audit fixes along with reward contract integration (#79)",
+          "files": [
+            "contracts/NodeELRewardVault.sol",
+            "contracts/PermissionedNodeRegistry.sol",
+            "contracts/PermissionedPool.sol",
+            "contracts/PermissionlessNodeRegistry.sol",
+            "contracts/PermissionlessPool.sol",
+            "contracts/PoolFactory.sol",
+            "contracts/PoolSelector.sol",
+            "contracts/SDCollateral.sol",
+            "contracts/StaderOracle.sol",
+            "contracts/StaderStakePoolsManager.sol",
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/factory/VaultFactory.sol",
+            "contracts/interfaces/INodeELRewardVault.sol",
+            "contracts/interfaces/INodeRegistry.sol",
+            "contracts/interfaces/IPermissionedNodeRegistry.sol",
+            "contracts/interfaces/IPermissionlessNodeRegistry.sol",
+            "contracts/interfaces/IPoolFactory.sol",
+            "contracts/interfaces/IPoolSelector.sol",
+            "contracts/interfaces/ISDStaking.sol"
+          ],
+          "file_count": 20,
+          "touches_dangerous": true
+        },
+        {
+          "sha": "a503ec3d4fe7271293e369ada4d88518d3c636e5",
+          "ts": 1677295864,
+          "iso": "2023-02-25T03:31:04.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "fix: testing changes[WIP, might add more according to testing] (#61)",
+          "files": [
+            "contracts/PermissionedNodeRegistry.sol",
+            "contracts/PermissionedPool.sol",
+            "contracts/PermissionlessNodeRegistry.sol",
+            "contracts/PermissionlessPool.sol",
+            "contracts/SDCollateral.sol",
+            "contracts/StaderStakePoolsManager.sol",
+            "contracts/TWAPGetter.sol",
+            "contracts/factory/VaultFactory.sol",
+            "contracts/interfaces/IPermissionedNodeRegistry.sol",
+            "contracts/interfaces/IPermissionlessNodeRegistry.sol",
+            "contracts/interfaces/IStaderStakePoolManager.sol",
+            "contracts/library/ValidatorStatus.sol"
+          ],
+          "file_count": 12,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "5a69b77f3ee0ebd996c8c45ef75f88eb4e91206f",
+          "ts": 1677099545,
+          "iso": "2023-02-22T20:59:05.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "create2 compute address fix (#59)",
+          "files": [
+            "contracts/factory/VaultFactory.sol"
+          ],
+          "file_count": 1,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "80343c3075ff6314ea0bcc348fde4b45dfefcaeb",
+          "ts": 1675703716,
+          "iso": "2023-02-06T17:15:16.000Z",
+          "author": "Dulguun",
+          "subject": "TODOs that will be completed before actual audit (#49)",
+          "files": [
+            "contracts/NodeELRewardVault.sol",
+            "contracts/StaderOracle.sol",
+            "contracts/StaderStakePoolsManager.sol"
+          ],
+          "file_count": 3,
+          "touches_dangerous": false
+        },
+        {
+          "sha": "a7b3e23a62e728040e6475c1a18cc0ba8f01050b",
+          "ts": 1672235990,
+          "iso": "2022-12-28T13:59:50.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "testing fix (#33)",
+          "files": [
+            "contracts/StaderManagedStakePool.sol",
+            "contracts/StaderOperatorRegistry.sol",
+            "contracts/StaderPermissionLessPool.sol",
+            "contracts/StaderStakePoolsManager.sol",
+            "contracts/StaderValidatorRegistry.sol",
+            "contracts/interfaces/IStaderValidatorRegistry.sol",
+            "scripts/grantRoles.ts",
+            "scripts/setSTaderValidatorRegistryParams.ts",
+            "scripts/setStakingManagerParams.ts"
+          ],
+          "file_count": 9,
+          "touches_dangerous": false
+        }
+      ]
+    },
+    "dangerous_area_changes": {
+      "count": 52,
+      "items": [
+        {
+          "sha": "d97dc9030188d99e42e9b6b7f922abd0dbbe330a",
+          "iso": "2025-12-12T13:15:42.000Z",
+          "author": "blockgroot",
+          "subject": "Remove Unnecessary Non-Terminal Key checks (#248)",
+          "dangerous_files": [
+            "test/foundry_tests/ValidatorWithdrawalVault.t.sol"
+          ]
+        },
+        {
+          "sha": "bd7e2391ef709dfccae75a11a46f27027164881e",
+          "iso": "2024-06-18T20:10:25.000Z",
+          "author": "John Cairns",
+          "subject": "238: fixing lint issues with imports",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "723fb35e1f15996a9d5b22c6b22b61488825d16b",
+          "iso": "2024-06-10T16:14:50.000Z",
+          "author": "blockgroot",
+          "subject": "Fix lint issues (#235)",
+          "dangerous_files": [
+            "test/foundry_tests/ValidatorWithdrawalVault.t.sol"
+          ]
+        },
+        {
+          "sha": "4dfc3d636d0d9ff8838dc225f225e7a3998a4d83",
+          "iso": "2024-04-10T19:48:52.000Z",
+          "author": "John Cairns",
+          "subject": "220: cleanup UserWithdrawlManager tests - cleanup UserWithdrawlManager requestId finalization tests - fixes for formatting, leftover from previous change - Dockerfile optimization, move npm and python",
+          "dangerous_files": [
+            "contracts/interfaces/IUserWithdrawalManager.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol",
+            "test/foundry_tests/UserWithdrawalManager.t.sol"
+          ]
+        },
+        {
+          "sha": "e34ece60308f73db626e45702bb9c7c9fd9020f9",
+          "iso": "2024-03-19T22:19:45.000Z",
+          "author": "John Cairns",
+          "subject": "217: Test fixes",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "test/foundry_tests/UserWithdrawalManager.t.sol",
+            "test/foundry_tests/ValidatorWithdrawalVault.t.sol",
+            "test/mocks/PoolUtilsMockForDepositFlow.sol"
+          ]
+        },
+        {
+          "sha": "1939e6c36087bf7cb437e4323f426219df6313b4",
+          "iso": "2024-04-01T09:56:49.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "SD utility pool (#212)",
+          "dangerous_files": [
+            "test/foundry_tests/ValidatorWithdrawalVault.t.sol"
+          ]
+        },
+        {
+          "sha": "34ba126684b835c9144a7f0cab6bd3ec6659d4de",
+          "iso": "2023-09-21T07:13:36.000Z",
+          "author": "Manoj Patra",
+          "subject": "Extended referral methods (#206)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/interfaces/IUserWithdrawalManager.sol"
+          ]
+        },
+        {
+          "sha": "9fc819388373ed711ae9c9da1a73d32e17e82c18",
+          "iso": "2023-07-08T08:04:18.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "integration guide and license (#197)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IUserWithdrawalManager.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol",
+            "test/foundry_tests/UserWithdrawalManager.t.sol",
+            "test/foundry_tests/ValidatorWithdrawalVault.t.sol"
+          ]
+        },
+        {
+          "sha": "f74d58512b0c8c79e59ecf0532b46ff7e61967e8",
+          "iso": "2023-06-30T05:57:50.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "uint tests (#195)",
+          "dangerous_files": [
+            "test/foundry_tests/UserWithdrawalManager.t.sol",
+            "test/mocks/ETHDepositMock.sol",
+            "test/mocks/PoolUtilsMockForDepositFlow.sol"
+          ]
+        },
+        {
+          "sha": "b8beb3832aafc91aed76e47137c0db40325739f0",
+          "iso": "2023-06-30T05:54:40.000Z",
+          "author": "Manoj Patra",
+          "subject": "Oracle Unit Tests - II  (#196)",
+          "dangerous_files": [
+            "test/foundry_tests/ValidatorWithdrawalVault.t.sol"
+          ]
+        },
+        {
+          "sha": "229d0d5f5db8c79ad52d277213661fa2ce36a568",
+          "iso": "2023-06-23T04:52:22.000Z",
+          "author": "Manoj Patra",
+          "subject": "changed to manager role (#194)",
+          "dangerous_files": [
+            "contracts/ValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "bf00f676193c0620b1fc5bf52388249f2c62db74",
+          "iso": "2023-06-22T06:20:53.000Z",
+          "author": "Manoj Patra",
+          "subject": "Vault Unit Tests (#191)",
+          "dangerous_files": [
+            "test/foundry_tests/ValidatorWithdrawalVault.t.sol"
+          ]
+        },
+        {
+          "sha": "91b48841d4ee91c009a2b88094f945fa3ce1f2e2",
+          "iso": "2023-06-14T04:13:14.000Z",
+          "author": "Manoj Patra",
+          "subject": "Units Test for multiple contracts (#181)",
+          "dangerous_files": [
+            "contracts/interfaces/IValidatorWithdrawalVault.sol",
+            "test/foundry_tests/ValidatorWithdrawalVault.t.sol"
+          ]
+        },
+        {
+          "sha": "6a4d79d66ce2d0c0b3328c4fcee9ca81a98bd000",
+          "iso": "2023-06-05T16:57:00.000Z",
+          "author": "Manoj Patra",
+          "subject": "Improvements based on code4rena bot-race reports (#174)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol"
+          ]
+        },
+        {
+          "sha": "04f881f670f913126054aae376337a230a3bf2e8",
+          "iso": "2023-05-29T17:18:52.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Remove unused code (#164)",
+          "dangerous_files": [
+            "contracts/ValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "8d305fb8e13588d56cf2138db4a8600f39e6eeae",
+          "iso": "2023-05-26T18:25:51.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Loop optimization (#155)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol"
+          ]
+        },
+        {
+          "sha": "ca3a8499688aede945f45fd3eb871bd263440875",
+          "iso": "2023-05-24T07:49:23.000Z",
+          "author": "Manoj Patra",
+          "subject": "Halborn | SigP | Audit fixes 1 (#149)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IDepositContract.sol",
+            "contracts/interfaces/IUserWithdrawalManager.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol",
+            "test/mocks/ETHDepositMock.sol",
+            "test/mocks/PoolUtilsMockForDepositFlow.sol"
+          ]
+        },
+        {
+          "sha": "31569ff851e21f039d45788772451c0c7c8ad274",
+          "iso": "2023-05-24T05:17:41.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Vault upgradability (#143)",
+          "dangerous_files": [
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "9884fa092f827895cfce35a57b2ab4c5739bceab",
+          "iso": "2023-05-24T04:40:28.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "request withdraw fix (#148)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol"
+          ]
+        },
+        {
+          "sha": "a9dcf3c96e47adc932d34cab4516eef640610714",
+          "iso": "2023-05-22T04:54:52.000Z",
+          "author": "Manoj Patra",
+          "subject": "pull payments (#145)",
+          "dangerous_files": [
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "6b0564504b6100a75a5ba394aac7c561c09eadca",
+          "iso": "2023-05-17T11:12:48.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Permissionless Node registry test (#141)",
+          "dangerous_files": [
+            "test/mocks/PoolUtilsMockForDepositFlow.sol"
+          ]
+        },
+        {
+          "sha": "1c49a048978f75c75faa9e7556efb0aac5e073f7",
+          "iso": "2023-05-15T07:09:12.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "distribution logic fix (#140)",
+          "dangerous_files": [
+            "contracts/ValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "1e46fbd0439ec66b2865d55bde383c92f7b0c30d",
+          "iso": "2023-05-09T05:44:40.000Z",
+          "author": "Manoj Patra",
+          "subject": "Foundry fuzzy unit tests (#121)",
+          "dangerous_files": [
+            "test/mocks/ETHDepositMock.sol"
+          ]
+        },
+        {
+          "sha": "8a592cc020a9e55b778ae8c606dbbae010af57c4",
+          "iso": "2023-05-08T17:15:47.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "remove depositPooledETH variable (#133)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol"
+          ]
+        },
+        {
+          "sha": "bac05df6f12529bda9c6e3b76935e10c931faacd",
+          "iso": "2023-04-29T08:53:23.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Single Socializing Pool changes (#126)",
+          "dangerous_files": [
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "e81775da859043b13aa239501c3ded702dc49876",
+          "iso": "2023-04-27T17:03:36.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Halborn audit fix (#123)",
+          "dangerous_files": [
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "3a5a6ea726b9fcc199574efa33c3a5599a4a9fd8",
+          "iso": "2023-04-27T05:45:13.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "User withdraw requestIds getter (#120)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/interfaces/IUserWithdrawalManager.sol"
+          ]
+        },
+        {
+          "sha": "33ec1eeb7a210bc7fd96b19798925bad1ff06950",
+          "iso": "2023-04-21T04:58:58.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "change in update penalty amount input (#116)",
+          "dangerous_files": [
+            "contracts/ValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "58c6096c5f49063a58e7c579012e0f115b58152f",
+          "iso": "2023-04-17T09:05:39.000Z",
+          "author": "Manoj Patra",
+          "subject": "user withdraw finalize fix (#106)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol"
+          ]
+        },
+        {
+          "sha": "387722259c536ba3d3d1e127b936abf137d6c4c5",
+          "iso": "2023-04-17T05:08:33.000Z",
+          "author": "Manoj Patra",
+          "subject": "0 slashSD and penalty case",
+          "dangerous_files": [
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "ce897ebbb6c8e145e1808bf7880554602b26963a",
+          "iso": "2023-04-14T07:21:49.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Feat/pool utils redesign (#95)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol"
+          ]
+        },
+        {
+          "sha": "d6ff2a7501350a471d92d105f795f3a7ccf10f47",
+          "iso": "2023-04-13T04:49:47.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Feat/sigma prime audit (#91)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "cc54a064d2387f638fb8b1285ff18084738c6258",
+          "iso": "2023-04-12T19:15:07.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Feat/open points (#90)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "85fd1e5cb0ebee8f4c353b6824dfcbada8d05cd4",
+          "iso": "2023-04-11T17:52:13.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "permission fixes across contracts (#86)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IUserWithdrawalManager.sol"
+          ]
+        },
+        {
+          "sha": "34b0b51a77017f0e5d7601cc152ff4e110bb148f",
+          "iso": "2023-04-10T19:48:52.000Z",
+          "author": "Manoj Patra",
+          "subject": "fix: DefiWind TODOs (#85)",
+          "dangerous_files": [
+            "contracts/ValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "4139ddbbd4b6d96bc363fd764a5ff3bb4a9e0a18",
+          "iso": "2023-04-09T06:07:50.000Z",
+          "author": "Manoj Patra",
+          "subject": "Refactor, Events, Code Improvements, etc (#83)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IUserWithdrawalManager.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "b4cb370fcfd4c32c02154faf5ad3fa1fdde0bbba",
+          "iso": "2023-04-06T04:22:10.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Feat/insurance fund (#84)",
+          "dangerous_files": [
+            "contracts/ValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "bf4ace86fb91b9066e45d8810db9bef7a01d5aef",
+          "iso": "2023-04-05T06:55:37.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Feat/phase2 audit ready (#82)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IUserWithdrawalManager.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "c366e8372f5a1543a4e1eec8a576842d304c8106",
+          "iso": "2023-04-03T04:26:32.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Audit fixes along with reward contract integration (#79)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IUserWithdrawalManager.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "c32880d8a86a9e1c43b41a6bfb1069ff7599e875",
+          "iso": "2023-04-03T03:24:58.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "penalty integration (#78)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "6f3b281a5167f599d21bdf6344ad4e8cf401306f",
+          "iso": "2023-03-27T04:16:43.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "index file integration (#74)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IUserWithdrawalManager.sol"
+          ]
+        },
+        {
+          "sha": "70fb533be79f70883b466c3158cd0065f45e84fb",
+          "iso": "2023-03-22T17:14:13.000Z",
+          "author": "Dulguun",
+          "subject": "CL Rewards and Node EL Rewards (#63)",
+          "dangerous_files": [
+            "contracts/ValidatorWithdrawVault.sol",
+            "contracts/ValidatorWithdrawalVault.sol",
+            "contracts/interfaces/IValidatorWithdrawalVault.sol"
+          ]
+        },
+        {
+          "sha": "aa01ce460fc98fec51d2004b9c6905478d486a40",
+          "iso": "2023-03-22T08:12:15.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Feat/todo changes (#72)",
+          "dangerous_files": [
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/interfaces/IStaderNodeWithdrawManager.sol",
+            "contracts/interfaces/IUserWithdrawalManager.sol"
+          ]
+        },
+        {
+          "sha": "f3b61a39863095883e084fe53dcda8a54d22bd50",
+          "iso": "2023-03-21T02:03:47.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Withdraw implementation (#69)",
+          "dangerous_files": [
+            "contracts/StaderNodeWithdrawManager.sol",
+            "contracts/StaderWithdrawVault.sol",
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/ValidatorWithdrawVault.sol",
+            "contracts/interfaces/IUserWithdrawalManager.sol"
+          ]
+        },
+        {
+          "sha": "e20ae47533b806fac175c69eb9ea4782316b16e0",
+          "iso": "2023-02-22T20:34:10.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Feat/deposit flow (#55)",
+          "dangerous_files": [
+            "contracts/StaderNodeWithdrawManager.sol",
+            "contracts/StaderWithdrawVault.sol",
+            "contracts/UserWithdrawalManager.sol",
+            "contracts/interfaces/IStaderNodeWithdrawManager.sol",
+            "contracts/interfaces/IUserWithdrawalManager.sol",
+            "contracts/library/ValidatorWithdrawState.sol"
+          ]
+        },
+        {
+          "sha": "3ee2703b3074aa4f3970bd3b497186aa6fa8210a",
+          "iso": "2023-02-06T16:38:26.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Feat/beta v1 (#48)",
+          "dangerous_files": [
+            "contracts/StaderNodeWithdrawManager.sol",
+            "contracts/StaderUserWithdrawalManager.sol",
+            "contracts/StaderWithdrawVault.sol",
+            "contracts/interfaces/IStaderNodeWithdrawManager.sol",
+            "contracts/interfaces/IStaderUserWithdrawalManager.sol",
+            "contracts/library/ValidatorWithdrawState.sol"
+          ]
+        },
+        {
+          "sha": "0b07904c1f79555876f1e7e5568780133304d789",
+          "iso": "2023-01-12T16:50:22.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Feat/operator selection (#38)",
+          "dangerous_files": [
+            "contracts/interfaces/IPoolDeposit.sol"
+          ]
+        },
+        {
+          "sha": "0116b5f4e6235cdf36b8936dd8d4af235be45d5a",
+          "iso": "2022-12-26T14:18:35.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Feat/socializing pool contract (#27)",
+          "dangerous_files": [
+            "contracts/interfaces/IPoolDeposit.sol"
+          ]
+        },
+        {
+          "sha": "3ac8b263b93020633cf27b1e416d733f5444a8aa",
+          "iso": "2022-12-26T14:01:54.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "ERC4626 logic in PoolManager (#26)",
+          "dangerous_files": [
+            "contracts/interfaces/IETHxVaultWithdrawer.sol"
+          ]
+        },
+        {
+          "sha": "204bf32fa959b1c1d2ed5b82f164741f84d76e49",
+          "iso": "2022-12-19T13:15:44.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Alpha testnet v3 (#16)",
+          "dangerous_files": [
+            "contracts/interfaces/IETHxVaultWithdrawer.sol",
+            "contracts/mocks/ETHDepositMock.sol"
+          ]
+        },
+        {
+          "sha": "27c92f314bf0985792182391a3354044093facc1",
+          "iso": "2022-11-29T13:24:42.000Z",
+          "author": "Dulguun",
+          "subject": "Run slither on CI (#12)",
+          "dangerous_files": [
+            "contracts/interfaces/IDepositContract.sol"
+          ]
+        },
+        {
+          "sha": "ee8435b172b3ecf941b37963caa1014be70f4095",
+          "iso": "2022-11-20T19:14:49.000Z",
+          "author": "Sanjay Yadav",
+          "subject": "Feat/add update/remove ssv methods (#6)",
+          "dangerous_files": [
+            "contracts/interfaces/IDepositContract.sol"
+          ]
+        }
+      ]
+    },
+    "late_changes": {
+      "count": 0,
+      "window_days": 30,
+      "items": []
+    },
+    "audit_age": {
+      "present": false,
+      "reason": "no audits/ directory found (searched: audits, contracts/audits, docs/audits, security/audits, reports/audits, audit-reports)"
+    },
+    "untouched_critical": {
+      "count": 9,
+      "threshold_days": 90,
+      "items": [
+        {
+          "file": "contracts/interfaces/IDepositContract.sol",
+          "last_touch_iso": "2023-05-24T07:49:23.000Z",
+          "days_untouched": 1099
+        },
+        {
+          "file": "test/mocks/ETHDepositMock.sol",
+          "last_touch_iso": "2023-06-30T05:57:50.000Z",
+          "days_untouched": 1062
+        },
+        {
+          "file": "test/mocks/PoolUtilsMockForDepositFlow.sol",
+          "last_touch_iso": "2024-03-19T22:19:45.000Z",
+          "days_untouched": 798
+        },
+        {
+          "file": "contracts/interfaces/IUserWithdrawalManager.sol",
+          "last_touch_iso": "2024-04-10T19:48:52.000Z",
+          "days_untouched": 776
+        },
+        {
+          "file": "test/foundry_tests/UserWithdrawalManager.t.sol",
+          "last_touch_iso": "2024-04-10T19:48:52.000Z",
+          "days_untouched": 776
+        },
+        {
+          "file": "contracts/UserWithdrawalManager.sol",
+          "last_touch_iso": "2024-06-18T20:10:25.000Z",
+          "days_untouched": 707
+        },
+        {
+          "file": "contracts/ValidatorWithdrawalVault.sol",
+          "last_touch_iso": "2024-06-18T20:10:25.000Z",
+          "days_untouched": 707
+        },
+        {
+          "file": "contracts/interfaces/IValidatorWithdrawalVault.sol",
+          "last_touch_iso": "2024-06-18T20:10:25.000Z",
+          "days_untouched": 707
+        },
+        {
+          "file": "test/foundry_tests/ValidatorWithdrawalVault.t.sol",
+          "last_touch_iso": "2025-12-12T13:15:42.000Z",
+          "days_untouched": 165
+        }
+      ]
+    },
+    "revert_history": {
+      "count": 0,
+      "items": []
+    },
+    "author_distribution": {
+      "count": 10,
+      "items": [
+        {
+          "author": "Sanjay Yadav",
+          "commit_count": 97,
+          "insertions": 73198,
+          "deletions": 26369
+        },
+        {
+          "author": "Manoj Patra",
+          "commit_count": 42,
+          "insertions": 19158,
+          "deletions": 37970
+        },
+        {
+          "author": "John Cairns",
+          "commit_count": 10,
+          "insertions": 8547,
+          "deletions": 17870
+        },
+        {
+          "author": "dependabot[bot]",
+          "commit_count": 10,
+          "insertions": 6292,
+          "deletions": 10714
+        },
+        {
+          "author": "Dulguun",
+          "commit_count": 10,
+          "insertions": 1360,
+          "deletions": 590
+        },
+        {
+          "author": "blockgroot",
+          "commit_count": 9,
+          "insertions": 10865,
+          "deletions": 271
+        },
+        {
+          "author": "arigatodl",
+          "commit_count": 4,
+          "insertions": 177,
+          "deletions": 122
+        },
+        {
+          "author": "TheRealTkwk",
+          "commit_count": 2,
+          "insertions": 19587,
+          "deletions": 2
+        },
+        {
+          "author": "Gus",
+          "commit_count": 1,
+          "insertions": 10713,
+          "deletions": 6655
+        },
+        {
+          "author": "happie-chappie",
+          "commit_count": 1,
+          "insertions": 1,
+          "deletions": 0
+        }
+      ]
+    }
+  }
+}

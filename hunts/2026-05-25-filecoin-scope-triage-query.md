@@ -1,5 +1,13 @@
 # Filecoin Scope Triage Query — Operator Paste-Ready
 
+> **Status: MOOT — NEVER POSTED. 2026-05-26 17:28 UTC.** Operator (Ogie msg 7837) confirmed via visual inspection of the Filecoin Immunefi program-page asset-selection that `filecoin-project/builtin-actors` is **explicitly listed as an in-scope asset**. Scope gate CLEARED without needing the triage query. Outcome equivalent to path (a): in-scope, file under the Filecoin/Lotus program.
+>
+> Original draft preserved below for the methodology record + Lane 5 scope-monitor training datum (the proactive scope-triage query is the discipline; the answer here was "already explicit, no query needed").
+>
+> ---
+>
+> _Original draft 2026-05-25 below:_
+
 > Status: DRAFTED 2026-05-25 — for operator to post on Immunefi program Q&A or message Filecoin triage directly.
 > Authority: Veda OOS lesson + Standing-Intake Step 5.2 pre-flight scope check.
 > Context: Gate 1 surfaced LEAD-1 (VERIFIED, paste-ready drafted) + LEAD-2 (FORECLOSED, mainnet never ran broken enum). Both leads live inside `filecoin-project/builtin-actors` — the Rust WASM actor set Lotus deploys via the `_load` system actor. Before sending the LEAD-1 paste-ready, we need explicit triage confirmation that `builtin-actors` is in-scope transitively via the in-scope Lotus miner node.

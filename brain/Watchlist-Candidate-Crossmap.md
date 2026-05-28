@@ -1372,3 +1372,42 @@ _v2.16 Addendum: 2026-05-27 ~23:35 UTC | row 21 Templar WATCHLIST-PARK | **INFO 
 - Cap clones purge (operator sudo)
 
 _v2.17 Addendum: 2026-05-28 ~13:25 UTC | row N+9 Gnosis Chain bridge WATCHLIST-PARK | **Doctrine #37 Sub-B 4th anchor (LONGEST-FROZEN 1725 days)** | **DC-7 EXCLUSION 4th compound-impact validation (Yaho re-entry filtered)** | **Doctrine #34 sub-b Anchor #5 → 5-anchor OPERATIONALLY PERMANENT cluster** | INFO #19 6-axis drift catalog | next-dispatch: Flux Finance G1_
+
+---
+
+### v2.18 Addendum — Flux Finance Immunefi (row N+10, 2026-05-28 ~16:45 UTC)
+
+| Field | Value |
+|-------|-------|
+| Program | Flux Finance Immunefi (Ethereum, Compound V2 fork — Ondo Finance team) |
+| Bounty | $550K Critical / $25K High / $10K Med / $1K Low (flat), no-KYC, PoC required |
+| Brain overlap | **MEDIUM-HIGH (overlap=18)** — Doctrine #29 v1.1 partial fire on V2 oracle (one-sided ceiling, no floor); Doctrine #34 sub-b V1→V2 oracle composition (+198 LoC post-V1-audit); Doctrine #37 Sub-Type B single-commit frozen 1207d; CANDIDATE-I cToken inflation CLOSED on existing markets; CANDIDATE-J state-residue OOS-centralization; Doctrine #36 PERMANENT P-floor 0.05 binds |
+| EV pre-Doctrine-36 | $27.5K (operator brief) |
+| EV post-Doctrine-36 | **$5.8K** (5x reduction: 0.05 × $550K × 0.30 × 0.7) |
+| Status | **FORECLOSURE+WATCHLIST-PARK** with 2 candidates (C-1 CANDIDATE-I closed-on-existing-markets; C-2 Doctrine #29 v1.1 missing-floor pending on-chain OracleType verify + flash-loan framing) |
+| Gate 1 hunt | `hunts/2026-05-28-fluxfinance-immunefi-gate1.md` (36KB) |
+
+**Brain compound proposals (5 from Flux G1):**
+
+1. **F-1 — Watchlist row N+10 status update (DONE in this addendum)**
+2. **F-2 — Doctrine #34 sub-class b 6th-anchor pre-promotion candidate**: OndoPriceOracleV2 V1→V2 oracle composition surface (single-anchor candidate; needs 2nd confirming feature for promotion to 6-anchor cluster). Defer until next Compound V2 fork hunt or Templar G2 produces second anchor.
+3. **F-3 — Doctrine #36 PERMANENT validation**: Flux hunt validates Doctrine #36 P-floor 0.05 binds Compound V2 fork substrate. 5x EV reduction observed. Strengthens always-apply prior.
+4. **F-4 — INFO #19 9-axis drift catalog** (was 7 after Stargate-V3 brief-version drift): adds Axis 8 SUBSTRATE-AFFILIATION drift (brief said FRAX-affiliated; live confirmed Ondo Finance-affiliated) + Axis 9 ORG-NAME drift (`fluxfinance` vs canonical `flux-finance` with hyphen). Now 9-axis catalog: PLATFORM (Kiln) / PLATFORM (Cap) / TIME (OnRe) / SCOPE (Gearbox) / SUBSTRATE-LANGUAGE (Gnosis) / SUBSTRATE-VERSION (Stargate-V3-vs-V2) / SUBSTRATE-AFFILIATION (Flux-FRAX-vs-Ondo) / ORG-NAME (`fluxfinance`-vs-`flux-finance`) / [+ Gearbox SCOPE-drift backfill: router-v3 brief absent live].
+5. **F-5 — hunts/intake-log.md entry** (DONE)
+
+**Cross-walk against Code4rena 2023-01 Ondo Finance contest (74 wardens, 6 valid findings):**
+- H-01 `completeRedemptions` totalBurned → CashManager → **OOS Flux Immunefi**
+- M-01 admin-cannot-refund-sanctioned-users → CashManager → **OOS Flux Immunefi**
+- **M-02 First Deposit Bug → CANDIDATE-I canonical anchor → AUDITED, CLOSED on existing markets, future-recurrence contingent**
+- M-03 setEpochDuration → CashManager → **OOS Flux Immunefi**
+- **M-04 KYCRegistry signature replay → External KYCRegistry NOT in 9 in-scope assets → OOS unless flux-impact framed**
+- M-05 setPendingRedemptionBalance → CashManager → **OOS Flux Immunefi**
+
+**4/6 OUT-OF-FLUX-SCOPE (CashManager findings); 1/6 audited-canonical CANDIDATE-I; 1/6 external-substrate-OOS.** No actionable bounty surface inherited from Code4rena coverage.
+
+**Next-action sequence:**
+1. Probe on-chain V2 oracle config (5 eth_calls to read `fTokenToOracleType[<each in-scope fToken>]`)
+2. If ANY fToken is CHAINLINK → C-2 promotion-eligible; if all MANUAL/COMPOUND → C-2 collapses
+3. Move to next-highest-EV Lane 5 target
+
+_v2.18 Addendum: 2026-05-28 ~16:45 UTC | row N+10 Flux Finance Immunefi FORECLOSURE+WATCHLIST-PARK | **Doctrine #36 PERMANENT P-floor 0.05 5x EV reduction validation** | **Doctrine #34 sub-class b 6th-anchor pre-promotion candidate (V1→V2 oracle composition)** | **Doctrine #37 Sub-Type B 5th anchor (1207d frozen single-commit)** | INFO #19 9-axis drift catalog (added SUBSTRATE-AFFILIATION + ORG-NAME) | next-dispatch: on-chain OracleType probe + Lane 5 next-highest-EV target_
