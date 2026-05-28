@@ -152,17 +152,22 @@
 
 ---
 
-## §6 BUDGET (TODO — pre-Jun-15)
+## §6 BUDGET (operator-confirmed 2026-05-28 deep night)
 
 **Required:**
 - $250 USDC deposit × N submissions
-- Estimated: 5-15 submissions × $250 = $1,250 – $3,750 USDC working capital
-- Excludes failed deposits (deposit is refunded on valid submission, forfeited if abusive/spam)
+- **Operator estimate: 5-10 submissions × $250 = $1,250 – $2,500 USDC working capital** (narrower than initial 5-15 range; operator-set ceiling)
+- Deposits REFUND on valid submission, forfeit on abusive/spam
 
-**Funding sources:**
-- Firedancer #77340 (KYC pending) — if payout lands pre-Jun-15, allocate portion
-- Operator wallet — TBD per operator decision
-- Cantina/Immunefi payouts — none confirmed in queue
+**Funding decision tree (operator-confirmed):**
+1. **Firedancer #77340 payout (KYC pending)** — IF payout lands before Jun 15, allocate portion to Sherlock deposits. PRIMARY funding source.
+2. **Ops wallet fallback** — IF Firedancer does NOT pay pre-Jun-15, fund from ops wallet. Operator handles transfer when triggered.
+3. **Cantina/Immunefi payouts** — none confirmed in queue; not a planning assumption.
+
+**Action items:**
+- [ ] Monitor Firedancer #77340 KYC status weekly (next check 2026-06-04)
+- [ ] Trigger ops-wallet fallback request to operator by 2026-06-10 if Firedancer not paid
+- [ ] Pre-Jun-15: confirm $1,250 minimum USDC in ops wallet
 
 ---
 
@@ -178,9 +183,17 @@
 
 ## CROSS-PILLAR INTEGRATION
 
-**Pillar 1 (token scoring):** Polygon-ecosystem tokens (MATIC, POL) on pipeline must NOT be tweeted with hostile framing during contest window. Update Pillar-2 tweet generation to filter ecosystem-affiliated tokens for engagement-exclusivity preservation.
+**Pillar 1 (token scoring):** **NO change to MATIC/POL scoring** per operator clarification 2026-05-28 deep night. Polygon tokens can still be scored + leaderboard-published + tweeted normally per tweet-on-score.md v2.2. The engagement exclusivity is SECURITY-FINDING-SCOPE only, not token-scoring-scope.
 
-**Pillar 2 (HSaaS):** Mention Sherlock x Polygon Heimdall participation in outreach (when public) as case-study of AI-Auditor positioning. Increase HSaaS Tier-3 (Swarm) value proposition.
+**Pillar 2 (tweet generation) — exclusivity scope NARROWED 2026-05-28 deep night:**
+- ✓ ALLOWED: MATIC/POL score tweets (HOT/QUALIFIED/WATCH bands per v2.2)
+- ✓ ALLOWED: standard "passed honest calibration" / "Not a fail. Not a pass." framings
+- ✗ FORBIDDEN until 2026-07-07: any tweet hinting at security findings on Polygon ecosystem (Heimdall, Bor, PoS validators, checkpoint contracts, staking manager, governance contracts)
+- ✗ FORBIDDEN until 2026-07-07: "Caught" template tweets for any Polygon-affiliated contract
+- ✗ FORBIDDEN until 2026-07-07: "FLAGGED" or "Calibration Before/After" templates on any Polygon contract
+- Implementation: add a content filter on Pillar-2 tweet drafter that flags any Polygon-ecosystem contract address in a SECURITY-framing draft for operator review (not score-framing — score-framing is fine).
+
+**Pillar 2 (HSaaS):** Mention Sherlock x Polygon Heimdall participation in outreach (when public, post-Jul-7) as case-study of AI-Auditor positioning. Increase HSaaS Tier-3 (Swarm) value proposition.
 
 **Pillar 3 (corpus):** Phase 2 consumer should prioritize Cosmos SDK + Tendermint + Polygon historical exploit corpus for Heimdall-class pattern extraction.
 
