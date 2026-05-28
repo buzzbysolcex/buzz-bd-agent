@@ -34,6 +34,78 @@ const MAX_SCORE = Object.values(SCORING_FACTORS).reduce(
   0,
 ); // 100
 
+// ─── P4 → P1 CANDIDATE RULES (test-mode, NOT promoted) ────────────────────────
+// Top-3 highest-confidence picks from data/lane1/p4-p1-rule-proposals/2026-05-28/
+// Authority: Ogie msg 7942 (2026-05-28) — append as CANDIDATE, not promoted.
+// Mode: inert. evaluate() returns null until data sources are wired in
+// (brain/Deployer-Crossref.md + contract source via Sourcify/Etherscan).
+// When ready to promote: set mode → "active", set weight, implement evaluate(),
+// add unit test, surface in operator approval queue.
+const P4_P1_CANDIDATE_RULES = [
+  {
+    id: "p4p1-doctrine-37-permanent",
+    mode: "candidate-stub",
+    weight: 0,
+    description:
+      "POSITIVE rule: token deployed by audited team with frozen-but-product-live contracts " +
+      "(Sub-Type B per Doctrine #37 PERMANENT, 4-anchor: rhino.fi + Gains Network + Veda + Gnosis Chain bridge) " +
+      "should NOT lose token_age points purely for repo staleness. Anti-false-penalty on long-audited deployers.",
+    anchor: "brain/Doctrine.md #37 PERMANENT (4 anchors as of 2026-05-27 night)",
+    data_source: "brain/Deployer-Crossref.md + audits-library/ + token_age + deployer_history flags",
+    evaluate: (_token, _ctx) => null, // stub — wire in when deployer-crossref data plumbed
+  },
+  {
+    id: "p4p1-dc-7-exclusion-canonical",
+    mode: "candidate-stub",
+    weight: 0,
+    description:
+      "EXCLUSION rule: prevents false-positive DC-7 paired-pipeline penalty when contract uses " +
+      "deterministic state derivation (Validating-Field = Consuming-Field via same canonical source). " +
+      "3-anchor PERMANENT: Cap C1 + Function FBTC H1 + Gearbox H2 (same-day promotion 2026-05-27). " +
+      "Without this, deterministic-derivation contracts get spurious DC-7 penalties.",
+    anchor: "brain/Patterns-Defense-Classes.md DC-7 EXCLUSION CANONICAL (3 anchors)",
+    data_source: "Contract source (Sourcify/Etherscan) — detect deterministic derivation patterns (epoch, nonce, roundId)",
+    evaluate: (_token, _ctx) => null, // stub — wire in when source-fetch plumbed
+  },
+  {
+    id: "p4p1-doctrine-38-pass-through-wrapper",
+    mode: "candidate-stub",
+    weight: 0,
+    description:
+      "STRUCTURAL EXCLUSION: pure pass-through *WithSig wrappers (EIP712 signed permits forwarded to " +
+      "protocol *WithSig endpoint with no local validated action) should NOT penalize the wrapper deployer — " +
+      "the signature binds all trust-relevant fields; protocol ecrecover enforces signer identity. " +
+      "1-anchor DeFi Saver (NEGATIVE worked example). Pending 2nd anchor for canonical promotion.",
+    anchor: "brain/Doctrine.md #38 NEW (DeFi Saver CANDIDATE-1 Gate 2 NEGATED at Phase 1)",
+    data_source: "Contract source bytecode hints (EIP712 + *WithSig signature)",
+    evaluate: (_token, _ctx) => null, // stub — wire in when source-fetch plumbed
+  },
+];
+
+function evaluateP4P1Candidates(token, ctx) {
+  const fired = [];
+  for (const rule of P4_P1_CANDIDATE_RULES) {
+    if (rule.mode !== "candidate-stub" && rule.mode !== "active") continue;
+    try {
+      const verdict = rule.evaluate(token, ctx);
+      if (verdict !== null && verdict !== undefined) {
+        fired.push({
+          name: rule.id,
+          score: 0, // test-mode: no scoring impact
+          max: 0,
+          category: "info",
+          detail: `[P4→P1 CANDIDATE, test-mode] ${rule.description.split(".")[0]}. Verdict: ${JSON.stringify(verdict).slice(0, 200)}`,
+          candidate_rule: true,
+          mode: rule.mode,
+        });
+      }
+    } catch (e) {
+      // stub-mode never throws; defensive only
+    }
+  }
+  return fired;
+}
+
 async function runScorerAgent({
   address,
   chain,
@@ -353,6 +425,20 @@ async function runScorerAgent({
           detail: `Tags: ${cmcInfo.tags.slice(0, 5).join(", ")}`,
         });
       }
+    }
+
+    // ═══════════════════════════════════════════════
+    // P4 → P1 CANDIDATE RULES (test-mode, inert — telemetry only)
+    // ═══════════════════════════════════════════════
+    const p4p1Fired = evaluateP4P1Candidates(
+      { address, chain, scannerData, safetyData, walletData, socialData },
+      { requestId, scores, details },
+    );
+    if (p4p1Fired.length > 0) {
+      factors.push(...p4p1Fired);
+      console.log(
+        `[${requestId}] 🧪 P4→P1 candidate rules fired (test-mode, no scoring impact): ${p4p1Fired.map((r) => r.name).join(", ")}`,
+      );
     }
 
     // ═══════════════════════════════════════════════
