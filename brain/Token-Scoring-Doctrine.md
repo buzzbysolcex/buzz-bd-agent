@@ -126,4 +126,24 @@ These triggers fire at Pillar 1 cron output. Pillar 4 receives the escalation as
 
 ---
 
-_Brain Token Scoring Doctrine | v1.0 | 2026-05-27 | 8 doctrines seeded. Maintenance: every Pillar 1 cron cycle that produces a notable outcome (rug catch / false positive / cross-pillar trigger) appends a worked example. Cross-references: `brain/Token-Rug-Patterns.md`, `brain/Deployer-Crossref.md`, `brain/Doctrine.md`, `BUZZ_RULES.md`._
+---
+
+## Doctrine T-4 cross-pillar clarification — Notification-hook tokens are NOT automatically penalized
+
+**Pillar:** P1 (token scoring) ← cross-pollination from P4 DISC-020 closure
+**Anchored:** 2026-05-28 — DISC-020 Filecoin #79987 CLOSED NOT-A-BUG productive closure
+
+**Rule:** When applying a Doctrine T-4 penalty derived from a Pillar 4 defense pattern, check whether the candidate token's "callback" / "notification hook" / "event listener" surface controls economic state OR is merely informational.
+
+- **Notification-hook tokens with INFORMATIONAL hooks** (events emitted for off-chain observers; return values logged but not consumed for authorization) → NO penalty. The hook is descriptive metadata, not an exploit primitive.
+- **Notification-hook tokens with AUTHORIZATION hooks** (callback return values consumed by transfer/mint/burn/credit logic; receiver-controlled state mutation) → apply Doctrine T-4 penalty per the matched P4 defense pattern.
+
+**Cross-reference:** Doctrine #39 CANDIDATE in `brain/Doctrine.md` (Notification Path ≠ Authorization Path) + DC-13 sub-pattern 5 in `brain/Patterns-Defense-Classes.md` (notification-callback-informational-only Phase 0 FORECLOSE gate).
+
+**Operational implication:** When the scoring engine flags a token for "has callback hook / notification mechanism", run a Phase 0 check on the hook's economic-outcome path before adding a penalty. If informational-only, no penalty applies even if the surface SHAPE matches a P4 attack-class pattern.
+
+**Anchor:** DISC-020 Filecoin FIP-0109 — the `notify` field shape matched a callback-attestation pattern, but the authorization path (`batch_claim_allocations` to verified registry actor) was separate; FIL+ economic outcome controlled by the authorization path independently. Same shape, opposite outcome.
+
+---
+
+_Brain Token Scoring Doctrine | v1.1 | 2026-05-28 | 8 doctrines + T-4 cross-pillar clarification (notification-vs-authorization-path check before applying P4-derived penalty). Cross-pillar entry from DISC-020 productive closure. Cross-references: `brain/Token-Rug-Patterns.md`, `brain/Deployer-Crossref.md`, `brain/Doctrine.md` Doctrine #39 CANDIDATE, `brain/Patterns-Defense-Classes.md` DC-13 sub-5, `BUZZ_RULES.md`._

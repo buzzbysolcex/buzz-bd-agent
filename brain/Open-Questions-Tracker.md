@@ -667,4 +667,24 @@ _Brain Open Questions Tracker | v1.7 | 2026-05-27 ~02:25 UTC | 41 questions (40 
 
 ---
 
-_Brain Open Questions Tracker | v1.8 | 2026-05-27 | 43 questions (41 P4 + 1 P2 + 1 P3; v1.8 four-pillar section organization added + pillar tag requirement, P1/CROSS sections seeded with placeholders pending first operational entries)_
+---
+
+## Q-CLOSED-P4 — Filecoin FIP-0109 notifee-self-confirmation: does self-notifying affect FIL+ crediting?
+
+**Pillar:** P4
+**Status:** CLOSED 2026-05-28 — answer NO (productive closure)
+**Source:** DISC-020 Filecoin Immunefi #79987 project rebuttal accepted
+
+**Question:** Can a miner-actor exploit FIP-0109 `notify_data_consumers` by registering a self-controlled `notifee_addr` to bypass FIL+ allocation crediting?
+
+**Answer:** No. The `notify` field is informational only. FIL+ allocations are validated independently via `batch_claim_allocations` to the verified registry actor — the registry validates the allocation regardless of who receives the notification. Self-notifying doesn't affect FIL+ because FIL+ flows through a different code path entirely.
+
+**Brain compounds anchored from closure:**
+- Doctrine #39 CANDIDATE NEW (Notification Path ≠ Authorization Path; needs 2nd anchor for canonical promotion)
+- DC-13 sub-pattern 5 NEW (notification-callback-informational-only Phase 0 FORECLOSE gate)
+
+**Reference:** `brain/Security-Research-Submission-Ledger.md` DISC-020 row + `brain/Doctrine.md` Doctrine #39 CANDIDATE entry + `brain/Patterns-Defense-Classes.md` DC-13 sub-pattern 5.
+
+---
+
+_Brain Open Questions Tracker | v1.9 | 2026-05-28 | 44 questions (42 P4 + 1 P2 + 1 P3; v1.9 closes Q Filecoin notifee-self-confirmation with productive answer + cross-references Doctrine #39 CANDIDATE)_

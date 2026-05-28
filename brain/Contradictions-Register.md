@@ -461,4 +461,30 @@ The three INFO entries together describe **three distinct drift axes** that Stan
 
 ---
 
-_Brain Contradictions Register | v1.10 | 2026-05-27 23:25 UTC | 21 entries (19 P4 + 1 P1 + 1 CROSS; v1.10 adds 3rd anchor to INFO #19 (Gearbox router-v3 scope drift) — now 4-axis: VERSION/CAP/KYC/SCOPE + PLATFORM + TIME + NOVELTY. Step 5.11 promoted MANDATORY validated by Cap C1 + Cap C3 + Function FBTC + Gearbox = 4 production deployments)_
+---
+
+## #22 CLARIFICATION — Doctrine #34 misapplication on DISC-020 Filecoin: target surface must be authorization path not notification path
+
+**Pillar:** P4
+**Status:** CLARIFICATION (not a contradiction; Doctrine #34 stands, was applied to wrong code path)
+**Anchored:** 2026-05-28 — DISC-020 Filecoin #79987 CLOSED NOT-A-BUG productive closure
+
+**Pattern observation:** Doctrine #34 (Post-Audit Composition Multiplier) was used to justify the DISC-020 Filecoin LEAD-1 finding. Doctrine #34 is NOT contradicted — the post-audit composition surface on Filecoin FIP-0109 IS a high-EV class. The misapplication was: we targeted the `notify` field (informational callback) as the composition surface, but the authorization-path (`verified_allocation_key + batch_claim_allocations` to verified registry actor) is the SEPARATE code path that controls economic outcomes.
+
+**Why this matters:**
+- Doctrine #34 sub-class b (audit-regression / compositional-interaction) requires identifying the TARGET SURFACE that controls the economic outcome
+- For notification-callback compositional surfaces, Step 5.11 Cross-Protocol Defense Enumeration must enumerate: does the notification's return value control the economic outcome, or is there a SEPARATE authorization path that validates independently?
+- If SEPARATE, the notification surface is NOT a Doctrine #34 sub-class b target — it's a DC-13 sub-pattern 5 FORECLOSE (notification-callback-informational-only)
+
+**Cross-references:**
+- Doctrine #39 CANDIDATE NEW (Notification Path ≠ Authorization Path) — companion doctrine ensuring future Doctrine #34 sub-b applications check this gate first
+- DC-13 sub-pattern 5 (notification-callback-informational-only Phase 0 FORECLOSE gate)
+- DISC-020 Filecoin closure productive — taught us the Phase 0 gate
+
+**Resolution:** Doctrine #34 stands as canonical. Add a pre-application check on the target surface: "Before applying Doctrine #34 sub-class b to a notification/callback surface, run Doctrine #39 Phase 0 gate (notification-vs-authorization-path separation). If informational-only, foreclose at Phase 0, do not pursue Doctrine #34 sub-b composition multiplier."
+
+**Status:** RESOLVED — clarification documented, Doctrine #34 unchanged, Doctrine #39 CANDIDATE files the new gate.
+
+---
+
+_Brain Contradictions Register | v1.11 | 2026-05-28 | 22 entries (20 P4 + 1 P1 + 1 CROSS; v1.11 adds #22 CLARIFICATION Doctrine #34 misapplication on DISC-020 — productive closure resolved by Doctrine #39 CANDIDATE Phase 0 gate, doctrine unchanged)_

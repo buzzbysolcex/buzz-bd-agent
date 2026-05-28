@@ -1,0 +1,8 @@
+- 2026-05-28 | doctrine | Doctrine #36 sub-rule #36c | a920ef24 | data/lane1/p4-p1-rule-proposals/2026-05-28/doctrine-doctrine-36-sub-rule-36c.md
+- 2026-05-28 | defense_class | DC-7 EXCLUSION | a920ef24 | data/lane1/p4-p1-rule-proposals/2026-05-28/defense_class-dc-7-exclusion.md
+- 2026-05-28 | candidate | CANDIDATE-A.4 NEW | f1846de1 | data/lane1/p4-p1-rule-proposals/2026-05-28/candidate-candidate-a.4-new.md
+- 2026-05-28 | doctrine | Doctrine #34 sub-class b Anchor #4 | 23ef7143 | data/lane1/p4-p1-rule-proposals/2026-05-28/doctrine-doctrine-34-sub-class-b-anchor-4.md
+- 2026-05-28 | doctrine | Doctrine #34 sub-class b anchor #3 | 527ed847 | data/lane1/p4-p1-rule-proposals/2026-05-28/doctrine-doctrine-34-sub-class-b-anchor-3.md
+- 2026-05-28 | doctrine | Doctrine #37 PERMANENT | 623d8e83 | data/lane1/p4-p1-rule-proposals/2026-05-28/doctrine-doctrine-37-permanent.md
+- 2026-05-28 | doctrine | Doctrine #36 PERMANENT | 7cd49cca | data/lane1/p4-p1-rule-proposals/2026-05-28/doctrine-doctrine-36-permanent.md
+- 2026-05-28 | doctrine | Doctrine #38 NEW | 9925d388 | data/lane1/p4-p1-rule-proposals/2026-05-28/doctrine-doctrine-38-new.md

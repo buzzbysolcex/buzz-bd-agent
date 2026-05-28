@@ -2720,6 +2720,36 @@ _Doctrine v3.6 | 2026-05-26 evening | Day 26 evening batch — Doctrine #29 v1.1
 
 _Doctrine v3.5 | 2026-05-26 afternoon | Day 26 afternoon batch — Doctrine #34 PROVISIONAL anchor 5 (Across V3 `ArbitraryEVMFlowExecutor`, OpenZeppelin single-firm-continuous-audit baseline; promotion gated on operator routing or competitor disclosure) + Doctrine #36 CANDIDATE NEW (Substrate-Coverage Gate, single-anchor dYdX V4 Cosmos-SDK Go, pending 2nd substrate-blind anchor for promotion). Authority: Ogie msg 7844 (Across proposals approved) + dYdX V4 P2 auto-approve (corpus-internal discipline improvement). Origins: 3 PRE-CLONE-HALT files (`hunts/2026-05-26-across-immunefi-gate1-PRE-CLONE-HALT.md`, `hunts/2026-05-26-dydx-v4-immunefi-gate1-PRE-CLONE-HALT.md`, `hunts/2026-05-26-lombard-immunefi-gate1-PRE-CLONE-HALT.md`)._
 
+## Doctrine #39 CANDIDATE — Notification Path ≠ Authorization Path (Phase 0 foreclose for notification-callback findings)
+
+**Status:** CANDIDATE (1-anchor; needs 2nd for canonical promotion)
+**Anchored:** 2026-05-28 — DISC-020 Filecoin #79987 CLOSED NOT-A-BUG (productive)
+
+**Statement:** Before escalating any notification-callback finding to Gate 2, verify which code path controls the **ECONOMIC OUTCOME** (token transfer, allocation credit, power update, reward distribution). If the notification surface is INFORMATIONAL-ONLY and a SEPARATE authorization path independently validates the action, the notification surface is **NOT exploitable for economic impact regardless of who controls the receiver**.
+
+**Phase 0 gate (mandatory before DC-13 sub-4 Gate 2 dispatch):**
+1. Identify the notification/callback function — what does it emit/send?
+2. Identify the economic-outcome code path — what mutates balances, allocations, or fund-flow state?
+3. Compare: does the consumer of the notification's return value control the economic outcome? Or does the notification consume the return only for informational/logging purposes?
+4. If the two paths are SEPARATE and the authorization path validates independently → FORECLOSE at Phase 0 (sub-5 of DC-13 fires; see Patterns-Defense-Classes.md DC-13 sub-pattern 5).
+
+**Canonical anchor (Filecoin FIP-0109):** Report DISC-020 conflated the `notify` field (informational callback to user-set notifee) with `verified_allocation_key + batch_claim_allocations` path (authoritative FIL+ crediting). Self-notifying doesn't affect FIL+ because FIL+ flows through batch_claim_allocations to the verified registry actor, validated independently. Project rebuttal accepted as correct — NOT a bug, productive closure.
+
+**Cross-references:**
+- DC-13 sub-pattern 4 (notification-callback-admits-attacker-controlled-notifee) — the suspicion-raising surface
+- DC-13 sub-pattern 5 (notification-callback-informational-only) — the structural negation
+- Doctrine #34 (post-audit composition multiplier) — still applies, but the TARGET SURFACE must be the authorization path not the notification path. DISC-020 was a Doctrine #34 misapplication on the wrong code path (NOT a Doctrine #34 contradiction).
+
+**Promotion path:** needs 2nd anchor on a different protocol where the same notification-vs-authorization separation negates a notification-callback finding. Candidates: any cross-actor messaging system where the message recipient is user-set but the economic outcome is signed/registry-validated independently (e.g., Cosmos IBC packet-receive vs registered-IBC-account verification, Solana CPI vs cross-program-invocation account-validation).
+
+**Time-cost saved per future anchor:** Phase 0 gate (~10 min source-read of authorization path) vs Gate 2 PoC (~2-3h Foundry + paste-ready). 12-18× cost ratio. Productive closure DISC-020 is itself the time-budget proof — instead of pursuing mediation, the rebuttal taught us the foreclosure gate.
+
+**Authority:** DISC-020 Filecoin #79987 project rebuttal (accepted, no mediation), 2026-05-28.
+
+---
+
+_Doctrine v3.9 | 2026-05-28 | Doctrine #39 CANDIDATE NEW (Notification Path ≠ Authorization Path) — DISC-020 Filecoin #79987 CLOSED NOT-A-BUG productive-closure anchored as 1st anchor; needs 2nd anchor for canonical promotion. Companion: DC-13 sub-pattern 5 NEW (notification-callback-informational-only Phase 0 FORECLOSE gate) in Patterns-Defense-Classes.md. Cross-pillar: P4→P1 cross-pollination — tokens with notification hooks or callback events are NOT automatically penalized; check whether the callback controls economic state or is just informational (Token-Scoring-Doctrine.md update queued). Authority: Filecoin project rebuttal accepted, productive closure on submission ledger DISC-020. Cumulative Phase 0/Phase 1 NEGATE savings now spans 6 anchors with the new DC-13 sub-5 gate added (Sky + Alchemix + DeFi Saver + Cap C1 + Cap C3 + DC-13 sub-5 Filecoin productive closure)._
+
 _Doctrine v3.4 | 2026-05-26 | Day 26 batch — Doctrine #34 enrichment (anchors 2/3/4 + vendor-cadence anti-anchor + Composition-Multiplier-Strength axis) + Doctrine #35 NEW (Trust-Boundary Surface Asymmetry, Stacks sBTC anchor). Authority: Ogie msg 7817 (Day 26 frozen-brain-proposals batch from 5-target hunting day: Raydium + Hydration + Stacks + Filecoin + JustLend + ALEX retrospective). Doctrine #34 now dual-to-quad anchored (Cap + Filecoin + Stacks + JustLend), threshold met for production-grade EV math; Raydium serves as vendor-cadence anti-anchor for discount calibration. Doctrine #35 is FIRST cross-function comparative-asymmetry doctrine; sits adjacent to DC-9 (per-function defense absence) on the same architecture-review pass._
 
 _Doctrine v3.3 | 2026-05-25 | Batch-approval of 19 brain proposals across 4 Gate 1 outcomes (14 from Cantina trio + DeXe per msg 7770 + 5 from Cap Sherlock per msg 7772). 12 brain knowledge edits landed via subagent (A-J + L + M); detector code patches K+N in main session; 5 Cap proposals C-Cap-1..5 landed in main session post-subagent (CANDIDATE-Q grow-only-allowlist as DC-5 sub-pattern + CANDIDATE-A LZ-OFT-default-DVN enrichment + Doctrine #34 Post-Audit Composition Multiplier + Standing-Intake Step 1 Sherlock-status preflight rule + Watchlist-Candidate-Crossmap Cap row). Authority: Ogie msg 7770 + 7772 (2026-05-25 18:22-18:31 UTC). Doctrine #34 is the FIRST post-audit-composition doctrine; sits beside Doctrine #27 (audit-saturation discount) as the composition layer of the same EV calculation._
