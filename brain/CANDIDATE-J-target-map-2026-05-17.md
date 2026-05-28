@@ -140,6 +140,10 @@ Synthetix v2x has scope split: v3 SNX/sUSD staking + v2x perpetual trading IN-sc
 
 Spark (Maker's Aave-V3-fork) inherits PoolConfigurator + ACL manager pattern from Aave V3. A clean worked example on Aave V3 PoolConfigurator likely propagates to Spark, Radiant, and other Aave-V3-forks (Amplifier Layer 8 propagation). Operator may want to queue a Spark rescan immediately after Aave V3 CANDIDATE-J pass/fail is recorded.
 
+**2026-05-28 UPDATE — DIRECTION INVERSION confirmed.** Spark Gate 1 ran first (DEDUP-FORECLOSURE-RECEIPT Doctrine #27 F MAXIMUM 3rd anchor); Aave V3 Gate 1 ran after (DEDUP-FORECLOSURE-RECEIPT HIGH-J 0.25× tier). Empirical cascade direction was REVERSED from prediction: **Spark→Aave V3→Aave-V3-forks** (Radiant/Sonne/Hashflow Lend), not Aave V3→Spark. Aave V3 Gate 1 inherited Spark's verified [INSPECTED defended] receipts to upgrade its own [ASSUMED defended] verdict. Future Aave-V3-fork intakes inherit Spark+Aave-V3 combined defense receipts, saving ~30-60 min per fork-target. Cross-pollination cascade is now SATURATED at the parent layer — fork hunts are short-circuit eligible per Doctrine #27 F MAXIMUM tier inheritance.
+
+Authority: Spark Gate 1 hunt `hunts/2026-05-28-spark-immunefi-gate1.md` + Aave V3 Gate 1 hunt `hunts/2026-05-28-aave-v3-immunefi-gate1.md`. R8: [INSPECTED] both verdicts source-confirmed; [ASSUMED] inheritance applies to all Aave-V3 architectural forks (Radiant/Sonne/Hashflow Lend) without per-fork re-verification.
+
 ### E5 — Compound Bravo Governor → Compound III Comet redirect
 
 The original Day 17 digest listed "Compound governance proposal-executor + emergency-pause" as target #5. WebFetch confirmed Compound's Governor Bravo only has in-module cancel (proposer + whitelistGuardian), NOT a sibling-pair MOM-equivalent. **The intended pattern actually lives in Compound III Comet** (`pause()` with governor + pauseGuardian dual-authority on shared supply/borrow state). This document re-routes the operator's attention to Comet as the actual CANDIDATE-J fit; the original Governor Bravo framing was architecturally imprecise.
