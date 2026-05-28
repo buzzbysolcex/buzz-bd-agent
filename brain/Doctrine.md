@@ -2764,3 +2764,49 @@ _Doctrine v3.10 | 2026-05-28 deep night | **Doctrine #37 NEW Sub-Type C CANDIDAT
 _Doctrine v3.4 | 2026-05-26 | Day 26 batch — Doctrine #34 enrichment (anchors 2/3/4 + vendor-cadence anti-anchor + Composition-Multiplier-Strength axis) + Doctrine #35 NEW (Trust-Boundary Surface Asymmetry, Stacks sBTC anchor). Authority: Ogie msg 7817 (Day 26 frozen-brain-proposals batch from 5-target hunting day: Raydium + Hydration + Stacks + Filecoin + JustLend + ALEX retrospective). Doctrine #34 now dual-to-quad anchored (Cap + Filecoin + Stacks + JustLend), threshold met for production-grade EV math; Raydium serves as vendor-cadence anti-anchor for discount calibration. Doctrine #35 is FIRST cross-function comparative-asymmetry doctrine; sits adjacent to DC-9 (per-function defense absence) on the same architecture-review pass._
 
 _Doctrine v3.3 | 2026-05-25 | Batch-approval of 19 brain proposals across 4 Gate 1 outcomes (14 from Cantina trio + DeXe per msg 7770 + 5 from Cap Sherlock per msg 7772). 12 brain knowledge edits landed via subagent (A-J + L + M); detector code patches K+N in main session; 5 Cap proposals C-Cap-1..5 landed in main session post-subagent (CANDIDATE-Q grow-only-allowlist as DC-5 sub-pattern + CANDIDATE-A LZ-OFT-default-DVN enrichment + Doctrine #34 Post-Audit Composition Multiplier + Standing-Intake Step 1 Sherlock-status preflight rule + Watchlist-Candidate-Crossmap Cap row). Authority: Ogie msg 7770 + 7772 (2026-05-25 18:22-18:31 UTC). Doctrine #34 is the FIRST post-audit-composition doctrine; sits beside Doctrine #27 (audit-saturation discount) as the composition layer of the same EV calculation._
+
+---
+
+## Doctrine #40 CANDIDATE — Conformance ≠ Exploit Narrative (added 2026-05-28 — Firedancer #77340 INSIGHT-tier FIRST CONFIRMED BOUNTY anchor, Ogie msg 7957)
+
+**Rule:** RFC / spec non-conformance findings (server accepts malformed input, parser leniency beyond spec, validation gaps) land at **INSIGHT tier**, NOT Low / Medium / High, **unless** the PoC demonstrates an END-TO-END attack chain producing concrete impact against a realistic deployment.
+
+**Definition of "exploit narrative" vs "conformance observation":**
+
+- _Conformance observation_: "Server accepts non-conformant HTTP framing" / "Parser accepts trailing bytes" / "Validation does not reject malformed denom" / "Path X allows input Y that RFC Z prohibits." Reads as a primitive. No demonstrated impact path.
+- _Exploit narrative_: "Attacker-controlled bytes reached the authenticated application via this proxy → this desync → here's the captured response demonstrating session-confusion / cache-poison / SSRF / privilege-grant against a realistic deployment." Reads as an end-to-end chain with impact.
+
+The gap between them is the gap between INSIGHT and Medium. **Primitive without chain = INSIGHT. Primitive + demonstrated chain + concrete impact = Medium or higher.**
+
+**Anchor — Firedancer #77340 (FIRST CONFIRMED BOUNTY 2026-05-28):**
+
+- 6 HTTP framing sub-findings on Firedancer's HTTP front-end (Solana validator RPC surface).
+- All `[INSPECTED]`-grade: source-read + spec-citation confirmed non-conformance.
+- NONE demonstrated end-to-end attack reaching the validated application behind the proxy.
+- Immunefi triager CLOSED for "no demonstrated chain to impact" (consistent with this doctrine before it was filed).
+- Project (Jump Crypto / Firedancer) REOPENED and accepted as INSIGHT tier — KYC complete, payout pending.
+
+**EV-model update (binding):**
+
+INSIGHT tier on audit-competition programs pays **flat / pool-share**, materially below Medium. Conformance-class findings are brain-compound-rich (yield doctrines + detector seeds) but revenue-light. Lane 5 target ranking MUST reweight:
+
+```
+P(finding) × cap × P(acc) × overlap × brain_multiplier × conformance_class_discount
+```
+
+Where `conformance_class_discount = 0.10× to 0.20×` when the target's primary attack surface is conformance-class (HTTP framing, parser leniency, RFC-validation gaps) and the hypothesis does NOT include a demonstrated end-to-end chain. Conformance-only Lane 5 targets de-prioritized below chain-demonstrating Medium-EV targets even when cap looks attractive.
+
+**Cross-references:**
+
+- Doctrine #29 v1.1 (MIN-Cap Defense) — both doctrines guard against over-investing in low-payout outcomes; Doctrine #29 on the EV side, Doctrine #40 on the severity-class side.
+- DC-13 sub-pattern 6 NEW (Gate-2 Phase 0 chain-to-impact gate) — operationalization of this doctrine; see Patterns-Defense-Classes.md.
+- Companion compound — _Two-Reviewer Pattern_ (below): on audit-competition programs (Immunefi + Cantina + Sherlock), a triager close is NOT final. The project gets the last word and can reopen / re-classify. Do NOT inquire about insight status post-close (Immunefi T&C prohibits status inquiries) but DO assume project may re-classify favorably.
+- Companion compound — _EV-Model Update_ (above): reweight Lane 5 targets immediately.
+
+**Promotion path:** needs 2nd anchor on a different conformance-class finding (HTTP / parser / spec gap) that landed at INSIGHT not Medium. Candidates: any future Sherlock / Cantina / Immunefi finding where the primitive is a parser bug without a demonstrated chain.
+
+**Authority:** Firedancer #77340 CONFIRMED INSIGHT 2026-05-28 (Ogie msg 7957, FIRST CONFIRMED BOUNTY). Lesson worth more than the payout — recalibrates EV across every future conformance-class target.
+
+---
+
+_Doctrine v3.11 | 2026-05-28 evening | **Doctrine #40 CANDIDATE NEW — Conformance ≠ Exploit Narrative** (Firedancer #77340 FIRST CONFIRMED BOUNTY anchor, INSIGHT tier). 4-part compound: (1) Doctrine #40 itself — conformance observations land INSIGHT not Medium without demonstrated end-to-end chain; (2) DC-13 sub-6 NEW Gate-2 Phase 0 chain-to-impact gate — for any HTTP / parser / RFC-conformance hypothesis, ask "Can I demonstrate the chain to impact, or only the primitive?" before investing Foundry / PoC time; if primitive-only → pre-classify INSIGHT EV not Medium EV; (3) Two-Reviewer pattern — on Immunefi / Cantina / Sherlock audit-competition programs, triager close is NOT final; project gets the last word and can re-classify; do NOT inquire about post-close insight status (Immunefi T&C); (4) EV-Model update — `conformance_class_discount = 0.10×-0.20×` factor multiplied into Lane 5 EV math when target surface is conformance-class and hypothesis lacks chain. Authority: Ogie msg 7957 (2026-05-28 evening, Firedancer KYC complete payout pending). The lesson is worth more than the payout — recalibrates EV across every future conformance-class target._
