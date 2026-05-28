@@ -95,7 +95,7 @@
 
 | Detector | Spec source | Build status | Sherlock-Heimdall fit |
 |---|---|---|---|
-| **#129 Cosmos SDK / Go coverage AST** | dYdX V4 PRE-CLONE-HALT, Open-Q #27 | NOT BUILT | **CRITICAL — must build to lift Doctrine #36 P-floor before Jun 15** |
+| **#129 Cosmos SDK / Go coverage AST** | dYdX V4 PRE-CLONE-HALT, Open-Q #27 | **LIVE v1.0 2026-05-28 deep night** (operator msg 7951) — `scripts/detectors/cosmos-sdk-go-ast/c129-cosmos-go-ast`. Smoke-tested against cosmos/cosmos-sdk@HEAD: 1690 files / 2.76s / is_cosmos_sdk=true / 15 signature ids (IMPORT, KEEPER, MSG, HANDLER, BEGIN, END, INVARIANT, PARAM-SET, PARAM-GET, CROSS-MODULE, BECH32, EVIDENCE, SLASH, GOV-PROPOSAL, CHECKPOINT, STATESYNC). **Doctrine #36 P-floor lift: PARTIAL** (surface map LIVE; deep semantic detectors #137 + #138 + #165 remain to build). | **Doctrine #36 P-floor lift PARTIAL** — Sherlock engagement EV math can now use substrate-aware P(finding) ≥ 0.05 floor + per-signature lens-fit multipliers, not substrate-blind floor. |
 | **#137 cross-module canonicalization mismatch** | dYdX V4 brain audit | NOT BUILT | **HIGH — fits Heimdall x/bank + x/staking + x/gov inter-module** |
 | **#138 no-overwrite-guard** | dYdX V4 brain audit | NOT BUILT | **HIGH — fits Heimdall checkpoint state updates** |
 | **#165 cosmos-bech32 address handling** | dYdX V4 Doctrine.md:900 | NOT BUILT | **MEDIUM — fits Heimdall validator-address canonicalization** |
