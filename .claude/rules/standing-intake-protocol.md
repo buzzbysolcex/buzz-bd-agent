@@ -83,6 +83,13 @@ Rank EV against current pipeline targets. Pipeline targets: open Gate 1s + queue
 3. **Bytecode-verify prep** (Veda + Wormhole lesson):
    - For each in-scope address, plan a `cast code` + `solc --standard-json` direct compile against the candidate source SHA
    - Defer execution until Gate 2 finding, but plan the verification command up-front
+3a. **SUBSTRATE-IDENTITY VERIFICATION (added 2026-05-28 deep night — FRAX V3 frxUSD H4 G2 substrate-confusion lesson, RECURRING-risk class)**:
+   - For multi-repo protocols where the named bounty surface spans both WRAPPER and TOKEN layers (LayerZero OFT / Wormhole NTT / Circle CCT / cross-chain bridge wrappers / token-distribution-layer separations), MANDATORY pre-Gate-2 check:
+     a. Name the EXACT repo path for the candidate finding (`owner/repo`)
+     b. Grep the repo for the attack-vector primitive (e.g., `permit|transferWithAuthorization|EIP3009|ERC1271|isValidSignature` for signature replay; `_authorizeUpgrade|UUPSUpgradeable` for upgrade attacks)
+     c. If grep returns ZERO matches, the attack-vector substrate is in a DIFFERENT repo — re-locate before invoking Gate 2 PoC
+   - **Anchor**: FRAX V3 frxUSD H4 hypothesis assumed `frax-oft-upgradeable` had EIP-712 / TransferWithAuthorization surfaces; live grep returned ZERO; the surfaces live in `frax-tokens` (FrxUSD3 token-layer). H4 wasted ~5min clone + ~25min source-read before substrate-confusion FORECLOSURE. 5-channel Step 0.5 caught it post-clone; this 3a check catches it pre-clone.
+   - **Cross-pollination targets**: any future LayerZero OFT / Wormhole NTT / CCT / Hyperlane Warp / similar wrapper-protocol Gate 1 → require 3a verification before Gate 2 dispatch on signature, upgrade, or access-control attack vectors.
 4. **Inventory**: LOC, modules, entry functions, paired-function targets
 5. **Apply ALL brain lenses from Step 2** — note candidate matches per file
 6. **5-Target Quality Checklist (0xTeam Attacker's Mindset, Ogie msg 7519 — 2026-05-22 permanent)** — every Gate 1 surface map MUST touch all 5 target-classes. If any are missing, the surface map is incomplete and the Gate 1 fails its quality check:
