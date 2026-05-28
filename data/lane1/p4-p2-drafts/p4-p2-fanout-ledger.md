@@ -1,0 +1,9 @@
+- 2026-05-28 | kiln | FORECLOSE | tweet+moltbook+outreach | promotion=True | 2026-05-27-kiln-immunefi-gate1.md
+- 2026-05-28 | veda | FORECLOSE | tweet+moltbook+outreach | promotion=True | 2026-05-27-veda-immunefi-gate1.md
+- 2026-05-28 | cap | FORECLOSE | tweet+outreach | promotion=False | 2026-05-27-cap-immunefi-gate1.md
+- 2026-05-28 | cap | NEGATE | tweet+moltbook+outreach | promotion=True | 2026-05-27-cap-c1-gate2-foreclosure.md
+- 2026-05-28 | cap | NEGATE | tweet+moltbook+outreach | promotion=True | 2026-05-27-cap-c3-gate2-foreclosure.md
+- 2026-05-28 | function-fbtc | FORECLOSE | tweet+moltbook+outreach | promotion=True | 2026-05-27-function-fbtc-immunefi-gate1.md
+- 2026-05-28 | onre | FORECLOSE | tweet+moltbook+outreach | promotion=True | 2026-05-27-onre-immunefi-DEDUP-FORECLOSURE.md
+- 2026-05-28 | gearbox | WATCHLIST | tweet+moltbook+outreach | promotion=True | 2026-05-27-gearbox-immunefi-gate1.md
+- 2026-05-28 | templar | WATCHLIST | tweet+moltbook+outreach | promotion=True | 2026-05-27-templar-immunefi-gate1.md

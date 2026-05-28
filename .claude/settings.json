@@ -101,6 +101,10 @@
           {
             "type": "command",
             "command": "/home/claude-code/buzz-workspace/.claude/hooks/hunt-auto-index.sh 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "/home/claude-code/buzz-workspace/.claude/hooks/p4-to-p2-fanout.sh 2>/dev/null || true"
           }
         ]
       }
