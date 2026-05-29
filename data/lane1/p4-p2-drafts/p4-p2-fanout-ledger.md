@@ -67,3 +67,7 @@
 - 2026-05-29 | wormhole-ntt-hyp-e | NEGATE | (skipped-ineligible) | promotion=True | 2026-05-29-wormhole-ntt-hyp-e-gate2-foreclosure.md
 - 2026-05-29 | gearbox | WATCHLIST | tweet+moltbook+outreach | promotion=True | 2026-05-27-gearbox-immunefi-gate1.md
 - 2026-05-29 | wormhole-ntt-hyp-c | CONFIRM | tweet | promotion=False | 2026-05-29-wormhole-ntt-hyp-c-gate2-paste-ready.md
+- 2026-05-29 | lido | NEGATE | (skipped-ineligible) | promotion=True | 2026-05-29-lido-immunefi-gate1.md
+- 2026-05-29 | lido-v3-nonoracle | NEGATE | (skipped-ineligible) | promotion=False | 2026-05-29-lido-v3-nonoracle-gate1.md
+- 2026-05-29 | renzo | WATCHLIST | tweet+outreach | promotion=False | 2026-05-29-renzo-immunefi-gate1.md
+- 2026-05-29 | dexalot-cd-removeauction | NEGATE | (private-suppressed) | promotion=False | 2026-05-29-dexalot-cd-removeauction-gate1.md
