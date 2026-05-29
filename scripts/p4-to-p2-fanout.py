@@ -266,12 +266,19 @@ def fan_out_one(hunt_path: Path, notify_war_room: bool = False) -> dict:
     moltbook_path = None
     outreach_path = None
 
+    # PRIVATE-PROGRAM SUPPRESSION (Ogie msg 8019, 2026-05-29): private platforms
+    # (HackenProof / Cantina-private / direct) require PLATFORM-ONLY disclosure —
+    # generate ZERO public content drafts. A hunt file self-marks private via the
+    # sentinel below; the hunt is still ledgered (processed) but emits no draft.
+    PRIVATE_MARKERS = ("P4P2-PRIVATE-SUPPRESS", "PLATFORM-ONLY DISCLOSURE")
+    is_private = any(m in text for m in PRIVATE_MARKERS)
+
     # CONTENT-ELIGIBILITY FILTER (Ogie msg 7997, 2026-05-29): only hunts that
     # produced a real, postable result get content drafts. FORECLOSE / NEGATE /
     # DEDUP / KILL / UNKNOWN = no public finding → NO drafts (still ledgered as
     # processed below, so the backstop never reprocesses them).
     GENERATE_VERDICTS = ("PROCEED", "WATCHLIST", "CONFIRM")
-    if verdict in GENERATE_VERDICTS:
+    if verdict in GENERATE_VERDICTS and not is_private:
         out_dir.mkdir(parents=True, exist_ok=True)
 
         tweet_path = out_dir / f"{base}-tweet.md"
@@ -304,7 +311,7 @@ def fan_out_one(hunt_path: Path, notify_war_room: bool = False) -> dict:
         # Base the type summary on what was ACTUALLY written (not hardcoded) —
         # skipped (content-ineligible) hunts log "(skipped)" but are still
         # ledgered as processed.
-        types_summary = "+".join(p.stem.split("-")[-1] for p in written) or "(skipped-ineligible)"
+        types_summary = "+".join(p.stem.split("-")[-1] for p in written) or ("(private-suppressed)" if is_private else "(skipped-ineligible)")
         f.write(
             f"- {today} | {target} | {verdict} | "
             f"{types_summary} | promotion={promotion} | {hunt_path.name}\n"

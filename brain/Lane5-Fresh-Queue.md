@@ -40,4 +40,27 @@ All rows: verify scope-freshness / cap / KYC / clauses / **audit-count** at Gate
 
 ---
 
-_Lane5-Fresh-Queue | v1.0 | 2026-05-29 (Ogie msg 8011 — fresh-weighted re-sort; replaces cap-sorted blue-chip walk). Companion: Doctrine #42 (Hunt Freshness Not Cap). Verify [EST] rows at dispatch._
+---
+
+## 4-Target HackenProof/Cantina Batch — Gate-1 EV Triage (2026-05-29, Ogie msg 8019)
+
+**PRIVATE platforms** (HackenProof / Cantina) — PLATFORM-ONLY disclosure, P4→P2 fanout SUPPRESSED (sentinel-gated). **RUNNABLE [EXECUTED] PoC MANDATORY** (no green PoC = no submission — HackenProof rejects AI-no-PoC). $5-20/sub. Parallel to Hyp-C (no 1/24h conflict). KYC likely for payout (operator step). Ranked by Doctrine #42 freshness **× PoC-feasibility** (the [EXECUTED]-only constraint makes PoC-feasibility a GATE, not a multiplier), NOT cap.
+
+| Rank | Target | Platform | Cap | Fresh surface | Substrate-fit | PoC-feasibility | Audit/subs | EV ≈ p·W−(1−p)L |
+|---|---|---|---|---|---|---|---|---|
+| **1** | **Dexalot — `cd/removeAuction` DIFF vs main** | HackenProof | $50-100K Crit / $20-30K High | **HIGH — removal-refactor branch (net-new, un-audited); hunt the DIFF, NOT the 532-sub core** | EVM Solidity (Pattern A-J + DC-7 + #43 CLOB) **HIGH** | **HIGH (pure Solidity, local Foundry)** | $0 paid / 532 subs ($5/sub) | p≈0.12 · W $75K · **P(acc)≈0.25 ($0-paid haircut)** − small-L ≈ **~$2.2K** |
+| **2** | **Hyperbridge — `solidity-merkle-trees`** | HackenProof | $30-50K Crit | MED — fresh-ish bridge proof-verification | EVM Solidity (CANDIDATE-A bridge, KelpDAO/Wormhole priors) **HIGH** for the Solidity side; Rust runtime = **LOW-fit (skip)** | **HIGH (pure Solidity merkle verify)** | $5/sub | p≈0.08 · W $40K · P(acc) 0.4 − L ≈ **~$1.3K** |
+| **3** | **Ventuals — vHYPE LST** | Cantina | $1M Crit / $20K High | **HIGH — fresh 2025 Hyperliquid LST, audit-LIGHT** | HyperEVM (Pattern A-J + CANDIDATE-I/J share-accounting) | **MED — HyperEVM precompile RISK: a HYPE-staking-precompile bug can't be locally Foundry-PoC'd → fails [EXECUTED]; only pure share-math findings PoC-able** | $20 deposit, ARCHITECTURE.md | p≈0.10 · W $100K · P(acc) 0.4 = ~$4K NOMINAL, **but PoC-feasibility-gated → ~$2K realizable** |
+| **4** | **OKX Labs** | Cantina | $1M | **LOW — vague scope ("OKX-deployed mainnet"), no fresh-surface signal** | EVM but unscoped | low (vague scope = high surface-map L) | **495 subs (Doctrine #27 J ≥100 → auto-foreclosure-receipt), big-exchange F-MAXIMUM**, KYC + $10 deposit | p≈0.02 · W $1M · P(acc) 0.4 − high-L ≈ **CAP-TRAP, deprioritize** |
+
+**Ogie hypothesis (Dexalot-DIFF > Hyperbridge-merkle > Ventuals > OKX): CONFIRMED, with refinements:**
+- **#1 Dexalot-DIFF** — driven by DIFF-freshness × pure-Solidity PoC-feasibility (the [EXECUTED] gate), NOT the cap. ⚠️ FLAG: **$0-paid / 532-subs** → P(acc) haircut to ~0.25 (realizable-W risk); the DIFF avoids the core's 532-sub saturation but the payer-history is real. Doctrine #43 applies directly (CLOB DEX — run the QC gates on any per-step/slippage pattern).
+- **#3 Ventuals** has the HIGHEST *nominal* p·W ($1M cap + fresh + audit-light + Cantina-pays), but the **RUNNABLE-PoC-mandatory constraint drops it to #3**: HyperEVM staking-precompile findings can't reach [EXECUTED] on a local fork (only pure share-math can). If a pure-share-math candidate surfaces, Ventuals jumps.
+- **#4 OKX** — CONFIRM deprioritize: cap-trap (max cap × 495-sub saturation × vague scope × big-exchange F-MAXIMUM = predictable foreclose, Doctrine #42 + #27 J).
+- All: R-1 in-scope clarity — exclude front-run-only / theoretical-no-PoC / imported-contracts / gas-best-practice (do NOT hunt those).
+
+**STEP 2 target = #1 Dexalot `cd/removeAuction` DIFF.**
+
+---
+
+_Lane5-Fresh-Queue | v1.1 | 2026-05-29 (Ogie msg 8011 fresh-weighted re-sort + msg 8019 4-target HackenProof/Cantina batch EV triage). Companion: Doctrine #42 (Hunt Freshness Not Cap) + #43 (Aggregate-Bound). Verify [EST] rows at dispatch._
