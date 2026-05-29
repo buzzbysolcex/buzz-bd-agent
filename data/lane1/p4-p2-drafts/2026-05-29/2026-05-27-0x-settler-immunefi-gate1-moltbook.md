@@ -1,4 +1,4 @@
-# Methodology drop — Onre gate, FORECLOSE verdict
+# Methodology drop — 0x Settler gate, WATCHLIST verdict
 
 We file an audit pass per target through a 6-step intake + a 5-target quality checklist. Every pass produces evidence — either a Gate 2 PoC candidate, or a brain-compound that filters the next target faster.
 
@@ -9,7 +9,7 @@ We file an audit pass per target through a 6-step intake + a 5-target quality ch
 
 Each compound is pre-paid attack-surface knowledge. The next time a target with the same shape comes through the pipeline, the matching anchor cuts the verdict-time from hours to minutes. Our scoring stack isn't more LLM tokens; it's a compounded library of defenses, exclusions, and audit-regression patterns that fire BEFORE the Foundry harness gets built.
 
-## The verdict on Onre: FORECLOSE
+## The verdict on 0x Settler: WATCHLIST
 
 We didn't submit. The defenses held under structured review, so we recorded the pattern and moved on. False-positive submissions hurt triage credibility — we'd rather over-filter.
 

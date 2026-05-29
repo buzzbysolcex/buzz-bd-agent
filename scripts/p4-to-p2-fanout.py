@@ -158,7 +158,14 @@ def render_tweet(target: str, verdict: str, top_finding: str | None, compounds: 
     display = short_target_for_audience(target)
     leading_compound = compounds[0] if compounds else None
 
-    if verdict == "PROCEED":
+    if verdict == "CONFIRM":
+        body = (
+            f"🐝 Confirmed finding on {display} — PoC verified, paste-ready.\n"
+            f"Under operator review for responsible submission.\n"
+            f"Methodology now; specifics post-disclosure.\n"
+            f"shield.buzzbd.ai/audit\n#BugBounty #HonestScoring"
+        )
+    elif verdict == "PROCEED":
         body = (
             f"🐝 Gate cleared on {display} — proceeding to PoC verification.\n"
             f"Methodology not bug details. Findings disclosed post-triage.\n"
@@ -239,32 +246,49 @@ def fan_out_one(hunt_path: Path, notify_war_room: bool = False) -> dict:
     text = hunt_path.read_text(errors="replace")
     target = extract_target(hunt_path)
     verdict = extract_verdict(text)
+    # CONFIRM override (Ogie msg 7997): a "*-paste-ready.md" FILE is an
+    # unambiguous confirmed, PoC-verified finding — use the FILENAME signal
+    # ONLY. Text-based signals ("3/3 tests PASS", "paste-ready", "CONFIRM")
+    # are too noisy: foreclosure files cross-reference confirmed siblings and
+    # were mislabeled CONFIRM (regression caught + fixed 2026-05-29). Filename
+    # is precise. Also fixes the prior UNKNOWN on the Hyp-C paste-ready.
+    if "paste-ready" in hunt_path.name.lower():
+        verdict = "CONFIRM"
     compounds = extract_brain_compounds(text)
     top_finding = extract_top_finding(text)
     promotion = has_promotion_trigger(text)
 
     today = datetime.datetime.utcnow().strftime("%Y-%m-%d")
     out_dir = OUT_ROOT / today
-    out_dir.mkdir(parents=True, exist_ok=True)
 
     base = hunt_path.stem
     written = []
-
-    tweet_path = out_dir / f"{base}-tweet.md"
-    tweet_path.write_text(render_tweet(target, verdict, top_finding, compounds))
-    written.append(tweet_path)
-
     moltbook_path = None
-    if promotion and verdict in ("PROCEED", "FORECLOSE", "NEGATE", "WATCHLIST", "DEDUP", "KILL"):
-        moltbook_path = out_dir / f"{base}-moltbook.md"
-        moltbook_path.write_text(render_moltbook(target, verdict, compounds, top_finding))
-        written.append(moltbook_path)
-
     outreach_path = None
-    if verdict in ("DEDUP", "FORECLOSE", "NEGATE", "WATCHLIST"):
-        outreach_path = out_dir / f"{base}-outreach.md"
-        outreach_path.write_text(render_outreach(target, verdict, compounds, top_finding))
-        written.append(outreach_path)
+
+    # CONTENT-ELIGIBILITY FILTER (Ogie msg 7997, 2026-05-29): only hunts that
+    # produced a real, postable result get content drafts. FORECLOSE / NEGATE /
+    # DEDUP / KILL / UNKNOWN = no public finding → NO drafts (still ledgered as
+    # processed below, so the backstop never reprocesses them).
+    GENERATE_VERDICTS = ("PROCEED", "WATCHLIST", "CONFIRM")
+    if verdict in GENERATE_VERDICTS:
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        tweet_path = out_dir / f"{base}-tweet.md"
+        tweet_path.write_text(render_tweet(target, verdict, top_finding, compounds))
+        written.append(tweet_path)
+
+        if promotion:
+            moltbook_path = out_dir / f"{base}-moltbook.md"
+            moltbook_path.write_text(render_moltbook(target, verdict, compounds, top_finding))
+            written.append(moltbook_path)
+
+        # Outreach only for WATCHLIST (closed-but-tracked). CONFIRM / PROCEED
+        # are pre-disclosure — no proof-point until the finding is public.
+        if verdict == "WATCHLIST":
+            outreach_path = out_dir / f"{base}-outreach.md"
+            outreach_path.write_text(render_outreach(target, verdict, compounds, top_finding))
+            written.append(outreach_path)
 
     hunt_abs = hunt_path.resolve()
     summary = {
@@ -277,13 +301,10 @@ def fan_out_one(hunt_path: Path, notify_war_room: bool = False) -> dict:
 
     OUT_ROOT.mkdir(parents=True, exist_ok=True)
     with open(LEDGER, "a") as f:
-        types_summary = "+".join(
-            t for t in [
-                "tweet",
-                "moltbook" if moltbook_path else "",
-                "outreach" if outreach_path else "",
-            ] if t
-        )
+        # Base the type summary on what was ACTUALLY written (not hardcoded) —
+        # skipped (content-ineligible) hunts log "(skipped)" but are still
+        # ledgered as processed.
+        types_summary = "+".join(p.stem.split("-")[-1] for p in written) or "(skipped-ineligible)"
         f.write(
             f"- {today} | {target} | {verdict} | "
             f"{types_summary} | promotion={promotion} | {hunt_path.name}\n"

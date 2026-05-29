@@ -1,10 +1,10 @@
 **Outreach proof-point — for HSaaS prospect emails**
 
-Subject hook: "How we filtered [false-positive class] on Hyperlane Hyp 1 before it hit your inbox"
+Subject hook: "How we filtered [false-positive class] on Fluxfinance before it hit your inbox"
 
 Body inline:
 
-> Our internal audit pipeline ran a 10-layer pass on Hyperlane Hyp 1 today. Verdict: FORECLOSE. We didn't ship a submission. Here's why:
+> Our internal audit pipeline ran a 10-layer pass on Fluxfinance today. Verdict: WATCHLIST. We didn't ship a submission. Here's why:
 >
 > Multi-anchor brain-stack analysis showed the surface was already defended at the canonical anchor level.
 >

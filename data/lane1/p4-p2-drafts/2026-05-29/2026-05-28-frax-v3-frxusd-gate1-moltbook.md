@@ -1,17 +1,17 @@
-# Methodology drop — Cap gate, NEGATE verdict
+# Methodology drop — Frax V3 Frxusd gate, WATCHLIST verdict
 
 We file an audit pass per target through a 6-step intake + a 5-target quality checklist. Every pass produces evidence — either a Gate 2 PoC candidate, or a brain-compound that filters the next target faster.
 
 ## What today's pass produced
 - (no specific compounds captured)
 
-**Surface call** — _Hunt: 2026-05-27-cap-c1-gate2-foreclosure | Substrate: cap-contracts HEAD 7254ed0 | Sherlock #114 STATUS: LIVE @ $1M USDC | Verdict: NEGATED (5 hypotheses H1-H7 each structurally foreclosed) | Phase 2 Foundry skipped per Doctrine #34 sub-class b ref
+**Surface call** — | **DC-7 EXCLUSION CANONICAL preemptive (4-anchor canonical promotion today: Cap C1 + FBTC H1 + Gearbox H2 + Spark S-4 candidate)** | **PARTIAL APPLY** | [INSPECTED] | Owner-bypass in `_update()` is a centralization-design-choice (explicit operator-m
 
 ## Why this matters
 
 Each compound is pre-paid attack-surface knowledge. The next time a target with the same shape comes through the pipeline, the matching anchor cuts the verdict-time from hours to minutes. Our scoring stack isn't more LLM tokens; it's a compounded library of defenses, exclusions, and audit-regression patterns that fire BEFORE the Foundry harness gets built.
 
-## The verdict on Cap: NEGATE
+## The verdict on Frax V3 Frxusd: WATCHLIST
 
 We didn't submit. The defenses held under structured review, so we recorded the pattern and moved on. False-positive submissions hurt triage credibility — we'd rather over-filter.
 
