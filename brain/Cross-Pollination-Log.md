@@ -164,4 +164,20 @@ Sunday weekly synthesis includes a CROSS-POLLINATION section per `Weekly-Synthes
 
 ---
 
+## Section 11 — P3 (corpus / ground-truth) → P4 (detector) wire — FIRST LIT INSTANCE (Day 29, 2026-05-29)
+
+**The dark wire from the 4-Pillar Calibration (`brain/4-Pillar-Calibration-2026-05-29.md`):** P3→P4 was diagnosed as ARMED-NOT-FIRING — corpus/ground-truth accumulated but never converted into a P4 detector. This is the **proof-of-concept instance that lights it.**
+
+**Event chain:**
+1. **P3 ground-truth intake** — Ogie surfaced Zebra GHSA-4m69-67m6-prqp (a DISCLOSED, PATCHED High-sev advisory; fixed zebrad 4.4.2 / zebra-state 7.0.0). Not a hunt target (no bounty for a public patched bug) — ingested purely as a reusable ground-truth pattern seed.
+2. **P4 detector compound** — extracted two primitives → **Detector Seed #166 (Cache-Before-Validate-No-Cleanup, CWE-459/460)** + **Doctrine #44 (Identity-vs-Content Binding Gap)**. Substrate-agnostic (EVM/Solana/Cosmos-Go). Standing-Intake Step 5.12 checklist + Go-AST build-candidate.
+3. **P4 sibling-hunt** — #166 + #44 checklist run against the live fresh queue + bridge/relay targets where dedup caches are core (Hyperbridge #2 first: both merkle binding-gap + cache-before-validate). The patched Zebra bug → an unpatched-sibling search across in-scope programs.
+
+**Why this is the wire (not just a compound):** the value did not stop at "filed a doctrine." A patched public advisory (zero direct EV) was converted into a detector + checklist that now drives ACTIVE hunting on LIVE bounty targets — ground-truth → detector → revenue-eligible sibling. That is the P3→P4 mechanism the calibration said was missing. Authority: Ogie msg 8021 (2026-05-29).
+
+**Open Question (file under Open-Questions-Tracker):** does the sibling-scan convert (Hyperbridge or an IBC target yields a live unpatched #166/#44 instance)? If yes → the wire is not just lit but REVENUE-positive (first P3→P4→bounty trace). Tracking.
+
+---
+
+_Brain Cross-Pollination Log | v1.3 | 2026-05-29 | **Section 11 — first lit P3→P4 (ground-truth→detector) wire instance** (Zebra GHSA-4m69-67m6-prqp → Detector #166 + Doctrine #44 → Hyperbridge sibling-hunt). Converts the calibration's diagnosed dark wire from ARMED to FIRING. Ogie msg 8021._
 _Brain Cross-Pollination Log | v1.2 | 2026-05-27 evening | Section 10 adds Day-27 Step 0.5 reliability validation (Paxos T+3 + Kiln T+3 + Veda T+5). Three same-day demonstrations. Compound-engine positive feedback loop empirically confirmed._
