@@ -59,8 +59,29 @@ All rows: verify scope-freshness / cap / KYC / clauses / **audit-count** at Gate
 - **#4 OKX** — CONFIRM deprioritize: cap-trap (max cap × 495-sub saturation × vague scope × big-exchange F-MAXIMUM = predictable foreclose, Doctrine #42 + #27 J).
 - All: R-1 in-scope clarity — exclude front-run-only / theoretical-no-PoC / imported-contracts / gas-best-practice (do NOT hunt those).
 
-**STEP 2 target = #1 Dexalot `cd/removeAuction` DIFF.**
+**STEP 2 target = #1 Dexalot `cd/removeAuction` DIFF.** → DONE: NEGATE/PARK. Hyperbridge #2 → NEGATE/CLEAN. Ventuals #3 → deferred. OKX #4 → dropped (cap-trap).
 
 ---
 
-_Lane5-Fresh-Queue | v1.1 | 2026-05-29 (Ogie msg 8011 fresh-weighted re-sort + msg 8019 4-target HackenProof/Cantina batch EV triage). Companion: Doctrine #42 (Hunt Freshness Not Cap) + #43 (Aggregate-Bound). Verify [EST] rows at dispatch._
+## REFRESHED QUEUE — PoC-FEASIBILITY PRIMARY (2026-05-29, Ogie msg 8023)
+
+**Re-rank key: realizable-EV = p × W × P(PoC-able) × P(acc)** — NOT nominal cap. The funnel that CONVERTS is pure-logic-PoC-able. P(PoC-able) HIGH for pure-math / in-contract-state / pure-state-machine / Go-state-logic (local-forkable, Foundry/Anchor/Go-unittest); LOW (→ DROP) for precompile / oracle-manipulation / cross-chain-relay / external-state. P(acc) discounts $0-paid + audit-saturated payers. Secondary: audit-light (≤2 OR net-new module) + fresh (≤1-3mo) + R-1 clarity + cap-floor + substrate-fit (EVM A-J / Solana DC-8 / Cosmos-Go #129/#137/#138/#165/#166). WebFetch-verified caps tagged [VER]; others [EST].
+
+| # | Target | Platform / Cap | PoC-feasibility | Surface age / audit-count | Substrate-fit | Realizable-EV | Notes |
+|---|--------|----------------|-----------------|---------------------------|---------------|---------------|-------|
+| **1** | **Babylon — Cosmos-Go chain** (epoching / checkpointing / finality-provider / BTC-timestamping consensus modules) | Immunefi **$1M crit** [VER], 10%-of-funds, KYC likely | **HIGH** (pure Cosmos-SDK state-logic → Go-unittest PoC; BTC-light-client parts lower) | mainnet 2024-25 fresh; moderate audits | **Cosmos-Go — DIRECT #129/#137/#138/#166 arsenal fit** + my Heimdall tooling runs as-is | **~$48K** | ⭐ funnel-converter: arsenal BUILT, pure-state, fresh, less EVM-saturated. Doubles as June-Heimdall dry-run. **NEW #1.** |
+| **2** | **Symbiotic** (vault / delegator / slasher / burner / epoch) | Immunefi **$500K crit** [VER], 10%-of-funds | **HIGH** (slashing math + epoch accounting = pure state-machine, forkable) | 2024-25, modules iterating; moderate audits | EVM CANDIDATE-J/D + DC-9 | **~$21K** | confirm not already Gate-1'd (BuzzShield regression-tested it 2026-05-09, not a hunt). |
+| **3** | **Morpho Vaults V2** (curator / allocator) | Cantina ~$2.5M [EST] | **HIGH** (share-accounting + role logic, pure-EVM) | 2025-26 new standard | CANDIDATE-I + Pattern-A (distinct from V1/MetaMorpho = DISC-018) | **~$11K** | net-new curator/allocator surface. |
+| **4** | **Euler v2** (EVC / EVK / EPO) | Cantina **$7.5M crit / $5M High / $200K High-FLOOR** [VER], 10%-of-impact | **HIGH** (modular lending share + operator/sub-account logic, forkable) | 2024-25; **audit-HEAVY (low p)** | CANDIDATE-I + DC-9 + operator-auth | **~$9K** but **$200K High-floor = high-variance** | research-first: low-p but the $200K min-High floor means any landed finding pays huge. |
+| **5** | **EtherFi recent** (Liquid vaults / Cash) | Immunefi ~$500K-$1M [EST] | **MED-HIGH** (vault accounting forkable; Cash card flows external) | 2025 modules | CANDIDATE-I share-accounting | **~$9.6K** | hunt the pure-vault sliver, not the card rails. |
+| **6** | **Usual / Falcon** (fresh yield-stablecoins — **NOT Resolv**) | Immunefi $100-500K [EST] | **HIGH** (collateral/share pure-math) | 2025 launches, audit-LIGHT (high p) | CANDIDATE-I + Pattern-E | **~$10K** | floor-clearing high-p. ⚠️ **Resolv DROPPED** (14 audits/5 firms; 2026-03 hack was AWS-cred not code — saturated, Doctrine #42-refined). |
+| **7** | **Ethena recent** (USDtb / minting-converter) | Immunefi ~$1M [EST] | **HIGH** (mint/convert share-math) | 2025-26 fresh modules | CANDIDATE-I/J (cooldown already hunted #79589) | **~$7.6K** | USDtb + converter are fresh un-hunted. |
+| **8** | **Solana restaking** (Jito / Sanctum / Kamino recent modules) | Immunefi varies [EST] | **MED** (Anchor PoC = more setup) | 2024-25 fresh | **Solana DC-8 Anchor-signer + CANDIDATE-G** | **~$6K** | verify bounty exists; less EVM-lens-saturated. |
+
+**DROPPED / DEFERRED:** Ventuals (PoC-gated precompile, ~$2K realizable — bottom; revive only if a pure-share-math sliver lights up at Gate-1) · OKX (cap-trap, 495 subs) · Lido V3 (foreclosed) · Aave Umbrella (audit-heavy-fresh, demote) · Resolv (14-audit saturated) · Dexalot/Hyperbridge (hunted, NEGATE/CLEAN).
+
+**NEXT ACTION = #1 Babylon Cosmos-Go.** Highest realizable-EV (~$48K) AND the only target where the detector arsenal I just built runs as-is. Start: clone `babylonlabs-io/babylon` (Cosmos-Go), run #129 → #137/#138/#166 (scope to keeper/handler files via `--from-c129 --scope-files-only`), source-read the dedup/epoch/checkpoint hits. Pure-state modules first (epoching, checkpointing, finality) — defer BTC-light-client (lower PoC-feasibility).
+
+---
+
+_Lane5-Fresh-Queue | v1.2 | 2026-05-29 (Ogie msg 8023 PoC-feasibility-primary re-rank — realizable-EV = p×W×P(PoC-able)×P(acc); Babylon Cosmos-Go = NEW #1 arsenal-fit funnel-converter; Resolv dropped 14-audit-saturated; Ventuals deferred precompile-gated). WebFetch-verified caps: Euler $7.5M/$5M-High/$200K-floor, Symbiotic $500K, Babylon $1M, Resolv $500K. Supersedes v1.1 cap/4-target sections. Companion: Doctrine #42 + #42-refined + #43. Verify [EST] rows at dispatch._
