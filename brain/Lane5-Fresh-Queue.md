@@ -28,10 +28,15 @@
 
 ---
 
-## NEXT ACTION
-**Hunt #1 = Lido V3 stVaults non-oracle modules** (PredepositGuarantee + OperatorGrid first — novel mechanisms, highest p). I already have the V3 vaults dir + contract layout from the Lido core Gate 1 — continue the source-read on the fresh non-oracle surface (Pattern-A access-control + DC-9 admin/share-limit + accounting), applying the direction-error rule + Doctrine #41. Clone only if a candidate survives.
+## NEXT ACTION (updated post-#1-hunt, 2026-05-29)
 
-Rows 2-8 [EST]: verify scope-freshness/cap/KYC/clauses at Gate-1 Step-1 before committing (INFO #19). The point is the SORT principle (freshness > cap), refined as hunts land.
+**#1 Lido V3 non-oracle = FORECLOSED** (`hunts/2026-05-29-lido-v3-nonoracle-gate1.md`): OperatorGrid DC-7-compliant + uint96-truncation NEGATED-on-direction-trace (4th direction-error); PredepositGuarantee 6/6 paths guarded. **Lesson: fresh ≠ unaudited** — Lido V3 is fresh (~1mo) but had a heavy pre-launch audit cohort → predictable foreclose.
+
+**RE-RANK (Doctrine #42 refinement): weight fresh-AND-audit-LIGHT, not just fresh.** Demote audit-heavy-fresh (Lido V3 ✗, Aave Umbrella — big pre-launch audits); promote audit-LIGHT-fresh:
+- **New top candidates (verify audit-COUNT + bounty + cap at dispatch):** row 7 **Resolv / Falcon / Usual** (fresh 2025 yield-stablecoins, likely 0-2 audits = high p, lower cap) · row 5 **fresh Solana** (Jito/Sanctum/Kamino recent modules — DC-8 Anchor fit, new modules often audit-light) · row 3 **Symbiotic** (fresh restaking, slasher/burner modules iterating).
+- **Dispatch criterion (refined):** ≤2 audits AND deploy/upgrade ≤1-3mo AND scope-fresh AND cap-floor AND low-friction. A fresh-but-20-audit module is NOT a hunt target.
+
+All rows: verify scope-freshness / cap / KYC / clauses / **audit-count** at Gate-1 Step-1 (INFO #19 + Doctrine #42 refinement).
 
 ---
 
