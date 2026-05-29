@@ -97,10 +97,10 @@
 |---|---|---|---|
 | **#129 Cosmos SDK / Go coverage AST** | dYdX V4 PRE-CLONE-HALT, Open-Q #27 | **LIVE v1.0 2026-05-28 deep night** (operator msg 7951) — `scripts/detectors/cosmos-sdk-go-ast/c129-cosmos-go-ast`. Smoke-tested against cosmos/cosmos-sdk@HEAD: 1690 files / 2.76s / is_cosmos_sdk=true / 15 signature ids (IMPORT, KEEPER, MSG, HANDLER, BEGIN, END, INVARIANT, PARAM-SET, PARAM-GET, CROSS-MODULE, BECH32, EVIDENCE, SLASH, GOV-PROPOSAL, CHECKPOINT, STATESYNC). **Doctrine #36 P-floor lift: PARTIAL** (surface map LIVE; deep semantic detectors #137 + #138 + #165 remain to build). | **Doctrine #36 P-floor lift PARTIAL** — Sherlock engagement EV math can now use substrate-aware P(finding) ≥ 0.05 floor + per-signature lens-fit multipliers, not substrate-blind floor. |
 | **#137 cross-module canonicalization mismatch** | dYdX V4 brain audit | NOT BUILT | **HIGH — fits Heimdall x/bank + x/staking + x/gov inter-module** |
-| **#138 no-overwrite-guard** | dYdX V4 brain audit | NOT BUILT | **HIGH — fits Heimdall checkpoint state updates** |
-| **#165 cosmos-bech32 address handling** | dYdX V4 Doctrine.md:900 | NOT BUILT | **MEDIUM — fits Heimdall validator-address canonicalization** |
+| **#138 no-overwrite-guard** | dYdX V4 brain audit | **BUILT v1.0 2026-05-29** — `scripts/detectors/no-overwrite-guard/` (commit `d850305`). Flags Set in create-semantic fns (Add/Create/Register/Submit) lacking Has/Exists/Get-found guard → silent overwrite. Sub-findings C138-CHECKPOINT-OVER + C138-SEQ-NO-MONOTONIC. Validated on fixture (flags unguarded AddCheckpoint + sequence-no-monotonic; skips Has-guarded/Get-found-guarded/setter-named). Consumes #129 via `--from-c129`. | **HIGH — fits Heimdall checkpoint state updates + StateSync nonce** |
+| **#165 cosmos-bech32 address handling** | dYdX V4 Doctrine.md:900 | **BUILT v1.0 2026-05-29** — `scripts/detectors/cosmos-bech32-deep/` (commit `d850305`). 5 findings: RAW-BECH32, BECH32-STRCMP (.String() addr equality), ADDR-FROM-BYTES (unchecked []byte→AccAddress), FROMBECH32-NOPREFIX (cross-prefix confusion), HARDCODED-HRP. Validated on fixture incl. a GetConfig-prefix-checked control (no FP). | **MEDIUM-HIGH — fits Heimdall validator/proposer-address canonicalization across Heimdall↔Bor↔ETH** |
 
-**NEW detector seeds (consensus-specific) — file as CANDIDATE prior to Jun 15:**
+**5 consensus-specific detector seeds — FILED CANDIDATE 2026-05-29** (Ogie msg 7976; build post-invite when the Heimdall repo is cloned + the exact module layout is known. Ordered by EV: checkpoint-sig-aggregation > statesync-nonce > validator-jail-bypass > gov-param-bounds > equivocation-evidence):
 
 | Detector | Class statement | Build complexity |
 |---|---|---|
@@ -135,7 +135,7 @@
 
 ---
 
-## §5 SHERLOCK COMPETITION FORMAT (TODO — research before Jun 15)
+## §5 SHERLOCK COMPETITION FORMAT (RESEARCHED 2026-05-29 via docs.sherlock.xyz; deposit + AI-policy still operator-confirm)
 
 **Known intel (PAG Discord 2026-05-21 + Sherlock prior contests):**
 - Submission requires $250 USDC deposit per finding (per Day 27 PAG intel)
@@ -143,6 +143,18 @@
 - Duplicates handled via "primary submission" selection — judges pick best-written + earliest valid submission
 - Judging timeline: usually 2-4 weeks post contest close
 - Awards: USDC primary; specific rewards/escrow per contest
+
+**RESEARCHED 2026-05-29 (docs.sherlock.xyz/audits/judging/guidelines — "Criteria for Issue Validity"):**
+- **Severity (likelihood is NOT considered — impact only):**
+  - **High** = direct fund loss **>1% AND >$10**, without extensive external conditions.
+  - **Medium** = conditional loss **>0.01% AND >$10** (specific conditions required), OR breaks core protocol functionality.
+  - Design decisions with no fund loss / no broken-core = **Informational (invalid for reward).**
+- **Scope:** only in-scope contracts count; out-of-scope vuln = invalid (the Veda OOS lesson applies — pre-flight scope-check every Heimdall module).
+- **PoC:** recommended, and **mandatory if the issue cannot be clearly understood without one** (explicitly required for precision-loss, reentrancy, gas, non-trivial input constraints). For Heimdall (Go), ship a `go test` PoC — our Go toolchain (§4) supports this.
+- **Duplicates:** a valid duplicate must independently identify (1) root cause, (2) ≥Medium impact, (3) a valid attack path. The dup group is awarded the **highest severity** in the group. (Implication: write the root-cause + attack-path explicitly so we qualify as a valid dup even if not first.)
+- **Common INVALID classes (do NOT submit):** gas optimizations; wrong event values; zero-address checks; admin input / call-ordering mistakes; user self-blacklisting (self-harm only); front-running on private-mempool chains; non-standard token behavior unless the README names the token.
+- **AI-generated-report policy:** NOT addressed in Sherlock docs (no explicit ban found). Posture: apply the DISC-019 7-rule humanization + [EXECUTED]-bias R8 tags as belt-and-suspenders for quality + acceptance; no proactive AI-validation sentence needed (no clause to satisfy).
+- **Deposit/bond:** NOT found in docs. The "$250 USDC/submission" figure is **PAG-Discord intel only — treat as operator-confirm** before budgeting (§6). May be contest-specific or outdated.
 
 **Research tasks before Jun 15:**
 - [ ] Read prior Sherlock contests (especially Cap, Flying Tulip, Symbiotic) for format examples

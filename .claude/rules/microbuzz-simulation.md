@@ -1,6 +1,7 @@
 # Rule: MicroBuzz v2 Simulation Safety
 
 > Applies when: running MicroBuzz simulations, Ollama operations, AMM scoring, heuristic agents, or batch token analysis
+> ⚠️ **qwen3:8b reclaimed 2026-05-29 for disk** (Ogie msg 8003) — re-pull (`ollama pull qwen3:8b`) + `ollama serve` to revive LLM-agent simulations. Heuristic agents (pure JS) unaffected.
 
 ---
 
@@ -55,4 +56,4 @@ Model: qwen3:14b ONLY
 
 ---
 
-*Rule: microbuzz-simulation | 500-agent hybrid safety + resource management*
+_Rule: microbuzz-simulation | 500-agent hybrid safety + resource management_
