@@ -2140,7 +2140,9 @@ When auditing a protocol's privilege-removal hygiene:
 
 **Why it matters:** pure state-logic DoS/lockout → **locally PoC-able ([EXECUTED] gate feasible, no precompile)**. High-relevance on bridges/relays/IBC with seen-hash / proof / message dedup caches.
 
-**P3-corpus→P4-detector wire:** this is the proof-of-concept instance lighting the dark P3→P4 wire from the 4-Pillar Calibration (ground-truth advisory → detector seed → sibling-hunt). Pairs with Doctrine #44. Cross-ref `brain/Cross-Pollination-Log.md`.
+**NEGATING-EXAMPLE (done-right contrast — Hyperbridge sibling-scan 2026-05-29, `hunts/2026-05-29-hyperbridge-166-44-siblingscan-gate1.md`):** `EvmHost.dispatchIncoming` (polytope-labs/hyperbridge) writes `_requestReceipts[commitment]=relayer` (L807) then on module-call failure `delete _requestReceipts[commitment]` (L814; response path L837) — **cleanup-on-failure PRESENT**, the exact piece Zebra lacked. Plus the write is `restrict(handler)` and only reached AFTER a valid MMR proof (validate-then-cache). Detector #166 must NOT fire when (a) every validation-failure branch after the insert has a matching delete/reset, OR (b) the insert is gated by a prior verify. Companion #44 NEGATING-EXAMPLE: Hyperbridge `Message.hash = keccak256(abi.encode(fullStruct))` + MMR sorted-unique index-to-root binding = identity-equals-content (the opposite of Zebra ZIP-244 subset-binding).
+
+**P3-corpus→P4-detector wire:** this is the proof-of-concept instance lighting the dark P3→P4 wire from the 4-Pillar Calibration (ground-truth advisory → detector seed → sibling-hunt). Pairs with Doctrine #44. Cross-ref `brain/Cross-Pollination-Log.md`. First sibling-scan (Hyperbridge) = CLEAN (negating-example); next sibling-candidate = Cosmos-Go IBC `ibc-go` (apply Step 5.12 checklist at next Cosmos Gate-1; ibc-go saturation = low standalone-clone EV).
 
 ---
 

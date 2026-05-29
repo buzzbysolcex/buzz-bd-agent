@@ -71,3 +71,4 @@
 - 2026-05-29 | lido-v3-nonoracle | NEGATE | (skipped-ineligible) | promotion=False | 2026-05-29-lido-v3-nonoracle-gate1.md
 - 2026-05-29 | renzo | WATCHLIST | tweet+outreach | promotion=False | 2026-05-29-renzo-immunefi-gate1.md
 - 2026-05-29 | dexalot-cd-removeauction | NEGATE | (private-suppressed) | promotion=False | 2026-05-29-dexalot-cd-removeauction-gate1.md
+- 2026-05-29 | hyperbridge-166-44-siblingscan | NEGATE | (private-suppressed) | promotion=False | 2026-05-29-hyperbridge-166-44-siblingscan-gate1.md
