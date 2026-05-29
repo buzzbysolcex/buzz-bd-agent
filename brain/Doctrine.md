@@ -2825,6 +2825,8 @@ Where `conformance_class_discount = 0.10× to 0.20×` when the target's primary 
 
 **Promotion path:** 2-anchor reached (Wormhole Hyp-E DC-8 + Hyperlane Hyp-1 DC-12 sub-6, both 2026-05-29, different targets + different defense classes). PERMANENT on a 3rd cross-class anchor or operator confirmation. Both anchors share the signature: Gate-1 attack/magnitude tagged `[ASSUMED]` → Gate-2 commit-pinned source-read NEGATES → hours of build saved. Cross-references: DC-8 NEGATING-EXAMPLES sub-catalog + DC-12 sub-6 Conserved-Quantity EXCLUSION (Patterns-Defense-Classes.md); R8 Calibrated Reporting ([ASSUMED] tag on un-source-read claims); Doctrine #40 (companion — both guard against over-investing on under-confirmed signals).
 
+**Promoted to a standing rule (Ogie msg 8008, 2026-05-29):** the WebFetch/summary DIRECTION-ERROR sub-note is now its own rule — `.claude/rules/webfetch-direction-error.md`. A WebFetch/search summary's claimed exploit DIRECTION is ALWAYS `[ASSUMED]` until traced by hand at the action site; never seed a Foundry build from a summary's directional claim. 3 same-session anchors (Hyperlane Hyp-1 donation/rate + Lido V3 donation→under-mint + prior). **Brain symmetry (Ogie msg 8008):** the summary layer OVER-asserts exploit direction; human instinct OVER-dismisses boring flags (Sectricity lesson / anomaly-vs-vector distinction, parked). Same fix for both: trace the actual arithmetic/chain — trust neither the summary's assertion nor the instinct's dismissal. This rule corrects the over-assertion side; anomaly-vs-vector corrects the over-dismissal side.
+
 **Authority:** `hunts/2026-05-29-wormhole-ntt-hyp-e-gate2-foreclosure.md` §5 (W-5-NEG doctrine principle), reboot-recovery TODO item 2, Ogie msg 7962.
 
 ---
