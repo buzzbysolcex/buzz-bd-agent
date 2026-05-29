@@ -1,3 +1,5 @@
+<!-- P4P2-PRIVATE-SUPPRESS — PLATFORM-ONLY DISCLOSURE (Immunefi live program). NO public content drafts. -->
+
 # Renzo Protocol — Immunefi Gate 1
 
 **Date:** 2026-05-29 (single-agent hunt loop, Ogie msg 8008 Part 2)
