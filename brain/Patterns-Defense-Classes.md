@@ -1047,6 +1047,14 @@ _Patterns: Defense Classes | v1.9 | 2026-05-19 | CANDIDATE-G PROMOTED to DC-8 ("
 - CANDIDATE-E (Rust rounding-asymmetry): arithmetic-direction error within a single function; CANDIDATE-O is composition-error across functions
 - CANDIDATE-L (Consensus-Bucket-Key-Asymmetry): aggregation-key mismatch in consensus; CANDIDATE-O is value-reuse mismatch in DEX state-machine
 
+**CANDIDATE-O EXCLUSION — Aggregate-Bound Single-Victim Per-Step Absence (added 2026-05-29, Doctrine #43; PancakeSwap #80247 INVALID-accepted + Balancer V3 B-1 #80150 self-reexam):** CANDIDATE-O is a GENUINE finding ONLY when the SAME value is consumed by TWO semantically-distinct economic paths such that the SECOND consumer lacks aggregate protection — e.g. **Rhea Finance ($18.4M, the canonical anchor):** a swap `amountOut` ALSO feeds an oracle/liquidation input that has no slippage bound, so a flash-loan self-trade corrupts the second consumer (a DIFFERENT victim than the swapper).
+
+It is a **MISFRAME (NOT a finding)** when it is merely a missing PER-STEP slippage floor on a SINGLE-victim multi-hop swap whose OWN aggregate `amountOutMinimum` / `path.minAmountOut` bounds the swapper's total loss. There is no double-CONSUMPTION — the intermediate amount feeds only the next hop (clean output→input chain), and the only victim (the swapper) is protected by their aggregate floor. "More hops = more fees" is expected; "2-hop-leak vs 1-hop-leak" is apples-to-oranges (different trades).
+
+**Pre-filter (Gate-1, before ANY CANDIDATE-O value-extraction PoC):** identify the SECOND consumer of the reused value. If the only consumer is the next swap step AND the user's aggregate bound governs the final output → **FORECLOSE (misframe, Doctrine #43)**. If a second, aggregate-UNprotected consumer exists (oracle / liquidation / volume-gated rewards = a different victim) → CANDIDATE-O stands.
+
+**Anchors:** GENUINE = Rhea Finance $18.4M (swap-amount→oracle, flash-loan self-trade). MISFRAME = PancakeSwap #80247 (INVALID, rebuttal accepted 2026-05-29) + Balancer V3 B-1 #80150 (self-reexam 2026-05-29 → MISFRAME, recommend-withdraw). The B-1/Pancake "slippage double-count" framing was per-step-absence dressed up — NOT a literal double-debit (source-confirmed: `BatchRouterHooks` single-chain output→input accounting, one aggregate floor at the last step `minAmountOut = isLastStep ? path.minAmountOut : 0`).
+
 **Worked-example artifact path:** `/home/claude-code/buzz-workspace/brain/Ground-Truth-Exploits.md` Rhea Finance entry (filed 2026-05-22).
 
 **Economic substrate (added 2026-05-24 via Morpho Blue flash-loan-volume-washing intake, msg 7639):**

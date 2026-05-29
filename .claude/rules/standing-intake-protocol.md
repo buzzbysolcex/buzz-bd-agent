@@ -118,6 +118,8 @@ Rank EV against current pipeline targets. Pipeline targets: open Gate 1s + queue
 
     See `brain/External-Frameworks.md` for adoption record + convergence note.
 
+11. **Aggregate-Bound QC gate — MANDATORY before building any "value-extraction" PoC (Doctrine #43, added 2026-05-29; PancakeSwap #80247 INVALID anchor + Balancer B-1 self-reexam).** When a finding claims per-step / intermediate value extraction, run 3 gates FIRST: **(a)** verify no user-controlled AGGREGATE bound (end-to-end slippage / `amountOutMinimum` / final limit) already caps total loss — the user's own limit IS a surface, check it; **(b)** confirm the claimed "loss" is not just expected accumulation ("more hops = more fees") — prove the aggregate floor FAILS (bypassable / absent / blind) before claiming loss; **(c)** confirm any counterfactual is the SAME trade (1-hop-vs-2-hop = apples-to-oranges = invalid). If the aggregate bound protects the only victim → FORECLOSE. Only a TRUE double-CONSUMPTION (same value feeds a second, aggregate-unprotected consumer / different victim — e.g. swap-amount→oracle) survives. See CANDIDATE-O EXCLUSION (`brain/Patterns-Defense-Classes.md`).
+
 ---
 
 ## STEP 6 — CONTINUOUS
@@ -137,6 +139,7 @@ Every new program must be added to:
 - Skipping Step 5.3 (bytecode-verify prep) = unverifiable finding = violation
 - Skipping Step 5.6 (5-target quality checklist) = incomplete surface map = violation (Ogie msg 7519, 2026-05-22)
 - Skipping Step 5.10 (R8 Calibrated Reporting tags on Gate 2 findings) = uncalibrated evidence base = violation (Ogie msg 7555, 2026-05-22)
+- Skipping Step 5.11 (Aggregate-Bound QC gate before a value-extraction PoC) = exploit-narrative-over-true-structural-fact misframe = violation (Doctrine #43, 2026-05-29; PancakeSwap #80247 + Balancer B-1 anchors)
 - Bypassing Step 4 (queue decision surfacing) = unilateral pipeline reorder = violation
 
 If unsure where a new program fits, run Steps 1-3 anyway and surface to War Room with the EV table. Operator decides the queue position.
