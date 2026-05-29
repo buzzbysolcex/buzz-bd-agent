@@ -68,6 +68,12 @@ Pre-identified Cosmos-SDK / Tendermint / Heimdall-v2 dedup paths this detector t
 
 Pairs with **Doctrine #44**: where a dedup id is computed over a strict subset (malleable), a #166 cache-before-validate becomes a _poisoning_ primitive (pre-seed a same-id variant) rather than just self-DoS.
 
+## Real-target validation + FP tuning (Babylon, 2026-05-29)
+
+First run on a real fresh Cosmos chain (`babylonlabs-io/babylon`, 374 Go files under `x/`): **1 raw hit** — `checkpointing/keeper/keeper.go:357 SetCheckpointFinalized`. Source-read triaged as a **FALSE POSITIVE**: `setCheckpointStatus(…, [Confirmed], Finalized)` validates the status and returns early on failure _before_ the `SetLastFinalizedEpoch` insert (validate-then-set), and `SetLastFinalizedEpoch` is a monotonic last-epoch counter, not a replay-dedup cache. Root cause: `validateMethodRe` substring-matched **"check" inside `AfterRawCheckpointFinalized`** (a hook).
+
+**Fix applied (improves the June Heimdall run — same "checkpoint"/`Confirmed` noise):** `check` → `check([^p]|$)` (excludes the `checkpoint` substring); dropped bare `confirm` (status/hook noise); added `nonValidatePrefixRe = ^(After|Before|Emit|Event|Log|On|Get|Has|Is)` to exclude hooks/events/logging/reads from validation-classification. Post-fix: **Babylon → 0 findings**, fixtures still **0 FP / 0 FN**. Known residual: a real validation named `Confirm*` is now a false-negative (rare; noted for v2).
+
 ## Usage
 
 ```bash

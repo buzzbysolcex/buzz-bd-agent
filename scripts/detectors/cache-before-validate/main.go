@@ -113,8 +113,16 @@ var insertMethodRe = regexp.MustCompile(`^(Set|Add|Insert|Store|Save|Put|Mark|Re
 // DELETE / unwind method prefixes + builtin delete() handled separately.
 var deleteMethodRe = regexp.MustCompile(`^(Delete|Remove|Del|Unset|Clear|Discard|Drop|Prune|Evict|Reset|Rollback|Revert|Undo)`)
 
-// VALIDATION / fallible-operation method names (case-insensitive substring).
-var validateMethodRe = regexp.MustCompile(`(?i)(verify|validate|check|prove|ensure|assert|authenticate|attest|confirm)`)
+// VALIDATION / fallible-operation method names. "check" uses `check([^p]|$)`
+// to EXCLUDE the "checkpoint" substring (rampant in Cosmos consensus chains ->
+// FP, real-target-discovered on Babylon checkpointing). "confirm" dropped
+// (status/hook noise: AfterRaw*Confirmed). Hook/event/log/read prefixes are
+// excluded by nonValidatePrefixRe in the classifier.
+var validateMethodRe = regexp.MustCompile(`(?i)(verify|validate|prove|ensure|assert|authenticate|attest|sanity|check([^p]|$))`)
+
+// Method-name prefixes that are NEVER validations even if they substring-match
+// (hooks, event emitters, logging, reads) — cuts the dominant Cosmos FP class.
+var nonValidatePrefixRe = regexp.MustCompile(`^(After|Before|Emit|Event|Log|On|Get|Has|Is)`)
 
 // DEDUP-class keyword — matched against the insert method name, receiver name,
 // map name, and arg-key hint. This is what makes an insert "dedup-relevant".
@@ -308,7 +316,7 @@ func collectEvents(fn *ast.FuncDecl) []event {
 			switch {
 			case deleteMethodRe.MatchString(m):
 				evs = append(evs, event{kind: evDelete, pos: x.Pos(), blob: m + " " + hint})
-			case validateMethodRe.MatchString(m):
+			case validateMethodRe.MatchString(m) && !nonValidatePrefixRe.MatchString(m):
 				evs = append(evs, event{kind: evValidate, pos: x.Pos(), blob: m})
 			case insertMethodRe.MatchString(m) && dedupKw.MatchString(ctx):
 				evs = append(evs, event{kind: evInsert, pos: x.Pos(), blob: m + "(" + hint + ")"})
