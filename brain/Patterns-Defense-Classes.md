@@ -2125,6 +2125,23 @@ When auditing a protocol's privilege-removal hygiene:
 
 ---
 
+## W-2 facet — Forged-Quorum Bitmap Binding (BLS-aggregate scheme) — NEGATING-EXAMPLE [EXECUTED] (added 2026-05-29 — Babylon checkpointing anchor; W-2-FQ-NEG)
+
+**Distinct from the config-change-invalidation facet above.** This facet answers: _can a forged/mismatched validator-bitmap claim a >2/3 quorum that did not actually sign?_ For a **BLS-aggregate-over-bitmap** scheme the answer is structurally NO, proven [EXECUTED] on Babylon `x/checkpointing`:
+
+- **Auto-binding:** the multisig is verified against the aggregate of EXACTLY the bitmap-selected pubkeys (`bls12381.VerifyMultiSig` = `AggrPKList(pks)` then `Verify(sig, aggPk, msg)` with `pkValidate`+`sigGroupcheck`). A wrong bit → wrong aggregate pubkey → `e(sig,g)≠e(H(m),aggPk)` → fail. Bitmap binds to the aggregate WITHOUT being in the signed message (`GetSignBytes = epoch||hash`).
+- **No double-count:** a bitmap is a SET (each index 0/1) → a signer cannot be counted twice. (Contrast ECDSA-signature-array schemes — see Heimdall split below.)
+- **Same-set tally:** power-sum and pubkey-set built from the SAME `FindSubset(bitmap)` result in one loop → the >2/3 gate is over exactly the verified signers (no split tally-set ≠ verify-set).
+- **Rogue-key closed:** the cancel-key `g^a·(∏pkᵢ)^{-1}` attack on naive BLS aggregation is blocked by ENFORCED PoP at registration (`MsgWrappedCreateValidator.ValidateBasic`→`pop.IsValid`, two-way BLS-possession + ed25519-binding; enforced via cosmos-sdk v0.53.5 `baseapp.validateBasicTxMsgs`, unconditional in runTx).
+
+**[EXECUTED] anchor:** `hunts/2026-05-29-babylon-bls-bitmap-binding-poc_test.go` — `TestBitmapBindingPoC` (forged `{A,B,C}` vs `agg(A,B)` FAILS; cross-epoch replay FAILS) + `TestPoPRejectsRogueKey` (PoP key-binding + DST/DST_POP domain-sep) both PASS against the clone's real `bls12381` package.
+
+**Heimdall split (HIGH-VALUE cross-pollination, [ASSUMED] — verify at June Gate-1):** the forged-quorum-binding question SPLITS BY SIGNATURE SCHEME. BLS-aggregate-bitmap (Babylon) = auto-bound + dedup-free + PoP-gated → LOW-p, do NOT hunt the binding. **ECDSA-signature-ARRAY (Polygon Heimdall checkpoint votes, secp256k1 `ecrecover`) = binding shifts to per-sig recover + EXPLICIT dedup + member-check + power-sum + canonical-digest.** PRIMARY Heimdall hunt axes become: **double-count/no-dedup** (repeat a signer to inflate power — impossible in BLS-bitmap, POSSIBLE in ECDSA-array if signers aren't sorted-strictly-increasing/deduped), **non-member acceptance**, **signed-vote-bytes malleability** (Detector #44 identity-binding-gap: digest must cover start+end+roothash+proposer+chainID+epoch), **ecrecover(0)/s-malleability**. Do NOT port the BLS-binding low-p prior onto Heimdall — different scheme, different gaps.
+
+**Status:** NEGATING-EXAMPLE (binding-soundness reference for BLS-aggregate-bitmap; sharpens June-Heimdall scope split). Authority: `hunts/2026-05-29-babylon-cosmos-gate1.md` (RESIDUAL RESOLVED) + `brain/Sherlock-Polygon-Heimdall-Prep.md`.
+
+---
+
 ## Detector Seed #166 — Cache-Before-Validate-No-Cleanup (CWE-459/460) (added 2026-05-29 — Zebra GHSA-4m69-67m6-prqp ground-truth intake, Ogie msg 8021)
 
 **Class:** an identifier is inserted into a dedup / seen / sent / nonce / processed set on the OPTIMISTIC path (before validation completes), and the validation-FAILURE / early-return / revert branch does NOT remove it. A later LEGITIMATE item carrying the same identifier is then rejected as a duplicate → **lockout / DoS**. Composes with Doctrine #44 (binding-gap): if the id is malleable, the attacker poisons the cache with a same-id variant they craft.

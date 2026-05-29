@@ -80,7 +80,9 @@ All rows: verify scope-freshness / cap / KYC / clauses / **audit-count** at Gate
 
 **DROPPED / DEFERRED:** Ventuals (PoC-gated precompile, ~$2K realizable — bottom; revive only if a pure-share-math sliver lights up at Gate-1) · OKX (cap-trap, 495 subs) · Lido V3 (foreclosed) · Aave Umbrella (audit-heavy-fresh, demote) · Resolv (14-audit saturated) · Dexalot/Hyperbridge (hunted, NEGATE/CLEAN).
 
-**NEXT ACTION = #1 Babylon Cosmos-Go.** Highest realizable-EV (~$48K) AND the only target where the detector arsenal I just built runs as-is. Start: clone `babylonlabs-io/babylon` (Cosmos-Go), run #129 → #137/#138/#166 (scope to keeper/handler files via `--from-c129 --scope-files-only`), source-read the dedup/epoch/checkpoint hits. Pure-state modules first (epoching, checkpointing, finality) — defer BTC-light-client (lower PoC-feasibility).
+**#1 Babylon Cosmos-Go = FULLY CLOSED (2026-05-29).** NEGATE (prioritized leads: finality+btcstaking SEQ — caller-loop/consensus-key monotonicity) **+ NEGATE [EXECUTED] (checkpointing BLS-bitmap forged-quorum residual — 5-axis binding sound, 2 Go-test PoCs PASS).** Only un-hunted residual = #137 canonicalization(27) surface map (lower-value, deferred). June-Heimdall dry-run = GO at [EXECUTED] level (Go-unittest harness validated on real Cosmos BLS module). Compounds banked: #138 caller-loop NEGATING-example + W-2-FQ-NEG BLS-bitmap-binding + Heimdall ECDSA-array-vs-BLS-bitmap scheme split. Clone purge-eligible. See `hunts/2026-05-29-babylon-cosmos-gate1.md` + `brain/Sherlock-Polygon-Heimdall-Prep.md` §DRY-RUN COMPLETE.
+
+**NEXT ACTION = #2 Symbiotic** (Immunefi $500K crit [VER], 10%-of-funds). PoC-feasibility HIGH (slasher + epoch accounting = pure state-machine, forkable Foundry). EVM CANDIDATE-J/D + DC-9. R-1 at dispatch: confirm NOT already Gate-1'd (BuzzShield regression-tested it 2026-05-09, that was NOT a hunt) + re-run Step-1 PROFILE (audit-count, KYC, scope-freshness). Realizable-EV ~$21K. **HOLD: Hyp-C = Immunefi slot 1 (21:40Z, untouched, operator-gated submit); Symbiotic is parallel Gate-1 work, NO submission conflict.**
 
 ---
 

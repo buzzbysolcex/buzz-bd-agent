@@ -17,7 +17,7 @@
 | 1. Brain audit Cosmos SDK | IN PROGRESS | Sections below |
 | 2. Substrate research Heimdall v2 | DEFERRED — needs invite + repo access | Pre-work: identify public repo URL |
 | 3. Detector priming | IN PROGRESS | Maps below |
-| 4. Go toolchain verify | DONE: Go 1.22.2 + semgrep ✓ | staticcheck + gosec install running background |
+| 4. Go toolchain verify | DONE + DRY-RUN VALIDATED [EXECUTED] (2026-05-29) | Go 1.22.2 + semgrep ✓; **Go-unittest PoC harness ran clean on real Cosmos BLS module (CGO/blst, gcc 13.3) — Babylon dry-run, see §DRY-RUN COMPLETE** |
 | 5. Sherlock format intel | TODO | Search prior contest formats |
 | 6. Wallet/USDC deposit ($250/sub) | TODO | Check post Firedancer payout |
 | 7. KILL_LIST Polygon/Heimdall add | DONE | See §KILL_LIST below |
@@ -211,6 +211,31 @@
 **Pillar 3 (corpus):** Phase 2 consumer should prioritize Cosmos SDK + Tendermint + Polygon historical exploit corpus for Heimdall-class pattern extraction.
 
 **Pillar 4 (bug research):** This file IS the Pillar 4 prep dossier. Future Heimdall hunts MUST reference brain compounds here.
+
+---
+
+## §DRY-RUN COMPLETE — Babylon Cosmos-Go (2026-05-29) — harness validated [EXECUTED]
+
+The Babylon Immunefi Gate-1 (`hunts/2026-05-29-babylon-cosmos-gate1.md`) WAS the Heimdall dry-run. Outcome: **GO at [EXECUTED] level.**
+
+**What ran clean end-to-end on a real Cosmos chain:**
+- Detector arsenal #129/#137/#138/#166 executed against 374 Go files; #166 FP-tuned (checkpoint/hook substring noise → 0 after tune); #138 produced a **caller-loop/consensus-key NEGATING-example** (a setter with no inline `>`/`>=` guard is NOT backwards-overwrite when its sole non-genesis caller is a monotonic increment loop, OR the store key is a consensus-monotonic block height — trace the CALLER before flagging).
+- **Go-unittest PoC harness validated:** `go test` builds + runs against a real Cosmos BLS module (CGO/blst compiled, gcc 13.3, go fetched toolchain automatically). Two PoCs PASS (`hunts/2026-05-29-babylon-bls-bitmap-binding-poc_test.go`). **This is the Foundry-equivalent for Go — confirmed working for June.**
+
+**BLS-bitmap binding pre-flight checklist (the 5 axes I traced on Babylon checkpointing — REUSE on Heimdall):**
+1. Aggregate-pubkey binding — is the multisig verified against EXACTLY the bitmap/selector-derived pubkeys (with pkValidate/groupcheck)?
+2. Same-set tally — are power-sum and the verified pubkey-set derived from the SAME selector (no split tally-set ≠ verify-set)?
+3. Rogue-key/PoP — is key registration PoP-gated (possession + identity-binding), and is the PoP check actually ENFORCED on the live tx path (in Cosmos: `Msg.ValidateBasic` is auto-called by `baseapp.validateBasicTxMsgs`, unconditional in runTx as of SDK v0.53.5)?
+4. Construction-side — are the per-signer votes feeding the aggregate each epoch-checked + content-checked + malleability-rejected (unknown-field strict + re-marshal compare)?
+5. Selector mechanics — bounds/ordering of the selector vs the validator set; signed-bytes content (what the signature commits to) + domain separation (no cross-epoch/cross-context replay).
+
+**⚠️ CRITICAL Heimdall scheme split (the high-value transfer, [ASSUMED] until June Gate-1 source-read):** Babylon uses **BLS-aggregate-over-bitmap** → binding is AUTOMATIC + double-count STRUCTURALLY IMPOSSIBLE + PoP-gated → the binding itself is LOW-p (don't waste cycles there). **Heimdall checkpoint votes are ECDSA-signature-ARRAY (secp256k1 `ecrecover`), NOT BLS-aggregate.** That moves the binding to per-signature recover + EXPLICIT dedup + member-check + power-sum + canonical-digest. **PRIMARY Heimdall hunt axes (do these instead of BLS-binding):**
+- **Double-count / no-dedup** — can one validator's signature be repeated in the array to inflate power past 2/3? (Impossible in BLS-bitmap; POSSIBLE in ECDSA-array unless signers are required strictly-increasing/deduped.)
+- **Non-member acceptance** — is a recovered address that's NOT in the current validator set rejected (or zero-powered)?
+- **Signed-vote-bytes malleability / canonicalization** — Detector #44 identity-binding-gap: the signed digest MUST cover all consumed fields (start, end, roothash, proposer, chainID/borChainID, epoch); if the consumer acts on a field not in the digest → poisoning.
+- **ecrecover(0) / s-malleability (s > n/2)** — classic secp pitfalls on both the Heimdall side and the Ethereum RootChain checkpoint-submit contract.
+
+Cross-ref: `brain/Patterns-Defense-Classes.md` W-2-FQ-NEG facet (Babylon anchor) + W-2/W-2-NEG (cross-substrate quorum-bitmap).
 
 ---
 
