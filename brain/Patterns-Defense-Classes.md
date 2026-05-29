@@ -2142,6 +2142,26 @@ When auditing a protocol's privilege-removal hygiene:
 
 ---
 
+## CANDIDATE-J facet — Restaking Slash-Window ⊂ Claim-Delay — NEGATING-EXAMPLE [INSPECTED] (added 2026-05-29 — Symbiotic anchor, Ogie msg 8031 override hunt)
+
+**The defense invariant for epoch-based restaking slashers** (the cross-module economic seam a per-contract / formal-verification audit cohort structurally misses): a slash for an offense captured at time `T_c` must remain executable against the offender's collateral even if the staker races a withdrawal. The defense is a **timing asymmetry** with three legs:
+
+1. **Claim-delay > slash-window.** The withdrawal→claim delay (epochs before withdrawn funds physically exit) must STRICTLY exceed the slash-execution window measured from capture. Symbiotic: claim-delay = **2 epochs** (`Vault._withdraw` books to `withdrawals[currentEpoch+1]`; `_claim` requires `epoch < currentEpoch` → claimable at withdrawEpoch+2) vs slash-window = **1 epoch** (`VetoSlasher.executeSlash`: `now − captureTimestamp ≤ epochDuration`; `Vault.onSlash`: `captureEpoch ∈ {currentEpoch−1, currentEpoch}`).
+2. **onSlash must reduce the IN-FLIGHT withdrawal buckets, not just activeStake.** `Vault.onSlash` slashes `activeStake + withdrawals[curr]/[curr+1]`. A withdrawal mid-window just moves funds `activeStake → withdrawals[curr+1]` — both slashed. So withdrawing during the window does NOT remove value from the slashable set.
+3. **Slash amount binds to OFFENSE-TIME stake via immutable checkpoints**, not execution-time stake. `BaseSlasher._slashableStake` uses `delegator.stakeAt(captureTimestamp)` (+ opt-in-at-capture gate) − slashes-since-capture (overlap guard) ; monotonic `latestSlashedCaptureTimestamp` (double-slash guard). Post-offense re-delegation/undelegation can't reduce the slashable amount.
+
+**Plus the veto-window consistency:** `vetoDuration < epochDuration` (init) AND `requestSlash` lower-bounds `captureTimestamp ≥ now + vetoDuration − epochDuration` → `vetoDeadline = T_r + vetoDuration ≤ captureTimestamp + epochDuration` (the slash-period deadline). So the veto window ALWAYS ends inside the executable window — a veto can't push a legitimate slash past its deadline. And `onSlash`/`stakeAt` hooks swallow callee reverts (`pop(call)`) → a malicious delegator/burner hook can't grief-block a slash.
+
+**When this NEGATES a hunt:** if all three legs hold AND the veto-window fits inside the slash-window, the "withdraw/re-delegate to escape a slash" and "race the epoch boundary" hypotheses are foreclosed by construction — no Foundry PoC needed.
+
+**When to suspect a POSITIVE (the gap to hunt elsewhere):** claim-delay ≤ slash-window (off-by-one epoch); onSlash that reduces ONLY activeStake (leaves withdrawal buckets exitable); slash amount measured at execution-time instead of capture; veto/dispute window that can exceed the slash-execution deadline; or a cooldown/unbonding path whose duration is shorter than the slash window.
+
+**Anchor:** Symbiotic `VetoSlasher`+`BaseSlasher`+`Vault`+`BaseDelegator` @ `7cb0663` (`hunts/2026-05-29-symbiotic-immunefi-gate1.md`). **Reuse target:** Aave Umbrella (queue row 4 — stkToken slashing + cooldown), EigenLayer / Karak / Jito-restaking slashers — run the 3-leg + veto-consistency check FIRST; it's the highest-signal cross-module seam on any restaking slasher.
+
+**Status:** NEGATING-EXAMPLE (CANDIDATE-J cross-module restaking-slashing defense reference). Authority: Ogie msg 8031 (narrow time-boxed override) + `hunts/2026-05-29-symbiotic-immunefi-gate1.md`.
+
+---
+
 ## Detector Seed #166 — Cache-Before-Validate-No-Cleanup (CWE-459/460) (added 2026-05-29 — Zebra GHSA-4m69-67m6-prqp ground-truth intake, Ogie msg 8021)
 
 **Class:** an identifier is inserted into a dedup / seen / sent / nonce / processed set on the OPTIMISTIC path (before validation completes), and the validation-FAILURE / early-return / revert branch does NOT remove it. A later LEGITIMATE item carrying the same identifier is then rejected as a duplicate → **lockout / DoS**. Composes with Doctrine #44 (binding-gap): if the id is malleable, the attacker poisons the cache with a same-id variant they craft.
