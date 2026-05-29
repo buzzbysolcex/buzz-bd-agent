@@ -2162,6 +2162,21 @@ When auditing a protocol's privilege-removal hygiene:
 
 ---
 
+## CANDIDATE-I facet — Curated-Vault-of-Adapters Delta-Accounting — NEGATING-EXAMPLE [INSPECTED] (added 2026-05-29 — Morpho Vaults V2 anchor, Ogie msg 8034)
+
+**The correct pattern for a curated vault that allocates to multiple adapters/markets with shared cap-buckets** (Morpho Vaults V2, generalizes to Aave/Euler vaults, Yearn v3, MetaMorpho):
+- On allocate/deallocate, the adapter returns `change = expectedRealValueNow − vaultStoredAllocation[market-id]` and the SAME `change` is applied to EVERY shared cap-id the market belongs to (adapter-aggregate id, collateral-aggregate id, market-specific id). This is the CORRECT delta-propagation: the market-specific id is set to current real value; each aggregate id moves by exactly that market's delta → aggregates stay = Σ market real values (for touched markets). The market-specific id hash binds the adapter address + full market params → no cross-adapter/cross-market collision.
+- **Intentional, NOT a bug (don't flag these):** (a) caps can be EXCEEDED by accrued interest/donations in untouched sibling markets (aggregate id is stale-low until each market is touched) — soft caps w.r.t. interest are documented/accepted; (b) relative caps checked against a flashloan-resistant transient snapshot (`firstTotalAssets`, set at first accrual of the tx) → big deposits via the liquidity adapter get conservative false-positive reverts, not a bypass; (c) "interest accrued once per tx" via transient storage IS the anti-share-shorting lock (no ReentrancyGuard needed if adapters + token are assumed non-reentrant — ERC777-style reentrancy excluded by token-requirement assumptions).
+- ERC4626 rounding must be vault-favorable on all 4 previews (deposit/redeem→down, mint/withdraw→up) + virtual-shares inflation defense. Morpho V2: all four correct.
+
+**When to suspect a POSITIVE instead:** `change` computed from a stale or wrong-id `oldAllocation` (delta applied to an id whose old value wasn't read) → aggregate drift exploitable; a cap checked on a HARD invariant (not soft) that the delta-staleness bypasses for real value extraction (not just interest); rounding that favors the user on any preview; an adapter whose `realAssets()` can be manipulated to inflate share price BEYOND the maxRate cap (the maxRate cap is the donation/inflation throttle — if absent or bypassable, that's the bug).
+
+**Doctrine #42-refined 3rd anchor (fresh ≠ unaudited):** Morpho V2 HEAD is ~3wk fresh yet 10-audit-incl-Certora-formal-verification → predictable NEGATE (after Lido V3 + Symbiotic). **The freshest-sliver heuristic** (hunt the newest-audited component — here `MarketV1AdapterV2`, Dec-2025 audit round) **is sound methodology but does not manufacture p when that sliver is itself audited.** Operator-greenlit ≠ high-p; honest-count the NEGATE.
+
+**Status:** NEGATING-EXAMPLE (CANDIDATE-I curated-vault delta-accounting reference + Doctrine #42-refined 3rd anchor). Authority: Ogie msg 8034 + `hunts/2026-05-29-morpho-vaultv2-cantina-gate1.md`.
+
+---
+
 ## Detector Seed #166 — Cache-Before-Validate-No-Cleanup (CWE-459/460) (added 2026-05-29 — Zebra GHSA-4m69-67m6-prqp ground-truth intake, Ogie msg 8021)
 
 **Class:** an identifier is inserted into a dedup / seen / sent / nonce / processed set on the OPTIMISTIC path (before validation completes), and the validation-FAILURE / early-return / revert branch does NOT remove it. A later LEGITIMATE item carrying the same identifier is then rejected as a duplicate → **lockout / DoS**. Composes with Doctrine #44 (binding-gap): if the id is malleable, the attacker poisons the cache with a same-id variant they craft.
