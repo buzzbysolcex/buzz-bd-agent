@@ -2177,6 +2177,21 @@ When auditing a protocol's privilege-removal hygiene:
 
 ---
 
+## SUBSTRATE ARSENAL — CLARITY / STACKS (NEW, added 2026-05-30 — Hermetica USDh first-anchor; Doctrine #36 arsenal seed)
+
+**First Clarity hunt (Hermetica USDh/sUSDh on Stacks).** Seeds Buzz's Clarity bug-research coverage (Bitcoin/Stacks/AIBTC-aligned; capability-investment like Cosmos-Go → Heimdall). Clarity is decidable, non-Turing-complete: **no reentrancy in the EVM sense, no silent overflow** (checked arithmetic, `/` floors). Bug surface is NARROW → manual source-read is tractable even substrate-blind. Lens-map:
+
+- **DC-3-Clarity (authorization) — THE primary lens.** `tx-sender` = original tx signer (propagates through intermediary contracts → spoofable as an auth basis for inter-contract calls). `contract-caller` = immediate caller. **Privileged inter-contract functions (mint/burn/reserve-drain) MUST gate on `contract-caller` against an allowlist; EOA-admin functions use `tx-sender`.** The bug to hunt = the INVERSION (a privileged inter-contract fn checking `tx-sender`, lettable through a malicious wrapper; or an admin fn checking `contract-caller` wrongly). Hermetica did both correctly (hq-style allowlist on `check-is-minting-contract contract-caller`).
+- **Replay / nonce / request-id:** `map-insert` (fails if key exists) is the correct one-shot/replay guard; `map-set` (overwrites) is NOT — a `map-set`-based "confirmed" flag is a replay red flag. Best practice = explicit `confirmed`-flag assert AND `map-insert`.
+- **`as-contract` value-flow:** code inside `(as-contract ...)` runs with `tx-sender = the contract` → moves the CONTRACT's own funds. Audit that (a) the recipient is allowlisted (Hermetica: `check-is-protocol recipient`), (b) the amount is caller-bounded. Misuse = arbitrary drain of contract-held funds.
+- **CANDIDATE-I-Clarity (SIP-10 share vault):** sUSDh-style yield vaults have the SAME virtual-shares / first-depositor inflation surface as ERC4626 (`rate = assets×base/supply`, default base when empty, donatable reserve balance). ALWAYS check LIVE seed-state — a seeded vault (large existing supply) forecloses the empty-vault inflation attack, and on a seeded vault a reserve donation is the INTENDED yield-accrual mechanism, not a bug. (Hermetica: foreclosed post-seed.)
+- **Oracle-gating (Pyth on Stacks):** mint/redeem priced via `pyth-oracle-v4 decode-price-feeds`; check staleness (`publish-time > block-time`), confidence tolerance, and `price-feed-id` match. A `none`/default price-feed fallback is safe only if a feed-id mismatch rejects it for oracle-priced assets (designed par-collateral path). Oracle manipulation itself = standard OOS.
+- **Source acquisition:** Stacks contract source is on-chain & public. Pull via Hiro `https://api.hiro.so/v2/contracts/source/<principal>/<contract-name>`; enumerate a deployer's contracts via `https://api.hiro.so/extended/v1/address/<principal>/transactions`; find token principals via `https://api.hiro.so/metadata/v1/ft?symbol=<SYM>`. No GitHub needed (project gitbooks auth-gate). **Gate-2 PoC tool = Clarinet** (Rust-based Clarity test harness) — not yet installed; set up if a Clarity CONFIRM ever surfaces.
+
+**Status:** SUBSTRATE-SEED (Clarity arsenal v0.1, 1 anchor = Hermetica NEGATE). Promote lenses to detectors after a 2nd Clarity hunt. Authority: `hunts/2026-05-30-hermetica-immunefi-gate1.md` (Ogie msg 8042 autonomous loop).
+
+---
+
 ## Detector Seed #166 — Cache-Before-Validate-No-Cleanup (CWE-459/460) (added 2026-05-29 — Zebra GHSA-4m69-67m6-prqp ground-truth intake, Ogie msg 8021)
 
 **Class:** an identifier is inserted into a dedup / seen / sent / nonce / processed set on the OPTIMISTIC path (before validation completes), and the validation-FAILURE / early-return / revert branch does NOT remove it. A later LEGITIMATE item carrying the same identifier is then rejected as a duplicate → **lockout / DoS**. Composes with Doctrine #44 (binding-gap): if the id is malleable, the attacker poisons the cache with a same-id variant they craft.
