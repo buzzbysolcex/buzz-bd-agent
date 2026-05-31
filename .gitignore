@@ -85,3 +85,4 @@ deploy*.yaml
 # Detector binaries (rebuildable, not for git)
 scripts/detectors/*/detector*
 scripts/detectors/cosmos-sdk-go-ast/c129-cosmos-go-ast
+data/lane1/stranded-funds/stranded.db

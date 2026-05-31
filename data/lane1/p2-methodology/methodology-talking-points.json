@@ -44,6 +44,20 @@
       "tweet": "Three guards foreclose the over-liquidation / flash-borrow-self-liquidate family: (1) a param invariant capping seizure ≤100% of collateral, (2) a post-liquidation health-buffer assert, (3) a same-block-borrow guard. Run them as a checklist — a missing one is the candidate.",
       "claim": "Three guards foreclose the over-liquidation / flash-borrow-self-liquidate family: a parameter invariant capping seizure at <=100% of collateral value, a post-liquidation health-buffer assertion, and a same-block-borrow guard. Run them as a checklist on any lending target — a missing one is the candidate.",
       "hashtags": ["#DeFiSecurity"]
+    },
+    {
+      "id": "stranded-funds-recovery-taxonomy",
+      "title": "Stranded-funds recovery-path taxonomy",
+      "tweet": "Funds stranded in a dormant contract recover (or don't) via one of 5 paths: CLEAN-ADMIN (owner fn), BUG-PATH (a vuln releases them), OWNER-KEY-ONLY, ANYONE-CALLABLE (anyone can move them — never disclose live), or UNRECOVERABLE. The executor-class is the whole question.",
+      "claim": "Funds stranded in a dormant/abandoned contract recover (or don't) via one of five paths, classified by WHO can move them and under what condition: CLEAN-ADMIN (an existing owner function releases them), BUG-PATH (a vulnerability enables an unintended release/refund), OWNER-KEY-ONLY (only the legitimate key-holder), ANYONE-CALLABLE (a no-auth function moves them — maximum-sensitivity, never disclosed while live), or UNRECOVERABLE (no path). The executor-class is the whole analysis. Recovery analysis IS bug analysis: the same vuln that lets a thief drain is the one that lets a claimant refund — what separates them is the executor and the claimant's legitimacy.",
+      "hashtags": ["#SmartContractSecurity", "#DeFiSecurity"]
+    },
+    {
+      "id": "fork-only-recovery-verification",
+      "title": "Local-fork-only verification (responsible recovery research)",
+      "tweet": "Recovery-path research, done right: prove every path in a LOCAL mainnet-fork (anvil --fork-url) against forked state. NEVER a mainnet tx. NEVER contact-and-pressure. NEVER rescue-drain. Analysis + responsible claimant hand-off only — the rest is legal territory.",
+      "claim": "Responsible stranded-funds research has hard guardrails: prove every recovery path ONLY in a local mainnet-fork (anvil/foundry --fork-url) against forked state — never a mainnet transaction; resolve the legitimate claimant by record only — never contact, never pressure; never rescue-drain an anyone-callable contract (that's the legally-risky move, not the safe one). Publishable output is post-recovery case studies (funds already home) or fully-generalized methodology — never a live, not-yet-recovered, anyone-callable target and its path.",
+      "hashtags": ["#SmartContractSecurity"]
     }
   ],
   "thesis_lines": [
