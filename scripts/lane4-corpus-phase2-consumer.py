@@ -62,113 +62,97 @@ THRESHOLD_OPEN_QUESTION = 5        # ≥5 corroborating posts triggers promotion
 # Per task constraint: cap output volume; sample top-N if exceeded
 MAX_FINDINGS_PER_CLASS = 100
 
-# Keyword catalog v1.0 — refine after first 3 runs (anti-noise threshold)
-# Compiled as case-insensitive regex with word boundaries to reduce noise.
+# Keyword catalog v1.1 — HIGH/WEAK split (anti-noise, Ogie msg 8085 Tier-2).
+# v1.0 single-broad-keyword-anywhere produced massive FPs ("watch for the little
+# bow" -> DETECTOR_SEED; any MtGox mention -> GROUND_TRUTH; any "scam" -> RUG).
+# v1.1 rule: a post qualifies for a class iff it matches ONE HIGH-signal phrase,
+# OR >=2 DISTINCT WEAK keywords (corroboration within the post). Pure-FP terms
+# ("watch for", "trigger on", bare "rug") removed. Broad single words ("scam",
+# "hacker", bare "mt.gox") demoted to WEAK (need a 2nd signal). This is the
+# precision step BELOW an eventual v1.2 LLM filter — still NO canonical-brain
+# auto-file (proposals + digest only); keyword precision is insufficient to inject
+# into Doctrine/Patterns/Ground-Truth without review.
 KEYWORDS = {
-    "GROUND_TRUTH": [
-        # Exploit terminology
-        r"\bexploit(?:ed|ing)?\b",
-        r"\bstolen\b",
-        r"\bdrained?\b",
-        r"\bhacker\b",
-        r"\bhacked\b",
-        r"\blost coins?\b",
-        r"\blost btc\b",
-        r"\blost bitcoins?\b",
-        r"\blost funds\b",
-        r"\bprivate keys?\b",
-        r"\bprivkey\b",
-        r"\bwallet compromise[d]?\b",
-        r"\bcompromised wallet\b",
-        r"\bphishing\b",
-        r"\bphished?\b",
-        r"\brogue exchange\b",
-        r"\bexchange hack\b",
-        # Historical incidents (high-signal anchors)
-        r"\bmt\.? ?gox\b",
-        r"\bbitfinex hack\b",
-        r"\blinode breach\b",
-        r"\ballinvain\b",
-        # Confirmed-historical signal phrases
-        r"\bconfirmed lost\b",
-        r"\bconfirmed exploit\b",
-        r"\bverified theft\b",
-    ],
-    "RUG_PATTERN": [
-        r"\bscam(?:mer|med|ming)?\b",
-        r"\brug[- ]?pulls?\b",
-        r"\brug\b",
-        r"\babandon(?:ed|ing)?\b",
-        r"\babandon project\b",
-        r"\bexit scam\b",
-        r"\bponzi\b",
-        r"\bpyramid scheme\b",
-        r"\bfake exchange\b",
-        r"\btoken failure\b",
-        r"\bcoin failed\b",
-        r"\brug post[- ]mortem\b",
-        r"\bdisappeared with\b",
-        r"\bvanished with\b",
-    ],
-    "METHODOLOGY": [
-        r"\bsecurity audit\b",
-        r"\bcode review\b",
-        r"\bsmart contract audit\b",
-        r"\banalyze the code\b",
-        r"\bverify the math\b",
-        r"\bverify deposits\b",
-        r"\bprivate[- ]key management\b",
-        r"\bcold storage\b",
-        r"\bhot wallet\b",
-        r"\bmultisig\b",
-        r"\bmulti[- ]signature\b",
-        r"\bkey derivation\b",
-        r"\bchecksum verification\b",
-        r"\baddress verification\b",
-        r"\bbrain wallet\b",
-        r"\bdeterministic wallet\b",
-        r"\bhierarchical deterministic\b",
-    ],
-    "DETECTOR_SEED": [
-        r"\bautomated check\b",
-        r"\bmonitoring script\b",
-        r"\balert when\b",
-        r"\bwatch for\b",
-        r"\btrigger on\b",
-        r"\bdetection pattern\b",
-        r"\bwe should check\b",
-        r"\bneeds verification\b",
-        r"\bautomate(?:d)? detection\b",
-        r"\bauto[- ]flag\b",
-        r"\bsanity check\b",
-    ],
+    "GROUND_TRUTH": {
+        "high": [
+            r"\bexploit(?:ed|ing)?\b", r"\bdrained?\b", r"\bhacked\b",
+            r"\bwallet compromise[d]?\b", r"\bcompromised wallet\b",
+            r"\brogue exchange\b", r"\bexchange hack\b", r"\bbitfinex hack\b",
+            r"\blinode breach\b", r"\bconfirmed lost\b", r"\bconfirmed exploit\b",
+            r"\bverified theft\b", r"\bstole(?:n)? (?:my|the|all) (?:coins?|btc|bitcoins?|funds|wallet)\b",
+        ],
+        "weak": [
+            r"\bstolen\b", r"\bhacker\b", r"\blost coins?\b", r"\blost btc\b",
+            r"\blost bitcoins?\b", r"\blost funds\b", r"\bprivate keys?\b",
+            r"\bprivkey\b", r"\bphishing\b", r"\bphished?\b", r"\bmt\.? ?gox\b",
+            r"\ballinvain\b",
+        ],
+    },
+    "RUG_PATTERN": {
+        "high": [
+            r"\brug[- ]?pulls?\b", r"\bexit scam\b", r"\bponzi\b",
+            r"\bpyramid scheme\b", r"\bfake exchange\b", r"\btoken failure\b",
+            r"\bcoin failed\b", r"\brug post[- ]mortem\b", r"\bdisappeared with\b",
+            r"\bvanished with\b", r"\babandon(?:ed)? (?:the )?project\b",
+        ],
+        "weak": [
+            r"\bscam(?:mer|med|ming)?\b", r"\babandon(?:ed|ing)?\b",
+        ],
+    },
+    "METHODOLOGY": {
+        "high": [
+            r"\bsecurity audit\b", r"\bcode review\b", r"\bsmart contract audit\b",
+            r"\bcold storage\b", r"\bmultisig\b", r"\bmulti[- ]signature\b",
+            r"\bbrain wallet\b", r"\bdeterministic wallet\b",
+            r"\bhierarchical deterministic\b", r"\bkey derivation\b",
+            r"\bprivate[- ]key management\b", r"\bchecksum verification\b",
+            r"\baddress verification\b",
+        ],
+        "weak": [
+            r"\banalyze the code\b", r"\bverify the math\b", r"\bverify deposits\b",
+            r"\bhot wallet\b",
+        ],
+    },
+    "DETECTOR_SEED": {
+        "high": [
+            r"\bautomated check\b", r"\bmonitoring script\b", r"\bdetection pattern\b",
+            r"\bautomate(?:d)? detection\b", r"\bauto[- ]flag\b", r"\bsanity check\b",
+            r"\balert when\b",
+        ],
+        "weak": [
+            r"\bwe should check\b", r"\bneeds verification\b",
+        ],
+    },
 }
 
-# Pre-compile regex for speed
+# Pre-compile regex for speed (high + weak per class)
 COMPILED_KEYWORDS = {
-    cls: [re.compile(p, re.IGNORECASE) for p in patterns]
-    for cls, patterns in KEYWORDS.items()
+    cls: {band: [re.compile(p, re.IGNORECASE) for p in pats] for band, pats in bands.items()}
+    for cls, bands in KEYWORDS.items()
 }
 
 # Classification priority — first match wins (highest-signal first).
-# A post hitting GROUND_TRUTH keywords is GROUND_TRUTH even if it also
-# contains RUG_PATTERN keywords (e.g., "this scammer stole my private key").
 CLASSIFICATION_PRIORITY = ["GROUND_TRUTH", "RUG_PATTERN", "METHODOLOGY", "DETECTOR_SEED"]
 
 
 def classify_post(post):
-    """Return (classification, matched_keyword) or (None, None).
+    """Return (classification, matched_signal) or (None, None).
 
-    Keyword-only pass v1.0. Empty body → None. First-priority-class wins.
+    Keyword pass v1.1: a post qualifies for a class iff it matches ONE HIGH-signal
+    phrase OR >=2 DISTINCT WEAK keywords. First-priority-class wins. Empty/short
+    body -> None.
     """
     body = post.get("body_excerpt") or ""
     if not body or len(body) < 40:  # too-short posts are signal-low
         return None, None
     for cls in CLASSIFICATION_PRIORITY:
-        for pat in COMPILED_KEYWORDS[cls]:
+        for pat in COMPILED_KEYWORDS[cls]["high"]:
             m = pat.search(body)
             if m:
                 return cls, m.group(0).lower()
+        weak_hits = {pat.pattern for pat in COMPILED_KEYWORDS[cls]["weak"] if pat.search(body)}
+        if len(weak_hits) >= 2:
+            return cls, "weak2:" + "+".join(sorted(w.strip(r"\b")[:18] for w in weak_hits)[:2])
     return None, None
 
 
