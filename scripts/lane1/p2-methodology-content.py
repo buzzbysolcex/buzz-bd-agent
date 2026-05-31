@@ -119,15 +119,17 @@ def guardrail_violations(text):
 
 
 def pick_lens(tp, posted_ids):
-    """Pick the freshest lens not yet posted; cycle if all used."""
+    """Pick the oldest lens NOT yet posted. Returns None when the pool is
+    exhausted (every lens posted) — event-driven: no repeat until the pool is
+    refreshed with a genuinely NEW lens (Ogie msg 8082, hard rule)."""
     lenses = tp.get("lenses", [])
     fresh = [l for l in lenses if l["id"] not in posted_ids]
-    pool = fresh if fresh else lenses
-    return pool[0] if pool else None
+    return fresh[0] if fresh else None
 
 
 TWEET_MAX = 280
 URL_WEIGHT = 23  # Twitter counts any URL as 23 chars regardless of length
+MIN_DAYS_BETWEEN_DROPS = 3  # ~1-2/week natural pace (Ogie msg 8082); --force overrides
 
 
 def _tweet_weight(s):
@@ -191,21 +193,35 @@ def cmd_generate(args):
         print("[p2-content] talking-points pool missing/empty — nothing to draw from.", file=sys.stderr)
         return 2
 
+    # EVENT-DRIVEN GATE (Ogie msg 8082): emit ONLY when a genuinely NEW (unposted)
+    # lens exists. No repeat until the pool is exhausted + refreshed.
+    lens = pick_lens(tp, state.get("posted_lens_ids", []))
+    if not lens:
+        print("[p2-content] pool exhausted — every banked lens already posted. No NEW "
+              "lens to publish (event-driven). Bank a fresh lens into the pool when a "
+              "new NEGATE produces one, then re-run.")
+        return 0
+
+    today = args.date or now_utc().strftime("%Y-%m-%d")
+
+    # RATE-LIMIT to ~1-2/week (there is intentionally NO cron; guards manual over-invocation).
+    last = state.get("last_drop_date")
+    if last and not args.force:
+        try:
+            gap = (datetime.date.fromisoformat(today) - datetime.date.fromisoformat(last)).days
+            if gap < MIN_DAYS_BETWEEN_DROPS:
+                nxt = (datetime.date.fromisoformat(last) + datetime.timedelta(days=MIN_DAYS_BETWEEN_DROPS)).isoformat()
+                print(f"[p2-content] rate-limited (~1-2/wk): last drop {last}, next eligible {nxt}. --force to override.")
+                return 0
+        except ValueError:
+            pass
+
     rows = parse_ledger()
     consumed = set(state["consumed"])
     pending_hunts = {h for b in state["pending"].values() for h in b["hunts"]}
     new = [r for r in rows if r["hunt"] not in consumed and r["hunt"] not in pending_hunts]
-
-    if not new:
-        print("[p2-content] no new promotion=True rows to convert. (nothing to do)")
-        return 0
-
-    lens = pick_lens(tp, state["posted_lens_ids"])
-    if not lens:
-        print("[p2-content] no lenses in pool.", file=sys.stderr)
-        return 2
     thesis = (tp.get("thesis_lines") or ["Honest calibration scales."])[
-        len(state["posted_lens_ids"]) % max(1, len(tp.get("thesis_lines", [1])))
+        len(state.get("posted_lens_ids", [])) % max(1, len(tp.get("thesis_lines", [1])))
     ]
 
     tweet = render_tweet(tp, lens, thesis)
@@ -222,8 +238,8 @@ def cmd_generate(args):
         return 3
 
     date = args.date or now_utc().strftime("%Y-%m-%d")
-    batch_id = f"{date}-{lens['id']}"
-    out_dir = DRAFTS / date
+    batch_id = f"{today}-{lens['id']}"
+    out_dir = DRAFTS / today
     out_dir.mkdir(parents=True, exist_ok=True)
     tweet_path = out_dir / f"{batch_id}-tweet.md"
     molt_path = out_dir / f"{batch_id}-moltbook.md"
@@ -239,6 +255,7 @@ def cmd_generate(args):
         "generated_at": now_utc().isoformat(),
         "status": "pending-WR-approval",
     }
+    state["last_drop_date"] = today
     save_state(state)
 
     print(f"[p2-content] ✅ batch {batch_id} — {len(new)} promotion-event(s) → leak-safe drafts (GUARDRAIL passed)")
@@ -262,17 +279,20 @@ def cmd_list(_args):
 
 def cmd_approve(args):
     state = load_state()
-    b = state["pending"].pop(args.batch, None)
+    b = state["pending"].pop(args.approve, None)
     if not b:
-        print(f"[p2-content] no pending batch '{args.batch}'", file=sys.stderr)
+        print(f"[p2-content] no pending batch '{args.approve}'", file=sys.stderr)
         return 1
     for h in b["hunts"]:
         if h not in state["consumed"]:
             state["consumed"].append(h)
     if b["lens_id"] not in state["posted_lens_ids"]:
         state["posted_lens_ids"].append(b["lens_id"])
+    # publish time = the real drop date; engages the ~1-2/wk rate-limit so the
+    # backlog of unposted lenses can't all drip at once.
+    state["last_drop_date"] = now_utc().strftime("%Y-%m-%d")
     save_state(state)
-    print(f"[p2-content] ✅ approved {args.batch} — {len(b['hunts'])} hunt(s) marked consumed; lens '{b['lens_id']}' marked posted. No double-post.")
+    print(f"[p2-content] ✅ approved {args.approve} — {len(b['hunts'])} hunt(s) marked consumed; lens '{b['lens_id']}' marked posted. No double-post.")
     return 0
 
 
@@ -282,6 +302,7 @@ def main():
     ap.add_argument("--list", action="store_true", help="list pending/consumed state")
     ap.add_argument("--approve", metavar="BATCH", help="mark a batch consumed after WR approval")
     ap.add_argument("--date", help="override UTC date (YYYY-MM-DD), for deterministic runs")
+    ap.add_argument("--force", action="store_true", help="bypass the ~1-2/week rate-limit")
     args = ap.parse_args()
     if args.approve:
         return cmd_approve(args)
