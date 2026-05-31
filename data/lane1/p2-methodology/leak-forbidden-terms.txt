@@ -1,0 +1,43 @@
+# LEAK-SAFE guardrail blocklist for the P2 content-wire (Ogie msg 8078).
+# Any generated draft containing ANY of these (case-insensitive substring,
+# or `re:` regex) is BLOCKED — not emitted. This is the belt-and-suspenders
+# check on top of the curated talking-points pool. Add live targets here as
+# they enter the hunt queue. Lines starting with # are comments.
+#
+# --- live / recent / queued TARGET names (Stacks) ---
+granite
+zest
+stackingdao
+stacking dao
+hermetica
+bitflow
+arkadiko
+# --- live / recent TARGET names (EVM / other) ---
+wormhole
+native-token-transfers
+malachite
+arc-node
+euler
+usdtb
+ethena
+symbiotic
+morpho
+babylon
+# --- token / contract identifiers that reveal scope ---
+sbtc
+ststx
+ststxbtc
+usdh
+usdcx
+zusdh
+zsbtc
+zststx
+hyp-c
+ntt
+# --- contract-identifier PATTERNS (regex) ---
+re:SP[0-9A-Z]{37,40}
+re:0x[a-fA-F0-9]{40}
+re:\bv0-\d?-?(vault|market|egroup|assets|rates)\b
+re:\.clar\b
+re:\.move\b
+re:reserve-v1|market-vault|stacking-dao-core|ststx-ratio

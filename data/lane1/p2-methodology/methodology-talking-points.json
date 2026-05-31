@@ -1,0 +1,54 @@
+{
+  "_doc": "LEAK-SAFE methodology talking points for the P2 content-wire (Tier 1, Ogie msg 8078). The consumer draws ONLY from this curated pool — it NEVER reads hunt-file specifics. Every entry is generalized methodology (lens/doctrine/anchor-class). Operator-editable: add an entry when a NEGATE produces a publishable, target-stripped methodology win. RULE: no live-target name, no contract/function/address, no platform+scope combo. When in doubt, generalize harder.",
+  "version": "1.0",
+  "updated": "2026-05-31",
+  "arsenal_state": {
+    "substrate": "Clarity / Stacks smart contracts",
+    "anchors": 4,
+    "lending_sub_anchors": 2,
+    "liquid_staking_sub_anchors": 1,
+    "headline": "Our Clarity security arsenal now spans 4 protocol-classes — a compounding library of reusable audit lenses, not more LLM tokens."
+  },
+  "lenses": [
+    {
+      "id": "erc4626-vs-index",
+      "title": "ERC4626-share-vs-separate-index pricing-consistency",
+      "tweet": "A vault share used as collateral but priced by a SEPARATE liquidity index — while the vault redeems via ERC4626 shares — must track that index. If it over-states the share: over-borrow → bad debt.",
+      "claim": "When a tokenized-vault share is used as collateral but priced by a SEPARATE liquidity index (aToken-style) while the vault redeems via ERC4626 total-assets/total-supply, the two valuations must track — or the gap becomes over-borrow and bad debt. The dangerous direction is the index OVER-stating share value. Check the treasury-dilution formula, the rounding direction, and whether the utilization denominator equals total-assets.",
+      "hashtags": ["#DeFiSecurity", "#SmartContractAudit"]
+    },
+    {
+      "id": "cross-protocol-rate-source",
+      "title": "Cross-protocol exchange-rate-source manipulation",
+      "tweet": "Protocol B reads protocol A's internal rate as an oracle (LST ratio, vault price, AMM TWAP). Safe only if: A's rate isn't in-tx movable, OR the move is unrecoverable, OR B bounds it. Movable + recoverable + unbounded = cross-protocol critical.",
+      "claim": "When protocol B consumes protocol A's INTERNAL exchange-rate as an oracle (an LST ratio, a vault share-price, an AMM TWAP), three questions decide safety: (1) is A's rate in-tx movable — raw-balance/donation vs a tracked accounting variable? (2) is the move RECOVERABLE in-tx, or only a permanent donation that dilutes across all holders? (3) does B's consuming math BOUND the rate? Movable + recoverable + unbounded = a cross-protocol critical; movable-but-unrecoverable-or-bounded is a fragility to monitor.",
+      "hashtags": ["#DeFiSecurity", "#OracleSecurity"]
+    },
+    {
+      "id": "tracked-var-vs-raw-balance",
+      "title": "Tracked-var vs raw-balance accounting",
+      "tweet": "A share/rate from a TRACKED accounting var is immune to donation-inflation; from a raw token balance it's only seed-state-safe. But even a partly-raw total is safe if the raw part is attacker-unrecoverable AND the consumer is bounded. Foreclosure = capture<cost + unrecoverable.",
+      "claim": "A share or rate computed from a TRACKED accounting variable is structurally immune to donation-inflation; one computed from a raw token balance is only seed-state-safe. But even a partially-raw total can be safe — if the raw component is attacker-unrecoverable and the consumer is bounded. The real foreclosure is 'capture < cost AND unrecoverable', not simply 'use a tracked var'.",
+      "hashtags": ["#DeFiSecurity"]
+    },
+    {
+      "id": "mandatory-arithmetic-edge",
+      "title": "Mandatory-path arithmetic edge -> DoS / freeze / halt",
+      "tweet": "Unguarded arithmetic (div-by-zero, underflow, a zero-guard testing the wrong quantity) on a MANDATORY accounting/charging path → it aborts → every entry point that must run it bricks. Deposits, withdrawals, even chain liveness. Guard the divisor itself, or cross-multiply.",
+      "claim": "Generalized detector class: an unguarded arithmetic edge — divide-by-zero, subtraction underflow, or a zero-guard that tests the wrong quantity (a sum or sibling rather than the actual divisor) — sitting on a MANDATORY accounting/charging/metering path. When it aborts, every entry point that must run that calc bricks: deposits, withdrawals, liquidations, even chain liveness. The fix: guard the divisor itself, or cross-multiply to avoid the division. Real-world anchors span multiple chains and a mainnet halt.",
+      "hashtags": ["#SmartContractSecurity"]
+    },
+    {
+      "id": "liquidation-3-guard",
+      "title": "The 3-guard liquidation checklist",
+      "tweet": "Three guards foreclose the over-liquidation / flash-borrow-self-liquidate family: (1) a param invariant capping seizure ≤100% of collateral, (2) a post-liquidation health-buffer assert, (3) a same-block-borrow guard. Run them as a checklist — a missing one is the candidate.",
+      "claim": "Three guards foreclose the over-liquidation / flash-borrow-self-liquidate family: a parameter invariant capping seizure at <=100% of collateral value, a post-liquidation health-buffer assertion, and a same-block-borrow guard. Run them as a checklist on any lending target — a missing one is the candidate.",
+      "hashtags": ["#DeFiSecurity"]
+    }
+  ],
+  "thesis_lines": [
+    "Honest calibration scales; LLM throughput doesn't. Every defense we file pre-pays the next audit.",
+    "A clean NEGATE is a product: each foreclosed surface compounds into a reusable lens that filters the next target faster.",
+    "We don't ship false positives. The discipline behind the scoring engine is pre-paid pattern recognition, not retroactive triage."
+  ]
+}
