@@ -1,0 +1,50 @@
+{"idx": 0, "line": 315, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP PeerBlock is a privacy tool, not a security exploit."}
+{"idx": 1, "line": 733, "cls": "GROUND_TRUTH", "verdict": "KEEP", "reason": "KEEP: Discusses exchange security, references past hacks."}
+{"idx": 2, "line": 1149, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual chatter, no security keywords."}
+{"idx": 3, "line": 1459, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Off-topic, no security keywords."}
+{"idx": 4, "line": 1820, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Old Bitcoin Q&A, not security-related."}
+{"idx": 5, "line": 1953, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual chatter, no security keywords."}
+{"idx": 6, "line": 2112, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual chatter, no security keywords."}
+{"idx": 7, "line": 2222, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Old, off-topic, no security keywords."}
+{"idx": 8, "line": 2805, "cls": "GROUND_TRUTH", "verdict": "KEEP", "reason": "KEEP: Discusses lost coins impacting supply."}
+{"idx": 9, "line": 4056, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual chatter, no security keywords."}
+{"idx": 10, "line": 5020, "cls": "GROUND_TRUTH", "verdict": "KEEP", "reason": "KEEP Oauth hack mentioned at Blackhat."}
+{"idx": 11, "line": 5477, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual chatter, not security-related."}
+{"idx": 12, "line": 5508, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP Public key crypto is basic knowledge, not exploit."}
+{"idx": 13, "line": 6546, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual chatter, no real security threat."}
+{"idx": 14, "line": 6890, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual chatter, no security mention."}
+{"idx": 15, "line": 7308, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Off-topic, no security keywords."}
+{"idx": 16, "line": 7332, "cls": "GROUND_TRUTH", "verdict": "KEEP", "reason": "KEEP The post mentions SHA256 crypto features and hacking Satoshi's code."}
+{"idx": 17, "line": 7957, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual chatter, no security keywords."}
+{"idx": 18, "line": 8349, "cls": "GROUND_TRUTH", "verdict": "KEEP", "reason": "KEEP: Possible crypto theft warning."}
+{"idx": 19, "line": 8945, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual discussion, not security-related."}
+{"idx": 20, "line": 8965, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual discussion, not security-related."}
+{"idx": 21, "line": 9353, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual chatter, no security flag."}
+{"idx": 22, "line": 10175, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual chatter, no security mention."}
+{"idx": 23, "line": 11052, "cls": "GROUND_TRUTH", "verdict": "KEEP", "reason": "KEEP: Security methodology discussion."}
+{"idx": 24, "line": 12394, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual chatter, no security flag."}
+{"idx": 25, "line": 12534, "cls": "GROUND_TRUTH", "verdict": "KEEP", "reason": "KEEP: GROUND_TRUTH - stolen credit cards linked to exchanges."}
+{"idx": 26, "line": 12563, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual chatter, not a real exploit or scam."}
+{"idx": 27, "line": 12566, "cls": "GROUND_TRUTH", "verdict": "KEEP", "reason": "KEEP: Mentions PayPal theft risk."}
+{"idx": 28, "line": 13556, "cls": "GROUND_TRUTH", "verdict": "KEEP", "reason": "KEEP The post discusses fraud prevention and scam tactics."}
+{"idx": 29, "line": 14747, "cls": "GROUND_TRUTH", "verdict": "KEEP", "reason": "KEEP: Early discussion on BTC theft risks."}
+{"idx": 30, "line": 14897, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual chatter, no security keywords."}
+{"idx": 31, "line": 15069, "cls": "GROUND_TRUTH", "verdict": "KEEP", "reason": "KEEP: Discusses potential economic threat, not noise."}
+{"idx": 32, "line": 15238, "cls": "GROUND_TRUTH", "verdict": "DROP", "reason": "DROP: Casual chatter, no security keywords."}
+{"idx": 33, "line": 15706, "cls": "GROUND_TRUTH", "verdict": "KEEP", "reason": "KEEP: Discusses double-spending attack difficulty."}
+{"idx": 34, "line": 326, "cls": "RUG_PATTERN", "verdict": "KEEP", "reason": "KEEP: Pyramid scheme analogy matches RUG_PATTERN."}
+{"idx": 35, "line": 4904, "cls": "RUG_PATTERN", "verdict": "DROP", "reason": "DROP: Casual chatter, price talk, off-topic."}
+{"idx": 36, "line": 8217, "cls": "RUG_PATTERN", "verdict": "DROP", "reason": "DROP It's a dismissive comment, not a security flag."}
+{"idx": 37, "line": 8359, "cls": "RUG_PATTERN", "verdict": "DROP", "reason": "DROP - Casual joke, not a rug pattern."}
+{"idx": 38, "line": 9170, "cls": "RUG_PATTERN", "verdict": "DROP", "reason": "DROP: No mention of theft, rug, or security exploit."}
+{"idx": 39, "line": 9569, "cls": "RUG_PATTERN", "verdict": "KEEP", "reason": "KEEP: Historical reference to Ponzi scheme warnings."}
+{"idx": 40, "line": 14977, "cls": "RUG_PATTERN", "verdict": "DROP", "reason": "DROP: Casual confrontation, no clear theft/rug signal."}
+{"idx": 41, "line": 15065, "cls": "RUG_PATTERN", "verdict": "DROP", "reason": "DROP: Casual chatter, no security flag."}
+{"idx": 42, "line": 2436, "cls": "METHODOLOGY", "verdict": "KEEP", "reason": "KEEP: Identity linkage raises privacy concerns."}
+{"idx": 43, "line": 2652, "cls": "METHODOLOGY", "verdict": "DROP", "reason": "DROP: No security keywords or patterns detected."}
+{"idx": 44, "line": 3592, "cls": "METHODOLOGY", "verdict": "KEEP", "reason": "KEEP: Potential security methodology testing."}
+{"idx": 45, "line": 6447, "cls": "METHODOLOGY", "verdict": "KEEP", "reason": "KEEP: Technical discussion on blockchain security."}
+{"idx": 46, "line": 9157, "cls": "METHODOLOGY", "verdict": "DROP", "reason": "DROP: Casual chatter, no security keywords."}
+{"idx": 47, "line": 12237, "cls": "DETECTOR_SEED", "verdict": "DROP", "reason": "DROP: Casual code chat, no security flags."}
+{"idx": 48, "line": 12238, "cls": "DETECTOR_SEED", "verdict": "DROP", "reason": "DROP: Casual code chat, no security keywords."}
+{"idx": 49, "line": 15049, "cls": "DETECTOR_SEED", "verdict": "DROP", "reason": "DROP: Casual chatter, no security keywords."}
