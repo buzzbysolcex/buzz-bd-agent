@@ -1,0 +1,3 @@
+# Foreclosed Gate-2 clones — TIER-1 EVICTABLE allowlist (disk-evict-guard.sh).
+# One absolute path per line. Add a clone here ONLY after its hunt is FORECLOSED/NEGATED.
+# Active clones (pending submission / live PoC) must NOT be listed.
