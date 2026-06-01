@@ -5,7 +5,12 @@
 **Platform:** Immunefi, **$100K max** (10% funds), PoC ALWAYS required (all severities), **no-KYC**, min severity Low
 **Scope (Step-1 VERIFIED):** Clarity contracts in `contracts/` of master (`github.com/arkadiko-dao/arkadiko`), excluding test-only.
 **Repo HEAD:** `--depth 1` 2026-06-01, 60M, 118 non-test contracts. Focus: `vaults-v2/` (freshest redesign) + `arkadiko-oracle-v2-3.clar`.
-**Verdict:** **CANDIDATE — 2 surviving, both Gate-0 NOVEL-VARIANT-REVIEW → Gate-2 PoC.** First survivor of the 2026-06-01 hunt. Substrate is saturated/audited (Doctrine #37-B) BUT the V2 oracle-consume path has a clean gap the V1 audit (CR-01) did not cover — in fact CR-01's own fix introduced sub-finding #1.
+**Verdict:** **CANDIDATE → GATE-2 [EXECUTED] (both confirmed) → paste-ready drafted, operator-gated submit.** First survivor of the 2026-06-01 hunt. CR-01's own replay-fix introduced sub-finding #1.
+
+**GATE-2 RESULT (2026-06-01, clarinet-sdk simnet — first Clarity exec harness on this box):**
+- **#1 oracle signature cache-before-validate DoS — 4/4 PASS [EXECUTED]** (`hunts/poc/2026-06-01-arkadiko-oracle-166/`): under-quorum (2 trusted sigs) → `(ok false)` + both sigs marked `used`; full-quorum reuse → reverts `u8403` lockout; replay-key = per-(block,price) signature → keeper escapes by re-signing (=> **Medium, recoverable**, not permanent).
+- **#2 missing consumer staleness — PASS [EXECUTED]**: `get-collateral-to-debt` returns identical `(ratio 20000, valid true)` on a 500-burn-block-stale price; quantified conditional bad-debt ~$50/vault for a $3→$1 move. TASK-3: NOT an accepted-risk (only an informal 2021 grant "30s cron" note) → clean novel gap.
+- **Honest severity (Doctrine #14):** no GUARANTEED fund-loss end-state reproduced (the DoS is escapable; loss is conditional on a sustained stall over a price move on Stacks' miner-ordered mempool). Per operator gate → **#1 standalone Medium DoS, #2 standalone gap**; High-composition argument noted but conditional. Paste-ready: `hunts/poc/2026-06-01-arkadiko-oracle-166/PASTE-READY.md`. Submission OPERATOR-GATED.
 
 ---
 

@@ -1,0 +1,41 @@
+[project]
+name = "ark-poc"
+[project.cache]
+[contracts.arkadiko-oracle-trait-v1]
+path = "contracts/arkadiko-oracle-trait-v1.clar"
+clarity_version = 2
+epoch = 2.4
+[contracts.arkadiko-dao]
+path = "contracts/arkadiko-dao.clar"
+clarity_version = 2
+epoch = 2.4
+[contracts.arkadiko-oracle-v2-3]
+path = "contracts/arkadiko-oracle-v2-3.clar"
+clarity_version = 2
+epoch = 2.4
+[repl.analysis]
+passes = []
+[contracts.arkadiko-vaults-helpers-trait-v1-1]
+path = "contracts/arkadiko-vaults-helpers-trait-v1-1.clar"
+clarity_version = 2
+epoch = 2.4
+[contracts.arkadiko-vaults-tokens-trait-v1-1]
+path = "contracts/arkadiko-vaults-tokens-trait-v1-1.clar"
+clarity_version = 2
+epoch = 2.4
+[contracts.arkadiko-vaults-data-trait-v1-1]
+path = "contracts/arkadiko-vaults-data-trait-v1-1.clar"
+clarity_version = 2
+epoch = 2.4
+[contracts.arkadiko-vaults-helpers-v1-1]
+path = "contracts/arkadiko-vaults-helpers-v1-1.clar"
+clarity_version = 2
+epoch = 2.4
+[contracts.stub-vaults-tokens]
+path = "contracts/stub-vaults-tokens.clar"
+clarity_version = 2
+epoch = 2.4
+[contracts.stub-vaults-data]
+path = "contracts/stub-vaults-data.clar"
+clarity_version = 2
+epoch = 2.4

@@ -1,0 +1,5 @@
+(impl-trait .arkadiko-vaults-data-trait-v1-1.vaults-data-trait)
+(define-read-only (get-vault (owner principal) (token principal))
+  (ok { status: u101, collateral: u100, debt: u150, last-block: u0 }))
+(define-read-only (get-total-debt (token principal)) (ok u150))
+(define-public (set-vault (owner principal) (token principal) (status uint) (collateral uint) (debt uint)) (ok true))

@@ -1,0 +1,21 @@
+setup: 3 trusted oracles registered
+
+block=4 minimum-valid-signers=3
+each sig recovers to a TRUSTED signer?  u1 u1 u1
+
+STEP 1 under-quorum (2 trusted sigs) result: (ok false)  <-- expect (ok false): 2 < 3, no price update
+  sig0 used AFTER? true  sig1 used AFTER? true  <-- expect true true: BURNED on the no-op path
+
+STEP 2 full-quorum (3 sigs incl. 2 burned) result: (err u8403)  <-- expect (err u8403) ERR-SIGNATURES-NOT-UNIQUE = lockout
+
+PART 2 — replay-key granularity:
+  fresh-block sig0 pre-consumed? false  <-- expect false (key = signature buffer, per exact message)
+  keeper re-signs fresh block -> full-quorum result: (ok true)  <-- expect (ok true): lockout is per-message, escapable
+
+=== PoC RESULT ===
+  [PASS] under-quorum (2 trusted sigs) returned (ok false) — success response, no update
+  [PASS] both trusted signatures marked 'used' despite no price update (cache-before-validate, not unwound)
+  [PASS] legitimate full-quorum update reverted ERR-SIGNATURES-NOT-UNIQUE = oracle lockout
+  [PASS] replay-key = per-(block,price) signature; keeper escapes by re-signing a fresh block (=> Medium, recoverable)
+
+>>> 4/4 PASS — #166 oracle-update DoS CONFIRMED [EXECUTED]; severity-bounding (escapable) also proven

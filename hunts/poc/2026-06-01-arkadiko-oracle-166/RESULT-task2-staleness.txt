@@ -1,0 +1,17 @@
+=== TASK-2: missing consumer staleness ===
+price set: $3.00 (last-price=300, scale=100)
+burn height now: 2 | oracle: (tuple (decimals u100) (last-block u1) (last-price u300))
+
+FRESH get-collateral-to-debt: (ok (tuple (ratio u20000) (valid true)))  <-- ratio 20000 (=200%), valid true (healthy)
+
+--- mined 500 burn blocks, NO oracle update ---
+burn height now: 503 | oracle last-block UNCHANGED: (tuple (decimals u100) (last-block u1) (last-price u300))
+STALE get-collateral-to-debt: (ok (tuple (ratio u20000) (valid true)))  <-- IDENTICAL ratio, STILL valid true: no age rejection
+
+=== quantified conditional outcome ===
+  on-chain (stale $3.00): ratio = 100*300*100/150 = 20000 (=200%) -> valid=true -> liquidate() reverts ERR_CAN_NOT_LIQUIDATE [INSPECTED mgr L98]
+  real price $1.00:        ratio = 100*100*100/150 =  6666 (=66%)  -> under-collateralized; collateral value $100 < debt $150
+  => locked bad debt = debt - real collateral value = 150 - 100 = 50 USDA per vault (scales with vault size + price move)
+  CONDITIONAL on a SUSTAINED oracle stall (see #1) across the price move — escapable on Stacks' miner-ordered mempool, so NOT a guaranteed exploit.
+
+=== RESULT === [PASS] consumer uses a 500-block-stale price identically to a fresh one — NO staleness gate [EXECUTED]
