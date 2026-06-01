@@ -73,6 +73,23 @@ Rank EV against current pipeline targets. Pipeline targets: open Gate 1s + queue
 
 ---
 
+## STEP 4.5 — GATE-0: KNOWN-ISSUES PRE-FLIGHT (MANDATORY, runs BEFORE Gate-1 + before ANY PoC — Doctrine #15, added 2026-06-01)
+
+> Authority: Ogie GATE-0 directive (2026-06-01); Doctrine #15. Origin: DISC-022 (Wormhole Hyp-C) — a 3/3 Foundry PoC CLOSED as known-behaviour because it matched the program's own `SECURITY_CONTEXT.md` accepted-risk entry. A finding is **not novel until checked against the target's own accepted-risk / known-issues corpus.**
+
+Before cloning/PoC, build (or refresh) the program's known-issues corpus and match each candidate finding's `{class, mechanism, impact, component}` against it:
+
+1. **Build/refresh corpus** (`scripts/lane1/gate0-known-issues.py`): fetch + extract accepted-risk entries from the program's own docs — `SECURITY_CONTEXT.md` / `SECURITY.md` / `KNOWN_ISSUES*` / published-audit accepted/acknowledged findings / NatSpec `@custom:security` — PLUS the Immunefi/HackerOne/HackenProof/Sherlock page Out-of-Scope + Known-Issues + Previously-Reported + impact-exclusions. Store structured `{class, mechanism, impact, component, source_url, citation_anchor}` in `data/lane1/gate0/known-issues.json` keyed by program. Re-fetch on each re-engagement (these docs change).
+2. **Match → 3 buckets** (free `bankr/gpt-5-nano` precision-matcher when the route is up; structural matcher otherwise):
+   - **KNOWN-NEGATE** (HIGH-confidence match) → FORECLOSE pre-PoC; cite the exact doc section; log disposition `NEGATE-KNOWN` with the citation. NO PoC, NO file.
+   - **NOVEL-VARIANT-REVIEW** (partial/uncertain) → WR-flag the matched entry + one-line "why this might be a true variant the entry does NOT cover." Human decides; do NOT auto-kill.
+   - **NO-MATCH-PROCEED** → continue to Step 5 / Gate-1 / PoC.
+3. **Bias** (mirror P3 precision): auto-NEGATE ONLY on high confidence; default uncertain → WR review. A false-NEGATE costs a real bounty.
+
+**Skipping Step 4.5 = repeat of the DISC-022 wasted-PoC error = violation.** Cross-ref Doctrine #14 (Exploit Vector ≠ Outcome) + #15.
+
+---
+
 ## STEP 5 — GATE 1 EXECUTION (when activated)
 
 1. Clone scope repos via `GIT_TERMINAL_PROMPT=0 git clone --depth 1` (per `git-clone-noninteractive.md`)
