@@ -41,6 +41,14 @@ Built `data/lane1/gate0/known-issues.json["aave-umbrella"]` (5 entries) from `as
 
 If revisited: focus Umbrella.sol deficit-offset desync (the `deficitOffset` manual-increase path L75-86) for an accounting gap NOT covered by the acknowledged liquidationFee issue.
 
+### TASK-6 CLOSURE (2026-06-01, Ogie msg 8108 — verify before abandoning) → **CLOSED-INSTANCE, NEGATE UPGRADED scoped→VERIFIED**
+
+Targeted read of `Umbrella.sol` `slash`/`_slashAsset`/`_coverDeficit` vs StErMi **H-01** (`liquidationBonus`-in-`pendingDeficit`, sev High, status **Fixed**):
+- **Fix verified [INSPECTED]:** `_slashAsset` computes `deficitToCoverWithFee = deficitToCover·(liquidationFee+100%)/100%` and slashes for it, but returns ONLY `newCoveredAmount` (= `deficitToCover`, full-slash; pro-rata on partial); `liquidationFeeAmount` is computed + emitted but NEVER returned. `slash()` does `_setPendingDeficit(+= newCoveredAmount)` — fee EXCLUDED from `pendingDeficit`. Invariant `pendingDeficit ≤ poolDeficit` holds (newCoveredAmount ≤ deficitToCover ≤ newDeficit). H-01 is a CLOSED instance.
+- **No open variant:** partial-slash uses floor division → UNDER-counts newCoveredAmount (conservative, invariant-safe — opposite direction to H-01's over-count). Fee never leaks into pendingDeficit on any path. Dust-handling documented (L187-190).
+- **Adjacent concerns = audit-acknowledged (KNOWN, not new):** `_slashAsset` underlying price via `latestAnswer()` (no staleness check) = StErMi **I-03** (align Chainlink getters, **Ack**); eliminateReserveDeficit-return dust = **L-01 (Ack)**. Both Gate-0 KNOWN.
+- **Verdict:** residual CLOSED. Aave Umbrella NEGATE is now VERIFIED (core + deficit/fee math read; arsenal lenses sound or audit-acknowledged). Clone foreclosed → added to disk-evict manifest.
+
 ## WHY NEGATE (honest EV — Doctrine #42)
 
 Umbrella IS fresh (June 2025) — but it carries **4 audits + an explicit accepted-risk doc** that pre-empts exactly the Clarity/lending arsenal's strongest edges (ERC4626 inflation, slash/share accounting, cooldown state-machine, admin trust). Freshness does not overcome audit-density here; p(net-new) on the read core is low and the residual is audit-covered. Foreclosing the core; residual flagged not-cleared.

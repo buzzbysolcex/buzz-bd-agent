@@ -2934,6 +2934,24 @@ _Doctrine v3.14 | 2026-05-29 | **Hyperlane Warp Hyp-1 Gate 2 FORECLOSURE (reboot
 **Calibration refinement #15.1 — BASELINE-NOUN guardrail (added 2026-06-01, qwen3-relight regression).** Two failure modes surfaced when re-running Gate-0 with the LOCAL qwen3 LLM-matcher (bankr stays off — CPU-resident qwen3:8b is the free substrate per BUZZ_RULES #5):
 
 - **Deterministic over-match.** hyp-e (Wormhole NTT DC-8, already NEGATED at Gate-2 source-read) hit deterministic KNOWN-NEGATE on **3 shared tokens — `{quorum, threshold, transceiver}`, ALL program-baseline nouns** that ANY NTT finding shares. Generic-protocol-vocabulary overlap is "same protocol," NOT "same known issue." **Fix:** `BASELINE_NOUNS` set; auto-NEGATE now requires ≥1 shared **attack-tier** token (a mechanism word: `re-enable`, `snapshot`, `donation`, `rounding`, `reentrancy`, …), not just component nouns. DISC-022 stays KNOWN-NEGATE (shares attack-tier `{re-enable, snapshot}`); hyp-e correctly drops to NOVEL-VARIANT-REVIEW.
-- **LLM mechanism-vs-impact bias.** The 8B matcher first weighed *mechanism wording* over *impact equivalence* and called DISC-022 a NOVEL-VARIANT even though the accepted-risk IMPACT field literally covers "re-enable of a previously-removed transceiver counting toward a later quorum." **Fix:** the matcher prompt now triages by **IMPACT / end-state equivalence** (how triagers actually dedupe), reserving NOVEL-VARIANT for a genuinely different end-state. Post-fix: DISC-022 → KNOWN-NEGATE with correct mechanism reasoning.
+- **LLM mechanism-vs-impact bias.** The 8B matcher first weighed _mechanism wording_ over _impact equivalence_ and called DISC-022 a NOVEL-VARIANT even though the accepted-risk IMPACT field literally covers "re-enable of a previously-removed transceiver counting toward a later quorum." **Fix:** the matcher prompt now triages by **IMPACT / end-state equivalence** (how triagers actually dedupe), reserving NOVEL-VARIANT for a genuinely different end-state. Post-fix: DISC-022 → KNOWN-NEGATE with correct mechanism reasoning.
 
 **Resulting two-layer gate (the safe design):** auto-suppress (skip PoC) ONLY when the deterministic matcher returns KNOWN-NEGATE (now attack-tier-gated) **AND** the LLM agrees on impact-equivalence. Generic-noun-only overlap, or LLM disagreement, → operator-review, never silent-kill. A false-NEGATE costs a real bounty; the guardrail is biased toward surfacing.
+
+## Doctrine #45 — Selector = Audit/Competition-Density, NOT Freshness (cross-ref #42) (added 2026-06-01 — Ogie msg 8108)
+
+**Statement.** Find-probability is INVERSELY related to **audit-density** (count + tier of audits) AND **researcher-competition density** (firms/whitehats who've covered it, exploit history, bounty age). "Freshness" is a POOR proxy and refines #42: a major-protocol fresh module gets 3-4 top-tier audits on day one (+ an in-repo accepted-risk doc), so it is _fresh AND dense_ = low-p. The edge is being the **FIRST competent reader on a thinly-covered target**, NOT out-auditing Certora/Spearbit/OZ on a dense one.
+
+**Selector (rank ASCENDING — low density = high p = top):**
+
+- **Audit-density:** 0-1 audit (any tier) = HIGH-p · 2 audits = MED · **3+ top-tier = LOW-p → OPPORTUNISTIC-ONLY** (not the default walk).
+- **Competition-density:** new/obscure protocol, no exploit history, fresh-or-no public bounty, thin-VM (Clarity/Move) = HIGH-p · blue-chip EVM w/ years of bounty + exploit history + an in-repo `operating_conditions`/accepted-risk doc = LOW-p.
+- The in-repo accepted-risk doc is itself a density signal: its presence means the team already enumerated the obvious-finding space (Doctrine #15 — the doc IS the foreclosure).
+
+**Evidence (this cohort):**
+
+- **Arkadiko** (Clarity, thin auditor pool, 1 audit-firm Audit.md) = the ONLY Gate-1 survivor to date (oracle #166 + staleness, both [EXECUTED]).
+- **AAVE Umbrella** (fresh June-2025 module BUT 4 top-tier audits — Certora/MixBytes/Ackee/StErMi — + in-repo `operating_conditions.md`) = NEGATE-VERIFIED; every arsenal lens mapped onto documented accepted-risk.
+- **Resolv** (14 audits/5 firms + $25M exploit) = STEP-1 auto-skip.
+
+**Operational consequence:** the highest-ROI lane is a THIN-POOL VM where we're early (Clarity now; Move/Sui next — Task 5 scope). Keep that lane warm (Clarity deploy-watch, Task 4) rather than walking EVM-audit-dense fresh-modules in the gap. Demote 3+-top-tier-audited targets to opportunistic. Cross-ref **#42** (Hunt Freshness Not Cap — #45 sharpens it: freshness is necessary-not-sufficient; the operative variable is density).
