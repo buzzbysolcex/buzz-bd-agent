@@ -1504,16 +1504,15 @@ EV = P(finding) × bounty_cap × P(acceptance) × P(first-to-report) × brain_ov
 
 **Status.** PERMANENT (3-anchor band reached 2026-05-28 evening): Euler V2 Cantina (canonical 33-audit anchor, 2026-05-25) + Gearbox-BOUNDARY (2nd anchor) + **Spark Immunefi $5M (3rd canonical anchor 2026-05-28 evening)**. Spark's anchor evidence: spark-alm-controller alone has 21 audit rounds (8 ChainSecurity + 11 Cantina + 2 Certora, v100→v1100 sustained bi-directional cadence); aggregate across Spark in-scope contracts surfaces 36-44+ visible audit rounds across 8+ firms. 0.20× MAXIMUM-tier multiplier applied; FORECLOSURE-RECEIPT verdict at Gate 1 (no clone, NO Foundry investment). EV pre-discount $180K → post-discount $1.5-4K (~0.024× weighted combined: MAXIMUM tier 0.20× × Pattern H ×0.40 × DC-7 EXCLUSION ×0.30 = 0.024×). Spark anchor proves F corollary cleanly transfers across Immunefi-platform target class (was Euler+Cantina + Gearbox+? → now Spark+Immunefi adds platform-portability evidence). Authority: 2026-05-28 background-agent Spark Gate 1 (`hunts/2026-05-28-spark-immunefi-gate1.md`, 37KB, DEDUP-FORECLOSURE-RECEIPT verdict).
 
-
 **Saturation ceiling threshold = 33 audits (Euler V2 anchor 2026-05-25).** Programs at/above this threshold receive a **0.20× P(finding) discount multiplier — the lowest in the calibration**. This is the MAXIMUM-audit-saturation discount tier in the Doctrine #27 hierarchy:
 
-| Audit count | Saturation tier | P(finding) multiplier | Default action |
-| --- | --- | --- | --- |
-| <8 | LOW | 1.0× (no discount) | Standard Gate 1 + Gate 2 |
-| 8-14 | MEDIUM | 0.50× | Standard Gate 1; reduced Gate 2 |
-| 15-29 | HIGH | 0.30-0.40× (per #27 sub-rule cadence) | FORECLOSURE-RECEIPT default; Gate 2 on net-new lens only |
-| 30-32 | HIGH-J | 0.25× (per #27 J corollary if submissions ≥100) | Auto-FORECLOSURE-RECEIPT possible |
-| **≥33** | **MAXIMUM** | **0.20×** | **FORECLOSURE-RECEIPT (brain-compound is primary value vector)** |
+| Audit count | Saturation tier | P(finding) multiplier                           | Default action                                                   |
+| ----------- | --------------- | ----------------------------------------------- | ---------------------------------------------------------------- |
+| <8          | LOW             | 1.0× (no discount)                              | Standard Gate 1 + Gate 2                                         |
+| 8-14        | MEDIUM          | 0.50×                                           | Standard Gate 1; reduced Gate 2                                  |
+| 15-29       | HIGH            | 0.30-0.40× (per #27 sub-rule cadence)           | FORECLOSURE-RECEIPT default; Gate 2 on net-new lens only         |
+| 30-32       | HIGH-J          | 0.25× (per #27 J corollary if submissions ≥100) | Auto-FORECLOSURE-RECEIPT possible                                |
+| **≥33**     | **MAXIMUM**     | **0.20×**                                       | **FORECLOSURE-RECEIPT (brain-compound is primary value vector)** |
 
 **Sub-rule.** At ≥33 audits with HEAD ≤180d, **brain-compound is the primary value vector, not Gate 2 submission**. Buzz's economic ROI on a MAXIMUM-tier target is captured by:
 
@@ -1687,19 +1686,19 @@ Authority: Ogie msg 7770 (2026-05-25 18:22 UTC) — batch-approval of 14 proposa
 
 Catalog of audit-saturated programs encountered in Buzz Lane 1 operations. Each row is calibrated with the Doctrine #27 / #27 sub-rule / #32 multipliers applicable at intake time. The catalog is APPEND-ONLY — programs that fall below the saturation floor are NOT removed; programs that cross 15+ audits are added. Cross-referenced from F, G, J corollaries below.
 
-| Program | Audits (count) | Saturation tier | P(finding) multiplier | Default action | Source |
-| --- | --- | --- | --- | --- | --- |
-| Euler V2 | 33 (multi-firm) | MAXIMUM (≥33, per #27 F corollary) | 0.20× | FORECLOSURE-RECEIPT at Gate 1 (brain-compound primary) | Cantina $7.5M, 2026-05-25 |
-| Aave V3 | ~25 | HIGH (multi-firm) | 0.30× | FORECLOSURE-RECEIPT default, Gate 2 only on net-new lens | Pashov + OZ + Spearbit cumulative |
-| Reserve | 21 (139 submissions) | HIGH-J (per #27 J corollary auto-FORECLOSURE-RECEIPT) | 0.20× | Auto-FORECLOSURE-RECEIPT (Step 5 short-circuit) | Cantina $10M, 2026-05-25 |
-| Aave V4 | ~20 | HIGH | 0.30× | FORECLOSURE-RECEIPT default; composition surfaces still OOS | Pre-launch audit cadence |
+| Program                    | Audits (count)                                                                                    | Saturation tier                                                             | P(finding) multiplier                              | Default action                                                                                                               | Source                                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Euler V2                   | 33 (multi-firm)                                                                                   | MAXIMUM (≥33, per #27 F corollary)                                          | 0.20×                                              | FORECLOSURE-RECEIPT at Gate 1 (brain-compound primary)                                                                       | Cantina $7.5M, 2026-05-25                                                                                 |
+| Aave V3                    | ~25                                                                                               | HIGH (multi-firm)                                                           | 0.30×                                              | FORECLOSURE-RECEIPT default, Gate 2 only on net-new lens                                                                     | Pashov + OZ + Spearbit cumulative                                                                         |
+| Reserve                    | 21 (139 submissions)                                                                              | HIGH-J (per #27 J corollary auto-FORECLOSURE-RECEIPT)                       | 0.20×                                              | Auto-FORECLOSURE-RECEIPT (Step 5 short-circuit)                                                                              | Cantina $10M, 2026-05-25                                                                                  |
+| Aave V4                    | ~20                                                                                               | HIGH                                                                        | 0.30×                                              | FORECLOSURE-RECEIPT default; composition surfaces still OOS                                                                  | Pre-launch audit cadence                                                                                  |
 | MakerDAO / Sky DSS classic | 30+ across 4 firms on DSS core (ChainSecurity+Cantina+ABDK+Sherlock, 8y) / 15+ on net-new modules | **MAXIMUM** (DSS core, #27 F 4th canonical anchor) / HIGH (net-new modules) | **0.20×** (DSS core) / 0.35× (lockstake/sUSDS/D3M) | DSS classic core (Vat/Dai/Spot/Pot/Vow/Flap/Flop) auto-FORECLOSURE-RECEIPT (#27 J corollary); Gate 2 only on net-new modules | Day 17 sweep 2026-05-16 + Sky DSS Gate 1 2026-05-29 FORECLOSED (`hunts/2026-05-29-sky-immunefi-gate1.md`) |
-| Compound | 12+ | MEDIUM-HIGH | 0.40× | Standard #27 discount; Gate 2 viable on net-new substrate | Cycle 2 pending |
-| Notional V2 | 8+ | MEDIUM | 0.50× | Standard #27 discount; V3 DISC-019 anchor demonstrates net-new substrate accessible | DISC-019 Immunefi #79837 |
-| Morpho V1 | 10+ | MEDIUM | 0.45× | Standard #27 discount; V2 family-widening accessible (DISC-018 anchor) | DISC-018 Cantina #1035 |
-| Olympus | 5+ internal + Sherlock + Code4rena | MEDIUM | 0.45× | FORECLOSURE-RECEIPT when wrapper #5 (internal-monotonic-oracle) confirmed; Gate 2 elsewhere | Cooler Loans task #59 |
-| Uniswap V4 | ~9+ off-repo (per Cantina blog) | MEDIUM-HIGH | 0.35× | FORECLOSURE-RECEIPT default per audit-AHEAD-of-HEAD posture (per #32 v1.1.1 M corollary) | Cantina $15.5M, 2026-05-25 |
-| Lido (V1/V2 + V3 stVaults) | 20+ multi-firm core (Statemind/OZ/MixBytes/SigmaPrime over 4y) + V3 2025 pre-launch cohort | **MAXIMUM** (#27 F 5th canonical anchor) | **0.20×** | auto-FORECLOSURE-RECEIPT; V3 stVaults net-new but layered-defended (LazyOracle freshness-delta + reserveRatio + quarantine) | Immunefi $2M no-KYC, Lido Gate 1 2026-05-29 FORECLOSED (`hunts/2026-05-29-lido-immunefi-gate1.md`) |
+| Compound                   | 12+                                                                                               | MEDIUM-HIGH                                                                 | 0.40×                                              | Standard #27 discount; Gate 2 viable on net-new substrate                                                                    | Cycle 2 pending                                                                                           |
+| Notional V2                | 8+                                                                                                | MEDIUM                                                                      | 0.50×                                              | Standard #27 discount; V3 DISC-019 anchor demonstrates net-new substrate accessible                                          | DISC-019 Immunefi #79837                                                                                  |
+| Morpho V1                  | 10+                                                                                               | MEDIUM                                                                      | 0.45×                                              | Standard #27 discount; V2 family-widening accessible (DISC-018 anchor)                                                       | DISC-018 Cantina #1035                                                                                    |
+| Olympus                    | 5+ internal + Sherlock + Code4rena                                                                | MEDIUM                                                                      | 0.45×                                              | FORECLOSURE-RECEIPT when wrapper #5 (internal-monotonic-oracle) confirmed; Gate 2 elsewhere                                  | Cooler Loans task #59                                                                                     |
+| Uniswap V4                 | ~9+ off-repo (per Cantina blog)                                                                   | MEDIUM-HIGH                                                                 | 0.35×                                              | FORECLOSURE-RECEIPT default per audit-AHEAD-of-HEAD posture (per #32 v1.1.1 M corollary)                                     | Cantina $15.5M, 2026-05-25                                                                                |
+| Lido (V1/V2 + V3 stVaults) | 20+ multi-firm core (Statemind/OZ/MixBytes/SigmaPrime over 4y) + V3 2025 pre-launch cohort        | **MAXIMUM** (#27 F 5th canonical anchor)                                    | **0.20×**                                          | auto-FORECLOSURE-RECEIPT; V3 stVaults net-new but layered-defended (LazyOracle freshness-delta + reserveRatio + quarantine)  | Immunefi $2M no-KYC, Lido Gate 1 2026-05-29 FORECLOSED (`hunts/2026-05-29-lido-immunefi-gate1.md`)        |
 
 **Catalog usage:**
 
@@ -1765,8 +1764,9 @@ Catalog of audit-saturated programs encountered in Buzz Lane 1 operations. Each 
 3. Consumer-side targets are typically LESS audit-saturated than the platform — Doctrine #27 discount inverts.
 
 **Concrete watchlist additions (post-Kelp DAO):**
+
 - LayerZero V2 consumers with single-DVN configurations → check via OApp `setConfig` events
-- Hyperlane consumers with single-validator-set configurations  
+- Hyperlane consumers with single-validator-set configurations
 - Wormhole consumers with single-guardian-quorum overrides
 - CCIP / Axelar / Across consumers with permissionless oracle-feed selection
 
@@ -1858,7 +1858,7 @@ Sub-step 5.4 sits between 5.3 (brain lens application) and 5.5 (5-target checkli
 2. For each override hit, enumerate ALL downstream consumers (functions or external contracts) that:
    - Read the overridden method's return value AND cache it (storage or memory)
    - Read the overridden method's return value AND use it AFTER any external call that could mutate underlying state
-   - Assume the standard semantics of the method (e.g., "balanceOf is monotone non-decreasing absent transfers", "msg.sender == _msgSender() unless explicit forwarder check passed", "decimals() is a compile-time constant", "transfer of N tokens decreases sender balance by exactly N")
+   - Assume the standard semantics of the method (e.g., "balanceOf is monotone non-decreasing absent transfers", "msg.sender == \_msgSender() unless explicit forwarder check passed", "decimals() is a compile-time constant", "transfer of N tokens decreases sender balance by exactly N")
 3. For each (override, consumer) pair, classify the consumer-invariant:
    - SAFE: consumer is invalidation-aware (e.g., calls `_updateUser(from, to)` on every state change; re-reads `balanceOf` after every external call; checks `if (from == to) return;` short-circuit)
    - DANGEROUS: consumer caches without re-read; consumer assumes static value; consumer doesn't short-circuit edge cases
@@ -1957,6 +1957,7 @@ upper_bound_per_attack = realized_yield_per_rebase × max_attacker_fraction - JI
 ```
 
 where:
+
 - `realized_yield_per_rebase` = TVL × APR / rebases_per_year
 - `max_attacker_fraction` = min(attacker_capital / (attacker_capital + existing_supply), 0.5) — capped at 50% (above which attacker IS the protocol)
 - `JIT_capital_cost` = flash-loan fee × lockup_duration (typical ~0.5 bps/min)
@@ -2042,6 +2043,7 @@ CauldronV4 was the canonical internal-cache class (debt-cache stale on rebase). 
    - **`@notice DEPRECATED:` format** — `/// @notice DEPRECATED: <vulnerability description> - do not use this function.` — canonical anchor (2nd, added 2026-05-25 proposal L): Uniswap V4 PositionManager `_increaseFromDeltas` + `_mintFromDeltas` (both LIVE in `_handleAction` dispatch with `/// @notice DEPRECATED: Vulnerable to sandwich attacks - do not use this function.`)
 
    The acknowledgment-OOS rule applies to BOTH formats — functionally identical operator-disclosure signals. Both signal: "the protocol team is aware of this surface; treat it as an OOS-by-acknowledgment design property." Cantina's "known/acknowledged in audits" OOS rule explicitly covers both NatSpec formats.
+
 4. **Verdict:** Check1=YES + Check2=NO + Check3=NO → **Gate 2 escalation candidate**. Check3=YES (in EITHER format) → **FORECLOSED by acknowledgment + Doctrine #27 (audit-saturation)**.
 
 **Uniswap V4 PositionManager 2nd-anchor verification (proposal L, 2026-05-25) [INSPECTED]:**
@@ -2067,7 +2069,8 @@ The Cantina $15.5M Uniswap V4 program treats these as OOS — operator-acknowled
 The DC-20 detector (`buzzshield-cand-z-detector.js`) `@dev`-warning negative-control should be extended to also match `@notice DEPRECATED:` patterns. Both NatSpec formats trigger FP-immunity for cross-chain bridge-adapter and rebase-pair surfaces. Update the detector's NatSpec regex from `/@dev [^\n]*(?:MEV|sweep|asymmetric|warning|caution)/i` to:
 
 ```js
-const NATSPEC_ACKNOWLEDGMENT_RE = /(?:\/\/\/|\/\*)\s*(?:@dev|@notice\s+DEPRECATED:?)\s+[^\n]*(?:MEV|sweep|asymmetric|warning|caution|vulnerable|do not use|deprecated)/i;
+const NATSPEC_ACKNOWLEDGMENT_RE =
+  /(?:\/\/\/|\/\*)\s*(?:@dev|@notice\s+DEPRECATED:?)\s+[^\n]*(?:MEV|sweep|asymmetric|warning|caution|vulnerable|do not use|deprecated)/i;
 ```
 
 Either format match → auto-REJECT at Skeptic conf 0.95.
@@ -2105,13 +2108,13 @@ When all three conditions hold, the FORECLOSURE-RECEIPT verdict is the default �
 
 **Worked anchor — Propagation Cycle 1 (2026-05-23 through 2026-05-25, 5/5 FORECLOSURE-RECEIPT).**
 
-| Target | Audits | late_changes (30d) | Detector hits | Verdict |
-|---|---|---|---|---|
-| silo-v2 (task #43) | 5+ Certora | 0 net-new surface | 0 | FORECLOSURE-RECEIPT |
-| origin-dollar (task #45 / Gate 2 #53) | 7+ (OZ + ToB + Spearbit + Certora) | 0 net-new surface | 0 (multiple rotations) | FORECLOSURE-RECEIPT |
-| venus-core-pool (task #47) | 8+ (Certora + Halborn + multiple) | 0 net-new surface | 0 | FORECLOSURE-RECEIPT |
-| lifi (task #57) | 85 (Cantina + Somraaj + Spearbit + ToB) | 0 net-new (4 housekeeping) | 0 | FORECLOSURE-RECEIPT |
-| cooler-loans (task #59) | 5+ internal + Sherlock + Code4rena | 0 net-new surface | 0 | FORECLOSURE-RECEIPT |
+| Target                                | Audits                                  | late_changes (30d)         | Detector hits          | Verdict             |
+| ------------------------------------- | --------------------------------------- | -------------------------- | ---------------------- | ------------------- |
+| silo-v2 (task #43)                    | 5+ Certora                              | 0 net-new surface          | 0                      | FORECLOSURE-RECEIPT |
+| origin-dollar (task #45 / Gate 2 #53) | 7+ (OZ + ToB + Spearbit + Certora)      | 0 net-new surface          | 0 (multiple rotations) | FORECLOSURE-RECEIPT |
+| venus-core-pool (task #47)            | 8+ (Certora + Halborn + multiple)       | 0 net-new surface          | 0                      | FORECLOSURE-RECEIPT |
+| lifi (task #57)                       | 85 (Cantina + Somraaj + Spearbit + ToB) | 0 net-new (4 housekeeping) | 0                      | FORECLOSURE-RECEIPT |
+| cooler-loans (task #59)               | 5+ internal + Sherlock + Code4rena      | 0 net-new surface          | 0                      | FORECLOSURE-RECEIPT |
 
 5/5 FORECLOSURE-RECEIPT outcomes across the cycle 1 watchlist — the Clara Ground-Truth bulk-intake lenses (CANDIDATE-T/V/W/X/Y/Z, now DC-14/17/18/19/20) found NO surface in any of the 5 heavily-audited mature targets. **The pattern is real:** mature targets with sustained audit cadence have already foreclosed the substrate that historical Clara incidents anchor on.
 
@@ -2215,11 +2218,11 @@ All 3 in-scope Uniswap repos (V4 PositionManager, V4 Core pool manager, V4 Perip
 
 **Forecast for future cycle 2 PASS targets with similar audit-AHEAD posture:**
 
-| Audit posture | Detector binding | Gate 2 yield | Brain compound yield |
-| --- | --- | --- | --- |
-| audit-AHEAD (audit >30d AFTER HEAD) + multi-firm | LOW (Pareto-frontier substrate) | LOW (FORECLOSURE-RECEIPT default) | HIGH (methodology contribution primary) |
-| audit-MIRROR (audit ±7d of HEAD) + multi-firm | LOW-MEDIUM | LOW-MEDIUM | MEDIUM-HIGH |
-| audit-BEHIND (audit >30d BEFORE HEAD) + multi-firm | MEDIUM | MEDIUM | MEDIUM |
+| Audit posture                                      | Detector binding                | Gate 2 yield                      | Brain compound yield                    |
+| -------------------------------------------------- | ------------------------------- | --------------------------------- | --------------------------------------- |
+| audit-AHEAD (audit >30d AFTER HEAD) + multi-firm   | LOW (Pareto-frontier substrate) | LOW (FORECLOSURE-RECEIPT default) | HIGH (methodology contribution primary) |
+| audit-MIRROR (audit ±7d of HEAD) + multi-firm      | LOW-MEDIUM                      | LOW-MEDIUM                        | MEDIUM-HIGH                             |
+| audit-BEHIND (audit >30d BEFORE HEAD) + multi-firm | MEDIUM                          | MEDIUM                            | MEDIUM                                  |
 
 The audit-AHEAD-of-HEAD pattern is the strongest FORECLOSURE-RECEIPT signal — the project signaled "we're done shipping; audit team validate the locked state." Future Gate 1s identifying this pattern should default to FORECLOSURE-RECEIPT verdict with brain-compound focus.
 
@@ -2474,11 +2477,11 @@ Captures the asymmetry between protocols that respond to compositional growth wi
 
 **Anchor — Stacks sBTC `update-protocol-contract-wrapper`** (`sbtc-deposit.clar:53-60`):
 
-| Function                                | Asserts | Blast radius                                        |
-| --------------------------------------- | ------- | --------------------------------------------------- |
-| `complete-deposit-wrapper`              | 6       | Single deposit state advance                        |
-| `initiate-withdrawal-request`           | 2       | Single user withdrawal queue insert                 |
-| `update-protocol-contract-wrapper`      | **1**   | **Swap entire protocol-logic contract (admin)**     |
+| Function                           | Asserts | Blast radius                                    |
+| ---------------------------------- | ------- | ----------------------------------------------- |
+| `complete-deposit-wrapper`         | 6       | Single deposit state advance                    |
+| `initiate-withdrawal-request`      | 2       | Single user withdrawal queue insert             |
+| `update-protocol-contract-wrapper` | **1**   | **Swap entire protocol-logic contract (admin)** |
 
 The most-blast-radius function has the LEAST defense. Defense-asymmetry inversion is the finding even though `update-protocol-contract-wrapper`'s single assert (signer-multisig check) is "correct" per function.
 
@@ -2497,6 +2500,7 @@ The most-blast-radius function has the LEAST defense. Defense-asymmetry inversio
 **Statement (PERMANENT).** When Buzz's detector pack has ZERO mechanical coverage for a target substrate (no AST walker, no Layer 1 deep-analyzer for the language, no semgrep ruleset binding), apply a floor `P(finding) ≤ 0.01` in Step 3 EV calculation. The floor prevents EV-inflation on Gate 1 dispatches against substrates where the corpus is structurally blind. [INSPECTED]
 
 **Promotion to PERMANENT (2026-05-27 evening).** 2-anchor criteria met across different substrate-blind substrates:
+
 - **Anchor 1 — dYdX V4 (Cosmos-SDK Go)** — original anchor 2026-05-23 + 2026-05-26 double-confirmation
 - **Anchor 2 — Bifrost Finance (Polkadot Substrate-Rust)** — 2026-05-27 Gate 1 (`hunts/2026-05-27-bifrost-immunefi-gate1.md`). 31 pallets across `bifrost-io/bifrost`, ZERO Substrate-Rust AST detector. Manual source-read sufficient for surface-mapping but P(finding) floor 0.01 applied to EV (final EV $8,800 below queue threshold). Supporting evidence: Hydration Gate 1 (`hunts/2026-05-26-hydration-immunefi-gate1.md`) hit the same substrate-blind condition on a different Polkadot parachain (HydraDX) at 2026-05-26.
 
@@ -2633,6 +2637,7 @@ CANDIDATE Doctrine #37 filed with 2 anchors (CoW canonical A; rhino.fi canonical
 **Status.** PERMANENT Doctrine #37 (promoted 2026-05-27 evening — Sub-Type B reaches 3 anchors: rhino.fi canonical + Gains Network gTrade 2nd anchor + Veda BoringVault 3rd anchor). Sub-Type A still 1 anchor (CoW); promotion of A pending 2nd Sub-A anchor.
 
 **Sub-Type B 6 anchors (PERMANENT, expanded 2026-05-29):**
+
 1. rhino.fi (canonical) — 440-day frozen + Immunefi branch-pinned `master` + 28-chain deployment vs 10 in scope + 5 audits
 2. Gains Network gTrade (2nd anchor 2026-05-27) — frozen Solidity substrate + active product launches off same contracts
 3. Veda BoringVault (3rd anchor 2026-05-27 evening) — `Se7en-Seas/boring-vault` HEAD `0e23e7f` 525d stale + `veda-labs/boring-vault-svm` HEAD `450cfd8` 275d stale + Immunefi program LIVE since 2026-01-21 with 52 active assets, 4 firms × 14+ audits, 0xMacro continuous cadence
@@ -2653,15 +2658,18 @@ Authority: CoW P1 + rhino.fi P1 (joint authorities), Gains Network 2026-05-27 di
 **Why the lens fires syntactically but not semantically.** DC-12's pattern detector matches the `(, answer, , , )` destructure shape. The shape is correct syntax for the FP detector but the source SEMANTIC must also be Chainlink-or-equivalent (push-based external feed with `updatedAt` lag potential). When the source is on-chain math, the destructured `updatedAt` would always be either `block.timestamp` (correct-fresh, false-positive lens) or `0` (deliberately-meaningless, like Pendle's case — adding a check would brick the oracle).
 
 **Refinement to Standing Intake Step 5.6 (5-target quality checklist) + Gate 1 → Gate 2 dispatch protocol.** Add as a sub-check under Liquidation+Oracle (target #2): for every DC-12 lens-hit, before dispatching Gate 2, verify the upstream `latestRoundData()` source class:
+
 - **CLASS A (stale-able feed)** — Chainlink price feeds, Pyth on-chain feeds with publish-time, Tellor reporter-pushed feeds. DC-12 fires valid. Promote to Gate 2.
 - **CLASS B (deterministic on-chain formula)** — Pendle LinearDiscount, fixed-formula maturity oracles, TWAP-derivation oracles with no external source, computed-from-immutable adapters. DC-12 misfires. Foreclose at Gate 1.
 - **CLASS C (hybrid)** — Adapter wraps Chainlink for one leg + on-chain math for another (e.g., Lista's `PTLinearDiscountMarketOracle` multiplies WBNB-Chainlink-price × on-chain-discount). DC-12 fires ONLY on the Chainlink leg, and only if THAT leg's staleness check is missing AT THE WRAPPER level (not upstream). Most well-architected hybrid oracles delegate staleness to upstream ResilientOracle/multi-pivot validators — verify whether the staleness check belongs to the wrapper or the upstream.
 
 **Distinct from DC-12 sub-7g (LST-PoR-feed-no-staleness, DEDUP-FORECLOSED-CLASS).** Sub-7g was Stader StaderOracle.getPORFeedData — 3-firm publicly-published DUP. Sub-Rule 34.1 is the STRUCTURAL companion: even with no DUP, the bug class can be NOT-A-BUG if the upstream is on-chain deterministic math. Both sub-rules close paths where the DC-12 lens fires but EV is $0:
+
 - Sub-7g: dedup-foreclosed (someone else already submitted)
 - Sub-Rule 34.1: structurally-negated (no bug exists)
 
 **Cross-pollination targets (CLASS B candidates likely to false-positive on DC-12 lens).** Future Gate 1 dispatches should pre-screen for CLASS B upstreams before promoting DC-12 candidates:
+
 - Any PT (principal token) oracle adapter (Pendle, Spark, Element, etc.)
 - Bond-style discount oracles (zero-coupon bond price adapters)
 - vAMM / TWAP-only oracles (Uniswap V3 cardinality-based, no external)
@@ -2681,6 +2689,7 @@ Authority: CoW P1 + rhino.fi P1 (joint authorities), Gains Network 2026-05-27 di
 **Why the saturation multiplier under-discounted.** Doctrine #27 calibration assumes lens-promotion-AFTER-audit = auditors-did-not-have-the-lens. But auditors don't NEED the Buzz lens label to hit the substrate — they hit it via their own framing ("ward-removal", "deprecation", "config hygiene"). When the SOURCE CODE still contains the dangerous-looking pattern but the GOVERNANCE-LAYER STATE has neutralized it, only on-chain state verification (or audit-language search) reveals the dead-code reality. Source-only Gate 1 inspection cannot see this.
 
 **Refinement to Standing Intake Step 0 (Phase 0 dedup).** When in-scope repos contain an `audit/` subdirectory with PDF reports, MUST grep ALL audit PDFs for:
+
 1. **Contract names** from the candidate (e.g., `LockstakeMigrator`)
 2. **Magic numbers** from the candidate source (e.g., `55_000_000`, `55M`)
 3. **Mechanism keywords** (e.g., `flashloan`, `migration`, `vat.line`)
@@ -2696,11 +2705,12 @@ Use pypdf (Python `import pypdf`) — pdftotext is often not installed. Pattern:
 
 **Anchor #2 mechanism note.** The Alchemix anchor is a SECOND-class of Corollary B foreclosure: not "remediation verbs in audit PDFs" (Sky pattern) but "**commit-message + function-docstring self-disclosure of the defense**" within the in-scope source repo. The Phase 0 search pattern that hit the foreclosure was a simple `git show <commit>` of the two flagged audit-fix commits — the auditor's intent was encoded directly in the docstring (`/// @dev Keeps already-earmarked transfers from being re-counted as future cover.`) and the commit subject ("fixed transmuter cover calculation. report 57587" + "updated cover system"). The bug-class was self-disclosed in the post-audit codebase itself.
 
-**Refinement — Standing Intake Step 0 (Phase 0 dedup) expands.** In addition to the 4-vector grep on audit PDFs (Sky anchor), Phase 0 MUST also:
-5. **Read full diffs** of every audit-fix commit flagged at Gate 1 Step 5.7 (Doctrine #34 audit-regression scan). Look specifically at:
-   - **Function docstrings added** in the fix-commit (auditors often encode the bug-class they're defending against)
-   - **Test functions added** in the fix-commit (regression tests reveal the exact attack scenario)
-   - **Comments inline** in the fix-commit that name what the defense is for ("consume the corresponding portion of pending cover shares so we can't reuse it" — auditor self-disclosure of the double-credit class)
+**Refinement — Standing Intake Step 0 (Phase 0 dedup) expands.** In addition to the 4-vector grep on audit PDFs (Sky anchor), Phase 0 MUST also: 5. **Read full diffs** of every audit-fix commit flagged at Gate 1 Step 5.7 (Doctrine #34 audit-regression scan). Look specifically at:
+
+- **Function docstrings added** in the fix-commit (auditors often encode the bug-class they're defending against)
+- **Test functions added** in the fix-commit (regression tests reveal the exact attack scenario)
+- **Comments inline** in the fix-commit that name what the defense is for ("consume the corresponding portion of pending cover shares so we can't reuse it" — auditor self-disclosure of the double-credit class)
+
 6. **Cross-check** that no post-fix commits to the same file regressed the defense (`git log <fix-commit>..HEAD -- <file>`)
 
 **Why audit-PDF-search alone was insufficient here.** No audit PDFs exist in the Alchemix V3 repo (`audits-library/` doesn't exist on host; the only PDFs are Morpho V2 vault audits in `lib/vault-v2/audits/`, irrelevant substrate). The audit findings are encoded in git history as commit-messages referencing report numbers (Cantina, yAudit, Sherlock, V3 Audit Comp) rather than checked-in PDFs. **Phase 0 Vector 5 (commit-diff inspection) is the substrate-equivalent of PDF-grep for repos that don't ship audit PDFs.**
@@ -2711,7 +2721,7 @@ Use pypdf (Python `import pypdf`) — pdftotext is often not installed. Pattern:
 
 ---
 
-_Doctrine v3.8.2 | 2026-05-27 | Doctrine #38 NEW (Pure Pass-Through *WithSig Wrappers Are STRUCTURAL FORECLOSE) — DeFi Saver CANDIDATE-1 Gate 2 NEGATED at Phase 1 source-read (35min, Foundry investment NOT made). Claim: "A wrapper contract that forwards an EIP712 signed permit to a protocol's `*WithSig` endpoint and takes NO local validated action is a FORECLOSE — the signature binds all trust-relevant fields, the protocol's `ecrecover` enforces signer identity (signer = `permit.owner` / `delegator` / `authorizer`), and the wrapper has no validating-field/consuming-field divergence (DC-7 fails to apply). EIP712 relayer-untrust IS the design intent, NOT a vulnerability." Anchor evidence: 7 DeFi Saver actions (AaveV4*WithSig ×4, AaveV3DelegateWithSig, MorphoBlueSetAuthWithSig, SparkDelegateWithSig), each <10 lines effective logic, pure pass-through to `approveBorrowWithSig` / `setAuthorizationWithSig` / `delegationWithSig`. The DSProxy delegatecall context affects `msg.sender` for downstream `borrowOnBehalfOf` calls but is irrelevant to signature validation (protocol checks signer vs `permit.owner`, not `msg.sender`). Subscription binding (`subDataHash` check) only locks the StrategySub struct; per-execution `_actionsCallData` is bot-supplied by design but cannot mutate signed fields without breaking the EIP712 hash. **Lens implication:** at Gate 1 surface mapping, `*WithSig` family contracts are NO-SURFACE unless they (a) take additional local action gated by signature, OR (b) extract fields from the signed struct for downstream parameter resolution beyond pass-through. Skip on initial map; refined CANDIDATE-Q (Bot-Supplied Calldata Trust Gap on Wrappers WITH local action) is still pending anchor. Authority: DeFi Saver Gate 2 foreclosure receipt (`hunts/2026-05-27-defisaver-c1-gate2-foreclosure.md`). Cumulative Phase-0/Phase-1 NEGATE savings across 3 anchors (Sky + Alchemix + DeFi Saver): 6-12h Foundry investment avoided._
+_Doctrine v3.8.2 | 2026-05-27 | Doctrine #38 NEW (Pure Pass-Through *WithSig Wrappers Are STRUCTURAL FORECLOSE) — DeFi Saver CANDIDATE-1 Gate 2 NEGATED at Phase 1 source-read (35min, Foundry investment NOT made). Claim: "A wrapper contract that forwards an EIP712 signed permit to a protocol's `*WithSig`endpoint and takes NO local validated action is a FORECLOSE — the signature binds all trust-relevant fields, the protocol's`ecrecover`enforces signer identity (signer =`permit.owner`/`delegator`/`authorizer`), and the wrapper has no validating-field/consuming-field divergence (DC-7 fails to apply). EIP712 relayer-untrust IS the design intent, NOT a vulnerability." Anchor evidence: 7 DeFi Saver actions (AaveV4*WithSig ×4, AaveV3DelegateWithSig, MorphoBlueSetAuthWithSig, SparkDelegateWithSig), each <10 lines effective logic, pure pass-through to `approveBorrowWithSig`/`setAuthorizationWithSig`/`delegationWithSig`. The DSProxy delegatecall context affects `msg.sender`for downstream`borrowOnBehalfOf`calls but is irrelevant to signature validation (protocol checks signer vs`permit.owner`, not `msg.sender`). Subscription binding (`subDataHash`check) only locks the StrategySub struct; per-execution`\_actionsCallData`is bot-supplied by design but cannot mutate signed fields without breaking the EIP712 hash. **Lens implication:** at Gate 1 surface mapping,`\*WithSig` family contracts are NO-SURFACE unless they (a) take additional local action gated by signature, OR (b) extract fields from the signed struct for downstream parameter resolution beyond pass-through. Skip on initial map; refined CANDIDATE-Q (Bot-Supplied Calldata Trust Gap on Wrappers WITH local action) is still pending anchor. Authority: DeFi Saver Gate 2 foreclosure receipt (`hunts/2026-05-27-defisaver-c1-gate2-foreclosure.md`). Cumulative Phase-0/Phase-1 NEGATE savings across 3 anchors (Sky + Alchemix + DeFi Saver): 6-12h Foundry investment avoided._
 
 _Doctrine v3.8.4 | 2026-05-27 evening | Doctrine #34 sub-class b Anchor #4 added (Cap C3 PriceOracle pause-asymmetry NEGATED at Phase 1 via natspec self-disclosure, Doctrine #27 Corollary B Anchor #2 mechanism re-fires). Phase 0 commit-diff inspection: 4 surgical Aug 2025 audit-driven fix-commits touched the EXACT `liquidate` function (Issues 49 / 145 / 150 / #201) yet auditors deliberately did NOT add a pause check; `validateBorrow` natspec explicitly states "Check the pause state of the reserve and the health of the agent before and after the borrow" — pause is borrow-only by design. Liquidation-during-pause is industry-standard (Aave/Compound/Sky/Maker positions wind down during pause). Cross-Protocol Defense Enumeration matrix: Q1=YES (Oracle re-derives freshness, no cache) + Q3=YES (backup oracle fallback active) = 2/3 → DC-7 EXCLUSION fires (Oracle-private validation field). Gate 1 novelty 30% → actual ~4% = 7.5× overestimate, **matches predicted ~7× median exactly**, INFO #20 2nd anchor secured. Foundry investment NOT made (~2.5h saved). Authority: Cap C3 Gate 2 foreclosure receipt (`hunts/2026-05-27-cap-c3-gate2-foreclosure.md`). Cumulative Phase 0/Phase 1 NEGATE savings across 5 anchors (Sky + Alchemix + DeFi Saver + Cap C1 + Cap C3): 10.5-17.5h Foundry investment avoided._
 
@@ -2735,6 +2745,7 @@ _Doctrine v3.5 | 2026-05-26 afternoon | Day 26 afternoon batch — Doctrine #34 
 **Statement:** Before escalating any notification-callback finding to Gate 2, verify which code path controls the **ECONOMIC OUTCOME** (token transfer, allocation credit, power update, reward distribution). If the notification surface is INFORMATIONAL-ONLY and a SEPARATE authorization path independently validates the action, the notification surface is **NOT exploitable for economic impact regardless of who controls the receiver**.
 
 **Phase 0 gate (mandatory before DC-13 sub-4 Gate 2 dispatch):**
+
 1. Identify the notification/callback function — what does it emit/send?
 2. Identify the economic-outcome code path — what mutates balances, allocations, or fund-flow state?
 3. Compare: does the consumer of the notification's return value control the economic outcome? Or does the notification consume the return only for informational/logging purposes?
@@ -2743,6 +2754,7 @@ _Doctrine v3.5 | 2026-05-26 afternoon | Day 26 afternoon batch — Doctrine #34 
 **Canonical anchor (Filecoin FIP-0109):** Report DISC-020 conflated the `notify` field (informational callback to user-set notifee) with `verified_allocation_key + batch_claim_allocations` path (authoritative FIL+ crediting). Self-notifying doesn't affect FIL+ because FIL+ flows through batch_claim_allocations to the verified registry actor, validated independently. Project rebuttal accepted as correct — NOT a bug, productive closure.
 
 **Cross-references:**
+
 - DC-13 sub-pattern 4 (notification-callback-admits-attacker-controlled-notifee) — the suspicion-raising surface
 - DC-13 sub-pattern 5 (notification-callback-informational-only) — the structural negation
 - Doctrine #34 (post-audit composition multiplier) — still applies, but the TARGET SURFACE must be the authorization path not the notification path. DISC-020 was a Doctrine #34 misapplication on the wrong code path (NOT a Doctrine #34 contradiction).
@@ -2759,7 +2771,7 @@ _Doctrine v3.9 | 2026-05-28 | Doctrine #39 CANDIDATE NEW (Notification Path ≠ 
 
 _Doctrine v3.9.1 | 2026-05-28 evening | Doctrine #37 Sub-Type B 5th anchor added (Flux Finance Compound V2 fork, single-commit 1207d frozen). Sub-Type B 5-anchor PERMANENT band reached; doctrine core "frozen substrate ≠ dead product" now demonstrated across 1207d (Flux), 1725d (Gnosis OmniBridge), 525d (Veda), 590d (Hashi PR), 440d (rhino.fi) — spectrum from 1.2y to 4.7y. Companion compounds: INFO #19 expanded to 9-axis drift catalog (Contradictions-Register v1.12); Stargate V2 brief-version drift Axis 7; Flux Finance substrate-affiliation Axis 8 + org-name Axis 9. Doctrine #34 sub-class b 6th-anchor candidate filed (Flux V1→V2 OndoPriceOracle +198 LoC composition surface). DC-9 sub-2 DEFENSE PATTERN 2nd-anchor candidate filed (Stargate V2 setAddressConfig + non-upgradeable, pending bytecode-verify Owner=TimelockController). Both today's hunts confirm Doctrine #36 PERMANENT P(finding) floor binding: Flux Compound V2 fork lens-saturated → 5× EV reduction; Stargate LayerZero V2 OFT lens-saturated → 100× EV reduction (Pattern H strong-defense template ×0.40). Authority: 2026-05-28 background-agent Flux Finance Gate 1 + Stargate V2 Gate 1 (both FORECLOSE/WATCHLIST-PARK, comprehensive R8-tagged hunt files at hunts/2026-05-28-fluxfinance-immunefi-gate1.md + hunts/2026-05-28-stargate-v3-immunefi-gate1.md)._
 
-_Doctrine v3.10.1 | 2026-05-28 deep night (later) | **Sub-Type C CORROLLARY — "Audit-coverage ≠ structural-defense"** (added on 2026-05-28 V3 frxUSD H5 G2 NEGATE). Sub-Type C qualification (substrate unaudited-and-active) lifts Doctrine #27 F MAXIMUM audit-saturation discount but does NOT bypass Doctrine #27 Corollary B remediation-language search. Independent axes: audit-coverage describes WHO has verified the surface; structural-defense describes WHAT the surface itself defends against. V3 frxUSD anchor: substrate qualified Sub-Type C (no public audits post-March 2025; v1.0.0 released 2025-11-25) AND yet exhibits 5 defense layers (ERC-7201 namespacing + DEPRECATED__ slot-preservation + EIP712StoragePad dedicated contract + OZ `@custom:oz-renamed-from` annotations + DOMAIN_SEPARATOR runtime-recompute). Author Travis Moore demonstrates expert-level storage-layout discipline. H5 storage-collision hypothesis NEGATED at Phase 1 source-read (no Foundry — Phase 1 dispositive). Empirical: 2 of 6 V3 frxUSD G1 hypotheses (H4 + H5) hit Sub-Type C-but-defended state. Sub-Type C remains valid as EV uplift signal but caller MUST apply Doctrine #27 Corollary B remediation-search independently. Cross-pollination: NEW detector DC-9 sub-3a DEFENSE ANCHOR — 3+ of {DEPRECATED__, @custom:oz-renamed-from, ERC-7201, EIP712StoragePad, StorageSlot.*Location, @custom:storage-location} present = storage-collision auto-foreclose at Phase 1. Pillar 1 cross-pollination candidate: FraxFinance/Travis Moore deployer-trust bonus (+5-10 token-score points) for storage-layout discipline anchored at 5 defense-layer count. Authority: V3 frxUSD H5 Gate 2 NEGATE 2026-05-28 (`hunts/2026-05-28-frax-v3-frxusd-h5-gate2-foreclosure.md`)._
+_Doctrine v3.10.1 | 2026-05-28 deep night (later) | **Sub-Type C CORROLLARY — "Audit-coverage ≠ structural-defense"** (added on 2026-05-28 V3 frxUSD H5 G2 NEGATE). Sub-Type C qualification (substrate unaudited-and-active) lifts Doctrine #27 F MAXIMUM audit-saturation discount but does NOT bypass Doctrine #27 Corollary B remediation-language search. Independent axes: audit-coverage describes WHO has verified the surface; structural-defense describes WHAT the surface itself defends against. V3 frxUSD anchor: substrate qualified Sub-Type C (no public audits post-March 2025; v1.0.0 released 2025-11-25) AND yet exhibits 5 defense layers (ERC-7201 namespacing + DEPRECATED** slot-preservation + EIP712StoragePad dedicated contract + OZ `@custom:oz-renamed-from` annotations + DOMAIN_SEPARATOR runtime-recompute). Author Travis Moore demonstrates expert-level storage-layout discipline. H5 storage-collision hypothesis NEGATED at Phase 1 source-read (no Foundry — Phase 1 dispositive). Empirical: 2 of 6 V3 frxUSD G1 hypotheses (H4 + H5) hit Sub-Type C-but-defended state. Sub-Type C remains valid as EV uplift signal but caller MUST apply Doctrine #27 Corollary B remediation-search independently. Cross-pollination: NEW detector DC-9 sub-3a DEFENSE ANCHOR — 3+ of {DEPRECATED**, @custom:oz-renamed-from, ERC-7201, EIP712StoragePad, StorageSlot.\*Location, @custom:storage-location} present = storage-collision auto-foreclose at Phase 1. Pillar 1 cross-pollination candidate: FraxFinance/Travis Moore deployer-trust bonus (+5-10 token-score points) for storage-layout discipline anchored at 5 defense-layer count. Authority: V3 frxUSD H5 Gate 2 NEGATE 2026-05-28 (`hunts/2026-05-28-frax-v3-frxusd-h5-gate2-foreclosure.md`)._
 
 _Doctrine v3.10 | 2026-05-28 deep night | **Doctrine #37 NEW Sub-Type C CANDIDATE — "Unaudited-and-Active"**. Inverse direction of Sub-Type A (frozen+SHA-pinned, audit-saturated foreclosure) and Sub-Type B (audited+frozen-but-product-live foreclosure). Sub-Type C signals **upward EV multiplier**, not downward foreclosure. Anchor: FRAX V3 frxUSD substrate (`FraxFinance/frax-tokens` v1.0.0 released 2025-11-25, ~6mo old; `frax-oft-upgradeable` v1.1.0 with Permit + TransferWithAuthorization + EIP-3009 + ERC-1271 modules added — none in public-audit list at docs.frax.finance/other/audits which ends March 2025 Fraxtal North Star; bug bounty docs explicitly list only "Fraxswap, Fraxlend, frxETH" as in-scope-named — frxUSD/sfrxUSD NOT in named coverage). Distinct from Sub-Type B Veda/Gnosis/Flux which were frozen-substrate-but-audit-covered → Sub-Type C is **active-codebase-development-without-audit-coverage**. Detection signature: (a) repo with `v1.x.x` release tag in last 12mo + (b) docs.firm/audits index has CUTOFF date predating the repo release + (c) bug bounty named scope LIST omits the new substrate. R8: [INSPECTED] FRAX V3 frxUSD repo + audit-cutoff verification (V3 frxUSD G1 hunt). Time-cost saving per anchor: prevents misapplication of Doctrine #27 F MAXIMUM multiplier to substrate that does NOT inherit the saturation (FRAX V1/V2 had 20 audits / 6 firms / MAXIMUM tier; frxUSD V3 inherits ZERO of that — Doctrine #27 F does NOT transfer). Cross-pollination: future protocol-version-pivot hunts (V2→V3 / V3→V4 / module-stacking) must Step 1 PROFILE check audit-CUTOFF-date-vs-substrate-release-date axis. **Promotion path:** needs 2nd Sub-Type C anchor on a different protocol's unaudited-but-active substrate (Doctrine #27 F + Doctrine #34 sub-b complement: Doctrine #34 sub-b targets composition-window; Sub-Type C targets fresh-substrate-without-audit-saturation). Authority: V3 frxUSD Gate 1 dispatch 2026-05-28 night, hunt file `hunts/2026-05-28-frax-v3-frxusd-gate1.md`, EV $53K (19.7× FRAX core G1's $2.7K MAXIMUM-tier post-discount) — empirical multiplier validation._
 
@@ -2849,9 +2861,10 @@ Where `conformance_class_discount = 0.10× to 0.20×` when the target's primary 
 
 ## Doctrine #43 — Aggregate-Bound ≠ Per-Step Vulnerability (added 2026-05-29 — PancakeSwap #80247 INVALID rebuttal accepted, Ogie msg)
 
-**Rule:** When a user-controlled AGGREGATE bound (end-to-end slippage / `amountOutMinimum` / final limit) governs the total outcome, the ABSENCE of a per-step bound is **NOT** a vulnerability — the aggregate tolerance already caps total loss, *including* any per-step extraction. A true structural fact ("there is no per-step floor") becomes a FALSE vulnerability claim the moment you ignore the aggregate surface that already protects the user.
+**Rule:** When a user-controlled AGGREGATE bound (end-to-end slippage / `amountOutMinimum` / final limit) governs the total outcome, the ABSENCE of a per-step bound is **NOT** a vulnerability — the aggregate tolerance already caps total loss, _including_ any per-step extraction. A true structural fact ("there is no per-step floor") becomes a FALSE vulnerability claim the moment you ignore the aggregate surface that already protects the user.
 
 **QC sub-gates — run at Gate-1 BEFORE building any "value-extraction" PoC:**
+
 - **(a) Aggregate-surface check.** Before claiming "the user has no surface to bound X," VERIFY no existing aggregate/downstream control already bounds X. The user's own slippage / final limit IS a surface — check it first. (B-1/PancakeSwap: `path.minAmountOut` / `amountOutMinimum` bounds the total.)
 - **(b) Expected-accumulation check.** "More hops/steps = more cumulative fees" is EXPECTED behavior, not theft. A per-step floor absence is exploitable ONLY if the aggregate floor FAILS to protect (bypassable, absent, or blind to the extraction) — prove the aggregate protection FAILS before claiming loss.
 - **(c) Counterfactual-comparison check.** When comparing two configs to demonstrate "loss," confirm they are the SAME trade. Comparing 1-hop vs 2-hop (or any two structurally different paths) and calling the delta a "loss" is INVALID — different trades have different costs by design. The valid counterfactual is: same route via the batched path vs the same route via sequential single swaps — if equal, there is no double-count.
@@ -2869,6 +2882,7 @@ Where `conformance_class_discount = 0.10× to 0.20×` when the target's primary 
 ## Doctrine #44 — Identity-vs-Content Binding Gap (added 2026-05-29 — Zebra GHSA-4m69-67m6-prqp ground-truth intake, Ogie msg 8021)
 
 **Rule:** When a dedup / cache / identity is computed over a STRICT SUBSET of the object (header hash over txid only, not auth_digest/scriptSig; a message-id over payload-minus-signature; a merkle leaf over a field subset), an attacker can hold the IDENTIFIER fixed while varying the rest → two failure shapes:
+
 - **Poisoning** — attacker pre-seeds the cache with a malleated variant carrying the same identity; the legitimate object is later rejected as a duplicate (composes with the Cache-Before-Validate primitive, detector #166 → lockout/DoS).
 - **Substitution** — two semantically-distinct objects share an identity; the consumer treats them as equivalent.
 
@@ -2905,13 +2919,21 @@ _Doctrine v3.14 | 2026-05-29 | **Hyperlane Warp Hyp-1 Gate 2 FORECLOSURE (reboot
 ## Doctrine #15 — Known-Issues Pre-Flight (Gate-0): check the accepted-risk doc BEFORE the PoC (added 2026-06-01 — DISC-022 Wormhole Hyp-C closed-as-known)
 
 **Statement.** A finding is NOT novel until it has been checked against the TARGET PROGRAM'S OWN accepted-risk / known-issues corpus — the program's `SECURITY_CONTEXT.md` / `SECURITY.md` / `KNOWN_ISSUES` / published-audit accepted findings / Immunefi-or-platform out-of-scope + known-issues + impact exclusions. **Gate-0 runs BEFORE Gate-1 and BEFORE any PoC/Foundry investment.** Three buckets, mirroring the P3 precision bias:
+
 - **HIGH-confidence match → NEGATE-KNOWN** (FORECLOSE pre-PoC; cite the exact doc section; log disposition with citation).
 - **PARTIAL/uncertain → NOVEL-VARIANT-REVIEW** (WR-flag the matched entry + a one-line "why this might be a true variant the entry does NOT cover"; human decides; do NOT auto-kill).
 - **No match → PROCEED** to Gate-1 / PoC as today.
-**Bias:** auto-NEGATE ONLY on high confidence; uncertain defaults to WR review. A false-NEGATE costs a real bounty — better to surface than silently kill. (LLM-precision matcher = free bankr/gpt-5-nano, route-dependent; when down, structural matcher runs high-confidence + everything else defaults to review.)
+  **Bias:** auto-NEGATE ONLY on high confidence; uncertain defaults to WR review. A false-NEGATE costs a real bounty — better to surface than silently kill. (LLM-precision matcher = free bankr/gpt-5-nano, route-dependent; when down, structural matcher runs high-confidence + everything else defaults to review.)
 
 **Rationale.** Documented non-issues cost real Foundry/Anchor cycles to PoC AND dilute whitehat signal when the submission is closed-as-known (a closed-known submission is a near-FP on the program's books). The program's accepted-risk doc is often **explicitly addressed to "security researchers and automated tools"** — it exists to deflect exactly our pipeline's submissions. Checking it is the cheapest possible filter.
 
 **Provenance — DISC-022 (Wormhole NTT "Hyp-C" stale-attestation revival).** A technically sound 3/3 Foundry PoC, **CLOSED as known behaviour**: it matched `wormhole-foundation/wormhole/SECURITY_CONTEXT.md` **#L146-L169** — "NTT attestations are evaluated against live threshold/transceiver config rather than a snapshot taken when the attestation was recorded" (admin threshold/transceiver changes are deliberate). Independently, Wormhole's **quorum-compromise axiom** ("any impact assuming control of a quorum of signing keys is out of scope") defeated the impact — and the PoC's DummyTransceiver-staged stale attestation implicitly assumes a transceiver attests maliciously, i.e. a within-quorum compromise the axiom rules out. Hyp-C should have been a **pre-file NEGATE before any Foundry cycle.** Gate-0 was built + validated against it 2026-06-01 (`scripts/lane1/gate0-known-issues.py --validate-disc022` → KNOWN-NEGATE, 6 shared distinctive tokens, L146-169 citation).
 
-**Cross-ref Doctrine #14 (Exploit Vector ≠ Exploit Outcome)** — both guard against confusing a *demonstrated mechanism* with an *in-scope, realistic, novel exploit*. #14: the vector firing ≠ a real-impact outcome. #15: a real mechanism ≠ a NOVEL finding if the program has already documented it as accepted-risk. Also cross-ref Doctrine #40 (Conformance ≠ Exploit Narrative) + `.claude/rules/webfetch-direction-error.md`. Implementation: `scripts/lane1/gate0-known-issues.py` + corpus `data/lane1/gate0/known-issues.json` (per-program). Supersedes the unbuilt Doctrine #133 OOS-pre-filter intent by moving the check PRE-PoC (not pre-submission) and PRE-Gate-1.
+**Cross-ref Doctrine #14 (Exploit Vector ≠ Exploit Outcome)** — both guard against confusing a _demonstrated mechanism_ with an _in-scope, realistic, novel exploit_. #14: the vector firing ≠ a real-impact outcome. #15: a real mechanism ≠ a NOVEL finding if the program has already documented it as accepted-risk. Also cross-ref Doctrine #40 (Conformance ≠ Exploit Narrative) + `.claude/rules/webfetch-direction-error.md`. Implementation: `scripts/lane1/gate0-known-issues.py` + corpus `data/lane1/gate0/known-issues.json` (per-program). Supersedes the unbuilt Doctrine #133 OOS-pre-filter intent by moving the check PRE-PoC (not pre-submission) and PRE-Gate-1.
+
+**Calibration refinement #15.1 — BASELINE-NOUN guardrail (added 2026-06-01, qwen3-relight regression).** Two failure modes surfaced when re-running Gate-0 with the LOCAL qwen3 LLM-matcher (bankr stays off — CPU-resident qwen3:8b is the free substrate per BUZZ_RULES #5):
+
+- **Deterministic over-match.** hyp-e (Wormhole NTT DC-8, already NEGATED at Gate-2 source-read) hit deterministic KNOWN-NEGATE on **3 shared tokens — `{quorum, threshold, transceiver}`, ALL program-baseline nouns** that ANY NTT finding shares. Generic-protocol-vocabulary overlap is "same protocol," NOT "same known issue." **Fix:** `BASELINE_NOUNS` set; auto-NEGATE now requires ≥1 shared **attack-tier** token (a mechanism word: `re-enable`, `snapshot`, `donation`, `rounding`, `reentrancy`, …), not just component nouns. DISC-022 stays KNOWN-NEGATE (shares attack-tier `{re-enable, snapshot}`); hyp-e correctly drops to NOVEL-VARIANT-REVIEW.
+- **LLM mechanism-vs-impact bias.** The 8B matcher first weighed *mechanism wording* over *impact equivalence* and called DISC-022 a NOVEL-VARIANT even though the accepted-risk IMPACT field literally covers "re-enable of a previously-removed transceiver counting toward a later quorum." **Fix:** the matcher prompt now triages by **IMPACT / end-state equivalence** (how triagers actually dedupe), reserving NOVEL-VARIANT for a genuinely different end-state. Post-fix: DISC-022 → KNOWN-NEGATE with correct mechanism reasoning.
+
+**Resulting two-layer gate (the safe design):** auto-suppress (skip PoC) ONLY when the deterministic matcher returns KNOWN-NEGATE (now attack-tier-gated) **AND** the LLM agrees on impact-equivalence. Generic-noun-only overlap, or LLM disagreement, → operator-review, never silent-kill. A false-NEGATE costs a real bounty; the guardrail is biased toward surfacing.

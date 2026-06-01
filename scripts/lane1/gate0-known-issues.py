@@ -45,6 +45,17 @@ DISTINCTIVE = {
     "compromise", "precondition", "out-of-scope", "centralization", "privileged",
 }
 
+# Program-baseline NOUNS: vocabulary that names a component, not an attack mechanism.
+# ANY finding on a given protocol shares these — so overlap on baseline nouns ALONE is
+# not a known-issue match (it's just "same protocol"). KNOWN-NEGATE auto-suppress requires
+# >=1 shared token OUTSIDE this set (a real attack-mechanism token). Calibration anchor:
+# hyp-e matched DISC-022's entry on {quorum,threshold,transceiver} (all baseline) -> must
+# be REVIEW not auto-NEGATE; DISC-022 itself shares {re-enable,snapshot} -> stays NEGATE.
+BASELINE_NOUNS = {
+    "transceiver", "threshold", "quorum", "attestation", "guardian", "signer",
+    "oracle", "collateral", "ltv", "owner", "admin", "nonce", "merkle", "timelock",
+}
+
 # normalize a token-ish phrase set from text
 _WORD = re.compile(r"[a-z0-9][a-z0-9\-]+")
 
@@ -100,13 +111,15 @@ def match_finding(finding, program, corpus):
         if len(shared) > len(best_shared):
             best, best_shared = e, shared
     n = len(best_shared)
-    if n >= HIGH_SHARED:
+    attack_shared = best_shared - BASELINE_NOUNS  # tokens that name a mechanism, not just a component
+    if n >= HIGH_SHARED and attack_shared:
         bucket = "KNOWN-NEGATE"
-        reason = (f"HIGH-confidence match ({n} shared distinctive tokens) vs accepted-risk entry "
+        reason = (f"HIGH-confidence match ({n} shared, attack-tier {sorted(attack_shared)}) vs accepted-risk entry "
                   f"'{best.get('class')}' — {best.get('source_url')}{best.get('citation_anchor','')}")
     elif n >= 1:
         bucket = "NOVEL-VARIANT-REVIEW"
-        reason = (f"PARTIAL match ({n} shared: {sorted(best_shared)}) vs '{best.get('class')}'. "
+        gen = " (overlap is program-baseline nouns only — NOT a known-issue match, just same protocol)" if not attack_shared else ""
+        reason = (f"PARTIAL match ({n} shared: {sorted(best_shared)}) vs '{best.get('class')}'.{gen} "
                   f"WR review: is this a true variant the entry does NOT cover? (LLM-precision route down → defaulting to review)")
     else:
         bucket = "NO-MATCH-PROCEED"
