@@ -75,5 +75,48 @@
         "raw_text": "Input token balance increases by (input - fees); output decreases by output; user balances change by exactly the amounts swapped. Arithmetic edge-cases + rounding fuzzed/tested."
       }
     ]
+  },
+  "arkadiko": {
+    "source_primary": "github.com/arkadiko-dao/arkadiko Audit.md + SECURITY.md + Immunefi",
+    "audience": "4.5yr protocol, multiple audits; Audit.md lists fixed findings",
+    "fetched": "2026-06-01",
+    "entries": [
+      {
+        "class": "signature replay in price oracle",
+        "mechanism": "oracle price signatures re-used; FIXED by storing each signature in a map (buff->bool) and rejecting re-use (CR-01).",
+        "impact": "replay of a signed price; FIXED/known.",
+        "component": "arkadiko-oracle",
+        "source_url": "github.com/arkadiko-dao/arkadiko/blob/master/Audit.md",
+        "citation_anchor": "#CR-01",
+        "raw_text": "CR-01 Signature Replay in Price Oracle - signatures now stored in a map; re-use fails."
+      },
+      {
+        "class": "fee front-running on vault mint",
+        "mechanism": "mint fee could be front-run; FIXED by adding max-mint-fee param to open-vault/update-vault (ME-02).",
+        "impact": "front-run fee change; FIXED/known.",
+        "component": "freddie/vault open+update",
+        "source_url": "github.com/arkadiko-dao/arkadiko/blob/master/Audit.md",
+        "citation_anchor": "#ME-02",
+        "raw_text": "ME-02 Lost Funds due to Fee Front-Running - added max-mint-fee param."
+      },
+      {
+        "class": "tx-sender authentication",
+        "mechanism": "auth via tx-sender; FIXED switched to contract-caller; admin via get-dao-owner; wstx-token L55 deliberately keeps tx-sender (ME-03).",
+        "impact": "phishing/intermediate-contract auth; FIXED/known. wstx-token tx-sender use is BY DESIGN.",
+        "component": "all + wstx-token",
+        "source_url": "github.com/arkadiko-dao/arkadiko/blob/master/Audit.md",
+        "citation_anchor": "#ME-03",
+        "raw_text": "ME-03 switched tx-sender->contract-caller; wstx-token L55 keeps tx-sender by design."
+      },
+      {
+        "class": "staking rewards race / fragments-per-token",
+        "mechanism": "rewards must NOT use fragments-per-token (that var only converts staker amount->fragments for USDA-burn rebasing); rewards distribute across total fragments (ME-01).",
+        "impact": "reward race; FIXED/known.",
+        "component": "staking",
+        "source_url": "github.com/arkadiko-dao/arkadiko/blob/master/Audit.md",
+        "citation_anchor": "#ME-01",
+        "raw_text": "ME-01 rewards logic should not take fragments-per-token into account."
+      }
+    ]
   }
 }
