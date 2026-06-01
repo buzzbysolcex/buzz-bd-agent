@@ -120,11 +120,22 @@ def main():
         cid = (r.get("smart_contract") or {}).get("contract_id")
         if cid: seen.add(cid)
     json.dump(sorted(seen), open(SEEN, "w"))
-    # queue-DEPTH digest (backlog can't silt unworked) — auto-QUEUE only, NEVER auto-hunt
-    backlog = sum(1 for _ in open(NEWQ)) if os.path.exists(NEWQ) else 0
-    print(f"[watch] queue-DEPTH (cumulative surfaced, un-dispositioned): {backlog}")
+    # queue-DEPTH digest, SPLIT: ACTIONABLE (thin + bounty/disclosure = TOP) vs WATCHLIST (thin + no bounty = MED).
+    # The split stops watchlist (no payout route) from reading as an actionable backlog.
+    actionable = watchlist = 0
+    if os.path.exists(NEWQ):
+        for line in open(NEWQ):
+            try:
+                pr = json.loads(line).get("priority")
+                if pr == "TOP": actionable += 1
+                elif pr == "MED": watchlist += 1
+            except Exception:
+                pass
+    print(f"[watch] queue-DEPTH split — ACTIONABLE (thin+bounty): {actionable} | WATCHLIST (thin+no-bounty): {watchlist}")
     if notify:
-        digest = [f"new this run: {len(tops)} TOP + {len(meds)} MED", f"backlog depth: {backlog} (auto-QUEUED, awaiting Gate-0/operator — never auto-hunted)"]
+        digest = [f"new this run: {len(tops)} actionable + {len(meds)} watchlist",
+                  f"backlog — ACTIONABLE (thin+bounty/disclosure): {actionable} | WATCHLIST (thin+no-bounty, no payout route): {watchlist}",
+                  "(auto-QUEUED only — never auto-hunted; ACTIONABLE drives Gate-0, WATCHLIST waits for a bounty)"]
         digest += [f"TOP {c}" for c in tops] + [f"MED {c}" for c in meds[:5]]
         notify_wr(digest)
 

@@ -2,3 +2,4 @@
 # One absolute path per line. Add a clone here ONLY after its hunt is FORECLOSED/NEGATED.
 # Active clones (pending submission / live PoC) must NOT be listed.
 /home/claude-code/.tmp-clones/aave-umbrella   # NEGATE-VERIFIED 2026-06-01 (Gate-1 + TASK-6 closure)
+/home/claude-code/skillspector-audit   # SkillSpector self-audit scratch (this session, done)
