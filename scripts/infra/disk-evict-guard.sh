@@ -33,6 +33,7 @@ EXEMPT_PREFIXES=(
   "$WORKSPACE/data/lane1/gate0"      # 6. Gate-0 known-issues corpus (cheap, load-bearing)
   "$HOME_DIR/.tmp-build"             # 7. V6 CANONICAL code (.tmp-build/v6; scripts/v6 symlinks here) — NOT a clone
   "$HOME_DIR/.tmp-playwright"        # 8. chromium-headless-shell for contest-monitor cron — re-install is costly
+  "$HOME_DIR/.tmp-clones"            # 9. ACTIVE Gate-2 clones live here — evict per-subdir via MANIFEST, never wholesale
 )
 # .env* files anywhere under home are exempt by pattern (checked in is_exempt).
 

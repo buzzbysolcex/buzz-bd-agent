@@ -118,5 +118,57 @@
         "raw_text": "ME-01 rewards logic should not take fragments-per-token into account."
       }
     ]
+  },
+  "aave-umbrella": {
+    "source_primary": "github.com/aave-dao/aave-umbrella assets/operating_conditions.md + audits/Stermi/*",
+    "audience": "Aave Immunefi $1M; 4 audits (Certora/MixBytes/Ackee/StErMi); in-repo accepted-risk doc + audit acknowledgements",
+    "fetched": "2026-06-01",
+    "entries": [
+      {
+        "class": "exchange-rate inflation / precision loss within bound",
+        "mechanism": "totalSupply/totalAssets can grow up to 2^256/1e6 by design; soft-capped at 100 (redeploy beyond); violating soft reqs zeroes new rewards (precision loss). totalAssets<=totalSupply hard-enforced (slash reduces totalAssets only).",
+        "impact": "share-price inflation / reward precision-loss WITHIN these documented bounds = accepted design, NOT a bug.",
+        "component": "ERC4626StakeToken",
+        "source_url": "github.com/aave-dao/aave-umbrella/blob/main/assets/operating_conditions.md",
+        "citation_anchor": "#requirements",
+        "raw_text": "totalAssets<=totalSupply; totalSupply/totalAssets soft-capped 100; precision loss when soft reqs violated."
+      },
+      {
+        "class": "fee-on-transfer / non-standard ERC20 underlying",
+        "mechanism": "StakeToken accepts ANY ERC20 as underlying asset, not only StataTokenV2; fee-on-transfer / non-standard tokens are incompatible by documented limitation.",
+        "impact": "findings requiring a fee-on-transfer or non-standard ERC20 underlying = documented limitation / OOS.",
+        "component": "StakeToken asset",
+        "source_url": "github.com/aave-dao/aave-umbrella/blob/main/audits/Stermi/REPORT Aave StakeToken.md",
+        "citation_anchor": "#L214",
+        "raw_text": "StakeToken accepts any ERC20; fee-on-transfer incompatible; BGD documents supported asset types."
+      },
+      {
+        "class": "StataToken rewards lost on deposit/unwrap/transfer",
+        "mechanism": "StataTokenV2 accrued rewards are not recorded/awarded when the stataToken is deposited into StakeToken or unwrapped/transferred via the batch helper.",
+        "impact": "loss of stataToken-side rewards in these flows = acknowledged/documented limitation.",
+        "component": "StakeToken / UmbrellaBatchHelper",
+        "source_url": "github.com/aave-dao/aave-umbrella/blob/main/audits/Stermi/REPORT Aave UmbrellaBatchHelper.md",
+        "citation_anchor": "#L138",
+        "raw_text": "stataToken accrued rewards owed are not recorded on unwrap/transfer; acknowledged."
+      },
+      {
+        "class": "rewards not refreshed on all flows",
+        "mechanism": "by design, reward indexes are not refreshed on every flow (adding new reward tokens is rare vs flow frequency).",
+        "impact": "stale-reward-index on a flow that didn't refresh = by-design, acknowledged.",
+        "component": "RewardsController/StakeToken",
+        "source_url": "github.com/aave-dao/aave-umbrella/blob/main/audits/Stermi/REPORT Aave StakeToken.md",
+        "citation_anchor": "#L197",
+        "raw_text": "By design, we didn't want to include refreshing of rewards on all flows."
+      },
+      {
+        "class": "privileged slash/admin via trusted controller",
+        "mechanism": "slash and admin functions are onlyOwner; owner is an UmbrellaController with ACL, called only by DAO/strong-multisig (5-9), never an EOA.",
+        "impact": "msg.sender/admin-trust/centralization findings on slash/config = accepted trust model.",
+        "component": "StakeToken/Umbrella admin",
+        "source_url": "github.com/aave-dao/aave-umbrella/blob/main/audits/Stermi/REPORT Aave StakeToken.md",
+        "citation_anchor": "#L561",
+        "raw_text": "owner installs controller with ACL; only DAO/multisig calls slash; msg.sender not useful here."
+      }
+    ]
   }
 }
