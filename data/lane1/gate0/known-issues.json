@@ -1,0 +1,36 @@
+{
+  "wormhole": {
+    "source_primary": "https://github.com/wormhole-foundation/wormhole/blob/main/SECURITY_CONTEXT.md",
+    "audience": "explicitly addressed to security researchers and automated tools",
+    "fetched": "2026-06-01",
+    "entries": [
+      {
+        "class": "stale-attestation / live-config-vs-snapshot evaluation",
+        "mechanism": "NTT attestations are evaluated against the CURRENT threshold and CURRENT enabled-transceiver set at execution time, rather than against the (threshold, enabled-set) snapshot that existed when the attestation was recorded. Administrative threshold/transceiver reductions and re-enables are deliberate admin actions.",
+        "impact": "an attestation recorded under one transceiver/threshold config counting toward quorum under a later config (incl. re-enable of a previously-removed transceiver) \u2014 DECLARED NON-ISSUE.",
+        "component": "NTT ManagerBase / TransceiverRegistry attestation+threshold+transceiver quorum",
+        "source_url": "https://github.com/wormhole-foundation/wormhole/blob/main/SECURITY_CONTEXT.md",
+        "citation_anchor": "#L146-L169",
+        "raw_text": "NTT attestations are evaluated against live threshold/transceiver config rather than a snapshot taken when the attestation was recorded; admin threshold reductions are deliberate; any fraudulent-attestation scenario requires a quorum of malicious Guardians (out of scope)."
+      },
+      {
+        "class": "quorum / signing-key compromise precondition",
+        "mechanism": "any impact that assumes control over a quorum of signing keys (Guardians / malicious transceiver quorum) as a precondition.",
+        "impact": "compromising independent Guardian infra deemed infeasible without evidence; INVALID as a PoC assumption \u2014 out of scope.",
+        "component": "Guardian / transceiver quorum",
+        "source_url": "https://github.com/wormhole-foundation/wormhole/blob/main/SECURITY_CONTEXT.md",
+        "citation_anchor": "#quorum-compromise",
+        "raw_text": "Any impact that assumes control over a quorum of signing keys as a precondition is out of scope; compromising independent Guardian infrastructure is infeasible without supporting evidence."
+      },
+      {
+        "class": "rate-limit linear-usage DoS",
+        "mechanism": "denial-of-service based on linear usage of a rate-limiting mechanism via legitimate transfers.",
+        "impact": "normal capacity consumption is expected; only disproportionate inflation counts \u2014 otherwise non-issue.",
+        "component": "NTT rate limiter",
+        "source_url": "https://github.com/wormhole-foundation/wormhole/blob/main/SECURITY_CONTEXT.md",
+        "citation_anchor": "#rate-limit-dos",
+        "raw_text": "Denial-of-service based on linear usage of a rate limiting mechanism is expected behavior; only disproportionate inflation of consumed capacity counts as a potential bug."
+      }
+    ]
+  }
+}
