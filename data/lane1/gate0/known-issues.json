@@ -32,5 +32,48 @@
         "raw_text": "Denial-of-service based on linear usage of a rate limiting mechanism is expected behavior; only disproportionate inflation of consumed capacity counts as a potential bug."
       }
     ]
+  },
+  "bitflow": {
+    "source_primary": "https://immunefi.com/bug-bounty/bitflow/ + github.com/BitflowFinance/bitflow-dlmm (docs/invariants.md)",
+    "audience": "Immunefi PoC-required program; in-repo docs enumerate tested+guaranteed invariants",
+    "fetched": "2026-06-01",
+    "entries": [
+      {
+        "class": "malicious wallet interaction (Immunefi standard OOS)",
+        "mechanism": "modifying tx args/params, substituting contract addresses, submitting malicious txs against an already-connected wallet.",
+        "impact": "OUT OF SCOPE per program rules.",
+        "component": "any",
+        "source_url": "https://immunefi.com/bug-bounty/bitflow/",
+        "citation_anchor": "#oos-malicious-wallet",
+        "raw_text": "Malicious interactions with an already-connected wallet (modifying tx args, substituting contract addresses, malicious txs) are out of scope."
+      },
+      {
+        "class": "non-whitelisted / out-of-scope token",
+        "mechanism": "a finding that requires a token NOT deployed from SPQC38PW542EQJ5M11CR25P7BS1CA6QT4TBXGB3M; the system whitelists tokens and has a mock-unwhitelisted-token for negative testing (unwhitelisted tokens are rejected by design).",
+        "impact": "OUT OF SCOPE \u2014 only tokens from the named deployer are in scope; unwhitelisted-token paths are tested-rejects, not bugs.",
+        "component": "token whitelist",
+        "source_url": "https://immunefi.com/bug-bounty/bitflow/",
+        "citation_anchor": "#token-scope",
+        "raw_text": "Tokens deployed from SPQC38PW542EQJ5M11CR25P7BS1CA6QT4TBXGB3M are in scope; other tokens are not."
+      },
+      {
+        "class": "tested-and-guaranteed invariant (LP-supply conservation on swap)",
+        "mechanism": "swaps must not mint/burn LP tokens (LP supply unchanged during swap) \u2014 fuzzed as checkSwapXForY/YForX invariants (Critical).",
+        "impact": "a finding merely RE-STATING this invariant without a concrete BREAK is covered by the project's own Critical fuzz property; only a demonstrated violation is novel.",
+        "component": "dlmm-core swap",
+        "source_url": "github.com/BitflowFinance/bitflow-dlmm/blob/main/docs/invariants.md",
+        "citation_anchor": "#lp-supply-conservation",
+        "raw_text": "LP supply must remain unchanged during swaps. Violation impact: Critical."
+      },
+      {
+        "class": "tested-and-guaranteed invariant (bin/user balance conservation + rounding)",
+        "mechanism": "bin balances change by (input-fees)/output; user balances change exactly by swapped amounts; arithmetic-edge (overflow/underflow/div-zero/boundary) + rounding + 'exploit detection' covered by 276+ unit tests incl. swap-calculations-validation-logic + arithmetic-edge-cases.",
+        "impact": "plain rounding/slippage/precision/overflow claims without a NET value-extraction proof beyond the tested envelope are covered; only an untested composition that breaks conservation is novel.",
+        "component": "dlmm-core swap math / fees",
+        "source_url": "github.com/BitflowFinance/bitflow-dlmm/blob/main/docs/invariants.md",
+        "citation_anchor": "#balance-changes",
+        "raw_text": "Input token balance increases by (input - fees); output decreases by output; user balances change by exactly the amounts swapped. Arithmetic edge-cases + rounding fuzzed/tested."
+      }
+    ]
   }
 }
