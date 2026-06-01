@@ -31,9 +31,21 @@ NOISE = re.compile(r"test|mock|-demo|sandbox|tutorial|hello|example", re.I)
 
 
 def fetch(n):
-    req = urllib.request.Request(FEED.format(n=n), headers={"User-Agent": "buzz-deploy-watch"})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return json.loads(r.read()).get("results", [])
+    """Resilient: Hiro feed is flaky from the box (seen 000/500). Retry, then skip gracefully."""
+    import time
+    last = None
+    for attempt in range(4):
+        try:
+            req = urllib.request.Request(FEED.format(n=n), headers={"User-Agent": "buzz-deploy-watch"})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return json.loads(r.read()).get("results", [])
+        except Exception as e:
+            last = e
+            if attempt < 3:
+                try: time.sleep(5 * (attempt + 1))
+                except Exception: pass
+    print(f"[watch] Hiro feed unreachable after retries ({type(last).__name__}: {last}); skipping this run.")
+    return []
 
 
 def load_seen():
@@ -103,13 +115,18 @@ def main():
         with open(TOPQ, "a") as f:
             for c in tops: f.write(f"- [TOP] {c} — known-bounty Clarity protocol new deploy → Gate-1 NOW\n")
             for c in meds: f.write(f"- [MED] {c} — new Clarity DeFi deploy → verify bounty/disclosure at Step-1\n")
-        if notify and tops:
-            notify_wr([f"TOP {c}" for c in tops])
     # update seen (all fetched)
     for r in results:
         cid = (r.get("smart_contract") or {}).get("contract_id")
         if cid: seen.add(cid)
     json.dump(sorted(seen), open(SEEN, "w"))
+    # queue-DEPTH digest (backlog can't silt unworked) — auto-QUEUE only, NEVER auto-hunt
+    backlog = sum(1 for _ in open(NEWQ)) if os.path.exists(NEWQ) else 0
+    print(f"[watch] queue-DEPTH (cumulative surfaced, un-dispositioned): {backlog}")
+    if notify:
+        digest = [f"new this run: {len(tops)} TOP + {len(meds)} MED", f"backlog depth: {backlog} (auto-QUEUED, awaiting Gate-0/operator — never auto-hunted)"]
+        digest += [f"TOP {c}" for c in tops] + [f"MED {c}" for c in meds[:5]]
+        notify_wr(digest)
 
 
 if __name__ == "__main__":

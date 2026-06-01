@@ -1,0 +1,14 @@
+- [TOP] SP20XD46NGAX05ZQZDKFYCCX49A3852BQABNP0VG5.alex-arb-receiver-v5 — known-bounty Clarity protocol new deploy → Gate-1 NOW
+- [TOP] SP20XD46NGAX05ZQZDKFYCCX49A3852BQABNP0VG5.alex-arb-receiver-v4 — known-bounty Clarity protocol new deploy → Gate-1 NOW
+- [TOP] SP20XD46NGAX05ZQZDKFYCCX49A3852BQABNP0VG5.alex-arb-receiver-v3 — known-bounty Clarity protocol new deploy → Gate-1 NOW
+- [MED] SP51N7RK1H0YS0N7SHZ6TXD5MP03DMWH9YQBJSJK.cf-vault-v1-tfys5x-36t — new Clarity DeFi deploy → verify bounty/disclosure at Step-1
+- [MED] SPZYY7560YPR8BY63XNTDX36HBY1G8K0TST365B2.stacksarena-CommitVaults-fix — new Clarity DeFi deploy → verify bounty/disclosure at Step-1
+- [MED] SPZYY7560YPR8BY63XNTDX36HBY1G8K0TST365B2.stacksarena-VaultFactory-fix — new Clarity DeFi deploy → verify bounty/disclosure at Step-1
+- [MED] SP3TXKY0REKG6P3W6ACFB615N5556EC8VYS4MFA4D.stxbazaar-vaults-beta — new Clarity DeFi deploy → verify bounty/disclosure at Step-1
+- [MED] SP3TXKY0REKG6P3W6ACFB615N5556EC8VYS4MFA4D.stxbazaar-yieldadapter-beta — new Clarity DeFi deploy → verify bounty/disclosure at Step-1
+- [MED] SP3TXKY0REKG6P3W6ACFB615N5556EC8VYS4MFA4D.stxbazaar-vault-beta — new Clarity DeFi deploy → verify bounty/disclosure at Step-1
+- [MED] SP258BY8D71JCTV73A4V3ADPHCVWSBEM6G4FETPYF.blockyields-v2 — new Clarity DeFi deploy → verify bounty/disclosure at Step-1
+- [MED] SPV9K21TBFAK4KNRJXF5DFP8N7W46G4V9RCJDC22.juice-pool-v0 — new Clarity DeFi deploy → verify bounty/disclosure at Step-1
+- [MED] SP3PXGYYR9Y7GCQKNDWTWJW4R1YMAZ97VKSDWAGB8.nft-marketplace — new Clarity DeFi deploy → verify bounty/disclosure at Step-1
+- [MED] SP3PXGYYR9Y7GCQKNDWTWJW4R1YMAZ97VKSDWAGB8.nft-marketplace-v2 — new Clarity DeFi deploy → verify bounty/disclosure at Step-1
+- [MED] SP1HK6H018TMMZ1BZPS1QMJZE9WPA7B93TA2BMTGA.escrow-mainnet-v3 — new Clarity DeFi deploy → verify bounty/disclosure at Step-1
