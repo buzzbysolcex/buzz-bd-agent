@@ -229,10 +229,10 @@ For every function exposed to user input, build the validation→consumption map
 
 **Three canonical anchors:**
 
-| Anchor | Source | Validating-field | Consuming-field | Defenses (Q1/Q2/Q3) |
-|--------|--------|------------------|-----------------|---------------------|
-| #1 Cap C1 | `EigenOperator.advanceTotp()` | `allowlistedDigests[digest]` write | `isValidSignature` read SAME mapping | 3/3 (deterministic derivation + EigenLayer `approverSaltIsSpent` replay + LIVE `getOperatorShares` no-cache) |
-| #2 Function FBTC H1 | `confirmMintRequest` srcHash binding | `getCrossSourceRequestHash` recompute | `crosschainRequestConfirmation[srcHash]` | 3/3 (recompute freshness + dstChain==chain() replay + pause fallback) |
+| Anchor                           | Source                                                            | Validating-field                                                         | Consuming-field                           | Defenses (Q1/Q2/Q3)                                                                                           |
+| -------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| #1 Cap C1                        | `EigenOperator.advanceTotp()`                                     | `allowlistedDigests[digest]` write                                       | `isValidSignature` read SAME mapping      | 3/3 (deterministic derivation + EigenLayer `approverSaltIsSpent` replay + LIVE `getOperatorShares` no-cache)  |
+| #2 Function FBTC H1              | `confirmMintRequest` srcHash binding                              | `getCrossSourceRequestHash` recompute                                    | `crosschainRequestConfirmation[srcHash]`  | 3/3 (recompute freshness + dstChain==chain() replay + pause fallback)                                         |
 | #3 Gearbox H2 (CANONICAL anchor) | `CreditFacadeV3.multicall` → `CreditManagerV3` collateralDebtData | storage re-derive `.debt`/`.cumulativeIndexLastUpdate`/`.lastDebtUpdate` | `_calcDebtAndCollateral` read same struct | 3/3 (storage re-derive + `DebtUpdatedTwiceInOneBlockException` replay + LossPolicy pluggable circuit-breaker) |
 
 ### DC-7 EXCLUSION sub-pattern (canonical, formerly CANDIDATE, added 2026-05-27 evening from Cap Gate 2 NEGATE, hunt `hunts/2026-05-27-cap-c1-gate2-foreclosure.md`)
@@ -246,6 +246,7 @@ For every function exposed to user input, build the validation→consumption map
 In this case validating-field IS consuming-field — they're the SAME deterministic slot, just accessed at different times. The "permissionless setter" surface is operationally a no-op flag-toggle, not a key-binding decision.
 
 **Negative-control for DC-7 surface mapping:** before flagging a permissionless setter / mutator as DC-7, ask:
+
 - Does the attacker control ANY input to the write function that affects the resulting key/digest? (If no → EXCLUSION fires, not DC-7)
 - Is the consuming-side read deriving its key from the SAME storage variables and SAME hash function? (If yes → EXCLUSION fires)
 - Is there a cross-protocol consumer that re-derives state from LIVE on-chain reads (no cache)? (If yes → EXCLUSION fires across protocol boundaries too)
@@ -254,7 +255,7 @@ In this case validating-field IS consuming-field — they're the SAME determinis
 
 **Detector spec (negative — to AVOID Gate 1 false-positive):** when surface-mapping permissionless setters, AST-grep the setter body for `keccak256(...)` / hash-derivation calls. If ALL hash inputs are storage-reads OR `address(this)` OR `block.chainid`-class constants, flag as DC-7 EXCLUSION candidate. Cross-check consumer's hash derivation matches. If match → EXCLUSION, no surface entry.
 
-**Boundary anchor for Doctrine #38:** this exclusion is the OPPOSITE pattern from Doctrine #38 (Pure Pass-Through *WithSig STRUCTURAL FORECLOSE). Doctrine #38 fires when a contract is a stateless signature-forwarding wrapper (no local state). DC-7 EXCLUSION fires when the contract has local state but the state-transitions are deterministic (no attacker binding). Both produce NEGATE verdicts at Gate 1/Gate 2 but for different structural reasons.
+**Boundary anchor for Doctrine #38:** this exclusion is the OPPOSITE pattern from Doctrine #38 (Pure Pass-Through \*WithSig STRUCTURAL FORECLOSE). Doctrine #38 fires when a contract is a stateless signature-forwarding wrapper (no local state). DC-7 EXCLUSION fires when the contract has local state but the state-transitions are deterministic (no attacker binding). Both produce NEGATE verdicts at Gate 1/Gate 2 but for different structural reasons.
 
 **Authority:** Cap Gate 2 foreclosure receipt (`hunts/2026-05-27-cap-c1-gate2-foreclosure.md`). Gate 1 estimated novelty 35%, actual <5% — Contradictions-Register INFO #20 anchors the Gate 1 hardening rule (cross-protocol DC-7 hypotheses MUST enumerate consumer-side replay/freshness defenses before finalizing surface map).
 
@@ -501,6 +502,7 @@ Both anchor protocols are Solana (cp-swap fork + C-runtime private credit). The 
 Excluded from CANDIDATE-E hit-list (per refinements above): 1:1 PSM-class single-asset stablecoin parity modules; rate-accumulator ERC4626 share wrappers. **Productization impact:** detector FP cost reduced; targeted-sweep EV increased.
 
 **Exclusion class 3 — defensive-direction-symmetric rebasing-index lending family (added 2026-05-28 night — Compound III Comet C-3 Gate 2 Phase 1 NEGATE).** When a lending protocol uses a rebasing-index pair (e.g., `baseSupplyIndex` + `baseBorrowIndex`) where:
+
 1. **All rounding directions are intentionally pool-favoring** (supply-side rounds DOWN; borrow-side stored debt rounds UP — both bias against user, in favor of reserves)
 2. The protocol **lacks flash-loan + same-tx-paired-conversion primitives** required for Raydium-class amplification (per-cycle wei dust << gas cost makes single-direction extraction unprofitable)
 3. The reserves equation preserves pool-favoring net direction across both legs
@@ -512,6 +514,7 @@ Excluded from CANDIDATE-E hit-list (per refinements above): 1:1 PSM-class single
 **2nd confirming anchor (NEGATE, [INSPECTED]) — Sky DSS classic CDP engine (2026-05-29).** `Vat.sol` rate-accumulator (`rate` per-Ilk + `chi` on `Pot` + `rho` timestamp) is the canonical lending-family rate-accrual surface, attack-resistant 8 years. `Vat.frob/fork/flux/move` paired pipelines all verified conservative-direction-symmetric (signed `dink`/`dart` deltas, `wish()` permission on both endpoints) — Step 5.11 enumeration found ZERO asymmetric pipelines. Distinct TOPOLOGY from Compound III's rebasing-index pair: DSS uses a CDP debt-accrual `rate`/`chi` accumulator, Comet uses `baseSupplyIndex`/`baseBorrowIndex` rebasing. Yet SAME Exclusion Class 3 outcome — no flash-loan + same-tx-paired-conversion amplification primitive → Pattern E cannot fire profitably. Two distinct lending sub-topologies (Comet rebasing-index + Maker CDP rate-accrual) now both anchor Exclusion Class 3, widening it beyond the rebasing-index sub-family to lending-family-defensive-symmetric generally. [INSPECTED] — Gate 1 source-read foreclosure, no Foundry. Authority: `hunts/2026-05-29-sky-immunefi-gate1.md`.
 
 **Sharpened cross-protocol prediction:** Expect NEGATE on future Pattern E Gate 1 dispatches against:
+
 - Aave V3 / Aave V4 (WadRayMath defensive symmetry, no flash-loan-paired primitive in same tx)
 - Morpho / Morpho Blue (P2P matching uses index-based accounting)
 - Spark Lend (Aave V3 fork — already FORECLOSURE-RECEIPT today via Doctrine #27 F MAXIMUM, double-anchored exclusion now)
@@ -697,6 +700,7 @@ Result: contracts with `balanceOf`-based `totalAssets()` AND no `_decimalsOffset
 **Second anchor — MetaMorpho V1 Surface A (NEGATIVE outcome, 2026-05-23, twice-independently-discovered):** Curator-setting authority (`setCurator`, instant, no timelock) paired with cap-acceptance authority (`submitCap` → 24h MIN_TIMELOCK → `acceptCap`) on the same protocol state (vault market admission). **Violates points #1 (Ordering correctness) + #2 (Cooldown enforcement)**: owner can swap the curator INSIDE the pending-cap window, breaking the implied sibling-pair ordering (`pendingCap.curator == acceptCap.caller` should be invariant; it isn't). Asymmetric-defense window: instant-mutation authority bypasses the timelocked sibling.
 
 **Independent-discovery convergence anchor (load-bearing for class validation):**
+
 - 2026-05-23: independent researcher files Cantina finding #947 with structurally identical observation
 - 2026-05-23: Buzz files Cantina finding #1035 in parallel with same finding (10-audit-saturation gap closed by 2 independent discoverers within ~24h window)
 - 2026-05-24: Cantina triages #1035 as `CLOSED_DUPLICATE` of #947, severity HIGH→MEDIUM (operator msg 7670)
@@ -704,7 +708,6 @@ Result: contracts with `balanceOf`-based `totalAssets()` AND no `_decimalsOffset
 Convergence-as-validation: two independent methodologies arriving at the same finding under audit-saturated conditions is a strong signal that the CANDIDATE-J class is real, not over-fit. Methodology confirmed; submission velocity is the differentiator (independent discoverer filed first).
 
 **Promotion status update:** Sky stUSDS (positive/CLEAN) + MetaMorpho V1 Surface A (negative/VIOLATED + twice-independently-discovered) = **2 anchors, 1 needed for promotion**. Recommend operator-decision on whether twice-independently-discovered counts as additional weight toward DC-N promotion vs. requiring fresh-third-anchor.
-
 
 **Cross-pollination scan target list (post-CVP):**
 
@@ -1017,8 +1020,6 @@ _Patterns: Defense Classes | v1.9 | 2026-05-19 | CANDIDATE-G PROMOTED to DC-8 ("
 
 **Multi-anchor pattern argument:** Two independent production deployments (Balancer V3 + Pancake Infinity) by two unrelated teams converge on the same structural shape: end-of-path-only slippage enforcement composed with permitted per-hop hook deltas. Pancake's expression is even more exposed — there is no per-step `minAmountOut` parameter at all in the four affected router-base loops (Balancer at least zeros an explicit per-step field; Pancake's structs don't even define one). The pattern is intrinsic to the hook-based singleton-vault router architecture family, not an implementation accident. Proposed promotion name (Q-41): **DC-13 End-of-Path-Only Slippage Composition With Per-Hop Hook Deltas**. Productization-friendly: AST-grep for multi-hop loop bodies in router contracts that propagate hop-N output without per-step floor check.
 
-
-
 **Cross-pollination scan targets:**
 
 - **Uniswap V4 hooks** — multi-hop swaps via PoolManager.unlock() callbacks; check if hook return values are reused across pool boundaries
@@ -1062,6 +1063,7 @@ It is a **MISFRAME (NOT a finding)** when it is merely a missing PER-STEP slippa
 CANDIDATE-O exploitation in the wild is gated on producing the illusion of organic volume / organic counterparty diversity for the oracle / liquidation / volume-gated consumer to accept the attacker-manipulated price. **Flash-loan-driven self-trading is the canonical economic substrate that produces this illusion at zero net capital.**
 
 Canonical composite template:
+
 ```
 1. Open flash loan from Morpho Blue / Aave V3 / Balancer / Uniswap V4 flash account (capital substrate, atomic)
 2. Distribute flash-loan proceeds across N attacker-controlled wallets
@@ -1083,6 +1085,7 @@ Ground-truth instance: Morpho Blue $54.5M flash loan → 7 wallets → self-trad
 **Implication for Buzz detector pack:** every Gate 1 surface map on a lending / options / oracle-consuming protocol must include the explicit question — "what's the volume-organicity gate (counterparty diversity, time-spread, source-restriction) on the oracle / pricing input the protocol consumes, AND can a flash-loan-self-trade defeat it?" Many DEX-fed oracles have NO such gate; those are direct CANDIDATE-O composition targets.
 
 **Sibling-class economic substrate** — same flash-loan-self-trade substrate composes with:
+
 - DC-7 (Validating-Field ≠ Consuming-Field): when the validating field is "volume > threshold" and the consuming field is "TWAP price input" — flash-loan-self-trade satisfies the volume gate without organic counterparty
 - CANDIDATE-J (state-machine cooldown overwrite): flash-loan-self-trade can satisfy state-machine progression gates that assume natural trade pacing
 - DC-9 sub-4 (state-not-invalidated repeated-mint): flash-loan-self-trade composes with stale-state assumptions for atomic-window exploitation
@@ -1188,6 +1191,7 @@ Ground-truth instance: Morpho Blue $54.5M flash loan → 7 wallets → self-trad
 **Anchor (Stacks sBTC, 2026-05-26):** `current-signer-principal` init = `tx-sender` at deploy time (`sbtc-registry.clar:18`). Intent is rotate-keys-immediately-after-deploy via multisig. Window exists between deploy block + rotate-keys tx confirmation. During that window, the deploying EOA is the protocol-admin equivalent of full multisig authority. Attack surface = compromise of the deployer EOA OR adversarial reordering of the deploy + rotate tx pair via miner/sequencer collusion. [INSPECTED] hunt `hunts/2026-05-26-stacks-immunefi-gate1.md` proposal P2.
 
 **Examples to seed (cross-substrate):**
+
 - Stacks sBTC: deploy → rotate-keys → multisig active
 - Generic Solidity OZ Ownable: deploy → transferOwnership(timelock) → renounceOwnership
 - Solana Anchor: deploy → set_authority → freeze_authority (mint authority, upgrade authority)
@@ -1223,11 +1227,11 @@ Ground-truth instance: Morpho Blue $54.5M flash loan → 7 wallets → self-trad
 
 **3 worked-example anchors (collective $600M+ exposure):**
 
-| #   | Protocol          | Date       | $ Drained | Sub-pattern                                        | Source                        |
-| --- | ----------------- | ---------- | --------- | -------------------------------------------------- | ----------------------------- |
-| 1   | Wormhole          | 2022-02-02 | $325M     | Guardian signature scope omitted destination-bind  | Wormhole / SignatureProvider  |
-| 2   | Nomad             | 2022-08-01 | $190M     | Default-trust enumeration on Merkle root           | Nomad / default-trust-enum    |
-| 3   | Kelp DAO rsETH    | 2026-04-18 | $292M     | Single-DVN trust-anchor compromise (LZ V2 consumer)| Ethereal News Weekly #20      |
+| #   | Protocol       | Date       | $ Drained | Sub-pattern                                         | Source                       |
+| --- | -------------- | ---------- | --------- | --------------------------------------------------- | ---------------------------- |
+| 1   | Wormhole       | 2022-02-02 | $325M     | Guardian signature scope omitted destination-bind   | Wormhole / SignatureProvider |
+| 2   | Nomad          | 2022-08-01 | $190M     | Default-trust enumeration on Merkle root            | Nomad / default-trust-enum   |
+| 3   | Kelp DAO rsETH | 2026-04-18 | $292M     | Single-DVN trust-anchor compromise (LZ V2 consumer) | Ethereal News Weekly #20     |
 
 **Sub-pattern enumeration (each anchored above):**
 
@@ -1261,6 +1265,7 @@ Ground-truth instance: Morpho Blue $54.5M flash loan → 7 wallets → self-trad
 4. **donateAndLiq compound** — donate raw asset → flash-borrow → liquidate → extract via wrapper
 
 **Anchor incidents (Clara + brain):**
+
 - Compound v2 cToken (canonical historical anchor — class-defining)
 - ~28 Clara anchors across Yearn-class vault wrappers, AMM LP wrappers, RWA tokenization vaults (per Clara intake §3 cumulative count)
 - Combined Clara USD: $50M+ named exposure
@@ -1292,10 +1297,10 @@ Ground-truth instance: Morpho Blue $54.5M flash loan → 7 wallets → self-trad
 4. **read-only-reentrancy-on-oracle** — oracle read happens mid-callback when reserves are temporarily wrong-state (Curve / Balancer V2-class)
 5. **slippage-double-count-across-swap-steps** (Rhea-class) — per-step slippage check reuses carry-value semantically; cumulative protection unbounded
 6. **cross-chain-staleness-asymmetry** (Pendle-class, filed 2026-05-25, Ogie msg 7733) — consumer chain reads price/exchange-rate posted via cross-chain message (LayerZero, Wormhole, Hyperlane, Axelar, custom bridge). The update path is monotonic OR write-only — there is NO per-read `block.timestamp - last_updated < max_age` floor enforced at the read site. Cross-chain message delays (1-30 min for honest delivery, hours under network congestion / bridge halts / DDoS) let stale rates persist on consumer chain. Distinct from sub-1 (spot-no-TWAP is on-chain spot read; sub-6 is cross-chain message staleness with no time-decay defense). Anchor: PendleExchangeRateOracleApp `getExchangeRate()` lacks max-age floor on consumer chain; `_updateExchangeRate()` is monotonic but only fires on cross-chain message arrival — no fallback if messages stall. (Pendle V2 Gate 1 task #61 v1.1 re-dispatch, R8 [INSPECTED])
-
    - **sub-6 EXCLUSION refinement — Conserved-Quantity Test (added 2026-05-29 from Hyperlane HypERC4626 Gate 2 NEGATE):** a stale cross-chain rate (sub-6) is exploitable ONLY if the stale rate determines a CONSERVED / extractable cross-chain quantity. If the protocol conserves the underlying unit (e.g. ERC4626 SHARES) across chains and the synced rate is (a) display-only and (b) a self-cancelling input-parametrization appearing identically on both sides of the local burn/mint, staleness creates NO arbitrage. **NEGATING anchor: Hyperlane `HypERC4626`** — the message carries SHARES (NatSpec: "Messages contain amounts as shares of ERC4626"); synthetic `exchangeRate` cancels (burn uses `assetsToShares(amount)`, the outbound message uses the SAME `assetsToShares(amount)`); collateral `vault.redeem(shares)` uses the LIVE vault rate on the message's share count. The synthetic rate never enters the conserved redemption — stale rate → zero arbitrage; a user can never extract more than `their_shares × liveRate`. **Pre-filter sub-rule:** before crediting sub-6 EV on a cross-chain rate-syncing target, trace whether the synced rate enters the CONSERVED cross-chain quantity or only local display/UX; if display-only → FORECLOSE (analogue of Pattern E EXCLUSION Class 3 — the lens fires on the SHAPE, but conservation/topology negates it). Doctrine #41 anchor #2. R8 [INSPECTED] `hunts/2026-05-29-hyperlane-hyp-1-gate2-foreclosure.md`.
 
    - **sub-6 EXCLUSION refinement #2 — Bounded-Staleness-Window (added 2026-05-29 from Lido V3 LazyOracle Gate 1 FORECLOSE):** a DEFERRED / lazy oracle (value reported on a delay, pull/push, timestamped) is NOT exploitable-staleness when the CONSUMER pairs ALL of: (a) a freshness-delta gate at the ACTION site (`block.timestamp - reportTs < MAX_DELTA`, not just at report-acceptance), (b) a real-time on-chain in/out-delta adjustment to the cached value, (c) an over-collateralization / reserve buffer bounding the worst-case stale-drift, (d) an anomaly/quarantine on suspicious value jumps. Residual drift over the window (e.g., validator slashing between reports) is bounded BELOW the collateral buffer = designed, audited tradeoff, not extractable. **NEGATING anchor: Lido V3 `LazyOracle` -> `VaultHub.mintShares`** (`_requireFreshReport` REPORT_FRESHNESS_DELTA ~2d + `totalValue = report + inOutDelta` + reserveRatio + quarantineValue). Pre-filter: deferred-oracle target with the freshness-delta + buffer + quarantine stack present -> FORECLOSE. [INSPECTED via WebFetch] `hunts/2026-05-29-lido-immunefi-gate1.md`. **Doctrine #41 note:** the WebFetch source-summary mis-stated the staleness DIRECTION here (claimed donation->over-mint; actually donation->conservative under-mint + quarantined) — 3rd direction-error data-point (after Hyperlane Hyp-1): trace the arithmetic direction yourself, never bank a WebFetch "CONFIRMED RISK" unverified.
+
 7. **wrapper-strips-staleness-from-feed** (filed 2026-05-25 from 3-way DC-12 sub-6 propagation hunt, Ogie msg 7741) — the wrapper layer (interface contract, adapter implementation, custom oracle) strips the staleness signal between an upstream source that carries it and a downstream consumer that expects it. Three observed flavors, all canonical:
    - **7a (interface-level strip):** the wrapper's solidity interface returns only `(uint256)` — staleness CANNOT be carried regardless of implementation. Canonical: Pendle `IPExchangeRateOracle` (cross-protocol cross-pollination anchor for sub-6).
    - **7b (API-choice strip):** wrapper consumes the upstream's `latestAnswer() returns (int256)` instead of `latestRoundData() returns (roundId, answer, startedAt, updatedAt, answeredInRound)`. The `updatedAt` field exists upstream but is never read. Canonical: bgd-labs `aave-capo/PendlePriceCapAdapter.sol` + family (RETH / EzETH / cbETH adapters). Trail of Bits 2022 publicly flagged this choice on Aave V3; Aave explicitly retained across 30 subsequent audits = Doctrine #23 architectural foreclosure on AAVE specifically, but the class transfers per Doctrine #29 to other Chainlink consumers without Aave-tier audit-saturation.
@@ -1311,6 +1316,7 @@ Ground-truth instance: Morpho Blue $54.5M flash loan → 7 wallets → self-trad
    - **Meta-doctrine corollary (from Stader 7g foreclosure):** Targets with ≥3 reputable audit firms + HEAD-stale >3 months collapse paste-ready EV on the audited surface toward zero — even when the vulnerability class is confirmed present. Phase 0 audit-dedup is the canonical gate that saves Foundry-PoC build cycles. (Proposed Standing-Intake-Protocol Step 3 EV multiplier: 0.25× when ≥3 firms + HEAD-stale.)
 
 **Anchor incidents (Clara + brain):**
+
 - Rhea Finance 2026-04-16 **$18.4M** (NEAR; 0xTeam analysis — canonical Buzz anchor, sub-5)
 - PancakeBunny 2021-05-19 **$43.5M** (Clara — canonical historical anchor, sub-1)
 - Cream Finance 2021-10-27 **$4.4M** (Clara — sub-1 cross-pool)
@@ -1342,13 +1348,13 @@ The CLEAN canonical reference is the JOINT 2-anchor Pareto frontier of Euler V2 
 
 Euler V2 implements 8 oracle adapter families (Chainlink ×3 [BasePrice / OEV / Capped], Chronicle, Redstone, Pyth, UniswapV3 TWAP, RateProvider, Ondo, Pendle, Lido, CrossAdapter) — all 5/5 sub-7 sub-rules CLEAN across the full surface:
 
-| Sub-rule | Euler implementation status |
-| --- | --- |
-| roundId mismatch defense (`require(answeredInRound >= roundId)`) | CLEAN — checked in every Chainlink adapter |
-| staleness buffer (`block.timestamp - updatedAt <= maxStaleness`) | CLEAN — per-feed `maxStaleness` parameter, enforced uniformly |
-| negative-price reject (`require(answer > 0)`) | CLEAN — checked, with adapter-specific upper-bound caps where appropriate |
-| deprecated-aggregator detection (revert if aggregator returns sentinel) | CLEAN — Chronicle + Chainlink adapters both check |
-| try/catch on feed call (graceful fallback) | CLEAN — Pendle + CrossAdapter both use try/catch with explicit fallback |
+| Sub-rule                                                                | Euler implementation status                                               |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| roundId mismatch defense (`require(answeredInRound >= roundId)`)        | CLEAN — checked in every Chainlink adapter                                |
+| staleness buffer (`block.timestamp - updatedAt <= maxStaleness`)        | CLEAN — per-feed `maxStaleness` parameter, enforced uniformly             |
+| negative-price reject (`require(answer > 0)`)                           | CLEAN — checked, with adapter-specific upper-bound caps where appropriate |
+| deprecated-aggregator detection (revert if aggregator returns sentinel) | CLEAN — Chronicle + Chainlink adapters both check                         |
+| try/catch on feed call (graceful fallback)                              | CLEAN — Pendle + CrossAdapter both use try/catch with explicit fallback   |
 
 The CLEAN baseline anchors what a fully-defended sub-7 surface looks like: 8 adapter families × 5 sub-rules = 40 sub-rule checks across the production surface, all defended at audit-saturation 33 (MAXIMUM tier per Doctrine #27 F corollary). FORECLOSURE-RECEIPT at Gate 1 2026-05-25.
 
@@ -1356,13 +1362,13 @@ The CLEAN baseline anchors what a fully-defended sub-7 surface looks like: 8 ada
 
 Reserve protocol implements `OracleLib` (canonical Chainlink-consumer wrapper used by Reserve's RToken collateral / asset / RewardableLibP1 pricing pipelines). Manual sweep 2026-05-25 (Reserve $10M Cantina Gate 1 FORECLOSURE-RECEIPT, see Doctrine #32 v1.1.1 corollary anchor):
 
-| Sub-rule | Reserve `OracleLib` implementation status |
-| --- | --- |
-| roundId mismatch defense (`require(answeredInRound >= roundId)`) | CLEAN — checked in `OracleLib.price(IChainlinkFeedRegistryLike, ...)` |
-| staleness buffer (`block.timestamp - updatedAt <= timeout`) | CLEAN — per-feed `timeout` parameter, enforced uniformly across Reserve collateral types |
-| negative-price reject (`require(answer > 0)`) | CLEAN — checked, with `_priceTimeout` revert path |
+| Sub-rule                                                                        | Reserve `OracleLib` implementation status                                                        |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| roundId mismatch defense (`require(answeredInRound >= roundId)`)                | CLEAN — checked in `OracleLib.price(IChainlinkFeedRegistryLike, ...)`                            |
+| staleness buffer (`block.timestamp - updatedAt <= timeout`)                     | CLEAN — per-feed `timeout` parameter, enforced uniformly across Reserve collateral types         |
+| negative-price reject (`require(answer > 0)`)                                   | CLEAN — checked, with `_priceTimeout` revert path                                                |
 | deprecated-aggregator detection (revert if aggregator returns sentinel / stale) | CLEAN — `latestRoundData()` consumer pattern (NOT `latestAnswer()` — sub-7b structurally absent) |
-| try/catch on feed call (graceful fallback) | CLEAN — try/catch with explicit `errorOnPriceTimeout` policy parameter |
+| try/catch on feed call (graceful fallback)                                      | CLEAN — try/catch with explicit `errorOnPriceTimeout` policy parameter                           |
 
 **Why two anchors define the Pareto frontier (rather than one):**
 
@@ -1422,6 +1428,7 @@ DC-12 splits into two sub-classes by oracle-source architecture. The split mater
 **DC-12 / CANDIDATE-O-RAW** — raw DEX spot in oracle path. The pricing pipeline reads a single-pool spot price (Uniswap V2/V3 `getReserves()` or `slot0` sqrtPriceX96), an instantaneous AMM mid-price, or a single-tick TWAP with insufficient window for the asset's volatility. No defended-wrapper between the DEX surface and the consumer. **All 5 DC-12 sub-patterns apply.** Classic Sharwa, PancakeBunny, Cream, Elephant.
 
 **DC-12 / CANDIDATE-O-WRAPPED** — DEX-derived price but defended via at least one of the following independently-verifiable wrappers:
+
 1. **External-priced sqrt ratio** — the consumer reads a sqrt-price-from-external-price (e.g., Kamino KToken oracle computes sqrtPriceX96 from independent Pyth + Switchboard prices of the underlying pair, then derives the LP-share price from THAT sqrt). Pool sqrt is never read directly.
 2. **CappedFloored** — price reads bounded by a hardcoded ceiling/floor (Kamino USDH at FixedPrice = $1; Liquity stETH/wstETH peg-bound math).
 3. **MostRecentOf with divergence rejection** — consumer reads N price feeds, accepts only the MostRecentOf passing a per-pair `max_divergence_bps` check (Kamino reserve config; Pendle SY guards).
@@ -1433,6 +1440,7 @@ A consumer with ≥1 wrapper passes the Kamino three-layer convergence test. ZER
 **Triage rule:** Gate 1 surveys that confirm wrapper-presence + wrapper-independence may FORECLOSE on DC-12 with a documented receipt. Surveys without wrapper-verification leave the finding [ASSUMED] DC-12 substrate; demote to Gate 2 verification.
 
 **Canonical O-WRAPPED-DEFENDED references:**
+
 1. **Kamino klend Gate 2** (task #37, 2026-05-24, Solana substrate) — surveyed 30 reserves across 4 markets, found 2 with `max_twap_divergence_bps=0` but ZERO using direct-DEX-spot Scope chain index. kSOLJITOSOLOrca uses external-priced sqrt ratio (anti-Sharwa source comment at `programs/scope/src/oracles/ktokens.rs:41-44`). USDH uses FixedPrice $1. Class refuted across production surface. See `data/lane1/gate2-clones/kamino-twap-bypass-paste-ready.md` for the regression sentinel.
 2. **Origin Dollar (OUSD/OETH) Gate 2** (task #53, 2026-05-25, EVM substrate, second-anchor confirmation) — Origin's `AbstractOracleRouter.sol` + `OracleRouter.sol` + `OETHOracleRouter.sol` family is Chainlink-only with `latestRoundData()` + staleness + DRIFT bounds. ZERO `get_p` / `last_price` / `price_oracle` grep hits in `oracle/` dir. NO Curve fallback path. WETH = FIXED_PRICE 1e18. Stablecoin reserves all mapped to Chainlink USD feeds. CONFIRMS the DC-12 O-WRAPPED reference pattern cross-substrate (Solana + EVM). See `data/lane1/gate2-clones/origin-dollar-rebase-sandwich-foreclosed.md` for full V2 verification record. (Operator approval: Ogie msg 7715 proposal A, 2026-05-25)
 3. **Olympus Cooler V2 Gate 1** (task #59, 2026-05-25, EVM substrate, third-anchor confirmation — INTERNAL-MONOTONIC-ORACLE wrapper #5 canonical reference) — `CoolerLtvOracle` is policy-set + monotonically up-only + slope-bounded internal-only oracle. NO external feed (Chainlink / Pyth / Switchboard / DEX) appears in pricing path. LTV value can only INCREASE on update (admin-callable), with per-setter slope invariant bounding max rate-of-change. The class is structurally foreclosed — no oracle-feed substrate exists for any of the 5 DC-12 sub-patterns to bind. All 4 detector rotations clean (cand-t / cand-w / cand-y / cand-v: 0/0/0/0 findings on 235 .sol). cand-z (DC-20 rebase cache) SKIPPED structurally — no rebase wrapper. See `hunts/2026-05-25-cooler-loans-gate1.md` for full Gate 1 record. (Operator approval: Ogie msg 7728 proposal A, 2026-05-25)
@@ -1463,6 +1471,7 @@ A consumer with ≥1 wrapper passes the Kamino three-layer convergence test. ZER
 6. **conformance-only-no-chain (Phase 0 INSIGHT-tier gate)** (added 2026-05-28 from Firedancer #77340 INSIGHT CONFIRMED — FIRST CONFIRMED BOUNTY, Ogie msg 7957) — when scanning any RFC / spec conformance surface (HTTP framing, parser leniency, validation gaps, denom-regex bypass, packet-format desync), Phase 0 MUST ask: **"Can I demonstrate the chain to impact, or only the primitive?"** Primitive without chain = INSIGHT-tier flat/pool-share payout on audit-competition programs, materially below Medium. Pre-classify EV as `cap × P(acc) × 0.10-0.20 conformance_class_discount` BEFORE investing Foundry/PoC time on a chain-less hypothesis. The conformance observation may still be worth filing (brain-compound-rich for doctrine + detector seeds, and on Immunefi the project — not the triager — can reopen as INSIGHT) but Gate 2 PoC effort budget should reflect INSIGHT-tier ROI not Medium-tier ROI. Distinguishing test: an EXPLOIT NARRATIVE reads as "attacker bytes reached the authenticated app via this proxy + this desync, here's the captured response"; a CONFORMANCE OBSERVATION reads as "server accepts non-conformant framing per RFC X §Y" with no captured-response artifact. Canonical anchor: Firedancer #77340 — 6 HTTP framing sub-findings, all [INSPECTED]-grade, no end-to-end chain demonstrated; triager CLOSED, project REOPENED at INSIGHT (KYC complete, payout pending). Cross-reference: Doctrine #40 CANDIDATE ("Conformance ≠ Exploit Narrative"). Two-reviewer pattern observed: triager close ≠ final on audit-competition programs; project gets last word. Do NOT inquire about post-close insight status (Immunefi T&C prohibits status inquiries). [INSPECTED] + [EXECUTED] (Firedancer KYC + payout confirmation, 2026-05-28.)
 
 **Anchor incidents (Clara + brain):**
+
 - 0xBugDrop unnamed 2026-05-22 **$7M** (canonical Buzz brain anchor — sub-1+sub-2 compound)
 - ~10 Clara anchors across 2022-2024 reentrancy revival corpus (per Clara intake §3 cumulative count); 2022 CEI-class chain (Hundred Gnosis + Agave + Paraluni + bHOME + Fuse Pool 127 + Revest + ACOWriter + Umbrella) as substrate for the re-emergent class
 - Filecoin FIP-0109 `notify_data_consumers` 2024 (Lead 1, hunt `hunts/2026-05-26-filecoin-immunefi-gate1.md` — sub-4 canonical anchor)
@@ -1494,6 +1503,7 @@ A consumer with ≥1 wrapper passes the Kamino three-layer convergence test. ZER
 3. **permit-router-misuse** — `permit($OWNER, ...)` + `transferFrom($OWNER, ...)` where `$OWNER` is unbound to `msg.sender` before permit usage (AnyswapV4 sub-anchor)
 
 **Anchor incidents (Clara):**
+
 - LiFi 2022-03-20 **$202K** (canonical Clara anchor — multi-route aggregator class) **[INSPECTED]** (published post-mortem)
 - SocketGateway 2024-01-16 **$2.6M** ("Route 406 USDC drain") **[INSPECTED]** (published post-mortem)
 - RubicProxy 2022-12-25 **$1.5M** **[INSPECTED]**
@@ -1544,9 +1554,9 @@ LiFi 2022-03-20 ($202K) was the canonical Clara anchor that opened the DC-14 cla
 1. **Explicit `_receiver` parameter binding** — `swapAndExecute` / `swapAndCompleteBridgeTokens` take `_receiver` as an explicit argument; downstream transferFrom is bound to `_receiver`, not to attacker-supplied `from`
 2. **`nonReentrant` modifier** on all Executor entry-points (Executor.sol L100+131)
 3. **Backend-generated `LibSwap.SwapData[]` calldata constraint** — Cantina program OOS rule: "self-crafted calldata" not in scope. Means user-supplied `from` reaches the contract only via off-chain-signed routes that re-validate
-4. **Receiver* periphery layer** — 5 dedicated Receiver contracts that re-validate the destination address against signed intent
+4. **Receiver\* periphery layer** — 5 dedicated Receiver contracts that re-validate the destination address against signed intent
 
-This is the **structural reference DC-14 defense**. Future Gate 1 surveys finding router/aggregator transferFrom patterns should compare against this baseline. Defense ratio: explicit _receiver + nonReentrant + backend-calldata + Receiver* re-validation = 4-layer defense. Any router shipping with fewer than 3 of these layers is candidate Gate 2 surface.
+This is the **structural reference DC-14 defense**. Future Gate 1 surveys finding router/aggregator transferFrom patterns should compare against this baseline. Defense ratio: explicit \_receiver + nonReentrant + backend-calldata + Receiver\* re-validation = 4-layer defense. Any router shipping with fewer than 3 of these layers is candidate Gate 2 surface.
 
 **Source:** lifi Gate 1 task #57, 2026-05-25. Foreclosure-receipt at `hunts/2026-05-25-lifi-gate1.md`. Operator-approved msg 7725 proposal A.
 
@@ -1568,6 +1578,7 @@ This is the **structural reference DC-14 defense**. Future Gate 1 surveys findin
 4. **DC-15.Y (self-transfer-acct compound)** — token allows `_transfer(addr, addr, amount)` without short-circuit; in pair context produces double-counted accounting. **(Net-new sub-pattern from Clara intake; ALSO filed as standalone CANDIDATE-Y — see below)**
 
 **Anchor incidents (Clara):**
+
 - Uranium 2021-04-28 **$40.9M** (largest single anchor — pair-drain class) **[INSPECTED]** (published post-mortem)
 - SafeMoon 2023-03-28 **$8.9M** (LP-burn drain, deflationary-class anchor) **[INSPECTED]** (published post-mortem)
 - LeetSwap 2023-08-01 **$221K** (Base-chain anchor) **[ASSUMED]**
@@ -1607,6 +1618,7 @@ This is the **structural reference DC-14 defense**. Future Gate 1 surveys findin
 4. **stablecoin-mixed-decimal** — pools / protocols supporting USDC (6-dec) + DAI (18-dec) + USDT (6-dec) where one path normalizes and another doesn't (theoretical sub-pattern, no Clara anchor yet)
 
 **Anchor incidents (Clara + brain):**
+
 - Blueberry 2024-02-23 **$1.3M** ("Decimal mismatch exploit") — canonical sub-1 anchor `[INSPECTED]` (published post-mortem)
 - ENF 2023-02-24 **$5.2M** ("Redeem decimal mis-scaling") — sub-2 anchor `[ASSUMED]` (Clara index-only)
 - Nowswap V1 2021-09-15 **$1.1M** ("WETH mis-scaled KLOSS invariant") — sub-3 anchor `[ASSUMED]` (Clara index-only)
@@ -1647,6 +1659,7 @@ The pattern `USDC + USDT in same contract` (both 6-dec) is structurally immune t
 4. **tx-origin-in-forwarder-context** — even worse: contract uses `tx.origin` instead of either; tx.origin resolves to relayer wallet which is forwarder owner (theoretical sub-pattern, no Clara anchor yet)
 
 **Anchor incidents (Clara + brain):**
+
 - thirdweb TokenERC20-class 2023 (~$Xk-Mk, multi-token burn exploit across forks) — canonical sub-1 anchor `[INSPECTED]` (published post-mortem)
 - TIME (BSC/multi-chain staking) — sub-2 anchor `[ASSUMED]` (Clara index-only)
 - DominoTT — sub-3 anchor `[ASSUMED]` (Clara index-only)
@@ -1688,6 +1701,7 @@ OZ canonical pattern imports `ERC2771Context` from `node_modules/@openzeppelin/.
 4. **NFT-stake-transfer-no-snapshot-reset** — NFT-position staking pays against the original staker's snapshot after position transfer
 
 **Anchor incidents (Clara):**
+
 - NFD 2022-09-08 **$1.3M** (canonical reward Sybil anchor) **[ASSUMED]**
 - YYDS 2022-09-08 **$742K** (referral overpayment, sub-3) **[ASSUMED]**
 - BCT 2023-12-09 $2.5K **[ASSUMED]**
@@ -1706,12 +1720,12 @@ OZ canonical pattern imports `ERC2771Context` from `node_modules/@openzeppelin/.
 
 DeXe Gate 1 (2026-05-25 FORECLOSURE-RECEIPT) surfaced accumulator-field naming patterns NOT present in the original Clara-anchor regex set. The detector's `SUBSTRATE_ACCUM_FIELDS_RE_V` pattern pool has been widened in main session (proposal K) to include the following additional accumulator-field idioms; brain documents the widened substrate so future Gate 1s can match against the same widened set:
 
-| Original idiom                             | Widened idioms (DeXe-derived)                                                                                                                                                                  |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `accRewardPerShare`                        | `accRewardsPerShare`, `accumulatedRewardPerShare`, `cumulativeRewardPerToken`, `rewardPerTokenStored`, `globalRewardIndex`                                                                     |
-| `cumulativeIndex`                          | `rewardIndex`, `lastRewardIndex`, `globalIndex`, `poolIndex`, `accumulatorSnapshot`                                                                                                            |
-| `lastUpdate`                               | `lastAccrualTime`, `lastClaimAt`, `lastUpdateTimestamp`, `lastAccumulatorUpdate`, `accumulationStartedAt`                                                                                      |
-| `userInfo[u].rewardDebt`                   | `userRewardDebt[u]`, `_userDebt[u].snapshot`, `participants[u].rewardOffset`, `delegators[u].lastAccumulator`, `stakers[u].entryIndex`                                                         |
+| Original idiom           | Widened idioms (DeXe-derived)                                                                                                          |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `accRewardPerShare`      | `accRewardsPerShare`, `accumulatedRewardPerShare`, `cumulativeRewardPerToken`, `rewardPerTokenStored`, `globalRewardIndex`             |
+| `cumulativeIndex`        | `rewardIndex`, `lastRewardIndex`, `globalIndex`, `poolIndex`, `accumulatorSnapshot`                                                    |
+| `lastUpdate`             | `lastAccrualTime`, `lastClaimAt`, `lastUpdateTimestamp`, `lastAccumulatorUpdate`, `accumulationStartedAt`                              |
+| `userInfo[u].rewardDebt` | `userRewardDebt[u]`, `_userDebt[u].snapshot`, `participants[u].rewardOffset`, `delegators[u].lastAccumulator`, `stakers[u].entryIndex` |
 
 **Why DeXe surfaced the widening:** DeXe's reward distribution uses governance-delegated accumulator math (delegator-snapshot-vs-pool-accumulator divergence). The naming convention diverged from MasterChef-fork lineage, surfacing 5+ idiom variants the original Clara regex missed. Detector now matches DeXe-class governance-token-distribution accumulators in addition to MasterChef-class farming accumulators.
 
@@ -1740,6 +1754,7 @@ DeXe Gate 1 (2026-05-25 FORECLOSURE-RECEIPT) surfaced accumulator-field naming p
 5. **DC-15.Y compound** — composed with AMM pair to drain reserves (see DC-15 active catalog)
 
 **Anchor incidents (Clara):**
+
 - SSS 2024-03-21 **$4.6M** (largest single anchor, fee-on-transfer compound) **[INSPECTED]** (published post-mortem)
 - DeezNutz 2024-02-21 **$170K** **[ASSUMED]**
 - MINER 2024-02-14 **$77.7K** **[ASSUMED]**
@@ -1780,6 +1795,7 @@ DeXe Gate 1 (2026-05-25 FORECLOSURE-RECEIPT) surfaced accumulator-field naming p
 4. **read-asymmetric-cache-vs-live-mismatch** — protocol caches the value but reads `live` for related computation; the two diverge across rebase; arbitrage between cache-read and live-read
 
 **Anchor incidents (Clara + brain):**
+
 - CauldronV4 2024-01-30 **$4.7M** (canonical sub-1 anchor — "Debt rebase exploit") **[INSPECTED]** (published post-mortem)
 - ElasticSwap 2022-12-13 **$500K** (sub-2 anchor — "Rebase exploit") **[INSPECTED]** (published post-mortem)
 - QUATERNION 2023-01-18 $4K ("Pair-rebase accounting drift", sub-3) **[ASSUMED]**
@@ -1825,6 +1841,7 @@ The following 7 candidates were filed from the Clara Ground-Truth bulk-intake (`
 **Specialization of:** DC-9 sub-4 (state-not-invalidated repeated mint) applied to reward-distribution rather than mint-by-signature.
 
 **Anchor incidents (Clara):**
+
 - NFD 2022-09-08 **$1.3M** (largest anchor — reward Sybil exploit) **[ASSUMED]** (Clara index-only)
 - YYDS 2022-09-08 **$742K** (referral overpayment) **[ASSUMED]**
 - BCT 2023-12-09 $2.5K **[ASSUMED]**
@@ -1834,6 +1851,7 @@ The following 7 candidates were filed from the Clara Ground-Truth bulk-intake (`
 - Combined anchor USD: $3-5M+ named
 
 **Detector primitive:**
+
 - `claim()` / `harvest()` / `withdraw()` / `collect()` reads `userInfo[msg.sender].rewardDebt` OR `userInfo[msg.sender].lastClaim`
 - AND updates `rewardDebt` AFTER the reward is paid
 - AND there exists a transfer / mint of the staking-token that does NOT call `_updateUser(from, to)`
@@ -1853,11 +1871,13 @@ FP gate: most modern reward systems use SushiSwap's `_updateRewardDebt` pattern 
 **Specialization of:** DC-7 (Validating-Field ≠ Consuming-Field on Adjacent Function Pipelines) — `_msgSender()` validates "trusted forwarder check passed" but consumes "appended-bytes-as-sender" regardless of whether the forwarder check actually fired.
 
 **Anchor incidents (Clara):**
+
 - thirdweb 2023-12-07 $831 (canonical anchor — "Sender Spoof Burn") **[INSPECTED]** (published post-mortem)
 - TIME 2023-12-06 **$199K** ("ERC2771 Burn Exploit") **[INSPECTED]** (published post-mortem)
 - DominoTT 2023-12-07 $267 ("Forwarder Burn Exploit") **[ASSUMED]** (Clara index-only)
 
 **Detector primitive:**
+
 - contract uses `_msgSender()` from ERC2771Context
 - AND function `burn` / `burnFrom` / `_burn` reads from `_msgSender()`
 - AND `_msgSender()` does NOT explicitly check `msg.sender == trustedForwarder` before parsing appended bytes
@@ -1875,12 +1895,14 @@ FP gate: most modern reward systems use SushiSwap's `_updateRewardDebt` pattern 
 **Specialization of:** Sibling of CANDIDATE-H (C-runtime overflow) and CANDIDATE-K (float-in-deterministic-VM) — same parent family "fixed-precision arithmetic surface gaps" (per CANDIDATE-E parent-family notes above).
 
 **Anchor incidents (Clara):**
+
 - Blueberry 2024-02-23 **$1.3M** ("Decimal mismatch exploit") — canonical anchor **[INSPECTED]** (published post-mortem)
 - ENF 2023-02-24 **$5.2M** ("Redeem decimal mis-scaling") **[ASSUMED]** (Clara index-only)
 - Nowswap V1 2021-09-15 **$1.1M** ("WETH mis-scaled KLOSS invariant") **[ASSUMED]**
 - Combined anchor USD: **$7.6M**
 
 **Detector primitive:**
+
 - arithmetic in financial function: `$RESULT = $A * $B / $C`
 - where `$A` reads from chainlink-feed (8-dec) OR oracle that returns scaled-int
 - AND `$B` is an ERC20 amount (likely 6 or 18 dec)
@@ -1902,6 +1924,7 @@ FP gate: most contracts that do `price * amount / 1e18` DO handle decimals corre
 **Specialization of:** Parent family with DC-15 (AMM pair-skew); both rely on custom transfer logic that's correct in two-party scenarios but broken on edge inputs. CANDIDATE-Y is ALSO enumerated as DC-15.Y sub-pattern (filed both as standalone CANDIDATE and as sub-pattern of DC-15 — the same exploit composes both at the token-class and pair-class layers).
 
 **Anchor incidents (Clara):**
+
 - SSS 2024-03-21 **$4.6M** ("Self-transfer drain" — largest single anchor) **[INSPECTED]** (published post-mortem)
 - DeezNutz 2024-02-21 **$170K** **[ASSUMED]** (Clara index-only)
 - MINER 2024-02-14 **$77.7K** **[ASSUMED]**
@@ -1912,6 +1935,7 @@ FP gate: most contracts that do `price * amount / 1e18` DO handle decimals corre
 - Combined anchor USD: ~**$5M**
 
 **Detector primitive:**
+
 - token's `_transfer` / `_update` does NOT include `if (from == to) return;` short-circuit
 - AND contract has fee-on-transfer / reflection / custom `_balances` mutation
 
@@ -1926,6 +1950,7 @@ FP gate: most contracts that do `price * amount / 1e18` DO handle decimals corre
 > A rebase token (Ampleforth-class, OHM staking, AAVE aTokens, Compound cTokens, stETH) exposes `balanceOf(u) = _shares[u] * _index() / _SCALE`. A downstream consumer (vault, AMM, lending market) caches `balanceOf(u)` at time T and consumes the cached value at time T+1 across an index update. The cached value is now stale — either over-priced (rebase up, attacker over-redeems) or under-priced (rebase down, protocol over-mints to attacker). Attacker triggers the index update mid-flow.
 
 **Anchor incidents (Clara):**
+
 - CauldronV4 2024-01-30 **$4.7M** ("Debt rebase exploit") — canonical anchor **[INSPECTED]** (published post-mortem)
 - ElasticSwap 2022-12-13 **$500K** ("Rebase exploit") **[INSPECTED]** (published post-mortem)
 - QUATERNION 2023-01-18 $4K ("Pair-rebase accounting drift") **[ASSUMED]** (Clara index-only)
@@ -1934,6 +1959,7 @@ FP gate: most contracts that do `price * amount / 1e18` DO handle decimals corre
 - Combined anchor USD: ~**$5.3M**
 
 **Detector primitive:**
+
 - contract calls `IERC20(rebaseToken).balanceOf(...)`
 - AND caches result to storage / memory
 - AND uses cached result AFTER any external call that could trigger rebase
@@ -2005,6 +2031,7 @@ Future Gate 1 surveys finding `lastOraclePrice`-style cache should check: (a) is
 > An ERC4626-backed deposit facility computes a minted token amount (e.g., OHM, shares, receipt) from a **user-input field** (e.g., `receiptTokenIn`, `depositAmount`, `assets`) while the actual asset moved by the underlying call is a **return-value field** (e.g., `actualAmount`, `actualShares`). When the two fields can diverge (ERC4626 share-rounding-down on tiny inputs, vault fee deductions, or explicit "may return 0" documentation), and the calling layer DISCARDS the return-value and mints based on the user-input, the protocol's mint-vs-asset accounting drifts. Compound effect appears when the operator-liability ledger is ALSO decremented by the user-input field (not the return-value), so the ledger drifts in the same direction as the mint-vs-asset drift. Repeated dust-conversion exploits inflation-from-nothing.
 
 **Specialization of:** DC-9 (Privileged State Mutation Without Defense-in-Depth) family. Sibling to:
+
 - DC-9 sub-1 (unchecked mint)
 - DC-9 sub-2 (zero-timelock migration)
 - DC-9 sub-3 (upgradeable-hook-no-timelock)
@@ -2057,6 +2084,7 @@ Future Gate 1 surveys finding `lastOraclePrice`-style cache should check: (a) is
 > A contract that retains a privileged registry-mutation call in its source code (e.g., `vat.file(ilk, "line", 55M)`) but is NOT a current ward on the target registry exhibits **dead-code at the privileged call-site**: any invocation will revert with the registry's `not-authorized` error. The source-level pattern appears risky to source-only Gate 1 inspection, but the on-chain state has neutralized it. This is a VALID defense pattern when (a) the privileged mutation was needed temporarily (migration, bootstrap, parameter-config), (b) governance has since denyed the contract on the registry, and (c) the source retains the call for archaeological/audit-traceability reasons or because removing it would require redeploying an immutable.
 
 **Specialization of:** DC-9 sub-2 (zero-timelock migration) defense surface. Sibling defense to:
+
 - "Pause + Sunset" pattern (contract self-pauses + governance signals deprecation)
 - "Self-Destruct After Migration" pattern (contract removes itself from chain entirely)
 - "Multisig Threshold Inflation" pattern (raise required-sigs to functionally-impossible level)
@@ -2073,6 +2101,7 @@ Future Gate 1 surveys finding `lastOraclePrice`-style cache should check: (a) is
 **Detection signature (offense — for Gate 1 dispatch):**
 
 When scanning a contract for DC-9 sub-2 candidates, after identifying the privileged-mutation call-site, verify:
+
 1. Does the contract NEED to be a ward on the target registry to make the call work?
 2. Is the contract CURRENTLY a ward at the latest block? (`cast call <REGISTRY> "wards(address)(uint256)" <CONTRACT> --rpc-url $ETH_RPC`)
 3. If NOT a ward → the candidate is DEAD-CODE-FORECLOSED. File under DC-9 sub-2 defense pattern, not as a finding.
@@ -2080,6 +2109,7 @@ When scanning a contract for DC-9 sub-2 candidates, after identifying the privil
 **Detection signature (defense — for governance hygiene auditing):**
 
 When auditing a protocol's privilege-removal hygiene:
+
 1. List every contract that was ever relied on a registry (grep deploy scripts + chainlog for `rely(X)` calls)
 2. For each, check if a corresponding `deny(X)` was executed at a later block (governance spell history)
 3. If a contract has rely-without-deny AND has a privileged call-site that no longer needs to be live → flag as "stale ward" (possible attack surface if the contract gets compromised by a different vulnerability that allows it to call back to the registry)
@@ -2094,11 +2124,13 @@ When auditing a protocol's privilege-removal hygiene:
 **R8 grade:** anchor `[INSPECTED]` (audit-document quote + deployment script + source code all confirmed); on-chain ward state `[ASSUMED]` pending future `cast` verification.
 
 **Cross-reference:**
+
 - DC-9 sub-2 base (zero-timelock migration) — this is the DEFENSE counterpart to the OFFENSE pattern
 - Doctrine #27 Corollary B (Remediation-Language Search Beats Lens-Label Search) — the dedup technique that surfaces this defense pattern at Phase 0
 - Doctrine #34 sub-rule 34.2 candidate (post-mitigation vs post-null distinction) — pending 2nd anchor
 
 **Status:** 1 anchor (Sky LockstakeMigrator). Promotion to PERMANENT DC-9 sub-2 defense pattern requires 2nd anchor with similar ward-removal-without-source-modification pattern. Candidate 2nd anchors:
+
 - Any MakerDAO/Sky module that was deprecated via governance spell rather than redeployment
 - Any Aave V2/V3 contract with admin permission removed via governance vote
 - Any Compound governance-deprecated module
@@ -2113,10 +2145,12 @@ When auditing a protocol's privilege-removal hygiene:
 **Specialization of DC-9 sub-4** (state-not-invalidated repeated-mint) applied to a multi-attester quorum bitmap: when a quorum/threshold accumulator caches or persists the set of enabled attesters at attestation time, and a separate config-mutation path (`removeTransceiver` / `disable_transceiver` / `deregister`) can change that set while messages are in-flight, votes recorded under the OLD set may survive into a threshold count taken under the NEW set — a stale-attestation revival.
 
 **POSITIVE anchors (gap present — stale votes can revive):**
+
 - **Wormhole NTT EVM** `ManagerBase.sol` — the enabled-transceiver set is read into memory during the transfer-prep path; `removeTransceiver()` mutates storage, but in-flight messages reference the stale set. Hyp-C paste-ready (`hunts/2026-05-29-wormhole-ntt-hyp-c-gate2-paste-ready.md`) with Foundry PoC 3/3 PASS confirms a stale attestation from a removed transceiver re-enters quorum on re-enable.
 - **Wormhole NTT Sui** `transceiver_registry.move` + `inbox.move` — no version tags, epoch fields, or stale-attestation invalidation; an inbox item can accumulate votes under one transceiver set and be released after the set changes.
 
 **NEGATING anchor (gap ABSENT — structural defense; W-2-NEG):**
+
 - **Wormhole NTT Solana** `bitmap.rs::count_enabled_votes(enabled)` (`[INSPECTED]` @ `4a15527c`) — computes `popcount(self.map & enabled.map)`: a bitwise AND with the CURRENT `enabled_transceivers` at count time auto-masks votes from currently-disabled transceivers WITHOUT needing per-message snapshot semantics. Cheap, correct, structural. EVM/Sui could close their gap by surfacing the enabled-bitmap at count time rather than caching it at attestation time.
 
 **Why this matters (productization-gap narrative, SHARPENED by cross-substrate asymmetry):** the same protocol implements the SAME quorum primitive three times; Solana got the count-time-mask defense, EVM + Sui did not. The Solana implementation is proof-by-implementation that the fix is mechanical — a citable corroborator for the Hyp-C EVM paste-ready (the EVM/Sui omission is the productization gap, not inherent hardness). Refines the Gate 1 W-2 framing (which treated DC-9 sub-4 cross-substrate as a {EVM, Sui} confirmed gap); the Solana NEGATING-EXAMPLE confirms the locus is EVM+Sui and shows the closing fix.
@@ -2165,6 +2199,7 @@ When auditing a protocol's privilege-removal hygiene:
 ## CANDIDATE-I facet — Curated-Vault-of-Adapters Delta-Accounting — NEGATING-EXAMPLE [INSPECTED] (added 2026-05-29 — Morpho Vaults V2 anchor, Ogie msg 8034)
 
 **The correct pattern for a curated vault that allocates to multiple adapters/markets with shared cap-buckets** (Morpho Vaults V2, generalizes to Aave/Euler vaults, Yearn v3, MetaMorpho):
+
 - On allocate/deallocate, the adapter returns `change = expectedRealValueNow − vaultStoredAllocation[market-id]` and the SAME `change` is applied to EVERY shared cap-id the market belongs to (adapter-aggregate id, collateral-aggregate id, market-specific id). This is the CORRECT delta-propagation: the market-specific id is set to current real value; each aggregate id moves by exactly that market's delta → aggregates stay = Σ market real values (for touched markets). The market-specific id hash binds the adapter address + full market params → no cross-adapter/cross-market collision.
 - **Intentional, NOT a bug (don't flag these):** (a) caps can be EXCEEDED by accrued interest/donations in untouched sibling markets (aggregate id is stale-low until each market is touched) — soft caps w.r.t. interest are documented/accepted; (b) relative caps checked against a flashloan-resistant transient snapshot (`firstTotalAssets`, set at first accrual of the tx) → big deposits via the liquidity adapter get conservative false-positive reverts, not a bypass; (c) "interest accrued once per tx" via transient storage IS the anti-share-shorting lock (no ReentrancyGuard needed if adapters + token are assumed non-reentrant — ERC777-style reentrancy excluded by token-requirement assumptions).
 - ERC4626 rounding must be vault-favorable on all 4 previews (deposit/redeem→down, mint/withdraw→up) + virtual-shares inflation defense. Morpho V2: all four correct.
@@ -2189,16 +2224,19 @@ When auditing a protocol's privilege-removal hygiene:
 - **Source acquisition:** Stacks contract source is on-chain & public. Pull via Hiro `https://api.hiro.so/v2/contracts/source/<principal>/<contract-name>`; enumerate a deployer's contracts via `https://api.hiro.so/extended/v1/address/<principal>/transactions`; find token principals via `https://api.hiro.so/metadata/v1/ft?symbol=<SYM>`. No GitHub needed (project gitbooks auth-gate). **Gate-2 PoC tool = Clarinet** (Rust-based Clarity test harness) — not yet installed; set up if a Clarity CONFIRM ever surfaces.
 
 **2nd-anchor compounds (Granite Protocol lending, 2026-05-30 — `hunts/2026-05-30-granite-immunefi-gate1.md`, NEGATE):**
+
 - **Tracked-var-vs-raw-balance accounting (CANDIDATE-I-Clarity refinement — the deciding sub-check):** a SIP-10 share vault whose `total-assets` is a **tracked `define-data-var`** (mutated only by deposit/withdraw/interest) is **STRUCTURALLY immune** to donation-inflation — a raw-token donation changes `ft-get-balance`/`free-liquidity` but never the accounting var, so share price is untouched regardless of seed state. A vault that reads a **raw `ft-get-balance`** as its asset base is only SEED-STATE-foreclosed. ⇒ On every Clarity share-vault Gate-1, first determine WHICH: tracked-var → inflation NEGATE structurally (Granite `state-v1` `total-assets`); raw-balance → must check live seed (Hermetica reserve). This is the single fastest CANDIDATE-I disposition.
 - **Liquidation solvency-invariant checklist (positive/defensive reference, Clarity + EVM):** the 3 guards that foreclose the over-liquidation / flash-borrow-self-liquidate / >100%-seizure family — (1) `liqLTV < scaling²/(scaling+premium)` param invariant (seizure ≤100% of collateral value, keeps the repay denominator >0); (2) post-liquidation health asserted `<= buffer + min-health` (cannot over-liquidate a position past restoring health); (3) same-block-borrow guard (`block-height > borrowed-block`, where `borrowed-block` updates ONLY on borrow). Granite has all three. Run this as a checklist on any future lending Gate-1 — a MISSING one is the candidate.
 - **Oracle price==0 short-circuit (defense-in-depth note):** a confidence/validity check that returns `(ok true)` on `price==0` can cascade — a 0 market-asset price zeroes debt-value (→ unlimited borrow past the LTV assert), a 0 collateral price + a `repay==0 → give full collateral` liquidation branch (+ a `collateral-price<=0 → accept any repay` escape) = free collateral seizure. OOS when oracle-gated (Pyth-trust), but a real defense-in-depth gap to FLAG on any oracle-priced lender. (Granite `pyth-adapter-v1` + `liquidator-v1` anchor.)
 
 **3rd-anchor compounds (Zest Protocol V2, multi-vault ERC4626 lending, 2026-05-31 — `hunts/2026-05-31-zest-v2-immunefi-gate1.md`, NEGATE):**
+
 - **NEW LENS — ERC4626-share-vs-separate-index collateral-pricing consistency:** when a protocol prices a tokenized-vault SHARE used as COLLATERAL via a SEPARATE liquidity-index (Aave-aToken-style: `price = underlying-price × lindex`) while the vault REDEEMS that share via ERC4626 `total-assets/total-supply`, the two valuations MUST track or you get over-borrow→bad-debt. **The exploitable direction is index OVER-stating share value.** Check: (a) does the reserve/treasury-dilution formula reproduce the net index? (b) rounding direction — index round-DOWN = conservative/safe, round-UP = danger; (c) is `util`'s denominator == `total-assets`? Zest: `util = debt/ta` EXACTLY (`available=assets−borrowed`, `ta=assets+debt−borrowed`), treasury-LP dilution reproduces net-of-reserve index, lindex rounds down → collateral UNDER-valued = safe ⇒ NEGATE. Banked as the analysis template for any "ERC4626-vault-share-as-collateral priced by a separate index" design.
 - **tracked-var-vs-raw-balance = now 2 Clarity anchors (Granite + Zest)** — both use a tracked `assets`/`total-assets` var (not raw `ft-get-balance`) ⇒ donation-inflation structurally foreclosed. CANONICAL Clarity disposition for CANDIDATE-I.
 - **Lending sub-arsenal (Granite + Zest = 2 anchors):** liquidation-3-guard checklist + oracle staleness/confidence/monotonic-timestamp + tracked-var + kinked-rate-index-direction (debt round-up / liquidity round-down) all reused successfully. Zest adds: graduated-liquidation bound, egroup superset-invariant LTV (broader basket → ≤ LTV), MINIMUM-LIQUIDITY dead-share first-depositor lock, #167 positive-defense (cross-multiplication in is-healthy).
 
 **4th-anchor compounds (StackingDAO liquid staking, 2026-05-31 — `hunts/2026-05-31-stackingdao-immunefi-gate1.md`, NEGATE):**
+
 - **NEW LENS — Cross-protocol exchange-rate-source manipulation:** when protocol B consumes protocol A's INTERNAL exchange-rate as an oracle (LST ratio, vault share-price, AMM TWAP), check (i) does A's rate have an in-tx-MOVABLE component (raw-balance / donation / reward-injection vs tracked-var)? (ii) is the move RECOVERABLE in-tx (else permanent donation = dilutes proportionally → capture < cost)? (iii) does B's consuming math BOUND the rate (LTV<1 / sanity caps)? movable+recoverable+unbounded = cross-protocol Critical; movable-but-unrecoverable-or-bounded = NEGATE-but-fragile → WATCHLIST. **Anchor:** StackingDAO `get-ststx-ratio-v3` reads `reserve.get-total-stx = (stx-get-balance reserve) + stx-stacking` → raw-balance is donation-movable, BUT all reserve STX-out is `check-is-protocol`-gated (unrecoverable) + dilutes proportionally (`S·X/supply<X`) + Zest egroup LTV<BPS bounds over-borrow ⇒ NEGATE. Zest is the consumer (CALLCODE-ZSTSTX). Pairs with the ERC4626-share-vs-index lens = the "share/rate pricing-consistency" family.
 - **tracked-var-vs-raw-balance refinement:** a PARTIALLY-raw total (StackingDAO total-stx = raw + tracked) is still safe IF the raw component is attacker-UNRECOVERABLE + the consumer is bounded — the true foreclosure is "capture<cost + unrecoverable", not purely "tracked-var".
 - **Liquid-staking sub-arsenal seeded (1 anchor):** ratio-source-movability + reward-timing-cycle-delay + unstake-queue-snapshot + delegation-gating (user delegates own pox-4; pool delegate-stack/aggregation protocol-gated; prepare cranks time-gated to protocol pox-reward-address).
@@ -2212,6 +2250,7 @@ When auditing a protocol's privilege-removal hygiene:
 **Class (generalized, Ogie msg 8069):** an UNGUARDED arithmetic op (div-by-zero, subtraction underflow, mul overflow, wrong-quantity zero-guard) on a MANDATORY accounting / charging / metering calc → the op aborts → every entry point that must run that calc is bricked → DoS / brick / chain-halt. The original sub-class is "guard-wrong-quantity divide" (zero-guard tests a SUM/sibling, not the actual divisor). Now widened to any mandatory-path arithmetic edge (gas-accounting, fee-charging, index-accrual, health, utilization).
 
 **Anchors:**
+
 1. **Granite `linear-kinked-ir-v1.utilization-calc` [INSPECTED]** — `(if (> (+ total-assets open-interest) u0) (/ … total-assets) …)` guards the SUM but divides by `total-assets`; `total-assets==0` & `open-interest>0` → panic in `accrue-interest` → bricks borrow/repay/withdraw/deposit/liquidate/stake. Low-EV (needs bad-debt ≥ pool) but the PATTERN is the keeper.
 2. **Sui v1.72 mainnet HALT [EXECUTED — real-world, Ogie msg 8069]** — gas-accounting underflow on a mandatory charging path → liveness halt of the whole chain. Ground-truth proof the class has TEETH (a mainnet halt, not a hypothetical). (Move substrate, patched/public → NOT a hunt; content/post-mortem only after exvul verified-refs.)
 3. **Zest V2 `v0-4-market` [INSPECTED — POSITIVE/DEFENSIVE anchor, 2026-05-31]** — the COUNTER-example / negating template: `current-ltv` guards `total-collateral-usd==0` (the real divisor) before dividing; vault `calc-utilization` guards `total==0` (the divisor itself, not a sum); and `is-healthy` AVOIDS division entirely via cross-multiplication `(<= (* debt-usd BPS) (* collateral-usd ltv))`. This is exactly what Granite's utilization-calc failed to do → use cross-multiplication or divisor-guard as the FIX/negate pattern.
@@ -2227,6 +2266,7 @@ When auditing a protocol's privilege-removal hygiene:
 **Anchor (ground-truth, PATCHED — not a hunt target):** Zebra `zebra-state` `service.rs` @ `d4cd662c` — `queue_and_commit` (L659-714) + hash-added-before-validation (L797-802): a block/tx hash is inserted into the sent/seen set BEFORE full contextual validation; the failure path leaves it in the set → a later legitimate block with the same hash is rejected as a duplicate. Fixed zebrad 4.4.2 / zebra-state 7.0.0. CWE-459 (incomplete cleanup) / CWE-460 (improper cleanup on early return).
 
 **Substrate-agnostic signature:**
+
 - **EVM** — `processedMessages[id]=true` / `usedNonces[n]=true` / `seen[hash]=true` SSTORE on a path that PRECEDES a `require`/verify, where the failing branch (revert/return) doesn't reset it. (Bridges / relays: processed-message + nonce maps. Combined with a malleable message-id = Doctrine #44 poisoning.)
 - **Solana** — a seen-slot / replay set insert BEFORE the Anchor constraint/verify, no cleanup on the `Err` path.
 - **Cosmos-Go** — IBC packet-receipt / ack dedup (`SetPacketReceipt` / `SetPacketAcknowledgement`) set BEFORE packet/proof verification, no delete on the verify-failure return. (#129/#137 substrate.)
@@ -2243,7 +2283,8 @@ When auditing a protocol's privilege-removal hygiene:
 
 ### Detector #138 NEGATING-EXAMPLE — Caller-Loop / Consensus-Key Monotonicity (added 2026-05-29 — Babylon finality+btcstaking anchor, Ogie msg 8025)
 
-**Class (FP to AVOID):** #138 `C138-SEQ-NO-MONOTONIC` flags a sequence/nonce/height `Set` with no INLINE `>`/`>=` guard *in the setter function*. This is NOT a backwards-overwrite when the guard lives UPSTREAM. Two negating shapes:
+**Class (FP to AVOID):** #138 `C138-SEQ-NO-MONOTONIC` flags a sequence/nonce/height `Set` with no INLINE `>`/`>=` guard _in the setter function_. This is NOT a backwards-overwrite when the guard lives UPSTREAM. Two negating shapes:
+
 - **Caller-loop monotonicity** — the sole non-genesis caller is a monotonic increment loop: `start = max(stored, floor)`, `for i := start; …; i++`, write `i+1` (optionally gated `if new != old`). The loop bounds every write ≥ stored. **Anchor:** Babylon finality `setNextHeightToFinalize` (callers tallying.go L74/L94 in `TallyBlocks` finalizationLoop, `startHeight = max(getNextHeightToFinalize, activatedHeight)`) + `SetNextHeightToReward` (rewarding.go L48 loop). [INSPECTED] `hunts/2026-05-29-babylon-cosmos-gate1.md`.
 - **Consensus-monotonic key** — the store KEY is a consensus block-height (each EndBlock writes a fresh key; no prior-height slot is reachable). **Anchor:** Babylon btcstaking `IndexBTCHeight` (keyed by `babylonHeight`).
 
@@ -2274,6 +2315,7 @@ _Patterns: Defense Classes | v2.1 | 2026-05-25 | Batch-commit of 6 brain edits a
 **Purpose:** classify HOW funds stranded in a dormant / abandoned high-balance contract can (or cannot) be recovered. The recovery-path analog of the attack-path classification — same primitive (who can move the funds, under what condition), inverted intent (recover-to-claimant vs steal). Reuses the full bug-research arsenal at the "fund-moving-function × auth-condition" layer.
 
 **The 5 classes (by EXECUTOR + condition):**
+
 1. **CLEAN-ADMIN** — an existing owner/admin function releases the funds as designed (`withdraw`/`sweep`/`rescueTokens`). Executor = owner-key. Recovery = the legitimate owner calls it. Lowest-risk, fully legitimate.
 2. **BUG-PATH** — a vulnerability enables a release/refund the deployer didn't intend (e.g. integer-overflow-resets-balance unblocks a refund gate; an unprotected `transfer` of escrow; a state-not-invalidated repeat). Executor = depends on the bug's auth (owner OR anyone). The SAME vuln classes as the attack arsenal (DC-1..DC-9, CANDIDATE pool) — recovery analysis IS bug analysis.
 3. **OWNER-KEY-ONLY** — funds movable ONLY with the owner/deployer key; no bug, no open path. Executor = owner-key. Recovery requires the legitimate key-holder (→ claimant resolution).
@@ -2287,3 +2329,16 @@ _Patterns: Defense Classes | v2.1 | 2026-05-25 | Batch-commit of 6 brain edits a
 **Cross-pollination:** BUG-PATH recovery analysis = the bug-research arsenal pointed at recovery (a vuln that lets a claimant refund is the same vuln that lets a thief steal — the EXECUTOR-class + the claimant-legitimacy is what separates recovery from exploit). ANYONE-CALLABLE recoverables are the same class as the highest-severity bug findings — which is exactly why they're content-locked here.
 
 **Status:** TAXONOMY-SEED (lane foundation, 2026-05-31). Live discovery (Stage 1) + fork-verification (Stage 2) BLOCKED pending Ethereum data infra (no Etherscan/Dune key, no ETH archive RPC; public RPCs Cloudflare-blocked from datacenter IP) — anvil present, needs a fork-url. Authority: Ogie Stranded-Funds Scout directive (research+content core; Stage 4B owner-outreach/paid-recovery = legal-gated, OUT OF SCOPE).
+
+---
+
+## Pattern-H — DxSale anchor + #45 generic-lens routing (added 2026-06-02, Ogie msg 956)
+
+**Class:** Pattern-H = Off-chain verifier / single trust anchor (canonical anchor: Kelp DAO 2026-04-18 $293M; sub-types H.1 DVN, H.2 admin+UUPS+zero-timelock, H.3 proof-gap, H.4 key-loss — per `buzzshield-rekt-monitor.js`).
+
+**New anchor — DxSale (launchpad/presale class):** rekt-monitor classified a DxSale-class incident as Pattern-H (off-chain-verifier / single-trust-anchor fragility on a presale/locker/launchpad surface). [ASSUMED on the precise mechanism — confirm amount + exact H.sub-type from the rekt-monitor incident record before any GO; the load-bearing fact here is the ROUTING, below.]
+
+**#45 GENERIC-LENS ROUTING (the operative rule):** Pattern-H propagation matched blue-chips (GMX / Compound / Pyth) on a hit-count basis. Per Doctrine #45, a high HIT-count on a blue-chip/dense repo means **the pattern exists in the wild = a generic lens**, NOT a hunt-GO. Off-chain-verifier / single-trust-anchor primitives are *everywhere* (every protocol with an oracle/DVN/keeper has one), so Pattern-H is intrinsically a high-false-positive generic lens on dense targets.
+- **Blue-chip / dense Pattern-H matches → tag INTEL/CONTENT** (route to content/intel — "the pattern is common in the wild"), never an auto-GO. Wired into `buzzshield-propagation.js` `rankAndSurface` (`isDense45` → `intel_content` bucket).
+- **Only THIN-pool Pattern-H matches reach a Gate-1 GO prompt** (where being the first competent reader is the edge).
+- Cross-ref Doctrine #45 (density selector) + Doctrine #42 (freshness-not-cap). The lesson generalizes to ALL pattern propagation: rank candidates by realizable-EV / thinness, not raw hit-density.

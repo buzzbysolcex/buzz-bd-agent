@@ -20,9 +20,12 @@ NEWQ = OUT + "/new-deploys.jsonl"
 TOPQ = OUT + "/TOP-queue.md"
 FEED = "https://api.hiro.so/extended/v1/tx?type=smart_contract&limit={n}"
 
-# KNOWN Stacks/Clarity protocols WITH an Immunefi bounty / disclosure path → a NEW contract = TOP auto-queue.
+# KNOWN Stacks/Clarity protocols WITH an Immunefi bounty / disclosure path.
 KNOWN_BOUNTY = ["granite", "zest", "stacking-dao", "ststx", "stackingdao", "bitflow", "dlmm",
                 "arkadiko", "usda", "hermetica", "usdh", "alex", "velar"]
+# #45-DENSE known-bounty protocols (3+ top-tier audits / saturated) → NOT actionable, OPPORTUNISTIC only.
+# ALEX = CoinFabrik x4 + Least Authority, core audit-excluded, post-hack -> demoted (Ogie msg 956).
+DENSE_DEMOTE = ["alex"]
 # DeFi-relevant contract-name signal (unknown protocol → MED, verify bounty at Step-1).
 DEFI = re.compile(r"vault|pool|lend|borrow|stake|oracle|swap|market|mint|collateral|liquidat|"
                   r"reserve|cdp|stable|amm|perp|\bdex\b|tranche|yield|redeem|peg|escrow", re.I)
@@ -55,11 +58,13 @@ def load_seen():
 
 
 def classify(cid):
-    name = cid.split(".", 1)[1] if "." in cid else cid
+    """3-way #45 fold: TOP=ACTIONABLE (known-bounty AND not-dense) · OPP=OPPORTUNISTIC (known-bounty
+    BUT #45-dense, e.g. ALEX) · MED=WATCHLIST (DeFi-name, unknown bounty). None=ignore."""
+    name = (cid.split(".", 1)[1] if "." in cid else cid).lower()
     if NOISE.search(name):
         return None
-    if any(k in name.lower() for k in KNOWN_BOUNTY):
-        return "TOP"
+    if any(k in name for k in KNOWN_BOUNTY):
+        return "OPP" if any(k in name for k in DENSE_DEMOTE) else "TOP"
     if DEFI.search(name):
         return "MED"
     return None
@@ -86,7 +91,7 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     results = fetch(limit)
     seen = load_seen()
-    tops, meds = [], []
+    tops, opps, meds = [], [], []
     for r in results:
         cid = (r.get("smart_contract") or {}).get("contract_id")
         if not cid or cid in seen:
@@ -94,49 +99,52 @@ def main():
         cls = classify(cid)
         if cls == "TOP":
             tops.append(cid)
+        elif cls == "OPP":
+            opps.append(cid)
         elif cls == "MED":
             meds.append(cid)
     fresh_total = len([1 for r in results if (r.get("smart_contract") or {}).get("contract_id") not in seen])
-    print(f"[watch] fetched={len(results)} unseen={fresh_total} TOP={len(tops)} MED={len(meds)}")
-    for c in tops:
-        print("  TOP:", c)
-    for c in meds:
-        print("  MED:", c)
+    print(f"[watch] fetched={len(results)} unseen={fresh_total} TOP={len(tops)} OPP={len(opps)} MED={len(meds)}")
+    for c in tops: print("  ACTIONABLE:", c)
+    for c in opps: print("  OPPORTUNISTIC:", c)
+    for c in meds: print("  WATCHLIST:", c)
 
     if seed:
         json.dump(sorted(seen | {(r.get("smart_contract") or {}).get("contract_id") for r in results if (r.get("smart_contract") or {}).get("contract_id")}), open(SEEN, "w"))
         print("[watch] SEED: baseline recorded, no queue writes. Future runs flag only NEW.")
         return
-    # record qualifying ships
-    if tops or meds:
+    # record qualifying ships (priority tag = current class; backlog split recomputes from cid so #45 demotes apply retroactively)
+    if tops or opps or meds:
         with open(NEWQ, "a") as f:
             for c in tops: f.write(json.dumps({"cid": c, "priority": "TOP"}) + "\n")
+            for c in opps: f.write(json.dumps({"cid": c, "priority": "OPP"}) + "\n")
             for c in meds: f.write(json.dumps({"cid": c, "priority": "MED"}) + "\n")
         with open(TOPQ, "a") as f:
-            for c in tops: f.write(f"- [TOP] {c} — known-bounty Clarity protocol new deploy → Gate-1 NOW\n")
-            for c in meds: f.write(f"- [MED] {c} — new Clarity DeFi deploy → verify bounty/disclosure at Step-1\n")
+            for c in tops: f.write(f"- [ACTIONABLE] {c} — thin+bounty Clarity protocol new deploy → Gate-1 NOW\n")
+            for c in opps: f.write(f"- [OPPORTUNISTIC] {c} — known-bounty but #45-DENSE → only on a fresh-diff signal\n")
+            for c in meds: f.write(f"- [WATCHLIST] {c} — new Clarity DeFi deploy → verify bounty/disclosure at Step-1\n")
     # update seen (all fetched)
     for r in results:
         cid = (r.get("smart_contract") or {}).get("contract_id")
         if cid: seen.add(cid)
     json.dump(sorted(seen), open(SEEN, "w"))
-    # queue-DEPTH digest, SPLIT: ACTIONABLE (thin + bounty/disclosure = TOP) vs WATCHLIST (thin + no bounty = MED).
-    # The split stops watchlist (no payout route) from reading as an actionable backlog.
-    actionable = watchlist = 0
+    # queue-DEPTH digest, 3-WAY #45 split — recomputed from cid so demotes apply to the existing backlog.
+    a = o = w = 0
     if os.path.exists(NEWQ):
         for line in open(NEWQ):
             try:
-                pr = json.loads(line).get("priority")
-                if pr == "TOP": actionable += 1
-                elif pr == "MED": watchlist += 1
+                cid = json.loads(line).get("cid"); cl = classify(cid) if cid else None
+                if cl == "TOP": a += 1
+                elif cl == "OPP": o += 1
+                elif cl == "MED": w += 1
             except Exception:
                 pass
-    print(f"[watch] queue-DEPTH split — ACTIONABLE (thin+bounty): {actionable} | WATCHLIST (thin+no-bounty): {watchlist}")
+    print(f"[watch] queue-DEPTH (#45 3-way) — ACTIONABLE(thin+bounty+not-dense): {a} | OPPORTUNISTIC(bounty+dense): {o} | WATCHLIST(thin+no-bounty): {w}")
     if notify:
-        digest = [f"new this run: {len(tops)} actionable + {len(meds)} watchlist",
-                  f"backlog — ACTIONABLE (thin+bounty/disclosure): {actionable} | WATCHLIST (thin+no-bounty, no payout route): {watchlist}",
-                  "(auto-QUEUED only — never auto-hunted; ACTIONABLE drives Gate-0, WATCHLIST waits for a bounty)"]
-        digest += [f"TOP {c}" for c in tops] + [f"MED {c}" for c in meds[:5]]
+        digest = [f"new this run: {len(tops)} actionable + {len(opps)} opportunistic + {len(meds)} watchlist",
+                  f"backlog #45-split — ACTIONABLE: {a} | OPPORTUNISTIC: {o} | WATCHLIST: {w}",
+                  "(auto-QUEUED only — never auto-hunted; only ACTIONABLE drives a Gate-0 GO; OPPORTUNISTIC=fresh-diff-only; WATCHLIST waits for a bounty)"]
+        digest += [f"ACTIONABLE {c}" for c in tops] + [f"OPP {c}" for c in opps] + [f"WL {c}" for c in meds[:4]]
         notify_wr(digest)
 
 
