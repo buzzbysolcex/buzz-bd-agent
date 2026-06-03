@@ -234,29 +234,26 @@ def main():
     topics_scraped = 0
 
     with output_path.open("a", encoding="utf-8") as fout:
-        for page in range(args.start_page, args.end_page + 1):
-            offset = (page - 1) * 40
-            print(f"[board {args.board}] page {page} (offset {offset})", file=sys.stderr)
-            topics = list_topics_on_board(session, args.board, offset, args.delay_seconds)
-            print(f"  found {len(topics)} topics", file=sys.stderr)
-
-            for topic_id, title in topics:
+        # MODE 1: Topic-ID range (era-targeted)
+        if args.topic_range_start is not None and args.topic_range_end is not None:
+            print(f"[topic-range mode] {args.topic_range_start}..{args.topic_range_end} step {args.topic_range_step}", file=sys.stderr)
+            for topic_id in range(args.topic_range_start, args.topic_range_end + 1, args.topic_range_step):
                 if topic_id in seen_topics:
                     continue
                 if args.max_topics is not None and topics_scraped >= args.max_topics:
                     break
 
                 if args.dry_run:
-                    print(f"  DRY: would fetch topic {topic_id} ({title[:80]})", file=sys.stderr)
+                    print(f"  DRY: would fetch topic {topic_id}", file=sys.stderr)
                     seen_topics.add(topic_id)
                     topics_scraped += 1
                     continue
 
-                print(f"  fetching topic {topic_id}: {title[:80]}", file=sys.stderr)
+                print(f"  fetching topic {topic_id}", file=sys.stderr)
                 posts = fetch_topic(session, topic_id, args.delay_seconds)
                 for p in posts:
-                    p["topic_title"] = title
-                    p["board_id"] = args.board
+                    p["topic_title"] = None  # not pre-fetched in range mode; will be in post body
+                    p["board_id"] = None
                     p["fetched_at_utc"] = datetime.now(timezone.utc).isoformat()
                     fout.write(json.dumps(p, ensure_ascii=False) + "\n")
                     posts_written += 1
@@ -264,12 +261,46 @@ def main():
                 seen_topics.add(topic_id)
                 topics_scraped += 1
 
-                # Save checkpoint every 5 topics
                 if args.checkpoint and topics_scraped % 5 == 0:
                     save_checkpoint(args.checkpoint, {"seen_topics": list(seen_topics)})
 
-            if args.max_topics is not None and topics_scraped >= args.max_topics:
-                break
+        # MODE 2: Board pagination (current-era browse)
+        else:
+            for page in range(args.start_page, args.end_page + 1):
+                offset = (page - 1) * 40
+                print(f"[board {args.board}] page {page} (offset {offset})", file=sys.stderr)
+                topics = list_topics_on_board(session, args.board, offset, args.delay_seconds)
+                print(f"  found {len(topics)} topics", file=sys.stderr)
+
+                for topic_id, title in topics:
+                    if topic_id in seen_topics:
+                        continue
+                    if args.max_topics is not None and topics_scraped >= args.max_topics:
+                        break
+
+                    if args.dry_run:
+                        print(f"  DRY: would fetch topic {topic_id} ({title[:80]})", file=sys.stderr)
+                        seen_topics.add(topic_id)
+                        topics_scraped += 1
+                        continue
+
+                    print(f"  fetching topic {topic_id}: {title[:80]}", file=sys.stderr)
+                    posts = fetch_topic(session, topic_id, args.delay_seconds)
+                    for p in posts:
+                        p["topic_title"] = title
+                        p["board_id"] = args.board
+                        p["fetched_at_utc"] = datetime.now(timezone.utc).isoformat()
+                        fout.write(json.dumps(p, ensure_ascii=False) + "\n")
+                        posts_written += 1
+
+                    seen_topics.add(topic_id)
+                    topics_scraped += 1
+
+                    if args.checkpoint and topics_scraped % 5 == 0:
+                        save_checkpoint(args.checkpoint, {"seen_topics": list(seen_topics)})
+
+                if args.max_topics is not None and topics_scraped >= args.max_topics:
+                    break
 
     if args.checkpoint:
         save_checkpoint(args.checkpoint, {"seen_topics": list(seen_topics)})
