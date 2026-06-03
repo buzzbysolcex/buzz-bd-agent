@@ -1,0 +1,13 @@
+rules:
+  - id: buzz-c7-vesting-release-revert-freeze
+    languages: [generic]
+    severity: WARNING
+    metadata: { freeze-of-funds: true, severity-class: HIGH, lane1: disclose-to-target }
+    message: >-
+      FREEZE-OF-FUNDS (C7, HIGH) RECALL: a vesting/release/claim path with division in the
+      vested-amount math. If the denominator can be zero (or subtraction underflow), release()
+      reverts FOREVER = permanently locked vested funds. Confirm the denominator is guarded
+      (require(duration>0)) and no subtraction can underflow. (RECALL: semantic — analyst confirms.)
+    patterns:
+      - pattern: $T * (...) / (...)
+    paths: { include: ['*.sol'] }

@@ -1,0 +1,14 @@
+rules:
+  - id: buzz-c10-solana-pda-no-withdraw-freeze
+    languages: [generic]
+    severity: WARNING
+    metadata: { freeze-of-funds: true, severity-class: HIGH, lane1: disclose-to-target, substrate: solana-anchor }
+    message: >-
+      FREEZE-OF-FUNDS (C10, HIGH) RECALL [Solana]: lamports are credited INTO a PDA
+      (try_borrow_mut_lamports += ...). Confirm the program ALSO has a withdraw instruction
+      that debits this PDA — a fee/deposit PDA with no withdraw ix permanently locks SOL
+      (recoverable only by an upgrade-authority upgrade). (RECALL: semgrep-Rust cannot prove the
+      no-withdraw-ix negative; analyst confirms a withdraw ix exists.)
+    patterns:
+      - pattern: 'try_borrow_mut_lamports()? += $AMT'
+    paths: { include: ['*.rs'] }

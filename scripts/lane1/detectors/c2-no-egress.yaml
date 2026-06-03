@@ -1,0 +1,12 @@
+rules:
+  - id: buzz-c2-no-egress-freeze
+    languages: [generic]
+    severity: ERROR
+    metadata: { freeze-of-funds: true, severity-class: HIGH, lane1: disclose-to-target }
+    message: >-
+      FREEZE-OF-FUNDS (C2, HIGH) RECALL: ETH-accepting surface (receive/fallback payable).
+      Confirm a reachable egress (withdraw/transfer/call{value}/send) exists — payable + no
+      withdraw = permanent freeze. (RECALL: analyst confirms the no-egress negative.)
+    patterns:
+      - pattern: receive() external payable
+    paths: { include: ['*.sol'] }

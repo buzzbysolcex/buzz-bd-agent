@@ -1,0 +1,16 @@
+rules:
+  - id: buzz-c1-killable-library-freeze
+    languages: [solidity]
+    severity: ERROR
+    metadata: { category: security, freeze-of-funds: true, severity-class: CRITICAL, lane1: disclose-to-target }
+    message: >-
+      FREEZE-OF-FUNDS (C1, HIGH/CRITICAL): a selfdestruct/suicide is present. If this is a
+      library reached via delegatecall (or a fund-backing contract) and the destruct is not
+      behind strong access control, anyone can brick it and PERMANENTLY freeze all dependent
+      funds (Parity-class, ~513K ETH). Confirm: is destruct access-controlled + is this
+      contract delegatecall-depended-upon? Disclose to the target protocol (Lane 1).
+    patterns:
+      - pattern-either:
+          - pattern: selfdestruct(...)
+          - pattern: suicide(...)
+    paths: { include: ['*.sol'] }

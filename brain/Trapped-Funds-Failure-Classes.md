@@ -154,3 +154,17 @@
 **RECOVERABLE-BY-ANYONE [DANGER]:** whitehat rescue-and-return ONLY. No self-drain (= theft). Monetization ≈ reputation + maybe a voluntary project bounty. Never enumerated here.
 
 **Honest read — is a recovery BUSINESS worth the Phase-2 infra+legal lift?** Marginal as a standalone business: the high-$ cases are PERMANENT-LOCK (dead), the BY-OWNER cases need heavy owner-identification + legal + paid-API infra for thin/uncertain finder's-fees, and BY-ANYONE is whitehat-charity. **The taxonomy's real, immediate value is CROSS-LANE → Lane-1:** classes C1/C2/C7/C10 (killable-library, no-egress, vesting-revert-lock, PDA-no-withdraw) are **findable freeze-of-funds bugs in LIVE protocols** → disclose to the project for a bounty (often Critical/High "permanent freezing of funds"). **Recommendation: harvest this taxonomy as Lane-1 hunting detectors NOW (free, immediate-EV); defer the recovery-business (Lane-4 Phase-2) until the infra+legal lift is justified by a concrete reachable-owner + authorized case — do not build it speculatively.** Cross-ref [[Patterns-Defense-Classes]] (no-egress/freeze detectors) + the autonomy-boundary Scout guardrail.
+
+---
+
+## RECOVERY BUSINESS — PARKED (Ogie msg 8136). Do NOT build speculatively.
+The Lane-4 recovery business is deferred (honest read above: high-$ cases are PERMANENT-LOCK; BY-OWNER needs heavy owner-ID + legal + paid-API infra for thin finder's-fees).
+**REVISIT-TRIGGER (all must hold before any Phase-2 build):** a CONCRETE RECOVERABLE-BY-OWNER case with (1) an IDENTIFIED rightful owner, (2) who is REACHABLE, (3) who AUTHORIZES the recovery, AND (4) a finder's-fee large enough to justify the data-infra + legal lift. Until all four hold, no recovery infra is built. (RECOVERABLE-BY-ANYONE never triggers a business — whitehat rescue-and-return only.)
+
+## HARVESTED → LANE-1 DETECTORS (Ogie msg 8136, shipped 2026-06-03)
+The findable freeze-of-funds classes are now automated detectors in `.tmp-build/v6/buzz-detectors/` (wired into `buzzshield-semgrep.js` DEFAULT_PACKS, auto-apply every scan), severity-tagged `freeze-of-funds:true` / HIGH-CRITICAL so the pipeline surfaces them high-priority:
+- **C1 killable-library** → `buzz-c1-killable-library-freeze` (PRECISE — selfdestruct/suicide match; CRITICAL).
+- **C2 no-egress** → `buzz-c2-no-egress-freeze` (RECALL — ETH-intake flag, analyst confirms no-withdraw; HIGH).
+- **C7 vesting-revert** → `buzz-c7-vesting-release-revert-freeze` (RECALL — division-in-release-math flag; HIGH).
+- **C10 Solana PDA-no-withdraw** → `buzz-c10-solana-pda-no-withdraw-freeze` (RECALL, generic-mode — lamports-IN flag, analyst confirms a withdraw ix; HIGH). semgrep-Rust couldn't express the no-withdraw-ix negative precisely.
+Each has a positive+negative regression fixture in `buzz-detectors/regression/`. These find a BUG CLASS in a TARGET protocol's code → disclose to that protocol for a bounty (Lane 1). NOT chain-scanners for drainable funds.
