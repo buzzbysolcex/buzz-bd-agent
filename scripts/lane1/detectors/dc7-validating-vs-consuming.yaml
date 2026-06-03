@@ -1,0 +1,16 @@
+rules:
+  - id: buzz-dc7-validating-vs-consuming-recall
+    languages: [generic]
+    severity: INFO
+    message: >-
+      DC-7 candidate (RECALL): an approval/authorization require() co-occurs with a
+      transferFrom() — build the validation->consumption key map and confirm the consumed
+      KEY-B is the SAME upstream identity as the validated KEY-A (Validating-Field !=
+      Consuming-Field is the bug). Semgrep cannot prove key-divergence; Skeptic/analyst confirms.
+    patterns:
+      - pattern: transferFrom(...)
+      - pattern-inside: |
+          require(...)
+          ...
+    paths:
+      include: ['*.sol']

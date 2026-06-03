@@ -1,0 +1,14 @@
+rules:
+  - id: buzz-pattern-h-single-trust-anchor-recall
+    languages: [generic]
+    severity: WARNING
+    message: >-
+      Pattern-H candidate (RECALL): value/authorization gated by a SINGLE off-chain trust
+      anchor recovered via ecrecover and compared to one settable address (verifier/signer/
+      oracle/relayer/DVN). Single point of trust (H.1 DVN / H.2 admin+UUPS+zero-timelock /
+      H.3 proof-gap / H.4 key-loss). Confirm: is it a single key, settable without timelock?
+      M-of-N quorum = negative-control. (RECALL: analyst confirms.)
+    patterns:
+      - pattern: ecrecover(...)
+    paths:
+      include: ['*.sol']

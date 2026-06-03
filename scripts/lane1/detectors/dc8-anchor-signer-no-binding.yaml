@@ -1,0 +1,21 @@
+rules:
+  - id: buzz-dc8-anchor-signer-no-struct-binding
+    languages: [generic]
+    severity: WARNING
+    message: >-
+      DC-8 candidate: an Anchor Signer account in a #[derive(Accounts)] struct that has NO
+      struct-level binding (has_one / constraint / seeds). If the only authorization is a
+      function-body require!/key()-compare, this is the DC-8 refactor-regression class —
+      a CPI/proxy/upgrade caller path can reach the privileged mutation without the body
+      check. Confirm the binding lives in the #[account(...)] attribute. (RECALL: Skeptic
+      confirms; has_one/attribute-constraint = SAFE negative-control.)
+    patterns:
+      - pattern: Signer<...>
+      - pattern-not-inside: |
+          struct $S<...> { ... has_one ... }
+      - pattern-not-inside: |
+          struct $S<...> { ... constraint = ... }
+      - pattern-not-inside: |
+          struct $S<...> { ... seeds = ... }
+    paths:
+      include: ['*.rs']
