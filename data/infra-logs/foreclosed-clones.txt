@@ -13,3 +13,4 @@
 /home/claude-code/.tmp-clones/stader-ethx   # foreclosed EVM hunt clone (status-read cleanup 2026-06-03)
 /home/claude-code/.tmp-clones/truefi   # foreclosed EVM hunt clone (status-read cleanup 2026-06-03)
 /home/claude-code/.tmp-clones/mezo-musd   # NEGATE 2026-06-03 (loop cycle 1, fork-delta sound)
+/home/claude-code/.tmp-clones/yei-contracts   # NEGATE-on-sight 2026-06-03 (loop cycle 2, verbatim Aave-V3 fork)
