@@ -3,3 +3,12 @@
 # Active clones (pending submission / live PoC) must NOT be listed.
 /home/claude-code/.tmp-clones/aave-umbrella   # NEGATE-VERIFIED 2026-06-01 (Gate-1 + TASK-6 closure)
 /home/claude-code/skillspector-audit   # SkillSpector self-audit scratch (this session, done)
+/home/claude-code/.tmp-clones/ssv-network   # foreclosed EVM hunt clone (status-read cleanup 2026-06-03)
+/home/claude-code/.tmp-clones/dexe-protocol   # foreclosed EVM hunt clone (status-read cleanup 2026-06-03)
+/home/claude-code/.tmp-clones/cap-contracts   # foreclosed EVM hunt clone (status-read cleanup 2026-06-03)
+/home/claude-code/.tmp-clones/coinbase-smart-wallet   # foreclosed EVM hunt clone (status-read cleanup 2026-06-03)
+/home/claude-code/.tmp-clones/huma-contracts   # foreclosed EVM hunt clone (status-read cleanup 2026-06-03)
+/home/claude-code/.tmp-clones/maple   # foreclosed EVM hunt clone (status-read cleanup 2026-06-03)
+/home/claude-code/.tmp-clones/monetrix   # foreclosed EVM hunt clone (status-read cleanup 2026-06-03)
+/home/claude-code/.tmp-clones/stader-ethx   # foreclosed EVM hunt clone (status-read cleanup 2026-06-03)
+/home/claude-code/.tmp-clones/truefi   # foreclosed EVM hunt clone (status-read cleanup 2026-06-03)

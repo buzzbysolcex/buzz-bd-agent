@@ -12,7 +12,16 @@ OLLAMA = "http://localhost:11434/api/chat"
 MODEL = "qwen3:8b"
 
 
+# RETIRED 2026-06-03 (Ogie msg 8129 — disk reclaim; qwen NOT load-bearing). The model is deleted and
+# ollama serve is stopped. These functions now DEGRADE GRACEFULLY (no crash) to the same "uncertain ->
+# WR-review" / v1.1-keyword path the consumers already use. Re-enable per brain/qwen-retired-2026-06-03.md.
+# Live crons never called these (Gate-0 = structural match_finding; P3 = v1.1 classify_post).
+QWEN_RETIRED = True
+
+
 def chat(prompt, system=None, num_predict=60, timeout=120):
+    if QWEN_RETIRED:
+        raise RuntimeError("qwen retired 2026-06-03 (disk reclaim) — see brain/qwen-retired-2026-06-03.md")
     msgs = []
     if system:
         msgs.append({"role": "system", "content": system})
@@ -35,7 +44,11 @@ def verdict_keep_drop(cls, body):
          f"METHODOLOGY=a real security practice; DETECTOR_SEED=a real detection/monitoring idea) — or NOISE "
          f"(casual chatter, price talk, the word used in passing, off-topic)? "
          f"Reply EXACTLY: KEEP or DROP, then a <=6-word reason.\n\nPOST: {body[:300]}")
-    out = chat(p, num_predict=24, timeout=200)
+    try:
+        out = chat(p, num_predict=24, timeout=200)
+    except Exception as e:
+        # qwen retired → v1.2 LLM filter disabled; KEEP (don't drop) + defer to v1.1 keyword + WR-review (safe).
+        return ("KEEP", f"qwen-retired: v1.1 keyword kept, WR-review ({type(e).__name__})")
     u = out.upper()
     keep = u.lstrip().startswith("KEEP") or (u.find("KEEP") != -1 and (u.find("DROP") == -1 or u.find("KEEP") < u.find("DROP")))
     return ("KEEP" if keep else "DROP"), out[:140]
@@ -55,7 +68,11 @@ def gate0_mechanism_match(finding, known_issue):
          "Reserve NOVEL-VARIANT-REVIEW for a genuinely DIFFERENT end-state, or a path the accepted-risk does not reach. "
          "Reply EXACTLY one of: KNOWN-NEGATE / NOVEL-VARIANT-REVIEW / NO-MATCH. "
          "Then ONE concise sentence of MECHANISM-level reasoning (not keyword overlap).")
-    out = chat(p, num_predict=80, timeout=300)
+    try:
+        out = chat(p, num_predict=80, timeout=300)
+    except Exception as e:
+        # qwen retired → LLM-matcher disabled; default to the structural gate's safe verdict (uncertain -> WR-review).
+        return ("NOVEL-VARIANT-REVIEW", f"qwen-retired: structural-only, uncertain->WR-review ({type(e).__name__})")
     u = out.upper()
     if "KNOWN-NEGATE" in u:
         v = "KNOWN-NEGATE"
