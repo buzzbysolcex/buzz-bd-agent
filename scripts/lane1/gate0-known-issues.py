@@ -31,6 +31,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))
+from scope_path_filter import is_out_of_scope_path  # noqa: E402  (Doctrine #48, single source of truth)
+
 WORKSPACE = Path(__file__).resolve().parent.parent.parent
 CORPUS = WORKSPACE / "data" / "lane1" / "gate0" / "known-issues.json"
 
@@ -99,6 +102,16 @@ HIGH_SHARED = 3
 
 
 def match_finding(finding, program, corpus):
+    # Doctrine #48 — PATH-BASED SCOPE FILTER, applied BEFORE any known-issues match.
+    # test/mock/shim/devnet/script/example/fixture = OUT OF SCOPE by construction (never a
+    # real finding — e.g. the DevnetSwapRouterShim.sol FP). Foreclose pre-match, no Gate-1/PoC.
+    for pf in ("file", "path", "location", "component"):
+        oos, why = is_out_of_scope_path(finding.get(pf, ""))
+        if oos:
+            return {"bucket": "OOS-BY-CONSTRUCTION",
+                    "reason": "%s [%s=%r] — foreclosed pre-match (Doctrine #48); non-production scaffolding is never a finding"
+                              % (why, pf, finding.get(pf)),
+                    "best": None, "shared": []}
     entries = corpus.get(program, {}).get("entries", [])
     if not entries:
         return {"bucket": "NO-MATCH-PROCEED", "reason": f"no known-issues corpus for program '{program}'",

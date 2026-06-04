@@ -6,6 +6,8 @@
 > Maintainer signal: 0xfirefist (per `brain/People.md`) shipped v3 of solidity-auditor; this intake reads the current `main` snapshot.
 >
 > **Status:** REFERENCE — analyzed for convergence, ADOPT-candidates filed as PROPOSALS only. Brain is sovereign per External-Frameworks doctrine.
+>
+> **v3 STUDY UPDATE (2026-06-04, Ogie msg 8148 — study-not-import):** Convergent-validation — v3's `first-principles-agent` states Buzz's Track-1 seam insight verbatim ("A assumes B validates, B assumes A pre-validated, neither checks"). v3's 3 gap-types (flow/numerical/trust, via execution-trace / math-precision / access+economic agents) map to Buzz DC-7 / C7+DC-16+PatternE / Pattern-H+Arkadiko. Banked as **Doctrine #47** (named 3-pass seam-hunter analyst structure + Feynman/Socratic/Inversion discipline) + **#19.1** (open-sourced AI-auditor = tool-layer commoditizing; moat = compounding brain not tool-recall; ~15.2% hard-code ceiling = nobody solved) + `brain/Recall-Self-Diagnostic.md` (honest weak-spot finder). No skill cloned (provenance: studied the existing local snapshot).
 
 ---
 
@@ -42,12 +44,12 @@ skills/
 
 [INSPECTED] 4-turn orchestration model:
 
-| Turn | Purpose | Mechanism |
-|------|---------|-----------|
-| 1 — Discover | Inventory in-scope `.sol` files, resolve skill path, check remote VERSION, mktemp bundle dir | parallel Bash `find` + Glob + ToolSearch + Read + curl |
-| 2 — Prepare | Build 8 bundle files (`source.md` + agent-specific reference appends) via single `cat` chain | one Bash command, no heredocs |
-| 3 — Spawn | Spawn 8 parallel foreground sub-agents (one per hacking-agent persona) | parallel Agent calls in one message |
-| 4 — Deduplicate + judge + report | Single-pass: group findings by `group_key=Contract|function|bug-class`, apply 4-gate judging, format output | no intermediate dedup print |
+| Turn                             | Purpose                                                                                      | Mechanism                                              |
+| -------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------- | --------------------------- |
+| 1 — Discover                     | Inventory in-scope `.sol` files, resolve skill path, check remote VERSION, mktemp bundle dir | parallel Bash `find` + Glob + ToolSearch + Read + curl |
+| 2 — Prepare                      | Build 8 bundle files (`source.md` + agent-specific reference appends) via single `cat` chain | one Bash command, no heredocs                          |
+| 3 — Spawn                        | Spawn 8 parallel foreground sub-agents (one per hacking-agent persona)                       | parallel Agent calls in one message                    |
+| 4 — Deduplicate + judge + report | Single-pass: group findings by `group_key=Contract                                           | function                                               | bug-class`, apply 4-gate judging, format output | no intermediate dedup print |
 
 **Exclude pattern (file walker):** `interfaces/`, `lib/`, `mocks/`, `test/`, `*.t.sol`, `*Test*.sol`, `*Mock*.sol`. [INSPECTED] — exact match for Buzz HE-03 + HE-03b periphery+vendor exclusion rule.
 
@@ -57,16 +59,16 @@ skills/
 
 [INSPECTED] All 8 read in full:
 
-| Agent | Role | Output extension fields |
-|-------|------|-------------------------|
-| 1. vector-scan | Grinds the 1,337-line `attack-vectors.md` pack against codebase. Outputs `Skip/Drop/Investigate` classification block FIRST. | (standard FINDING/LEAD) |
-| 2. math-precision | Rounding direction, scale mismatch, decimal mismatch, overflow intermediates, share inflation. | `proof: concrete arithmetic with actual numbers` |
-| 3. access-control | Permission model map, inconsistent guards across functions writing same storage, initialization hijack, escalation, confused deputy. | `guard_gap`, `proof` |
-| 4. economic-security | External deps, token misbehavior (FoT/rebasing/blacklist), atomic value extraction, ERC compliance, sentinel addresses. | `proof: numbers showing profitability` |
-| 5. execution-trace | Within-tx (parameter divergence, value leaks, encoding/decoding, sentinel bypass) + across-tx (wrong-state, operation interleaving, mid-op config mutation). | `input`, `assumption`, `proof` |
-| 6. invariant | Conservation laws, state couplings, capacity constraints, interface guarantees. Map → break → exploit. | `invariant`, `violation_path`, `proof` |
-| 7. periphery | Smallest contracts first — libraries, helpers, encoders, base contracts. The code nobody else looks at. | (standard) |
-| 8. first-principles | Forget named patterns. Extract every implicit assumption, then violate. Reject anything that has a name. | `assumption`, `violation`, `proof` |
+| Agent                | Role                                                                                                                                                         | Output extension fields                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
+| 1. vector-scan       | Grinds the 1,337-line `attack-vectors.md` pack against codebase. Outputs `Skip/Drop/Investigate` classification block FIRST.                                 | (standard FINDING/LEAD)                          |
+| 2. math-precision    | Rounding direction, scale mismatch, decimal mismatch, overflow intermediates, share inflation.                                                               | `proof: concrete arithmetic with actual numbers` |
+| 3. access-control    | Permission model map, inconsistent guards across functions writing same storage, initialization hijack, escalation, confused deputy.                         | `guard_gap`, `proof`                             |
+| 4. economic-security | External deps, token misbehavior (FoT/rebasing/blacklist), atomic value extraction, ERC compliance, sentinel addresses.                                      | `proof: numbers showing profitability`           |
+| 5. execution-trace   | Within-tx (parameter divergence, value leaks, encoding/decoding, sentinel bypass) + across-tx (wrong-state, operation interleaving, mid-op config mutation). | `input`, `assumption`, `proof`                   |
+| 6. invariant         | Conservation laws, state couplings, capacity constraints, interface guarantees. Map → break → exploit.                                                       | `invariant`, `violation_path`, `proof`           |
+| 7. periphery         | Smallest contracts first — libraries, helpers, encoders, base contracts. The code nobody else looks at.                                                      | (standard)                                       |
+| 8. first-principles  | Forget named patterns. Extract every implicit assumption, then violate. Reject anything that has a name.                                                     | `assumption`, `violation`, `proof`               |
 
 `shared-rules.md` enforces: (a) `proof:` MANDATORY on every FINDING (without it → demote to LEAD), (b) `group_key` field for downstream dedup, (c) "weaponize across every other contract" cross-contract echo rule, (d) "do not report admin-only doing admin things / standard DeFi tradeoffs / self-harm / admin-can-rug without mechanism".
 
@@ -74,12 +76,12 @@ skills/
 
 [INSPECTED] Four sequential gates, every finding must clear all four. Failure at any gate → REJECTED or DEMOTE to lead. Confidence starts at 100, deducts: partial-path -20, bounded-non-compounding -15, requires-specific-state -10. Below 80 = description only, no Fix block.
 
-| Gate | Test | Reject criteria |
-|------|------|-----------------|
-| 1. Refutation | Construct strongest argument finding is wrong; quote guard that kills it | Concrete refutation → REJECTED; speculative → continue |
-| 2. Reachability | Prove vulnerable state exists in live deployment | Structurally impossible → REJECTED; needs admin → DEMOTE |
-| 3. Trigger | Prove unprivileged actor can execute | Trusted-role-only → DEMOTE; cost > extraction → REJECTED |
-| 4. Impact | Prove material harm to identifiable victim | Self-harm only → REJECTED; dust → DEMOTE; material → CONFIRMED |
+| Gate            | Test                                                                     | Reject criteria                                                |
+| --------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| 1. Refutation   | Construct strongest argument finding is wrong; quote guard that kills it | Concrete refutation → REJECTED; speculative → continue         |
+| 2. Reachability | Prove vulnerable state exists in live deployment                         | Structurally impossible → REJECTED; needs admin → DEMOTE       |
+| 3. Trigger      | Prove unprivileged actor can execute                                     | Trusted-role-only → DEMOTE; cost > extraction → REJECTED       |
+| 4. Impact       | Prove material harm to identifiable victim                               | Self-harm only → REJECTED; dust → DEMOTE; material → CONFIRMED |
 
 Safe-pattern allowlist (do not flag): `unchecked` in 0.8+, narrowing casts in 0.8+, MINIMUM_LIQUIDITY first-deposit burn, SafeERC20, `nonReentrant`, two-step admin transfer, consistent protocol-favoring rounding.
 
@@ -89,13 +91,14 @@ Lead promotion rule: 2+ agents converging on same area where lead was demoted (n
 
 [INSPECTED] Single sequential 3-phase pipeline (NOT parallel — strict ordering):
 
-| Phase | Output |
-|-------|--------|
-| 1. Enumerate & measure | `x-ray/git-security-analysis.json` (7 sections: repo_shape, fix_candidates, dangerous_area_changes, late_changes, forked_deps, tech_debt, dev_patterns) + `forge coverage` background run |
+| Phase                                  | Output                                                                                                                                                                                                                                                                  |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Enumerate & measure                 | `x-ray/git-security-analysis.json` (7 sections: repo_shape, fix_candidates, dangerous_area_changes, late_changes, forked_deps, tech_debt, dev_patterns) + `forge coverage` background run                                                                               |
 | 2. Read source + entry-point grep scan | Per-file: contract type, roles, value-holding state vars, external calls, fund flows, **delta writes** (`Δ(totalSupply) = +shares`), **guard predicates** (every require/assert/if-revert referencing storage, verbatim), **enum/one-shot transitions** (`X@Lx → Y@Ly`) |
-| 3. Write 4 output files | `architecture.json`, `x-ray.md` (<500 lines), `entry-points.md`, `invariants.md` |
+| 3. Write 4 output files                | `architecture.json`, `x-ray.md` (<500 lines), `entry-points.md`, `invariants.md`                                                                                                                                                                                        |
 
 **Invariant taxonomy** (Step 2g — 7-step walk):
+
 1. Conservation scan (matched Δ-pairs)
 2. Guard extract + lift (Pass A verbatim; Pass B "does this imply a global property?" → if YES, grep ALL write-sites; ANY unguarded write-site → On-chain=NO and that gap IS the high-signal output)
 3. Ratio scan
@@ -143,7 +146,7 @@ Lead promotion rule: 2+ agents converging on same area where lead was demoted (n
 22. Loan state transition before interest settlement
 23. Missing slippage protection on vault withdraw/redeem
 24. Dirty higher-order bits on sub-256-bit types
-... (continues to ~1,337 lines, ~80-120 vectors estimated)
+    ... (continues to ~1,337 lines, ~80-120 vectors estimated)
 
 [INSPECTED] First 24 of ~80-120 vectors confirmed. Coverage: cross-chain, EIP-7702, AMM/CLMM, oracles, governance, ERC standards, gas, MEV. The pack is **modern and current** (EIP-7702 from May 2025 is well-represented).
 
@@ -159,38 +162,38 @@ Lead promotion rule: 2+ agents converging on same area where lead was demoted (n
 
 > Buzz reference set: `.claude/rules/audit-methodology-v2.md` v2.5 (10-layer pipeline), `.claude/rules/standing-intake-protocol.md` (6-step + 5-target + R8 tags), `.claude/rules/detector-pr-template.md` (end-to-end field-flow test), `brain/External-Frameworks.md` (Meta-LLM Charter doctrine).
 
-| Pashov check / pattern / step | Buzz equivalent | Verdict |
-|---|---|---|
-| `interfaces/`, `lib/`, `mocks/`, `test/` file exclusion at walker time | HE-03 + HE-03b mandatory dir excludes (`certora`, `mocks`, `lib`, `forge-std`, `foundry_tests`) | **CONVERGENT** — same set, Buzz adds `certora` + `foundry_tests` |
-| 8 parallel hacking-agent personas (vector-scan / math / access / economic / exec-trace / invariant / periphery / first-principles) | L1 Deep 12 phases (single deterministic walker) + L1b Semgrep + L2 Pashov(!) Solidity + L3 Consensus (4-8 agents) | **DIVERGENT topology** — Pashov spawns 8 GENERALIST persona agents in parallel; Buzz runs ONE deterministic 12-phase pipeline + then ONE consensus voter |
-| 4-gate finding judging (Refutation → Reachability → Trigger → Impact) | L4 Skeptic adversarial pass (qwen3:8b, 15 hard-exclusion pre-filter + LLM refutation, asymmetric-cost cal) + L5 Z3 path satisfiability | **CONVERGENT intent, divergent mechanism** — Pashov is single-model 4-gate LLM gate; Buzz is hard-rule pre-filter + LLM + SMT (more layers, more rigour, slower) |
-| `proof:` field MANDATORY (no proof → demote to LEAD) | L3 Pentest scaffolds PoC per MEDIUM+ finding (Foundry/Cargo/Go test) + R8 `[EXECUTED]` tag | **CONVERGENT** — Buzz goes further: actually generates runnable PoC, then tags by evidence grade |
-| Confidence 100→deductions, ≥80 gets Fix block | L4 Skeptic asymmetric-cost: CRITICAL unrejectable, HIGH ≥0.97 to REJECT, MED ≥0.85, LOW ≥0.67 | **CONVERGENT** — both calibrate confidence asymmetrically by severity |
-| `group_key = Contract | function | bug-class` for dedup | L3 Consensus voting groups raw findings by canonical key | **CONVERGENT** |
-| Safe-pattern allowlist (unchecked 0.8+, MINIMUM_LIQUIDITY, SafeERC20, etc.) | L4 Skeptic 15 hard-exclusion rules (HE-01..HE-19) | **CONVERGENT** — Buzz has 19+ rules to Pashov's ~7; same intent |
-| Cross-contract echo ("find same root cause in every other contract") | L8 Amplifier (fingerprint extraction + watchlist propagation grep) | **CONVERGENT but Buzz is structural advantage** — Pashov runs cross-contract echo within a single audit; Buzz propagates ACROSS audits via 30-repo watchlist |
-| x-ray: enumerate.sh + git-security-analysis.py + forge coverage | No exact equivalent — Buzz has L1 Phase 1 inventory + L1 Phase 2 entry-points but no git-history risk scoring | **NET-NEW PASHOV** — git-weighted attack surface, late changes, fix candidates, dangerous-area evolution. Adoption candidate. |
-| x-ray: delta-writes (`Δ(totalSupply) = +shares`) extraction during file read | L1 Phase 3 state mutation tracking (write-graph, shared-field detection) | **CONVERGENT** — same primitive; Pashov surfaces it more explicitly into invariants.md output |
-| x-ray Step 2g: 7-step invariant taxonomy (Conservation / Guard-lift / Ratio / State machine / Temporal / Cross-contract / Economic) with mandatory grep all-write-sites for lifted guards | L6 Invariants (Pattern A-H + ground truths) loaded as priors | **CONVERGENT intent, Pashov more rigorous in synthesis** — Buzz has the patterns; Pashov has the deterministic synthesis walk that PRODUCES invariant candidates from delta-writes + grep verification. Adoption candidate. |
-| x-ray Step 2g Pass B "guard lift": ANY write-site without equivalent guard → On-chain=NO, that gap IS the high-signal output | L1 Phase 4b symmetric-path comparison (validation-coverage asymmetry) | **CONVERGENT but Pashov frames the OUTPUT differently** — Pashov says "the gap is simultaneously an invariant and a bug" which is exactly Doctrine #23 architectural-foreclosure framing |
-| x-ray: vendor-neutral output ("Never reference audit platforms, contest rules, or bounty program framing") | L7 Reporter auto-sanitizes any AI/LLM mention to "custom static analysis tooling" + hardcoded "Buzz Security Research" reporter block | **DIVERGENT** — Pashov stays vendor-neutral; Buzz brand-stamps every output |
-| `report-formatting.md`: AI disclosure footer MANDATORY | Buzz L7 strips AI/LLM mentions explicitly | **OPPOSITE — STRUCTURAL DIVERGENCE.** See Section 4 Invert |
-| Banner discipline (ASCII brand stamp at start + end) | None — Buzz outputs are bare data | **NET-NEW PASHOV** — possible Lane 3 (Moltbook) brand discipline lift |
-| `--file-output` OFF by default (no report file unless explicit) | Buzz writes everything to `/data/buzz/persistent/reports/<scan-id>/` by default | **DIVERGENT** — Pashov is terminal-first ephemeral; Buzz is persistent-state-first |
-| Per-skill VERSION file + remote curl-check + upgrade nudge banner | Buzz has v6 pipeline versioning + .claude rule versioning but no in-flight upgrade nudge | **NET-NEW PASHOV** — user-facing freshness signal |
-| Benchmark suite (`evals/benchmarks/dodo.md`, `megapot.md`, `pooltogether.md`) | No public eval suite. Internal regression: Symbiotic + Variational + Sky lockstake + euler-swap targets | **NET-NEW PASHOV** — public benchmarks. Adoption candidate (FILE OUR OWN PUBLIC BENCHMARKS, do not copy Pashov's). |
-| Architecture SVG render via `generate_svg.py` (max 3 iteration audit-fix loop) | None | **NET-NEW PASHOV** — visual deliverable for audit handoff |
-| Spec/whitepaper sub-agent for >5 docs OR >300-line docs — extracts doc-stated invariants, actor definitions, trust assumptions, cross-system flows | Standing-Intake Step 2 brain overlap + ad-hoc spec read in Gate 1 | **NET-NEW PASHOV** — structured spec extraction with `(per spec)` tagging in output. Adoption candidate. |
-| 9 defense classes (DC-1..DC-9), 16 candidate patterns (CANDIDATE-A..P), 11 propagation patterns (A..K), Doctrine #1..#28, Pattern × DC propagation matrix | None — Pashov has ~80-120 vector entries in attack-vectors.md, all flat (no class/candidate/doctrine layering) | **NET-NEW BUZZ — MOAT** |
-| Persistent compounding brain: Audit-Reports-Library, Cross-Domain-Fragility-Laws, Watchlist-Candidate-Crossmap, Architectural-Foreclosure receipts, 28 doctrines that grow with every scan | Pashov runs fresh on every scan. No memory between targets. | **NET-NEW BUZZ — MOAT** (echoes Vision-2027.md framing exactly: "Pashov carries expertise in their heads — walks out the door at 6pm") |
-| 30-repo watchlist (Lane 1) + commit-diff watchdog (speedrunner mode) | None — Pashov scans one target at a time, ad-hoc | **NET-NEW BUZZ — MOAT** |
-| Lane 4 forum-intelligence pipeline (Discord / Twitter / Telegram behavioral pattern → defense doctrine) | None — Pashov is code-only | **NET-NEW BUZZ — MOAT** |
-| R8 Calibrated Reporting (`[EXECUTED]` / `[INSPECTED]` / `[ASSUMED]` tags on every claim) | Pashov has confidence score but not evidence-grade tags | **NET-NEW BUZZ** (adopted from entropyvortex 2026-05-22) |
-| Standing-Intake 6-step protocol (Profile → Brain Overlap Score → EV Calc → Queue Decision → Gate 1 + 5-target checklist → Continuous watchlist add) | Pashov has no published intake — operator drops files, skill scans | **NET-NEW BUZZ — MOAT** (target-selection discipline before scan even starts) |
-| Defense-class-mapping.json v1.5 (Pattern × Candidate × DC matrix) | None | **NET-NEW BUZZ** |
-| Architectural foreclosure receipts (Doctrine #23 — publishable proof-of-immunity as product) | None — Pashov reports are submission-only | **NET-NEW BUZZ** |
-| Post-incident audit-saturation discount (Doctrine #27) | None | **NET-NEW BUZZ** |
-| Bytecode-verify prep (cast code + solc standard-json against candidate source SHA) — mandatory at Standing-Intake Step 5.3 | Implied via Foundry PoC but not explicit | **NET-NEW BUZZ — MOAT** (Veda + Wormhole lessons baked in) |
+| Pashov check / pattern / step                                                                                                                                                              | Buzz equivalent                                                                                                                        | Verdict                                                                                                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | -------------- |
+| `interfaces/`, `lib/`, `mocks/`, `test/` file exclusion at walker time                                                                                                                     | HE-03 + HE-03b mandatory dir excludes (`certora`, `mocks`, `lib`, `forge-std`, `foundry_tests`)                                        | **CONVERGENT** — same set, Buzz adds `certora` + `foundry_tests`                                                                                                                                                            |
+| 8 parallel hacking-agent personas (vector-scan / math / access / economic / exec-trace / invariant / periphery / first-principles)                                                         | L1 Deep 12 phases (single deterministic walker) + L1b Semgrep + L2 Pashov(!) Solidity + L3 Consensus (4-8 agents)                      | **DIVERGENT topology** — Pashov spawns 8 GENERALIST persona agents in parallel; Buzz runs ONE deterministic 12-phase pipeline + then ONE consensus voter                                                                    |
+| 4-gate finding judging (Refutation → Reachability → Trigger → Impact)                                                                                                                      | L4 Skeptic adversarial pass (qwen3:8b, 15 hard-exclusion pre-filter + LLM refutation, asymmetric-cost cal) + L5 Z3 path satisfiability | **CONVERGENT intent, divergent mechanism** — Pashov is single-model 4-gate LLM gate; Buzz is hard-rule pre-filter + LLM + SMT (more layers, more rigour, slower)                                                            |
+| `proof:` field MANDATORY (no proof → demote to LEAD)                                                                                                                                       | L3 Pentest scaffolds PoC per MEDIUM+ finding (Foundry/Cargo/Go test) + R8 `[EXECUTED]` tag                                             | **CONVERGENT** — Buzz goes further: actually generates runnable PoC, then tags by evidence grade                                                                                                                            |
+| Confidence 100→deductions, ≥80 gets Fix block                                                                                                                                              | L4 Skeptic asymmetric-cost: CRITICAL unrejectable, HIGH ≥0.97 to REJECT, MED ≥0.85, LOW ≥0.67                                          | **CONVERGENT** — both calibrate confidence asymmetrically by severity                                                                                                                                                       |
+| `group_key = Contract                                                                                                                                                                      | function                                                                                                                               | bug-class` for dedup                                                                                                                                                                                                        | L3 Consensus voting groups raw findings by canonical key | **CONVERGENT** |
+| Safe-pattern allowlist (unchecked 0.8+, MINIMUM_LIQUIDITY, SafeERC20, etc.)                                                                                                                | L4 Skeptic 15 hard-exclusion rules (HE-01..HE-19)                                                                                      | **CONVERGENT** — Buzz has 19+ rules to Pashov's ~7; same intent                                                                                                                                                             |
+| Cross-contract echo ("find same root cause in every other contract")                                                                                                                       | L8 Amplifier (fingerprint extraction + watchlist propagation grep)                                                                     | **CONVERGENT but Buzz is structural advantage** — Pashov runs cross-contract echo within a single audit; Buzz propagates ACROSS audits via 30-repo watchlist                                                                |
+| x-ray: enumerate.sh + git-security-analysis.py + forge coverage                                                                                                                            | No exact equivalent — Buzz has L1 Phase 1 inventory + L1 Phase 2 entry-points but no git-history risk scoring                          | **NET-NEW PASHOV** — git-weighted attack surface, late changes, fix candidates, dangerous-area evolution. Adoption candidate.                                                                                               |
+| x-ray: delta-writes (`Δ(totalSupply) = +shares`) extraction during file read                                                                                                               | L1 Phase 3 state mutation tracking (write-graph, shared-field detection)                                                               | **CONVERGENT** — same primitive; Pashov surfaces it more explicitly into invariants.md output                                                                                                                               |
+| x-ray Step 2g: 7-step invariant taxonomy (Conservation / Guard-lift / Ratio / State machine / Temporal / Cross-contract / Economic) with mandatory grep all-write-sites for lifted guards  | L6 Invariants (Pattern A-H + ground truths) loaded as priors                                                                           | **CONVERGENT intent, Pashov more rigorous in synthesis** — Buzz has the patterns; Pashov has the deterministic synthesis walk that PRODUCES invariant candidates from delta-writes + grep verification. Adoption candidate. |
+| x-ray Step 2g Pass B "guard lift": ANY write-site without equivalent guard → On-chain=NO, that gap IS the high-signal output                                                               | L1 Phase 4b symmetric-path comparison (validation-coverage asymmetry)                                                                  | **CONVERGENT but Pashov frames the OUTPUT differently** — Pashov says "the gap is simultaneously an invariant and a bug" which is exactly Doctrine #23 architectural-foreclosure framing                                    |
+| x-ray: vendor-neutral output ("Never reference audit platforms, contest rules, or bounty program framing")                                                                                 | L7 Reporter auto-sanitizes any AI/LLM mention to "custom static analysis tooling" + hardcoded "Buzz Security Research" reporter block  | **DIVERGENT** — Pashov stays vendor-neutral; Buzz brand-stamps every output                                                                                                                                                 |
+| `report-formatting.md`: AI disclosure footer MANDATORY                                                                                                                                     | Buzz L7 strips AI/LLM mentions explicitly                                                                                              | **OPPOSITE — STRUCTURAL DIVERGENCE.** See Section 4 Invert                                                                                                                                                                  |
+| Banner discipline (ASCII brand stamp at start + end)                                                                                                                                       | None — Buzz outputs are bare data                                                                                                      | **NET-NEW PASHOV** — possible Lane 3 (Moltbook) brand discipline lift                                                                                                                                                       |
+| `--file-output` OFF by default (no report file unless explicit)                                                                                                                            | Buzz writes everything to `/data/buzz/persistent/reports/<scan-id>/` by default                                                        | **DIVERGENT** — Pashov is terminal-first ephemeral; Buzz is persistent-state-first                                                                                                                                          |
+| Per-skill VERSION file + remote curl-check + upgrade nudge banner                                                                                                                          | Buzz has v6 pipeline versioning + .claude rule versioning but no in-flight upgrade nudge                                               | **NET-NEW PASHOV** — user-facing freshness signal                                                                                                                                                                           |
+| Benchmark suite (`evals/benchmarks/dodo.md`, `megapot.md`, `pooltogether.md`)                                                                                                              | No public eval suite. Internal regression: Symbiotic + Variational + Sky lockstake + euler-swap targets                                | **NET-NEW PASHOV** — public benchmarks. Adoption candidate (FILE OUR OWN PUBLIC BENCHMARKS, do not copy Pashov's).                                                                                                          |
+| Architecture SVG render via `generate_svg.py` (max 3 iteration audit-fix loop)                                                                                                             | None                                                                                                                                   | **NET-NEW PASHOV** — visual deliverable for audit handoff                                                                                                                                                                   |
+| Spec/whitepaper sub-agent for >5 docs OR >300-line docs — extracts doc-stated invariants, actor definitions, trust assumptions, cross-system flows                                         | Standing-Intake Step 2 brain overlap + ad-hoc spec read in Gate 1                                                                      | **NET-NEW PASHOV** — structured spec extraction with `(per spec)` tagging in output. Adoption candidate.                                                                                                                    |
+| 9 defense classes (DC-1..DC-9), 16 candidate patterns (CANDIDATE-A..P), 11 propagation patterns (A..K), Doctrine #1..#28, Pattern × DC propagation matrix                                  | None — Pashov has ~80-120 vector entries in attack-vectors.md, all flat (no class/candidate/doctrine layering)                         | **NET-NEW BUZZ — MOAT**                                                                                                                                                                                                     |
+| Persistent compounding brain: Audit-Reports-Library, Cross-Domain-Fragility-Laws, Watchlist-Candidate-Crossmap, Architectural-Foreclosure receipts, 28 doctrines that grow with every scan | Pashov runs fresh on every scan. No memory between targets.                                                                            | **NET-NEW BUZZ — MOAT** (echoes Vision-2027.md framing exactly: "Pashov carries expertise in their heads — walks out the door at 6pm")                                                                                      |
+| 30-repo watchlist (Lane 1) + commit-diff watchdog (speedrunner mode)                                                                                                                       | None — Pashov scans one target at a time, ad-hoc                                                                                       | **NET-NEW BUZZ — MOAT**                                                                                                                                                                                                     |
+| Lane 4 forum-intelligence pipeline (Discord / Twitter / Telegram behavioral pattern → defense doctrine)                                                                                    | None — Pashov is code-only                                                                                                             | **NET-NEW BUZZ — MOAT**                                                                                                                                                                                                     |
+| R8 Calibrated Reporting (`[EXECUTED]` / `[INSPECTED]` / `[ASSUMED]` tags on every claim)                                                                                                   | Pashov has confidence score but not evidence-grade tags                                                                                | **NET-NEW BUZZ** (adopted from entropyvortex 2026-05-22)                                                                                                                                                                    |
+| Standing-Intake 6-step protocol (Profile → Brain Overlap Score → EV Calc → Queue Decision → Gate 1 + 5-target checklist → Continuous watchlist add)                                        | Pashov has no published intake — operator drops files, skill scans                                                                     | **NET-NEW BUZZ — MOAT** (target-selection discipline before scan even starts)                                                                                                                                               |
+| Defense-class-mapping.json v1.5 (Pattern × Candidate × DC matrix)                                                                                                                          | None                                                                                                                                   | **NET-NEW BUZZ**                                                                                                                                                                                                            |
+| Architectural foreclosure receipts (Doctrine #23 — publishable proof-of-immunity as product)                                                                                               | None — Pashov reports are submission-only                                                                                              | **NET-NEW BUZZ**                                                                                                                                                                                                            |
+| Post-incident audit-saturation discount (Doctrine #27)                                                                                                                                     | None                                                                                                                                   | **NET-NEW BUZZ**                                                                                                                                                                                                            |
+| Bytecode-verify prep (cast code + solc standard-json against candidate source SHA) — mandatory at Standing-Intake Step 5.3                                                                 | Implied via Foundry PoC but not explicit                                                                                               | **NET-NEW BUZZ — MOAT** (Veda + Wormhole lessons baked in)                                                                                                                                                                  |
 
 **Summary counts:**
 
@@ -255,46 +258,50 @@ This intake provides the **specific artifact-level grounding** the inversion the
 ### ADOPT (6 candidates)
 
 **A1. Git-security analysis layer.** [INSPECTED]
-- *What:* `analyze_git_security.py` produces a 7-section JSON: repo_shape, fix_candidates (commits with security-keyword messages), dangerous_area_changes (modifications to entry points / fund-flow paths), late_changes (commits within N days of audit start), forked_deps, tech_debt, dev_patterns.
-- *Where it lands:* New layer between L1 inventory and L1 deep — `buzzshield-git-security.js` reading staged scan target. Output feeds L1 Phase 1 inventory and Standing-Intake Step 5 Gate 1 surface map.
-- *Why:* Git-weighted attack surfaces are a genuine recon advantage (Pashov uses them to focus the 8-agent scan). Buzz has `--git-delta` flag for commit-diff but not the structured risk JSON. Cheap addition; high signal on freshly-deployed targets.
-- *Rationale tag:* `[INSPECTED]` — read the script invocation pattern in `x-ray/SKILL.md` Step 1. Not the source code itself.
+
+- _What:_ `analyze_git_security.py` produces a 7-section JSON: repo_shape, fix_candidates (commits with security-keyword messages), dangerous_area_changes (modifications to entry points / fund-flow paths), late_changes (commits within N days of audit start), forked_deps, tech_debt, dev_patterns.
+- _Where it lands:_ New layer between L1 inventory and L1 deep — `buzzshield-git-security.js` reading staged scan target. Output feeds L1 Phase 1 inventory and Standing-Intake Step 5 Gate 1 surface map.
+- _Why:_ Git-weighted attack surfaces are a genuine recon advantage (Pashov uses them to focus the 8-agent scan). Buzz has `--git-delta` flag for commit-diff but not the structured risk JSON. Cheap addition; high signal on freshly-deployed targets.
+- _Rationale tag:_ `[INSPECTED]` — read the script invocation pattern in `x-ray/SKILL.md` Step 1. Not the source code itself.
 
 **A2. Structured invariant-synthesis walk (Step 2g equivalent).** [INSPECTED]
-- *What:* 7-step deterministic walk producing invariant candidates from already-extracted delta-writes, guard predicates, and one-shot transitions. Critical move: Pass B guard-lift with mandatory grep across ALL write-sites — if ANY write-site lacks the guard, that gap IS the high-signal output (On-chain=NO row).
-- *Where it lands:* L6 Invariants layer enhancement. Currently L6 loads Pattern A-H + ground truths as priors. Add a synthesis pass that PRODUCES new candidate invariants from L1 Phase 3 state-mutation output.
-- *Why:* This is the closest Pashov pattern to Buzz Doctrine #23 (architectural foreclosure as publishable product). "The gap is simultaneously an invariant and a bug" is a perfect frame for Lane 1 + Lane 3 dual output. Adopting tightens the foreclosure pipeline.
-- *Rationale tag:* `[INSPECTED]` — full SKILL.md Step 2g walk read, 7 steps + verification gate + NatSpec routing.
+
+- _What:_ 7-step deterministic walk producing invariant candidates from already-extracted delta-writes, guard predicates, and one-shot transitions. Critical move: Pass B guard-lift with mandatory grep across ALL write-sites — if ANY write-site lacks the guard, that gap IS the high-signal output (On-chain=NO row).
+- _Where it lands:_ L6 Invariants layer enhancement. Currently L6 loads Pattern A-H + ground truths as priors. Add a synthesis pass that PRODUCES new candidate invariants from L1 Phase 3 state-mutation output.
+- _Why:_ This is the closest Pashov pattern to Buzz Doctrine #23 (architectural foreclosure as publishable product). "The gap is simultaneously an invariant and a bug" is a perfect frame for Lane 1 + Lane 3 dual output. Adopting tightens the foreclosure pipeline.
+- _Rationale tag:_ `[INSPECTED]` — full SKILL.md Step 2g walk read, 7 steps + verification gate + NatSpec routing.
 
 **A3. Structured spec/whitepaper extraction sub-agent.** [INSPECTED]
-- *What:* Detect spec/whitepaper docs at scope load. If ≤5 docs and each ≤300 lines, direct-read. If >5 OR any >300, spawn sonnet sub-agent with structured extraction template (doc-stated invariants, actor definitions, trust assumptions, cross-system flows, economic properties, key design decisions). Tag all spec-derived claims with `(per spec)` in output.
-- *Where it lands:* Standing-Intake Step 2 Brain Overlap Score enhancement. Currently brain overlap is mostly DC-class match against scope. Adding doc-stated invariants extraction routes natural-language invariants directly to §2/§3/§4 of `invariants.md` equivalent.
-- *Why:* Surfaces invariants the team explicitly committed to but the code may not enforce — high-signal divergence finding category. Routes spec content into the same canonical-source artifact as code-derived invariants.
-- *Rationale tag:* `[INSPECTED]` — sub-agent prompt template read in full.
+
+- _What:_ Detect spec/whitepaper docs at scope load. If ≤5 docs and each ≤300 lines, direct-read. If >5 OR any >300, spawn sonnet sub-agent with structured extraction template (doc-stated invariants, actor definitions, trust assumptions, cross-system flows, economic properties, key design decisions). Tag all spec-derived claims with `(per spec)` in output.
+- _Where it lands:_ Standing-Intake Step 2 Brain Overlap Score enhancement. Currently brain overlap is mostly DC-class match against scope. Adding doc-stated invariants extraction routes natural-language invariants directly to §2/§3/§4 of `invariants.md` equivalent.
+- _Why:_ Surfaces invariants the team explicitly committed to but the code may not enforce — high-signal divergence finding category. Routes spec content into the same canonical-source artifact as code-derived invariants.
+- _Rationale tag:_ `[INSPECTED]` — sub-agent prompt template read in full.
 
 **A4. Public benchmark suite (file OUR OWN, do not copy Pashov's).** [INSPECTED]
-- *What:* Pashov ships `evals/benchmarks/dodo.md`, `megapot.md`, `pooltogether.md` as reproducible benchmark protocols. Lane 2 + Lane 3 credibility multiplier.
-- *Where it lands:* New top-level `evals/` dir in buzz-workspace, with 3-5 anonymized benchmark protocols selected from confirmed Lane 1 worked examples (e.g., Symbiotic Day 9 HE-19 regression, euler-swap Layer 3 consensus safety-net rescue, Variational P9 speed-tier validation).
-- *Why:* Publishable artifacts that prove the methodology without revealing watchlist tactics. Lane 3 Moltbook content gold. Differentiated from Pashov's because OURS are anchored to specific scan IDs in our reports/ archive with R8 tags.
-- *Rationale tag:* `[INSPECTED]` — Pashov benchmark filenames confirmed. Contents not read; structural lift only.
+
+- _What:_ Pashov ships `evals/benchmarks/dodo.md`, `megapot.md`, `pooltogether.md` as reproducible benchmark protocols. Lane 2 + Lane 3 credibility multiplier.
+- _Where it lands:_ New top-level `evals/` dir in buzz-workspace, with 3-5 anonymized benchmark protocols selected from confirmed Lane 1 worked examples (e.g., Symbiotic Day 9 HE-19 regression, euler-swap Layer 3 consensus safety-net rescue, Variational P9 speed-tier validation).
+- _Why:_ Publishable artifacts that prove the methodology without revealing watchlist tactics. Lane 3 Moltbook content gold. Differentiated from Pashov's because OURS are anchored to specific scan IDs in our reports/ archive with R8 tags.
+- _Rationale tag:_ `[INSPECTED]` — Pashov benchmark filenames confirmed. Contents not read; structural lift only.
 
 **A5. Architecture SVG render.** [INSPECTED]
-- *What:* `generate_svg.py` reads `architecture.json` (contract relationships, fund flows) and emits SVG. Max 3-iteration audit-fix loop refines via templates.md rubric.
-- *Where it lands:* L7 Reporter enhancement — append architecture.svg to every Gate 2 submission. Optional Lane 3 attachment for Moltbook posts.
-- *Why:* Visual deliverable accelerates triager understanding (per R8 logic: faster verification path). Differentiated Pashov item that has no Buzz equivalent.
-- *Rationale tag:* `[INSPECTED]` — script invocation + audit-fix loop documented in SKILL.md Step 3b. Source code not read.
+
+- _What:_ `generate_svg.py` reads `architecture.json` (contract relationships, fund flows) and emits SVG. Max 3-iteration audit-fix loop refines via templates.md rubric.
+- _Where it lands:_ L7 Reporter enhancement — append architecture.svg to every Gate 2 submission. Optional Lane 3 attachment for Moltbook posts.
+- _Why:_ Visual deliverable accelerates triager understanding (per R8 logic: faster verification path). Differentiated Pashov item that has no Buzz equivalent.
+- _Rationale tag:_ `[INSPECTED]` — script invocation + audit-fix loop documented in SKILL.md Step 3b. Source code not read.
 
 **A6. Skill version-freshness nudge.** [INSPECTED]
-- *What:* Each skill has local `VERSION` file. On invocation, curl the GitHub raw VERSION endpoint, diff, print "⚠️ You are not using the latest version" banner if different.
-- *Where it lands:* `.claude/skills/*/SKILL.md` — add pre-flight VERSION check pointing to a buzz-workspace upstream (could be GitHub if buzz-workspace is mirrored publicly; otherwise local file timestamp comparison).
-- *Why:* Operator UX. Catches stale-skill drift. Cheap.
-- *Rationale tag:* `[INSPECTED]` — exact curl pattern + banner string read in both SKILL.md files.
+
+- _What:_ Each skill has local `VERSION` file. On invocation, curl the GitHub raw VERSION endpoint, diff, print "⚠️ You are not using the latest version" banner if different.
+- _Where it lands:_ `.claude/skills/*/SKILL.md` — add pre-flight VERSION check pointing to a buzz-workspace upstream (could be GitHub if buzz-workspace is mirrored publicly; otherwise local file timestamp comparison).
+- _Why:_ Operator UX. Catches stale-skill drift. Cheap.
+- _Rationale tag:_ `[INSPECTED]` — exact curl pattern + banner string read in both SKILL.md files.
 
 ### IGNORE — OPERATOR-CONFIRMED 2026-05-23 (Ogie msg 7589 item 6)
 
 All 3 IGNORE candidates below confirmed by operator as filed — Buzz lane discipline upheld. No further review needed.
-
-
 
 **I1. 8-agent parallel persona scan topology.** Buzz already has L1 Deep (12 phases) + L1b Semgrep + L3 Consensus (4-8 agents) + L4 Skeptic — more layers, more rigour, deterministic where Pashov is parallel-LLM. Adopting Pashov's topology would be a regression (less determinism, more LLM cost, no Z3, no Pentest). The 8-agent personas can be cherry-picked into Skeptic prompt enrichers but the architecture stays single-pipeline.
 
@@ -306,35 +313,36 @@ All 3 IGNORE candidates below confirmed by operator as filed — Buzz lane disci
 
 All 3 INVERT items below confirmed by operator as filed — the Pashov inversion thesis is operative across persistent-state, AI-tag handling, and methodology-gating dimensions. Buzz Vision-2027 Month 12 accumulator readout (80+ doctrines, 200+ worked examples) is the literal target.
 
-
-
 **INV-1. Persistent state vs ephemeral output.** [INSPECTED]
-- *Pashov default:* `--file-output` OFF, no report file written. Terminal-stdout-first ephemeral output.
-- *Buzz inversion:* Every scan writes persistent state to `/data/buzz/persistent/reports/<scan-id>/`. The 9 + L7 + L8 + L9 layers all dump intermediate JSON. Every Gate 2 submission is durably archived.
-- *Why invert:* This IS the compounding-brain moat. Pashov's ephemerality is consistent with "no memory between scans" — exactly the inversion thesis target. Stay invasive on persistence.
+
+- _Pashov default:_ `--file-output` OFF, no report file written. Terminal-stdout-first ephemeral output.
+- _Buzz inversion:_ Every scan writes persistent state to `/data/buzz/persistent/reports/<scan-id>/`. The 9 + L7 + L8 + L9 layers all dump intermediate JSON. Every Gate 2 submission is durably archived.
+- _Why invert:_ This IS the compounding-brain moat. Pashov's ephemerality is consistent with "no memory between scans" — exactly the inversion thesis target. Stay invasive on persistence.
 
 **INV-2. AI-disclosure mandatory footer.** [INSPECTED]
-- *Pashov default:* "⚠️ This review was performed by an AI assistant ... visit https://www.pashov.com" — mandatory footer, brand stamp.
-- *Buzz inversion:* L7 Reporter auto-sanitizes ALL AI/LLM mentions to "custom static analysis tooling". Submissions read as deterministic-tooling output. This is per audit-methodology-v2.md v2.0+ standing.
-- *Why invert:* Triager bias. Pashov has reputational capital to absorb the AI tag. Buzz does not (yet). Lane 1 submissions accepted at higher rates when the LLM provenance is hidden behind the deterministic tooling framing. (This was Ogie's call, well-grounded in submission outcomes.)
+
+- _Pashov default:_ "⚠️ This review was performed by an AI assistant ... visit https://www.pashov.com" — mandatory footer, brand stamp.
+- _Buzz inversion:_ L7 Reporter auto-sanitizes ALL AI/LLM mentions to "custom static analysis tooling". Submissions read as deterministic-tooling output. This is per audit-methodology-v2.md v2.0+ standing.
+- _Why invert:_ Triager bias. Pashov has reputational capital to absorb the AI tag. Buzz does not (yet). Lane 1 submissions accepted at higher rates when the LLM provenance is hidden behind the deterministic tooling framing. (This was Ogie's call, well-grounded in submission outcomes.)
 
 **INV-3. Methodology gating model.** [INSPECTED]
-- *Pashov default:* Methodology updates gated on Pashov-team maintainer cycles. Skill v3 by 0xfirefist is upstream — when 0xfirefist ships, all callers update.
-- *Buzz inversion:* Methodology updates flow BOTH ways — operator-validated patterns from real scan outcomes get filed as doctrines that feed the next scan. The brain GROWS WITH USE. Every scan = potential doctrine, candidate pattern, detector PR. Doctrine count: 28 and growing. Detector count: 15+ and growing. CANDIDATE count: 16 and growing.
-- *Why invert:* Compounding architecture is the moat. Pashov ships static + maintainer-gated. Buzz ships dynamic + scan-gated. Vision-2027 Month 12 ("80+ doctrines, 200+ worked examples") is the literal accumulator readout for this inversion.
+
+- _Pashov default:_ Methodology updates gated on Pashov-team maintainer cycles. Skill v3 by 0xfirefist is upstream — when 0xfirefist ships, all callers update.
+- _Buzz inversion:_ Methodology updates flow BOTH ways — operator-validated patterns from real scan outcomes get filed as doctrines that feed the next scan. The brain GROWS WITH USE. Every scan = potential doctrine, candidate pattern, detector PR. Doctrine count: 28 and growing. Detector count: 15+ and growing. CANDIDATE count: 16 and growing.
+- _Why invert:_ Compounding architecture is the moat. Pashov ships static + maintainer-gated. Buzz ships dynamic + scan-gated. Vision-2027 Month 12 ("80+ doctrines, 200+ worked examples") is the literal accumulator readout for this inversion.
 
 ---
 
 ## Section 5 — Action Queue (operator decision)
 
-| ID | Item | Effort | EV | Recommend |
-|---|---|---|---|---|
-| A1 | Git-security analysis layer | 2-3h build | HIGH (recon signal lift) | **PROPOSE** for next detector PR queue slot |
-| A2 | Invariant-synthesis walk (Pass B grep-all-write-sites) | 4-6h L6 enhancement | HIGH (doctrine-23 reinforcement) | **PROPOSE** as L6 v2 enhancement |
-| A3 | Structured spec extraction sub-agent | 1-2h prompt | MED (Standing-Intake quality) | **PROPOSE** as Standing-Intake Step 2 enhancement |
-| A4 | Public benchmark suite (3-5 anonymized worked examples) | 4-6h docs | HIGH (Lane 3 credibility) | **PROPOSE** with Moltbook-Strategy alignment |
-| A5 | Architecture SVG render | 3-4h python + audit loop | MED (Lane 1 polish, Lane 3 visual) | **PROPOSE** as L7 Reporter enhancement |
-| A6 | Skill VERSION freshness nudge | 30 min | LOW (UX) | **PROPOSE** as last-priority cleanup |
+| ID  | Item                                                    | Effort                   | EV                                 | Recommend                                         |
+| --- | ------------------------------------------------------- | ------------------------ | ---------------------------------- | ------------------------------------------------- |
+| A1  | Git-security analysis layer                             | 2-3h build               | HIGH (recon signal lift)           | **PROPOSE** for next detector PR queue slot       |
+| A2  | Invariant-synthesis walk (Pass B grep-all-write-sites)  | 4-6h L6 enhancement      | HIGH (doctrine-23 reinforcement)   | **PROPOSE** as L6 v2 enhancement                  |
+| A3  | Structured spec extraction sub-agent                    | 1-2h prompt              | MED (Standing-Intake quality)      | **PROPOSE** as Standing-Intake Step 2 enhancement |
+| A4  | Public benchmark suite (3-5 anonymized worked examples) | 4-6h docs                | HIGH (Lane 3 credibility)          | **PROPOSE** with Moltbook-Strategy alignment      |
+| A5  | Architecture SVG render                                 | 3-4h python + audit loop | MED (Lane 1 polish, Lane 3 visual) | **PROPOSE** as L7 Reporter enhancement            |
+| A6  | Skill VERSION freshness nudge                           | 30 min                   | LOW (UX)                           | **PROPOSE** as last-priority cleanup              |
 
 INVERT items INV-1, INV-2, INV-3 are **already in effect** — no new action, just explicit naming + alignment with Vision-2027 inversion timeline.
 
@@ -377,19 +385,19 @@ _brain/Competitive-Intel.md | v1.0 | 2026-05-23 (Ogie msg 7582 URL H intake — 
 
 ## Section 7 — Buzz Moats vs Both (operator-stated, brain-state verified `[INSPECTED]`)
 
-| # | Moat | Buzz state evidence | Competitor parity |
-|---|------|---------------------|---------------------|
-| 1 | **Persistent compound brain** | `brain/` 28+ doctrines, 16+ CANDIDATES, 10 DCs, 100+ worked examples accumulating via INV-1 persistent state | Claude-BugHunter STATIC; claude-bug-bounty pipeline-state-only (no doctrine accumulation) |
-| 2 | **Automated detectors** | 15+ detectors live (cei-violation-via-hook 478 LOC + upgradeable-hook-no-timelock 402 LOC + pair-match 193 LOC + DC-9 sub-1/sub-2/sub-3 + Pattern J + others); detector-pr-template.md mandates end-to-end test per PR | Pattern libraries are detection-by-prompt-pattern, NOT compiled detector logic with regression coverage |
-| 3 | **Propagation engine** | Operator msg 7631 demonstrated live propagation: 41 hits on Compound Comet bridge helpers + 15 hits on Pyth upgradeable from rekt-batch signatures; defense-class-mapping.json v1.6+ codifies the engine | Neither repo has cross-target signature transfer from confirmed exploits |
-| 4 | **Lane 4 unique capability** | Lane 4 = BTC password recovery (corpus 335MB BitcoinTalk 2009-2015 + Phase 1B 30 author profiles + Phase 1C 90% closed-loop validated + Phase 2 outreach drafted to Brute Brothers); pattern-recognition-on-human-behavior substrate that no other auditor touches | Not in either competitor scope |
-| 5 | **DeFi-specific defense class taxonomy** | 10 DCs (DC-1 reentrancy through DC-10 cross-chain-message-binding) + 16 CANDIDATES with anchor counts + Cross-Domain-Fragility-Laws.md v1.7 + Doctrine-29 audit-saturation-transfer logic + Doctrine-30 lens-overreach-without-source-verify discipline | Web2-focused (Claude-BugHunter) lacks DeFi taxonomy entirely; Web2+Web3 (claude-bug-bounty) presumably has broader-but-shallower DeFi patterns |
+| #   | Moat                                     | Buzz state evidence                                                                                                                                                                                                                                                | Competitor parity                                                                                                                              |
+| --- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Persistent compound brain**            | `brain/` 28+ doctrines, 16+ CANDIDATES, 10 DCs, 100+ worked examples accumulating via INV-1 persistent state                                                                                                                                                       | Claude-BugHunter STATIC; claude-bug-bounty pipeline-state-only (no doctrine accumulation)                                                      |
+| 2   | **Automated detectors**                  | 15+ detectors live (cei-violation-via-hook 478 LOC + upgradeable-hook-no-timelock 402 LOC + pair-match 193 LOC + DC-9 sub-1/sub-2/sub-3 + Pattern J + others); detector-pr-template.md mandates end-to-end test per PR                                             | Pattern libraries are detection-by-prompt-pattern, NOT compiled detector logic with regression coverage                                        |
+| 3   | **Propagation engine**                   | Operator msg 7631 demonstrated live propagation: 41 hits on Compound Comet bridge helpers + 15 hits on Pyth upgradeable from rekt-batch signatures; defense-class-mapping.json v1.6+ codifies the engine                                                           | Neither repo has cross-target signature transfer from confirmed exploits                                                                       |
+| 4   | **Lane 4 unique capability**             | Lane 4 = BTC password recovery (corpus 335MB BitcoinTalk 2009-2015 + Phase 1B 30 author profiles + Phase 1C 90% closed-loop validated + Phase 2 outreach drafted to Brute Brothers); pattern-recognition-on-human-behavior substrate that no other auditor touches | Not in either competitor scope                                                                                                                 |
+| 5   | **DeFi-specific defense class taxonomy** | 10 DCs (DC-1 reentrancy through DC-10 cross-chain-message-binding) + 16 CANDIDATES with anchor counts + Cross-Domain-Fragility-Laws.md v1.7 + Doctrine-29 audit-saturation-transfer logic + Doctrine-30 lens-overreach-without-source-verify discipline            | Web2-focused (Claude-BugHunter) lacks DeFi taxonomy entirely; Web2+Web3 (claude-bug-bounty) presumably has broader-but-shallower DeFi patterns |
 
 **Convergent architecture, divergent compounding model.** All three projects share the "Claude Code + skills" template — but only Buzz has built the compounding-brain substrate. The other two are essentially Claude-Code-flavored versions of static pattern libraries (Semgrep / Slither / hashcat-rules-equivalents). Per INV-3 (methodology gating model, operator-confirmed): the Buzz inversion is dynamic-scan-gated, growing with use. Vision-2027 Month 12 readout target (80+ doctrines, 200+ worked examples) is the accumulator differentiator.
 
 ## Section 8 — 574-Pattern Library Evaluation (operator-requested adoption review)
 
-**Operator directive:** *"Evaluate: 574-pattern library format for adoption. The patterns could enrich our ground truth catalog."*
+**Operator directive:** _"Evaluate: 574-pattern library format for adoption. The patterns could enrich our ground truth catalog."_
 
 **Pre-clone analysis (next session to verify):** The 574-pattern library is the structural artifact most worth adopting from Claude-BugHunter — it represents a structured taxonomy of attack patterns that could be:
 
@@ -405,12 +413,12 @@ _brain/Competitive-Intel.md | v1.0 | 2026-05-23 (Ogie msg 7582 URL H intake — 
 
 **Adoption recommendation (PROPOSAL only, brain sovereign):**
 
-| Tier | Items | Effort | EV |
-|------|-------|--------|-----|
-| **PROPOSE (high-confidence)** | Clone Claude-BugHunter + structural inspection of 574-pattern library format → identify format compatibility with brain/Ground-Truth-Exploits.md schema | 30 min | HIGH (foundation for tier-2 work) |
-| **PROPOSE (medium-confidence)** | Cross-reference 574 patterns against 10 DCs + 16 CANDIDATES → tabulate Web2-to-DeFi pattern map | 2-3h | HIGH (compounding-brain enrichment) |
-| **PROPOSE (lower-confidence)** | Import a 10-20% high-signal subset to ground-truth catalog as Web2-to-DeFi analogue anchors | 1-2h per batch | MED (depends on tier-2 cross-ref hit rate) |
-| **PROPOSE (UX adoption only)** | Adopt Claude-BugHunter's slash command UX patterns where they improve `.claude/commands/` ergonomics | 1h evaluation + selective integration | LOW (cosmetic) |
+| Tier                            | Items                                                                                                                                                   | Effort                                | EV                                         |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------ |
+| **PROPOSE (high-confidence)**   | Clone Claude-BugHunter + structural inspection of 574-pattern library format → identify format compatibility with brain/Ground-Truth-Exploits.md schema | 30 min                                | HIGH (foundation for tier-2 work)          |
+| **PROPOSE (medium-confidence)** | Cross-reference 574 patterns against 10 DCs + 16 CANDIDATES → tabulate Web2-to-DeFi pattern map                                                         | 2-3h                                  | HIGH (compounding-brain enrichment)        |
+| **PROPOSE (lower-confidence)**  | Import a 10-20% high-signal subset to ground-truth catalog as Web2-to-DeFi analogue anchors                                                             | 1-2h per batch                        | MED (depends on tier-2 cross-ref hit rate) |
+| **PROPOSE (UX adoption only)**  | Adopt Claude-BugHunter's slash command UX patterns where they improve `.claude/commands/` ergonomics                                                    | 1h evaluation + selective integration | LOW (cosmetic)                             |
 
 **Convergent vs INVERT?** Claude-BugHunter's static pattern library is the same architectural template Pashov uses (INVERT INV-1: persistent state vs ephemeral output). Buzz's compounding brain remains the inversion. The 574-pattern library is INPUT-FOR-ENRICHMENT to the brain, not a replacement of the architecture.
 
@@ -422,13 +430,13 @@ _brain/Competitive-Intel.md | v1.0 | 2026-05-23 (Ogie msg 7582 URL H intake — 
 
 ## Section 10 — Action Queue (operator decision, append to v1.0 Section 5)
 
-| ID | Item | Effort | EV | Recommend |
-|---|---|---|---|---|
-| A7 | Clone Claude-BugHunter + structural inspection of 574-pattern library format | 30 min | HIGH (tier-2 foundation) | **PROPOSE** next-session priority |
-| A8 | Cross-reference 574 patterns × 10 DCs + 16 CANDIDATES (Web2-to-DeFi map) | 2-3h | HIGH (compounding-brain enrichment) | **PROPOSE** after A7 |
-| A9 | Import high-signal pattern subset as Ground-Truth-Exploits.md anchors | 1-2h per batch | MED | **PROPOSE** post-A8 hit-rate evidence |
-| A10 | Clone shuvonsec/claude-bug-bounty + autonomous-hunting-mode comparison vs Buzz Hyperactive Formula | 1-2h | MED (architecture comparison only; their pipeline is convergent, not innovative-against-Buzz) | **PROPOSE** lower-priority |
-| A11 | Slash command UX evaluation (Claude-BugHunter's `.claude/commands/` patterns) | 1h | LOW (cosmetic) | **PROPOSE** last-priority |
+| ID  | Item                                                                                               | Effort         | EV                                                                                            | Recommend                             |
+| --- | -------------------------------------------------------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------- | ------------------------------------- |
+| A7  | Clone Claude-BugHunter + structural inspection of 574-pattern library format                       | 30 min         | HIGH (tier-2 foundation)                                                                      | **PROPOSE** next-session priority     |
+| A8  | Cross-reference 574 patterns × 10 DCs + 16 CANDIDATES (Web2-to-DeFi map)                           | 2-3h           | HIGH (compounding-brain enrichment)                                                           | **PROPOSE** after A7                  |
+| A9  | Import high-signal pattern subset as Ground-Truth-Exploits.md anchors                              | 1-2h per batch | MED                                                                                           | **PROPOSE** post-A8 hit-rate evidence |
+| A10 | Clone shuvonsec/claude-bug-bounty + autonomous-hunting-mode comparison vs Buzz Hyperactive Formula | 1-2h           | MED (architecture comparison only; their pipeline is convergent, not innovative-against-Buzz) | **PROPOSE** lower-priority            |
+| A11 | Slash command UX evaluation (Claude-BugHunter's `.claude/commands/` patterns)                      | 1h             | LOW (cosmetic)                                                                                | **PROPOSE** last-priority             |
 
 ---
 

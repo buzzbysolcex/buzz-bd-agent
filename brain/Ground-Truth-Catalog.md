@@ -4,9 +4,12 @@
 
 **Authority:** Created 2026-05-27 as Pillar 3 destination file per `brain/Self-Correction-Filing-Rules.md` RULE 7 (GROUND_TRUTH classification — 1 post = catalog entry). Companion to `brain/Corpus-Digest-Log.md`, `brain/Ground-Truth-Exploits.md` (existing curated catalog), `brain/Lane4-Phase1-Results.md` (existing Phase 1 results).
 
+**External contest GT sets (recall self-diagnostic, Ogie msg 8148):** DODO Cross-Chain DEX (Sherlock #991), Megapot (C4 2025-11), PoolTogether V5 (C4 2024-03), **Ammplify + Panoptic (new, to-acquire)** — class-mapped to Buzz DC/C/Pattern lenses in `brain/Recall-Self-Diagnostic.md` (paper-recall done on DODO: 12/16 covered, weak-spot = encoding/byte-precision; live-recall queued, disk-gated). Used to find Buzz's OWN weak spots, NOT to chase a tool-recall number (Doctrine #19.1).
+
 **Maintenance rule:** the Phase 2 consumer (`scripts/lane4-corpus-phase2-consumer.py`) generates proposals under `data/lane4/phase2-proposals/<date>/Ground-Truth-Catalog-proposals.md`. Operator reviews and appends qualifying entries to Section 1 below.
 
 **Versioning:**
+
 - v1.0 (2026-05-27) — file initialized, awaiting first Phase 2 production run
 
 ---
@@ -71,6 +74,7 @@ Hypothesis (per `Corpus-Digest-Log.md` §3): the 2009-2014 era yields the highes
 ```
 
 Examples of expected handoffs (none filed yet):
+
 - GT entry citing a specific exploited deployer wallet → Pillar 1 `brain/Deployer-Crossref.md` (add deployer to blacklist with GT-anchor)
 - GT entry citing a pattern (e.g., "rogue exchange held private keys") → Pillar 4 `brain/Patterns-Defense-Classes.md` (anchor for DC class)
 - GT entry providing historical context for a current Lane 5 target → Pillar 4 hunt notes

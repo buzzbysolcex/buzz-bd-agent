@@ -29,8 +29,10 @@ DENSE_DEMOTE = ["alex"]
 # DeFi-relevant contract-name signal (unknown protocol → MED, verify bounty at Step-1).
 DEFI = re.compile(r"vault|pool|lend|borrow|stake|oracle|swap|market|mint|collateral|liquidat|"
                   r"reserve|cdp|stable|amm|perp|\bdex\b|tranche|yield|redeem|peg|escrow", re.I)
-# noise to ignore even if DeFi-ish (test/mock/personal).
-NOISE = re.compile(r"test|mock|-demo|sandbox|tutorial|hello|example", re.I)
+# noise to ignore even if DeFi-ish (test/mock/personal). Doctrine #48: non-production scaffolding
+# is never a finding. NOTE name-substring match — 'script' deliberately OMITTED (would false-hit
+# 'subscription'); the segment-exact full list (script/scripts/...) lives in scripts/lib/scope_path_filter.py.
+NOISE = re.compile(r"test|mock|-demo|sandbox|tutorial|hello|example|shim|devnet|fixture", re.I)
 
 
 def fetch(n):
