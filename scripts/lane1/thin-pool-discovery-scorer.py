@@ -34,6 +34,36 @@ CONTRACT_DEFI = {"Dexs", "Lending", "Yield", "CDP", "Derivatives", "Yield Aggreg
                  "Insurance", "Launchpad", "RWA Lending", "Liquid Staking", "Liquid Restaking",
                  "Restaking", "Staking Pool", "Bridge", "Decentralized Stablecoin", "Lending Pool"}
 
+# ── #45 RE-WEIGHT (Ogie 2026-06-05): bias audit-THIN × complexity-HIGH × recent × ORIGINAL. ──
+# Rationale: the real candidate (Arkadiko) came from thin-audit Clarity, NOT EVM majors. Demote
+# audit-dense majors (NEGATE-prone) and FORKS (#46: fork inherits base audit → p(net-new) only in delta).
+import time as _time
+NOW = _time.time()
+HIGH_COMPLEXITY = {"CDP", "Lending", "Lending Pool", "Derivatives", "Synthetics", "Options",
+                   "Options Vault", "Leveraged Farming", "RWA Lending", "Restaking",
+                   "Liquid Restaking", "Bridge", "Yield Aggregator", "Decentralized Stablecoin"}
+LOW_COMPLEXITY = {"Dexs", "Liquid Staking", "Staking Pool", "Farm"}  # often forks / simpler surface
+
+
+def complexity_mult(p):
+    cat = p.get("category") or ""
+    if cat in HIGH_COMPLEXITY: return 1.3
+    if cat in LOW_COMPLEXITY: return 0.8
+    return 1.0
+
+
+def is_fork(p):
+    return bool(p.get("forkedFrom"))  # DeFiLlama forkedFrom[] non-empty = #46 fork
+
+
+def recency_mult(p):
+    la = p.get("listedAt")  # DeFiLlama listing unix ts — rough freshness proxy (#42)
+    try:
+        age_days = (NOW - float(la)) / 86400.0
+    except Exception:
+        return 1.0
+    return 1.2 if age_days <= 180 else (1.0 if age_days <= 540 else 0.9)
+
 
 def fetch_json(url, timeout=60):
     req = urllib.request.Request(url, headers={"User-Agent": "buzz-thin-scorer"})
@@ -66,6 +96,7 @@ def main():
         name = (p.get("name") or ""); n = name.lower()
         rank = tvl_rank.get(name, 99999); tvl = p.get("tvl") or 0
         cat = p.get("category") or ""
+        if is_fork(p): return "FORK"                            # #46: fork inherits base audit -> out of THIN pool
         if any(m in n for m in KNOWN_MAJOR): return "DENSE"      # known major (incl. the false-pass names)
         if any(x in n for x in KNOWN_REKT): return "DENSE"       # exploit history = scrutinized/combed (T3)
         if rank <= TOP_TVL_DEMOTE: return "DENSE"                # top-300 TVL prominence = crowd-watched
@@ -80,12 +111,13 @@ def main():
     def ev(p, t):
         tvl = p.get("tvl") or 0
         # p(finding): thin high. W: TVL impact-at-risk (already <=$10M for THIN). P(PoC): DeFi-contract good. P(accept): research/disclosure.
-        pf = {"DENSE": 0.01, "MED": 0.06, "THIN": 0.18}[t]
+        pf = {"DENSE": 0.01, "MED": 0.06, "THIN": 0.18, "FORK": 0.005}[t]
         has_contact = bool(p.get("twitter") or p.get("url")); has_addr = bool(p.get("address"))
         W = min(tvl, TVL_CEIL)
         p_poc = 0.7 if has_addr else 0.45
         p_acc = 0.4 if has_contact else 0.2
-        return round(pf * W * p_poc * p_acc, 1)
+        # #45 re-weight: × complexity (HIGH-surface protocols) × recency (#42) × (forks already → FORK tier)
+        return round(pf * W * p_poc * p_acc * complexity_mult(p) * recency_mult(p), 1)
 
     for p in prot:
         p["_tier"] = tier(p); p["_ev"] = ev(p, p["_tier"]); p["_tvl_rank"] = tvl_rank.get(p.get("name"), 99999)

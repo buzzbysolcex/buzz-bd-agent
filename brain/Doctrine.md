@@ -3078,3 +3078,11 @@ Codified directly (no qwen) from the msg-8123 thin-pool scorer build — the cor
 ## Doctrine #56 — Legal-Only-Intel: public on-chain / OSINT, never illicit material (added 2026-06-05 — ZachXBT/Rain, Ogie msg) [CROSS, BINDING]
 
 **Statement.** Buzz performs **legal, public on-chain / open-source analysis ONLY.** Buzz **does not engage, solicit, obtain, broker, or facilitate** stolen / illicitly-obtained material — including six-figure bounties for "insider documents... obtained by any means." Stolen or illicitly-obtained material is **out of scope, full stop**, regardless of who offers it or how relevant it seems. This binds all intel/forensic/BD work. Cross-ref `brain/intel/flagged-clusters.md` discipline header, autonomy-boundary, security rules.
+
+---
+
+## Doctrine #57 — A numerical/rounding seam is STRUCTURALLY ABSENT when the conversion is off-chain (added 2026-06-05 — Ethena H5 NEGATE, Ogie SSV-closeout msg)
+
+**Statement.** Before hunting a decimals / rounding-direction seam (C7 / numerical-gap), **check whether an on-chain conversion even exists.** Many intent/RFQ/signed-amount protocols move the conversion **off-chain**: the user signs BOTH sides (e.g., `collateral_amount` AND `usde_amount`) as independent values set by an off-chain pricer; the contract only `transfer`s the signed amounts. **No on-chain division → no rounding direction to get wrong → the numerical seam is structurally absent** (the decimals risk is borne by the off-chain pricer, typically OOS trusted-operations).
+
+**Operational rule:** at Gate-1, grep the mint/redeem/swap path for an actual on-chain conversion (`* price /`, `mulDiv`, `convertToShares`, decimals-normalization). If both amounts arrive as independent signed/calldata values and the contract just moves them → **NEGATE the decimals hypothesis at the surface map**, don't build a rounding PoC. Conversely, if the conversion IS on-chain (e.g., an AMM, an oracle-priced mint, a cross-chain SD↔LD dust truncation), the seam is **LIVE** — hunt it. **Anchor:** Ethena EthenaMinting (off-chain RFQ, `collateral_amount`+`usde_amount` both signed → H5 NEGATE) vs the LayerZero OFT `_toSD/_toLD/_removeDust` (on-chain dust conversion → LIVE). Cross-ref Doctrine #43 (aggregate-bound), `webfetch-direction-error`, #47 numerical-gap.

@@ -14,3 +14,6 @@
 /home/claude-code/.tmp-clones/truefi   # foreclosed EVM hunt clone (status-read cleanup 2026-06-03)
 /home/claude-code/.tmp-clones/mezo-musd   # NEGATE 2026-06-03 (loop cycle 1, fork-delta sound)
 /home/claude-code/.tmp-clones/yei-contracts   # NEGATE-on-sight 2026-06-03 (loop cycle 2, verbatim Aave-V3 fork)
+/home/claude-code/buzz-workspace/gate2-clones/symbiotic   # NEGATE 2026-05-29 (6-firm audit-dense, purge-eligible)
+/home/claude-code/buzz-workspace/gate2-clones/morpho-vault-v2   # NEGATE 2026-05-29 (10-audit, purge-eligible)
+/home/claude-code/buzz-workspace/gate2-clones/babylon   # NEGATE 2026-05-29 fully-closed, purge-eligible

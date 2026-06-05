@@ -82,4 +82,20 @@ Implementation: extend the path/tag layer (sibling to `scripts/lib/scope_path_fi
 
 This niche has **genuinely high p_net_new** (these bugs evade audits for years) — **but ONLY if Buzz can actually do circuit-level review.** Until the harness exists, ZK soundness is **CODIFIED, NOT HUNTED.** Do NOT add ZK targets to the active hunt queue. The RECALL surfacer may TAG; the analyst lane has no soundness pass to route to yet → tags park until the harness earns its place. **DISCLOSURE-SAFETY (Doctrine #51) precedes any future ZK hunt.**
 
-_Cross-ref: Doctrine #47 (seam-hunter — this adds the 4th "constraint-completeness" seam), #49 (AI+human+harness+PoC convergent-validation), #50 (PoC+work-log > prose), #51 (disclosure-safety), DC-21 (BuzzShield placement), `brain/Ground-Truth-Exploits.md` (Orchard anchor)._
+## CONSTRAINT-COMPLETENESS — "DONE-RIGHT" CHECKLIST (the 4th-seam audit template, added 2026-06-05)
+
+The constraint-completeness seam generalizes beyond ZK circuits to **any signed-or-proven digest** consumed on-chain (EIP-712 orders, Merkle/EB proofs, attestation quorums, signed price reports). Two clean EVM **NEGATING reference templates** banked — both are constraint-COMPLETE; use them as the bar.
+
+**The 5-point checklist — a complete scheme binds ALL of:**
+1. **IDENTITY** — the subject (clusterId / order benefactor+beneficiary / message-id) is in the digest, and is itself derived from trusted state (not attacker-substitutable).
+2. **VALUE** — every consumed quantity (effectiveBalance / collateral_amount + usde_amount / price) is in the digest.
+3. **FRESHNESS/STALENESS** — a binding that forces the latest/non-replayable state (latest-root force, expiry, nonce, observationsTimestamp ≥ request).
+4. **RANGE** — consumed values are bounded to a sane domain (EB ∈ [32,2048]·validators; amounts ≠ 0).
+5. **MALLEABILITY-RESISTANCE** — fixed-width encoding (`abi.encode`, OZ double-hash) — no `encodePacked` aliasing, no signature malleability that matters.
+
+**Reference template A — SSV EB-proof** (`SSVClusters._verifyMerkleProof`, NEGATE): leaf `keccak256²(abi.encode(clusterId, effectiveBalance))` ✓id ✓value; `_verifyEBStaleness` forces `blockNum==latestCommittedBlock` ✓freshness; `_verifyEBLimits` [32,2048] ✓range; double-hash `abi.encode` ✓malleability.
+**Reference template B — Ethena EIP-712 order** (`EthenaMinting.encodeOrder`, NEGATE): `abi.encode(ORDER_TYPE, order_type, expiry, nonce, benefactor, beneficiary, collateral_asset, collateral_amount, usde_amount)` ✓id ✓value; `order_type` bound (no MINT/REDEEM confusion) + domain binds `chainid+address(this)` ✓freshness/replay; amounts≠0 ✓range; `abi.encode` ✓malleability. (The `route` is unsigned BUT custodian-allowlisted + ratio-checked + MINTER-gated — an acceptable out-of-digest field because it can't redirect value to an attacker.)
+
+**Usage:** on any new signed/proven-digest consumer, walk the 5 points. **Flag any scheme missing one** — a missing IDENTITY = cross-subject substitution; missing VALUE = field-substitution; missing FRESHNESS = replay (cf. accepted SSV 76267 EB-drift); missing RANGE = out-of-domain forge; missing MALLEABILITY = aliasing/replay (Doctrine #44 identity-vs-content). An out-of-digest field is only safe if (like Ethena's route) it's independently constrained so it can't move value to the attacker.
+
+_Cross-ref: Doctrine #47 (seam-hunter — this adds the 4th "constraint-completeness" seam), #49 (AI+human+harness+PoC convergent-validation), #50 (PoC+work-log > prose), #51 (disclosure-safety), #57 (off-chain-conversion → numerical seam absent), DC-21 (BuzzShield placement), `brain/Ground-Truth-Exploits.md` (Orchard anchor); EVM NEGATING anchors `hunts/2026-06-05-ssv-network-directed-audit-gate2.md` + `hunts/2026-06-05-ethena-directed-audit-gate2.md`._

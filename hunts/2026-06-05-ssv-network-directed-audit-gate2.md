@@ -35,8 +35,11 @@
 ### H1 — EB-drift COMPOSED / opposite direction. **NOT-TRACED (residual).**
 Delta-from-accepted-**76267**. Premise (exploit the add-side 32-ETH-baseline latency against another party) is substantially undercut by H4 (EB-proof sound — attacker can't inject false EB) + H5 (forced-liq folds into 76267). Honest: not directly traced this cycle; the surviving angle would be a *different-victim* fee/liq mis-attribution during the add-side window — queued.
 
-### H3 — `removeOperator` frozen-index COMPOSED. **NOT-TRACED (residual).**
-Delta-from-accepted-**75571**. The sequence (remove → re-register, or co-operator settle ordering) making the preserved index double/under-count needs a `removeOperator`→`_resetOperatorState`→re-register trace + `updateClusterOperators` interaction with `block==0` (removed) operators (line 247: removed operators contribute their preserved index but skip snapshot-advance). Honest: not directly traced; queued as the highest-value residual (the `cumulativeIndex += operator.ethSnapshot.index` for `block==0` operators is the exact seam to walk next).
+### H3 — `removeOperator` frozen-index COMPOSED. **NEGATE `[INSPECTED]` (closeout pass, Ogie SSV-closeout msg). → SSV CLOSED.**
+Delta-from-accepted-**75571**. Traced both sub-hypotheses:
+- **remove→re-register same operatorId = STRUCTURALLY IMPOSSIBLE.** `registerOperator` does `s.lastOperatorId.increment(); id = lastOperatorId.current()` (SSVOperators:50-51) — ids are a monotonic counter, **never reused**. The removed operator's struct persists at the OLD id with its frozen index; a re-registration is a NEW id with fresh state. No stale-index carry across re-registration.
+- **co-operator settle-ordering = no double/under-count.** `removeOperator`→`_resetOperatorState` keeps the frozen `ethSnapshot.index`, sets `block=0` (does NOT `delete s.operators[id]`); OperatorLib confirms "Removed operators (both blocks == 0) contribute their frozen index but are not mutated." At each later settle, `cumulativeIndex += operator.ethSnapshot.index` adds the **same frozen index** → the per-operator **delta = 0** → the cluster is charged exactly up to the operator's removal block, then accrues **zero** further for it. Identical to the accepted #75571 by-design steady-state; no double-count (frozen index appears once and nets in the delta), no under-count.
+**Verdict: NEGATE.** Both seams hold; the composed sequence reduces to the accepted by-design behavior. No survivor → no PoC. **SSV directed-audit CLOSED (7/7 resolved, 0 candidates).**
 
 ---
 
