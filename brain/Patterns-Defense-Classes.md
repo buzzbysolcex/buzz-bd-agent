@@ -2338,7 +2338,37 @@ _Patterns: Defense Classes | v2.1 | 2026-05-25 | Batch-commit of 6 brain edits a
 
 **New anchor — DxSale (launchpad/presale class):** rekt-monitor classified a DxSale-class incident as Pattern-H (off-chain-verifier / single-trust-anchor fragility on a presale/locker/launchpad surface). [ASSUMED on the precise mechanism — confirm amount + exact H.sub-type from the rekt-monitor incident record before any GO; the load-bearing fact here is the ROUTING, below.]
 
-**#45 GENERIC-LENS ROUTING (the operative rule):** Pattern-H propagation matched blue-chips (GMX / Compound / Pyth) on a hit-count basis. Per Doctrine #45, a high HIT-count on a blue-chip/dense repo means **the pattern exists in the wild = a generic lens**, NOT a hunt-GO. Off-chain-verifier / single-trust-anchor primitives are *everywhere* (every protocol with an oracle/DVN/keeper has one), so Pattern-H is intrinsically a high-false-positive generic lens on dense targets.
+**#45 GENERIC-LENS ROUTING (the operative rule):** Pattern-H propagation matched blue-chips (GMX / Compound / Pyth) on a hit-count basis. Per Doctrine #45, a high HIT-count on a blue-chip/dense repo means **the pattern exists in the wild = a generic lens**, NOT a hunt-GO. Off-chain-verifier / single-trust-anchor primitives are _everywhere_ (every protocol with an oracle/DVN/keeper has one), so Pattern-H is intrinsically a high-false-positive generic lens on dense targets.
+
 - **Blue-chip / dense Pattern-H matches → tag INTEL/CONTENT** (route to content/intel — "the pattern is common in the wild"), never an auto-GO. Wired into `buzzshield-propagation.js` `rankAndSurface` (`isDense45` → `intel_content` bucket).
 - **Only THIN-pool Pattern-H matches reach a Gate-1 GO prompt** (where being the first competent reader is the edge).
 - Cross-ref Doctrine #45 (density selector) + Doctrine #42 (freshness-not-cap). The lesson generalizes to ALL pattern propagation: rank candidates by realizable-EV / thinness, not raw hit-density.
+
+---
+
+## DC-21 — ZK Circuit Soundness (Under-Constrained Proof Systems) — RECALL-grade only (added 2026-06-05, Ogie msg 8158/8159; Zcash Orchard anchor)
+
+**Class (BuzzShield placement, RECALL-NET):** under-constrained / soundness bugs in proof systems (Halo2, PLONK, Groth16, STARK, circom, arkworks, plonky2). A witness/advice signal USED but not *pinned* by a constraint → a malicious prover forges a valid proof of a FALSE statement. Full spec + 9 sub-patterns (a underconstrained-witness umbrella · b range/field-overflow · c boolean-not-pinned · d **under-constrained EC ops ← Orchard** · e unverified hints · f bit-decomposition aliasing · g selector-not-boolean · h public-input↔witness-unbound · i Halo2 row/rotation/lookup) in **`brain/vuln-classes/zk-circuit-soundness.md`**.
+
+**Why a NEW DC (not a candidate, not an A–J pattern):** CANDIDATE pool A–Z is exhausted; the existing seam toolkit (Doctrine #47 flow/numerical/trust) reasons about *code execution* and does NOT cover the **constraint-completeness** seam (what the constraint system FAILS TO FORBID — a non-syntactic, non-execution property). DC-21 carries the new 4th seam.
+
+**Detector grade — RECALL surfacer ONLY (no precise rule; static analysis is blind to constraint systems):** TAG a repo/path `ZK-CIRCUIT` on grep signals (halo2/circom/arkworks/plonky2 imports · Pasta/Pallas/Vesta · `EccChip`/`assign_region`/`assign_advice`/custom-gate/`lookup` · scalar-mul gadgets · circom `<--`) → route to the analyst soundness pass. Output = a TARGET TAG, never a finding.
+
+**GATE: CODIFIED, NOT HUNTED** until a circuit-analysis harness exists (Buzz has none today — no circomspect/Picus/Halo2-analyzer/Opus-constraint-harness; see `brain/Open-Questions-Tracker.md`). Disclosure-safety (Doctrine #51) precedes any ZK hunt. Cross-ref Doctrine #47 (4th seam), #49/#50/#51/#52, `brain/vuln-classes/zk-circuit-soundness.md`.
+
+---
+
+## Pattern-I — Supply-Conservation Invariant Recognition (the escalator) (added 2026-06-05, Ogie msg 8160/8161; Orchard turnstile anchor)
+
+**Class (seam toolkit, Doctrine #47 family — a trust/numerical-gap seam):** for any pool / bridge / AMM / mintable token / shielded pool, **identify whether a value-conservation invariant exists, and whether it is correctly enforced on EVERY path** (at consensus or contract level).
+
+- **Boundary present + correctly enforced → a soundness/forge bug is CONTAINED** (Orchard: the turnstile `valueBalance` consensus check capped an unbounded in-pool note-forge to mere pool-insolvency; chain-wide ZEC supply protected).
+- **Boundary absent / bypassable / mis-enforced on some path → THIS IS THE ESCALATOR** that turns a contained bug into a catastrophic one. **The missing/broken conservation check is itself a top-severity finding.**
+
+**Escalator examples to flag for review:** bridge lock↔mint parity not enforced on a path · AMM k-invariant skippable via a callback / reentrancy · token mint path lacking a cap/conservation check · shielded-pool `valueBalance` not enforced by all clients.
+
+**Companion A — Stakeholder Impact Mapping (bake into HSaaS/bounty report template):** classify affected parties: **A. direct holders** (solvency/dilution) · **B. adjacent subsystems** (conditional, timing-bounded) · **C. systemic/confidence** (no direct theft, but halts/forks/depeg). Sharpens severity justification; reads as practitioner work, not AI boilerplate.
+
+**Companion B — Clean-Pool Migration (remediation knowledge for HSaaS advisory):** the recovery model = spin up a NEW pool at zero, migrate value through the public turnstile so the new pool is collateralized-from-scratch under new rules. Isolates old hidden liabilities but does NOT retroactively prove every old claim was legitimate.
+
+**Applies IMMEDIATELY (tool-agnostic) to all current EVM/Clarity hunting + HSaaS** — unlike DC-21, Pattern-I needs no ZK harness. Cross-ref Doctrine #52 (impact calibration), #47, DC-21.

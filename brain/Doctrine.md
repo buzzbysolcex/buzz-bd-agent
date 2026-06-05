@@ -3035,3 +3035,27 @@ Codified directly (no qwen) from the msg-8123 thin-pool scorer build — the cor
 **Anchor.** Watchman E.1 flagged `base/base …/DevnetSwapRouterShim.sol:93 quoteExactInput` → FALSE POSITIVE on **BOTH** counts: (1) devnet test shim = PATH-OOS; (2) `base/base` = Coinbase = #45 REPO cap-trap. Foreclosed + logged (`hunts/2026-06-04-watchman-e1-devnetshim-foreclosure.md`).
 
 **Convergence.** Pashov solidity-auditor's exclude pattern (`interfaces/`/`lib/`/`mocks/`/`test/` + `*.t.sol`/`*Test*`/`*Mock*`) is the same discipline (Doctrine #47 study) — independent confirmation. Cross-ref #45, #47, HE-03b, `detector-pr-template` (end-to-end-test mandate — satisfied here: shared-module self-test + gate0 wiring test both PASS).
+
+---
+
+## Doctrine #49 — AI + Human + Harness + PoC beats lone experts (convergent-validation of the assisted model) (added 2026-06-05 — Zcash Orchard, Ogie msg 8158/8159)
+
+**Statement.** Taylor Hornby (Shielded Labs/ZODL), using **Anthropic Opus 4.8 + a custom constraint-reasoning harness**, found a 4-year-latent catastrophic soundness bug in Zcash's Orchard circuit that evaded many of the world's best cryptographers. This is external proof of (a) the AI-assisted thesis AND (b) the exact **recall-net + expert-confirm** model Buzz runs. **The winning unit = AI + expert human + purpose-built harness + working PoC — NOT AI-alone, NOT polished prose, NOT a human squinting at code unaided.** Extends Doctrine #19 (industry convergence) into the apex-difficulty regime. Operational read for Buzz: our edge is the *assembly* (compounding brain + analyst + harness + PoC), and the missing piece for the hardest classes is the **harness** (see DC-21 capability gap) — build the harness, keep the human-confirm gate, never ship AI-alone.
+
+## Doctrine #50 — A complete working PoC + transparent work-log beats polished prose (submission discipline) (added 2026-06-05 — Orchard report reception, Ogie msg 8158/8159)
+
+**Statement.** The Orchard report was lauded precisely because it shipped a **complete, working exploit (proven on local regtest)** + a **transparent work-log** — the *inverse* of the Notional V3 "AI report" rejection (DISC-019). PoC + work-log > prose, always. Ties to R8 calibrated reporting (`[EXECUTED]` > `[INSPECTED]` > `[ASSUMED]`) and the human-voice submission rules. For every Buzz paste-ready: the runnable PoC and the honest reasoning trail ARE the credibility; prose polish is decoration. A finding without a runnable PoC is a LEAD, not a submission (cross-ref `feedback_speedrunner_retired_for_audits`, the 7-rule AI-Report refactor).
+
+## Doctrine #51 — Disclosure-Safety for soundness/counterfeiting bugs: regtest ONLY, never mainnet (added 2026-06-05 — Orchard, Ogie msg 8158/8159) [BINDING, precedes any ZK hunt]
+
+**Statement.** Soundness / counterfeiting / infinite-mint bugs are the **most dangerous class to validate** — an anyone-exploitable infinite-mint demonstrated live is an unrecoverable catastrophe. **PoC on regtest / local devnet ONLY, NEVER mainnet.** Coordinate disclosure with the project before any public detail. The Orchard exploit was proven on local regtest and never touched mainnet — that discipline is the standard. This guardrail **precedes any ZK/soundness hunt** and generalizes to any class where the PoC itself, if run live, would cause the loss (drain-class, mint-class, freeze-class against live funds). Cross-ref DC-21 GATE, autonomy-boundary (submission operator-gated), `webfetch-direction-error` (trace, don't trigger).
+
+## Doctrine #52 — Impact Calibration: name the bug, name the boundary, state the bounded truth (added 2026-06-05 — Orchard turnstile, Ogie msg 8160/8161) [applies IMMEDIATELY to all hunting + HSaaS]
+
+**Statement.** Every minting / soundness / accounting finding's impact statement MUST answer, in order:
+1. **What can the attacker forge or corrupt?** (the raw bug)
+2. **What stops it from becoming total-system loss?** (the **containment boundary** — conservation invariant, supply cap, turnstile, lock↔mint parity, consensus `valueBalance` check)
+3. **What is the TRUE bounded loss inside that boundary?** (the honest number)
+4. **Who bears it, by stakeholder class?** (A direct holders / B adjacent subsystems, timing-bounded / C systemic-confidence)
+
+**Rule:** never claim "infinite / chain-wide" when a conservation boundary caps it — **overclaiming blast radius is a credibility kill** (the Notional "AI report" failure mode, ties to R8 / human-voice). Underclaiming buries severity. **Precision = the bounded truth.** Worked anchor: Orchard — raw bug = unbounded in-pool note forgery; boundary = the turnstile `valueBalance` consensus check; bounded loss = Orchard pool insolvency/dilution (NOT chain-wide ZEC mint); stakeholders = A Orchard holders (direct) / B Sapling (conditional, timing-bounded) / C transparent holders (confidence only). **The escalator (Pattern-I):** when step 2's boundary is absent/bypassable/not-enforced-on-all-paths, the same bug IS chain-wide catastrophic — and that missing boundary is itself the top-severity finding. Cross-ref Pattern-I, DC-21, `brain/vuln-classes/zk-circuit-soundness.md`.

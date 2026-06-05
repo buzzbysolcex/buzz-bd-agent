@@ -5,6 +5,7 @@
 **Authority:** Created 2026-05-26 as Part 2 of Brain Self-Correction Layer rollout. Companion to `brain/Doctrine.md`, `brain/External-Frameworks.md`, `brain/Security-Research-Submission-Ledger.md`.
 
 **Status legend:**
+
 - **OPEN** — no resolution yet, blocks or shapes a downstream decision
 - **ANSWERED** — resolved with source link (file:line, message ID, or operator decision)
 - **RECURRING** — appeared 3+ times across hunts within a 7-day window; indicates a pattern gap that should be promoted to doctrine, detector spec, or methodology rule
@@ -523,6 +524,7 @@
 **First-surfaced:** 2026-05-27 (Gate 2 dispatch Phase 0 dedup)
 
 **Hunt context:** `hunts/2026-05-27-stader-ethx-immunefi-gate1.md` queued 5 Gate 2 candidates. Phase 0 dedup against C4 2023-06-stader (M-09, M-14) + Halborn V2 (HAL-04, HAL-09, HAL-11) + Sigma Prime V2 (ETHX2-07 + ETHX2-20 area) + re-analysis of UserWithdrawalManager finalize semantics:
+
 - G2-CAND-1 (DC-12 PoR staleness) → **FORECLOSED**: C4 M-14 + Halborn HAL-09 both VALID + fix published. Submission would be instant-DUP.
 - G2-CAND-2 (UserWithdrawalManager MIN-cap asymmetry) → **NOT-A-BUG**: re-read of UserWithdrawalManager.sol:147-167 shows MIN is intentional sandwich-protection. Rate-delta accrues to remaining ETHx holders (Lido/RocketPool canonical LST pattern). `ethRequestedForWithdraw -= requiredEth` is correct liability bookkeeping; the "excess" that stays in pool is NOT stolen — it boosts the rate for non-withdrawing holders. Triager-instant-reject.
 - G2-CAND-3 (Manager.deposit single-source oracle) → **WEAK**: trust-model dependent; trusted-node attack partially covered by Halborn HAL-11 + Sigma Prime ETHX2-07. No concrete attack PoC at Gate 1 depth.
@@ -579,7 +581,7 @@ _Brain Open Questions Tracker | v1.5 | 2026-05-27 ~01:25 UTC | 39 questions (38 
 **Status:** OPEN (low priority bookmark)
 **Origin:** Lista DAO Moolah Gate 2 dispatch foreclosure (2026-05-27).
 
-**Context.** Lista's `PTLinearDiscountOracle.sol` + `PTLinearDiscountMarketOracle.sol` both consume Pendle `PendleSparkLinearDiscountOracle` which returns `updatedAt = 0` deterministically — CLASS B upstream per Sub-Rule 34.1. DC-12 lens NEGATED. But the Market variant ALREADY mixes a CLASS A upstream (`ResilientOracle.peek(WBNB)`) with the CLASS B linear-discount math — this is CLASS C hybrid. Lista delegates staleness on the CLASS A leg to upstream `ResilientOracle` (Venus fork, multi-firm audited). Question: are there any LATER Lista PT oracle additions that introduce a *new* CLASS A upstream (e.g., a Pyth-fed PT-base-asset) WITHOUT delegating staleness properly? Future Lista commits adding `Pyth*Oracle` or `*Chainlink*` adapter paired with PT discount math = re-fire opportunity.
+**Context.** Lista's `PTLinearDiscountOracle.sol` + `PTLinearDiscountMarketOracle.sol` both consume Pendle `PendleSparkLinearDiscountOracle` which returns `updatedAt = 0` deterministically — CLASS B upstream per Sub-Rule 34.1. DC-12 lens NEGATED. But the Market variant ALREADY mixes a CLASS A upstream (`ResilientOracle.peek(WBNB)`) with the CLASS B linear-discount math — this is CLASS C hybrid. Lista delegates staleness on the CLASS A leg to upstream `ResilientOracle` (Venus fork, multi-firm audited). Question: are there any LATER Lista PT oracle additions that introduce a _new_ CLASS A upstream (e.g., a Pyth-fed PT-base-asset) WITHOUT delegating staleness properly? Future Lista commits adding `Pyth*Oracle` or `*Chainlink*` adapter paired with PT discount math = re-fire opportunity.
 
 **Why it matters:** Lista is in active development with audit-agent CI (per Gate 1 finding). New oracle adapters land monthly. The composition window stays open. A future PT-via-Pyth oracle could legitimately surface DC-12 if Lista doesn't propagate Pyth's `publish_time` staleness check into the wrapper layer.
 
@@ -598,6 +600,7 @@ _Brain Open Questions Tracker | v1.6 | 2026-05-27 ~01:50 UTC | 40 questions (39 
 **First-surfaced:** 2026-05-27 (Pancake Infinity Gate 2 PoC CONFIRM)
 
 **Hunt context:** Two production-deployed hook-based singleton-vault routers now confirmed to exhibit the same structural pattern: end-of-path-only slippage enforcement composed with permitted per-hop hook deltas. Anchors:
+
 1. **Balancer V3 BatchRouter** — `pkg/vault/contracts/BatchRouterHooks.sol:122-127` explicit `minAmountOut = 0` per non-last step + `StableSurgeHook` approximation drift composing across hops. 2-hop leak 1.09% vs 1-hop 0.55% under default surge parameters (PoC HEAD `80fd29ce4eb6`).
 2. **Pancake Infinity Router (CL + Bin paths)** — `infinity-periphery/src/pool-cl/CLRouterBase.sol:40-65` + `infinity-periphery/src/pool-bin/BinRouterBase.sol:42-66` per-step floor absence + `CLHooks.afterSwap`/`BinHooks.afterSwap` permitting positive hookDelta. 2-hop leak 1.195% vs 1-hop 0.600% under 25-bps hook fee (PoC HEAD `f39aef4a1be6`).
 
@@ -606,6 +609,7 @@ Both PoCs CONFIRMED 2026-05-27 within a 90-minute window. Both bytecode-verifica
 **Implication for promotion:** Pattern is no longer a single-anchor candidate. Two independent production deployments by two unrelated teams converge on the same structural shape — strong evidence the pattern is intrinsic to the hook-based singleton-vault architecture family, not an implementation accident. Promotion criteria for DC-status per `Patterns-Defense-Classes.md` (≥2 independent anchors + ≥1 PoC-confirmed leak) appears satisfied.
 
 **Proposed promotion:** CANDIDATE-O → **DC-13: End-of-Path-Only Slippage Composition With Per-Hop Hook Deltas**. Sub-patterns:
+
 - DC-13a: Multi-hop router with per-step floor absence + hook-returns-delta primitive (Balancer V3 + Pancake Infinity confirmed)
 - DC-13b: Tentative — any future protocol that delegates per-step bounding to the user via array struct (e.g., the recommended fix) but ships v1 without the array
 
@@ -621,7 +625,7 @@ _Brain Open Questions Tracker | v1.7 | 2026-05-27 ~02:25 UTC | 41 questions (40 
 
 # === SECTION P1 — PILLAR 1 (TOKEN SCORING) QUESTIONS ===
 
-*(v1.8 seed: none yet — first operational P1 question emerges when the Phase 1 tweet-draft-generator runs against a token whose scoring outcome doesn't fit cleanly into the 4 tier bands. Anticipated first question: how to score a token that fires CTO_FLAG + clean audit + low FDV gap — does the CTO flag still warrant T-WATCH framing, or does clean-audit + low-FDV elevate to T-QUALIFIED?)*
+_(v1.8 seed: none yet — first operational P1 question emerges when the Phase 1 tweet-draft-generator runs against a token whose scoring outcome doesn't fit cleanly into the 4 tier bands. Anticipated first question: how to score a token that fires CTO_FLAG + clean audit + low FDV gap — does the CTO flag still warrant T-WATCH framing, or does clean-audit + low-FDV elevate to T-QUALIFIED?)_
 
 ---
 
@@ -663,7 +667,7 @@ _Brain Open Questions Tracker | v1.7 | 2026-05-27 ~02:25 UTC | 41 questions (40 
 
 # === SECTION CROSS — CROSS-PILLAR QUESTIONS ===
 
-*(v1.8 seed: none yet — first cross-pillar question emerges when an event in one pillar produces a measurement gap that only resolution from another pillar can fill. Anticipated first cross-pillar question: when Pillar 1 detects a rug-catch on a token that was ALSO previously flagged by Pillar 4 bug research, does the rug-catch tweet credit Pillar 1 calibration or Pillar 4 research foresight in the methodology framing?)*
+_(v1.8 seed: none yet — first cross-pillar question emerges when an event in one pillar produces a measurement gap that only resolution from another pillar can fill. Anticipated first cross-pillar question: when Pillar 1 detects a rug-catch on a token that was ALSO previously flagged by Pillar 4 bug research, does the rug-catch tweet credit Pillar 1 calibration or Pillar 4 research foresight in the methodology framing?)_
 
 ---
 
@@ -680,6 +684,7 @@ _Brain Open Questions Tracker | v1.7 | 2026-05-27 ~02:25 UTC | 41 questions (40 
 **Answer:** No. The `notify` field is informational only. FIL+ allocations are validated independently via `batch_claim_allocations` to the verified registry actor — the registry validates the allocation regardless of who receives the notification. Self-notifying doesn't affect FIL+ because FIL+ flows through a different code path entirely.
 
 **Brain compounds anchored from closure:**
+
 - Doctrine #39 CANDIDATE NEW (Notification Path ≠ Authorization Path; needs 2nd anchor for canonical promotion)
 - DC-13 sub-pattern 5 NEW (notification-callback-informational-only Phase 0 FORECLOSE gate)
 
@@ -687,4 +692,14 @@ _Brain Open Questions Tracker | v1.7 | 2026-05-27 ~02:25 UTC | 41 questions (40 
 
 ---
 
-_Brain Open Questions Tracker | v1.9 | 2026-05-28 | 44 questions (42 P4 + 1 P2 + 1 P3; v1.9 closes Q Filecoin notifee-self-confirmation with productive answer + cross-references Doctrine #39 CANDIDATE)_
+## #45 — [P4] BUILD-DECISION: should Buzz build/integrate a ZK-circuit constraint-analysis harness? `#methodology` `#operator-pending`
+
+**Status: OPEN (capability gap, DC-21 gate).** ZK circuit soundness (DC-21) has genuinely high p_net_new (4-year-latent catastrophic bugs evade audits) BUT Buzz has **ZERO** circuit-level reasoning capability today: semgrep/Rust/Solidity-static is blind to constraint-completeness (non-syntactic); qwen retired; no `circomspect`/Veridise Picus (circom) / Halo2 analyzer integrated; no Opus-driven constraint-reasoning harness (the thing Taylor Hornby actually built + paired with Opus 4.8 for Orchard).
+
+**Two paths:** (1) integrate existing tooling (`circomspect` + Picus for circom; Halo2 mock-prover/under-constrained analyzer) — circom-only + partial; (2) build an Opus-driven constraint-reasoning harness (enumerate assigned cells → "is this pinned?" per cell vs intended relation) — general but a real build.
+
+**Earns its place ONLY if:** (a) a ZK target enters in-scope on a paying program (none today — §6 cross-poll: Vesu/Starknet, Base ZKVerifier, rhino.fi/StarkEx all have app-layer in-scope, the CIRCUIT is upstream/out-of-scope), AND (b) a harness-feasibility spike validates path (1) or (2). **Recommend: build the cheap RECALL surfacer now (DC-21 §3); DEFER the constraint-harness until a concrete in-scope ZK target + a feasibility spike.** Until then ZK = CODIFIED-NOT-HUNTED. Cross-ref `brain/vuln-classes/zk-circuit-soundness.md`, DC-21, Doctrine #51.
+
+---
+
+_Brain Open Questions Tracker | v2.0 | 2026-06-05 | 45 questions (43 P4 + 1 P2 + 1 P3; v2.0 adds #45 ZK-harness build-decision OPEN, DC-21 gate)_
