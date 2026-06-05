@@ -87,6 +87,7 @@ This niche has **genuinely high p_net_new** (these bugs evade audits for years) 
 The constraint-completeness seam generalizes beyond ZK circuits to **any signed-or-proven digest** consumed on-chain (EIP-712 orders, Merkle/EB proofs, attestation quorums, signed price reports). Two clean EVM **NEGATING reference templates** banked — both are constraint-COMPLETE; use them as the bar.
 
 **The 5-point checklist — a complete scheme binds ALL of:**
+
 1. **IDENTITY** — the subject (clusterId / order benefactor+beneficiary / message-id) is in the digest, and is itself derived from trusted state (not attacker-substitutable).
 2. **VALUE** — every consumed quantity (effectiveBalance / collateral_amount + usde_amount / price) is in the digest.
 3. **FRESHNESS/STALENESS** — a binding that forces the latest/non-replayable state (latest-root force, expiry, nonce, observationsTimestamp ≥ request).
