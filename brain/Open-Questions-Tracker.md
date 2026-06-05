@@ -702,4 +702,12 @@ _(v1.8 seed: none yet — first cross-pillar question emerges when an event in o
 
 ---
 
-_Brain Open Questions Tracker | v2.0 | 2026-06-05 | 45 questions (43 P4 + 1 P2 + 1 P3; v2.0 adds #45 ZK-harness build-decision OPEN, DC-21 gate)_
+## #46 — [P1] BUILD-DECISION: should Buzz wire an address-intelligence data layer for listing-screening fund-source tracing? `#methodology` `#operator-pending`
+
+**Status: OPEN (capability gap, listing-screening §4 gate).** The token-fraud red-flags (`brain/intel/token-fraud-redflags.md`) split into: ✅ **operational today** (self-referential/fake-TVL F2, mcap/traction F1, DAT-no-comps F3, flagged-cluster registry match F4/F8, single-hop F5/F6, LP-concentration F7) vs ✗ **needs tooling**: full **CEX-deposit clustering + multi-hop fund-source tracing** at ZachXBT grade. That requires an address-intel layer (**Arkham / Nansen / Chainalysis-class**) — NOT wired today.
+
+**Decision:** is the address-intel subscription worth it for the listing lane? **Recommend: ship the registry + single-hop/composition checks now (free, high-leverage — converts one investigator's work into a permanent auto-HOLD tripwire); DEFER the address-intel layer** until (a) a listing prospect actually trips a flagged-cluster match needing deep trace, OR (b) listing volume justifies the subscription. Until then, deep tracing is **CODIFIED-NOT-OPERATIONAL** and routes to a human analyst. **No ZachXBT-grade capability claim.** Cross-ref `brain/intel/token-fraud-redflags.md` §4/§7, Doctrine #53–#56.
+
+---
+
+_Brain Open Questions Tracker | v2.1 | 2026-06-05 | 46 questions (44 P4 + 1 P2 + 1 P3... + #46 P1; v2.1 adds #46 address-intel build-decision OPEN, listing-screening gate)_

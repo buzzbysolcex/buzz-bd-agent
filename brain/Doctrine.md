@@ -3040,11 +3040,11 @@ Codified directly (no qwen) from the msg-8123 thin-pool scorer build — the cor
 
 ## Doctrine #49 — AI + Human + Harness + PoC beats lone experts (convergent-validation of the assisted model) (added 2026-06-05 — Zcash Orchard, Ogie msg 8158/8159)
 
-**Statement.** Taylor Hornby (Shielded Labs/ZODL), using **Anthropic Opus 4.8 + a custom constraint-reasoning harness**, found a 4-year-latent catastrophic soundness bug in Zcash's Orchard circuit that evaded many of the world's best cryptographers. This is external proof of (a) the AI-assisted thesis AND (b) the exact **recall-net + expert-confirm** model Buzz runs. **The winning unit = AI + expert human + purpose-built harness + working PoC — NOT AI-alone, NOT polished prose, NOT a human squinting at code unaided.** Extends Doctrine #19 (industry convergence) into the apex-difficulty regime. Operational read for Buzz: our edge is the *assembly* (compounding brain + analyst + harness + PoC), and the missing piece for the hardest classes is the **harness** (see DC-21 capability gap) — build the harness, keep the human-confirm gate, never ship AI-alone.
+**Statement.** Taylor Hornby (Shielded Labs/ZODL), using **Anthropic Opus 4.8 + a custom constraint-reasoning harness**, found a 4-year-latent catastrophic soundness bug in Zcash's Orchard circuit that evaded many of the world's best cryptographers. This is external proof of (a) the AI-assisted thesis AND (b) the exact **recall-net + expert-confirm** model Buzz runs. **The winning unit = AI + expert human + purpose-built harness + working PoC — NOT AI-alone, NOT polished prose, NOT a human squinting at code unaided.** Extends Doctrine #19 (industry convergence) into the apex-difficulty regime. Operational read for Buzz: our edge is the _assembly_ (compounding brain + analyst + harness + PoC), and the missing piece for the hardest classes is the **harness** (see DC-21 capability gap) — build the harness, keep the human-confirm gate, never ship AI-alone.
 
 ## Doctrine #50 — A complete working PoC + transparent work-log beats polished prose (submission discipline) (added 2026-06-05 — Orchard report reception, Ogie msg 8158/8159)
 
-**Statement.** The Orchard report was lauded precisely because it shipped a **complete, working exploit (proven on local regtest)** + a **transparent work-log** — the *inverse* of the Notional V3 "AI report" rejection (DISC-019). PoC + work-log > prose, always. Ties to R8 calibrated reporting (`[EXECUTED]` > `[INSPECTED]` > `[ASSUMED]`) and the human-voice submission rules. For every Buzz paste-ready: the runnable PoC and the honest reasoning trail ARE the credibility; prose polish is decoration. A finding without a runnable PoC is a LEAD, not a submission (cross-ref `feedback_speedrunner_retired_for_audits`, the 7-rule AI-Report refactor).
+**Statement.** The Orchard report was lauded precisely because it shipped a **complete, working exploit (proven on local regtest)** + a **transparent work-log** — the _inverse_ of the Notional V3 "AI report" rejection (DISC-019). PoC + work-log > prose, always. Ties to R8 calibrated reporting (`[EXECUTED]` > `[INSPECTED]` > `[ASSUMED]`) and the human-voice submission rules. For every Buzz paste-ready: the runnable PoC and the honest reasoning trail ARE the credibility; prose polish is decoration. A finding without a runnable PoC is a LEAD, not a submission (cross-ref `feedback_speedrunner_retired_for_audits`, the 7-rule AI-Report refactor).
 
 ## Doctrine #51 — Disclosure-Safety for soundness/counterfeiting bugs: regtest ONLY, never mainnet (added 2026-06-05 — Orchard, Ogie msg 8158/8159) [BINDING, precedes any ZK hunt]
 
@@ -3053,9 +3053,28 @@ Codified directly (no qwen) from the msg-8123 thin-pool scorer build — the cor
 ## Doctrine #52 — Impact Calibration: name the bug, name the boundary, state the bounded truth (added 2026-06-05 — Orchard turnstile, Ogie msg 8160/8161) [applies IMMEDIATELY to all hunting + HSaaS]
 
 **Statement.** Every minting / soundness / accounting finding's impact statement MUST answer, in order:
+
 1. **What can the attacker forge or corrupt?** (the raw bug)
 2. **What stops it from becoming total-system loss?** (the **containment boundary** — conservation invariant, supply cap, turnstile, lock↔mint parity, consensus `valueBalance` check)
 3. **What is the TRUE bounded loss inside that boundary?** (the honest number)
 4. **Who bears it, by stakeholder class?** (A direct holders / B adjacent subsystems, timing-bounded / C systemic-confidence)
 
 **Rule:** never claim "infinite / chain-wide" when a conservation boundary caps it — **overclaiming blast radius is a credibility kill** (the Notional "AI report" failure mode, ties to R8 / human-voice). Underclaiming buries severity. **Precision = the bounded truth.** Worked anchor: Orchard — raw bug = unbounded in-pool note forgery; boundary = the turnstile `valueBalance` consensus check; bounded loss = Orchard pool insolvency/dilution (NOT chain-wide ZEC mint); stakeholders = A Orchard holders (direct) / B Sapling (conditional, timing-bounded) / C transparent holders (confidence only). **The escalator (Pattern-I):** when step 2's boundary is absent/bypassable/not-enforced-on-all-paths, the same bug IS chain-wide catastrophic — and that missing boundary is itself the top-severity finding. Cross-ref Pattern-I, DC-21, `brain/vuln-classes/zk-circuit-soundness.md`.
+
+---
+
+## Doctrine #53 — Listing-Integrity: screening is a moat, not a formality (added 2026-06-05 — ZachXBT/Rain, Ogie msg; BD-screening) [P1/P2]
+
+**Statement.** For a CEX, listing a manipulated / fraud-linked token is a **reputational + regulatory existential risk** — the exchange inherits the hit. Cautionary case: ZachXBT downgraded **Kraken S→B** for listing low-quality manipulated tokens (M/RAIN/RIVER/RAVE) without due diligence. **SolCex is FinCEN-MSB-registered** — the stakes are real. Listing-screening (red-flag taxonomy + flagged-cluster registry, `brain/intel/`) is a moat to invest in, not a checkbox. A prospect matching a flagged cluster OR ≥3 red-flags → HOLD + human review, never auto-advance.
+
+## Doctrine #54 — Manipulation-Pattern catalog (named token-fraud tells) (added 2026-06-05 — ZachXBT/Rain, Ogie msg) [P1]
+
+**Statement.** Codified token-manipulation tells (each a listing-screening signal, `brain/intel/token-fraud-redflags.md`): **fake / self-referential TVL** (TVL = the project's own illiquid token) · **DAT-without-comps** (large treasury announcement with no peer benchmark) · **launchpad-clustering** (one launchpad repeatedly hosting flagged projects) · **LP + hot-wallet obfuscation** (concentrated Uni-V3 LP + spot transfers routed through a hot wallet) · **mcap/traction divergence** · **fund-source overlap / address-linking** (shared CEX-deposit clusters, near-simultaneous dust transfers) · **founder/team reuse**. These extend (do not duplicate) the existing FDV-gap / ghost-phantom / liquidity-cross-ref scoring rules.
+
+## Doctrine #55 — Allegation-Discipline: third-party investigations are leads, not facts (added 2026-06-05 — ZachXBT/Rain, Ogie msg) [CROSS]
+
+**Statement.** A credible third-party investigation (ZachXBT et al.) is a **LEAD, not adjudicated fact.** Buzz **attributes** named claims to the source, labels them `alleged / flagged for scrutiny`, and **verifies independently before asserting** — internally and (especially) in any public content. Buzz **never republishes a third party's named-person / named-project accusation as Buzz's own finding** (defamation + bad-data protection). Flags route a prospect to human review; they are never published as a Buzz accusation. Promotion `alleged → confirmed` requires independent evidence + operator sign-off. Ties to R8 calibrated reporting + the human-voice rules + Doctrine #52 (precision = bounded truth).
+
+## Doctrine #56 — Legal-Only-Intel: public on-chain / OSINT, never illicit material (added 2026-06-05 — ZachXBT/Rain, Ogie msg) [CROSS, BINDING]
+
+**Statement.** Buzz performs **legal, public on-chain / open-source analysis ONLY.** Buzz **does not engage, solicit, obtain, broker, or facilitate** stolen / illicitly-obtained material — including six-figure bounties for "insider documents... obtained by any means." Stolen or illicitly-obtained material is **out of scope, full stop**, regardless of who offers it or how relevant it seems. This binds all intel/forensic/BD work. Cross-ref `brain/intel/flagged-clusters.md` discipline header, autonomy-boundary, security rules.
