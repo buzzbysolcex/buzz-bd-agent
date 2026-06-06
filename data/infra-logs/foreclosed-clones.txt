@@ -17,3 +17,6 @@
 /home/claude-code/buzz-workspace/gate2-clones/symbiotic   # NEGATE 2026-05-29 (6-firm audit-dense, purge-eligible)
 /home/claude-code/buzz-workspace/gate2-clones/morpho-vault-v2   # NEGATE 2026-05-29 (10-audit, purge-eligible)
 /home/claude-code/buzz-workspace/gate2-clones/babylon   # NEGATE 2026-05-29 fully-closed, purge-eligible
+/home/claude-code/buzz-workspace/gate2-clones/ssv   # NEGATE/CLOSED 2026-06-05 directed-audit
+/home/claude-code/buzz-workspace/gate2-clones/ostium   # NEGATE 2026-06-05
+/home/claude-code/buzz-workspace/gate2-clones/3f-grunt   # WATCHLIST-PARK 2026-06-04 (verdict banked)

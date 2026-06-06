@@ -9,11 +9,45 @@ within tier. DENSE (3+ top-tier audits / blue-chip / huge-cap-mature) → OPPORT
 below every THIN target. Reads/writes target-scores.json siblings; non-destructive demo + the
 logic mirrored into buzzshield-target-scorer.js.
 """
-import json, sys
+import json, sys, re
 
 F = "/data/buzz/persistent/buzz-api/target-scores.json"
+
+# ── #45.3 BOUNTY-LIVE GATE (Ogie msg 8176): an ENDED contest is NOT a live target → DROP (EV 0). ──
+# Time-boxed contest platforms whose scope is combed-then-closed. A codehawks/c4 contest URL, or any
+# slug with a YYYY-MM date older than ~90d, = a finished contest. (Sherlock /contests/ → COMBED demote.)
+_DATE_SLUG = re.compile(r"/(20\d\d)-(0\d|1[0-2])-")  # /YYYY-MM- in the URL slug
+
+
+def is_dead_contest(r):
+    u = (r.get("url") or "").lower()
+    plat = (r.get("platform") or "").lower()
+    # codehawks + code4rena report/audit pages = finished, time-boxed contests
+    if "codehawks.cyfrin.io/c/" in u:
+        return True
+    if "code4rena.com/reports" in u or "code4rena.com/audits" in u:
+        return True
+    # any platform with a past-dated YYYY-MM slug > ~90 days old (contest run is weeks)
+    m = _DATE_SLUG.search(u)
+    if m:
+        y, mo = int(m.group(1)), int(m.group(2))
+        # crude age in months vs a fixed "now" (2026-06); >3 months past a contest = ended
+        age_months = (2026 - y) * 12 + (6 - mo)
+        if age_months >= 3:
+            return True
+    return False
+
+
+def is_contest_combed(r):
+    # a LIVE bounty whose scope was already run through a finished crowd-contest → hard demote (COMBED).
+    u = (r.get("url") or "").lower(); plat = (r.get("platform") or "").lower()
+    return ("sherlock" in plat and "/contests/" in u) or ("cantina" in plat and "/competitions/" in u)
+
+
 # Known 3+-top-tier-audited blue-chips / mega-programs = DENSE (#45 cap-traps). Lowercased substring match.
-BLUECHIP = ("sky", "spark", "gmx", "olympus", "rhino", "gnosis", "lido", "beanstalk", "aave",
+# (#45.3 saturation additions, Ogie msg 8176: Raydium/mETH/Flux/Nucleus = combed-by-everyone.)
+BLUECHIP = ("raydium", "meth", "mantle", "flux", "nucleus",
+            "sky", "spark", "gmx", "olympus", "rhino", "gnosis", "lido", "beanstalk", "aave",
             "compound", "uniswap", "curve", "makerdao", "maker", "morpho", "pendle", "eigenlayer",
             "pyth", "stargate", "frax", "balancer", "synthetix", "yearn", "convex", "1inch",
             "chainlink", "arbitrum", "optimism", "polygon", "starknet", "wormhole", "symbiotic", "renzo",
@@ -68,25 +102,42 @@ def realizable_ev(r, tier):
 
 def main():
     arr = json.load(open(F))
-    for r in arr:
-        t = density_tier(r)
-        r["_tier"] = t
-        r["_realizable_ev"] = round(realizable_ev(r, t), 1)
-    TIER_RANK = {"THIN": 0, "MED": 1, "DENSE": 2}
-    arr.sort(key=lambda r: (TIER_RANK[r["_tier"]], -r["_realizable_ev"]))
     from collections import Counter
-    print("tier counts:", dict(Counter(r["_tier"] for r in arr)))
-    print("\n=== NEW Top-10 (#45 + realizable-EV: THIN-tier first, then EV) ===")
-    for r in arr[:10]:
-        print(f"  [{r['_tier']:5s}] EV~${r['_realizable_ev']:>10,.0f}  {str(r.get('program'))[:26]:26s} {str(r.get('platform'))[:9]:9s} cap=${r.get('bounty_max') or 0:,} v1score={r.get('score')}")
-    print("\n=== (for contrast) where the old cap-trap Top-5 landed now ===")
-    for nm in ("Sky", "Spark", "GMX", "Olympus", "Rhino.fi"):
-        for i, r in enumerate(arr):
-            if (r.get("program") or "") == nm:
-                print(f"  {nm}: now rank #{i+1} tier={r['_tier']} EV~${r['_realizable_ev']:,.0f}")
-                break
+    # ── OLD ranking (pre-#45.3 gates): tier+EV only ──
+    for r in arr:
+        t0 = density_tier(r); r["_t0"] = t0; r["_ev0"] = round(realizable_ev(r, t0), 1)
+    TR0 = {"THIN": 0, "MED": 1, "DENSE": 2}
+    old5 = sorted(arr, key=lambda r: (TR0[r["_t0"]], -r["_ev0"]))[:5]
+    # ── NEW ranking (with #45.3 gates: dead-drop + contest-combed demote + saturation) ──
+    for r in arr:
+        if is_dead_contest(r):
+            r["_tier"] = "DEAD"; r["_realizable_ev"] = 0.0; continue
+        t = density_tier(r)
+        if is_contest_combed(r) and t != "DENSE":
+            t = "COMBED"   # finished-contest scope → hard demote below THIN/MED
+        r["_tier"] = t
+        r["_realizable_ev"] = round(realizable_ev(r, "DENSE" if t == "COMBED" else t), 1)
+    TIER_RANK = {"THIN": 0, "MED": 1, "COMBED": 2, "DENSE": 3, "DEAD": 9}
+    live = [r for r in arr if r["_tier"] != "DEAD"]
+    live.sort(key=lambda r: (TIER_RANK[r["_tier"]], -r["_realizable_ev"]))
+    dead_n = sum(1 for r in arr if r["_tier"] == "DEAD")
+    print("tier counts:", dict(Counter(r["_tier"] for r in arr)), f"| DROPPED dead-contest: {dead_n}/{len(arr)}")
+    # ── #45.3 gate effect on the prior Top-5 ──
+    print("\n=== #45.3 gate effect on the PRIOR Top-5 ===")
+    removed = 0
+    for r in old5:
+        t = r["_tier"]
+        if t == "DEAD": disp, hit = "DROPPED (dead contest)", True
+        elif t in ("DENSE", "COMBED"): disp, hit = f"DEMOTED ({t})", True
+        else: disp, hit = f"kept ({t})", False
+        removed += 1 if hit else 0
+        print(f"  {str(r.get('program'))[:24]:24s} {str(r.get('platform'))[:9]:9s} score={r.get('score')} -> {disp}")
+    print(f"  => {removed}/5 of the prior Top-5 removed/demoted by the #45.3 gates")
+    print("\n=== NEW Top-10 (#45.3: dead-dropped + contest-combed + saturation demoted) ===")
+    for r in live[:10]:
+        print(f"  [{r['_tier']:6s}] EV~${r['_realizable_ev']:>10,.0f}  {str(r.get('program'))[:26]:26s} {str(r.get('platform'))[:9]:9s} cap=${r.get('bounty_max') or 0:,} v1score={r.get('score')}")
     if "--write" in sys.argv:
-        json.dump(arr, open(F.replace(".json", "-rerank45.json"), "w"), indent=0)
+        json.dump(live, open(F.replace(".json", "-rerank45.json"), "w"), indent=0)
         print("\nwrote", F.replace(".json", "-rerank45.json"))
 
 
