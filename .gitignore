@@ -87,3 +87,5 @@ scripts/detectors/*/detector*
 scripts/detectors/cosmos-sdk-go-ast/c129-cosmos-go-ast
 data/lane1/stranded-funds/stranded.db
 data/lane1/gate0/*.db
+scripts/v6
+.tmp-build/
