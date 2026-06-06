@@ -3086,3 +3086,18 @@ Codified directly (no qwen) from the msg-8123 thin-pool scorer build — the cor
 **Statement.** Before hunting a decimals / rounding-direction seam (C7 / numerical-gap), **check whether an on-chain conversion even exists.** Many intent/RFQ/signed-amount protocols move the conversion **off-chain**: the user signs BOTH sides (e.g., `collateral_amount` AND `usde_amount`) as independent values set by an off-chain pricer; the contract only `transfer`s the signed amounts. **No on-chain division → no rounding direction to get wrong → the numerical seam is structurally absent** (the decimals risk is borne by the off-chain pricer, typically OOS trusted-operations).
 
 **Operational rule:** at Gate-1, grep the mint/redeem/swap path for an actual on-chain conversion (`* price /`, `mulDiv`, `convertToShares`, decimals-normalization). If both amounts arrive as independent signed/calldata values and the contract just moves them → **NEGATE the decimals hypothesis at the surface map**, don't build a rounding PoC. Conversely, if the conversion IS on-chain (e.g., an AMM, an oracle-priced mint, a cross-chain SD↔LD dust truncation), the seam is **LIVE** — hunt it. **Anchor:** Ethena EthenaMinting (off-chain RFQ, `collateral_amount`+`usde_amount` both signed → H5 NEGATE) vs the LayerZero OFT `_toSD/_toLD/_removeDust` (on-chain dust conversion → LIVE). Cross-ref Doctrine #43 (aggregate-bound), `webfetch-direction-error`, #47 numerical-gap.
+
+---
+
+## Doctrine #58 — ACTIONABLE requires IN-SCOPE MAPPING, not protocol-association (the deploy-watch gate, added 2026-06-06 — Ogie msg 8178)
+
+**Statement.** A deploy-watch / discovery hit is only an ACTIONABLE target if it maps to a bounty's **actual scope** — either (a) **in-scope DEPLOYER** (the contract was deployed by the program's listed deployer principal), or (b) **in-scope IMPACT** (a bug in it demonstrably causes loss to the program's protocol/users, e.g. Primacy-of-Impact). **"Related to a bountied protocol" is NOT in-scope.** A contract that merely *interacts with* or *pairs a token of* a bountied protocol, but is deployed by an external party and doesn't impact protocol funds, is **WATCHLIST, EV 0 — do NOT pipeline.** Bounty-EXISTS ≠ bounty-IN-SCOPE.
+
+**The scope-map runs BEFORE the pipeline** (Gate-0 sub-step): for each candidate, resolve (deployer principal vs the program's in-scope deployer) AND (does the source couple to the protocol — grep for the protocol's oracle/deployer/price reads). No in-scope mapping → WATCHLIST.
+
+**Worked anchor (2026-06-06 edge-lane scope-map, 2 of 2 "actionables" failed):**
+- `SP3NZY….hk-stx-bitflow-receiver-v1` — source self-declares *"external-developer flash-loan receiver… deployed under an EXTERNAL wallet (not the protocol deployer)."* Interacts with Bitflow (swaps STX↔stSTX) but is a third-party integrator's contract; a bug harms its own owner, not Bitflow → **WATCHLIST EV 0.**
+- `SM1FKX….dlmm-pool-zest-stx-v-2-bps-50` — a Bitflow DLMM pool *template* instance pairing a Zest token; source has **zero Zest-V2 coupling** (only its own internal `initial-price`, no Zest oracle/deployer ref) AND is not the Bitflow in-scope deployer → **WATCHLIST** (out of scope for both programs).
+- The ONLY properly-scoped target was the **Bitflow HODLMM** (in-scope deployer `SPQC38PW…` / `BitflowFinance/bitflow-dlmm` repo, EXCLUDING the dead known-issue #6).
+
+**Implication:** the deploy-watch / target-scorer ACTIONABLE classifier must require an in-scope-deployer-or-impact mapping field; "protocol-name-association" must be downgraded to WATCHLIST. Cross-ref `clarity-deploy-watch.py` classify(), #45 (density), Standing-Intake Step-1/Gate-0 (scope-check before pipeline).
