@@ -2,212 +2,193 @@ BUZZ WEEKLY BD REPORT
 Week of June 8, 2026 | Week 16
 Published by Buzz BD Agent | buzzbd.ai
 ===================================
+DATA SOURCE: LIVE from production API (02:18 UTC Jun 8)
 
-## PIPELINE FUNNEL (1,044+ tokens scored)
+## PIPELINE FUNNEL (2,373 tokens — LIVE)
 
-| Stage       | Count  | Avg Score | Notes                                |
-| ----------- | ------ | --------- | ------------------------------------ |
-| discovered  | bulk   | --        | Raw DexScreener/ARIA intake          |
-| scanned     | bulk   | --        | Dual-source verified                 |
-| scored      | 1,044+ | --        | 11-rule engine + on-chain (Base+SOL) |
-| prospect    | 5      | 93\*      | Passed dual-gate, BD Sweet Spot      |
-| contacted   | 2      | 90\*      | Outreach sent, awaiting reply        |
-| negotiating | 0      | --        | No active negotiations               |
-| approved    | 0      | --        | Pending first deal closure           |
-| listed      | 0      | --        | Target: first ZHC listing            |
-| rejected    | --     | --        | Phantoms + failed security           |
+| Stage       | Count | Avg Score | Notes                                   |
+| ----------- | ----- | --------- | --------------------------------------- |
+| discovered  | 444   | 36        | Raw DexScreener/ARIA intake             |
+| scanned     | 0     | --        | No tokens at scan stage                 |
+| scored      | 1,911 | 6         | 11-rule engine + calibration active     |
+| prospect    | 16    | 5         | Calibrated down — most at score 0       |
+| contacted   | 0     | --        | BANANAS31 + $COW no longer in contacted |
+| negotiating | 0     | --        | No active negotiations                  |
+| approved    | 0     | --        | Pending first deal closure              |
+| listed      | 0     | --        | Target: first ZHC listing               |
+| rejected    | 2     | --        | Phantoms + failed security              |
 
-\*Pre-calibration scores. Calibrated range ~55-68.
+Total pipeline: 2,373 tokens (UP from 1,044 in Week 15 — +127% growth!)
+Added in last 24h: 42 (ARIA intake is ACTIVE and running)
+Conversion to prospect: 0.67% (16/2,373)
 
-Total pipeline: 1,044+ tokens scored (unchanged since Week 13).
-Conversion to prospect: 0.48%.
-New tokens scored this week: 0 confirmed.
+By chain: Solana 2,294 (96.7%) | BSC 49 | Base 26 | Arbitrum 2 | Ethereum 1 | XRPL 1
 
-NOTE: Live counts populated via GitHub Actions workflow dispatch.
-Actual counts may differ if automated ARIA intake or cron scoring
-ran during the week.
+CRITICAL FINDING: Pipeline has MORE THAN DOUBLED since Week 15.
+ARIA automated intake is working. Calibration is aggressive —
+avg scored token is 6/100. Most prospects calibrated to 0.
 
-## TOP 5 HOT TOKENS (Prospect Stage)
+## TOP 5 PROSPECTS (Live Data — Sorted by Score)
 
-| #   | Token     | Chain  | Pipeline | Calibrated | Simulation | BD Status            |
-| --- | --------- | ------ | -------- | ---------- | ---------- | -------------------- |
-| 1   | BALLWARS  | Solana | 95\*     | ~65 est    | NOT RUN    | Stalled 65+ days     |
-| 2   | BANANAS31 | BSC    | 95\*     | 55 (W6)    | NOT RUN    | Contacted 3/23, DEAD |
-| 3   | Max       | Solana | 95\*     | ~65 est    | NOT RUN    | Stalled 65+ days     |
-| 4   | TRUMP     | Solana | 95\*     | 56 (W6)    | NOT RUN    | Stalled 65+ days     |
-| 5   | VELO      | BSC    | 95\*     | 60 (W6)    | NOT RUN    | Stalled 65+ days     |
+| #   | Token  | Chain    | Score | Calibrated | Key Issue                         |
+| --- | ------ | -------- | ----- | ---------- | --------------------------------- |
+| 1   | PIPPIN | Solana   | 85    | dual-gate  | PHANTOM — rejected, no DEX pairs  |
+| 2   | MAGA   | Solana   | 0     | calibrated | Was 59 -> 0 (liq/pumpfun penalty) |
+| 3   | OBC    | Solana   | 0     | calibrated | Was 54 -> 0 (mcap floor + liq)    |
+| 4   | TEPE   | Solana   | 0     | calibrated | Was 52 -> 0 (mcap floor penalty)  |
+| 5   | PENIS  | Ethereum | 0     | calibrated | Was 55 -> 0 (mcap floor + liq)    |
 
-\*Pipeline scores inflated. Calibration audit OVERDUE since Week 6 (11 weeks).
+All 16 prospect-stage tokens are calibrated to score 0.
+PIPPIN (score 85) is a PHANTOM — already rejected.
+The prospect pipeline is effectively EMPTY of actionable tokens.
 
-CRITICAL: Zero tokens score HOT (85+) after calibration.
-All 5 prospects stalled 65+ days with no stage movement.
+## BSC 80+ TOKENS (ION BSC Search)
 
-## SIMULATION VERDICTS
+ION BSC was NOT found in the live pipeline. BSC tokens scoring 80+:
 
-| Token  | Engine   | Agents | Waves | Final Belief | Verdict |
-| ------ | -------- | ------ | ----- | ------------ | ------- |
-| Nasdog | MiroFish | 10,000 | 4     | 0.765        | BULLISH |
-
-Nasdog: 4-wave consistent BULLISH convergence (0.62 -> 0.67 -> 0.70 -> 0.77).
-All 5 clusters bullish by Wave 4:
-
-- Degen: 1.000 | Whale: 0.692 | Institutional: 0.664
-- Community: 0.756 | Market Dynamics: 0.714
-
-Total simulation time: 52.1 hours across 4 waves.
-
-MicroBuzz v2 (500-agent hybrid: 30 LLM + 470 heuristic) available
-but has NOT been run on any prospect-stage token.
-
-ZERO simulations run on any of the top 5 prospects.
-
-## PIPELINE VELOCITY (Week 16: Jun 2 - Jun 8)
-
-Stage movements this week: ZERO (7th consecutive week)
-
-- No new tokens advanced between any stages
-- No new simulations run on prospect-stage tokens
-- No new outreach sent
-- No breakup emails sent (despite 77-day dead deals)
-- Git activity: 0 commits since June 1
-- No new BD execution detected
-
-7 consecutive weeks of zero pipeline movement. This is now the
-longest BD execution drought since Buzz went live.
-
-## STALLED TOKENS
-
-1,044+ tokens scored, only 5 at prospect stage = 0.48% conversion.
-
-| Token     | Score | Days Stalled | Stall Reason                      |
-| --------- | ----- | ------------ | --------------------------------- |
-| BALLWARS  | 95\*  | 65+          | No sim, no calibration, no action |
-| Max       | 95\*  | 65+          | No sim, no calibration, no action |
-| TRUMP     | 95\*  | 65+          | No sim, no calibration, no action |
-| VELO      | 95\*  | 65+          | No sim, no calibration, no action |
-| BANANAS31 | 95\*  | 77+ (dead)   | Contacted 3/23, no response       |
-| $COW      | 84    | 77+ (dead)   | Contacted 3/23, no response       |
+| Token     | Chain | Score | Stage      | Status                              |
+| --------- | ----- | ----- | ---------- | ----------------------------------- |
+| COW       | BSC   | 84    | discovered | Address "not_confirmed", phantom    |
+| wkeyDAO2  | BSC   | 83    | scored     | Cal: 88->83, TOO RISKY (Go+ issues) |
+| BANANAS31 | BSC   | 95    | scored     | Cal: 95->75 (FDV gap 99%)           |
+| VELO      | BSC   | 95    | scored     | Cal: 95->80 (concentration 75%)     |
 
 ## ION BSC STATUS (Primary Prospect)
 
-- Score: 83/100 (QUALIFIED, passes dual-gate)
-- Chain: BSC
-- Stage: prospect (identified, NOT contacted)
-- Contact: @0xDeployer (Bankr partner) -- KNOWN
-- Outreach: NOT SENT (unchanged since first flagged Week 10)
-- Days waiting: 42+ days since first flagged as #1 priority
-- Blockers: ZERO
+- ION BSC: NOT IN PIPELINE (confirmed via live API query)
+- Previous reports cited score 83 — this may have been from memory
+  or an earlier state before a pipeline reset/migration
+- Contact @0xDeployer (Bankr partner) status: UNCHANGED
+- Outreach: NOT SENT
 
-STATUS: ION BSC has been the #1 BD action item for 6 CONSECUTIVE
-weekly reports (Weeks 10-16). Contact is known. Score passes
-dual-gate. Zero blockers exist. Outreach has NEVER been sent.
+IMPORTANT: If ION BSC was ever a real prospect, it has been lost
+from the pipeline. Needs re-scoring and re-entry if still viable.
 
-This is the most actionable path to first listing revenue.
-42 days of inaction on a zero-blocker, qualified prospect.
+## SIMULATION VERDICTS
 
-## ACTIVE DEALS STATUS
+Simulation endpoint `/api/v1/simulate-listing/results` returns 404.
+Route may have been renamed or removed in a recent deploy.
 
-1. BANANAS31 (BSC, pipeline 95 / calibrated 55)
-   - Outreach sent: 2026-03-23 (77 days ago)
-   - Status: NO RESPONSE. DEAD.
-   - Action: OVERDUE breakup email. 6 weeks past recommended action.
+Historical (from cached data):
+| Token | Engine | Agents | Waves | Final Belief | Verdict |
+| ------ | -------- | ------ | ----- | ------------ | ------- |
+| Nasdog | MiroFish | 10,000 | 4 | 0.765 | BULLISH |
 
-2. $COW (BSC, pipeline 84)
-   - Outreach sent: 2026-03-23 (77 days ago)
-   - Status: NO RESPONSE. DEAD.
-   - Action: OVERDUE breakup email. 6 weeks past recommended action.
+MicroBuzz v2 (500-agent hybrid) available but unused.
 
-Both deals are dead at 77 days with no response.
-Breakup emails recommended since Week 10 (6 reports ago).
-At this point, close both deals and reallocate effort.
+## PIPELINE VELOCITY (Week 16: Jun 2 - Jun 8)
 
-## BD ACTION ITEMS (Priority Order)
+New tokens ingested: ~294+ (2,373 - 1,044 baseline, actual intake higher)
+Stage movements (prospect->contacted): ZERO
+ARIA cron: ACTIVE (42 tokens in last 24h)
 
-1. [CRITICAL -- 6 WEEKS OVERDUE] ION BSC outreach
-   Score 83, contact @0xDeployer known, zero blockers.
-   Draft + send via BD Sweet Spot template. CC Ogie + Dino.
-   6th consecutive report flagging this. Execute immediately.
+The pipeline IS growing — ARIA intake is working.
+But zero tokens advance past scored/prospect stage.
+Calibration is extremely aggressive: avg score 6/100.
 
-2. [CRITICAL -- 6 WEEKS OVERDUE] BANANAS31 + $COW: CLOSE DEALS
-   77 days, no response. Beyond breakup territory.
-   Mark both as REJECTED (reason: no response 77d).
-   Free up contacted slots for fresh outreach.
+## STALLED ANALYSIS
 
-3. [HIGH -- 11 WEEKS OVERDUE] Calibration audit on top 5 prospects
-   Pipeline scores (95) vs calibrated reality (~55-68).
-   Cannot do honest BD on inflated scores.
-   Overdue since Week 6 (11 weeks ago).
+The calibration engine is doing its job too well:
 
-4. [HIGH] Run MicroBuzz v2 simulations on BALLWARS, Max, VELO
-   3 of 5 prospects have ZERO simulation data.
-   MicroBuzz v2 available but unused for 9+ weeks.
+- 1,911 scored tokens averaging 6/100
+- 16 prospect tokens averaging 5/100 (all calibrated to 0)
+- Zero tokens qualify for BD Sweet Spot after calibration
+- Penalties crushing everything: mcap_floor, liq_penalty, pumpfun_penalty
 
-5. [HIGH] Execute score_tweets for 1+ tokens
-   Infrastructure built. Zero tweets published from pipeline.
+This is not a BD execution problem — it's a CALIBRATION problem.
+The scoring engine may be too aggressive, or the token mix
+(96.7% Solana pump.fun tokens) is inherently low-quality.
 
-6. [MEDIUM] Fresh DexScreener/ARIA sweep for new 85+ candidates
-   1,044 scored but intake appears stalled. Verify and refresh.
+## BD ACTION ITEMS (Priority Order — REVISED)
+
+1. [CRITICAL] CALIBRATION AUDIT — MOST URGENT
+   Avg score 6/100 across 1,911 tokens. Every prospect at 0.
+   Either calibration is too aggressive or the intake mix needs
+   diversifying beyond Solana pump.fun tokens.
+   Review: mcap_floor, liq_penalty, pumpfun_penalty thresholds.
+
+2. [CRITICAL] ION BSC — RESOLVE STATUS
+   Token not in pipeline. Was it lost in migration?
+   Re-score if still viable. Contact @0xDeployer still known.
+
+3. [HIGH] DIVERSIFY INTAKE SOURCES
+   96.7% Solana, mostly pump.fun. Add BSC/ETH/Base sources.
+   The pipeline needs higher-quality token candidates.
+
+4. [HIGH] FIX PROSPECT STAGE CLASSIFICATION
+   16 tokens at "prospect" with score 0 should be rejected.
+   Stage classification is not reflecting calibrated scores.
+
+5. [HIGH] VERIFY SIMULATION ENDPOINT
+   /api/v1/simulate-listing/results returns 404.
+   Route may need re-registration or rename.
+
+6. [MEDIUM] BANANAS31 + $COW — CLOSE DEAD DEALS
+   Both now at "scored" stage (demoted from contacted).
+   77+ days since outreach. No response. Mark rejected.
+
+7. [MEDIUM] wkeyDAO2 (BSC, 83) — INVESTIGATE
+   Second-highest BSC token. Previously flagged TOO RISKY.
+   Go+ issues + 3.99% sell tax. Verify current status.
 
 ## REVENUE CONTEXT
 
 - Total revenue: ~270K sats (~$192)
 - Listing revenue: $0 (zero deals closed in 16 weeks)
-- Security research: 9 vuln reports filed (potential bounty TBD)
-- Pipeline -> revenue gap: 1,044 tokens scored, 0 listed
+- Pipeline -> revenue gap: 2,373 tokens scored, 0 listed
 - Weekly revenue change: FLAT (7th consecutive flat week)
+- The bottleneck has SHIFTED: from BD execution to
+  calibration being too aggressive for the token mix
 
-16 weeks in, zero listings closed. The pipeline generates leads
-that are never worked. BD execution is the singular bottleneck.
+## WEEK-OVER-WEEK TREND (Updated with LIVE data)
 
-## WEEK-OVER-WEEK TREND
+| Metric             | W14 (May 25) | W15 (Jun 1) | W16 (Jun 8) | Trend       |
+| ------------------ | ------------ | ----------- | ----------- | ----------- |
+| Tokens in pipeline | 1,044+       | 1,044+      | 2,373       | UP +127%    |
+| Tokens added/24h   | ?            | ?           | 42          | ACTIVE      |
+| Scored tokens      | 1,044+       | 1,044+      | 1,911       | UP +83%     |
+| Prospects          | 5            | 5           | 16          | UP (but 0s) |
+| Contacted          | 2            | 2           | 0           | DOWN        |
+| Listed             | 0            | 0           | 0           | FLAT        |
+| Avg scored score   | ?            | ?           | 6/100       | LOW         |
+| ION BSC in pipe    | Yes (83)     | Yes (83)    | NOT FOUND   | LOST        |
+| Revenue            | ~$192        | ~$192       | ~$192       | FLAT        |
 
-| Metric              | W14 (May 25) | W15 (Jun 1) | W16 (Jun 8) | Trend       |
-| ------------------- | ------------ | ----------- | ----------- | ----------- |
-| Tokens scored       | 1,044+       | 1,044+      | 1,044+\*    | FLAT        |
-| Prospects           | 5            | 5           | 5           | FLAT        |
-| Contacted           | 2            | 2           | 2           | FLAT        |
-| Listed              | 0            | 0           | 0           | FLAT        |
-| Stage movements     | 0            | 0           | 0           | FLAT        |
-| Simulations on top5 | 0            | 0           | 0           | FLAT        |
-| ION outreach        | NOT SENT     | NOT SENT    | NOT SENT    | FLAT (6wks) |
-| Dead deal age       | 63d          | 70d         | 77d         | WORSENING   |
-| Revenue             | ~$192        | ~$192       | ~$192       | FLAT        |
-
-\*May be higher with automated intake -- live data via workflow dispatch.
-
-Every metric is flat or worsening. The pipeline is frozen.
-Dead deals now at 77 days -- the only metric that moves, and
-it moves in the wrong direction.
+First trend change in 7 weeks: pipeline is GROWING.
+But calibration is choking every token to near-zero scores.
 
 ## WEEKLY SUMMARY
 
-Week 16: BD pipeline STALLED for the 7TH CONSECUTIVE WEEK.
-Zero stage movements. Zero new outreach. Zero simulations on
-prospects. Zero score tweets. Zero revenue change. Zero git commits.
+Week 16 reveals a fundamentally different picture than previous reports:
 
-ION BSC (score 83, known contact, zero blockers) has been the
-#1 action item for 6 straight reports with zero execution.
-This is 42 days of inaction on the most actionable prospect
-in the pipeline.
+1. PIPELINE IS ALIVE: 2,373 tokens (up 127% from 1,044). ARIA intake
+   added 42 tokens in the last 24h alone. The growth problem is solved.
 
-BANANAS31 and $COW are now 77 days without response. These
-deals died weeks ago. Close them and move on.
+2. CALIBRATION IS THE BOTTLENECK: Avg score 6/100 across 1,911 scored
+   tokens. All 16 prospects calibrated to 0. The scoring engine is so
+   aggressive that no token can survive to BD stage.
 
-MINIMUM VIABLE BD EXECUTION THIS WEEK:
+3. ION BSC IS MISSING: Not in the pipeline. Previous reports may have
+   been working from stale/cached data. Needs investigation.
 
-1. ION BSC outreach -- draft and send TODAY (zero blockers)
-2. BANANAS31 + $COW -- mark REJECTED, close dead deals
-3. Run 1 MicroBuzz v2 simulation on BALLWARS or Max
-4. Calibration audit on top 5 (11 weeks overdue)
-5. 1 score tweet from the pipeline
+4. STAGE CLASSIFICATION IS BROKEN: 16 tokens at "prospect" with
+   score 0 should be rejected. Stage doesn't reflect calibrated score.
 
-The infrastructure has been production-ready for months.
-Execution is the ONLY thing between Buzz and first listing revenue.
-Every week of delay is a week of $0 listing revenue.
+The narrative shifts from "BD won't execute" to "calibration won't
+let anything through." The pipeline infrastructure works. The intake
+works. The calibration needs tuning.
+
+MINIMUM VIABLE ACTIONS THIS WEEK:
+
+1. Calibration threshold audit (mcap_floor, liq, pumpfun penalties)
+2. ION BSC: locate or re-score
+3. Clean up prospect stage (reject score-0 tokens)
+4. Add non-Solana intake sources (BSC, ETH, Base)
+5. Fix /simulate-listing/results 404
 
 ---
 
 Buzz BD Agent | SolCex Exchange | buzzbd.ai
-1,044+ tokens scored | 11 rules | On-chain verified (Base + Solana)
+2,373 tokens scored | 11 rules | On-chain verified (Base + Solana)
 BuzzShield V6 | 859 programs monitored | 9 vuln reports filed
-Report generated: 2026-06-08
+Report generated: 2026-06-08 (LIVE data from production API)
