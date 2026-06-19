@@ -1,0 +1,155 @@
+name: Pipeline Stats Check
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check-stats:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Get pipeline stats from server
+        id: stats
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 204.168.137.253
+          username: root
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          command_timeout: 2m
+          capture_stdout: true
+          script: |
+            echo "===STATS==="
+            docker exec buzz-production curl -s http://127.0.0.1:3000/api/v1/pipeline/stats 2>/dev/null || echo '{"error":"API unreachable"}'
+            echo "===HEALTH==="
+            docker exec buzz-production curl -s http://127.0.0.1:3000/api/v1/health 2>/dev/null || echo '{"error":"health unreachable"}'
+            echo "===DOCKER==="
+            docker ps --format "{{.Names}}: {{.Status}}" 2>/dev/null || echo "docker ps failed"
+
+      - name: Parse and send to Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          RAW: ${{ steps.stats.outputs.stdout }}
+        run: |
+          CHAT_ID="950395553"
+          DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
+
+          STATS_JSON=$(echo "$RAW" | sed -n '/===STATS===/,/===HEALTH===/p' | grep -v '===' | head -1)
+          HEALTH_JSON=$(echo "$RAW" | sed -n '/===HEALTH===/,/===DOCKER===/p' | grep -v '===' | head -1)
+          DOCKER_STATUS=$(echo "$RAW" | sed -n '/===DOCKER===/,$p' | grep -v '===' | head -5)
+
+          REPORT=$(python3 << 'PYEOF'
+          import json, os, sys
+
+          date_str = os.environ.get("DATE", "?")
+          stats_raw = os.environ.get("STATS_JSON", "{}")
+          health_raw = os.environ.get("HEALTH_JSON", "{}")
+
+          try:
+              stats = json.loads(stats_raw) if stats_raw.strip() else {}
+          except:
+              stats = {}
+
+          try:
+              health = json.loads(health_raw) if health_raw.strip() else {}
+          except:
+              health = {}
+
+          total = stats.get('total', stats.get('total_tokens', '?'))
+          added_24h = stats.get('added_24h', stats.get('new_24h', '?'))
+          by_stage = stats.get('by_stage', stats.get('stages', {}))
+
+          issues = []
+          lines = []
+          lines.append('📊 BUZZ PIPELINE STATS')
+          lines.append(f'   {date_str}')
+          lines.append('')
+          lines.append(f'Total tokens: {total}')
+          lines.append(f'Added (24h): {added_24h}')
+          lines.append('')
+          lines.append('TOKEN COUNTS BY STAGE:')
+
+          stage_order = ['discovered','scanned','scored','prospect','contacted','negotiating','approved','listed','rejected']
+
+          if isinstance(by_stage, dict):
+              for stage in stage_order:
+                  data = by_stage.get(stage)
+                  if data is None:
+                      continue
+                  if isinstance(data, dict):
+                      count = data.get('count', 0)
+                      avg = data.get('avg_score')
+                      avg_str = f' (avg {round(avg)})' if avg else ''
+                  else:
+                      count = data
+                      avg_str = ''
+                  lines.append(f'  {stage}: {count}{avg_str}')
+
+                  if stage == 'listed' and (count == 0 or count == '0'):
+                      issues.append('⚠️ ZERO tokens listed — no listing revenue')
+                  if stage == 'negotiating' and (count == 0 or count == '0'):
+                      issues.append('⚠️ No tokens in negotiating stage')
+
+              for k in by_stage:
+                  if k not in stage_order:
+                      data = by_stage[k]
+                      count = data.get('count', data) if isinstance(data, dict) else data
+                      lines.append(f'  {k}: {count}')
+          else:
+              lines.append('  (Could not parse stage breakdown)')
+              issues.append('⚠️ Stage data not parseable')
+
+          if added_24h == 0 or added_24h == '0':
+              issues.append('⚠️ Zero new tokens in last 24h — scanner may be idle')
+
+          if health and not health.get('error'):
+              db_check = health.get('checks', {}).get('database', {})
+              tables = db_check.get('tables', '?')
+              endpoints = health.get('endpoints', '?')
+              uptime = health.get('uptime', '?')
+              lines.append('')
+              lines.append(f'SYSTEM: {endpoints} endpoints | {tables} tables | uptime: {uptime}s')
+
+          if issues:
+              lines.append('')
+              lines.append('ISSUES FLAGGED:')
+              for i in issues:
+                  lines.append(f'  {i}')
+          else:
+              lines.append('')
+              lines.append('✅ No critical issues detected')
+
+          lines.append('')
+          lines.append('— Buzz BD Agent | buzzbd.ai')
+
+          print('\n'.join(lines))
+          PYEOF
+          ) || REPORT="❌ Failed to parse pipeline stats. Raw: ${STATS_JSON:0:500}"
+
+          if [ -n "$DOCKER_STATUS" ]; then
+            REPORT="$REPORT
+
+          CONTAINERS:
+          $DOCKER_STATUS"
+          fi
+
+          echo "--- REPORT ---"
+          echo "$REPORT"
+          echo "--- END ---"
+
+          export DATE STATS_JSON HEALTH_JSON
+
+          RESULT=$(curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg chat "$CHAT_ID" --arg text "$REPORT" '{chat_id: $chat, text: $text, disable_web_page_preview: true}')")
+
+          OK=$(echo "$RESULT" | jq -r '.ok // "false"')
+          if [ "$OK" = "true" ]; then
+            MSG_ID=$(echo "$RESULT" | jq -r '.result.message_id')
+            echo "✅ Telegram sent (msg_id: $MSG_ID)"
+          else
+            DESC=$(echo "$RESULT" | jq -r '.description // "unknown error"')
+            echo "❌ Telegram failed: $DESC"
+            echo "Full response: $RESULT"
+            exit 1
+          fi
