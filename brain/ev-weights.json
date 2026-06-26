@@ -1,0 +1,145 @@
+{
+  "_doc": "Bug-class × platform EV multipliers (Doctrine #75) WITH the exploration floor + confidence gate (Doctrine #78, Ogie intake-v2 2026-06-23). mem_type: semantic. A measured loop with no exploration term converges on its own tiny history and dies — so down-weights from near-zero n are pulled toward neutral and never fully foreclosed by statistics alone. Applied at the GATE-1 hypothesis-EV level (not the program scorer). Updated by scripts/lane1/post-mortem.py.",
+  "mem_type": "semantic",
+  "last_updated": "2026-06-23",
+  "exploration_floor": {
+    "min_statistical_multiplier": 0.3,
+    "justification": "Below ~0.30 a class is effectively never selected over a neutral one (3x under-weighted in realizable_ev × mult) -> starvation -> never re-sampled -> the down-weight becomes self-fulfilling. 0.30 keeps a down-weighted class ALIVE in the ranking; the 20% exploration slice then guarantees real re-sampling. NO class is fully foreclosed by ev-weights alone.",
+    "structural_foreclosure_exempt": "Only a #72-style STRUCTURAL fact (admin-set/safe-by-design custody) or a channel that structurally cannot receive a security report (general-inbox email) may go below the floor — flagged `structural:true`, kept SEPARATE from statistical weight."
+  },
+  "confidence_gate": {
+    "rule": "A multiplier may only move far from 1.0 once n crosses a threshold (low-n shrinkage toward the neutral prior).",
+    "clamps_by_n": {
+      "n_lt_3": [0.7, 1.2],
+      "n_3_to_5": [0.4, 1.4],
+      "n_gte_6": [0.3, 1.5]
+    },
+    "justification": "n<3 = ~no signal (1-2 draws) -> stay near-neutral + ride the exploration slice; n>=6 = enough to commit to a strong weight."
+  },
+  "exploration_slice": {
+    "pct_of_cycles": 0.2,
+    "rule": "1 in 5 hunt cycles IGNORES ev-weights entirely and samples the LEAST-observed bug-class / target (lowest n), so weights keep getting real data. epsilon-greedy = 0.2.",
+    "justification": "With ~10 tracked classes, 20% explore re-samples every class within ~50 cycles without over-spending; standard explore/exploit balance."
+  },
+  "update_rule": {
+    "paid": "× 1.25",
+    "duplicate": "× 0.85",
+    "closed_informative": "× 0.80",
+    "closed_not_a_bug": "× 0.70",
+    "ai_report_dismissal": "× 0.80 + MANDATORY #74 humanization gate next time",
+    "no_response": "× 0.85 (foreclose LANE per #77 if general-inbox)",
+    "missed_window": "× 1.0 + first-to-report-speed flag",
+    "note": "Multiplicative, THEN clamped by the confidence_gate (by n), THEN floored at 0.30 (structural-exempt). One observation nudges; n must accumulate before a weight commits."
+  },
+  "bug_class": {
+    "http_protocol_state": {
+      "mult": 1.2,
+      "n": 1,
+      "v1_was": 1.3,
+      "basis": "1/1 PAID (DISC-016 Firedancer Insight). Gate n<3 caps at 1.20 (was hand-set 1.30 on n=1). Novel class, thin target = the positive selection prior (#79)."
+    },
+    "slippage_double_count": {
+      "mult": 0.7,
+      "n": 2,
+      "v1_was": 0.2,
+      "basis": "0/2 (DISC-021/022 misframe+invalid). Gate n<3 + floor lift it from a self-fulfilling 0.20 to 0.70 — 2 unlucky draws, NOT a dead class. Per-hypothesis #43 aggregate-bound gate still applies structurally."
+    },
+    "dc7_validating_vs_consuming": {
+      "mult": 0.54,
+      "n": 3,
+      "v1_was": 0.4,
+      "basis": "0/3 (DISC-008 closed-info, DISC-015 OOS, DISC-015b dup). n=3 -> [0.4,1.4] -> 0.54."
+    },
+    "signature_replay": {
+      "mult": 0.72,
+      "n": 2,
+      "v1_was": 0.55,
+      "basis": "0/2 DUP (DISC-009/011 crowded marquees). Gate n<3 -> 0.72. Viable on THIN targets + first-to-report."
+    },
+    "oracle_engineered_staleness": {
+      "mult": 0.8,
+      "n": 1,
+      "v1_was": 0.7,
+      "basis": "0/1 AI-Report-dismissal (DISC-019). Class not disproven; the REPORT failed -> #74."
+    },
+    "state_machine_cooldown": {
+      "mult": 0.85,
+      "n": 1,
+      "v1_was": 0.7,
+      "basis": "0/1 DUP (DISC-017 Ethena)."
+    },
+    "timelock_access_control": {
+      "mult": 0.85,
+      "n": 1,
+      "v1_was": 0.7,
+      "basis": "0/1 DUP (DISC-018 Morpho)."
+    },
+    "multistep_pipeline": {
+      "mult": 0.85,
+      "n": 2,
+      "v1_was": 0.8,
+      "basis": "DISC-006/007 Arc dup/submitted."
+    },
+    "validation_coverage_asymmetry": {
+      "mult": 0.85,
+      "n": 1,
+      "v1_was": 0.7,
+      "basis": "DISC-012 Drift no-response + DISC-002 Sui rep-blocked."
+    },
+    "time_staleness_asymmetry": {
+      "mult": 0.85,
+      "n": 1,
+      "v1_was": 0.7,
+      "basis": "DISC-013 Drift email."
+    },
+    "ercVault_inflation_candidateI": {
+      "mult": 1.0,
+      "n": 0,
+      "basis": "untested in submissions (foreclosed by #72 custody NEGATEs structurally, not statistically). Neutral."
+    },
+    "default_novel_unhunted": {
+      "mult": 1.1,
+      "n": 0,
+      "basis": "the one win was a NOVEL class on a THIN target -> intentional positive prior for genuinely-novel classes (#79). Within the n<3 band."
+    }
+  },
+  "platform": {
+    "immunefi": {
+      "mult": 0.9,
+      "n": 8,
+      "v1_was": 1.0,
+      "basis": "n>=6 band. The payout lane (DISC-016) but several AI-dismissals/OOS pull it slightly sub-neutral; AI-Report risk handled by #74 not a platform penalty."
+    },
+    "sherlock": {
+      "mult": 0.9,
+      "n": 0,
+      "basis": "contest-judged; fresh-by-design; repo access-gated (secure transfer EARLY)."
+    },
+    "cantina": {
+      "mult": 0.85,
+      "n": 1,
+      "basis": "DISC-018 dup; currently 0 live competitions."
+    },
+    "hackerone": {
+      "mult": 0.6,
+      "n": 6,
+      "v1_was": 0.5,
+      "basis": "n>=6: crowded marquee (OKX/Arc/Circle) high-dup + first-to-report races lost. Floored, genuinely down."
+    },
+    "hackenproof": {
+      "mult": 0.4,
+      "n": 0,
+      "basis": "rep-gated (DISC-002 blocked 80/100)."
+    },
+    "email_general_inbox": {
+      "mult": 0.05,
+      "n": 2,
+      "structural": true,
+      "basis": "STRUCTURAL-FORECLOSURE (exempt from the 0.30 floor): a general/support inbox structurally cannot receive a security disclosure (DISC-012/013 0/2 no-response). #77 foreclosed the lane."
+    }
+  },
+  "history": [
+    "2026-06-22 v1 seed from DISC-001..022 (hand-set extremes).",
+    "2026-06-23 v2 (#78): applied confidence-gate (low-n shrinkage) + 0.30 floor + 20% exploration slice. All statistical classes pulled to [0.54,1.20] (no near-zeros). email flagged structural (exempt). Before/after recorded in `v1_was`."
+  ]
+}

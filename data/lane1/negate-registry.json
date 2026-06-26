@@ -1,0 +1,466 @@
+{
+  "_doc": "Program-level scope-aware NEGATE registry (Ogie msg 8274, 2026-06-13). Keyed by platform-slug. A NEGATE'd program is deduped (dropped from ranking) when its CURRENT in-scope asset set is a SUBSET of negated_assets. If it adds NEW in-scope assets, the scorer keeps it LIVE and tags new_scope=[only-the-new] (re-scoped = fresh only for the new assets). When negated_assets is [] OR the program-monitor has no current asset data (assets:[]), the gate falls back to slug-level dedup (labeled). NEVER dedup by program-NAME alone \u2014 always program+scope. Append a row here on every hunt FORECLOSURE/NEGATE. Asset tokens are normalized: lowercased 0x-address | gh:owner/repo | host/path.",
+  "mem_type": "semantic",
+  "_normalization": "etherscan/bscscan/*scan address -> lowercased 0x[40hex]; github.com/owner/repo -> gh:owner/repo; app/website -> hostname; else lowercased url.",
+  "last_updated": "2026-06-13",
+  "negated": {
+    "immunefi:utix": {
+      "platform": "immunefi",
+      "slug": "utix",
+      "negated_assets": [
+        "0xc9d7bd1fad7d5621dda20335818e9575ae07ea03"
+      ],
+      "negate_date": "2026-06-11",
+      "doctrine": "#62",
+      "hunt_file": "hunts/2026-06-11-utix-immunefi-gate1.md",
+      "note": "no-egress; MintedTokenCappedCrowdsaleExtv1 (ETH). Single-asset scope == negated."
+    },
+    "immunefi:ankr": {
+      "platform": "immunefi",
+      "slug": "ankr",
+      "negated_assets": [
+        "0x9e347af362059bf2e55839002c699f7a5bafe86e",
+        "0x52f24a5e03aee338da5fd9df68d2b6fae1178827",
+        "0x67428de0680494e448f1a19d33c2022a51719348",
+        "0x84db6ee82b7cf3b47e8f19270abde5718b936670",
+        "0xe95a203b1a91a908f9b9ce46459d101078c2c3cb",
+        "0xd01ef7c0a5d8c432fc2d1a85c66cf2327362e5c6"
+      ],
+      "negate_date": "2026-06-11",
+      "doctrine": "#63",
+      "hunt_file": "hunts/2026-06-11-ankr-immunefi-gate0.md",
+      "note": "17/17 LST staleness/admin/privileged-ratio. All 6 in-scope assets (3 ETH + 3 BSC) enumerated + NEGATE'd; all added 2022-2023, no new asset since."
+    },
+    "immunefi:defisaver": {
+      "platform": "immunefi",
+      "slug": "defisaver",
+      "negated_assets": [
+        "gh:defisaver/defisaver-v3-contracts",
+        "app.defisaver.com"
+      ],
+      "negate_date": "2026-06-13",
+      "doctrine": "#68",
+      "hunt_file": "hunts/2026-06-13-defisaver-v3-immunefi-gate1-foreclosure.md",
+      "note": "operator-custodial recipe-executor; 14-agent/2-round 0-survivor. Scope = whole V3 repo (ex mocks/views) + App."
+    },
+    "immunefi:benqi": {
+      "platform": "immunefi",
+      "slug": "benqi",
+      "negated_assets": [],
+      "negate_date": "2026-06-11",
+      "doctrine": "#64",
+      "hunt_file": "hunts/2026-06-11-benqi-ecosystem-gate1-foreclosure.md",
+      "note": "Avalanche ecosystem markets 5/0 NEGATE; oracle aggregator-only + cross-pool-sealed fork. SLUG-LEVEL (asset addrs not captured at negate \u2014 backfill when monitor populates assets)."
+    },
+    "immunefi:variational": {
+      "platform": "immunefi",
+      "slug": "variational",
+      "negated_assets": [],
+      "negate_date": "2026-06-11",
+      "doctrine": "#66",
+      "hunt_file": "hunts/2026-06-11-variational-immunefi-gate1-foreclosure.md",
+      "note": "operator-custodial Arbitrum perps 0/0 NEGATE. SLUG-LEVEL (asset addrs not captured at negate)."
+    },
+    "immunefi:zest-protocol-v2": {
+      "platform": "immunefi",
+      "slug": "zest-protocol-v2",
+      "negated_assets": [],
+      "negate_date": "2026-06-10",
+      "doctrine": "",
+      "hunt_file": "hunts/2026-06-10-zest-v2-freshangle-foreclosure.md",
+      "note": "Zest V2 fresh-angle foreclosure. SLUG-LEVEL (asset addrs not captured at negate)."
+    },
+    "immunefi:KAST": {
+      "platform": "immunefi",
+      "slug": "KAST",
+      "negated_assets": [
+        "gh:m0-foundation/solana-m-extensions"
+      ],
+      "negate_date": "2026-06-12",
+      "doctrine": "#67",
+      "hunt_file": "hunts/2026-06-12-kast-m0-ext-solana-gate1-foreclosure.md",
+      "note": "KAST/M0 solana-m-extensions (Solana) 19/0 NEGATE. Scope = solana-m-extensions repo (m_ext + ext_swap)."
+    },
+    "immunefi:ssvnetwork": {
+      "platform": "immunefi",
+      "slug": "ssvnetwork",
+      "negated_assets": [],
+      "negate_date": "2026-06-05",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-06-05-ssv-network-directed-audit-gate2.md",
+      "note": "directed-audit NO CANDIDATE; 5/7 NEGATE [INSPECTED] [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:trufin": {
+      "platform": "immunefi",
+      "slug": "trufin",
+      "negated_assets": [],
+      "negate_date": "2026-05-21",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-21-trufin-gate2.md",
+      "note": "Gate2 killed Critical; residual Med-Low DO-NOT-SUBMIT [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:alex": {
+      "platform": "immunefi",
+      "slug": "alex",
+      "negated_assets": [],
+      "negate_date": "2026-05-26",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-26-alex-immunefi-gate1.md",
+      "note": "dead-frozen Clarity since 2024; foreclosure-receipt [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:justlenddao": {
+      "platform": "immunefi",
+      "slug": "justlenddao",
+      "negated_assets": [],
+      "negate_date": "2026-05-26",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-26-justlend-immunefi-gate1.md",
+      "note": "C1 reentrancy foreclosed (no hook underlyings); rest OOS [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:raydium": {
+      "platform": "immunefi",
+      "slug": "raydium",
+      "negated_assets": [],
+      "negate_date": "2026-05-26",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-26-raydium-immunefi-gate1.md",
+      "note": "foreclosure-receipt; cp-swap CANDIDATE-E already fixed [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:rhinofi": {
+      "platform": "immunefi",
+      "slug": "rhinofi",
+      "negated_assets": [],
+      "negate_date": "2026-05-26",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-26-rhinofi-immunefi-gate1.md",
+      "note": "no confirmed in-scope candidate; selective-coverage=design [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:alchemix-1": {
+      "platform": "immunefi",
+      "slug": "alchemix-1",
+      "negated_assets": [],
+      "negate_date": "2026-05-27",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-27-alchemix-c1-gate2-foreclosure.md",
+      "note": "Gate2 dedup-foreclosed (Report 57587 + Apr-2026 invariant-fuzz fix) [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:debridge": {
+      "platform": "immunefi",
+      "slug": "debridge",
+      "negated_assets": [],
+      "negate_date": "2026-05-27",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-27-debridge-immunefi-gate1.md",
+      "note": "all 11 binding fields symmetric; 3 candidates foreclosed [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:gainsnetwork": {
+      "platform": "immunefi",
+      "slug": "gainsnetwork",
+      "negated_assets": [],
+      "negate_date": "2026-05-27",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-27-gainsnetwork-immunefi-gate1.md",
+      "note": "audited-frozen; 6 lenses NEGATE; EV below floor [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:gearbox": {
+      "platform": "immunefi",
+      "slug": "gearbox",
+      "negated_assets": [],
+      "negate_date": "2026-05-27",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-27-gearbox-immunefi-gate1.md",
+      "note": "Doctrine#27 saturation (31 audits); fullCollateralCheck defends DC-7 [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:gmx": {
+      "platform": "immunefi",
+      "slug": "gmx",
+      "negated_assets": [],
+      "negate_date": "2026-05-27",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-27-gmx-immunefi-gate1.md",
+      "note": "foreclosure-receipt Doctrine#27 J; admin-OOS [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:kiln": {
+      "platform": "immunefi",
+      "slug": "kiln",
+      "negated_assets": [],
+      "negate_date": "2026-05-27",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-27-kiln-immunefi-gate1.md",
+      "note": "dedup-foreclosure; LsETH frozen-substrate saturated [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:listadao": {
+      "platform": "immunefi",
+      "slug": "listadao",
+      "negated_assets": [],
+      "negate_date": "2026-05-27",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-27-lista-dao-gate2-foreclosure.md",
+      "note": "Gate2 foreclosed; PT oracle NOT-A-BUG; MANAGER-drain OOS [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:mETH": {
+      "platform": "immunefi",
+      "slug": "mETH",
+      "negated_assets": [],
+      "negate_date": "2026-05-27",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-27-meth-immunefi-gate1.md",
+      "note": "foreclosure-receipt 16 audits; CANDIDATE-A LZ-OFT falsified [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:sky": {
+      "platform": "immunefi",
+      "slug": "sky",
+      "negated_assets": [],
+      "negate_date": "2026-05-29",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-29-sky-immunefi-gate1.md",
+      "note": "substrate-identity NEGATE; primitive in OOS repos; Doctrine#27 J [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:staderforeth": {
+      "platform": "immunefi",
+      "slug": "staderforeth",
+      "negated_assets": [],
+      "negate_date": "2026-05-27",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-27-stader-ethx-gate2-foreclosure.md",
+      "note": "Gate2 foreclosed-all at audit-dedup; 5 candidates $0 EV [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:aave": {
+      "platform": "immunefi",
+      "slug": "aave",
+      "negated_assets": [],
+      "negate_date": "2026-05-28",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-28-aave-v3-immunefi-gate1.md",
+      "note": "dedup-foreclosure Doctrine#27 J (30+ audits) [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:compoundfinance": {
+      "platform": "immunefi",
+      "slug": "compoundfinance",
+      "negated_assets": [],
+      "negate_date": "2026-05-28",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-28-compound-iii-comet-gate2-c3-foreclosure.md",
+      "note": "Gate2 foreclosure; Pattern E rounding intentionally defensive [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:fluxfinance": {
+      "platform": "immunefi",
+      "slug": "fluxfinance",
+      "negated_assets": [],
+      "negate_date": "2026-05-28",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-28-fluxfinance-immunefi-gate1.md",
+      "note": "Compound-V2 fork saturated; first-mint closed; oracle third-party-OOS [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:sparklend": {
+      "platform": "immunefi",
+      "slug": "sparklend",
+      "negated_assets": [],
+      "negate_date": "2026-05-28",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-28-spark-immunefi-gate1.md",
+      "note": "dedup-foreclosure Doctrine#27 F; Aave-V3 inheritance defends. (SparkLend \u2014 NOT Spark-by-Lightspark) [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:stargate": {
+      "platform": "immunefi",
+      "slug": "stargate",
+      "negated_assets": [],
+      "negate_date": "2026-05-28",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-28-stargate-v3-immunefi-gate1.md",
+      "note": "V2 (not V3); DC-7 operator-misconfig + Pattern H DVN strong-defense [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:babylon-labs": {
+      "platform": "immunefi",
+      "slug": "babylon-labs",
+      "negated_assets": [],
+      "negate_date": "2026-05-29",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-29-babylon-cosmos-gate1.md",
+      "note": "finality/checkpoint NEGATE; BLS-bitmap [EXECUTED] 2 Go PoCs pass [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:lido": {
+      "platform": "immunefi",
+      "slug": "lido",
+      "negated_assets": [],
+      "negate_date": "2026-05-29",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-29-lido-v3-nonoracle-gate1.md",
+      "note": "Lido V3 NEGATE; LazyOracle direction-error; DC-7 negated [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:granite-protocol": {
+      "platform": "immunefi",
+      "slug": "granite-protocol",
+      "negated_assets": [],
+      "negate_date": "2026-05-30",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-30-granite-immunefi-gate1.md",
+      "note": "Clarity BTC-lending NEGATE; tracked-var donation-immune; liquidation bounded [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:hermetica": {
+      "platform": "immunefi",
+      "slug": "hermetica",
+      "negated_assets": [],
+      "negate_date": "2026-05-30",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-30-hermetica-immunefi-gate1.md",
+      "note": "Clarity sUSDh inflation non-exploitable (seeded vault); gated [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:stackingdao": {
+      "platform": "immunefi",
+      "slug": "stackingdao",
+      "negated_assets": [],
+      "negate_date": "2026-05-31",
+      "disposition": "NEGATE",
+      "hunt_file": "hunts/2026-05-31-stackingdao-immunefi-gate1.md",
+      "note": "ststx-ratio manip traced 3 ways NEGATE; watchlist cross-protocol fragility [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:balancer": {
+      "platform": "immunefi",
+      "slug": "balancer",
+      "negated_assets": [],
+      "negate_date": "2026-05-28",
+      "disposition": "SUBMITTED",
+      "hunt_file": "hunts/2026-05-26-balancer-immunefi-gate1.md",
+      "note": "DISC-021 #80150 SUBMITTED (CANDIDATE-O BatchRouter slippage) [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:filecoin": {
+      "platform": "immunefi",
+      "slug": "filecoin",
+      "negated_assets": [],
+      "negate_date": "2026-05-26",
+      "disposition": "SUBMITTED",
+      "hunt_file": "hunts/2026-05-26-filecoin-immunefi-gate1.md",
+      "note": "DISC-020 #79987 SUBMITTED (CLOSED NOT-A-BUG, productive rebuttal) [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:pancakeswap": {
+      "platform": "immunefi",
+      "slug": "pancakeswap",
+      "negated_assets": [],
+      "negate_date": "2026-05-29",
+      "disposition": "SUBMITTED",
+      "hunt_file": "hunts/2026-05-27-pancakeswap-v4-immunefi-gate1.md",
+      "note": "DISC-022 #80247 SUBMITTED (CANDIDATE-O slippage double-count) [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:veda": {
+      "platform": "immunefi",
+      "slug": "veda",
+      "negated_assets": [],
+      "negate_date": "2026-05-27",
+      "disposition": "SUBMITTED",
+      "hunt_file": "hunts/2026-05-27-veda-immunefi-gate1.md",
+      "note": "DISC-015/015b submitted (CLOSED OOS_ASSET + DUP) [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:ethena": {
+      "platform": "immunefi",
+      "slug": "ethena",
+      "negated_assets": [],
+      "negate_date": "2026-06-05",
+      "disposition": "SUBMITTED",
+      "hunt_file": "hunts/2026-06-05-ethena-directed-audit-gate2.md",
+      "note": "DISC-017 #79589 submitted (CLOSED dup of #68406) [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:arkadiko": {
+      "platform": "immunefi",
+      "slug": "arkadiko",
+      "negated_assets": [],
+      "negate_date": "2026-06-01",
+      "disposition": "PARTIAL_GATED",
+      "hunt_file": "hunts/2026-06-01-arkadiko-immunefi-gate1.md",
+      "note": "Gate2 [EXECUTED] paste-ready (sig cache-DoS + staleness), OPERATOR-GATED [SLUG-LEVEL: negated_assets backfill when program-monitor captures assets]"
+    },
+    "immunefi:Aevo": {
+      "platform": "immunefi",
+      "slug": "Aevo",
+      "negated_assets": [],
+      "negate_date": "2026-06-13",
+      "disposition": "DEPRIORITIZED_RECENCY",
+      "hunt_file": "hunts/intake-log.md",
+      "note": "GATE-0 recency-drop (Doctrine #65): mature Ribbon-legacy (listed 2021, scope last-updated 2024-12-02 = 18mo stale), 1% stingy basis, heavily audited. NOT full-audited \u2014 re-eligible on re-scope or pool-exhaustion. SLUG-LEVEL."
+    },
+    "immunefi:royco": {
+      "platform": "immunefi",
+      "slug": "royco",
+      "negated_assets": [
+        "gh:roycoprotocol/royco-dawn",
+        "gh:roycoprotocol/royco-vault-makina-strategy",
+        "0xcd9f5907f92818bc06c9ad70217f089e190d2a32",
+        "0xc5fef644d59415cec65049e0653ca10ed9cba778",
+        "0x7cc6fb28ec7b5e7afc3cb3986141797ffc27253c"
+      ],
+      "negate_date": "2026-06-13",
+      "doctrine": "#71",
+      "hunt_file": "hunts/2026-06-13-royco-dawn-immunefi-gate2-foreclosure.md",
+      "note": "Royco V2 Royco Dawn (tranched vaults). 2-round/9-agent + [EXECUTED] PoCs NEGATE. Substrate=royco-dawn V2 (NOT mature royco V1). 5-audit saturated; executor-bonus=ROYCO4-9 + yield-forfeit=ROYCO4-13(OOS). If RE-SCOPED with NEW assets beyond these \u2192 re-eligible."
+    },
+    "immunefi:notional-exponent": {
+      "platform": "immunefi",
+      "slug": "notional-exponent",
+      "negated_assets": [],
+      "negate_date": "2026-06-13",
+      "disposition": "DEPRIORITIZED_AUDIT_SATURATION",
+      "doctrine": "#27/#45",
+      "hunt_file": "hunts/intake-log.md",
+      "note": "GATE-0 audit-saturation deprioritize: fresh listing 2026-01 BUT Notional = 9 audit firms 2020-2026 (OZ x2/ABDK x2/C4 x2/Certora/Consensys x2/Sherlock-through-Jan2026/Mixbytes-Nov2025 covering Exponent). NOT full-audited. Re-eligible if a genuinely-uncovered new asset appears. SLUG-LEVEL."
+    },
+    "immunefi:stakestone": {
+      "platform": "immunefi",
+      "slug": "stakestone",
+      "negated_assets": [
+        "0x7122985656e38bdc0302db86685bb972b145bd3c",
+        "0xa62f9c5af106feee069f38de51098d9d81b90572",
+        "0x9485711f11b17f73f2ccc8561bcae05bdc7e9ad9",
+        "gh:stakestone/stone-vault-v1"
+      ],
+      "negate_date": "2026-06-13",
+      "disposition": "DEPRIORITIZED_RECENCY_CODE_MATURE",
+      "doctrine": "#63/#70",
+      "hunt_file": "hunts/intake-log.md",
+      "note": "GATE-0 code-recency deprioritize: Immunefi scope-updated 2026-04 (looks fresh) BUT in-scope STONE vault code (stone-vault-v1 StoneVault/AssetsVault) last commit 2024-07-24 = MATURE LST (Ankr-class #63). Recency-fix over-ranked via listing scope-date not code-date. Symbiotic/Mellow strategy adapters (newer restaking) substrate UNLOCATED (not in stone-vault-v1 contracts/ - only interfaces) = possible fresh seam but substrate-identity-blocked. NOT full-audited. SLUG-LEVEL."
+    },
+    "immunefi:enzyme-onyx": {
+      "platform": "immunefi",
+      "slug": "enzyme-onyx",
+      "negated_assets": [
+        "gh:enzymefinance/protocol-onyx"
+      ],
+      "negate_date": "2026-06-20",
+      "doctrine": "#66/#72",
+      "hunt_file": "hunts/2026-06-20-enzyme-onyx-immunefi-foreclosure.md",
+      "note": "Fresh (2026-05-13) + LIGHTLY-audited (ChainSecurity only) BUT operator-custodial-by-design: share price = admin-set stored var (not balanceOf) -> CANDIDATE-I immune + accepted-risk (CS-ONYX-011); all value-writes role-gated; permissionless surface transacts at admin price only. 5-finder+critic-CONFIRMED NEGATE. Re-eligible if a permissionless settlement/keeper role is added."
+    },
+    "immunefi:aster": {
+      "platform": "immunefi",
+      "slug": "aster",
+      "negated_assets": [],
+      "negate_date": "2026-06-20",
+      "disposition": "DEPRIORITIZED_RECENCY_CODE_MATURE",
+      "doctrine": "#70",
+      "hunt_file": "hunts/intake-log.md",
+      "note": "GATE-0 drop: perps DEX (BSC). asterdex org has NO contracts repo (API/SDK only); contracts at Astherus/Aster (renamed) last-commit 2025-09-20 = 9mo-stale code (#70 mature). Substrate-ambiguous + perps heavily-explored class. NOT audited. Re-eligible if a fresh contracts repo + clear substrate surfaces."
+    },
+    "immunefi:silofinance-v2": {
+      "platform": "immunefi",
+      "slug": "silofinance-v2",
+      "negated_assets": [
+        "gh:silo-finance/silo-contracts-v3"
+      ],
+      "negate_date": "2026-06-21",
+      "disposition": "DEPRIORITIZED_AUDIT_SATURATION",
+      "doctrine": "#45/#27",
+      "hunt_file": "hunts/intake-log.md",
+      "note": "GATE-0 combed-DROP via deeper-recency-check (scope-updated 4d ago). silo-contracts-v3 FRESH code (commit 2026-06-18) but 6 v3 audits incl. Enterprise-Continuous + KnownIssues.md; $100K cap + KYC = low net-new EV (Royco-precedent: 5-6-audit-fresh combs clean). WATCHLIST: silo-vaults/PublicAllocator (permissionless reallocation, Morpho-precedent) = the one focused-look item if revisited. NOT full-audited."
+    },
+    "immunefi:nuva": {
+      "platform": "immunefi",
+      "slug": "nuva",
+      "negated_assets": [],
+      "negate_date": "2026-06-22",
+      "disposition": "DEPRIORITIZED_LOW_EV",
+      "doctrine": "#62/#45",
+      "hunt_file": "hunts/intake-log.md",
+      "note": "GATE-0 low-EV DROP via deeper-recency (NEW listing 2026-05-18, RWA-tokenization vault, EVM/provlabs, in-capability, FRESH). BUT $40K cap (lowest of session) + 3 audits in 7wk (ProvLabs/Halborn/Sherlock-NVPrime) + KYC = realizable net-new EV ~$2K, below full-audit bar. NOTE: fewest audits + novel RWA-vault class of the recent batch \u2014 focused-look available if cap raises / operator wants a portfolio result despite low cap. NOT full-audited."
+    }
+  },
+  "_count": 47
+}

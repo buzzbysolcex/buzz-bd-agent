@@ -1,0 +1,40 @@
+{
+  "_doc": "Doctrine #70 code-recency overlay (Ogie msg 8285, 2026-06-14). slug -> {code_date, repo, note}. code_date = the IN-SCOPE contract code's last-commit / deploy date (NOT the Immunefi listing scope-update-date, which can be a routine metadata touch masking old code \u2014 StakeStone anchor: scope-updated 2026-04 but stone-vault-v1 code 2024-07). The scorer's recency dimension PREFERS code_date when present (0.8 code + 0.2 launch), else falls back to the listing launch+updated blend. GROW THIS on every GATE-0: when you clone an in-scope repo, append {slug: {code_date: <git log -1 date>, repo}}. This permanently corrects the 'fresh listing != fresh code' false-positive.",
+  "codes": {
+    "stakestone": {
+      "code_date": "2024-07-24",
+      "repo": "stakestone/stone-vault-v1",
+      "note": "STONE vault core mature 2024; scope-date 2026-04 was a metadata/asset refresh. Ankr-class LST."
+    },
+    "royco": {
+      "code_date": "2026-06-12",
+      "repo": "roycoprotocol/royco-dawn",
+      "note": "V2 genuinely fresh code; NEGATE'd (5-audit saturated)."
+    },
+    "defisaver": {
+      "code_date": "2026-06-09",
+      "repo": "defisaver/defisaver-v3-contracts",
+      "note": "actively developed; NEGATE'd (operator-custodial)."
+    },
+    "aevo": {
+      "code_date": "2022-06-01",
+      "repo": "ribbon/aevo (legacy)",
+      "note": "mature Ribbon-legacy; scope 18mo-stale. Approx date."
+    },
+    "enzyme-onyx": {
+      "code_date": "2026-05-13",
+      "repo": "enzymefinance/protocol-onyx",
+      "note": "FRESH (commit 2026-05-13, active) + LIGHTLY audited (ChainSecurity only) \u2014 genuine fresh-uncombed target. Tick-1 GATE-0 PASS 2026-06-20."
+    },
+    "silofinance-v2": {
+      "code_date": "2026-06-18",
+      "repo": "silo-finance/silo-contracts-v3",
+      "note": "V3 fresh-code (commit 2026-06-18, active new-market adds) BUT 6 v3 audits (Cantina/Certora/0xJCN/Enterprise-Continuous) = combed. GATE-0 combed-DROP."
+    },
+    "nuva": {
+      "code_date": "2026-05-18",
+      "repo": "provlabs/* (RWA vaults)",
+      "note": "Fresh listing (2026-05) RWA-tokenization vault. 3 audits in 7wk (ProvLabs/Halborn/Sherlock-NVPrime). $40K cap = low-EV."
+    }
+  }
+}

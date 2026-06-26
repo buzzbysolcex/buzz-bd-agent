@@ -38,14 +38,14 @@ Standing-Intake Protocol v1.0 Step 1 PROFILE column captures CURRENT platform bu
 
 ## Schema
 
-| Column | Description |
-|---|---|
-| Program slug | Canonical identifier — repo or program name |
-| Prior platform | Where the program WAS hosted (Immunefi / HackerOne / Cantina / Sherlock / Code4rena / direct-email / self-hosted) |
-| New platform | Where the program currently IS (same enum) |
-| Date observed | UTC date Buzz detected the migration |
-| Source of observation | Hunt file, live check method, or operator brief |
-| Impact on prior Gate 1 / submission | Concrete operational consequences |
+| Column                              | Description                                                                                                       |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Program slug                        | Canonical identifier — repo or program name                                                                       |
+| Prior platform                      | Where the program WAS hosted (Immunefi / HackerOne / Cantina / Sherlock / Code4rena / direct-email / self-hosted) |
+| New platform                        | Where the program currently IS (same enum)                                                                        |
+| Date observed                       | UTC date Buzz detected the migration                                                                              |
+| Source of observation               | Hunt file, live check method, or operator brief                                                                   |
+| Impact on prior Gate 1 / submission | Concrete operational consequences                                                                                 |
 
 ---
 
@@ -53,13 +53,13 @@ Standing-Intake Protocol v1.0 Step 1 PROFILE column captures CURRENT platform bu
 
 ### 2026-05-26 — Across Protocol (FROM Immunefi → TO self-hosted `bugs@across.to`)
 
-| Field | Value |
-|---|---|
-| Program slug | `across-protocol` (repo `across-protocol/contracts`) |
-| Prior platform | Immunefi |
-| New platform | Self-hosted email (`bugs@across.to`) |
-| Date observed | 2026-05-26 (observed between 2026-05-23 Buzz watchlist scrape and 2026-05-26 live check) |
-| Source of observation | `hunts/2026-05-26-across-immunefi-gate1-PRE-CLONE-HALT.md` Step 1 PROFILE table; 5 URL variants returned 404; `immunefi.com/explore?query=across` returned 0 matches across 219 programs; `docs.across.to/introduction/bug-bounty` canonical page showed self-hosted path |
+| Field                               | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Program slug                        | `across-protocol` (repo `across-protocol/contracts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Prior platform                      | Immunefi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| New platform                        | Self-hosted email (`bugs@across.to`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Date observed                       | 2026-05-26 (observed between 2026-05-23 Buzz watchlist scrape and 2026-05-26 live check)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Source of observation               | `hunts/2026-05-26-across-immunefi-gate1-PRE-CLONE-HALT.md` Step 1 PROFILE table; 5 URL variants returned 404; `immunefi.com/explore?query=across` returned 0 matches across 219 programs; `docs.across.to/introduction/bug-bounty` canonical page showed self-hosted path                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | Impact on prior Gate 1 / submission | (a) **Cap discrepancy:** Buzz watchlist recorded $1.5M Immunefi Critical; new self-hosted path is $1M Critical ($500K downside delta = -33% cap). (b) **P(acceptance) drop:** default Immunefi-tenured payer ≈ 0.40; self-hosted email with no public payout tracker ≈ 0.20 (50% drop). Combined EV impact: Scenario A → Scenario B = $90K → $30K (66% EV drop). (c) **Triager-less path:** self-hosted email has no Immunefi triager screening; submission velocity + dispute path unknown. (d) **No public payout tracker:** Buzz feedback-ledger loses cross-protocol-payout calibration signal for Across; CANDIDATE-A bridge-family EV calibration becomes harder. (e) **Cap-Sherlock-class status drift:** any future Buzz dispatch on Across must first check this log to avoid re-discovering migration |
 
 **Anchor status:** FIRST canonical entry in this log. Established the schema. Operator endorsed file creation (msg 7844: "real gap").
@@ -139,6 +139,7 @@ The two-anchor confirmation in a single evening cycle establishes the class. **D
 - Surface to operator at intake time: "N chains listed, M chains deployed, identical bytecode on most — clarify scope before Gate 2 escalation."
 
 **Why:**
+
 - Prevents Gate 1 dispatches that waste time on OOS chains (CoW Gnosis-chain attack-surface would have burned cycles before lens-firing)
 - Prevents Gate 2 wasted effort if Immunefi triager later rejects "we only meant the N listed chains" (rhino.fi: 18-chain ambiguity zone)
 - Cross-language guard-coverage findings (per DC-7 sub-pattern Cross-Language Guard-Coverage Asymmetry, Patterns-Defense-Classes.md v2.3) become harder to translate to bounty findings if the multi-chain deployment is partially OOS

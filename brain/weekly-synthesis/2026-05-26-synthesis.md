@@ -3,6 +3,7 @@
 **Window:** 3 calendar days (48-hour-plus sprint). First synthesis under the Weekly-Synthesis-Template v1.0; subsequent runs cover full 7-day windows.
 
 **Corpus inputs:**
+
 - 11 Gate 1 hunt files (Alex, Hydration, Raydium, Stacks, Filecoin, JustLend, Olympus, CoW, rhinofi, Balancer, plus `2026-05-25-filecoin-scope-triage-query.md`)
 - 3 PRE-CLONE-HALT files (Across, dYdX V4, Lombard)
 - 3 brain-proposals-applied ledgers (Day 26 morning / afternoon / evening — 32 proposals across the day)

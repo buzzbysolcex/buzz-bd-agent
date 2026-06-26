@@ -12,15 +12,15 @@
 
 Tweet formats currently in active rotation (per `.claude/rules/tweet-on-score.md` v2.2):
 
-| Format ID | Trigger | Body template | Visual | Hypothesis |
-|---|---|---|---|---|
-| T-HOT-v22 | Token scores 85+ | "passed honest calibration" + 1000-agent swarm framing | Score card with full address | Drives audit-tier upsell via shield.buzzbd.ai/audit |
-| T-QUALIFIED-v22 | Token scores 70-84 | "Strong calibration. Worth your attention." | Score card | Lower friction; informational |
-| T-WATCH-v22 | Token scores 50-69 | "Not a fail. Not a pass." | Score card | Engages curiosity; lower commitment ask |
-| T-FLAG-v22 | Rug catch / post-collapse | "Our 1000-agent swarm predicted this" + basescan link | Signal alert template | Highest visibility; methodology proof |
-| T-CAL-v22 | Score change ±15 pts | Before/after calibration | Score card | Demonstrates engine sensitivity |
-| T-CONTENT-MOLT | Moltbook deep-dive | Long-form X thread or moltbook article | Hero image | Drives long-tail engagement |
-| T-AIBTC-SIG | AIBTC signal repost | Beat-tagged signal body | Signal card | AIBTC network amplification |
+| Format ID       | Trigger                   | Body template                                          | Visual                       | Hypothesis                                          |
+| --------------- | ------------------------- | ------------------------------------------------------ | ---------------------------- | --------------------------------------------------- |
+| T-HOT-v22       | Token scores 85+          | "passed honest calibration" + 1000-agent swarm framing | Score card with full address | Drives audit-tier upsell via shield.buzzbd.ai/audit |
+| T-QUALIFIED-v22 | Token scores 70-84        | "Strong calibration. Worth your attention."            | Score card                   | Lower friction; informational                       |
+| T-WATCH-v22     | Token scores 50-69        | "Not a fail. Not a pass."                              | Score card                   | Engages curiosity; lower commitment ask             |
+| T-FLAG-v22      | Rug catch / post-collapse | "Our 1000-agent swarm predicted this" + basescan link  | Signal alert template        | Highest visibility; methodology proof               |
+| T-CAL-v22       | Score change ±15 pts      | Before/after calibration                               | Score card                   | Demonstrates engine sensitivity                     |
+| T-CONTENT-MOLT  | Moltbook deep-dive        | Long-form X thread or moltbook article                 | Hero image                   | Drives long-tail engagement                         |
+| T-AIBTC-SIG     | AIBTC signal repost       | Beat-tagged signal body                                | Signal card                  | AIBTC network amplification                         |
 
 **v1.0 winner-pending:** no engagement data yet; all formats untested.
 
@@ -67,12 +67,14 @@ AIBTC signals are filed per `.claude/rules/aibtc-bm-3source-standard.md` (3-sour
 Per `brain/Moltbook-Strategy.md` Mon-Sun submolt schedule + 3-tweets-per-day cap + 5-emails-per-day cap.
 
 **Daily slots (UTC):**
+
 - 00:00-06:00: night-work window (token scoring, brain compounds, no public posts)
 - 06:00-14:00: morning publish window (Moltbook submolt + 1 score tweet)
 - 14:00-22:00: afternoon publish window (1-2 score tweets, BD outreach + AIBTC signals)
 - 22:00-00:00: evening publish window (1 rug-catch / Moltbook follow-up)
 
 **Best-time hypotheses (untested):**
+
 - Score tweets: peak Twitter engagement 14:00-18:00 UTC (US market open + Asia evening)
 - Moltbook posts: weekday 13:00-15:00 UTC for max impression window
 - AIBTC signals: file before 14:00 UTC cutoff (per `aibtc-bm-3source-standard.md` QS target)
@@ -86,6 +88,7 @@ Per `brain/Moltbook-Strategy.md` Mon-Sun submolt schedule + 3-tweets-per-day cap
 Methodology threads (e.g., "How we caught X token's exit liquidity 48h before the dump") are the highest-leverage content type — they demonstrate the engine's value without giving away the rule logic.
 
 **Topics in queue (v1.0):**
+
 - Multi-anchor pattern demonstration (B-1 + P-1 → DC-13 promotion) — DRAFT pending operator approval to publish post-disclosure
 - Self-Correction Layer architecture (Contradictions Register + Open-Questions Tracker + Weekly Synthesis) — operator approval needed
 - Audit-dedup gate saving Foundry investment (Stader + Lista G2 foreclosure stories) — operator approval needed

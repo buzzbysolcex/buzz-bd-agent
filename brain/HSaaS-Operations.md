@@ -35,6 +35,7 @@ Per v2.2, max 3 score tweets per day. Track engagement post-publish.
 ```
 
 Templates currently defined in v2.2:
+
 - `T-HOT-v22` — score 85+ "passed honest calibration" template
 - `T-WATCH-v22` — score 50-69 "Not a fail. Not a pass." template
 - `T-FLAG-v22` — flagged/caught template (post-collapse, priority)
@@ -73,12 +74,12 @@ Track demographic patterns of prospects who convert vs ignore.
 
 **v1.0 baseline hypotheses (untested):**
 
-| Profile | Hypothesis | Test status |
-|---|---|---|
-| BSC, $500K-$5M mcap, anon team, no audits | High pain → high responsiveness to honest scoring | UNTESTED |
-| ETH, $5M-$50M mcap, doxxed team, 1+ audit | Moderate; established projects skeptical of unknown auditor | UNTESTED |
-| Solana, $1M-$10M mcap, mixed | Memecoin culture = low audit-spend appetite | UNTESTED |
-| Base, $500K-$5M mcap, new team | Newer ecosystem = open to alternative scoring | UNTESTED |
+| Profile                                   | Hypothesis                                                  | Test status |
+| ----------------------------------------- | ----------------------------------------------------------- | ----------- |
+| BSC, $500K-$5M mcap, anon team, no audits | High pain → high responsiveness to honest scoring           | UNTESTED    |
+| ETH, $5M-$50M mcap, doxxed team, 1+ audit | Moderate; established projects skeptical of unknown auditor | UNTESTED    |
+| Solana, $1M-$10M mcap, mixed              | Memecoin culture = low audit-spend appetite                 | UNTESTED    |
+| Base, $500K-$5M mcap, new team            | Newer ecosystem = open to alternative scoring               | UNTESTED    |
 
 Recalibrate per actual conversion data when Phase 2 outreach cycle produces results.
 
@@ -97,6 +98,7 @@ When multiple template variants are tested, log outcomes.
 **v1.0 seed (none — A/B testing not yet started).**
 
 **A/B planned (Phase 2 ready):**
+
 - Subject line variants: "Security Score Report — [TOKEN] scored [N]/100" vs "We scored your token honestly. Want the full report?"
 - Lead paragraph: data-first vs sales-first vs methodology-first
 - CTA: shield.buzzbd.ai/audit vs Calendly link vs reply-to-email
@@ -130,6 +132,7 @@ When HSaaS surfaces a finding that benefits another pillar:
 ```
 
 **Example handoffs (anticipated, not yet observed):**
+
 - HSaaS audit (when live) finds a bug → escalate to Pillar 4 Gate 2 pipeline (potential bounty revenue ON TOP of audit fee). Per `four-pillar-loop.md` Pillar 2→Pillar 4.
 - HSaaS outreach reveals prospect has Lane 5-scoped contracts → Pillar 4 scope-overlap intel.
 - Score tweet engagement surge on rug-catch tweet → Pillar 1 confidence signal, calibrate similar scoring patterns.

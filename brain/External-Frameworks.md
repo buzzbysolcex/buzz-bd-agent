@@ -34,11 +34,11 @@ The brain architecture is sound. Continued doctrine commits should not consult t
 
 **Rule:** every Gate 2 finding tags each individual claim with one of three evidence-grade labels:
 
-| Tag | Meaning |
-|-----|---------|
-| `[EXECUTED]` | Bytecode verified, PoC run, on-chain confirmed. Highest evidence grade. |
-| `[INSPECTED]` | Source code read, logic traced. Code-confirmed but not execution-confirmed. |
-| `[ASSUMED]` | Inferred from architecture, surrounding context, or documentation. Not code-confirmed. |
+| Tag           | Meaning                                                                                |
+| ------------- | -------------------------------------------------------------------------------------- |
+| `[EXECUTED]`  | Bytecode verified, PoC run, on-chain confirmed. Highest evidence grade.                |
+| `[INSPECTED]` | Source code read, logic traced. Code-confirmed but not execution-confirmed.            |
+| `[ASSUMED]`   | Inferred from architecture, surrounding context, or documentation. Not code-confirmed. |
 
 **Why:** triagers (Immunefi / HackerOne / Sherlock / Cantina / Cantina contests / direct-email program staff) make accept/reject decisions partly on confidence in the report's evidence base. A well-graded report gives the triager a faster path to verification — `[EXECUTED]` claims short-circuit re-verification, `[INSPECTED]` claims tell the triager which lines to read, `[ASSUMED]` claims explicitly signal where the reporter is reasoning architecturally and might be wrong. This is honest and improves first-pass acceptance.
 
@@ -118,15 +118,15 @@ These are NOT replicable from a scan. They are **accumulated state**. A new rese
 
 ### Vector-by-vector mapping (Buzz coverage matrix)
 
-| 0xTeam vector                          | Buzz brain anchor                                                              | Coverage status                                                                   |
-| -------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| Oracle manipulation (flash-loan-driven) | Pattern E + DC-7 + CANDIDATE-O (Rhea $18.4M)                                  | COVERED `[INSPECTED]`                                                             |
-| Reentrancy (ERC-777 callbacks)         | DC-1 + CANDIDATE-M (CEI-break-via-hook)                                       | COVERED `[INSPECTED]`                                                             |
-| Flash loan attacks (83.3% of 2024)     | Pattern E propagation engine                                                  | COVERED `[INSPECTED]`                                                             |
-| Governance attacks                     | DC-9 (privileged state mutation)                                              | COVERED `[INSPECTED]`                                                             |
-| LP token pricing vulns (Warp-style)    | NEW GAP — Buzz does not have a specific LP-token-as-collateral detector       | **GAP** `[ASSUMED]`                                                               |
-| Solvency check gaps (Euler/Platypus)   | Partial — DC-9 sub-4 (state-not-invalidated) + Pattern A (paired functions)   | **PARTIAL GAP** — emergency-function solvency-skip not separately tracked `[ASSUMED]` |
-| Interest rate bugs (precision, 100% util) | NEW GAP — Buzz has CANDIDATE-K (HTTP/protocol state) but not interest-curve precision | **GAP** `[ASSUMED]`                                                               |
+| 0xTeam vector                             | Buzz brain anchor                                                                     | Coverage status                                                                       |
+| ----------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Oracle manipulation (flash-loan-driven)   | Pattern E + DC-7 + CANDIDATE-O (Rhea $18.4M)                                          | COVERED `[INSPECTED]`                                                                 |
+| Reentrancy (ERC-777 callbacks)            | DC-1 + CANDIDATE-M (CEI-break-via-hook)                                               | COVERED `[INSPECTED]`                                                                 |
+| Flash loan attacks (83.3% of 2024)        | Pattern E propagation engine                                                          | COVERED `[INSPECTED]`                                                                 |
+| Governance attacks                        | DC-9 (privileged state mutation)                                                      | COVERED `[INSPECTED]`                                                                 |
+| LP token pricing vulns (Warp-style)       | NEW GAP — Buzz does not have a specific LP-token-as-collateral detector               | **GAP** `[ASSUMED]`                                                                   |
+| Solvency check gaps (Euler/Platypus)      | Partial — DC-9 sub-4 (state-not-invalidated) + Pattern A (paired functions)           | **PARTIAL GAP** — emergency-function solvency-skip not separately tracked `[ASSUMED]` |
+| Interest rate bugs (precision, 100% util) | NEW GAP — Buzz has CANDIDATE-K (HTTP/protocol state) but not interest-curve precision | **GAP** `[ASSUMED]`                                                                   |
 
 ### Gap analysis — vectors Buzz is NOT currently checking
 
@@ -182,8 +182,8 @@ The guide's "engage 2-3 audit firms" + "100% code coverage" recommendations are 
 
 `[INSPECTED]` 0xTeam's three bridge attack patterns map directly to existing Buzz brain:
 
-| 0xTeam bridge pattern               | Buzz brain anchor                                                                       |
-| ----------------------------------- | --------------------------------------------------------------------------------------- |
+| 0xTeam bridge pattern                                      | Buzz brain anchor                                                                       |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | Signature validation flaws (forge tx → mint on dest chain) | DC-7 (signature scope didn't bind chainId/contract) + Wormhole 2022 ground-truth anchor |
 | Centralized approval / multisig collusion                  | DC-9 sub-2 (zero-timelock migration) + CANDIDATE-N family ($320M+ combined)             |
 | Logic vulns (reentrancy, double issuance, inflation)       | CANDIDATE-A (cross-chain bridge) + CANDIDATE-N sub-1 (unchecked mint)                   |
@@ -200,11 +200,11 @@ Article does NOT introduce new technical content beyond what Buzz already catalo
 
 `[ASSUMED]` Application to current pipeline:
 
-| Stablecoin       | Enrichment from 0xTeam multi-chain article                                                                                                                                                                                                |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Usual USD0**   | No new vector. Existing CANDIDATE-N (MINTER_ROLE) + DC-9 (privileged state mutation) coverage is broader than the article. Continue current Gate 1 lens stack unchanged.                                                                  |
-| **Ethena USDe**  | No new vector. Queued Gate 2 (task #22) already targets MINTER_ROLE. Article's "centralized approval structure" risk is already captured by DC-9 family. Continue current Gate 1 lens stack unchanged.                                    |
-| **USDT0**        | No new vector. CANDIDATE-A cross-chain bridge coverage + Wormhole anchor (DC-7) + Nomad anchor (DC-7 sibling) all stronger than article's signature-flaw paragraph. Continue current Gate 1 lens stack unchanged.                          |
+| Stablecoin                    | Enrichment from 0xTeam multi-chain article                                                                                                                                                                                          |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Usual USD0**                | No new vector. Existing CANDIDATE-N (MINTER_ROLE) + DC-9 (privileged state mutation) coverage is broader than the article. Continue current Gate 1 lens stack unchanged.                                                            |
+| **Ethena USDe**               | No new vector. Queued Gate 2 (task #22) already targets MINTER_ROLE. Article's "centralized approval structure" risk is already captured by DC-9 family. Continue current Gate 1 lens stack unchanged.                              |
+| **USDT0**                     | No new vector. CANDIDATE-A cross-chain bridge coverage + Wormhole anchor (DC-7) + Nomad anchor (DC-7 sibling) all stronger than article's signature-flaw paragraph. Continue current Gate 1 lens stack unchanged.                   |
 | **General stablecoin Gate 1** | Use article as one-paragraph operator-brief summary when explaining "why we audit cross-chain stablecoins via DC-7 + CANDIDATE-A + DC-9" to non-technical reviewers. Pedagogical value, not technical-enrichment value. `[ASSUMED]` |
 
 ### ADOPTED items
@@ -271,6 +271,7 @@ The full hardening stack is **not adopted immediately** for two reasons:
 ### File pointer
 
 Brain entries: `brain/External-Frameworks.md` (this file, primary). Cross-reference rows in:
+
 - `brain/Doctrine.md` — file a Doctrine #31 candidate ("Treat the Buzz process as a hostile-environment OS — assume prompt-injection-induced internal tool calls and harden accordingly")
 - `brain/Vision-2027.md` — add a security-hardening lane item to the post-Mythos roadmap
 - `projects-mind/Security-Hardening.md` — NEW file, tracks the 5-item checklist progress with per-item PRD + ship-status
@@ -280,6 +281,7 @@ The paper validates that agent security is a REAL problem, not theoretical. File
 ---
 
 When additional external frameworks are surfaced by the operator or external research, file here with the same structure:
+
 1. Origin + status
 2. Convergence acknowledgement (which existing Buzz doctrines parallel the framework)
 3. ADOPTED items (with implementation pointer)
@@ -305,10 +307,10 @@ Doctrine #27 (post-incident audit saturation discount) applies a P(finding) disc
 
 Doctrine #27 saturation tiers should distinguish:
 
-| Audit pattern | P(finding) discount |
-|---|---|
-| Single-firm continuous (OpenZeppelin only) | 0.5-0.7× (lighter discount; one-lens coverage) |
-| Multi-firm saturated (3+ distinct firms) | 0.2-0.4× (heavier discount; multi-lens coverage) |
+| Audit pattern                                                                              | P(finding) discount                                                                                      |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Single-firm continuous (OpenZeppelin only)                                                 | 0.5-0.7× (lighter discount; one-lens coverage)                                                           |
+| Multi-firm saturated (3+ distinct firms)                                                   | 0.2-0.4× (heavier discount; multi-lens coverage)                                                         |
 | Multi-firm + contests + bug bounty + Hypernative + embedded security (Stacks sBTC profile) | 0.1-0.2× (deepest discount; STRONG-composition reality check still applies per Doctrine #34 STRONG tier) |
 
 **Status of calibration tiers:** PENDING 3rd single-firm-continuous anchor before promotion to standing Doctrine #27 sub-rule. Risk Labs UMA + Across V3 = 2 anchors so far; both share OpenZeppelin auditor. Need a 3rd protocol on the same model (e.g. another OpenZeppelin-continuous or another single-firm-continuous arrangement — likely candidates: Compound III, Aave V3 originally pre-Certora, MakerDAO core) to validate the calibration tier.
@@ -345,17 +347,17 @@ The base Selective-Coverage lens (sibling to FT-CircuitBreaker-Asymmetry) fires 
 
 Explicit OOS carve-outs from CoW v2 Immunefi page (per hunt file Step 1 PROFILE):
 
-| Carve-out | Genuine-risk-surface revealed |
-|---|---|
-| Settlement transaction DOS / sandwich attacks | CoW relies on solver competition + DAO governance to discipline DoS; doesn't believe on-chain defense is buildable |
-| Solver fund theft | Trusted-solver allowlist IS the threat model; solver behavior is treated as PRINCIPAL, not BUG |
-| Price manipulation by solvers | Same — solver IS the price authority, not the protocol |
-| Migration methods | One-time admin paths assumed safe; not a defended surface |
-| Vulnerabilities mentioned in CoW Swap's official audits | Prior-disclosed findings = institutional knowledge, not bug-bounty surface |
-| Pre-exploited / previously reported vulnerabilities | Standard de-dup |
-| Attacks requiring leaked keys / privileged access | Operator security is OFF the on-chain threat model |
-| 51% attacks, gas optimization, best-practice critiques, Sybil, gas depletion | Standard Immunefi excludes |
-| Non-Ethereum mainnet | Cross-chain trust intentionally OFF-scope (Gnosis chain deployment OOS despite being deployed) |
+| Carve-out                                                                    | Genuine-risk-surface revealed                                                                                      |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Settlement transaction DOS / sandwich attacks                                | CoW relies on solver competition + DAO governance to discipline DoS; doesn't believe on-chain defense is buildable |
+| Solver fund theft                                                            | Trusted-solver allowlist IS the threat model; solver behavior is treated as PRINCIPAL, not BUG                     |
+| Price manipulation by solvers                                                | Same — solver IS the price authority, not the protocol                                                             |
+| Migration methods                                                            | One-time admin paths assumed safe; not a defended surface                                                          |
+| Vulnerabilities mentioned in CoW Swap's official audits                      | Prior-disclosed findings = institutional knowledge, not bug-bounty surface                                         |
+| Pre-exploited / previously reported vulnerabilities                          | Standard de-dup                                                                                                    |
+| Attacks requiring leaked keys / privileged access                            | Operator security is OFF the on-chain threat model                                                                 |
+| 51% attacks, gas optimization, best-practice critiques, Sybil, gas depletion | Standard Immunefi excludes                                                                                         |
+| Non-Ethereum mainnet                                                         | Cross-chain trust intentionally OFF-scope (Gnosis chain deployment OOS despite being deployed)                     |
 
 **Carve-out → genuine-risk-surface mapping:**
 

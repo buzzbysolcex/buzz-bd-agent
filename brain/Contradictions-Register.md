@@ -151,7 +151,7 @@ A secondary refinement applies to pure-DEX / pure-aggregator / pure-router targe
 
 **Conflict scenario:** A Gate 1 lens application produces a candidate finding where the lens narrative is structurally sound but the primitive-grep check returns empty (the protocol does not have the surface the lens names). Rule A says: tag the claim `[ASSUMED]`, proceed to file the row, submission grading happens at Skeptic/Gate 2. Rule B says: DO NOT generate the candidate row at all; empty grep = lens does not apply. Rule C says: keep moving, deterministic dispatch.
 
-**Proposed resolution:** RESOLVED via doctrine ordering. Doctrine #30's PRIMITIVE-GREP CHECK gates the generation of a candidate row at Step 5.4 (between brain-lens application and 5-target checklist). R8 tags govern the *content* of claims that survive the grep check — not the *existence* of the candidate row itself. The hierarchy: Step 5.4 PRIMITIVE-GREP CHECK fires FIRST → if empty, candidate row never gets drafted (no R8 tag question). If hit, candidate row drafts with per-claim R8 tags. Hyperactive Formula's deterministic dispatch operates inside this verified-candidate space, not bypassing it.
+**Proposed resolution:** RESOLVED via doctrine ordering. Doctrine #30's PRIMITIVE-GREP CHECK gates the generation of a candidate row at Step 5.4 (between brain-lens application and 5-target checklist). R8 tags govern the _content_ of claims that survive the grep check — not the _existence_ of the candidate row itself. The hierarchy: Step 5.4 PRIMITIVE-GREP CHECK fires FIRST → if empty, candidate row never gets drafted (no R8 tag question). If hit, candidate row drafts with per-claim R8 tags. Hyperactive Formula's deterministic dispatch operates inside this verified-candidate space, not bypassing it.
 
 **Resolution detail:** No rule change needed — the resolution is the ordering already present in Doctrine #30 (PRIMITIVE-GREP CHECK is sub-step 5.4, before candidate-row drafting). Document the ordering explicitly in the Standing-Intake `STEP 5 — GATE 1 EXECUTION` section: "5.4 PRIMITIVE-GREP CHECK runs BEFORE candidate-row drafting. If grep returns empty, the lens does not apply and no candidate row is generated regardless of R8-tag potential. R8 tags govern only claims that survive 5.4."
 
@@ -167,7 +167,7 @@ A secondary refinement applies to pure-DEX / pure-aggregator / pure-router targe
 
 **Conflict scenario:** An Olympus BLVaultLido-class Balancer-LP-wrapping protocol with two-sided MIN-cap defense (Rule A satisfied) but using a Chainlink feed wrapper that consumes `latestAnswer()` instead of `latestRoundData()` (Rule B sub-rule 1 fails — sub-7b flavor). Rule A says: structurally complete, FORECLOSURE-RECEIPT verdict. Rule B says: 4/5 sub-rules at best, DIRTY canonical pattern — flag as Gate 2 candidate.
 
-**Proposed resolution:** SCOPE-LIMIT both. Rule A's "architecturally complete" claim is bounded to *read-only reentrancy on pool reserves* (the specific Pattern D defense (b) Balancer V2 class). It does NOT foreclose oracle-feed-side staleness, because two-sided MIN-cap depends on the oracle returning a fresh price — if the oracle wrapper strips staleness, the MIN-cap is computing against a stale `expectedAsset` and the conservative-bounding property no longer holds.
+**Proposed resolution:** SCOPE-LIMIT both. Rule A's "architecturally complete" claim is bounded to _read-only reentrancy on pool reserves_ (the specific Pattern D defense (b) Balancer V2 class). It does NOT foreclose oracle-feed-side staleness, because two-sided MIN-cap depends on the oracle returning a fresh price — if the oracle wrapper strips staleness, the MIN-cap is computing against a stale `expectedAsset` and the conservative-bounding property no longer holds.
 
 **Resolution detail:** Amend Doctrine #29 v1.1 amendment statement: "The two-sided MIN-cap is architecturally complete for **read-only reentrancy on Balancer/Curve pool reserves** (Pattern D defense (b)). Oracle-feed staleness defense (DC-12 sub-7 wrapper triad) is a separate layer and remains required. A protocol with two-sided MIN-cap + DC-12 sub-7 DIRTY wrapper is still vulnerable — the MIN-cap protects against pool-reserve manipulation but propagates oracle-side staleness directly into the conservative bound." Document Olympus BLVaultLido's oracle-wrapper status as a Gate 1 follow-up before granting FORECLOSURE-RECEIPT on the parent finding.
 
@@ -329,13 +329,13 @@ _Brain Contradictions Register | v1.3 | 2026-05-27 ~02:25 UTC | 16 entries (15 v
 
 # === SECTION P2 — PILLAR 2 (HSAAS / CONTENT) CONTRADICTIONS ===
 
-*(v1.4 seed: none yet — first operational P2 contradictions emerge when HSaaS outreach cycle goes live and engagement data accumulates. Anticipated first conflict: template-A vs template-B A/B winner-vs-Hyperactive-Formula deterministic-dispatch on next outreach batch.)*
+_(v1.4 seed: none yet — first operational P2 contradictions emerge when HSaaS outreach cycle goes live and engagement data accumulates. Anticipated first conflict: template-A vs template-B A/B winner-vs-Hyperactive-Formula deterministic-dispatch on next outreach batch.)_
 
 ---
 
 # === SECTION P3 — PILLAR 3 (CORPUS) CONTRADICTIONS ===
 
-*(v1.4 seed: none yet — first operational P3 contradictions emerge when Phase 2 corpus consumer runs and classification mix produces a DETECTOR_SEED row that conflicts with an existing Pillar 4 detector. Anticipated first conflict: corpus-extracted historical pattern flagged DETECTOR_SEED vs the same pattern already FORECLOSED in Patterns-Defense-Classes.md as a defended-by-design class.)*
+_(v1.4 seed: none yet — first operational P3 contradictions emerge when Phase 2 corpus consumer runs and classification mix produces a DETECTOR_SEED row that conflicts with an existing Pillar 4 detector. Anticipated first conflict: corpus-extracted historical pattern flagged DETECTOR_SEED vs the same pattern already FORECLOSED in Patterns-Defense-Classes.md as a defended-by-design class.)_
 
 ---
 
@@ -377,16 +377,19 @@ When the cap binds, drop from the bottom of the priority list. The cap remains 3
 **Pattern observation:** Operator briefs occasionally cite expected program profile (cap, KYC, version, no-KYC status) that diverges from the live Immunefi/Cantina page profile at dispatch time. Day-27 anchored on Kiln: brief said "Kiln on-chain **v1**, $1M cap, NO KYC", live page = "Kiln On-Chain **v2** only (v1 URL 404s), $500K Critical cap, KYC REQUIRED". 4-axis discrepancy (version + cap + KYC + scope).
 
 **Why this is INFO not a contradiction:**
+
 - Operator briefs are sourced from rotating signal-feeds, contest aggregators, and Telegram referrals, where profile data ages
 - Live page is canonical at dispatch time
 - The Standing-Intake Step 1 PROFILE step is precisely the corrective control — it forces canonical-page fetch before EV computation
 
 **How to apply:**
+
 - Step 1 PROFILE is MANDATORY (already enforced by `standing-intake-protocol.md`); never act on briefed cap/KYC/scope/version without WebFetch verification
 - When the live page diverges materially (cap ≥50% drift OR KYC flag flip OR major version-change), record the drift in the hunt receipt as `[ASSUMED]→[EXECUTED via WebFetch]` correction trace
 - Operator briefs remain the **dispatch trigger** even when imprecise; do not block on profile-verification, just verify before EV-commit
 
 **Recurrence count:** 3 anchored events:
+
 1. Kiln 2026-05-27 (4-axis drift: v1→v2, $1M→$500K, NO KYC→KYC, scope ~half)
 2. Cap 2026-05-27 evening (1-axis but high-impact: **platform discrepancy** — brief said Immunefi, live is Sherlock #114 $1M USDC since 2025-10-24; all 4 candidate Immunefi URLs returned 404)
 3. Gearbox 2026-05-27 23:24 (scope drift: brief listed `Gearbox-Protocol/router-v3` as in-scope, live scope file made NO mention of router-v3, GitHub repo 404). Same-axis as #2 but on SCOPE-asset dimension rather than PLATFORM dimension.
@@ -414,6 +417,7 @@ Pattern transition: simple cap/KYC/version drift → **platform-routing drift**.
 **How to apply (Standing-Intake Step 5 hardening proposal):**
 
 When Gate 1 surface map includes any DC-7 hypothesis that spans protocol boundaries (X writes, Y reads, OR X writes + downstream Y consumes via callback/integration), the Gate 1 file MUST include a "**Cross-Protocol Defense Enumeration**" subsection that lists:
+
 - Consumer-side replay defenses (saltIsSpent / nonceUsed / commitmentRevealed patterns)
 - Consumer-side freshness defenses (live-read vs cached-read, stale-tolerance windows)
 - Writer-side key-binding determinism (is the key fully determined by stored state? Or does attacker control any input?)
@@ -421,6 +425,7 @@ When Gate 1 surface map includes any DC-7 hypothesis that spans protocol boundar
 If 2+ of those 3 defenses are present → DC-7 EXCLUSION sub-pattern fires (see Patterns-Defense-Classes.md), foreclose at Gate 1.
 
 **Recurrence count:** **2 anchored events — PROMOTION-ELIGIBLE:**
+
 1. Cap C1 (advanceTotp + EigenLayer race) — Gate 1 novelty 35% → actual <5% = 7× overestimate
 2. Cap C3 (PriceOracle pause-asymmetry) — Gate 1 novelty 30% → actual ~4% = **7.5× overestimate, exact match to predicted median**
 
@@ -441,16 +446,19 @@ Both anchors fired on cross-protocol DC-7 hypotheses where the consumer-side rep
 **Pattern observation:** Subagent next-target recommendations can be stale by 7-14 days when the source watchlist priority list wasn't updated post-canonical-promotion. The Cap C3 G2 agent + Function FBTC G1 agent both recommended OnRe as "CANDIDATE-G promotion catalyst" — but CG was already PROMOTED to DC-8 (not DC-7) on 2026-05-18/19 via Ogie msg 7259 §5A. OnRe G1 Step 0.5 5-channel check caught the drift in ~7 min via brain-ledger lookup (Channel 1: `Patterns-Defense-Classes.md:265-345` DC-8 anchor record).
 
 **Why this is INFO not a contradiction:**
+
 - The drift is operator-brief-class (msg 7259 was a promotion directive that landed but watchlist priority list wasn't synced)
 - Step 0.5 5-channel check IS the defense — and it FIRED CORRECTLY here, ~7 min cost vs ~30-60 min sub-agent re-derivation against unchanged source
 - This is the SECOND positive worked example of Step 0.5 catching brief staleness (1st: Paxos T+3 redispatch 2026-05-27 — different staleness mechanism but same defense activated)
 
 **How to apply:**
+
 - Step 0.5 5-channel check stays MANDATORY (already enforced in Standing-Intake protocol)
 - Channel 1 (brain ledger) is the highest-yield channel for catching post-promotion drift — it has both the canonical doctrine + the original anchor evidence + the Watchlist row at synchronization time
 - When dispatching from a stale watchlist row, NORMAL behavior is the Step 0.5 catches it within 5-10 min — DO NOT pre-validate watchlist freshness, just dispatch and let Step 0.5 do its job
 
 **Cross-references:**
+
 - INFO #19 (platform-routing drift): brief said Immunefi, live was Sherlock #114 — 1-axis drift on PLATFORM dimension
 - INFO #20 (novelty over-estimate): cross-protocol DC-7 hypotheses 7× overestimate — 1-axis drift on NOVELTY dimension
 - INFO #21 (brief-generation freshness drift, THIS entry): watchlist row stale post-canonical-promotion — 1-axis drift on TIME dimension
@@ -459,28 +467,28 @@ The three INFO entries together describe **three distinct drift axes** that Stan
 
 **2026-05-28 EXPANSION 2 — Axis 5 sub-class NEW (Spark Gate 1):**
 
-| Sub-class | Drift mechanism | Anchor |
-|---|---|---|
-| **5a PLATFORM-CONFUSION-CANTINA-AS-AUDITOR** | Brief said Cantina (assumed = bounty platform); live = Immunefi (`immunefi.com/bug-bounty/sparklend/`). Cantina is an audit firm name colocated in the program's audit history, not the bounty platform. Operator-brief confused "audited by Cantina" with "Cantina-hosted bounty." | Spark Immunefi $5M Gate 1 2026-05-28 evening |
-| **5b PLATFORM-DIRECT-BOUNTY-NOT-LISTED** (NEW 2026-05-28 night) | Brief assumed Immunefi-listed program; live = protocol runs DIRECT bounty (private GitHub gist + Twitter/Telegram/Discord/Signal). `/frax/` + `/fraxfinance/` slugs both 404 across 219 Immunefi programs. Submission path is protocol-direct, not platform-mediated. **Cap payment currency = FRAX+FXS tokens (NOT USD)** — additional sub-axis. Cap realizability haircut: 10% exploit OR $10M (lesser) in protocol-native tokens; FX-realized cap ~33% of nominal at typical FRAX/FXS prices. | FRAX core Gate 1 2026-05-28 night |
-| **5c PRODUCT-LINE-VS-BOUNTY-SCOPE-COLLAPSE** (NEW 2026-05-29) | Brief described the PRODUCT LINE ("Sky.money: SKY + USDS + sUSDS + LayerZero multi-chain"); live Immunefi SCOPE bounties only the legacy DSS classic L1 core (Vat/Dai/Spot/Pot/Vow/Flap/Flop/Jug/Median/OSM/RwaInputConduit2/WETH). The product-rich substrate (USDS upgradeable + sUSDS + LayerZero OFT in `makerdao/usds` + `sky-ecosystem-token`) is OUT-OF-SCOPE. **product ≠ bounty-scope.** Sub-rule: when a brief names a product line AND references protocol-canonical multi-chain architecture, the Step 1 PROFILE preflight MUST enumerate which contracts the program page actually bounties. When the brief's PRIMARY substrate lands OOS, the drift IS the FORECLOSE signal (ties to Step 3a §3a NEGATIVE-WORKED-EXAMPLE 4th anchor). [Hunt file labeled this "Axis 5a"; filed as 5c since 5a was already PLATFORM-CONFUSION.] | Sky DSS Immunefi $10M Gate 1 2026-05-29 (FORECLOSED) |
-| **5d+ (reserved)** | Sub-classes d-f reserved for future direct-bounty / private-disclosure / platform-routing-edge cases | — |
+| Sub-class                                                       | Drift mechanism                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Anchor                                               |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| **5a PLATFORM-CONFUSION-CANTINA-AS-AUDITOR**                    | Brief said Cantina (assumed = bounty platform); live = Immunefi (`immunefi.com/bug-bounty/sparklend/`). Cantina is an audit firm name colocated in the program's audit history, not the bounty platform. Operator-brief confused "audited by Cantina" with "Cantina-hosted bounty."                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Spark Immunefi $5M Gate 1 2026-05-28 evening         |
+| **5b PLATFORM-DIRECT-BOUNTY-NOT-LISTED** (NEW 2026-05-28 night) | Brief assumed Immunefi-listed program; live = protocol runs DIRECT bounty (private GitHub gist + Twitter/Telegram/Discord/Signal). `/frax/` + `/fraxfinance/` slugs both 404 across 219 Immunefi programs. Submission path is protocol-direct, not platform-mediated. **Cap payment currency = FRAX+FXS tokens (NOT USD)** — additional sub-axis. Cap realizability haircut: 10% exploit OR $10M (lesser) in protocol-native tokens; FX-realized cap ~33% of nominal at typical FRAX/FXS prices.                                                                                                                                                                                                                                                                                                                                             | FRAX core Gate 1 2026-05-28 night                    |
+| **5c PRODUCT-LINE-VS-BOUNTY-SCOPE-COLLAPSE** (NEW 2026-05-29)   | Brief described the PRODUCT LINE ("Sky.money: SKY + USDS + sUSDS + LayerZero multi-chain"); live Immunefi SCOPE bounties only the legacy DSS classic L1 core (Vat/Dai/Spot/Pot/Vow/Flap/Flop/Jug/Median/OSM/RwaInputConduit2/WETH). The product-rich substrate (USDS upgradeable + sUSDS + LayerZero OFT in `makerdao/usds` + `sky-ecosystem-token`) is OUT-OF-SCOPE. **product ≠ bounty-scope.** Sub-rule: when a brief names a product line AND references protocol-canonical multi-chain architecture, the Step 1 PROFILE preflight MUST enumerate which contracts the program page actually bounties. When the brief's PRIMARY substrate lands OOS, the drift IS the FORECLOSE signal (ties to Step 3a §3a NEGATIVE-WORKED-EXAMPLE 4th anchor). [Hunt file labeled this "Axis 5a"; filed as 5c since 5a was already PLATFORM-CONFUSION.] | Sky DSS Immunefi $10M Gate 1 2026-05-29 (FORECLOSED) |
+| **5d+ (reserved)**                                              | Sub-classes d-f reserved for future direct-bounty / private-disclosure / platform-routing-edge cases                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | —                                                    |
 
 Detection signal for Step 1 PROFILE: when brief says "Cantina" + program name, cross-check on Cantina's program listing AND Immunefi's program listing. If Cantina hosts ONLY audit history while Immunefi hosts the live bounty, flag Axis 5a drift and pivot platform identification to Immunefi for the actual submission path. Same pattern likely applies to Trail of Bits / OpenZeppelin / Spearbit (audit firms that also have separate bounty programs but most engagements are auditor-only).
 
 **2026-05-28 EXPANSION — INFO #19 now 9-axis drift catalog (Stargate V2 + Flux Finance same-day):**
 
-| Axis | Drift dimension | Anchor |
-|---|---|---|
-| 1 | VERSION (major→minor) | Cap (brief v2.x → live v1.x) |
-| 2 | CAP (USD) | Kiln (brief $200K → live $100K) |
-| 3 | KYC requirement | Gearbox (brief no-KYC → live YES) |
-| 4 | SCOPE assets | Function FBTC (brief 3-asset → live 1-asset) |
-| 5 | PLATFORM | OnRe/etc (Immunefi vs Sherlock) |
-| 6 | TIME (LIVE-since staleness) | OnRe (brief said new → live 17d old) |
-| 7 | **BRIEF-VERSION (NEW 2026-05-28)** | **Stargate (brief said V3 — `stg-evm-v3` GitHub 404; live = V2 `stargate-protocol/stargate-v2`)** |
-| 8 | **SUBSTRATE-AFFILIATION (NEW 2026-05-28)** | **Flux Finance (brief said FRAX-affiliated; live = Ondo Finance team)** |
-| 9 | **ORG-NAME (NEW 2026-05-28)** | **Flux Finance (brief said `fluxfinance/`; canonical = `flux-finance/`)** |
+| Axis | Drift dimension                            | Anchor                                                                                            |
+| ---- | ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| 1    | VERSION (major→minor)                      | Cap (brief v2.x → live v1.x)                                                                      |
+| 2    | CAP (USD)                                  | Kiln (brief $200K → live $100K)                                                                   |
+| 3    | KYC requirement                            | Gearbox (brief no-KYC → live YES)                                                                 |
+| 4    | SCOPE assets                               | Function FBTC (brief 3-asset → live 1-asset)                                                      |
+| 5    | PLATFORM                                   | OnRe/etc (Immunefi vs Sherlock)                                                                   |
+| 6    | TIME (LIVE-since staleness)                | OnRe (brief said new → live 17d old)                                                              |
+| 7    | **BRIEF-VERSION (NEW 2026-05-28)**         | **Stargate (brief said V3 — `stg-evm-v3` GitHub 404; live = V2 `stargate-protocol/stargate-v2`)** |
+| 8    | **SUBSTRATE-AFFILIATION (NEW 2026-05-28)** | **Flux Finance (brief said FRAX-affiliated; live = Ondo Finance team)**                           |
+| 9    | **ORG-NAME (NEW 2026-05-28)**              | **Flux Finance (brief said `fluxfinance/`; canonical = `flux-finance/`)**                         |
 
 **Why 9-axis matters:** Step 1 PROFILE preflight must cross-check ALL 9 axes against the operator brief. Axes 7-9 added today are all anchored by today's hunts. Step 5.6 5-Target Quality Checklist + Step 5.11 Cross-Protocol Enumeration catch most downstream drift; Step 1 PROFILE preflight catches it cheapest (pre-clone).
 
@@ -501,11 +509,13 @@ Detection signal for Step 1 PROFILE: when brief says "Cantina" + program name, c
 **Pattern observation:** Doctrine #34 (Post-Audit Composition Multiplier) was used to justify the DISC-020 Filecoin LEAD-1 finding. Doctrine #34 is NOT contradicted — the post-audit composition surface on Filecoin FIP-0109 IS a high-EV class. The misapplication was: we targeted the `notify` field (informational callback) as the composition surface, but the authorization-path (`verified_allocation_key + batch_claim_allocations` to verified registry actor) is the SEPARATE code path that controls economic outcomes.
 
 **Why this matters:**
+
 - Doctrine #34 sub-class b (audit-regression / compositional-interaction) requires identifying the TARGET SURFACE that controls the economic outcome
 - For notification-callback compositional surfaces, Step 5.11 Cross-Protocol Defense Enumeration must enumerate: does the notification's return value control the economic outcome, or is there a SEPARATE authorization path that validates independently?
 - If SEPARATE, the notification surface is NOT a Doctrine #34 sub-class b target — it's a DC-13 sub-pattern 5 FORECLOSE (notification-callback-informational-only)
 
 **Cross-references:**
+
 - Doctrine #39 CANDIDATE NEW (Notification Path ≠ Authorization Path) — companion doctrine ensuring future Doctrine #34 sub-b applications check this gate first
 - DC-13 sub-pattern 5 (notification-callback-informational-only Phase 0 FORECLOSE gate)
 - DISC-020 Filecoin closure productive — taught us the Phase 0 gate

@@ -679,1109 +679,1386 @@
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T13:31:18Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 758 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T13:31:57Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 758 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T14:02:13Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 758 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T14:33:10Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 758 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T15:04:11Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 758 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T15:19:24Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 759 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T15:36:05Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 759 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T16:06:14Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 759 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T16:37:05Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 759 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T17:08:10Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 759 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T17:39:07Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 759 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T17:52:14Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 759 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T17:57:24Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 759 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T18:03:29Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 760 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T18:07:36Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 760 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T18:15:27Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T18:16:37Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T18:47:27Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T19:18:10Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T19:49:13Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T20:20:07Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T20:51:13Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T21:22:07Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T21:53:36Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T22:24:55Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T22:55:12Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T23:26:06Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-22T23:57:22Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T00:28:17Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T00:59:06Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T01:29:24Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T02:00:10Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 764 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T02:31:30Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T03:02:12Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T03:25:00Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 763 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T03:35:02Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 765 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T03:40:50Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 766 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T03:45:58Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 770 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T03:51:05Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 771 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T04:07:01Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 772 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T04:08:06Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 773 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T04:10:45Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 773 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T04:13:12Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 774 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T04:18:41Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 776 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T04:23:27Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 777 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T04:31:52Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 778 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T04:37:35Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 780 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T04:42:17Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 781 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T04:48:42Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 782 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T04:56:53Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 783 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T05:06:36Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 784 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T05:10:43Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 785 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T05:20:39Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 785 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T05:32:02Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 786 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T05:34:19Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 787 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T05:34:38Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 787 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T05:36:05Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 788 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T05:38:47Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 788 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T06:06:21Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 788 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T06:12:00Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 788 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T06:22:11Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T06:38:23Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T07:09:37Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T07:40:20Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T08:11:14Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T08:42:07Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T09:13:12Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T09:44:11Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T10:15:12Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T10:46:07Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T11:17:12Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T11:48:11Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T12:19:22Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T12:50:09Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T13:21:11Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T13:52:06Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T14:23:11Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T14:54:07Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T15:25:14Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T15:56:06Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T16:27:15Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T16:58:05Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T17:15:14Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T17:29:15Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T17:59:37Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T18:29:47Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T18:59:51Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 791 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T19:08:39Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 792 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T19:20:39Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 792 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T19:33:48Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 793 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T19:34:14Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 793 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T19:48:25Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 793 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T19:53:21Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 796 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T19:59:00Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 796 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T20:27:20Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 794 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T20:47:34Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 795 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T21:51:33Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 795 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T22:08:50Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 795 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T22:18:00Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 796 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T22:45:10Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 796 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T22:51:40Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 796 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-23T23:08:09Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 797 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T03:53:05Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 798 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T04:06:51Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 798 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T04:08:13Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 798 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T04:14:47Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 799 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T04:24:03Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 800 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T04:34:27Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 800 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T04:46:35Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 801 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T04:49:14Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 802 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T04:55:37Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 802 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T04:59:26Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 805 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T05:03:35Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 805 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T05:06:22Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 801 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T05:10:35Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 801 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T05:16:42Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 801 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T06:04:14Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 801 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T06:11:42Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 802 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T11:33:54Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 802 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T13:02:18Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 802 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T13:10:58Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 803 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T13:17:19Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 805 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T13:24:38Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 806 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T13:28:18Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 806 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T13:35:30Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 808 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T13:38:01Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 808 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T17:27:30Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 808 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T19:11:49Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 808 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T19:50:42Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 809 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T19:58:39Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 810 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T20:03:15Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 810 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T20:16:39Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 812 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T20:17:11Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 812 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T20:21:09Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 813 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T20:40:18Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 815 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T21:05:26Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 815 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T21:08:03Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 815 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T21:20:25Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 815 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T21:31:24Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 816 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T21:40:58Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 816 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T21:47:46Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 817 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T21:52:09Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 817 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T21:59:04Z — session end
+
 - branch: `main` @ `6cbb435` (dirty: 817 files)
 - last commit: 6cbb435 feat: Vision 2027 activation + Lane 4 scaffolding + hunt auto-index hook
 
 ## 2026-05-24T22:00:53Z — session end
+
 - branch: `main` @ `e810bd3` (dirty: 813 files)
 - last commit: e810bd3 brain: commit Clara intake decisions — CANDIDATE T-Z + DC-11..15 + Doctrine #31
 
 ## 2026-05-24T22:06:36Z — session end
+
 - branch: `main` @ `2a06c4f` (dirty: 780 files)
 - last commit: 2a06c4f brain-backup-2026-05-24-auto
 
 ## 2026-05-24T22:13:18Z — session end
+
 - branch: `main` @ `2189248` (dirty: 780 files)
 - last commit: 2189248 brain-backup-2026-05-24-auto
 
 ## 2026-05-24T22:22:48Z — session end
+
 - branch: `main` @ `f801b96` (dirty: 781 files)
 - last commit: f801b96 brain-backup-2026-05-24-auto
 
 ## 2026-05-24T22:28:10Z — session end
+
 - branch: `main` @ `f801b96` (dirty: 784 files)
 - last commit: f801b96 brain-backup-2026-05-24-auto
 
 ## 2026-05-24T22:38:07Z — session end
+
 - branch: `main` @ `f801b96` (dirty: 785 files)
 - last commit: f801b96 brain-backup-2026-05-24-auto
 
 ## 2026-05-24T22:45:42Z — session end
+
 - branch: `main` @ `f801b96` (dirty: 785 files)
 - last commit: f801b96 brain-backup-2026-05-24-auto
 
 ## 2026-05-24T22:58:28Z — session end
+
 - branch: `main` @ `f801b96` (dirty: 787 files)
 - last commit: f801b96 brain-backup-2026-05-24-auto
 
 ## 2026-05-24T23:14:48Z — session end
+
 - branch: `main` @ `f801b96` (dirty: 787 files)
 - last commit: f801b96 brain-backup-2026-05-24-auto
 
 ## 2026-05-24T23:28:35Z — session end
+
 - branch: `main` @ `f801b96` (dirty: 787 files)
 - last commit: f801b96 brain-backup-2026-05-24-auto
 
 ## 2026-05-24T23:50:22Z — session end
+
 - branch: `main` @ `f801b96` (dirty: 788 files)
 - last commit: f801b96 brain-backup-2026-05-24-auto
 
 ## 2026-05-25T00:05:58Z — session end
+
 - branch: `main` @ `f801b96` (dirty: 788 files)
 - last commit: f801b96 brain-backup-2026-05-24-auto
 
 ## 2026-05-25T00:23:55Z — session end
+
 - branch: `main` @ `f801b96` (dirty: 788 files)
 - last commit: f801b96 brain-backup-2026-05-24-auto
 
 ## 2026-05-25T00:28:17Z — session end
+
 - branch: `main` @ `fd13b68` (dirty: 787 files)
 - last commit: fd13b68 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T00:31:09Z — session end
+
 - branch: `main` @ `8528c4e` (dirty: 787 files)
 - last commit: 8528c4e brain-backup-2026-05-25-auto
 
 ## 2026-05-25T00:34:46Z — session end
+
 - branch: `main` @ `8528c4e` (dirty: 788 files)
 - last commit: 8528c4e brain-backup-2026-05-25-auto
 
 ## 2026-05-25T00:57:06Z — session end
+
 - branch: `main` @ `d52302d` (dirty: 787 files)
 - last commit: d52302d brain-backup-2026-05-25-auto
 
 ## 2026-05-25T01:18:29Z — session end
+
 - branch: `main` @ `d52302d` (dirty: 788 files)
 - last commit: d52302d brain-backup-2026-05-25-auto
 
 ## 2026-05-25T01:27:25Z — session end
+
 - branch: `main` @ `d52302d` (dirty: 791 files)
 - last commit: d52302d brain-backup-2026-05-25-auto
 
 ## 2026-05-25T01:58:38Z — session end
+
 - branch: `main` @ `d52302d` (dirty: 791 files)
 - last commit: d52302d brain-backup-2026-05-25-auto
 
 ## 2026-05-25T02:29:32Z — session end
+
 - branch: `main` @ `d52302d` (dirty: 791 files)
 - last commit: d52302d brain-backup-2026-05-25-auto
 
 ## 2026-05-25T03:00:08Z — session end
+
 - branch: `main` @ `d52302d` (dirty: 791 files)
 - last commit: d52302d brain-backup-2026-05-25-auto
 
 ## 2026-05-25T04:01:19Z — session end
+
 - branch: `main` @ `d52302d` (dirty: 791 files)
 - last commit: d52302d brain-backup-2026-05-25-auto
 
 ## 2026-05-25T05:02:16Z — session end
+
 - branch: `main` @ `d52302d` (dirty: 791 files)
 - last commit: d52302d brain-backup-2026-05-25-auto
 
 ## 2026-05-25T06:03:34Z — session end
+
 - branch: `main` @ `d52302d` (dirty: 791 files)
 - last commit: d52302d brain-backup-2026-05-25-auto
 
 ## 2026-05-25T06:33:27Z — session end
+
 - branch: `main` @ `d52302d` (dirty: 791 files)
 - last commit: d52302d brain-backup-2026-05-25-auto
 
 ## 2026-05-25T07:34:22Z — session end
+
 - branch: `main` @ `d52302d` (dirty: 791 files)
 - last commit: d52302d brain-backup-2026-05-25-auto
 
 ## 2026-05-25T08:35:20Z — session end
+
 - branch: `main` @ `d52302d` (dirty: 791 files)
 - last commit: d52302d brain-backup-2026-05-25-auto
 
 ## 2026-05-25T11:25:34Z — session end
+
 - branch: `main` @ `8a3533b` (dirty: 791 files)
 - last commit: 8a3533b brain-backup-2026-05-25-auto
 
 ## 2026-05-25T11:30:56Z — session end
+
 - branch: `main` @ `589cbb8` (dirty: 791 files)
 - last commit: 589cbb8 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T12:27:34Z — session end
+
 - branch: `main` @ `589cbb8` (dirty: 802 files)
 - last commit: 589cbb8 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T12:27:56Z — session end
+
 - branch: `main` @ `589cbb8` (dirty: 802 files)
 - last commit: 589cbb8 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T12:33:00Z — session end
+
 - branch: `main` @ `c1a1fb1` (dirty: 801 files)
 - last commit: c1a1fb1 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T12:44:55Z — session end
+
 - branch: `main` @ `c1a1fb1` (dirty: 804 files)
 - last commit: c1a1fb1 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T12:58:01Z — session end
+
 - branch: `main` @ `5560d69` (dirty: 806 files)
 - last commit: 5560d69 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T13:15:08Z — session end
+
 - branch: `main` @ `5560d69` (dirty: 807 files)
 - last commit: 5560d69 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T13:17:28Z — session end
+
 - branch: `main` @ `5560d69` (dirty: 810 files)
 - last commit: 5560d69 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T13:19:13Z — session end
+
 - branch: `main` @ `5560d69` (dirty: 811 files)
 - last commit: 5560d69 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T13:22:17Z — session end
+
 - branch: `main` @ `5560d69` (dirty: 812 files)
 - last commit: 5560d69 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T13:28:20Z — session end
+
 - branch: `main` @ `5560d69` (dirty: 812 files)
 - last commit: 5560d69 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T13:31:15Z — session end
+
 - branch: `main` @ `3d1f691` (dirty: 811 files)
 - last commit: 3d1f691 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T13:43:56Z — session end
+
 - branch: `main` @ `3d1f691` (dirty: 812 files)
 - last commit: 3d1f691 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T13:54:36Z — session end
+
 - branch: `main` @ `3d1f691` (dirty: 812 files)
 - last commit: 3d1f691 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T14:03:32Z — session end
+
 - branch: `main` @ `3d1f691` (dirty: 812 files)
 - last commit: 3d1f691 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T14:09:36Z — session end
+
 - branch: `main` @ `3d1f691` (dirty: 817 files)
 - last commit: 3d1f691 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T14:17:06Z — session end
+
 - branch: `main` @ `3d1f691` (dirty: 818 files)
 - last commit: 3d1f691 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T14:29:22Z — session end
+
 - branch: `main` @ `3d1f691` (dirty: 818 files)
 - last commit: 3d1f691 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T14:51:22Z — session end
+
 - branch: `main` @ `f6caf97` (dirty: 817 files)
 - last commit: f6caf97 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T15:05:44Z — session end
+
 - branch: `main` @ `f6caf97` (dirty: 818 files)
 - last commit: f6caf97 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T15:20:20Z — session end
+
 - branch: `main` @ `f6caf97` (dirty: 818 files)
 - last commit: f6caf97 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T15:29:37Z — session end
+
 - branch: `main` @ `f6caf97` (dirty: 818 files)
 - last commit: f6caf97 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T16:29:52Z — session end
+
 - branch: `main` @ `f6caf97` (dirty: 818 files)
 - last commit: f6caf97 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T17:07:36Z — session end
+
 - branch: `main` @ `f6caf97` (dirty: 818 files)
 - last commit: f6caf97 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T17:20:32Z — session end
+
 - branch: `main` @ `57da559` (dirty: 817 files)
 - last commit: 57da559 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T17:34:21Z — session end
+
 - branch: `main` @ `57da559` (dirty: 820 files)
 - last commit: 57da559 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T17:34:41Z — session end
+
 - branch: `main` @ `57da559` (dirty: 820 files)
 - last commit: 57da559 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T17:45:44Z — session end
+
 - branch: `main` @ `57da559` (dirty: 827 files)
 - last commit: 57da559 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T17:47:29Z — session end
+
 - branch: `main` @ `17ce839` (dirty: 826 files)
 - last commit: 17ce839 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T17:52:38Z — session end
+
 - branch: `main` @ `17ce839` (dirty: 828 files)
 - last commit: 17ce839 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T18:07:35Z — session end
+
 - branch: `main` @ `17ce839` (dirty: 829 files)
 - last commit: 17ce839 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T18:14:49Z — session end
+
 - branch: `main` @ `17ce839` (dirty: 829 files)
 - last commit: 17ce839 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T18:26:30Z — session end
+
 - branch: `main` @ `17ce839` (dirty: 831 files)
 - last commit: 17ce839 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T18:29:48Z — session end
+
 - branch: `main` @ `17ce839` (dirty: 832 files)
 - last commit: 17ce839 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T18:32:45Z — session end
+
 - branch: `main` @ `17ce839` (dirty: 832 files)
 - last commit: 17ce839 brain-backup-2026-05-25-auto
 
 ## 2026-05-25T18:42:37Z — session end
+
 - branch: `main` @ `eaf6c9e` (dirty: 829 files)
 - last commit: eaf6c9e brain: batch-commit 19 brain proposals A-N + C-Cap-1..5 from 2026-05-25 Gate 1 trio + Cap Sherlock
 
 ## 2026-05-25T19:08:24Z — session end
+
 - branch: `main` @ `eaf6c9e` (dirty: 830 files)
 - last commit: eaf6c9e brain: batch-commit 19 brain proposals A-N + C-Cap-1..5 from 2026-05-25 Gate 1 trio + Cap Sherlock
 
 ## 2026-05-25T19:21:59Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-25T19:47:19Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-25T20:04:58Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-25T20:19:03Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-25T20:44:31Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-25T21:10:19Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-25T21:41:25Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-25T22:12:13Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-25T22:43:12Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-25T23:14:13Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-25T23:45:15Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-26T00:16:17Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-26T00:47:17Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-26T01:18:13Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-26T01:49:11Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-26T02:20:19Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-26T02:38:37Z — session end
+
 - branch: `main` @ `8879c2d` (dirty: 830 files)
 - last commit: 8879c2d brain: file P1-P4 Flying Tulip Sherlock Gate 1 proposals (watchlist-only outcome)
 
 ## 2026-05-26T02:48:39Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 831 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T03:19:14Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 831 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T03:25:49Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 831 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T03:42:21Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 831 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T03:59:52Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 834 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T04:02:54Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 834 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T04:06:53Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 836 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T04:08:56Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 837 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T04:11:12Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 837 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T04:15:15Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 838 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T04:18:08Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 838 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T04:23:29Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 838 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T04:49:20Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 838 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T05:15:18Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 838 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T05:46:31Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 838 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T06:17:16Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 838 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T06:48:11Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 838 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T07:19:13Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 838 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T07:50:14Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 838 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T08:21:23Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 838 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T08:52:16Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 838 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T09:12:32Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 839 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T09:15:53Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 839 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T09:18:54Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 839 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T09:20:40Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 839 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T09:22:26Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 839 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T13:47:44Z — session end
+
 - branch: `main` @ `8fafa3d` (dirty: 839 files)
 - last commit: 8fafa3d feat(lane5): Automated Bounty Scope Monitor — "Subfinder for DeFi bounties"
 
 ## 2026-05-26T14:00:56Z — session end
+
 - branch: `main` @ `9000768` (dirty: 1044 files)
 - last commit: 9000768 brain: Day 26 batch — 41 frozen proposals applied + JustLend C1 FORECLOSURE-RECEIPT + paste-readys
 
 ## 2026-05-26T14:05:13Z — session end
+
 - branch: `main` @ `f8a0c72` (dirty: 1044 files)
 - last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
 
 ## 2026-05-26T15:10:34Z — session end
+
 - branch: `main` @ `f8a0c72` (dirty: 1044 files)
 - last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
 
 ## 2026-05-26T15:19:49Z — session end
+
 - branch: `main` @ `f8a0c72` (dirty: 1046 files)
 - last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
 
 ## 2026-05-26T15:24:20Z — session end
+
 - branch: `main` @ `f8a0c72` (dirty: 1046 files)
 - last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
 
 ## 2026-05-26T15:28:27Z — session end
+
 - branch: `main` @ `f8a0c72` (dirty: 1047 files)
 - last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
 
 ## 2026-05-26T16:59:06Z — session end
+
 - branch: `main` @ `f8a0c72` (dirty: 1047 files)
 - last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
 
 ## 2026-05-26T17:18:10Z — session end
+
 - branch: `main` @ `f8a0c72` (dirty: 1047 files)
 - last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
 
 ## 2026-05-26T17:25:12Z — session end
+
 - branch: `main` @ `f8a0c72` (dirty: 1047 files)
 - last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
 
 ## 2026-05-26T17:28:32Z — session end
+
 - branch: `main` @ `f8a0c72` (dirty: 1049 files)
 - last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
 
 ## 2026-05-26T17:29:42Z — session end
+
 - branch: `main` @ `f8a0c72` (dirty: 1049 files)
 - last commit: f8a0c72 brain: ledger update — DISC-017 CLOSED_DUPLICATE + DISC-019 AI-Report methodology compound
 
 ## 2026-05-26T18:00:13Z — session end
+
 - branch: `main` @ `477afbf` (dirty: 1049 files)
 - last commit: 477afbf brain: DISC-020 Filecoin builtin-actors #79987 SUBMITTED — first post-AI-Report-refactor
 
 ## 2026-05-26T18:05:01Z — session end
+
 - branch: `main` @ `477afbf` (dirty: 1050 files)
 - last commit: 477afbf brain: DISC-020 Filecoin builtin-actors #79987 SUBMITTED — first post-AI-Report-refactor
 
 ## 2026-05-26T18:16:12Z — session end
+
 - branch: `main` @ `477afbf` (dirty: 1051 files)
 - last commit: 477afbf brain: DISC-020 Filecoin builtin-actors #79987 SUBMITTED — first post-AI-Report-refactor
 
 ## 2026-05-26T18:17:57Z — session end
+
 - branch: `main` @ `477afbf` (dirty: 1052 files)
 - last commit: 477afbf brain: DISC-020 Filecoin builtin-actors #79987 SUBMITTED — first post-AI-Report-refactor
 
 ## 2026-05-26T18:21:27Z — session end
+
 - branch: `main` @ `477afbf` (dirty: 1052 files)
 - last commit: 477afbf brain: DISC-020 Filecoin builtin-actors #79987 SUBMITTED — first post-AI-Report-refactor
 
 ## 2026-05-26T18:23:39Z — session end
+
 - branch: `main` @ `477afbf` (dirty: 1054 files)
 - last commit: 477afbf brain: DISC-020 Filecoin builtin-actors #79987 SUBMITTED — first post-AI-Report-refactor
 
 ## 2026-05-26T18:24:16Z — session end
+
 - branch: `main` @ `477afbf` (dirty: 1056 files)
 - last commit: 477afbf brain: DISC-020 Filecoin builtin-actors #79987 SUBMITTED — first post-AI-Report-refactor
 
 ## 2026-05-26T18:28:41Z — session end
+
 - branch: `main` @ `b7539b1` (dirty: 1055 files)
 - last commit: b7539b1 brain: afternoon batch — 7 proposals from 3 halts (Across+dYdX+Lombard) + Platform-Migration-Log NEW
 
 ## 2026-05-26T18:42:27Z — session end
+
 - branch: `main` @ `ba3e2ed` (dirty: 1049 files)
 - last commit: ba3e2ed lane5: Immunefi crawler shipped — 219 programs ingested, 0 regressions
 
 ## 2026-05-26T18:53:30Z — session end
+
 - branch: `main` @ `ba3e2ed` (dirty: 1051 files)
 - last commit: ba3e2ed lane5: Immunefi crawler shipped — 219 programs ingested, 0 regressions
 
 ## 2026-05-26T19:03:01Z — session end
+
 - branch: `main` @ `ba3e2ed` (dirty: 1052 files)
 - last commit: ba3e2ed lane5: Immunefi crawler shipped — 219 programs ingested, 0 regressions
 
 ## 2026-05-26T19:12:16Z — session end
+
 - branch: `main` @ `ba3e2ed` (dirty: 1053 files)
 - last commit: ba3e2ed lane5: Immunefi crawler shipped — 219 programs ingested, 0 regressions
 
 ## 2026-05-26T19:21:07Z — session end
+
 - branch: `main` @ `fd34d72` (dirty: 1050 files)
 - last commit: fd34d72 brain: evening batch — 9 proposals from 3 DB-verified Gate 1s (Olympus + CoW + rhinofi)

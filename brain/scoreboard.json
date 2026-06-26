@@ -1,0 +1,136 @@
+{
+  "_doc": "Standing hunt-performance scoreboard (Doctrine #76, Ogie intake 2026-06-22, from Gulli Agentic Design Patterns / Evaluation & Monitoring). A SELF-DIAGNOSTIC, not a race-to-win (resolves the #19.1 tension: this is the data substrate that feeds #75 post-mortem EV-reweighting + #77 lane reallocation, NOT a vanity metric). Updated by scripts/lane1/post-mortem.py on every submission outcome. Seeded 2026-06-22 from the DISC-001..022 ledger.",
+  "last_updated": "2026-06-22",
+  "totals": {
+    "submitted": 17,
+    "paid": 1,
+    "duplicate": 6,
+    "closed_informative_or_oos": 3,
+    "closed_not_a_bug": 2,
+    "no_response": 3,
+    "missed_window": 1,
+    "never_submitted_or_blocked_or_expired": 5,
+    "hit_rate_paid_over_submitted": 0.059,
+    "dedup_rate_dup_over_submitted": 0.353,
+    "confirmed_payout_usd": 100
+  },
+  "by_lane_platform": {
+    "immunefi": {
+      "submitted": 8,
+      "paid": 1,
+      "duplicate": 1,
+      "closed_informative_or_oos": 2,
+      "closed_not_a_bug": 2,
+      "note": "ONLY confirmed payout here (DISC-016 Firedancer, via engineering re-review). High AI-Report-dismissal risk (DISC-019 closed 1h31m) -> #74 humanization gate mandatory."
+    },
+    "hackerone": {
+      "submitted": 6,
+      "paid": 0,
+      "duplicate": 4,
+      "closed_informative_or_oos": 1,
+      "missed_window": 1,
+      "note": "Crowded marquee targets (OKX/Arc/Circle) -> high dup-rate; first-to-report speed is the constraint (DISC-010 beaten by 7 days)."
+    },
+    "cantina": {
+      "submitted": 1,
+      "paid": 0,
+      "duplicate": 1,
+      "note": "DISC-018 Morpho HIGH->MED dup of #947."
+    },
+    "sherlock": {
+      "submitted": 0,
+      "note": "DRE #1259 authorized but code-transfer missed the window (project_contest_lane_repo_access)."
+    },
+    "email": {
+      "submitted": 2,
+      "paid": 0,
+      "no_response": 2,
+      "note": "DEAD LANE — general inbox = no-response (DISC-012/013 Drift). Never use; #77 forecloses."
+    },
+    "hackenproof": {
+      "submitted": 0,
+      "blocked": 1,
+      "note": "DISC-002 rep-gate 80/100."
+    }
+  },
+  "by_bug_class": {
+    "http_protocol_state": {
+      "submitted": 1,
+      "paid": 1,
+      "hit_rate": 1.0,
+      "note": "DISC-016 Firedancer Insight = the ONLY win. UP-WEIGHT (novel class, low researcher density). Class K."
+    },
+    "slippage_double_count": {
+      "submitted": 2,
+      "paid": 0,
+      "invalid": 2,
+      "hit_rate": 0.0,
+      "note": "CANDIDATE-O. DISC-021 Balancer (misframe) + DISC-022 PancakeSwap (invalid). DOWN-WEIGHT HARD -> Doctrine #43 aggregate-bound gate."
+    },
+    "dc7_validating_vs_consuming": {
+      "submitted": 3,
+      "paid": 0,
+      "dup_or_oos": 3,
+      "hit_rate": 0.0,
+      "note": "DISC-008 Circle (closed-info), DISC-015 Veda (OOS), DISC-015b Veda (dup). DOWN-WEIGHT; keeps closing OOS/dup."
+    },
+    "signature_replay": {
+      "submitted": 2,
+      "paid": 0,
+      "duplicate": 2,
+      "hit_rate": 0.0,
+      "note": "DISC-009 Arc, DISC-011 OKX. Real bugs but DUP on crowded targets -> need first-to-report or thinner targets."
+    },
+    "oracle_engineered_staleness": {
+      "submitted": 1,
+      "paid": 0,
+      "ai_report_dismissal": 1,
+      "hit_rate": 0.0,
+      "note": "DISC-019 Notional -> AI-Report dismissal (report-style failure, not class failure) -> #74."
+    },
+    "state_machine_cooldown": {
+      "submitted": 1,
+      "paid": 0,
+      "duplicate": 1,
+      "hit_rate": 0.0,
+      "note": "DISC-017 Ethena dup of #68406."
+    },
+    "timelock_access_control": {
+      "submitted": 1,
+      "paid": 0,
+      "duplicate": 1,
+      "hit_rate": 0.0,
+      "note": "DISC-018 Morpho dup."
+    },
+    "multistep_pipeline": {
+      "submitted": 2,
+      "paid": 0,
+      "dup_or_submitted": 2,
+      "hit_rate": 0.0,
+      "note": "DISC-006/007 Arc."
+    },
+    "validation_coverage_asymmetry": {
+      "submitted": 1,
+      "paid": 0,
+      "no_response": 1,
+      "hit_rate": 0.0,
+      "note": "DISC-012 Drift (email dead-end) + DISC-002 Sui (rep-blocked)."
+    },
+    "time_staleness_asymmetry": {
+      "submitted": 1,
+      "paid": 0,
+      "no_response": 1,
+      "hit_rate": 0.0,
+      "note": "DISC-013 Drift email."
+    }
+  },
+  "negate_registry_foreclosures": {
+    "count": 47,
+    "note": "data/lane1/negate-registry.json — SEMANTIC store of program+scope NEGATEs (separate from this submission scoreboard). Foreclosure-rate is the brain's main throughput this era (thin pool)."
+  },
+  "watch_next": [
+    "1/17 paid hit-rate reflects a crowded-marquee + thin-pool era; the ONE win was a NOVEL class (HTTP-protocol-state) on a THIN target -> bias selection toward novel-class + thin per #45/#65/#70.",
+    "35% dedup-rate is the dominant loss mode -> #74 (c) dup-check vs registry + first-to-report speed.",
+    "email + HackerOne-marquee lanes are EV-negative -> #77 reallocation already foreclosed them."
+  ]
+}

@@ -15,6 +15,7 @@
 **Statement.** Instant-kill scoring rules (those that return −100 and short-circuit further evaluation) are the engine's hardest commitments. They reflect deterministic disqualification — patterns whose presence GUARANTEES the token cannot be a viable scoring candidate regardless of other factors.
 
 Current instant-kills:
+
 - **STABLECOIN_EXCLUSION** — token symbol matches major stablecoin list. Justification: stablecoins are peg-targeting, not appreciation-targeting; they don't fit the scoring rubric.
 - **GHOST_TOKEN** — `txns24h < 10 AND volume24h < 1000`. Justification: no real activity = no market signal to score.
 
@@ -30,18 +31,18 @@ Current instant-kills:
 
 **Current calibration (v1.0):**
 
-| Rule | Penalty | Implied loss expectation |
-|---|---|---|
-| FDV_GAP_PENALTY (>5x) | −15 | Large insider supply unlocks ≈ 15-30% dilution shock |
-| FDV_GAP_PENALTY (>3x) | −8 | Moderate insider supply ≈ 8-15% dilution risk |
-| CONTRADICTORY_AUDIT | −20 | Source conflict ≈ 20% probability the worse claim is correct |
-| SECURITY_PENALTY (honeypot) | −50 | Honeypot = total loss-of-principal risk |
-| SECURITY_PENALTY (>2 flags) | −25 | Multiple flags = compounding risk |
-| LIQUIDITY_CROSSREF (<10K) | −20 | Low liquidity = high slippage + manipulation risk |
-| VOLUME_THRESHOLD (<5K) | −15 | Low volume = inactive market, illiquid exit |
-| GHOST_VOLUME (wash trading) | −20 | Wash trading = volume metric is fake, real liquidity unknown |
-| CTO_FLAG | −10 | Community takeover = no team accountability for code, latent bugs unpatched |
-| VOLUME_LIQUIDITY_RATIO (>10x) | −15 | V/L spike = pump or wash trading |
+| Rule                          | Penalty | Implied loss expectation                                                    |
+| ----------------------------- | ------- | --------------------------------------------------------------------------- |
+| FDV_GAP_PENALTY (>5x)         | −15     | Large insider supply unlocks ≈ 15-30% dilution shock                        |
+| FDV_GAP_PENALTY (>3x)         | −8      | Moderate insider supply ≈ 8-15% dilution risk                               |
+| CONTRADICTORY_AUDIT           | −20     | Source conflict ≈ 20% probability the worse claim is correct                |
+| SECURITY_PENALTY (honeypot)   | −50     | Honeypot = total loss-of-principal risk                                     |
+| SECURITY_PENALTY (>2 flags)   | −25     | Multiple flags = compounding risk                                           |
+| LIQUIDITY_CROSSREF (<10K)     | −20     | Low liquidity = high slippage + manipulation risk                           |
+| VOLUME_THRESHOLD (<5K)        | −15     | Low volume = inactive market, illiquid exit                                 |
+| GHOST_VOLUME (wash trading)   | −20     | Wash trading = volume metric is fake, real liquidity unknown                |
+| CTO_FLAG                      | −10     | Community takeover = no team accountability for code, latent bugs unpatched |
+| VOLUME_LIQUIDITY_RATIO (>10x) | −15     | V/L spike = pump or wash trading                                            |
 
 **Recalibration trigger.** If a rule's anchor list (per `Token-Rug-Patterns.md`) shows >10% false positive rate over 50+ applications, propose weight adjustment. Operator approves weight changes.
 
@@ -52,6 +53,7 @@ Current instant-kills:
 **Statement.** The 4-persona Hedge Brain debate (Degen / Whale / Institutional / Community) is invoked AFTER the 11 rules execute, never before. Personas weight the final classification (HOT / QUALIFIED / WATCH / SKIP) when the raw score lands near a band boundary (e.g., 69/70 or 84/85). Personas DO NOT override instant-kills or penalty calculations.
 
 **Persona weights (v1.0 — calibration pending real data):**
+
 - **Degen** — favors high-volume + high-volatility + meme-narrative tokens (+5 boost if narrative-fit)
 - **Whale** — favors high-liquidity + low-FDV-gap + token-distribution-spread (−5 if concentrated)
 - **Institutional** — favors clean-audit + age > 90d + multi-chain deployment (+3 if audit-clean)
@@ -67,13 +69,13 @@ Persona invocation logged for audit. Persona overrides logged separately.
 
 **Examples of cross-pollination candidates (v1.0, pending implementation):**
 
-| Pillar 4 finding | Pillar 1 penalty rule candidate | Detectability |
-|---|---|---|
-| DC-9 sub-1 unchecked-mint | "Owner can mint unlimited supply" — query token's owner permissions on-chain | DexScreener does not expose; needs Etherscan source check |
-| DC-9 sub-3 upgradeable-hook-no-timelock | "Upgradeable proxy with no timelock" — query proxy admin slot | Etherscan source + storage slot read |
-| DC-12 oracle staleness | "Oracle-dependent without staleness check" — detect by source-grep | Source-level only; not Pillar 1 candidate (too expensive per-scan) |
-| CANDIDATE-T approval drain | "Router approval drainable" — detect by approval-pattern recognition | On-chain via approval events; queryable |
-| TRP-3 Ghost Token + DC-13 honeypot | "Honeypot mechanism with mint disabled" — direct GoPlus/RugCheck integration | Already covered by SECURITY_PENALTY but weight could increase |
+| Pillar 4 finding                        | Pillar 1 penalty rule candidate                                              | Detectability                                                      |
+| --------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| DC-9 sub-1 unchecked-mint               | "Owner can mint unlimited supply" — query token's owner permissions on-chain | DexScreener does not expose; needs Etherscan source check          |
+| DC-9 sub-3 upgradeable-hook-no-timelock | "Upgradeable proxy with no timelock" — query proxy admin slot                | Etherscan source + storage slot read                               |
+| DC-12 oracle staleness                  | "Oracle-dependent without staleness check" — detect by source-grep           | Source-level only; not Pillar 1 candidate (too expensive per-scan) |
+| CANDIDATE-T approval drain              | "Router approval drainable" — detect by approval-pattern recognition         | On-chain via approval events; queryable                            |
+| TRP-3 Ghost Token + DC-13 honeypot      | "Honeypot mechanism with mint disabled" — direct GoPlus/RugCheck integration | Already covered by SECURITY_PENALTY but weight could increase      |
 
 **Promotion path:** every Pillar 4 Gate 2 CONFIRM should be evaluated for this list. If a candidate is detectable on-chain, propose new TRP-N rule. Operator approves.
 

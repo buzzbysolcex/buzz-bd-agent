@@ -51,3 +51,13 @@ DC-3-Clarity (auth), CANDIDATE-I-Clarity (ERC4626 share inflation + tracked-var 
 ---
 
 _Gate 1: 2026-05-31-zest-v2 | PRIVATE/Immunefi | **NEGATE [INSPECTED]** — ERC4626 inflation foreclosed (tracked-var + min-liquidity); zToken-collateral lindex-pricing consistent-with-share-value + conservative-rounding (traced); liquidation bounded (graduated + same-block-borrow guard + conservative rounding); oracle Pyth+DIA confidence/staleness/monotonic/price>0 gated; egroup superset-invariant sound; DC-3 auth correct | lone LOW defense-in-depth: redeem missing flashloan-guard (non-exploitable, tracked-var) | NO Gate-2 PoC | **THIRD CLARITY ANCHOR + new ERC4626-share-vs-index pricing-consistency lens** | autonomous EV-ordered loop | single-agent | P4→P2 suppressed_
+
+---
+
+## RE-ENGAGEMENT GATE-0 SCOPE-MAP — 2026-06-10 (Ogie msg 8201, fresh unprivileged-fund-loss lens) — PARKED for Vision-status-check (msg 8202)
+
+**Immunefi scope (re-fetched 2026-06-10, https://immunefi.com/bug-bounty/zest-protocol-v2/scope/):**
+- In-scope (12): v0-vault-{usdh,usdc,stx,ststxbtc,ststx,sbtc} · v0-market-vault · v0-egroup · v0-assets · vault-traits · dao-multisig · dao-treasury. Repo: `github.com/Zest-Protocol/zest-v2-contracts`. Deployer `SP1A27KFY4XERQCCRCARCYD1CC5N7M6688BSYADJ7`. Max $100K. **Primacy of Impact**, PoC-required, local-fork only.
+- In-scope IMPACT: Crit = direct theft (not unclaimed yield) / permanent freeze / **protocol insolvency**; High = theft of unclaimed yield, temp freeze.
+- OOS (decisive): **flashloan logic OOS** (confirms prior redeem-flashloan-guard = OOS), **DAO-compromise attack vector OOS** (per Doctrine #59 admin-trust foreclose — dao-multisig/dao-treasury bugs only in-scope if PERMISSIONLESS), liquidation-of-disabled-collateral OOS, leaked-credentials/privileged-access OOS.
+- **FRESH-ANGLE plan (vs 2026-05-31 NEGATE):** finder budget on UNPRIVILEGED fund-loss only (Doctrine #59) — (a) multi-vault / multi-collateral egroup SEQUENCE interactions (prior single-op traces NEGATED; sequences under-traced), (b) `v0-assets` full read (was partial), (c) **protocol-insolvency under Primacy-of-Impact** (re-scope prior "oracle-consumption" residuals: is there a permissionless way to push the protocol insolvent via index/liquidation/egroup logic, not oracle manipulation itself). Clone needed (prior clone purged in disk reclaim).

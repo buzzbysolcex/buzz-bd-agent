@@ -172,12 +172,12 @@ NEVER reveal IP 204.168.137.253. NEVER share keys. Tweets via War Room. Sentinel
 
 Every DVT protocol exposes cluster operations as state machines. The DC-7 lens (Validating-Field ≠ Consuming-Field on Adjacent Function Pipelines) maps directly to:
 
-| Paired-function family | Operations | Substrate to check |
-|---|---|---|
-| **Cluster lifecycle** | `createCluster` / `removeCluster`, `freezeCluster` / `unfreezeCluster`, `pauseOperator` / `resumeOperator` | Each pair must validate AND consume the SAME identity/state field |
-| **Operator lifecycle** | `registerOperator` / `removeOperator`, `setOperatorFee` / `claimOperatorFee`, `optInToCluster` / `optOutOfCluster` | Fee-index snapshot + balance-snapshot consistency across activate/deactivate |
-| **Validator lifecycle** | `registerValidator` / `removeValidator`, `activateValidator` / `exitValidator`, `bondCluster` / `unbondCluster` | Cluster balance recompute on validator state transitions |
-| **Stake / Unstake** | `stake` / `requestUnstake`, `claim` / `unclaim`, `delegate` / `undelegate` | Same accumulator-index settle pattern (DC-18) |
+| Paired-function family  | Operations                                                                                                         | Substrate to check                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| **Cluster lifecycle**   | `createCluster` / `removeCluster`, `freezeCluster` / `unfreezeCluster`, `pauseOperator` / `resumeOperator`         | Each pair must validate AND consume the SAME identity/state field            |
+| **Operator lifecycle**  | `registerOperator` / `removeOperator`, `setOperatorFee` / `claimOperatorFee`, `optInToCluster` / `optOutOfCluster` | Fee-index snapshot + balance-snapshot consistency across activate/deactivate |
+| **Validator lifecycle** | `registerValidator` / `removeValidator`, `activateValidator` / `exitValidator`, `bondCluster` / `unbondCluster`    | Cluster balance recompute on validator state transitions                     |
+| **Stake / Unstake**     | `stake` / `requestUnstake`, `claim` / `unclaim`, `delegate` / `undelegate`                                         | Same accumulator-index settle pattern (DC-18)                                |
 
 **Lens application rule:** For each paired-function in target, locate VALIDATING field (e.g., `clusterId`) and CONSUMING field (e.g., `_clusterState[clusterId].operatorBitmap`). If the consuming-side reads a field NOT bound by the validating-side check, surface as DC-7 candidate.
 
@@ -202,6 +202,7 @@ Every DVT protocol exposes cluster operations as state machines. The DC-7 lens (
 DVT clusters expose hooks for transfer / activation / fee-recipient-change / migration. Per Doctrine #31 (custom hooks break standard invariants), every hook is a candidate breakpoint for cluster accounting invariants.
 
 **SSV-class hook substrate observed (R8 [INSPECTED]):**
+
 - `onClusterUpdate(clusterId)` — fires on cluster state changes; check CEI ordering
 - `onOperatorChange(clusterId, operator)` — fires on operator add/remove; check fee-index settle ordering
 - `onValidatorActivation(validatorId, clusterId)` — fires on validator activation; check beacon-state binding
@@ -213,14 +214,14 @@ DVT clusters expose hooks for transfer / activation / fee-recipient-change / mig
 
 Apply the DVT lens stack at Gate 1 Step 5.6 on:
 
-| Target | Platform | Status | DVT subclass |
-|---|---|---|---|
-| SSV Network | Immunefi $250K | FORECLOSED 2026-05-25 (reference baseline) | Cluster-operator-validator triplet |
-| Diva Staking | Immunefi (cap pending) | Watchlist | Cluster-operator pattern |
-| Obol Network | Immunefi (cap pending) | Watchlist | Charon DV operator pattern |
-| EigenLayer DVT (Hyve / Operator-Set DVT extensions) | Immunefi $1M+ | Watchlist | AVS-operator-cluster pattern |
-| Lido CSM (Community Staking Module) | Immunefi $2M+ | Watchlist | Solo-operator-via-bond pattern |
-| Rocketpool Atlas DVT | Watchlist | Watchlist | Node-operator-DVT-extension pattern |
+| Target                                              | Platform               | Status                                     | DVT subclass                        |
+| --------------------------------------------------- | ---------------------- | ------------------------------------------ | ----------------------------------- |
+| SSV Network                                         | Immunefi $250K         | FORECLOSED 2026-05-25 (reference baseline) | Cluster-operator-validator triplet  |
+| Diva Staking                                        | Immunefi (cap pending) | Watchlist                                  | Cluster-operator pattern            |
+| Obol Network                                        | Immunefi (cap pending) | Watchlist                                  | Charon DV operator pattern          |
+| EigenLayer DVT (Hyve / Operator-Set DVT extensions) | Immunefi $1M+          | Watchlist                                  | AVS-operator-cluster pattern        |
+| Lido CSM (Community Staking Module)                 | Immunefi $2M+          | Watchlist                                  | Solo-operator-via-bond pattern      |
+| Rocketpool Atlas DVT                                | Watchlist              | Watchlist                                  | Node-operator-DVT-extension pattern |
 
 **Productization signal:** DVT lens stack is reusable across the cross-pollination scan targets above. Pre-loading saves 30-45 min per future DVT Gate 1 dispatch (no need to re-discover the cluster-operator-validator triplet substrate from scratch).
 

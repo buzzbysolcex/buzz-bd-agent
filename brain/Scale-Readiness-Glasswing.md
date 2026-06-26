@@ -16,6 +16,7 @@
 **Today's baseline (2026-05-23):** 28 doctrines | 16 candidates | 9 defense classes (DC-1..DC-9, DC-9 with 4 sub-patterns: sub-1 shipped 2026-05-23, sub-2 in flight, sub-3+sub-4 prior) | ~50 ground-truth anchors.
 
 **Daily ingestion discipline (NEW STANDING RULE):**
+
 - Ingest every disclosure from `rekt.news` + `BlockSec` + `SlowMist` + `PeckShield` + `0xTeam` + `CertiKAlert`
 - Extract defense class per disclosure (file DC-10, DC-11, etc. when new family surfaces)
 - File propagation signature per disclosure (regex + qual-hits for Step 9 sweep)
@@ -28,6 +29,7 @@ When Mythos drops, Buzz has a targeting library no other researcher has. Mythos 
 **Goal:** Finding → paste-ready in <2 hours (vs current <8 hours).
 
 **Build queue:**
+
 - Platform-specific paste-ready generators (Immunefi / Sherlock / HackenProof / Cantina) — pre-filled templates that consume a Gate-2 finding object and emit submission-ready markdown
 - Auto-scope-check wired into Gate 1 (Veda OOS lesson — Doctrine #18)
 - Auto-bytecode-verify wired into Gate 2 start
@@ -40,6 +42,7 @@ When Mythos drops, Buzz has a targeting library no other researcher has. Mythos 
 **Month-3 target:** 3+ confirmed payouts across platforms.
 
 **Active queue:**
+
 - Firedancer payment processing → Immunefi level bump → GMX unlock
 - Ethena Gate 2 paste-ready (#22) → submit when operator returns to Jeddah → second Immunefi finding
 - Sherlock: first submission to any of the 8 profiled targets (S1 Usual-Fira / S3 Aave V4 / S4 Flying Tulip / S5 Fira / S6 Midas / etc.)
@@ -53,6 +56,7 @@ Each confirmed payout = higher rep = bigger bounties + faster triage.
 **Month-3 target:** 20+ detectors, each from a real exploit.
 
 **Current (8 detectors shipped, ~2,400 LOC + 4 enrichers; sub-2 in flight 2026-05-23):**
+
 - `default-trust-enum` v1.0 (Nomad class)
 - `rust-rounding-asymmetry` v1.0 (Raydium class)
 - `cei-violation-hook` v1.0 (Pattern I)
@@ -65,6 +69,7 @@ Each confirmed payout = higher rep = bigger bounties + faster triage.
 - `vyper-detector-pack` (DC-1/3/4/7/9-sub-4 + CANDIDATE-E/I, 7 lenses; READY-TO-WIRE)
 
 **Next builds (operator-listed):**
+
 - DC-9 sub-2 `zero-timelock-migration` (Drift $285M class) — **IN FLIGHT 2026-05-23** (agent a124a67af90105310)
 - `cross-chain-replay` (GMX Edge class)
 - `post-audit-refactor-cei` (CANDIDATE-M, 0xBugDrop $7M class)
@@ -81,6 +86,7 @@ When Mythos drops: Buzz runs Mythos AND detectors simultaneously. Double coverag
 **2026-05-23 update:** DefiLlama top-100 expansion agent returned **101 NEW candidates (URL-deduped, HEAD-verified)** → watchlist target 100 REACHED at 120 repos (pending operator greenlight to write defense-class-mapping.json v1.6). 49 of 101 bounty-bearing ($87M combined cap). Top additions: safe ($80B), lido-dao-gov ($18.3B / $2M bounty), aave-v3 ($13.4B / $1M), morpho-blue ($7.24B / $2.5M), eigencloud ($6.46B / $2M). Candidates at `data/lane1/watchlist-expansion-candidates-2026-05-23.json` + hunt report `hunts/2026-05-23-lane1-watchlist-expansion-defillama-top100.md`.
 
 **Build queue:**
+
 - **Operator greenlight on 49 bounty-bearing subset → defense-class-mapping.json v1.6 write → Step 9 sweep re-run** (1-step from target 100)
 - Wire all new detectors into propagation engine
 - Auto-Gate-1 surface-map generation on HIGH-overlap hits
@@ -91,6 +97,7 @@ When Mythos drops: Buzz runs Mythos AND detectors simultaneously. Double coverag
 **PRIORITY:** Re-apply for Anthropic Constitutional Value Program / Cyber Verification Program NOW. Glasswing article confirms CVP is expanding.
 
 **Buzz qualifies on multi-axis:**
+
 - Confirmed Firedancer Insight payout (DISC-016 imu-77340)
 - 15 disclosed findings tracked in disclosure-tracker.json
 - 9 defense classes operationalized
@@ -103,6 +110,7 @@ When Mythos drops: Buzz runs Mythos AND detectors simultaneously. Double coverag
 ### 7. Lane 4 (the UNIQUE moat — Buzz-only IP)
 
 No other security researcher has:
+
 - 221K cypherpunk-era posts indexed
 - 30-author behavioral profiles
 - 90% closed-loop password recovery validation
@@ -114,11 +122,11 @@ When Mythos drops, everyone can find code bugs. **Nobody else can recover lost B
 
 ## Timeline
 
-| Phase     | Window         | Focus                                                                                  |
-| --------- | -------------- | -------------------------------------------------------------------------------------- |
-| Month 1-2 | NOW            | Brain depth + detector library + platform reputation. Compound daily.                  |
-| Month 3-4 | Mid-pipeline   | Pipeline automation. Finding → paste-ready in <2 hours. Multi-platform capacity.       |
-| Month 5-6 | Mythos drop    | Buzz is ready: deepest brain in the space + fastest pipeline + multi-platform rep + 20+ detectors + 100-repo propagation. |
+| Phase     | Window       | Focus                                                                                                                     |
+| --------- | ------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| Month 1-2 | NOW          | Brain depth + detector library + platform reputation. Compound daily.                                                     |
+| Month 3-4 | Mid-pipeline | Pipeline automation. Finding → paste-ready in <2 hours. Multi-platform capacity.                                          |
+| Month 5-6 | Mythos drop  | Buzz is ready: deepest brain in the space + fastest pipeline + multi-platform rep + 20+ detectors + 100-repo propagation. |
 
 ---
 

@@ -34,45 +34,117 @@
     ]
   },
   "bitflow": {
-    "source_primary": "https://immunefi.com/bug-bounty/bitflow/ + github.com/BitflowFinance/bitflow-dlmm (docs/invariants.md)",
-    "audience": "Immunefi PoC-required program; in-repo docs enumerate tested+guaranteed invariants",
-    "fetched": "2026-06-01",
+    "source_primary": "https://immunefi.com/bug-bounty/bitflow/ + https://github.com/BitflowFinance/bitflow-dlmm/blob/main/docs/invariants.md + https://docs.bitflow.finance/bitflow-documentation/resources/audits",
+    "audience": "Immunefi program (HODLMM-only) + in-repo invariants doc + Bitflow audit index",
+    "fetched": "2026-06-09",
+    "max_cap_usd": 100000,
+    "poc_mandatory": true,
+    "kyc": false,
+    "audit_coverage_gap": "HODLMM / DLMM / Liquidity-Book has NO external audit. Bitflow's 8 listed audits (Clarity Alliance x5, CoinFabrik x2, StrataLabs) all cover StableSwap / XYK / Staking / LP-token \u2014 NONE cover the DLMM. Therefore the program's 'unfixed audit-report vulnerabilities are OOS' exclusion does NOT foreclose any HODLMM finding (no HODLMM audit exists). Dedup baseline for HODLMM = Immunefi-standard OOS + in-scope-token restriction + the 9 self-tested invariants + any self-disclosed Known-Issue-Assurance item (none public as of fetch).",
     "entries": [
       {
         "class": "malicious wallet interaction (Immunefi standard OOS)",
-        "mechanism": "modifying tx args/params, substituting contract addresses, submitting malicious txs against an already-connected wallet.",
-        "impact": "OUT OF SCOPE per program rules.",
+        "mechanism": "attacker controls / has the victim already connect a malicious wallet and substitutes args/addresses.",
+        "impact": "OUT OF SCOPE per Immunefi program rules.",
         "component": "any",
         "source_url": "https://immunefi.com/bug-bounty/bitflow/",
-        "citation_anchor": "#oos-malicious-wallet",
-        "raw_text": "Malicious interactions with an already-connected wallet (modifying tx args, substituting contract addresses, malicious txs) are out of scope."
+        "citation_anchor": "out-of-scope/rules"
       },
       {
         "class": "non-whitelisted / out-of-scope token",
-        "mechanism": "a finding that requires a token NOT deployed from SPQC38PW542EQJ5M11CR25P7BS1CA6QT4TBXGB3M; the system whitelists tokens and has a mock-unwhitelisted-token for negative testing (unwhitelisted tokens are rejected by design).",
-        "impact": "OUT OF SCOPE \u2014 only tokens from the named deployer are in scope; unwhitelisted-token paths are tested-rejects, not bugs.",
+        "mechanism": "only tokens from deployer SPQC38PW542EQJ5M11CR25P7BS1CA6QT4TBXGB3M are in scope; mock-unwhitelisted-token exists for negative testing.",
+        "impact": "OUT OF SCOPE \u2014 unwhitelisted-token paths are tested-rejects, not bugs.",
         "component": "token whitelist",
         "source_url": "https://immunefi.com/bug-bounty/bitflow/",
-        "citation_anchor": "#token-scope",
-        "raw_text": "Tokens deployed from SPQC38PW542EQJ5M11CR25P7BS1CA6QT4TBXGB3M are in scope; other tokens are not."
+        "citation_anchor": "assets-in-scope"
       },
       {
-        "class": "tested-and-guaranteed invariant (LP-supply conservation on swap)",
-        "mechanism": "swaps must not mint/burn LP tokens (LP supply unchanged during swap) \u2014 fuzzed as checkSwapXForY/YForX invariants (Critical).",
-        "impact": "a finding merely RE-STATING this invariant without a concrete BREAK is covered by the project's own Critical fuzz property; only a demonstrated violation is novel.",
-        "component": "dlmm-core swap",
-        "source_url": "github.com/BitflowFinance/bitflow-dlmm/blob/main/docs/invariants.md",
-        "citation_anchor": "#lp-supply-conservation",
-        "raw_text": "LP supply must remain unchanged during swaps. Violation impact: Critical."
+        "class": "previously-discovered / consciously-unfixed known issue (Known Issue Assurance)",
+        "mechanism": "bug reports covering previously-discovered bugs, known issues the project is aware of but consciously decided not to fix, necessary code changes, or implemented operational mitigations.",
+        "impact": "NOT eligible for reward. Bitflow commits to disclosing known issues publicly OR privately via self-reported submission. NO public known-issue list found as of 2026-06-09 fetch.",
+        "component": "program-wide",
+        "source_url": "https://immunefi.com/bug-bounty/bitflow/",
+        "citation_anchor": "known-issues / known-issue-assurance"
       },
       {
-        "class": "tested-and-guaranteed invariant (bin/user balance conservation + rounding)",
-        "mechanism": "bin balances change by (input-fees)/output; user balances change exactly by swapped amounts; arithmetic-edge (overflow/underflow/div-zero/boundary) + rounding + 'exploit detection' covered by 276+ unit tests incl. swap-calculations-validation-logic + arithmetic-edge-cases.",
-        "impact": "plain rounding/slippage/precision/overflow claims without a NET value-extraction proof beyond the tested envelope are covered; only an untested composition that breaks conservation is novel.",
-        "component": "dlmm-core swap math / fees",
-        "source_url": "github.com/BitflowFinance/bitflow-dlmm/blob/main/docs/invariants.md",
-        "citation_anchor": "#balance-changes",
-        "raw_text": "Input token balance increases by (input - fees); output decreases by output; user balances change by exactly the amounts swapped. Arithmetic edge-cases + rounding fuzzed/tested."
+        "class": "unfixed vulnerability in a completed audit report",
+        "mechanism": "any unfixed vuln named in Bitflow's completed audit reports is OOS.",
+        "impact": "NOT eligible. BUT all 8 audits cover StableSwap/XYK/Staking/LP-token \u2014 ZERO cover HODLMM/DLMM. So this exclusion currently foreclosures NOTHING in the HODLMM scope.",
+        "component": "audit index (Clarity Alliance/CoinFabrik/StrataLabs)",
+        "source_url": "https://docs.bitflow.finance/bitflow-documentation/resources/audits",
+        "citation_anchor": "resources/audits"
+      },
+      {
+        "class": "tested-and-guaranteed invariant",
+        "mechanism": "INV-1: LP supply must remain unchanged during swaps.",
+        "impact": "A finding that merely RE-STATES this invariant without a concrete, untested BREAK (net value-extraction beyond the tested envelope) is COVERED \u2014 NEGATE-KNOWN. Only a demonstrated break is novel.",
+        "component": "bitflow-dlmm docs/invariants.md (9 properties)",
+        "source_url": "https://github.com/BitflowFinance/bitflow-dlmm/blob/main/docs/invariants.md",
+        "citation_anchor": "invariant #1"
+      },
+      {
+        "class": "tested-and-guaranteed invariant",
+        "mechanism": "INV-2: Bin balances must change correctly: input token balance increases by (input - fees); output token balance decreases by output.",
+        "impact": "A finding that merely RE-STATES this invariant without a concrete, untested BREAK (net value-extraction beyond the tested envelope) is COVERED \u2014 NEGATE-KNOWN. Only a demonstrated break is novel.",
+        "component": "bitflow-dlmm docs/invariants.md (9 properties)",
+        "source_url": "https://github.com/BitflowFinance/bitflow-dlmm/blob/main/docs/invariants.md",
+        "citation_anchor": "invariant #2"
+      },
+      {
+        "class": "tested-and-guaranteed invariant",
+        "mechanism": "INV-3: User balances must change by exactly the amounts swapped (input decreases by input amount; output increases by output amount).",
+        "impact": "A finding that merely RE-STATES this invariant without a concrete, untested BREAK (net value-extraction beyond the tested envelope) is COVERED \u2014 NEGATE-KNOWN. Only a demonstrated break is novel.",
+        "component": "bitflow-dlmm docs/invariants.md (9 properties)",
+        "source_url": "https://github.com/BitflowFinance/bitflow-dlmm/blob/main/docs/invariants.md",
+        "citation_anchor": "invariant #3"
+      },
+      {
+        "class": "tested-and-guaranteed invariant",
+        "mechanism": "INV-4: Protocol fees must increase (or stay the same) during swaps.",
+        "impact": "A finding that merely RE-STATES this invariant without a concrete, untested BREAK (net value-extraction beyond the tested envelope) is COVERED \u2014 NEGATE-KNOWN. Only a demonstrated break is novel.",
+        "component": "bitflow-dlmm docs/invariants.md (9 properties)",
+        "source_url": "https://github.com/BitflowFinance/bitflow-dlmm/blob/main/docs/invariants.md",
+        "citation_anchor": "invariant #4"
+      },
+      {
+        "class": "tested-and-guaranteed invariant",
+        "mechanism": "INV-5: All balances must remain non-negative.",
+        "impact": "A finding that merely RE-STATES this invariant without a concrete, untested BREAK (net value-extraction beyond the tested envelope) is COVERED \u2014 NEGATE-KNOWN. Only a demonstrated break is novel.",
+        "component": "bitflow-dlmm docs/invariants.md (9 properties)",
+        "source_url": "https://github.com/BitflowFinance/bitflow-dlmm/blob/main/docs/invariants.md",
+        "citation_anchor": "invariant #5"
+      },
+      {
+        "class": "tested-and-guaranteed invariant",
+        "mechanism": "INV-6: LP supply must increase when adding liquidity and decrease when removing.",
+        "impact": "A finding that merely RE-STATES this invariant without a concrete, untested BREAK (net value-extraction beyond the tested envelope) is COVERED \u2014 NEGATE-KNOWN. Only a demonstrated break is novel.",
+        "component": "bitflow-dlmm docs/invariants.md (9 properties)",
+        "source_url": "https://github.com/BitflowFinance/bitflow-dlmm/blob/main/docs/invariants.md",
+        "citation_anchor": "invariant #6"
+      },
+      {
+        "class": "tested-and-guaranteed invariant",
+        "mechanism": "INV-7: When moving liquidity, changes must be proportional to the amount moved.",
+        "impact": "A finding that merely RE-STATES this invariant without a concrete, untested BREAK (net value-extraction beyond the tested envelope) is COVERED \u2014 NEGATE-KNOWN. Only a demonstrated break is novel.",
+        "component": "bitflow-dlmm docs/invariants.md (9 properties)",
+        "source_url": "https://github.com/BitflowFinance/bitflow-dlmm/blob/main/docs/invariants.md",
+        "citation_anchor": "invariant #7"
+      },
+      {
+        "class": "tested-and-guaranteed invariant",
+        "mechanism": "INV-8: LP tokens minted/burned and tokens received must meet minimum requirements.",
+        "impact": "A finding that merely RE-STATES this invariant without a concrete, untested BREAK (net value-extraction beyond the tested envelope) is COVERED \u2014 NEGATE-KNOWN. Only a demonstrated break is novel.",
+        "component": "bitflow-dlmm docs/invariants.md (9 properties)",
+        "source_url": "https://github.com/BitflowFinance/bitflow-dlmm/blob/main/docs/invariants.md",
+        "citation_anchor": "invariant #8"
+      },
+      {
+        "class": "tested-and-guaranteed invariant",
+        "mechanism": "INV-9: Pool must be properly initialized with valid parameters.",
+        "impact": "A finding that merely RE-STATES this invariant without a concrete, untested BREAK (net value-extraction beyond the tested envelope) is COVERED \u2014 NEGATE-KNOWN. Only a demonstrated break is novel.",
+        "component": "bitflow-dlmm docs/invariants.md (9 properties)",
+        "source_url": "https://github.com/BitflowFinance/bitflow-dlmm/blob/main/docs/invariants.md",
+        "citation_anchor": "invariant #9"
       }
     ]
   },
@@ -168,6 +240,511 @@
         "source_url": "github.com/aave-dao/aave-umbrella/blob/main/audits/Stermi/REPORT Aave StakeToken.md",
         "citation_anchor": "#L561",
         "raw_text": "owner installs controller with ACL; only DAO/multisig calls slash; msg.sender not useful here."
+      }
+    ]
+  },
+  "benqi": {
+    "source_primary": "https://immunefi.com/bug-bounty/benqi/ + on-chain config (Avalanche C-chain, cast)",
+    "audience": "Immunefi program (Avalanche lending Compound-v2/Moonwell fork + sAVAX liquid staking + Ignite)",
+    "fetched": "2026-06-11",
+    "reward": "Critical SC = 10% of directly-affected funds, MIN $50,000, MAX $500,000. High up to $20K. Web Crit flat $10K.",
+    "kyc": false,
+    "poc_mandatory": true,
+    "poc_env": "local-fork only (no mainnet/public-testnet)",
+    "in_scope_note": "oracle MANIPULATION / flash-loan is explicitly IN-scope (NOT excluded). Risk-segregated pools: Core comptroller 0x486Af39519B4Dc9a7fCcd318217352830E8AD9b4 vs Ecosystem comptroller 0xD7c4006d33DA2A0A8525791ed212bbCD7Aca763F (oracle 0x926C0857bcB6b109C1260c3b6660EfA8E633d73A).",
+    "live_config_note": "Ecosystem oracle oracleMode()=1=CL_ONLY (NOT DUAL) as of 2026-06-11 [EXECUTED cast] \u2014 the dual-oracle staleness-fallback deviation-bypass code is NOT on the active price path. Re-check oracleMode on any re-engagement.",
+    "entries": [
+      {
+        "class": "incorrect data supplied by third-party oracles",
+        "mechanism": "oracle is purely aggregator-priced (Chainlink/Edge latestRoundData) + admin manual price; NO on-chain DEX/getReserves/slot0/TWAP surface. A wrong/stale-but-positive feed answer, or the staleness->fallback path that skips the deviation cross-check (BenqiDualOracle.sol:363-371), is only reachable via the EXTERNAL feed misbehaving.",
+        "impact": "OUT OF SCOPE (default exclusion e). Oracle MANIPULATION is in-scope, but there is no permissionless on-chain lever to manipulate the price -> the carve-out has no surface. NEGATE-KNOWN unless a genuine permissionless price-corruption logic flaw is shown.",
+        "component": "BenqiDualOracle / BenqiPriceOracle",
+        "source_url": "https://immunefi.com/bug-bounty/benqi/",
+        "citation_anchor": "default-exclusions / oracle"
+      },
+      {
+        "class": "reward distribution bug (zero-distribution / disabled markets)",
+        "mechanism": "Reward distribution bugs affecting early borrowers in markets with zero distribution rewards, OR resulting from temporarily disabling distribution rewards.",
+        "impact": "OUT OF SCOPE (program-specific exclusion). MultiRewardDistributor.sendReward moves only emission tokens, never market principal -> any over-accrual/double-claim cannot reach principal and is the OOS reward class.",
+        "component": "MultiRewardDistributor / Comptroller reward hooks",
+        "source_url": "https://immunefi.com/bug-bounty/benqi/",
+        "citation_anchor": "program-specific-exclusions"
+      },
+      {
+        "class": "ERC-777 re-entrancy",
+        "mechanism": "re-entrancy via ERC-777 token hooks.",
+        "impact": "OUT OF SCOPE (program-specific exclusion).",
+        "component": "any market accepting an ERC777 underlying",
+        "source_url": "https://immunefi.com/bug-bounty/benqi/",
+        "citation_anchor": "program-specific-exclusions"
+      },
+      {
+        "class": "privileged/admin action without code modification",
+        "mechanism": "impacts requiring access to privileged addresses (governance/strategist/owner/guardian) without additional code modification \u2014 collateralFactor/closeFactor/liquidationIncentive/oracle/market-caps/oracleMode setters, sweepToken, _reduceReserves, _become, accrueRewards (sAVAX ROLE_ACCRUE_REWARDS).",
+        "impact": "OUT OF SCOPE (default exclusion; Doctrine #59). Admin mis-config/rug not bankable.",
+        "component": "Comptroller/QiToken/Oracle/StakedAvax admin surface",
+        "source_url": "https://immunefi.com/bug-bounty/benqi/",
+        "citation_anchor": "default-exclusions / admin"
+      },
+      {
+        "class": "basic economic / governance attacks (51%)",
+        "mechanism": "impacts requiring basic economic and governance attacks (e.g. 51% attack).",
+        "impact": "OUT OF SCOPE (default exclusion).",
+        "component": "governance",
+        "source_url": "https://immunefi.com/bug-bounty/benqi/",
+        "citation_anchor": "default-exclusions"
+      },
+      {
+        "class": "first-depositor / donation exchangeRate inflation",
+        "mechanism": "classic Compound-v2 empty-market donation. Ecosystem markets are SEEDED on-chain (qiCOQ totalSupply 4.5e21, qiSolvBTC 5.7e7) and no caller can permissionlessly empty a market to re-arm totalSupply==0; doTransferIn credits balance-delta (fee-on-transfer safe).",
+        "impact": "CLOSED by seeding -> NEGATE-KNOWN unless a market is shown emptiable. Banked as NEGATE 2026-06-11.",
+        "component": "QiToken/QiErc20Delegate",
+        "source_url": "hunts/2026-06-11-benqi-ecosystem-gate1-foreclosure.md",
+        "citation_anchor": "Angle-3"
+      }
+    ]
+  },
+  "variational": {
+    "source_primary": "https://immunefi.com/bug-bounty/variational/ + on-chain Arbitrum (cast) + Sourcify-verified source (chain 42161)",
+    "audience": "Immunefi program (Arbitrum perps bilateral-settlement); private audits completed 2026-03-13 (docs.variational.io)",
+    "fetched": "2026-06-11",
+    "reward": "Critical SC = 10% of directly-affected funds, MIN $10,000, MAX $100,000. High $3.5K-$25K.",
+    "kyc": true,
+    "poc_mandatory": true,
+    "poc_env": "local-fork only",
+    "chain": "Arbitrum (EVM)",
+    "architecture_note": "OPERATOR-CUSTODIAL. Oracle.sol (0x84BE56470d45b7f6629A66A219a38681F6BA6172, 467 LOC) is 100% onlyRole(PROVIDER_ROLE/DEFAULT_ADMIN_ROLE). SettlementPoolFactory 0x0F820B9afC270d658a9fD7D16B1Bdc45b70f074C (createPool owner-or-oracle, EIP-1167 clones, impl 0x8db6c8B7a085C3839e93EB8DaD45b93FB1ef5836). SettlementPool clones: SOLE permissionless write = depositUSDC(amount,transferUuid) onlyParties (deposit-own-funds). $28.6M TVL in EOAs: OLP 0x74bbbb0e7f0bad6938509dd4b556a39a4db1f2cd (~$25.2M, nonce 745992) + Treasury 0x5e91b40467fb8902c46a7b6cb90482363188d645 (~$3.36M, nonce 537632) \u2014 key-custody. USDC 0xaf88d065e77c8cC2239327C5EDb3A432268e5831.",
+    "entries": [
+      {
+        "class": "oracle / price manipulation + third-party contracts",
+        "mechanism": "program explicitly prohibits testing with pricing oracles or third-party smart contracts.",
+        "impact": "OUT OF SCOPE.",
+        "component": "price feeds",
+        "source_url": "https://immunefi.com/bug-bounty/variational/",
+        "citation_anchor": "out-of-scope"
+      },
+      {
+        "class": "privileged/admin without code modification (Doctrine #59)",
+        "mechanism": "all fund-movers are PROVIDER_ROLE/DEFAULT_ADMIN_ROLE; TVL in operator EOAs. Loss requires operator-key compromise.",
+        "impact": "OUT OF SCOPE (centralization/key-security). NEGATE banked 2026-06-11.",
+        "component": "Oracle.sol + OLP/Treasury EOAs",
+        "source_url": "hunts/2026-06-11-variational-immunefi-gate1-foreclosure.md",
+        "citation_anchor": "Doctrine#59"
+      },
+      {
+        "class": "transfers_processed UUID-dedup griefing",
+        "mechanism": "permissionless depositUSDC lets a party set transfers_processed[uuid]=true, colliding with a future operator transferUuid/parentQuoteUuid/fees_batch_id.",
+        "impact": "operator-recoverable temporary DoS (uuid free-form/re-issuable, not derived/bound) \u2192 NOT a permanent freeze, below $10K floor. NEGATE banked. Doctrine #66 lens 2.",
+        "component": "SettlementPool.transfers_processed",
+        "source_url": "hunts/2026-06-11-variational-immunefi-gate1-foreclosure.md",
+        "citation_anchor": "Angle-2"
+      },
+      {
+        "class": "grantRole override ordering bug",
+        "mechanism": "Oracle.grantRole calls super.grantRole() before require(!hasRole(PROVIDER_ROLE)) \u2192 public grantRole always reverts for PROVIDER_ROLE; addProvider() uses _grantRole directly so mgmt works.",
+        "impact": "admin-only (DEFAULT_ADMIN_ROLE) \u2192 OOS; not a fund-loss. Noted, not banked.",
+        "component": "Oracle.sol:438-446",
+        "source_url": "hunts/2026-06-11-variational-immunefi-gate1-foreclosure.md",
+        "citation_anchor": "Angle-1"
+      }
+    ]
+  },
+  "kast-m0-ext": {
+    "source_primary": "https://immunefi.com/bug-bounty/KAST/ + m0-foundation/solana-m-extensions repo (5 in-repo audits)",
+    "audience": "Immunefi KAST program (M0 solana-m-extensions: m_ext + ext_swap)",
+    "fetched": "2026-06-12",
+    "reward": "Critical = 10% of funds directly affected, MIN $21K, MAX $50K",
+    "kyc": true,
+    "poc_mandatory": true,
+    "chain": "Solana (Rust/Anchor)",
+    "density_note": "5 in-repo audits (Halborn x2, OtterSec, Adevar x2). m_ext wrap/unwrap are wrap_authorities-allowlist-gated (NOT permissionless). Permissionless surface = scaled_ui::sync (benign) + ext_swap swap/wrap/unwrap (value-conserving). NEGATE banked 2026-06-12, Doctrine #67.",
+    "entries": [
+      {
+        "class": "off-by-one in multiplier conversions",
+        "mechanism": "flooring residual in amount_to_principal / principal_to_amount / calculate_new_index f64.",
+        "impact": "DISCLOSED known-issue \u2192 OOS. Round-DOWN-everywhere makes round-trips net-zero; no profitable loop net-new.",
+        "component": "m_ext/utils/conversion.rs",
+        "source_url": "https://immunefi.com/bug-bounty/KAST/",
+        "citation_anchor": "known-issues#1"
+      },
+      {
+        "class": "retroactive fee application",
+        "mechanism": "fee-on-yield applied retroactively in index calc.",
+        "impact": "DISCLOSED \u2192 OOS.",
+        "component": "scaled_ui set_fee / calculate_new_index",
+        "source_url": "https://immunefi.com/bug-bounty/KAST/",
+        "citation_anchor": "known-issues#2"
+      },
+      {
+        "class": "yield loss on removal",
+        "mechanism": "remove_orphaned_earner / earner removal forfeits accrued yield.",
+        "impact": "DISCLOSED \u2192 OOS. remove_orphaned_earner permissionless but !is_active precondition admin-gated.",
+        "component": "crank/remove_orphaned_earner",
+        "source_url": "https://immunefi.com/bug-bounty/KAST/",
+        "citation_anchor": "known-issues#3"
+      },
+      {
+        "class": "mint authority conflicts",
+        "mechanism": "mint authority / CPI authority confusion.",
+        "impact": "DISCLOSED \u2192 OOS. wrap/unwrap wrap_authorities-gated; CPI authority PDA-seed-pinned.",
+        "component": "manage_wrap_authority / token CPI",
+        "source_url": "https://immunefi.com/bug-bounty/KAST/",
+        "citation_anchor": "known-issues#4"
+      },
+      {
+        "class": "unsupported mint extensions",
+        "mechanism": "Token2022 extension assumptions (get_mint_extensions).",
+        "impact": "DISCLOSED \u2192 OOS.",
+        "component": "utils/conversion.rs get_mint_extensions",
+        "source_url": "https://immunefi.com/bug-bounty/KAST/",
+        "citation_anchor": "known-issues#5"
+      },
+      {
+        "class": "privileged/admin-gated (Doctrine #59)",
+        "mechanism": "set_fee/claim_fees/migrate/transfer_admin/add-remove earn_manager/wrap_authority + claim_for/crank-sync = admin or earn_authority gated.",
+        "impact": "OOS without code-mod.",
+        "component": "m_ext admin+crank",
+        "source_url": "hunts/2026-06-12-kast-m0-ext-solana-gate1-foreclosure.md",
+        "citation_anchor": "Doctrine#59"
+      }
+    ]
+  },
+  "enzyme-onyx": {
+    "source_primary": "ChainSecurity (sole audit firm) \u2014 main Onyx audit (Dec 05 2025, V1-V5) + Onyx CCIP Wallet audit (May 08 2026) + 2 Extensive-QA docs (Feb 10 & Mar 03 2026). Repo: github.com/enzymefinance/protocol-onyx",
+    "audience": "Enzyme Foundation. NOT a public bounty page in this corpus \u2014 pre-deployment private audits/QA only. Single-firm coverage => net-new likely; QA docs are explicitly NON-comprehensive (time-limited best-effort).",
+    "fetched": "2026-06-20",
+    "auditor": "ChainSecurity (Decentralized Security AG) \u2014 ONLY firm",
+    "scope_coverage": {
+      "FULL_AUDIT_main_Dec2025": [
+        "Shares",
+        "ValuationHandler",
+        "LinearCreditDebtTracker",
+        "AccountERC20Tracker(V2)",
+        "FeeHandler",
+        "ContinuousFlatRateManagementFeeTracker",
+        "ContinuousFlatRatePerformanceFeeTracker(+hurdle V5)",
+        "FeeTrackerHelpersMixin",
+        "ERC7540LikeDepositQueue",
+        "ERC7540LikeRedeemQueue",
+        "ERC7540LikeIssuanceBase",
+        "OpenAccessLimitedCallForwarder",
+        "LimitedAccessLimitedCallForwarder",
+        "BeaconFactory",
+        "ComponentBeaconFactory",
+        "ComponentBeaconProxy",
+        "Global",
+        "GlobalOwnable",
+        "WithdrawableAssetsSource",
+        "OneToOneAggregator",
+        "ValueHelpersLib",
+        "StorageHelpersLib",
+        "DeploymentHelpersLib(V4)"
+      ],
+      "FULL_AUDIT_ccip_May2026": [
+        "DepositorWallet",
+        "DeterministicBeaconFactory",
+        "WalletsManager(ccip)"
+      ],
+      "QA_ONLY_non_comprehensive": [
+        "AddressListBase / OwnableAddressList / SharesOwnedAddressList",
+        "AddressListsSharesTransferValidator",
+        "ERC7540LikeDepositQueue ControllerAllowlistExternal MODIFICATION (only the new external-list gate, not full re-audit)",
+        "CreWorkflowConsumer + IReceiver (Chainlink CRE)",
+        "SyncDepositHandler (synchronous deposit flow)"
+      ],
+      "NOTABLE": "ERC-7540-like DEPOSIT queue + REDEEM queue: FULLY audited (main Dec2025). ValuationHandler: FULLY audited. Fee trackers (mgmt+perf incl hurdle): FULLY audited. CCIP wallets: FULLY audited (May2026). SyncDepositHandler + AddressList + CRE consumer + DepositQueue external-list mod: QA-ONLY (lighter coverage => higher net-new probability there)."
+    },
+    "net_new_guidance": "Only ChainSecurity touched this code. Highest net-new probability in QA-ONLY components (SyncDepositHandler cached-price arbitrage beyond staleness bound, CRE consumer re-entrancy [QA confidence LOW, system risk MEDIUM, NOT validated], DepositQueue external-list enum-extension), and in any logic NOT exercised by the fee/share-conservation invariants the main audit centered on. Core inflation/donation/low-share attacks are ACCEPTED-RISK (CS-ONYX-011) => FORECLOSE any finding in that class. Admin-trust assumptions (Notes 8.1, 11 items) are by-design => FORECLOSE admin-misoperation findings.",
+    "entries": [
+      {
+        "class": "access-control / unsafe-downcast underflow",
+        "mechanism": "FeeHandler.claimFees() did not validate _value <= owed; int256->uint256 downcast underflows on over-claim. Fix: split __updateValueOwed into __increaseValueOwed/__decreaseValueOwed, uint256-only, no int casts.",
+        "impact": "CRITICAL \u2014 theft of all feeAssetsSrc funds + permanent DoS of updateShareValue (netValue underflow).",
+        "component": "FeeHandler.claimFees / __updateValueOwed",
+        "severity": "Critical",
+        "status": "fixed (CodeCorrected V1)",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "CS-ONYX-001"
+      },
+      {
+        "class": "share-accounting / fee-share burn omission",
+        "mechanism": "Redemption computed exit feeSharesAmount but burned only netShares; fee shares remained in queue balance while still counted in totalSupply. Fix: burn gross request.sharesAmount.",
+        "impact": "HIGH \u2014 permanently inflates totalSupply, deflates share price for all holders on every non-zero exit-fee redemption.",
+        "component": "ERC7540LikeRedeemQueue executeRedeemRequests",
+        "severity": "High",
+        "status": "fixed (CodeCorrected V1)",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "CS-ONYX-002"
+      },
+      {
+        "class": "performance-fee HWM accounting",
+        "mechanism": "HWM set to pre-performance-fee valuePerShare while actual share value is post-fee, so HWM always > end-of-period share value. Fix: subtract perf fee from _netValue -> netValueIncludingFee, set HWM to that.",
+        "impact": "MEDIUM \u2014 fund must re-earn last perf fee before charging new perf fees (under-charges manager; not a user-loss).",
+        "component": "ContinuousFlatRatePerformanceFeeTracker.settlePerformanceFee",
+        "severity": "Medium",
+        "status": "fixed (CodeCorrected V1)",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "CS-ONYX-005"
+      },
+      {
+        "class": "arithmetic rounding precision (low-decimal quote asset)",
+        "mechanism": "ValueHelpersLib.convert() imprecise when quote asset has low decimals + conversion done per-1-share then scaled. GUSD(8dec) example loses ~90 units per 10k shares. Fix: convert without intermediate scale-down of share price.",
+        "impact": "LOW \u2014 rounding loss to redeemer/depositor on low-decimal assets.",
+        "component": "ValueHelpersLib.convert via executeDepositRequests/executeRedeemRequests",
+        "severity": "Low",
+        "status": "fixed (CodeCorrected V1)",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "CS-ONYX-006"
+      },
+      {
+        "class": "valuation race condition (fee claim vs price update)",
+        "mechanism": "getTotalValueOwed reduced by a concurrent fee-claim tx ordered before admin updateShareValue while submitted positions value still includes those fees -> inflated fund value. Fix: only admins may claim fees (claim+update both admin-gated).",
+        "impact": "LOW \u2014 transient inflated valuation if recipient claim front-runs admin update.",
+        "component": "ValuationHandler.updateShareValue / FeeHandler.getTotalValueOwed",
+        "severity": "Low",
+        "status": "fixed (CodeCorrected V1) \u2014 fee-claim restricted to admins in V2",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "CS-ONYX-007"
+      },
+      {
+        "class": "inconsistent error handling",
+        "mechanism": "removePositionTracker reverts on missing tracker but unsetAssetOracle silently deletes. Fix: unsetAssetOracle removed in favor of manually-set rates.",
+        "impact": "INFO \u2014 developer confusion / off-chain state bugs.",
+        "component": "ValuationHandler.unsetAssetOracle / removePositionTracker",
+        "severity": "Informational",
+        "status": "fixed (CodeCorrected V1)",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "CS-ONYX-009"
+      },
+      {
+        "class": "EIP-7201 namespace-id mismatch (NatSpec)",
+        "mechanism": "@custom:storage-location tag had extra '.storage' segment vs code-computed slot (enzyme.storage.X vs enzyme.X). Fix: removed extra segment.",
+        "impact": "INFO \u2014 tooling may mislocate storage; no runtime effect.",
+        "component": "ContinuousFlatRateManagementFeeTracker + ContinuousFlatRatePerformanceFeeTracker",
+        "severity": "Informational",
+        "status": "fixed (CodeCorrected V1)",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "CS-ONYX-004"
+      },
+      {
+        "class": "inflation / donation / first-depositor share-price attack",
+        "mechanism": "AccountERC20Tracker values position via asset.balanceOf(_account); attacker front-runs valuation with a donation to inflate valuePerShare, then redeems to steal part of a victim deposit. Requires admin to execute a single very-low-value deposit.",
+        "impact": "LOW-sev rated; partial theft of a victim deposit on a fresh fund. ACCEPTED \u2014 Onyx intentionally does NOT protect against inflation/donation/low-supply attacks in core; admins told to mint existential shares.",
+        "component": "AccountERC20Tracker.balanceOf-based valuation + ERC7540LikeDepositQueue",
+        "severity": "Low",
+        "status": "won't-fix (RiskAccepted V2) \u2014 ACCEPTED-RISK / OOS-known",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "CS-ONYX-011"
+      },
+      {
+        "class": "fee change applied to pending requests",
+        "mechanism": "Entry/exit fees mutable by admin at any time; requests do not persist fee at creation and fees are taken at execution. Admin can raise fee then execute a pre-existing request.",
+        "impact": "LOW-sev; user pays higher-than-expected fee. ACCEPTED \u2014 admins trusted; their process governs whether to process pre-fee-change requests.",
+        "component": "ERC7540LikeDepositQueue / ERC7540LikeRedeemQueue fee settlement",
+        "severity": "Low",
+        "status": "won't-fix (RiskAccepted V1) \u2014 ACCEPTED-RISK / OOS-known",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "CS-ONYX-003"
+      },
+      {
+        "class": "misleading error name",
+        "mechanism": "...HighWaterMarkTimestampIsZero thrown when hwmTimestamp==0 AND hurdleRate!=0; name only describes timestamp condition.",
+        "impact": "INFO. ACCEPTED.",
+        "component": "ContinuousFlatRatePerformanceFeeTracker (hurdle)",
+        "severity": "Informational",
+        "status": "won't-fix (RiskAccepted V5)",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "CS-ONYX-012"
+      },
+      {
+        "class": "missing sanity check (upper bound)",
+        "mechanism": "setHurdleRate enforces non-negative int16 but no upper-bound check; bounded only by int16 max 327.67%.",
+        "impact": "INFO. ACCEPTED.",
+        "component": "ContinuousFlatRatePerformanceFeeTracker.setHurdleRate",
+        "severity": "Informational",
+        "status": "won't-fix (RiskAccepted V5)",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "CS-ONYX-013"
+      },
+      {
+        "class": "rounding-induced DoS (dust request)",
+        "mechanism": "executeDepositRequests reverts whole batch if any request yields 0 shares (1 wei asset & share value >1e18); symmetric in RedeemQueue when share price <1e18 (require(netShares>0)).",
+        "impact": "INFO/minor DoS. ACKNOWLEDGED \u2014 filtering dust requests is intended admin process, so 'no DoS'.",
+        "component": "ERC7540LikeDepositQueue.executeDepositRequests / ERC7540LikeRedeemQueue",
+        "severity": "Informational",
+        "status": "ack (Acknowledged V1) \u2014 ACCEPTED-RISK / OOS-known",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "CS-ONYX-008"
+      },
+      {
+        "class": "missing event indexes",
+        "mechanism": "No event params indexed (except IERC7540Like deposit/redeem handler events).",
+        "impact": "INFO. ACKNOWLEDGED \u2014 Enzyme does not rely on indexed events off-chain.",
+        "component": "all Onyx contracts (events)",
+        "severity": "Informational",
+        "status": "ack (Acknowledged V1) \u2014 OOS-known",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "CS-ONYX-010"
+      },
+      {
+        "class": "admin-trust design assumptions (Admin/Owner)",
+        "mechanism": "11-point trusted-admin assumption list: valuation must use correct values; deposit/redeem exec must be atomic right after updateShareValue (else front-run); asset change needs oracle/rate set first; resetLastSettled only pre-start; resetHighWaterMark must not disadvantage; no positive-value valuation on zero-share fund; minRequestDuration>0; bound LinearCreditDebtTracker item count (OOG DoS); no misappropriation; no very-low-value request exec (revert + inflation vector); admins claim fees for recipients (V2).",
+        "impact": "By-design. Any issue arising from admin mis-operation within these assumptions is OUT-OF-SCOPE / known.",
+        "component": "Shares admins/owner across ValuationHandler/FeeHandler/queues/LinearCreditDebtTracker",
+        "severity": "Note",
+        "status": "by-design (Note V1/V2) \u2014 ACCEPTED-RISK / OOS-known",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "Notes 8.1 Admin/Owner Assumptions"
+      },
+      {
+        "class": "performance-fee fund-level HWM (late-joiner advantage)",
+        "mechanism": "HWM stored fund-level not per-user; after a drawdown new depositors pay no perf fee until prior peak regained though they gain along the way.",
+        "impact": "By-design known. Late joiners advantaged.",
+        "component": "ContinuousFlatRatePerformanceFeeTracker",
+        "severity": "Note",
+        "status": "by-design (Note V1) \u2014 known",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "Notes 8.2 Inflexible Performance Fee"
+      },
+      {
+        "class": "management-fee compound depreciation",
+        "mechanism": "Mgmt fee = pct of (value - already-accrued fees); settled each valuation update -> total annual fee decreases as update frequency increases (10% annual -> ~95.54 if monthly).",
+        "impact": "By-design known. Fee under-charge with frequent updates.",
+        "component": "ContinuousFlatRateManagementFeeTracker",
+        "severity": "Note",
+        "status": "by-design (Note V1) \u2014 known",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "Notes 8.3 Mgmt Fee Compound Depreciation"
+      },
+      {
+        "class": "third-party donation to fee source -> inflated valuation",
+        "mechanism": "Third party sends funds to feeAssetsSrc; total fees owed reduced (claimable) without fund's knowledge -> inflated valuation next update if admin submits positions value still including claimed fees and address/FeeHandler unmonitored.",
+        "impact": "By-design known; depends on admin monitoring.",
+        "component": "ValuationHandler.updateShareValue + FeeHandler fee source",
+        "severity": "Note",
+        "status": "by-design (Note V1) \u2014 known",
+        "source_url": "https://github.com/enzymefinance/protocol-onyx + audits/2025-09-CS--onyx-and-initial-features.pdf",
+        "citation_anchor": "Notes 8.4 Third Party Fee Funds"
+      },
+      {
+        "class": "uninitialized implementation / init front-run",
+        "mechanism": "DepositorWallet constructor did not call _disableInitializers(); anyone could init() the implementation and become walletsManager, then executeCalls/sendCCIPMessage to drain assets sent to the impl address. Fix: constructor now calls _disableInitializers().",
+        "impact": "INFO (impl-only assets). FIXED.",
+        "component": "DepositorWallet (impl behind BeaconProxy)",
+        "severity": "Informational",
+        "status": "fixed (CodeCorrected V1)",
+        "source_url": "audits/ChainSecurity_EnzymeFoundation_OnyxCCIPWallet_Audit.pdf",
+        "citation_anchor": "CCIP #001"
+      },
+      {
+        "class": "permissionless deploy / isInstance pollution",
+        "mechanism": "DeterministicBeaconFactory.deployProxy has no access control; salt namespaced by msg.sender so no address collision with WalletsManager wallets, BUT attacker proxies still recorded in isInstance, mixing real wallets with arbitrary third-party proxies; any isInstance consumer could trust attacker proxies.",
+        "impact": "INFO. ACCEPTED \u2014 keeps pattern consistent with other factories.",
+        "component": "DeterministicBeaconFactory.deployProxy / isInstance",
+        "severity": "Informational",
+        "status": "won't-fix (RiskAccepted V1) \u2014 ACCEPTED-RISK / OOS-known",
+        "source_url": "audits/ChainSecurity_EnzymeFoundation_OnyxCCIPWallet_Audit.pdf",
+        "citation_anchor": "CCIP #002"
+      },
+      {
+        "class": "missing event indexes",
+        "mechanism": "CallExecuted/CCIPMessageSent/ChainSelectorSet/UserSet/WalletsManagerSet/CCIPMessageProcessed/MessageDataProcessingFailed emit no indexed params.",
+        "impact": "INFO. ACCEPTED.",
+        "component": "WalletsManager + DepositorWallet events",
+        "severity": "Informational",
+        "status": "won't-fix (RiskAccepted V1) \u2014 OOS-known",
+        "source_url": "audits/ChainSecurity_EnzymeFoundation_OnyxCCIPWallet_Audit.pdf",
+        "citation_anchor": "CCIP #003"
+      },
+      {
+        "class": "zero-amount transfer revert (fee token return)",
+        "mechanism": "If a return token's residual after exact fee deduction is 0, Router.ccipSend transfers 0 tokens to pool -> may revert on some token implementations.",
+        "impact": "INFO. ACCEPTED \u2014 deemed highly unlikely fee exactly matches sent amount.",
+        "component": "WalletsManager/DepositorWallet token-return + Router.ccipSend",
+        "severity": "Informational",
+        "status": "won't-fix (RiskAccepted V1) \u2014 ACCEPTED-RISK / OOS-known",
+        "source_url": "audits/ChainSecurity_EnzymeFoundation_OnyxCCIPWallet_Audit.pdf",
+        "citation_anchor": "CCIP #004"
+      },
+      {
+        "class": "fee-on-transfer / rebasing tokens unsupported",
+        "mechanism": "_ccipReceive forwards safeTransfer(wallet, message-declared amount) not actual received balance; sendCCIPMessage approves message amount read from balanceOf -> FoT/rebasing break accounting. Unsupported by design.",
+        "impact": "System Consideration \u2014 FoT/rebasing tokens OUT OF SCOPE / unsupported.",
+        "component": "WalletsManager._ccipReceive + DepositorWallet.sendCCIPMessage/buildTokenReturnMessage",
+        "severity": "Note",
+        "status": "by-design (SystemConsideration SC1) \u2014 ACCEPTED-RISK / OOS-known",
+        "source_url": "audits/ChainSecurity_EnzymeFoundation_OnyxCCIPWallet_Audit.pdf",
+        "citation_anchor": "CCIP SC1"
+      },
+      {
+        "class": "no upgrade timelock (instant beacon swap)",
+        "mechanism": "DeterministicBeaconFactory.setImplementation takes effect immediately for every DepositorWallet; owner can swap impl with no user-exit window; no on-chain mitigation. (Global.owner fully trusted, worst case: malicious impl drains all wallets.)",
+        "impact": "System Consideration \u2014 admin/owner-trust accepted; DC-9 sub-3 analogue but trusted-owner = known/accepted.",
+        "component": "DeterministicBeaconFactory.setImplementation / Global.owner",
+        "severity": "Note",
+        "status": "by-design (SystemConsideration SC2) \u2014 ACCEPTED-RISK / OOS-known",
+        "source_url": "audits/ChainSecurity_EnzymeFoundation_OnyxCCIPWallet_Audit.pdf",
+        "citation_anchor": "CCIP SC2"
+      },
+      {
+        "class": "on-chain enumeration absent (info)",
+        "mechanism": "AddressListBase stores mapping(address=>bool); no on-chain member enumeration, consumers must index ItemAdded/ItemRemoved off-chain. QA: access-control + list logic both straightforward, low system risk.",
+        "impact": "NOTE/INFO \u2014 by design.",
+        "component": "AddressListBase / OwnableAddressList / SharesOwnedAddressList",
+        "severity": "Note",
+        "status": "by-design (QA note) \u2014 known",
+        "source_url": "audits/QA/ChainSecurity_QA_EnzymeFoundation_AddressList_TransferValidator_DepositQueueList_CREConsumer.md",
+        "citation_anchor": "QA AddressList Findings"
+      },
+      {
+        "class": "transfer-validator coverage gaps (info/note)",
+        "mechanism": "(a) __validateSetList require mixes &&/|| without parens (precedence correct). (b) transfer initiator/operator (msg.sender on transferFrom) is NEVER validated \u2014 only _from/_to; spender cannot be list-gated. (c) Shares.authTransfer/authTransferFrom BYPASS the validator (admin/system transfers not allow/block-listed) \u2014 by design.",
+        "impact": "NOTE \u2014 allowlist/blocklist gates only user-facing transfer/transferFrom principals, not the operator nor admin/system transfers.",
+        "component": "AddressListsSharesTransferValidator + Shares.authTransfer/authTransferFrom",
+        "severity": "Note",
+        "status": "by-design (QA note) \u2014 known",
+        "source_url": "audits/QA/ChainSecurity_QA_EnzymeFoundation_AddressList_TransferValidator_DepositQueueList_CREConsumer.md",
+        "citation_anchor": "QA TransferValidator Findings"
+      },
+      {
+        "class": "deposit-gate config/sequencing (info/note)",
+        "mechanism": "DepositQueue external IAddressList gate: (a) setDepositRestriction(External) before setting controllerAllowlist reverts all deposits until configured (no cross-validation). (b) __validateDepositRequest has no final else{revert} \u2014 if enum extended, new value silently passes. (c) switching away from External does not clear stored controllerAllowlist (stale, harmless).",
+        "impact": "NOTE/INFO \u2014 fail-closed; admin-correctable; enum-extension foot-gun.",
+        "component": "ERC7540LikeDepositQueue.__validateDepositRequest / setDepositRestriction (ControllerAllowlistExternal)",
+        "severity": "Note",
+        "status": "by-design / fail-closed (QA note) \u2014 known",
+        "source_url": "audits/QA/ChainSecurity_QA_EnzymeFoundation_AddressList_TransferValidator_DepositQueueList_CREConsumer.md",
+        "citation_anchor": "QA DepositQueue ext-list Findings"
+      },
+      {
+        "class": "CRE consumer re-entrancy / forwarder-whitelist trust (medium-systemrisk note)",
+        "mechanism": "CreWorkflowConsumer.onReport forwards reports to LimitedAccessLimitedCallForwarder. QA flags: (a) re-entrancy into onReport if a system action triggers KeystoneForwarder report delivery mid-execution (QA confidence LOW \u2014 not validated, system risk MEDIUM). (b) compromised DON/KeystoneForwarder bounded only by forwarder (target,selector) whitelist; canCall validates selector only, NOT call params. (c) init() has no access control (double-init blocked) + does not verify consumer registered as forwarder user (deploy sequencing).",
+        "impact": "MEDIUM system risk per QA but Chainlink infra TRUSTED per trust model + forwarder whitelist OUT OF SCOPE; bounded by admin whitelist. NOTE/known. NOTE: CreWorkflowConsumer was NOT in the main Dec-2025 audit scope.",
+        "component": "CreWorkflowConsumer.onReport + LimitedAccessLimitedCallForwarder.executeCalls + KeystoneForwarder",
+        "severity": "Note",
+        "status": "by-design / trusted-infra (QA note, MEDIUM systemrisk flagged) \u2014 partial coverage",
+        "source_url": "audits/QA/ChainSecurity_QA_EnzymeFoundation_AddressList_TransferValidator_DepositQueueList_CREConsumer.md",
+        "citation_anchor": "QA CRE Workflow Consumer"
+      },
+      {
+        "class": "sync-deposit init config window (info)",
+        "mechanism": "After init, default depositorAllowlist=address(0) and maxSharePriceStaleness=0 (blocks deposits, needs same-block price). If admin sets staleness BEFORE configuring allowlist, anyone can deposit in that window (init only takes asset; allowlist+staleness set in separate txs).",
+        "impact": "INFO \u2014 transient permissionless-deposit window from config ordering.",
+        "component": "SyncDepositHandler.init / __validateDepositor / __validateSharePriceTimestamp",
+        "severity": "Informational",
+        "status": "by-design / admin-sequencing (QA note) \u2014 known",
+        "source_url": "audits/QA/ChainSecurity_QA_EnzymeFoundation_SyncDepositHandler.md",
+        "citation_anchor": "QA SyncDepositHandler Findings"
+      },
+      {
+        "class": "sync-deposit cached-stale-price arbitrage (risk-framed, bounded)",
+        "mechanism": "SyncDepositHandler mints pro-rata shares in one tx using a CACHED ValuationHandler share price (not recomputed), gated by maxSharePriceStaleness + per-asset rate expiry. QA: stale price -> more/fewer shares than warranted; arbitrage window = staleness bound. System risk LOW only IF maxSharePriceStaleness is tight and price updates frequent.",
+        "impact": "Bounded by maxSharePriceStaleness config. QA-acknowledged as the core risk; NOT a filed finding. Mint-before-transfer ordering deviates from CEI but atomic.",
+        "component": "SyncDepositHandler.__deposit (cached share price from ValuationHandler) + convertAssetAmountToValue",
+        "severity": "Note",
+        "status": "by-design / config-bounded (QA, no finding) \u2014 known-risk",
+        "source_url": "audits/QA/ChainSecurity_QA_EnzymeFoundation_SyncDepositHandler.md",
+        "citation_anchor": "QA SyncDepositHandler Risk"
       }
     ]
   }

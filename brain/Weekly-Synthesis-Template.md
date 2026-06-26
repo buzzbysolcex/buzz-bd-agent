@@ -17,30 +17,39 @@
 > Then produce a synthesis with FOUR core analytical sections (CONNECTIONS / PATTERNS / CONTRADICTIONS / OPEN QUESTIONS), followed by FIVE pillar sections (P1 / P2 / P3 / P4 / CROSS-POLLINATION):
 >
 > ## CONNECTIONS
+>
 > List 3-5 non-obvious links between findings from DIFFERENT targets / pillars this week. Each connection must reference specific hunt files / brain files / data files by name. Examples of "non-obvious links": the same defense-class gap appearing in two unrelated protocols, the same audit firm missing the same pattern across two clients, a Doctrine #X lens firing on two targets in different substrates, the same dispatch-time corpus-collision pattern recurring across multiple PRE-CLONE-HALT files, a Pillar 4 confirmed exploit producing a Pillar 1 penalty rule, a Pillar 3 corpus finding producing a Pillar 4 ground-truth catalog entry.
 >
 > ## PATTERNS
+>
 > List every doctrine, lens, defense class, or CANDIDATE that fired on 3+ targets this week. For each: name the pattern, list the targets, note the substrate distribution (Solidity / Rust / FunC / Clarity / Move / Cosmos-SDK Go / Substrate Rust / etc.), suggest whether the pattern is ripe for promotion (e.g., CANDIDATE → DC, or DC sub-type → standalone DC, or single-anchor Doctrine → multi-anchor PERMANENT). Include patterns that fire across pillars (e.g., a scoring-engine penalty rule that also appears in 3+ Pillar 4 anchors).
 >
 > ## CONTRADICTIONS
+>
 > List any new contradictions discovered this week (rules that produced conflicting decisions on the same target, or doctrines that fire in opposite directions on the same input). Tag each with its pillar(s) (`[P1]` / `[P2]` / `[P3]` / `[P4]` / `[CROSS]`). Feed into `brain/Contradictions-Register.md` by appending under the matching pillar section.
 >
 > ## OPEN QUESTIONS
+>
 > List any questions that appeared 2+ times this week without resolution. Tag each with its pillar. Feed into `brain/Open-Questions-Tracker.md` under the matching pillar section.
 >
 > ## P1 SCORING
+>
 > Top 3 tokens scored this week (and outcome / tweet-fate). Notable rug-catches (token previously scored ≥50 that subsequently dumped). False-positive count (tokens scored low that performed well). Calibration adjustments proposed for Token-Scoring-Doctrine.md (T-1..T-8 amendments). Net score-tweet count for the week vs cap.
 >
 > ## P2 HSAAS
+>
 > Tweets posted (count by template). Audit inquiries inbound (count by source). Revenue events (count + USD if any). Top 5 prospects by EV (mcap × outreach-fit × conversion-probability). Top template winner this week (if A/B sample sizes sufficient). Notable Moltbook posts + engagement. AIBTC signals filed + acceptance rate.
 >
 > ## P3 CORPUS
+>
 > Phase 2 consumer runs (count + records processed). Classification mix (GROUND_TRUTH / RUG_PATTERN / METHODOLOGY / DETECTOR_SEED counts). Top 3 corpus eras by findings-per-1k-posts productivity. New cross-pillar handoffs from corpus (P3 → P1 or P3 → P4 brain file additions). Corpus disk usage + PID health.
 >
 > ## P4 HUNTING
+>
 > Gate 1 dispatches (count + targets). Gate 2 escalations + outcomes (CONFIRMED / FORECLOSED / pending). Paste-ready submissions filed (count + platforms). Bounty payouts received (count + USD). New brain compounds (doctrines / DCs / CANDIDATEs / sub-rules) and which hunts anchored them.
 >
 > ## CROSS-POLLINATION
+>
 > Count of new cross-pillar events filed in `brain/Cross-Pollination-Log.md` this week (P4→P1, P4→P2, P1→P4, P1→P2, P3→both, P2→P4, CROSS meta-events). Top 3 highest-leverage cross-pillar events of the week (rank by downstream impact). Any pattern cycles closing (events that flowed A → B → A back to source pillar with measurable improvement — see Cross-Pollination-Log §8).
 >
 > Write the synthesis to `brain/weekly-synthesis/{{TODAY_ISO}}-synthesis.md`. Cap the synthesis at 3000 words (raised from 2000 to accommodate 4-pillar coverage). Each of the 4 analytical sections: 250-400 words. Each of the 5 pillar sections: 200-350 words. Then UPDATE the Contradictions Register, Open Questions Tracker, and Cross-Pollination Log with the new entries discovered. After writing, return: (a) top 3 CONNECTIONS in one line each, (b) top 3 PATTERNS that fired on 3+ targets, (c) count of new CONTRADICTIONS surfaced, (d) count of new OPEN QUESTIONS surfaced, (e) count of new CROSS-POLLINATION events filed, (f) revenue + tweet + Gate 1/2 + corpus-records totals for the week (one-line per pillar).
@@ -89,6 +98,7 @@ When the synthesis-running session completes, it appends to `brain/Contradiction
 The first run is documented at `brain/weekly-synthesis/2026-05-26-synthesis.md` and serves as the format reference for all future runs. It covers a 3-day sprint (the 48-hour-plus calibration window) rather than a full 7-day cycle. Subsequent weekly runs are expected to cover full 7-day cycles.
 
 The first synthesis is a calibration run with these properties:
+
 - Sprint window: 2026-05-24 → 2026-05-26 inclusive (3 calendar days)
 - Hunt corpus: ~15 Gate 1 files + 3 PRE-CLONE-HALT files + 3 brain-proposals-applied ledgers + 4 disclosure submission events
 - Brain compound state at start: pre-DISC-019-refactor

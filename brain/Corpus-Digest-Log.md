@@ -22,10 +22,10 @@ Classification mix counts: GROUND_TRUTH / RUG_PATTERN / METHODOLOGY / DETECTOR_S
 
 **Existing Phase 1 backfill (per `brain/Lane4-Phase1-Results.md`):**
 
-| date | phase | era_window | input_records | findings_extracted | classification_mix | brain_files_updated | runtime |
-|---|---|---|---|---|---|---|---|
-| 2026-05-20 | Phase 1 | 2009-2011 (topic IDs 1-30000) | 221,804 posts (corpus) → 1,230 extracted | 1,230 posts across 10 target authors | GROUND_TRUTH dominant | `brain/Lane4-Phase1-Results.md` created | not recorded |
-| 2026-05-27 | Phase 2 | extension-batch + carry-forward | 938202 new lines | 77884 findings | GT=56182/RP=20003/MTH=1442/DS=257 | proposals only (no brain writes) | 4.4m |
+| date       | phase   | era_window                      | input_records                            | findings_extracted                   | classification_mix                | brain_files_updated                     | runtime      |
+| ---------- | ------- | ------------------------------- | ---------------------------------------- | ------------------------------------ | --------------------------------- | --------------------------------------- | ------------ |
+| 2026-05-20 | Phase 1 | 2009-2011 (topic IDs 1-30000)   | 221,804 posts (corpus) → 1,230 extracted | 1,230 posts across 10 target authors | GROUND_TRUTH dominant             | `brain/Lane4-Phase1-Results.md` created | not recorded |
+| 2026-05-27 | Phase 2 | extension-batch + carry-forward | 938202 new lines                         | 77884 findings                       | GT=56182/RP=20003/MTH=1442/DS=257 | proposals only (no brain writes)        | 4.4m         |
 
 **Phase 2 status (2026-05-27):** consumer script LANDED at `scripts/lane4-corpus-phase2-consumer.py` + `.sh` wrapper. Dry-run validated against full 935K corpus in 4m28s — produced 56,104 GT / 19,992 RP / 1,441 MTH / 257 DS findings (pre-cap). First production run scheduled Wed 2026-06-03 06:00 UTC (cron entry pending operator install). Output: proposals to `data/lane4/phase2-proposals/<date>/`, brain writes deferred to operator review.
 
@@ -41,12 +41,12 @@ Aggregate of all digest runs by classification:
 | classification | count_total | last_added | top_5_targets | brain_file_destination |
 ```
 
-| classification | count_total | last_added | top_5_targets | brain_file_destination |
-|---|---|---|---|---|
-| GROUND_TRUTH | 1,230 (Phase 1 only) | 2026-05-20 | (10 target authors per Phase1-Results) | `brain/Ground-Truth-Catalog.md` (created 2026-05-27, awaiting first Phase 2 production-run entries) + `brain/Lane4-Phase1-Results.md` |
-| RUG_PATTERN | 0 | n/a | n/a | `brain/Token-Rug-Patterns.md` (created 2026-05-27, anchors pending) |
-| METHODOLOGY | 0 | n/a | n/a | `brain/Doctrine.md` (as CANDIDATE) |
-| DETECTOR_SEED | 0 | n/a | n/a | `brain/Patterns-Defense-Classes.md` (as CANDIDATE) |
+| classification | count_total          | last_added | top_5_targets                          | brain_file_destination                                                                                                                |
+| -------------- | -------------------- | ---------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| GROUND_TRUTH   | 1,230 (Phase 1 only) | 2026-05-20 | (10 target authors per Phase1-Results) | `brain/Ground-Truth-Catalog.md` (created 2026-05-27, awaiting first Phase 2 production-run entries) + `brain/Lane4-Phase1-Results.md` |
+| RUG_PATTERN    | 0                    | n/a        | n/a                                    | `brain/Token-Rug-Patterns.md` (created 2026-05-27, anchors pending)                                                                   |
+| METHODOLOGY    | 0                    | n/a        | n/a                                    | `brain/Doctrine.md` (as CANDIDATE)                                                                                                    |
+| DETECTOR_SEED  | 0                    | n/a        | n/a                                    | `brain/Patterns-Defense-Classes.md` (as CANDIDATE)                                                                                    |
 
 ---
 
@@ -62,9 +62,9 @@ Hypothesis: the 2009-2014 era (Bitcoin's pre-Ethereum years) yields the most fou
 
 **v1.0 baseline (Phase 1 only):**
 
-| era_window | topic_id_range | posts_consumed | findings_per_1k_posts | top_patterns | productivity_rank |
-|---|---|---|---|---|---|
-| 2009-2011 | 1-30000 | 221,804 → 1,230 | 5.5 | (TBD) | 1 (baseline) |
+| era_window | topic_id_range | posts_consumed  | findings_per_1k_posts | top_patterns | productivity_rank |
+| ---------- | -------------- | --------------- | --------------------- | ------------ | ----------------- |
+| 2009-2011  | 1-30000        | 221,804 → 1,230 | 5.5                   | (TBD)        | 1 (baseline)      |
 
 Phase 2 runs will populate 2012-2015 (topic IDs 30001-221000) and reveal era-productivity comparison.
 
@@ -129,6 +129,7 @@ Per `four-pillar-loop.md` Pillar 3 DAILY block + Hyperactive-Formula Step 7:
 **v1.0 seed (none — first Phase 2 run will produce these).**
 
 **Anticipated handoffs:**
+
 - Historical exploit discussion → Pillar 4 brain/Ground-Truth-Catalog
 - Pre-rug warning pattern → Pillar 1 brain/Token-Rug-Patterns
 - Audit-methodology insight → Pillar 4 brain/Doctrine (CANDIDATE)
@@ -147,3 +148,7 @@ Per `four-pillar-loop.md` Pillar 3 DAILY block + Hyperactive-Formula Step 7:
 ---
 
 _Brain Corpus Digest Log | v1.0 | 2026-05-27 | Schema + Phase 1 backfill. Phase 2 consumer build pending. Cross-references: `brain/Lane4-Forum-Intelligence-Doctrine.md`, `brain/Lane4-Phase1-Results.md`, `four-pillar-loop.md` Pillar 3, `brain/Token-Rug-Patterns.md`._
+
+<!-- phase2 row -->
+
+| 2026-06-10 | Phase 2 | extension-batch + carry-forward | 6359 new lines | 57 findings | GT=30/RP=19/MTH=7/DS=1 | proposals only (no brain writes) | 1.7s |

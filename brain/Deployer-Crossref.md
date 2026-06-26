@@ -45,13 +45,13 @@ Each row is a deployer wallet with cross-pillar provenance. Same wallet may appe
 
 The deployer addresses in the bug-research target lane are CLEAN-by-default (legitimate protocol admins). They're listed here as the index baseline; cross-pillar rug-flag matching is the operational query.
 
-| deployer_address | chain | pillar1_tokens | pillar1_avg_score | pillar4_protocols | risk_class | first_seen | last_seen | notes |
-|---|---|---|---|---|---|---|---|---|
-| (Balancer V3 deployer EOA — bytecode-verify pending operator RPC) | ETH | 0 | n/a | balancer-v3 | CLEAN | 2026-05-26 | 2026-05-27 | Deployed BatchRouter `0x136f1E…78d1` per B-1 Gate 2 paste-ready |
-| (Stader Manager EOA — checksum lookup pending) | ETH | 0 | n/a | staderforeth (PARKED) | CLEAN | 2026-05-27 | 2026-05-27 | Deployed StaderStakePoolsManager + StaderOracle; Stader Gate 2 foreclosed via dedup, no risk-class change |
-| (Olympus V3 multi-sig — operator scope-verify pending) | ETH+Arbitrum+Optimism+Polygon+Avalanche+Fantom+Boba | 0 | n/a | olympus | CLEAN | 2026-05-26 | 2026-05-26 | BLVaultLido + ConvertibleDepositFacility owners; canonical Doctrine #29 v1.1 PRESENT anchor |
-| (Lista DAO Moolah deployer — to be extracted from clone git-log) | BSC+Base | 0 | n/a | listadao | WATCH | 2026-05-27 | 2026-05-27 | DEFAULT_ADMIN_ROLE has unchecked `emergencyWithdraw` (G2-LISTA-3 `[EXECUTED]`); admin compromise = full broker drain. Elevation pending Gate 2 disposition |
-| (rhino.fi DVF deployer — operator confirms via Etherscan) | ETH+Base+10+ L2s | 0 | n/a | rhinofi | CLEAN | 2026-05-26 | 2026-05-26 | Frozen-substrate active-product = Doctrine #37 Sub-Type B anchor |
+| deployer_address                                                  | chain                                               | pillar1_tokens | pillar1_avg_score | pillar4_protocols     | risk_class | first_seen | last_seen  | notes                                                                                                                                                      |
+| ----------------------------------------------------------------- | --------------------------------------------------- | -------------- | ----------------- | --------------------- | ---------- | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (Balancer V3 deployer EOA — bytecode-verify pending operator RPC) | ETH                                                 | 0              | n/a               | balancer-v3           | CLEAN      | 2026-05-26 | 2026-05-27 | Deployed BatchRouter `0x136f1E…78d1` per B-1 Gate 2 paste-ready                                                                                            |
+| (Stader Manager EOA — checksum lookup pending)                    | ETH                                                 | 0              | n/a               | staderforeth (PARKED) | CLEAN      | 2026-05-27 | 2026-05-27 | Deployed StaderStakePoolsManager + StaderOracle; Stader Gate 2 foreclosed via dedup, no risk-class change                                                  |
+| (Olympus V3 multi-sig — operator scope-verify pending)            | ETH+Arbitrum+Optimism+Polygon+Avalanche+Fantom+Boba | 0              | n/a               | olympus               | CLEAN      | 2026-05-26 | 2026-05-26 | BLVaultLido + ConvertibleDepositFacility owners; canonical Doctrine #29 v1.1 PRESENT anchor                                                                |
+| (Lista DAO Moolah deployer — to be extracted from clone git-log)  | BSC+Base                                            | 0              | n/a               | listadao              | WATCH      | 2026-05-27 | 2026-05-27 | DEFAULT_ADMIN_ROLE has unchecked `emergencyWithdraw` (G2-LISTA-3 `[EXECUTED]`); admin compromise = full broker drain. Elevation pending Gate 2 disposition |
+| (rhino.fi DVF deployer — operator confirms via Etherscan)         | ETH+Base+10+ L2s                                    | 0              | n/a               | rhinofi               | CLEAN      | 2026-05-26 | 2026-05-26 | Frozen-substrate active-product = Doctrine #37 Sub-Type B anchor                                                                                           |
 
 ---
 
@@ -107,8 +107,8 @@ The wire-up is operator-greenlit (per `four-pillar-loop.md` Phase 1 build list);
 
 ## Cross-pillar audit log
 
-| date | event | action |
-|---|---|---|
+| date       | event        | action                                                                       |
+| ---------- | ------------ | ---------------------------------------------------------------------------- |
 | 2026-05-27 | File created | Seed rows from Balancer / Stader / Olympus / Lista / rhino.fi Gate 1+2 hunts |
 
 (Appended every time risk_class changes or a new escalation fires.)

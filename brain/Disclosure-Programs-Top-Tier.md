@@ -120,13 +120,14 @@ Today's brain growth produced 4 fragility-family entries. Map them to the 3 veri
 
 Standing-Intake Step 1 PROFILE includes payer-history as a key signal. Below: protocols where payer-history materially affects P(acceptance) calibration. Maintain as a running annotation set alongside the H2 named-targets list above.
 
-| Program | Bounty | Payer history | P(acc) calibration | Source |
-|---------|--------|---------------|---------------------|--------|
+| Program      | Bounty        | Payer history                                                                | P(acc) calibration                     | Source                                                         |
+| ------------ | ------------- | ---------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------------------------------- |
 | JustLend DAO | $50K Critical | **$20K total paid** ($0-history ZONE per standing-intake-protocol.md Step 1) | **P(acc) ≈ 0.2** (default 0.5 reduced) | Hunt `hunts/2026-05-26-justlend-immunefi-gate1.md` proposal #5 |
 
 **Why annotate JustLend specifically.** Standing Intake Step 1 PROFILE captures payer-history as a key signal for EV calibration. JustLend's $20K total paid is below the $50K Critical cap — the program has historically NOT settled at-cap, suggesting either (a) no Critical findings have been validated, or (b) settlements consistently scope-narrow to lower severities. Either way, P(acceptance) of a Critical finding is materially below the established-payer baseline (P(acc) ≈ 0.5). Reduce to P(acc) ≈ 0.2 per Step 1 $0-history-zone heuristic.
 
 **Operational implication.** EV recalculation for JustLend Gate 2 work:
+
 - Naive EV = P(finding) × $50K × P(acc) × overlap = 0.15 × $50K × 0.5 × 0.42 (M-?-H-?-M=22/52) = ~$1,575
 - Payer-discounted EV = 0.15 × $50K × **0.2** × 0.42 = **~$630**
 

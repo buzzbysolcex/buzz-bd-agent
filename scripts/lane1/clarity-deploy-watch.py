@@ -20,10 +20,21 @@ NEWQ = OUT + "/new-deploys.jsonl"
 TOPQ = OUT + "/TOP-queue.md"
 FEED = "https://api.hiro.so/extended/v1/tx?type=smart_contract&limit={n}"
 
-# KNOWN Stacks/Clarity protocols WITH an Immunefi bounty / disclosure path.
+# IN-SCOPE DEPLOYER allowlist (Doctrine #58, Ogie msg 8178+8191) — a deploy is ACTIONABLE only if
+# its DEPLOYER principal (the SP… before the first '.') is a bounty program's listed deployer.
+# "Related to a bountied protocol" (name-substring, token-pairing, integration) is NOT in-scope.
+# Step-1-VERIFIED principals ONLY — add a row only after confirming it is the program's deployer.
+# Value = protocol key (used for the #45 density fold below).
+IN_SCOPE_DEPLOYERS = {
+    "SPQC38PW542EQJ5M11CR25P7BS1CA6QT4TBXGB3M": "bitflow",  # Bitflow DLMM/HODLMM — Immunefi, Step-1 verified 2026-06-01 (hunts/2026-06-01-bitflow-dlmm-immunefi-gate1.md)
+    # TODO add as scope-verified: granite / zest / stacking-dao / arkadiko / velar / hermetica deployer principals
+}
+# KNOWN Stacks/Clarity protocols WITH a bounty path — NAME-ASSOCIATION ONLY signal. Per Doctrine #58
+# this NO LONGER drives ACTIONABLE: a name match without an in-scope DEPLOYER → WATCHLIST (verify scope
+# at Step-1). Kept so a name hit still surfaces for the human in-scope/impact check, not auto-pipelined.
 KNOWN_BOUNTY = ["granite", "zest", "stacking-dao", "ststx", "stackingdao", "bitflow", "dlmm",
                 "arkadiko", "usda", "hermetica", "usdh", "alex", "velar"]
-# #45-DENSE known-bounty protocols (3+ top-tier audits / saturated) → NOT actionable, OPPORTUNISTIC only.
+# #45-DENSE bounty protocols (3+ top-tier audits / saturated) → in-scope-deployer match demotes TOP→OPPORTUNISTIC.
 # ALEX = CoinFabrik x4 + Least Authority, core audit-excluded, post-hack -> demoted (Ogie msg 956).
 DENSE_DEMOTE = ["alex"]
 # DeFi-relevant contract-name signal (unknown protocol → MED, verify bounty at Step-1).
@@ -60,14 +71,25 @@ def load_seen():
 
 
 def classify(cid):
-    """3-way #45 fold: TOP=ACTIONABLE (known-bounty AND not-dense) · OPP=OPPORTUNISTIC (known-bounty
-    BUT #45-dense, e.g. ALEX) · MED=WATCHLIST (DeFi-name, unknown bounty). None=ignore."""
+    """Doctrine #58 IN-SCOPE-MAPPING gate + #45 density fold. ACTIONABLE requires an in-scope
+    DEPLOYER principal — protocol-NAME-association alone is downgraded to WATCHLIST.
+      TOP=ACTIONABLE     : deployer principal IS a program's in-scope deployer, AND not #45-dense
+      OPP=OPPORTUNISTIC  : in-scope deployer BUT #45-dense (e.g. ALEX) → fresh-diff only
+      MED=WATCHLIST      : name-association to a bountied protocol OR a DeFi-name, but deployer NOT
+                           in-scope → never auto-pipelined; verify in-scope-deployer/impact at Step-1
+      None=ignore        : noise / non-DeFi.
+    NOTE: in-scope IMPACT (Doctrine #58 path b, Primacy-of-Impact) cannot be decided from a contract
+    id alone — it needs source coupling analysis, so it is a MANUAL Step-1 promotion, never auto-TOP."""
+    deployer = cid.split(".", 1)[0]
     name = (cid.split(".", 1)[1] if "." in cid else cid).lower()
     if NOISE.search(name):
         return None
-    if any(k in name for k in KNOWN_BOUNTY):
-        return "OPP" if any(k in name for k in DENSE_DEMOTE) else "TOP"
-    if DEFI.search(name):
+    prog = IN_SCOPE_DEPLOYERS.get(deployer)
+    if prog:  # (a) in-scope DEPLOYER mapping → ACTIONABLE (dense protocols demote to OPPORTUNISTIC)
+        return "OPP" if prog in DENSE_DEMOTE else "TOP"
+    if any(k in name for k in KNOWN_BOUNTY):  # name-association w/o in-scope deployer → WATCHLIST, NOT actionable
+        return "MED"
+    if DEFI.search(name):  # DeFi-name, unknown protocol → WATCHLIST
         return "MED"
     return None
 
@@ -122,9 +144,9 @@ def main():
             for c in opps: f.write(json.dumps({"cid": c, "priority": "OPP"}) + "\n")
             for c in meds: f.write(json.dumps({"cid": c, "priority": "MED"}) + "\n")
         with open(TOPQ, "a") as f:
-            for c in tops: f.write(f"- [ACTIONABLE] {c} — thin+bounty Clarity protocol new deploy → Gate-1 NOW\n")
-            for c in opps: f.write(f"- [OPPORTUNISTIC] {c} — known-bounty but #45-DENSE → only on a fresh-diff signal\n")
-            for c in meds: f.write(f"- [WATCHLIST] {c} — new Clarity DeFi deploy → verify bounty/disclosure at Step-1\n")
+            for c in tops: f.write(f"- [ACTIONABLE] {c} — IN-SCOPE deployer ({IN_SCOPE_DEPLOYERS.get(c.split('.',1)[0])}) new deploy → Gate-1 NOW\n")
+            for c in opps: f.write(f"- [OPPORTUNISTIC] {c} — in-scope deployer but #45-DENSE → only on a fresh-diff signal\n")
+            for c in meds: f.write(f"- [WATCHLIST] {c} — name-assoc/DeFi-name, deployer NOT in-scope → verify in-scope-deployer/impact at Step-1 (Doctrine #58, EV 0 until mapped)\n")
     # update seen (all fetched)
     for r in results:
         cid = (r.get("smart_contract") or {}).get("contract_id")
@@ -145,7 +167,7 @@ def main():
     if notify:
         digest = [f"new this run: {len(tops)} actionable + {len(opps)} opportunistic + {len(meds)} watchlist",
                   f"backlog #45-split — ACTIONABLE: {a} | OPPORTUNISTIC: {o} | WATCHLIST: {w}",
-                  "(auto-QUEUED only — never auto-hunted; only ACTIONABLE drives a Gate-0 GO; OPPORTUNISTIC=fresh-diff-only; WATCHLIST waits for a bounty)"]
+                  "(auto-QUEUED only — never auto-hunted; ACTIONABLE = IN-SCOPE deployer match only [Doctrine #58]; OPPORTUNISTIC=fresh-diff-only; WATCHLIST=name-assoc, EV 0 until in-scope-deployer/impact verified at Step-1)"]
         digest += [f"ACTIONABLE {c}" for c in tops] + [f"OPP {c}" for c in opps] + [f"WL {c}" for c in meds[:4]]
         notify_wr(digest)
 

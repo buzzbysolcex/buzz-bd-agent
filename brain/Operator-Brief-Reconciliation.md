@@ -10,11 +10,11 @@
 
 Operator briefs are high-velocity surface descriptions delivered via Telegram. They are written from memory or quick scan and can diverge from on-chain reality on any of three axes:
 
-| Axis | Cap Sherlock divergence | Flying Tulip Sherlock divergence |
-|---|---|---|
-| **Prize amount** | $1M briefed | $93.1K final | $1M briefed | $100K actual |
-| **Status** | "active" implied | FINISHED 2025-07-24 (10mo ago) | "active" implied | FINISHED, judging adjudicated zero valid M/H findings |
-| **Scope** | EigenLayer "in scope" | EigenLayer added post-audit | (FT not source-checked) | (FT not source-checked) |
+| Axis             | Cap Sherlock divergence | Flying Tulip Sherlock divergence |
+| ---------------- | ----------------------- | -------------------------------- | ----------------------- | ----------------------------------------------------- |
+| **Prize amount** | $1M briefed             | $93.1K final                     | $1M briefed             | $100K actual                                          |
+| **Status**       | "active" implied        | FINISHED 2025-07-24 (10mo ago)   | "active" implied        | FINISHED, judging adjudicated zero valid M/H findings |
+| **Scope**        | EigenLayer "in scope"   | EigenLayer added post-audit      | (FT not source-checked) | (FT not source-checked)                               |
 
 **2-of-2 same-day divergence is a pattern, not noise.** [INSPECTED]
 

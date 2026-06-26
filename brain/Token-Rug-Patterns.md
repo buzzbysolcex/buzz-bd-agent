@@ -67,6 +67,7 @@
 **Mechanism:** Direct security-tool flags from RugCheck / GoPlus / TokenSniffer / on-chain probe. Includes honeypot detection (can buy but can't sell), buy-tax > 50%, blacklist functions, mint-without-cap, pause functions, upgradeable proxies without timelock.
 
 **Pillar 4 cross-applicability:** **DIRECT, MULTIPLE LENSES**:
+
 - Honeypot: DC-3 (access control denying sell-path conditional on caller identity)
 - High buy/sell tax: not a Pillar 4 pattern (it's documented behavior)
 - Blacklist functions: DC-9 sub-1 (privileged state mutation without defense-in-depth)
@@ -154,35 +155,38 @@
 
 ## Cross-pollination summary (Pillar 1 ↔ Pillar 4 wiring)
 
-| TRP rule | Pillar 4 lens | Wire-strength | Cross-feed trigger |
-|---|---|---|---|
-| TRP-1 FDV Gap | DC-9 sub-1 mint without timelock | Indirect | Pillar 4 mint-finding → re-eval Pillar 1 FDV |
-| TRP-2 Stablecoin | Doctrine #29 v1.1 MIN-cap | Strong | Pillar 4 MIN-cap-absent → Pillar 1 depeg-risk override |
-| TRP-3 Ghost Token | DC-13 honeypot + DC-3 access | Direct | TRP-3 + new-deployer → auto-queue Pillar 4 quick-scan |
-| TRP-4 Contradictory Audit | Self-Correction Layer Contradictions Register | Strong-meta | Contradictory-audit tokens → enhanced Phase 0 dedup |
-| TRP-5 Security Penalty | DC-3 + DC-9 sub-1/sub-3 | Direct multiple | TRP-5 −25+ + Lane 5 scope deployer → emergency Gate 1 |
-| TRP-6 Low Liquidity | (none direct) | Inverse | Pillar 4 collateral-token check (6th target-class) |
-| TRP-7 Age (counter) | Doctrine #32 v1.1 + #37 sub-types | Strong-classifier | Age + product-activity → sub-type input |
-| TRP-8 Volume Threshold | (none) | None | — |
-| TRP-9 Ghost Volume | DC-3 single-operator | Strong-indirect | TRP-9 + multi-sig overlap → elevated DC-3 priority |
-| TRP-10 CTO | DC-3 (unpatchable) | Medium | CTO + TVL > $1M → PERMANENT Lane 5 watchlist |
-| TRP-11 Vol/Liq Spike | (none direct) | Indirect | Lending collateral whitelist check |
+| TRP rule                  | Pillar 4 lens                                 | Wire-strength     | Cross-feed trigger                                     |
+| ------------------------- | --------------------------------------------- | ----------------- | ------------------------------------------------------ |
+| TRP-1 FDV Gap             | DC-9 sub-1 mint without timelock              | Indirect          | Pillar 4 mint-finding → re-eval Pillar 1 FDV           |
+| TRP-2 Stablecoin          | Doctrine #29 v1.1 MIN-cap                     | Strong            | Pillar 4 MIN-cap-absent → Pillar 1 depeg-risk override |
+| TRP-3 Ghost Token         | DC-13 honeypot + DC-3 access                  | Direct            | TRP-3 + new-deployer → auto-queue Pillar 4 quick-scan  |
+| TRP-4 Contradictory Audit | Self-Correction Layer Contradictions Register | Strong-meta       | Contradictory-audit tokens → enhanced Phase 0 dedup    |
+| TRP-5 Security Penalty    | DC-3 + DC-9 sub-1/sub-3                       | Direct multiple   | TRP-5 −25+ + Lane 5 scope deployer → emergency Gate 1  |
+| TRP-6 Low Liquidity       | (none direct)                                 | Inverse           | Pillar 4 collateral-token check (6th target-class)     |
+| TRP-7 Age (counter)       | Doctrine #32 v1.1 + #37 sub-types             | Strong-classifier | Age + product-activity → sub-type input                |
+| TRP-8 Volume Threshold    | (none)                                        | None              | —                                                      |
+| TRP-9 Ghost Volume        | DC-3 single-operator                          | Strong-indirect   | TRP-9 + multi-sig overlap → elevated DC-3 priority     |
+| TRP-10 CTO                | DC-3 (unpatchable)                            | Medium            | CTO + TVL > $1M → PERMANENT Lane 5 watchlist           |
+| TRP-11 Vol/Liq Spike      | (none direct)                                 | Indirect          | Lending collateral whitelist check                     |
 
 ---
 
 ## Maintenance loop
 
 **Daily cron (Pillar 1 scoring cycles):**
+
 - For every token scored < 30: append a row to the corresponding TRP-N anchor target list
 - Format: `<address> | <chain> | <ticker> | <score> | <triggered_rules>`
 - File via the scoring cron output handler (not yet wired — Phase 1 task)
 
 **Per Pillar 4 Gate 2 confirm:**
+
 - Check the exploit pattern against the 11 TRP rules
 - If a new exploit pattern is NOT covered by any existing rule, draft a TRP-12+ proposal
 - File under "Brain compounds queued" in the paste-ready submission and surface to operator
 
 **Weekly synthesis review:**
+
 - Count of <30 tokens caught by each TRP rule
 - Cross-pillar trigger events fired in the week
 - Promotion candidates (TRP rule with 10+ anchors in a single week → consider weight increase)

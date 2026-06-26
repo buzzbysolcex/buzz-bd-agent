@@ -252,6 +252,7 @@ _Hyperactive Formula | v1.0 | 2026-05-22 (Ogie msgs 7530 + 7531 — permanent au
 **Reporting form.** Report what was DONE, not what COULD be done. After every work-unit completes, the next sentence is what was started next — not a request for direction.
 
 **Trace.** Operator typed this rule three times before formalization:
+
 - Ogie msg 7440 (2026-05-21): Operator-Philosophy.md Rule 2 "bring results, not questions" + Rule 3 "only escalate what's truly out of your hands"
 - Ogie msg 7547 (2026-05-22): feedback_formula_no_decision_points.md
 - Ogie msg 7624 (2026-05-23): War Room report ended with A/B/C/D menu → operator msg 7628 FINAL WARNING + rule made permanent here

@@ -12,15 +12,15 @@
 
 ## TASK STATUS
 
-| Task | Status | Notes |
-|---|---|---|
-| 1. Brain audit Cosmos SDK | IN PROGRESS | Sections below |
-| 2. Substrate research Heimdall v2 | DEFERRED — needs invite + repo access | Pre-work: identify public repo URL |
-| 3. Detector priming | IN PROGRESS | Maps below |
-| 4. Go toolchain verify | DONE + DRY-RUN VALIDATED [EXECUTED] (2026-05-29) | Go 1.22.2 + semgrep ✓; **Go-unittest PoC harness ran clean on real Cosmos BLS module (CGO/blst, gcc 13.3) — Babylon dry-run, see §DRY-RUN COMPLETE** |
-| 5. Sherlock format intel | TODO | Search prior contest formats |
-| 6. Wallet/USDC deposit ($250/sub) | TODO | Check post Firedancer payout |
-| 7. KILL_LIST Polygon/Heimdall add | DONE | See §KILL_LIST below |
+| Task                              | Status                                           | Notes                                                                                                                                                |
+| --------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Brain audit Cosmos SDK         | IN PROGRESS                                      | Sections below                                                                                                                                       |
+| 2. Substrate research Heimdall v2 | DEFERRED — needs invite + repo access            | Pre-work: identify public repo URL                                                                                                                   |
+| 3. Detector priming               | IN PROGRESS                                      | Maps below                                                                                                                                           |
+| 4. Go toolchain verify            | DONE + DRY-RUN VALIDATED [EXECUTED] (2026-05-29) | Go 1.22.2 + semgrep ✓; **Go-unittest PoC harness ran clean on real Cosmos BLS module (CGO/blst, gcc 13.3) — Babylon dry-run, see §DRY-RUN COMPLETE** |
+| 5. Sherlock format intel          | TODO                                             | Search prior contest formats                                                                                                                         |
+| 6. Wallet/USDC deposit ($250/sub) | TODO                                             | Check post Firedancer payout                                                                                                                         |
+| 7. KILL_LIST Polygon/Heimdall add | DONE                                             | See §KILL_LIST below                                                                                                                                 |
 
 ---
 
@@ -28,41 +28,41 @@
 
 ### From dYdX V4 + Stride + Bifrost (Polkadot) + THORChain Bifrost intake history:
 
-| Brain compound | Source anchor | Sherlock-Heimdall applicability |
-|---|---|---|
-| **Doctrine #36 PERMANENT — Substrate-Coverage Gate** (P-floor 0.05 binds for substrate-blind hunts) | dYdX V4 Cosmos-Go + Bifrost Polkadot-Substrate-Rust + Hydration | **APPLIES.** Heimdall is Cosmos-SDK-Go. Without Go AST detector coverage, P(finding) floor binds at 0.05. **CRITICAL: prep MUST build detectors #129/#137/#138/#165 to LIFT the floor before Jun 15.** |
-| **Doctrine #34 sub-class b** (post-audit composition multiplier, 5+ anchors OPERATIONALLY PERMANENT) | Sky + Alchemix + DeFi Saver + Cap C1 + Cap C3 + Gnosis Chain + Flux + Spark | **APPLIES.** Heimdall v2 = post-v1 composition. Identify v1→v2 module additions. Highest-EV surface class. |
-| **Doctrine #37 Sub-Type C CANDIDATE** (Unaudited-and-Active) | FRAX V3 frxUSD 2026-05-28 | **TBD.** Heimdall v2 has audits (Halborn 2023, Code4rena 2024 are common Polygon vendors); if v2 modules added post-audit, Sub-Type C applies. |
-| **Doctrine #38** (Pure Pass-Through *WithSig STRUCTURAL FORECLOSE) | DeFi Saver | **LOW APPLICABILITY.** Cosmos SDK doesn't use EIP-712. Equivalent: Tendermint signatures (ed25519/secp256k1) — separate class. |
-| **Doctrine #39 CANDIDATE + DC-13 sub-5** (Notification Path ≠ Authorization Path) | Filecoin DISC-020 | **APPLIES.** Cosmos SDK BeginBlocker/EndBlocker hooks vs ABCI message handlers — separate authorization paths. Pre-Gate-2 Phase 0 gate. |
-| **Doctrine #27 F MAXIMUM** (33-audit ceiling 0.20×) | Euler + Gearbox + Spark (3-anchor PERMANENT 2026-05-28) | **TBD.** Probe Heimdall audit count + firm coverage at Step 1 PROFILE. Polygon ecosystem likely has 5-10 audits across Halborn + Hexens + others. |
-| **Doctrine #29 v1.1 consumer-transfer logic** | LayerZero V2 CONSUMER hunts | **APPLIES (via Bor).** Heimdall→Bor state-sync is consumer-of-Heimdall pattern. Verify message-passing trust boundary. |
-| **DC-7 EXCLUSION CANONICAL** (3-anchor PERMANENT) | Cap C1 + Function FBTC H1 + Gearbox H2 | **APPLIES.** Validator-only operations + checkpoint hash verification likely fit deterministic-derivation pattern. Pre-emptive exclusion filter. |
-| **DC-9 family** (privilege escalation, sub-1..6) | Multiple anchors | **APPLIES.** Validator admin functions = DC-9 sub-2 (admin-no-timelock). Heimdall governance = DC-9 sub-3 (upgradeable-hook-no-timelock). |
-| **DC-6 cross-domain** | Cross-chain bridges | **APPLIES.** Heimdall↔Bor↔Ethereum is 3-domain. Bridge boundaries each carry trust assumptions. |
-| **CANDIDATE-A bridge sig-replay** | Flying Tulip + Midas | **APPLIES.** Heimdall→Ethereum checkpoint signature path. |
-| **CANDIDATE-D state machine** | KyberSwap CLMM | **APPLIES.** Validator lifecycle states (active/jailed/unbonding/unbonded). |
-| **CANDIDATE-J state-machine cooldown** | top-3 saturated 2026-05-28 (Aave V3 + Comet + FRAX) | **APPLIES.** Cosmos SDK unbonding period + slashing window + validator rotation. Fresh substrate for CANDIDATE-J. |
-| **Pattern A access control** | LayerZero V2 (KILLED) + multiple | **APPLIES.** Validator-only operations, governance-only setters, admin functions. |
-| **CANDIDATE-W ERC2771 _msgSender()** | origin-dollar 2026-05-21 | **DOES NOT APPLY.** Cosmos SDK uses ctx.MsgSigners() not msg.sender. |
-| **CANDIDATE-V Reward Accumulator** | origin-dollar | **MAY APPLY.** Cosmos staking module distributes rewards — verify per-validator and per-delegator accumulator hygiene. |
-| **CANDIDATE-G Solana off-chain cosigner** | Indentura PL Vault | **DOES NOT APPLY** (Solana-specific). |
-| **CANDIDATE-Y from==to self-transfer accounting mutation** | origin-dollar | **MAY APPLY.** x/bank self-transfer accounting in Cosmos SDK is a known edge — verify. |
+| Brain compound                                                                                       | Source anchor                                                               | Sherlock-Heimdall applicability                                                                                                                                                                        |
+| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Doctrine #36 PERMANENT — Substrate-Coverage Gate** (P-floor 0.05 binds for substrate-blind hunts)  | dYdX V4 Cosmos-Go + Bifrost Polkadot-Substrate-Rust + Hydration             | **APPLIES.** Heimdall is Cosmos-SDK-Go. Without Go AST detector coverage, P(finding) floor binds at 0.05. **CRITICAL: prep MUST build detectors #129/#137/#138/#165 to LIFT the floor before Jun 15.** |
+| **Doctrine #34 sub-class b** (post-audit composition multiplier, 5+ anchors OPERATIONALLY PERMANENT) | Sky + Alchemix + DeFi Saver + Cap C1 + Cap C3 + Gnosis Chain + Flux + Spark | **APPLIES.** Heimdall v2 = post-v1 composition. Identify v1→v2 module additions. Highest-EV surface class.                                                                                             |
+| **Doctrine #37 Sub-Type C CANDIDATE** (Unaudited-and-Active)                                         | FRAX V3 frxUSD 2026-05-28                                                   | **TBD.** Heimdall v2 has audits (Halborn 2023, Code4rena 2024 are common Polygon vendors); if v2 modules added post-audit, Sub-Type C applies.                                                         |
+| **Doctrine #38** (Pure Pass-Through \*WithSig STRUCTURAL FORECLOSE)                                  | DeFi Saver                                                                  | **LOW APPLICABILITY.** Cosmos SDK doesn't use EIP-712. Equivalent: Tendermint signatures (ed25519/secp256k1) — separate class.                                                                         |
+| **Doctrine #39 CANDIDATE + DC-13 sub-5** (Notification Path ≠ Authorization Path)                    | Filecoin DISC-020                                                           | **APPLIES.** Cosmos SDK BeginBlocker/EndBlocker hooks vs ABCI message handlers — separate authorization paths. Pre-Gate-2 Phase 0 gate.                                                                |
+| **Doctrine #27 F MAXIMUM** (33-audit ceiling 0.20×)                                                  | Euler + Gearbox + Spark (3-anchor PERMANENT 2026-05-28)                     | **TBD.** Probe Heimdall audit count + firm coverage at Step 1 PROFILE. Polygon ecosystem likely has 5-10 audits across Halborn + Hexens + others.                                                      |
+| **Doctrine #29 v1.1 consumer-transfer logic**                                                        | LayerZero V2 CONSUMER hunts                                                 | **APPLIES (via Bor).** Heimdall→Bor state-sync is consumer-of-Heimdall pattern. Verify message-passing trust boundary.                                                                                 |
+| **DC-7 EXCLUSION CANONICAL** (3-anchor PERMANENT)                                                    | Cap C1 + Function FBTC H1 + Gearbox H2                                      | **APPLIES.** Validator-only operations + checkpoint hash verification likely fit deterministic-derivation pattern. Pre-emptive exclusion filter.                                                       |
+| **DC-9 family** (privilege escalation, sub-1..6)                                                     | Multiple anchors                                                            | **APPLIES.** Validator admin functions = DC-9 sub-2 (admin-no-timelock). Heimdall governance = DC-9 sub-3 (upgradeable-hook-no-timelock).                                                              |
+| **DC-6 cross-domain**                                                                                | Cross-chain bridges                                                         | **APPLIES.** Heimdall↔Bor↔Ethereum is 3-domain. Bridge boundaries each carry trust assumptions.                                                                                                        |
+| **CANDIDATE-A bridge sig-replay**                                                                    | Flying Tulip + Midas                                                        | **APPLIES.** Heimdall→Ethereum checkpoint signature path.                                                                                                                                              |
+| **CANDIDATE-D state machine**                                                                        | KyberSwap CLMM                                                              | **APPLIES.** Validator lifecycle states (active/jailed/unbonding/unbonded).                                                                                                                            |
+| **CANDIDATE-J state-machine cooldown**                                                               | top-3 saturated 2026-05-28 (Aave V3 + Comet + FRAX)                         | **APPLIES.** Cosmos SDK unbonding period + slashing window + validator rotation. Fresh substrate for CANDIDATE-J.                                                                                      |
+| **Pattern A access control**                                                                         | LayerZero V2 (KILLED) + multiple                                            | **APPLIES.** Validator-only operations, governance-only setters, admin functions.                                                                                                                      |
+| **CANDIDATE-W ERC2771 \_msgSender()**                                                                | origin-dollar 2026-05-21                                                    | **DOES NOT APPLY.** Cosmos SDK uses ctx.MsgSigners() not msg.sender.                                                                                                                                   |
+| **CANDIDATE-V Reward Accumulator**                                                                   | origin-dollar                                                               | **MAY APPLY.** Cosmos staking module distributes rewards — verify per-validator and per-delegator accumulator hygiene.                                                                                 |
+| **CANDIDATE-G Solana off-chain cosigner**                                                            | Indentura PL Vault                                                          | **DOES NOT APPLY** (Solana-specific).                                                                                                                                                                  |
+| **CANDIDATE-Y from==to self-transfer accounting mutation**                                           | origin-dollar                                                               | **MAY APPLY.** x/bank self-transfer accounting in Cosmos SDK is a known edge — verify.                                                                                                                 |
 
 ### Substrate-specific gaps (NOT YET COVERED — must build before Jun 15):
 
 **Consensus-specific attack classes** (NEW DETECTOR FAMILY — must seed brain):
 
-| Pattern | Class statement | Heimdall surface |
-|---|---|---|
-| **Equivocation / double-signing** | Validator signs two conflicting blocks at same height — detected via duplicate-vote evidence | Tendermint evidence module; Heimdall slashing module enforcement |
-| **Long-range attack** | Adversary buys old validator keys and forks chain history from genesis | Heimdall checkpoint finality vs Ethereum-anchored checkpoints (mitigated by L1 anchor) |
-| **Nothing-at-stake** | Validators sign multiple forks because no cost — mitigated by slashing | Heimdall slashing parameters + minimum self-bond enforcement |
-| **Validator key compromise** | Single-key validator compromised → equivocation OR vote-extraction | Heimdall key rotation + remote-signer integration |
-| **Checkpoint forgery** | Adversary submits invalid Heimdall checkpoint to Ethereum | Checkpoint signature validation + 2/3 voting power threshold |
-| **Bor↔Heimdall state-sync replay** | Adversary replays state-sync message to Bor from old Heimdall block | StateSyncer nonce / sequence enforcement |
-| **Governance proposal hijack** | Governance vote passes adversarial parameter change (e.g., reduce slashing) | Heimdall x/gov module parameter constraints |
-| **Tendermint ABCI ordering** | Adversary exploits ABCI message-handler ordering (DeliverTx / BeginBlock / EndBlock) | Heimdall custom ABCI handler interactions |
+| Pattern                            | Class statement                                                                              | Heimdall surface                                                                       |
+| ---------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **Equivocation / double-signing**  | Validator signs two conflicting blocks at same height — detected via duplicate-vote evidence | Tendermint evidence module; Heimdall slashing module enforcement                       |
+| **Long-range attack**              | Adversary buys old validator keys and forks chain history from genesis                       | Heimdall checkpoint finality vs Ethereum-anchored checkpoints (mitigated by L1 anchor) |
+| **Nothing-at-stake**               | Validators sign multiple forks because no cost — mitigated by slashing                       | Heimdall slashing parameters + minimum self-bond enforcement                           |
+| **Validator key compromise**       | Single-key validator compromised → equivocation OR vote-extraction                           | Heimdall key rotation + remote-signer integration                                      |
+| **Checkpoint forgery**             | Adversary submits invalid Heimdall checkpoint to Ethereum                                    | Checkpoint signature validation + 2/3 voting power threshold                           |
+| **Bor↔Heimdall state-sync replay** | Adversary replays state-sync message to Bor from old Heimdall block                          | StateSyncer nonce / sequence enforcement                                               |
+| **Governance proposal hijack**     | Governance vote passes adversarial parameter change (e.g., reduce slashing)                  | Heimdall x/gov module parameter constraints                                            |
+| **Tendermint ABCI ordering**       | Adversary exploits ABCI message-handler ordering (DeliverTx / BeginBlock / EndBlock)         | Heimdall custom ABCI handler interactions                                              |
 
 ---
 
@@ -71,10 +71,12 @@
 **Likely repo:** `0xPolygon/heimdall-v2` (or `maticnetwork/heimdall-v2`)
 **Likely chain:** Cosmos SDK Tendermint-based, Go
 **Companion repos:**
+
 - Bor (Polygon PoS execution layer; Go fork of Geth) — `maticnetwork/bor`
 - StateSync contracts on Ethereum — checkpoint submission + reward distribution
 
 **Six target classes to map post-invite (per operator directive):**
+
 1. Checkpoint submission and validation logic (Polygon → Ethereum bridge)
 2. Validator set management (staking, slashing, rotation)
 3. Governance module (parameter changes, upgrades)
@@ -83,6 +85,7 @@
 6. Cosmos SDK module boundaries (auth, bank, staking, gov, IBC if present)
 
 **Pre-clone preparation tasks** (autonomous now):
+
 - [ ] Identify Heimdall v2 public repo URL once invite arrives
 - [ ] Search dYdX V4 ground-truth findings for transferable patterns (Cosmos SDK shared substrate)
 - [ ] Pull Polygon's prior bug bounty disclosed findings (Immunefi historical Polygon program — DELISTED per engagement exclusivity, but disclosed-findings catalog still informational)
@@ -93,37 +96,38 @@
 
 **Already-filed-but-unbuilt detector specs** (per Open-Questions-Tracker.md #27 + brain/Doctrine.md detector spec list):
 
-| Detector | Spec source | Build status | Sherlock-Heimdall fit |
-|---|---|---|---|
-| **#129 Cosmos SDK / Go coverage AST** | dYdX V4 PRE-CLONE-HALT, Open-Q #27 | **LIVE v1.0 2026-05-28 deep night** (operator msg 7951) — `scripts/detectors/cosmos-sdk-go-ast/c129-cosmos-go-ast`. Smoke-tested against cosmos/cosmos-sdk@HEAD: 1690 files / 2.76s / is_cosmos_sdk=true / 15 signature ids (IMPORT, KEEPER, MSG, HANDLER, BEGIN, END, INVARIANT, PARAM-SET, PARAM-GET, CROSS-MODULE, BECH32, EVIDENCE, SLASH, GOV-PROPOSAL, CHECKPOINT, STATESYNC). **Doctrine #36 P-floor lift: PARTIAL** (surface map LIVE; deep semantic detectors #137 + #138 + #165 remain to build). | **Doctrine #36 P-floor lift PARTIAL** — Sherlock engagement EV math can now use substrate-aware P(finding) ≥ 0.05 floor + per-signature lens-fit multipliers, not substrate-blind floor. |
-| **#137 cross-module canonicalization mismatch** | dYdX V4 brain audit | NOT BUILT | **HIGH — fits Heimdall x/bank + x/staking + x/gov inter-module** |
-| **#138 no-overwrite-guard** | dYdX V4 brain audit | **BUILT v1.0 2026-05-29** — `scripts/detectors/no-overwrite-guard/` (commit `d850305`). Flags Set in create-semantic fns (Add/Create/Register/Submit) lacking Has/Exists/Get-found guard → silent overwrite. Sub-findings C138-CHECKPOINT-OVER + C138-SEQ-NO-MONOTONIC. Validated on fixture (flags unguarded AddCheckpoint + sequence-no-monotonic; skips Has-guarded/Get-found-guarded/setter-named). Consumes #129 via `--from-c129`. | **HIGH — fits Heimdall checkpoint state updates + StateSync nonce** |
-| **#165 cosmos-bech32 address handling** | dYdX V4 Doctrine.md:900 | **BUILT v1.0 2026-05-29** — `scripts/detectors/cosmos-bech32-deep/` (commit `d850305`). 5 findings: RAW-BECH32, BECH32-STRCMP (.String() addr equality), ADDR-FROM-BYTES (unchecked []byte→AccAddress), FROMBECH32-NOPREFIX (cross-prefix confusion), HARDCODED-HRP. Validated on fixture incl. a GetConfig-prefix-checked control (no FP). | **MEDIUM-HIGH — fits Heimdall validator/proposer-address canonicalization across Heimdall↔Bor↔ETH** |
+| Detector                                        | Spec source                        | Build status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Sherlock-Heimdall fit                                                                                                                                                                    |
+| ----------------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **#129 Cosmos SDK / Go coverage AST**           | dYdX V4 PRE-CLONE-HALT, Open-Q #27 | **LIVE v1.0 2026-05-28 deep night** (operator msg 7951) — `scripts/detectors/cosmos-sdk-go-ast/c129-cosmos-go-ast`. Smoke-tested against cosmos/cosmos-sdk@HEAD: 1690 files / 2.76s / is_cosmos_sdk=true / 15 signature ids (IMPORT, KEEPER, MSG, HANDLER, BEGIN, END, INVARIANT, PARAM-SET, PARAM-GET, CROSS-MODULE, BECH32, EVIDENCE, SLASH, GOV-PROPOSAL, CHECKPOINT, STATESYNC). **Doctrine #36 P-floor lift: PARTIAL** (surface map LIVE; deep semantic detectors #137 + #138 + #165 remain to build). | **Doctrine #36 P-floor lift PARTIAL** — Sherlock engagement EV math can now use substrate-aware P(finding) ≥ 0.05 floor + per-signature lens-fit multipliers, not substrate-blind floor. |
+| **#137 cross-module canonicalization mismatch** | dYdX V4 brain audit                | NOT BUILT                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | **HIGH — fits Heimdall x/bank + x/staking + x/gov inter-module**                                                                                                                         |
+| **#138 no-overwrite-guard**                     | dYdX V4 brain audit                | **BUILT v1.0 2026-05-29** — `scripts/detectors/no-overwrite-guard/` (commit `d850305`). Flags Set in create-semantic fns (Add/Create/Register/Submit) lacking Has/Exists/Get-found guard → silent overwrite. Sub-findings C138-CHECKPOINT-OVER + C138-SEQ-NO-MONOTONIC. Validated on fixture (flags unguarded AddCheckpoint + sequence-no-monotonic; skips Has-guarded/Get-found-guarded/setter-named). Consumes #129 via `--from-c129`.                                                                    | **HIGH — fits Heimdall checkpoint state updates + StateSync nonce**                                                                                                                      |
+| **#165 cosmos-bech32 address handling**         | dYdX V4 Doctrine.md:900            | **BUILT v1.0 2026-05-29** — `scripts/detectors/cosmos-bech32-deep/` (commit `d850305`). 5 findings: RAW-BECH32, BECH32-STRCMP (.String() addr equality), ADDR-FROM-BYTES (unchecked []byte→AccAddress), FROMBECH32-NOPREFIX (cross-prefix confusion), HARDCODED-HRP. Validated on fixture incl. a GetConfig-prefix-checked control (no FP).                                                                                                                                                                 | **MEDIUM-HIGH — fits Heimdall validator/proposer-address canonicalization across Heimdall↔Bor↔ETH**                                                                                      |
 
 **5 consensus-specific detector seeds — FILED CANDIDATE 2026-05-29** (Ogie msg 7976; build post-invite when the Heimdall repo is cloned + the exact module layout is known. Ordered by EV: checkpoint-sig-aggregation > statesync-nonce > validator-jail-bypass > gov-param-bounds > equivocation-evidence):
 
-| Detector | Class statement | Build complexity |
-|---|---|---|
-| Equivocation evidence verification | Walk Tendermint evidence module: are duplicate-vote / light-client-attack evidence types parsed + slashed correctly? | Medium (Tendermint protobuf walk) |
-| Validator-jail bypass | Are jailed validators excluded from EndBlocker reward distribution + checkpoint signing? | Low (state-machine walk) |
-| Checkpoint signature aggregation | Walk Heimdall checkpoint module: is 2/3 voting power threshold enforced on aggregated signatures? Off-by-one? Stake-weighted vs count-weighted? | Medium (BLS / ed25519 verification path) |
-| Bor↔Heimdall state-sync nonce | Is StateSyncer nonce monotonic + non-replayable on Bor receive side? | Low (sequence-number walk) |
-| Governance parameter bounds | Are critical parameter changes (slashing fraction, unbonding period, min-self-bond) bounded? Can governance set them to invariant-breaking values? | Low (param walk + bounds check) |
+| Detector                           | Class statement                                                                                                                                    | Build complexity                         |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Equivocation evidence verification | Walk Tendermint evidence module: are duplicate-vote / light-client-attack evidence types parsed + slashed correctly?                               | Medium (Tendermint protobuf walk)        |
+| Validator-jail bypass              | Are jailed validators excluded from EndBlocker reward distribution + checkpoint signing?                                                           | Low (state-machine walk)                 |
+| Checkpoint signature aggregation   | Walk Heimdall checkpoint module: is 2/3 voting power threshold enforced on aggregated signatures? Off-by-one? Stake-weighted vs count-weighted?    | Medium (BLS / ed25519 verification path) |
+| Bor↔Heimdall state-sync nonce      | Is StateSyncer nonce monotonic + non-replayable on Bor receive side?                                                                               | Low (sequence-number walk)               |
+| Governance parameter bounds        | Are critical parameter changes (slashing fraction, unbonding period, min-self-bond) bounded? Can governance set them to invariant-breaking values? | Low (param walk + bounds check)          |
 
 ---
 
 ## §4 GO TOOLCHAIN STATUS (probed 2026-05-28 deep night)
 
-| Tool | Status | Path |
-|---|---|---|
-| go | ✓ 1.22.2 linux/amd64 | /usr/bin/go |
-| GOPATH | ✓ /home/claude-code/go | — |
-| semgrep | ✓ installed | /home/claude-code/.local/bin/semgrep |
-| staticcheck | INSTALLING (background, 2026-05-28 deep night) | TBD /home/claude-code/go/bin/staticcheck |
-| gosec | INSTALLING (background) | TBD /home/claude-code/go/bin/gosec |
-| gopls | NOT INSTALLED | install command: `go install golang.org/x/tools/gopls@latest` |
+| Tool        | Status                                         | Path                                                          |
+| ----------- | ---------------------------------------------- | ------------------------------------------------------------- |
+| go          | ✓ 1.22.2 linux/amd64                           | /usr/bin/go                                                   |
+| GOPATH      | ✓ /home/claude-code/go                         | —                                                             |
+| semgrep     | ✓ installed                                    | /home/claude-code/.local/bin/semgrep                          |
+| staticcheck | INSTALLING (background, 2026-05-28 deep night) | TBD /home/claude-code/go/bin/staticcheck                      |
+| gosec       | INSTALLING (background)                        | TBD /home/claude-code/go/bin/gosec                            |
+| gopls       | NOT INSTALLED                                  | install command: `go install golang.org/x/tools/gopls@latest` |
 
 **Buzz Go capability:**
+
 - ✓ Can clone Go projects (git clone — same path as Solidity)
 - ✓ Can run `go vet` (stdlib)
 - ✓ Can run `go build` (validates project compiles)
@@ -138,6 +142,7 @@
 ## §5 SHERLOCK COMPETITION FORMAT (RESEARCHED 2026-05-29 via docs.sherlock.xyz; deposit + AI-policy still operator-confirm)
 
 **Known intel (PAG Discord 2026-05-21 + Sherlock prior contests):**
+
 - Submission requires $250 USDC deposit per finding (per Day 27 PAG intel)
 - Severity classifications: Critical / High / Medium / Low / Info
 - Duplicates handled via "primary submission" selection — judges pick best-written + earliest valid submission
@@ -145,6 +150,7 @@
 - Awards: USDC primary; specific rewards/escrow per contest
 
 **RESEARCHED 2026-05-29 (docs.sherlock.xyz/audits/judging/guidelines — "Criteria for Issue Validity"):**
+
 - **Severity (likelihood is NOT considered — impact only):**
   - **High** = direct fund loss **>1% AND >$10**, without extensive external conditions.
   - **Medium** = conditional loss **>0.01% AND >$10** (specific conditions required), OR breaks core protocol functionality.
@@ -157,6 +163,7 @@
 - **Deposit/bond:** NOT found in docs. The "$250 USDC/submission" figure is **PAG-Discord intel only — treat as operator-confirm** before budgeting (§6). May be contest-specific or outdated.
 
 **Research tasks before Jun 15:**
+
 - [ ] Read prior Sherlock contests (especially Cap, Flying Tulip, Symbiotic) for format examples
 - [ ] Identify Sherlock contest submission portal + dashboard
 - [ ] Understand judge-comment workflow (rebuttal window?)
@@ -168,16 +175,19 @@
 ## §6 BUDGET (operator-confirmed 2026-05-28 deep night)
 
 **Required:**
+
 - $250 USDC deposit × N submissions
 - **Operator estimate: 5-10 submissions × $250 = $1,250 – $2,500 USDC working capital** (narrower than initial 5-15 range; operator-set ceiling)
 - Deposits REFUND on valid submission, forfeit on abusive/spam
 
 **Funding decision tree (operator-confirmed):**
+
 1. **Firedancer #77340 payout (KYC pending)** — IF payout lands before Jun 15, allocate portion to Sherlock deposits. PRIMARY funding source.
 2. **Ops wallet fallback** — IF Firedancer does NOT pay pre-Jun-15, fund from ops wallet. Operator handles transfer when triggered.
 3. **Cantina/Immunefi payouts** — none confirmed in queue; not a planning assumption.
 
 **Action items:**
+
 - [ ] Monitor Firedancer #77340 KYC status weekly (next check 2026-06-04)
 - [ ] Trigger ops-wallet fallback request to operator by 2026-06-10 if Firedancer not paid
 - [ ] Pre-Jun-15: confirm $1,250 minimum USDC in ops wallet
@@ -199,6 +209,7 @@
 **Pillar 1 (token scoring):** **NO change to MATIC/POL scoring** per operator clarification 2026-05-28 deep night. Polygon tokens can still be scored + leaderboard-published + tweeted normally per tweet-on-score.md v2.2. The engagement exclusivity is SECURITY-FINDING-SCOPE only, not token-scoring-scope.
 
 **Pillar 2 (tweet generation) — exclusivity scope NARROWED 2026-05-28 deep night:**
+
 - ✓ ALLOWED: MATIC/POL score tweets (HOT/QUALIFIED/WATCH bands per v2.2)
 - ✓ ALLOWED: standard "passed honest calibration" / "Not a fail. Not a pass." framings
 - ✗ FORBIDDEN until 2026-07-07: any tweet hinting at security findings on Polygon ecosystem (Heimdall, Bor, PoS validators, checkpoint contracts, staking manager, governance contracts)
@@ -219,10 +230,12 @@
 The Babylon Immunefi Gate-1 (`hunts/2026-05-29-babylon-cosmos-gate1.md`) WAS the Heimdall dry-run. Outcome: **GO at [EXECUTED] level.**
 
 **What ran clean end-to-end on a real Cosmos chain:**
+
 - Detector arsenal #129/#137/#138/#166 executed against 374 Go files; #166 FP-tuned (checkpoint/hook substring noise → 0 after tune); #138 produced a **caller-loop/consensus-key NEGATING-example** (a setter with no inline `>`/`>=` guard is NOT backwards-overwrite when its sole non-genesis caller is a monotonic increment loop, OR the store key is a consensus-monotonic block height — trace the CALLER before flagging).
 - **Go-unittest PoC harness validated:** `go test` builds + runs against a real Cosmos BLS module (CGO/blst compiled, gcc 13.3, go fetched toolchain automatically). Two PoCs PASS (`hunts/2026-05-29-babylon-bls-bitmap-binding-poc_test.go`). **This is the Foundry-equivalent for Go — confirmed working for June.**
 
 **BLS-bitmap binding pre-flight checklist (the 5 axes I traced on Babylon checkpointing — REUSE on Heimdall):**
+
 1. Aggregate-pubkey binding — is the multisig verified against EXACTLY the bitmap/selector-derived pubkeys (with pkValidate/groupcheck)?
 2. Same-set tally — are power-sum and the verified pubkey-set derived from the SAME selector (no split tally-set ≠ verify-set)?
 3. Rogue-key/PoP — is key registration PoP-gated (possession + identity-binding), and is the PoP check actually ENFORCED on the live tx path (in Cosmos: `Msg.ValidateBasic` is auto-called by `baseapp.validateBasicTxMsgs`, unconditional in runTx as of SDK v0.53.5)?
@@ -230,6 +243,7 @@ The Babylon Immunefi Gate-1 (`hunts/2026-05-29-babylon-cosmos-gate1.md`) WAS the
 5. Selector mechanics — bounds/ordering of the selector vs the validator set; signed-bytes content (what the signature commits to) + domain separation (no cross-epoch/cross-context replay).
 
 **⚠️ CRITICAL Heimdall scheme split (the high-value transfer, [ASSUMED] until June Gate-1 source-read):** Babylon uses **BLS-aggregate-over-bitmap** → binding is AUTOMATIC + double-count STRUCTURALLY IMPOSSIBLE + PoP-gated → the binding itself is LOW-p (don't waste cycles there). **Heimdall checkpoint votes are ECDSA-signature-ARRAY (secp256k1 `ecrecover`), NOT BLS-aggregate.** That moves the binding to per-signature recover + EXPLICIT dedup + member-check + power-sum + canonical-digest. **PRIMARY Heimdall hunt axes (do these instead of BLS-binding):**
+
 - **Double-count / no-dedup** — can one validator's signature be repeated in the array to inflate power past 2/3? (Impossible in BLS-bitmap; POSSIBLE in ECDSA-array unless signers are required strictly-increasing/deduped.)
 - **Non-member acceptance** — is a recovered address that's NOT in the current validator set rejected (or zero-powered)?
 - **Signed-vote-bytes malleability / canonicalization** — Detector #44 identity-binding-gap: the signed digest MUST cover all consumed fields (start, end, roothash, proposer, chainID/borChainID, epoch); if the consumer acts on a field not in the digest → poisoning.
@@ -241,18 +255,18 @@ Cross-ref: `brain/Patterns-Defense-Classes.md` W-2-FQ-NEG facet (Babylon anchor)
 
 ## TIMELINE TO JUN 15 (18 days remaining as of 2026-05-28)
 
-| Days | Milestone |
-|---|---|
-| 17 | Install Go tooling (staticcheck + gosec + gopls); receive Sherlock invite (expected) |
-| 14 | Build detectors #129 + #137 + #138 + #165 (lift Doctrine #36 P-floor); identify Heimdall v2 public repo |
-| 10 | Clone Heimdall v2; map 6 target classes; first source-read pass |
-| 7 | Surface map complete; identify 3-5 candidate hypotheses |
-| 5 | Phase 0 audit-dedup on each candidate; Foundry-equivalent Go test scaffolding |
-| 3 | Foundry-equivalent PoC for top-2 candidates |
-| 1 | Final paste-ready drafts for Sherlock submission portal |
-| 0 (Jun 15) | Contest opens — submit on Day 1 if findings ready |
-| -7 (Jun 22) | Mid-contest checkpoint — refine + add findings |
-| -21 (Jul 6) | Contest closes |
+| Days        | Milestone                                                                                               |
+| ----------- | ------------------------------------------------------------------------------------------------------- |
+| 17          | Install Go tooling (staticcheck + gosec + gopls); receive Sherlock invite (expected)                    |
+| 14          | Build detectors #129 + #137 + #138 + #165 (lift Doctrine #36 P-floor); identify Heimdall v2 public repo |
+| 10          | Clone Heimdall v2; map 6 target classes; first source-read pass                                         |
+| 7           | Surface map complete; identify 3-5 candidate hypotheses                                                 |
+| 5           | Phase 0 audit-dedup on each candidate; Foundry-equivalent Go test scaffolding                           |
+| 3           | Foundry-equivalent PoC for top-2 candidates                                                             |
+| 1           | Final paste-ready drafts for Sherlock submission portal                                                 |
+| 0 (Jun 15)  | Contest opens — submit on Day 1 if findings ready                                                       |
+| -7 (Jun 22) | Mid-contest checkpoint — refine + add findings                                                          |
+| -21 (Jul 6) | Contest closes                                                                                          |
 
 ---
 
