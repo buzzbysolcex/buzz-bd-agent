@@ -25,7 +25,15 @@ EVT="${1:-tick}"
 # Best-effort PID of the live claude session (informational only).
 PID="$(pgrep -f 'claude' 2>/dev/null | head -1)"
 
-printf '{"ts":%s,"iso":"%s","pid":"%s","source":"%s","event":"%s"}\n' \
-  "$TS" "$ISO" "${PID:-unknown}" "$SRC" "$EVT" > "$HB" 2>/dev/null || true
+# Atomic write: a failed/partial write must never truncate the last good beat.
+# (A surviving stale beat is the safe direction — the watchdog will catch it.)
+TMP="${HB}.$$.tmp"
+if printf '{"ts":%s,"iso":"%s","pid":"%s","source":"%s","event":"%s"}\n' \
+     "$TS" "$ISO" "${PID:-unknown}" "$SRC" "$EVT" > "$TMP" 2>/dev/null; then
+  mv -f "$TMP" "$HB" 2>/dev/null || rm -f "$TMP" 2>/dev/null
+else
+  rm -f "$TMP" 2>/dev/null || true
+fi
 
+# MUST exit 0 — a hook that fails would break the tool call it's attached to.
 exit 0

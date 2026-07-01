@@ -63,49 +63,66 @@ def main():
     dag = _read_json(DAG) or {"tasks": {}}
     tasks = dag.get("tasks", {})
 
-    # Which tasks SHOULD be advancing right now?
-    active = []
+    # Partition open work.
+    in_progress, parked_overdue = [], []
     for tid, t in tasks.items():
         st = t.get("status")
         if st == "in_progress":
-            active.append((tid, t, "in_progress"))
+            in_progress.append((tid, t))
         elif st == "parked":
             ra = t.get("resume_at")
             if ra is not None and NOW > (int(ra) + PARK_GRACE):
-                active.append((tid, t, "parked-overdue"))
-    if not active:
+                parked_overdue.append((tid, t))
+    if not in_progress and not parked_overdue:
         print("OK: no in-progress/overdue task; idle is fine.")
         return 0
 
     # Heartbeat age. Missing heartbeat while work is open = maximally stale.
     hb = _read_json(HB)
     if hb and "ts" in hb:
-        hb_ts = int(hb["ts"])
-        hb_age = NOW - hb_ts
+        hb_age = NOW - int(hb["ts"])
         hb_iso = hb.get("iso", "?")
     else:
-        hb_ts = None
-        hb_age = 10**9
+        hb_age = 10 ** 9
         hb_iso = "MISSING"
 
-    if hb_age <= STALL_THRESHOLD:
-        print("OK: %d active task(s) but heartbeat fresh (%s ago)." % (len(active), _fmt_age(hb_age)))
+    # What is ACTUALLY stalled — two independent tests (fixes the red-team gap
+    # where a fresh heartbeat masked an overdue parked task):
+    #   in_progress   -> stalled ONLY if heartbeat is stale (session went quiet)
+    #   parked-overdue -> stalled REGARDLESS of heartbeat. A live session that
+    #                     never resumed its own parked task past resume_at is the
+    #                     dropped-work failure, even though it's beating elsewhere.
+    stalled = []
+    if hb_age > STALL_THRESHOLD:
+        for tid, t in in_progress:
+            stalled.append((tid, t, "in_progress-stale"))
+    for tid, t in parked_overdue:
+        stalled.append((tid, t, "parked-overdue"))
+
+    if not stalled:
+        print("OK: %d in-progress task(s), heartbeat fresh (%s ago); 0 parked-overdue."
+              % (len(in_progress), _fmt_age(hb_age)))
         return 0
 
     # ---- STALL confirmed. Build alert. ----
     lines = []
-    for tid, t, why in active:
+    for tid, t, why in stalled:
         task_age = NOW - int(t.get("updated_at", NOW))
+        if why == "parked-overdue":
+            overdue = NOW - int(t.get("resume_at", NOW))
+            detail = "overdue %s past resume_at (session may be alive but dropped this)" % _fmt_age(overdue)
+        else:
+            detail = "no heartbeat for %s (threshold %s)" % (_fmt_age(hb_age), _fmt_age(STALL_THRESHOLD))
         lines.append(
-            "• task=%s [%s] phase=%s\n    idle=%s · task-age=%s\n    resume: %s"
-            % (tid, why, t.get("phase") or "-", _fmt_age(hb_age),
-               _fmt_age(task_age), t.get("resume_hint") or "(no resume hint recorded)"))
-    ids = ",".join(tid for tid, _, _ in active)
+            "• task=%s [%s] phase=%s\n    %s · task-age=%s\n    resume: %s"
+            % (tid, why, t.get("phase") or "-", detail, _fmt_age(task_age),
+               t.get("resume_hint") or "(no resume hint recorded)"))
+    ids = ",".join(tid for tid, _, _ in stalled)
 
     alert = (
-        "\U0001F6A8 STALL WATCHDOG — main loop appears stalled\n\n"
-        "Heartbeat last beat: %s (%s ago; threshold %s)\n"
-        "Open work that should be advancing:\n\n%s\n\n"
+        "\U0001F6A8 STALL WATCHDOG — open work is not advancing\n\n"
+        "Heartbeat last beat: %s (%s ago; stall threshold %s)\n"
+        "Stalled work:\n\n%s\n\n"
         "Re-kick: resume the task above from its recorded phase, or reply to clear."
         % (hb_iso, _fmt_age(hb_age), _fmt_age(STALL_THRESHOLD), "\n".join(lines))
     )

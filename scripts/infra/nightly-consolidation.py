@@ -24,7 +24,7 @@ THE EVICTION SEAM — evict(candidate) -> action — is where a future ratified
 eviction policy (Xcode's triage rule) slots in. Today it returns ARCHIVE always.
 DELETE is not a permitted return until reviewed.
 """
-import argparse, glob, gzip, hashlib, json, os, re, sys, time
+import argparse, glob, gzip, hashlib, json, os, re, subprocess, sys, time
 from datetime import datetime, timezone
 
 ROOT = os.environ.get("BUZZ_ROOT", "/home/claude-code/buzz-workspace")
@@ -78,6 +78,33 @@ def is_forbidden(path):
     for bad in FORBIDDEN_SUBSTR:
         if bad in rel or bad in path:
             return True
+    return False
+
+
+def held_open(path):
+    """True if a live process holds this file open. Rolling up (os.replace) a
+    file a long-running daemon is appending to would orphan the daemon's fd and
+    silently drop its subsequent writes — so --apply must SKIP such files. Best-
+    effort via /proc; if /proc is unreadable we conservatively return False."""
+    try:
+        real = os.path.realpath(path)
+    except OSError:
+        return False
+    if not os.path.isdir("/proc"):
+        return False
+    for pid in os.listdir("/proc"):
+        if not pid.isdigit():
+            continue
+        fddir = os.path.join("/proc", pid, "fd")
+        try:
+            for fd in os.listdir(fddir):
+                try:
+                    if os.path.realpath(os.path.join(fddir, fd)) == real:
+                        return True
+                except OSError:
+                    continue
+        except OSError:
+            continue
     return False
 
 
@@ -179,6 +206,11 @@ def rollup_episodic(apply, manifest):
             # DOUBLE SAFETY: never touch a forbidden path, only allowlisted ones.
             if is_forbidden(p) or not under_allowlist(p):
                 raise RuntimeError("REFUSED: %s is forbidden or off-allowlist" % p)
+            # Never roll up a file a live process holds open (stale-fd data loss).
+            if held_open(p):
+                results.append({**cand, "action": "SKIP-HELD-OPEN", "archived_lines": 0,
+                                "note": "held open by a live process; skipped to avoid stale-fd write loss"})
+                continue
             os.makedirs(adir, exist_ok=True)
             with gzip.open(apath, "wt", encoding="utf-8") as gz:
                 gz.write(archive_text)
@@ -357,6 +389,10 @@ def main():
     report = build_report(mode, episodic, semantic, doctrines, scoreboard)
     os.makedirs(ARCHIVE_ROOT, exist_ok=True)
     out_path = args.report_out or os.path.join(ARCHIVE_ROOT, "report-%s.md" % today())
+    # A --report-out must never be pointed at a protected store.
+    if args.report_out and is_forbidden(out_path):
+        print("REFUSED: --report-out onto a forbidden path: %s" % out_path, file=sys.stderr)
+        return 2
     with open(out_path, "w") as f:
         f.write(report)
 
@@ -384,13 +420,13 @@ def main():
                    len(semantic["dup_candidates"]), nref, ndup,
                    os.path.relpath(ARCHIVE_ROOT, ROOT), os.path.relpath(out_path, ROOT)))
         wr = os.path.join(ROOT, "scripts/infra/warroom-send.sh")
-        os.system('%s %s' % (wr, json_arg(summ)))
-
-
-def json_arg(s):
-    import shlex
-    return shlex.quote(s)
+        # subprocess with an argv list — no shell, so multiline/newlines in the
+        # summary are passed verbatim and there is no quoting/injection surface.
+        try:
+            subprocess.run([wr, summ], check=False)
+        except Exception as e:
+            print("warroom send failed: %r" % e)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main() or 0)
