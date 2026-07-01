@@ -1,0 +1,11 @@
+[Unit]
+Description=Buzz stall watchdog — independent monitor for a silently-stalled main loop
+# Deliberately NOT bound to claude-code.service: this must survive/observe that
+# unit stalling. It is a oneshot fired by the paired .timer.
+
+[Service]
+Type=oneshot
+User=claude
+Group=claude
+ExecStart=/home/claude-code/buzz-workspace/scripts/infra/stall-watchdog.sh
+Nice=10

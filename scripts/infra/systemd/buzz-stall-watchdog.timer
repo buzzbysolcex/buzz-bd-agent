@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Buzz stall watchdog every 10 minutes
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=10min
+AccuracySec=30s
+Persistent=true
+Unit=buzz-stall-watchdog.service
+
+[Install]
+WantedBy=timers.target

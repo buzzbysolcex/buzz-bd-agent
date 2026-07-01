@@ -88,6 +88,10 @@
           {
             "type": "command",
             "command": "python3 .claude/hooks/prompt-injection-defender/post-tool-defender.py"
+          },
+          {
+            "type": "command",
+            "command": "HB_SOURCE=posttooluse /home/claude-code/buzz-workspace/scripts/infra/heartbeat.sh tool 2>/dev/null || true"
           }
         ]
       },
@@ -115,6 +119,10 @@
           {
             "type": "command",
             "command": "/home/claude-code/buzz-workspace/.claude/hooks/post-session-reflect.sh"
+          },
+          {
+            "type": "command",
+            "command": "HB_SOURCE=stop /home/claude-code/buzz-workspace/scripts/infra/heartbeat.sh turn 2>/dev/null || true"
           }
         ]
       }

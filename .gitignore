@@ -89,3 +89,10 @@ data/lane1/stranded-funds/stranded.db
 data/lane1/gate0/*.db
 scripts/v6
 .tmp-build/
+
+# Buzz runtime state (ephemeral heartbeat/task-dag/alert markers — not versioned)
+state/heartbeat.json
+state/task-dag.json
+state/task-dag.json.corrupt.*
+state/*.state
+state/.task-dag.*.tmp
