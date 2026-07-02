@@ -111,6 +111,15 @@
             "command": "/home/claude-code/buzz-workspace/.claude/hooks/p4-to-p2-fanout.sh 2>/dev/null || true"
           }
         ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "HB_SOURCE=posttool-all /home/claude-code/buzz-workspace/scripts/infra/heartbeat.sh anytool 2>/dev/null || true"
+          }
+        ]
       }
     ],
     "Stop": [
